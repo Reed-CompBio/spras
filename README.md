@@ -4,6 +4,8 @@ This repo is a first-start at a dockerized library of pathway reconstruction enh
 
 ## Work Log
 
+**9/30/2020** -- Added a draft interface of a front-end to a BEELINE style YAML system for configuring experiments. 
+
 **9/2020** -- CLI draft, following the [Ontology of Pathway Reconstruction](https://docs.google.com/document/d/11gJeQf9sphP4oRz1FQYRxewxfVvNyXqbwOkeq9VxikI/edit?pli=1#bookmark=id.86waxedse4i) google doc.
 
 ```
