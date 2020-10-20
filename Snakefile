@@ -1,3 +1,8 @@
+algorithms = ['pathlinker']
+datasets = ['data1']
+data_dir = 'input'
+out_dir = 'output'
+
 # One rule per reconstruction method initially
 # Universal input to PathLinker input
 rule prepare_input_pathlinker:
@@ -18,6 +23,7 @@ rule parse_output_pathlinker:
     shell: # run the preprocessing script for this particular reconstruction method
 
 # A rule to define all the expected outputs from all pathway reconstruction
-# algorithms run on all datasets
+# algorithms run on all datasets for all arguments
 rule reconstruct_pathways:
-    input: # enumerate the list of all desired reconstructed pathways
+    # Not using arguments yet
+    input: expand('{{out_dir}}/{dataset}-{algorithm}-pathway.txt', dataset=datasets, algorithm=algorithms)
