@@ -26,4 +26,4 @@ rule parse_output_pathlinker:
 # algorithms run on all datasets for all arguments
 rule reconstruct_pathways:
     # Not using arguments yet
-    input: expand('{{out_dir}}/{dataset}-{algorithm}-pathway.txt', dataset=datasets, algorithm=algorithms)
+    input: expand('{out_dir}/{dataset}-{algorithm}-pathway.txt', out_dir=out_dir, dataset=datasets, algorithm=algorithms)
