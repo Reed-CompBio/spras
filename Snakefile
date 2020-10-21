@@ -3,7 +3,7 @@
 import os
 
 wildcard_constraints:
-    algorithm='\d+'
+    algorithm='\w+'
 
 algorithms = ['pathlinker']
 datasets = ['data1']
@@ -14,7 +14,12 @@ out_dir = 'output'
 # algorithms run on all datasets for all arguments
 rule reconstruct_pathways:
     # Not using pathway reconstruction method arguments yet
-    input: expand('{out_dir}/{dataset}-{algorithm}-pathway.txt', out_dir=out_dir, dataset=datasets, algorithm=algorithms)
+    # Look for a more elegant way to use the OS-specific separator
+    input: expand('{out_dir}{sep}{dataset}-{algorithm}-pathway.txt', out_dir=out_dir, sep=os.sep, dataset=datasets, algorithm=algorithms)
+    # Test only the prepare_input_pathlinker rule
+    # If using os.path.join use it everywhere because having some / and some \
+    # separators can cause the pattern matching to fail
+    #input: os.path.join(out_dir, 'data1-pathlinker-network.txt')
 
 # One rule per reconstruction method initially
 # Universal input to PathLinker input
@@ -28,11 +33,11 @@ rule prepare_input_pathlinker:
         targets=os.path.join(out_dir, '{dataset}-{algorithm}-targets.txt'),
         network=os.path.join(out_dir, '{dataset}-{algorithm}-network.txt')
     # run the preprocessing script for PathLinker
+    # With Git Bash on Windows multiline strings are not executed properly
+    # https://carpentries-incubator.github.io/workflows-snakemake/07-resources/index.html
     shell:
         '''
-        echo {input.sources} >> {output.sources}
-        echo {input.targets} >> {output.targets}
-        echo {input.network} >> {output.network}
+        echo {input.sources} >> {output.sources} && echo {input.targets} >> {output.targets} && echo {input.network} >> {output.network}
         '''
 
 # Run PathLinker
@@ -43,12 +48,7 @@ rule reconstruct_pathlinker:
         network=os.path.join(out_dir, '{dataset}-{algorithm}-network.txt')
     output: os.path.join(out_dir, '{dataset}-{algorithm}-raw-pathway.txt')
     # run PathLinker
-    shell:
-        '''
-        echo {input.sources} >> {output}
-        echo {input.targets} >> {output}
-        echo {input.network} >> {output}
-        '''
+    shell: 'echo {input.sources} >> {output} && echo {input.targets} >> {output} && echo {input.network} >> {output}'
 
 # PathLinker output to universal output
 rule parse_output_pathlinker:
@@ -56,3 +56,7 @@ rule parse_output_pathlinker:
     output: os.path.join(out_dir, '{dataset}-{algorithm}-pathway.txt')
     # run the post-processing script for PathLinker
     shell: 'echo {input} >> {output}'
+
+# Remove the output directory
+rule clean:
+    shell: f'rm -rf {out_dir}'

@@ -127,3 +127,9 @@ dmypy.json
 
 # Pyre type checker
 .pyre/
+
+# Snakemake
+.snakemake/
+
+# Output files
+output/
