@@ -11,13 +11,37 @@ datasets = ['data1']
 data_dir = 'input'
 out_dir = 'output'
 
+# Eventually we'd store these values in a config file
+run_options = {}
+run_options["augment"] = False
+run_options["parameter-advise"] = False
+
+# Choose the final input for reconstruct_pathways based on which options are being run
+# Right now this is a static run_options dictionary but would eventually
+# be done with the config file
+def make_final_input(wildcards):
+    # Right now this lets us do ppa or augmentation, but not both. 
+    # An easy solution would be to make a seperate rule for doing both, but 
+    # if we add more things to do after the fact that will get
+    # out of control pretty quickly. Steps run in parallel won't have this problem, just ones
+    # whose inputs depend on eachother. 
+    if run_options["augment"]:
+        final_input = expand('{out_dir}{sep}{dataset}-{algorithm}-{params}-pathway-augmented.txt', out_dir=out_dir, sep=os.sep, dataset=datasets, algorithm=algorithms, params=pathlinker_params)
+    elif run_options["parameter-advise"]:
+        #not a great name
+        final_input = expand('{out_dir}{sep}{dataset}-{algorithm}-pathway-advised.txt', out_dir=out_dir, sep=os.sep, dataset=datasets, algorithm=algorithms)
+    else:
+        final_input = expand('{out_dir}{sep}{dataset}-{algorithm}-{params}-pathway.txt', out_dir=out_dir, sep=os.sep, dataset=datasets, algorithm=algorithms, params=pathlinker_params)
+    return final_input
+
 # A rule to define all the expected outputs from all pathway reconstruction
 # algorithms run on all datasets for all arguments
 rule reconstruct_pathways:
     # Look for a more elegant way to use the OS-specific separator
     # Probably do not want filenames to dictate which parameters to sweep over,
     # consider alternative implementations
-    input: expand('{out_dir}{sep}{dataset}-{algorithm}-{params}-pathway.txt', out_dir=out_dir, sep=os.sep, dataset=datasets, algorithm=algorithms, params=pathlinker_params)
+    # input: expand('{out_dir}{sep}{dataset}-{algorithm}-{params}-pathway.txt', out_dir=out_dir, sep=os.sep, dataset=datasets, algorithm=algorithms, params=pathlinker_params)
+    input: make_final_input 
     # Test only the prepare_input_pathlinker rule
     # If using os.path.join use it everywhere because having some / and some \
     # separators can cause the pattern matching to fail
@@ -61,6 +85,36 @@ rule parse_output_pathlinker:
     # run the post-processing script for PathLinker
     shell: 'echo {input} >> {output}'
 
+# Pathway Augmentation
+rule augment_pathway:
+    input: os.path.join(out_dir, '{dataset}-{algorithm}-{params}-pathway.txt')
+    output: os.path.join(out_dir, '{dataset}-{algorithm}-{params}-pathway-augmented.txt')
+    shell: 'echo {input} >> {output}'
+
+# Pathway Parameter Advising
+rule parameter_advise:
+    input: expand('{out_dir}{sep}{dataset}-{algorithm}-{params}-pathway.txt', out_dir=out_dir, sep=os.sep, dataset=datasets, algorithm=algorithms, params=pathlinker_params)
+    output: os.path.join(out_dir, '{dataset}-{algorithm}-pathway-advised.txt')
+    shell: 'echo {input} >> {output}'
+
 # Remove the output directory
 rule clean:
     shell: f'rm -rf {out_dir}'
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
