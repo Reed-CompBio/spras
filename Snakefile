@@ -14,7 +14,7 @@ out_dir = 'output'
 # Eventually we'd store these values in a config file
 run_options = {}
 run_options["augment"] = False
-run_options["parameter-advise"] = False
+run_options["parameter-advise"] = True
 
 # Choose the final input for reconstruct_pathways based on which options are being run
 # Right now this is a static run_options dictionary but would eventually
@@ -24,7 +24,7 @@ def make_final_input(wildcards):
     # An easy solution would be to make a seperate rule for doing both, but 
     # if we add more things to do after the fact that will get
     # out of control pretty quickly. Steps run in parallel won't have this problem, just ones
-    # whose inputs depend on eachother. 
+    # whose inputs depend on each other. 
     if run_options["augment"]:
         final_input = expand('{out_dir}{sep}{dataset}-{algorithm}-{params}-pathway-augmented.txt', out_dir=out_dir, sep=os.sep, dataset=datasets, algorithm=algorithms, params=pathlinker_params)
     elif run_options["parameter-advise"]:
@@ -100,21 +100,3 @@ rule parameter_advise:
 # Remove the output directory
 rule clean:
     shell: f'rm -rf {out_dir}'
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
