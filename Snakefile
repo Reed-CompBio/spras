@@ -1,9 +1,11 @@
 # Initially the shell commands do not do anything
 # They simply echo the input filename into the expected output file
+import itertools as it
 import os
 
 wildcard_constraints:
-    algorithm='\w+'
+    algorithm='\w+'#,
+#    params='^(?!.*raw$).*$'
 
 algorithms = ['pathlinker']
 pathlinker_params = ['k5', 'k10']
@@ -14,7 +16,22 @@ out_dir = 'output'
 # Eventually we'd store these values in a config file
 run_options = {}
 run_options["augment"] = False
-run_options["parameter-advise"] = True
+run_options["parameter-advise"] = False
+
+# Determine which input files are needed based on the
+# pathway reconstruction algorithm
+def reconstruction_inputs(wildcards):
+    if wildcards.algorithm == 'pathlinker':
+        inputs = ['sources', 'targets', 'network']
+    elif wildcards.algorithm == 'pcsf':
+        inputs = ['nodes', 'network']
+    # Not currently used, placeholder
+    else:
+        inputs = ['other']
+    #return it.chain([f'--{type}' for type in inputs], [os.path.join(out_dir, f'{dataset}-{algorithm}-{type}.txt') for type in inputs])
+    return expand(os.path.join(out_dir, '{{dataset}}-{{algorithm}}-{type}.txt'), type=inputs) 
+    #return expand('--{type} ' + os.path.join(out_dir, '{{dataset}}-{{algorithm}}-{type}.txt'), type=inputs) 
+    #return [os.path.join(out_dir, '{dataset}-{algorithm}-sources.txt'), os.path.join(out_dir, '{dataset}-{algorithm}-targets.txt'), os.path.join(out_dir, '{dataset}-{algorithm}-network.txt')]
 
 # Choose the final input for reconstruct_pathways based on which options are being run
 # Right now this is a static run_options dictionary but would eventually
@@ -25,6 +42,8 @@ def make_final_input(wildcards):
     # if we add more things to do after the fact that will get
     # out of control pretty quickly. Steps run in parallel won't have this problem, just ones
     # whose inputs depend on each other. 
+    # Currently, this will not re-generate all of the individual pathways
+    # when augmenting or advising
     if run_options["augment"]:
         final_input = expand('{out_dir}{sep}{dataset}-{algorithm}-{params}-pathway-augmented.txt', out_dir=out_dir, sep=os.sep, dataset=datasets, algorithm=algorithms, params=pathlinker_params)
     elif run_options["parameter-advise"]:
@@ -68,15 +87,15 @@ rule prepare_input_pathlinker:
         echo {input.sources} >> {output.sources} && echo {input.targets} >> {output.targets} && echo {input.network} >> {output.network}
         '''
 
-# Run PathLinker
-rule reconstruct_pathlinker:
-    input:
-        sources=os.path.join(out_dir, '{dataset}-{algorithm}-sources.txt'),
-        targets=os.path.join(out_dir, '{dataset}-{algorithm}-targets.txt'),
-        network=os.path.join(out_dir, '{dataset}-{algorithm}-network.txt')
+# Run PathLinker or other pathway reconstruction
+rule reconstruct:
+    input: reconstruction_inputs
+#        sources=os.path.join(out_dir, '{dataset}-{algorithm}-sources.txt'),
+#        targets=os.path.join(out_dir, '{dataset}-{algorithm}-targets.txt'),
+#        network=os.path.join(out_dir, '{dataset}-{algorithm}-network.txt')
     output: os.path.join(out_dir, '{dataset}-{algorithm}-{params}-raw-pathway.txt')
     # run PathLinker
-    shell: 'echo {input.sources} >> {output} && echo {input.targets} >> {output} && echo {input.network} >> {output} && echo Params: {wildcards.params} >> {output}'
+    shell: 'echo {input} && echo {input} >> {output} && echo Params: {wildcards.params} >> {output}'
 
 # PathLinker output to universal output
 rule parse_output_pathlinker:
