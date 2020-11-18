@@ -4,8 +4,7 @@ import itertools as it
 import os
 
 wildcard_constraints:
-    algorithm='\w+'#,
-#    params='^(?!.*raw$).*$'
+    algorithm='\w+'
 
 algorithms = ['pathlinker']
 pathlinker_params = ['k5', 'k10']
@@ -13,25 +12,24 @@ datasets = ['data1']
 data_dir = 'input'
 out_dir = 'output'
 
+# This would be part of our Python package
+required_inputs = {
+    'pathlinker': ['sources', 'targets', 'network'],
+    'pcsf': ['nodes', 'network']
+    }
+
 # Eventually we'd store these values in a config file
 run_options = {}
 run_options["augment"] = False
 run_options["parameter-advise"] = False
 
+
 # Determine which input files are needed based on the
 # pathway reconstruction algorithm
-def reconstruction_inputs(wildcards):
-    if wildcards.algorithm == 'pathlinker':
-        inputs = ['sources', 'targets', 'network']
-    elif wildcards.algorithm == 'pcsf':
-        inputs = ['nodes', 'network']
-    # Not currently used, placeholder
-    else:
-        inputs = ['other']
-    #return it.chain([f'--{type}' for type in inputs], [os.path.join(out_dir, f'{dataset}-{algorithm}-{type}.txt') for type in inputs])
-    return expand(os.path.join(out_dir, '{{dataset}}-{{algorithm}}-{type}.txt'), type=inputs) 
-    #return expand('--{type} ' + os.path.join(out_dir, '{{dataset}}-{{algorithm}}-{type}.txt'), type=inputs) 
-    #return [os.path.join(out_dir, '{dataset}-{algorithm}-sources.txt'), os.path.join(out_dir, '{dataset}-{algorithm}-targets.txt'), os.path.join(out_dir, '{dataset}-{algorithm}-network.txt')]
+# May no longer need a function for this, but keep it because
+# the final implmentation may be more complex than a dictionary
+def reconstruction_inputs(algorithm):
+    return required_inputs[algorithm]
 
 # Choose the final input for reconstruct_pathways based on which options are being run
 # Right now this is a static run_options dictionary but would eventually
@@ -66,20 +64,18 @@ rule reconstruct_pathways:
     # separators can cause the pattern matching to fail
     #input: os.path.join(out_dir, 'data1-pathlinker-network.txt')
 
-# One rule per reconstruction method initially
-# Universal input to PathLinker input
-rule prepare_input_pathlinker:
+# One rule per reconstruction method initially, need to generalize
+# Universal input to pathway-reconstruction specific input
+rule prepare_input:
     input:
         sources=os.path.join(data_dir, '{dataset}-sources.txt'),
         targets=os.path.join(data_dir, '{dataset}-targets.txt'),
         network=os.path.join(data_dir, '{dataset}-network.txt')
-    # No need to use {algorithm} here instead of 'pathlinker' if this is a
-    # PathLinker rule instead of a generic prepare input rule
     output:
         sources=os.path.join(out_dir, '{dataset}-{algorithm}-sources.txt'),
         targets=os.path.join(out_dir, '{dataset}-{algorithm}-targets.txt'),
         network=os.path.join(out_dir, '{dataset}-{algorithm}-network.txt')
-    # run the preprocessing script for PathLinker
+    # run the preprocessing script for this algorithm
     # With Git Bash on Windows multiline strings are not executed properly
     # https://carpentries-incubator.github.io/workflows-snakemake/07-resources/index.html
     shell:
@@ -87,22 +83,28 @@ rule prepare_input_pathlinker:
         echo {input.sources} >> {output.sources} && echo {input.targets} >> {output.targets} && echo {input.network} >> {output.network}
         '''
 
-# Run PathLinker or other pathway reconstruction
+# See https://stackoverflow.com/questions/46714560/snakemake-how-do-i-use-a-function-that-takes-in-a-wildcard-and-returns-a-value
+# for why the lambda function is required
+# Run PathLinker or other pathway reconstruction algorithm
 rule reconstruct:
-    input: reconstruction_inputs
-#        sources=os.path.join(out_dir, '{dataset}-{algorithm}-sources.txt'),
-#        targets=os.path.join(out_dir, '{dataset}-{algorithm}-targets.txt'),
-#        network=os.path.join(out_dir, '{dataset}-{algorithm}-network.txt')
+    input: lambda wildcards: expand(os.path.join(out_dir, '{{dataset}}-{{algorithm}}-{type}.txt'), type=reconstruction_inputs(algorithm=wildcards.algorithm))
     output: os.path.join(out_dir, '{dataset}-{algorithm}-{params}-raw-pathway.txt')
-    # run PathLinker
-    shell: 'echo {input} && echo {input} >> {output} && echo Params: {wildcards.params} >> {output}'
+    # chain.from_iterable trick from https://stackoverflow.com/questions/3471999/how-do-i-merge-two-lists-into-a-single-list
+    run:
+        input_args = ['--' + arg for arg in reconstruction_inputs(wildcards.algorithm)]
+        input_args = list(it.chain.from_iterable(zip(input_args, *{input})))
+        # Write the command to a file instead of running it because this
+        # functionality has not been implemented
+        shell('''
+            echo python command --algorithm {wildcards.algorithm} {input_args} --output {output} >> {output} && echo Params: {wildcards.params} >> {output}
+        ''')
 
-# PathLinker output to universal output
-rule parse_output_pathlinker:
+# Original pathway reconstruction output to universal output
+rule parse_output:
     input: os.path.join(out_dir, '{dataset}-{algorithm}-{params}-raw-pathway.txt')
     output: os.path.join(out_dir, '{dataset}-{algorithm}-{params}-pathway.txt')
-    # run the post-processing script for PathLinker
-    shell: 'echo {input} >> {output}'
+    # run the post-processing script
+    shell: 'echo {wildcards.algorithm} {input} >> {output}'
 
 # Pathway Augmentation
 rule augment_pathway:
