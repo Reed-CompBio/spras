@@ -12,6 +12,7 @@ algorithm_params = {
     'pcsf': ['beta0', 'beta1', 'beta2']
     }
 pathlinker_params = algorithm_params['pathlinker'] # Temporary
+
 datasets = ['data1']
 data_dir = 'input'
 out_dir = 'output'
@@ -36,6 +37,9 @@ def generate_param_counts(algorithm_params):
     return algorithm_param_counts
 
 algorithm_param_counts = generate_param_counts(algorithm_params)
+#print(algorithm_param_counts)
+algorithms_with_params = [f'{algorithm}-params{index}' for algorithm, count in algorithm_param_counts.items() for index in range(count)]
+#print(algorithms_with_params)
 
 # Determine which input files are needed based on the
 # pathway reconstruction algorithm
@@ -61,7 +65,8 @@ def make_final_input(wildcards):
         #not a great name
         final_input = expand('{out_dir}{sep}{dataset}-{algorithm}-pathway-advised.txt', out_dir=out_dir, sep=os.sep, dataset=datasets, algorithm=algorithms)
     else:
-        final_input = expand('{out_dir}{sep}{dataset}-{algorithm}-{params}-pathway.txt', out_dir=out_dir, sep=os.sep, dataset=datasets, algorithm=algorithms, params=pathlinker_params)
+        # Use 'params<index>' in the filename instead of describing each of the parameters and its value
+        final_input = expand('{out_dir}{sep}{dataset}-{algorithm_params}-raw-pathway.txt', out_dir=out_dir, sep=os.sep, dataset=datasets, algorithm_params=algorithms_with_params)
     return final_input
 
 # A rule to define all the expected outputs from all pathway reconstruction
@@ -79,21 +84,35 @@ rule reconstruct_pathways:
 
 # One rule per reconstruction method initially, need to generalize
 # Universal input to pathway-reconstruction specific input
-rule prepare_input:
+rule prepare_input_pathlinker:
     input:
         sources=os.path.join(data_dir, '{dataset}-sources.txt'),
         targets=os.path.join(data_dir, '{dataset}-targets.txt'),
         network=os.path.join(data_dir, '{dataset}-network.txt')
     output:
-        sources=os.path.join(out_dir, '{dataset}-{algorithm}-sources.txt'),
-        targets=os.path.join(out_dir, '{dataset}-{algorithm}-targets.txt'),
-        network=os.path.join(out_dir, '{dataset}-{algorithm}-network.txt')
+        # Hard code pathlinker instead of {algorithm} to eliminate ambigutiy about how to prepare the network
+        sources=os.path.join(out_dir, '{dataset}-pathlinker-sources.txt'),
+        targets=os.path.join(out_dir, '{dataset}-pathlinker-targets.txt'),
+        network=os.path.join(out_dir, '{dataset}-pathlinker-network.txt')
     # run the preprocessing script for this algorithm
     # With Git Bash on Windows multiline strings are not executed properly
     # https://carpentries-incubator.github.io/workflows-snakemake/07-resources/index.html
     shell:
         '''
         echo {input.sources} >> {output.sources} && echo {input.targets} >> {output.targets} && echo {input.network} >> {output.network}
+        '''
+
+# Can delete this once the rule is generalized to work for all algorithms
+rule prepare_input_pcsf:
+    input:
+        nodes=os.path.join(data_dir, '{dataset}-nodes.txt'),
+        network=os.path.join(data_dir, '{dataset}-network.txt')
+    output:
+        nodes=os.path.join(out_dir, '{dataset}-pcsf-nodes.txt'),
+        network=os.path.join(out_dir, '{dataset}-pcsf-network.txt')
+    shell:
+        '''
+        echo {input.nodes} >> {output.nodes} && echo {input.network} >> {output.network}
         '''
 
 # See https://stackoverflow.com/questions/46714560/snakemake-how-do-i-use-a-function-that-takes-in-a-wildcard-and-returns-a-value
@@ -113,11 +132,11 @@ rule reconstruct:
         ''')
 
 # Original pathway reconstruction output to universal output
-rule parse_output:
-    input: os.path.join(out_dir, '{dataset}-{algorithm}-{params}-raw-pathway.txt')
-    output: os.path.join(out_dir, '{dataset}-{algorithm}-{params}-pathway.txt')
-    # run the post-processing script
-    shell: 'echo {wildcards.algorithm} {input} >> {output}'
+#rule parse_output:
+#    input: os.path.join(out_dir, '{dataset}-{algorithm}-{params}-raw-pathway.txt')
+#    output: os.path.join(out_dir, '{dataset}-{algorithm}-{params}-pathway.txt')
+#    # run the post-processing script
+#    shell: 'echo {wildcards.algorithm} {input} >> {output}'
 
 # Pathway Augmentation
 rule augment_pathway:
