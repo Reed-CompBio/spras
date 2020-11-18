@@ -7,7 +7,11 @@ wildcard_constraints:
     algorithm='\w+'
 
 algorithms = ['pathlinker']
-pathlinker_params = ['k5', 'k10']
+algorithm_params = {
+    'pathlinker': ['k5', 'k10'], # Eventually this would be a list of dictionaries
+    'pcsf': ['beta0', 'beta1', 'beta2']
+    }
+pathlinker_params = algorithm_params['pathlinker'] # Temporary
 datasets = ['data1']
 data_dir = 'input'
 out_dir = 'output'
@@ -23,6 +27,15 @@ run_options = {}
 run_options["augment"] = False
 run_options["parameter-advise"] = False
 
+# Generate numeric indices for the parameter combinations
+# of each reconstruction algorithms
+def generate_param_counts(algorithm_params):
+    algorithm_param_counts = {}
+    for algorithm, param_list in algorithm_params.items():
+        algorithm_param_counts[algorithm] = len(param_list)
+    return algorithm_param_counts
+
+algorithm_param_counts = generate_param_counts(algorithm_params)
 
 # Determine which input files are needed based on the
 # pathway reconstruction algorithm
