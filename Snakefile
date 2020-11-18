@@ -41,6 +41,12 @@ algorithm_param_counts = generate_param_counts(algorithm_params)
 algorithms_with_params = [f'{algorithm}-params{index}' for algorithm, count in algorithm_param_counts.items() for index in range(count)]
 #print(algorithms_with_params)
 
+# Get the parameter dictionary (currently string) for the specified
+# algorithm and index
+def reconstruction_params(algorithm, index_string):
+    index = int(index_string.replace('params', ''))
+    return algorithm_params[algorithm][index]
+
 # Determine which input files are needed based on the
 # pathway reconstruction algorithm
 # May no longer need a function for this, but keep it because
@@ -59,6 +65,7 @@ def make_final_input(wildcards):
     # whose inputs depend on each other. 
     # Currently, this will not re-generate all of the individual pathways
     # when augmenting or advising
+    # Changes to the parameter handling may have broken the augment and advising options
     if run_options["augment"]:
         final_input = expand('{out_dir}{sep}{dataset}-{algorithm}-{params}-pathway-augmented.txt', out_dir=out_dir, sep=os.sep, dataset=datasets, algorithm=algorithms, params=pathlinker_params)
     elif run_options["parameter-advise"]:
@@ -66,7 +73,7 @@ def make_final_input(wildcards):
         final_input = expand('{out_dir}{sep}{dataset}-{algorithm}-pathway-advised.txt', out_dir=out_dir, sep=os.sep, dataset=datasets, algorithm=algorithms)
     else:
         # Use 'params<index>' in the filename instead of describing each of the parameters and its value
-        final_input = expand('{out_dir}{sep}{dataset}-{algorithm_params}-raw-pathway.txt', out_dir=out_dir, sep=os.sep, dataset=datasets, algorithm_params=algorithms_with_params)
+        final_input = expand('{out_dir}{sep}{dataset}-{algorithm_params}-pathway.txt', out_dir=out_dir, sep=os.sep, dataset=datasets, algorithm_params=algorithms_with_params)
     return final_input
 
 # A rule to define all the expected outputs from all pathway reconstruction
@@ -125,18 +132,19 @@ rule reconstruct:
     run:
         input_args = ['--' + arg for arg in reconstruction_inputs(wildcards.algorithm)]
         input_args = list(it.chain.from_iterable(zip(input_args, *{input})))
+        params = reconstruction_params(wildcards.algorithm, wildcards.params)
         # Write the command to a file instead of running it because this
         # functionality has not been implemented
         shell('''
-            echo python command --algorithm {wildcards.algorithm} {input_args} --output {output} >> {output} && echo Params: {wildcards.params} >> {output}
+            echo python command --algorithm {wildcards.algorithm} {input_args} --output {output} >> {output} && echo Parameters: {params} >> {output}
         ''')
 
 # Original pathway reconstruction output to universal output
-#rule parse_output:
-#    input: os.path.join(out_dir, '{dataset}-{algorithm}-{params}-raw-pathway.txt')
-#    output: os.path.join(out_dir, '{dataset}-{algorithm}-{params}-pathway.txt')
-#    # run the post-processing script
-#    shell: 'echo {wildcards.algorithm} {input} >> {output}'
+rule parse_output:
+    input: os.path.join(out_dir, '{dataset}-{algorithm}-{params}-raw-pathway.txt')
+    output: os.path.join(out_dir, '{dataset}-{algorithm}-{params}-pathway.txt')
+    # run the post-processing script
+    shell: 'echo {wildcards.algorithm} {input} >> {output}'
 
 # Pathway Augmentation
 rule augment_pathway:
