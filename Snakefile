@@ -6,13 +6,21 @@ import os
 wildcard_constraints:
     algorithm='\w+'
 
-algorithms = ['pathlinker']
+# Each algorithm's parameters are provided as a list of dictionaries
+# Defaults are handled in the Python function or class that wraps
+# running that algorithm
+# Keys in the parameter dictionary are strings
 algorithm_params = {
-    'pathlinker': ['k5', 'k10'], # Eventually this would be a list of dictionaries
-    'pcsf': ['beta0', 'beta1', 'beta2']
+    'pathlinker': [{'k':5}, {'k':10}],
+    'pcsf': [{'beta':0, 'mu':0},
+        {'beta':1.0, 'mu':0},
+        {'beta':1.0, 'mu':1.0}]
     }
+algorithms = list(algorithm_params.keys())
 pathlinker_params = algorithm_params['pathlinker'] # Temporary
 
+# Need to work more on input file naming to make less strict assumptions
+# about the filename structure
 datasets = ['data1']
 data_dir = 'input'
 out_dir = 'output'
@@ -41,7 +49,7 @@ algorithm_param_counts = generate_param_counts(algorithm_params)
 algorithms_with_params = [f'{algorithm}-params{index}' for algorithm, count in algorithm_param_counts.items() for index in range(count)]
 #print(algorithms_with_params)
 
-# Get the parameter dictionary (currently string) for the specified
+# Get the parameter dictionary for the specified
 # algorithm and index
 def reconstruction_params(algorithm, index_string):
     index = int(index_string.replace('params', ''))
@@ -53,6 +61,20 @@ def reconstruction_params(algorithm, index_string):
 # the final implmentation may be more complex than a dictionary
 def reconstruction_inputs(algorithm):
     return required_inputs[algorithm]
+
+# Convert a parameter dictionary to a string of command line arguments
+def params_to_args(params):
+    args_list = [f'--{param}={value}' for param, value in params.items()]
+    return ' '.join(args_list)
+
+# Log the parameter dictionaries and the mapping from indices to parameter values
+# Could write this as a YAML file
+def write_parameter_log(algorithm, logfile):
+    with open(logfile, 'w') as f:
+        # May want to use the previously created mapping from parameter indices
+        # instead of recreating it to make sure they always correspond
+        for index, params in enumerate(algorithm_params[algorithm]):
+            f.write(f'params{index}: {params}\n')
 
 # Choose the final input for reconstruct_pathways based on which options are being run
 # Right now this is a static run_options dictionary but would eventually
@@ -74,6 +96,8 @@ def make_final_input(wildcards):
     else:
         # Use 'params<index>' in the filename instead of describing each of the parameters and its value
         final_input = expand('{out_dir}{sep}pathway-{dataset}-{algorithm_params}.txt', out_dir=out_dir, sep=os.sep, dataset=datasets, algorithm_params=algorithms_with_params)
+        # Create log files for the parameter indices
+        final_input.extend(expand('{out_dir}{sep}parameters-{algorithm}.txt', out_dir=out_dir, sep=os.sep, algorithm=algorithms))
     return final_input
 
 # A rule to define all the expected outputs from all pathway reconstruction
@@ -112,12 +136,17 @@ rule reconstruct:
     # chain.from_iterable trick from https://stackoverflow.com/questions/3471999/how-do-i-merge-two-lists-into-a-single-list
     run:
         input_args = ['--' + arg for arg in reconstruction_inputs(wildcards.algorithm)]
+        # A list of the input file type and filename, for example
+        # ['--sources' 'data1-pathlinker-sources.txt' ''--targets' 'data1-pathlinker-targets.txt']
         input_args = list(it.chain.from_iterable(zip(input_args, *{input})))
         params = reconstruction_params(wildcards.algorithm, wildcards.params)
+        # A string representation of the parameters as command line arguments,
+        # for example '--k=5'
+        params_args = params_to_args(params)
         # Write the command to a file instead of running it because this
         # functionality has not been implemented
         shell('''
-            echo python command --algorithm {wildcards.algorithm} {input_args} --output {output} >> {output} && echo Parameters: {params} >> {output}
+            echo python command --algorithm {wildcards.algorithm} {input_args} --output {output} {params_args} >> {output}
         ''')
 
 # Original pathway reconstruction output to universal output
@@ -126,6 +155,13 @@ rule parse_output:
     output: os.path.join(out_dir, 'pathway-{dataset}-{algorithm}-{params}.txt')
     # run the post-processing script
     shell: 'echo {wildcards.algorithm} {input} >> {output}'
+
+# Write the mapping from parameter indices to parameter dictionaries
+rule log_parameters:
+    output:
+        logfile = os.path.join(out_dir, 'parameters-{algorithm}.txt')
+    run:
+        write_parameter_log(wildcards.algorithm, output.logfile)
 
 # Pathway Augmentation
 rule augment_pathway:
