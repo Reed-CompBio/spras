@@ -18,42 +18,55 @@
  # careful: too many parameters might make your runs take a long time.
  
  algorithms:
-        - name: "BowtieBuilder"
+        - name: "bowtiebuilder"
           params:
                 include: true
+                run1:
 
-        - name: "PathLinker"
+        - name: "pathlinker"
           params:
                 include: true
-                k: [500]
+                run1:
+                    k: range(100,501,100)
 
-        - name: "ResponseNet"
+        - name: "responsenet"
+          params:
+                include: false
+                run1:
+                    y: [20]
+
+        - name: "pcsf"
           params:
                 include: true
-                y: [20]
+                run1:
+                    r: [5]
+                    b: [1,2]
+                    w: np.linspace(0,5,20)
+                    g: [3]
+                run2:
+                    r: [5]
+                    b: [1,2]
+                    w: np.linspace(0,5,20)
+                    g: [3]
 
-        - name: "PCSF"
+        - name: "shortestpaths"
           params:
-                include: true
-                r: [5]
-                b: [1]
-                w: [5]
-                g: [3]
+                include: false
+                run1:
 
-        - name: "ShortestPaths"
+
+        - name: "rwr"
           params:
-                include: true
+                include: false
+                run1:
+                    a: [0.85]
+                    t: [0.3]
 
-
-        - name: "RWR"
-          params:
-                include: true
-                a: [0.85]
-                t: [0.3]
-
- # Here we fix which pathways to run. This is just a list. 
- pathways: ["Wnt","IL-6"]
-
+ # Here we fix which pathways to run and other file location information. 
+ data:
+        datasets: ["data1"]
+        data_dir: "input"
+        out_dir:  "output"
 
  # If we want to reconsruct then we should set run to true.
  reconstruction_settings:

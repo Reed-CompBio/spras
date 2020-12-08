@@ -2,33 +2,67 @@
 # They simply echo the input filename into the expected output file
 import itertools as it
 import os
+import numpy as np
 
+configfile: "Config-Files/test-config.yaml"
 wildcard_constraints:
     algorithm='\w+'
 
-# Each algorithm's parameters are provided as a list of dictionaries
-# Defaults are handled in the Python function or class that wraps
-# running that algorithm
-# Keys in the parameter dictionary are strings
-algorithm_params = {
-    'pathlinker': [{'k':5}, {'k':10}],
-    'pcsf': [{'beta':0, 'mu':0},
-        {'beta':1.0, 'mu':0},
-        {'beta':1.0, 'mu':1.0}]
-    }
+algorithm_params = dict()
+datasets = []
+data_dir = ""
+out_dir = ""
+
+def parse_config_file():
+    global datasets
+    global data_dir
+    global out_dir 
+    global algorithm_params
+    
+    # Parse dataset information
+    # Need to work more on input file naming to make less strict assumptions
+    # about the filename structure
+    datasets = config["data"]["datasets"]
+    data_dir = config["data"]["data_dir"]
+    out_dir  = config["data"]["out_dir"]
+    
+    # Parse algorithm information
+    # Each algorithm's parameters are provided as a list of dictionaries
+    # Defaults are handled in the Python function or class that wraps
+    # running that algorithm
+    # Keys in the parameter dictionary are strings
+    for alg in config["algorithms"]:
+        # Each set of runs should be 1 level down in the config file
+        for r in alg["params"]:
+            allRuns = []
+            if r == "include":
+                if alg["params"][r]:
+                    # This is trusting that "include" is always first
+                    algorithm_params[alg["name"]] = []
+                    continue
+                else:
+                    break
+            # We create a the product of all param combinations for each run
+            paramNameList = []
+            if alg["params"][r] is not None:
+                for p in alg["params"][r]:
+                    paramNameList.append(p)
+                    allRuns.append(eval(str(alg["params"][r][p])))
+            runListTuples = list(it.product(*allRuns))
+            paramNameTuple = tuple(paramNameList)
+            for r in runListTuples:
+                runDict = dict(zip(paramNameTuple,r))
+                algorithm_params[alg["name"]].append(runDict)
+
+parse_config_file()
 algorithms = list(algorithm_params.keys())
 pathlinker_params = algorithm_params['pathlinker'] # Temporary
-
-# Need to work more on input file naming to make less strict assumptions
-# about the filename structure
-datasets = ['data1']
-data_dir = 'input'
-out_dir = 'output'
 
 # This would be part of our Python package
 required_inputs = {
     'pathlinker': ['sources', 'targets', 'network'],
-    'pcsf': ['nodes', 'network']
+    'pcsf': ['nodes', 'network'],
+    'bowtiebuilder': ['nodes', 'network']
     }
 
 # Eventually we'd store these values in a config file
