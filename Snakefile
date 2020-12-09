@@ -4,7 +4,7 @@ import itertools as it
 import os
 import numpy as np
 
-configfile: "Config-Files/test-config.yaml"
+configfile: "Config-Files/config.yaml"
 wildcard_constraints:
     algorithm='\w+'
 
