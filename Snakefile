@@ -16,16 +16,16 @@ out_dir = ""
 def parse_config_file():
     global datasets
     global data_dir
-    global out_dir 
+    global out_dir
     global algorithm_params
-    
+
     # Parse dataset information
     # Need to work more on input file naming to make less strict assumptions
     # about the filename structure
     datasets = config["data"]["datasets"]
     data_dir = config["data"]["data_dir"]
     out_dir  = config["data"]["out_dir"]
-    
+
     # Parse algorithm information
     # Each algorithm's parameters are provided as a list of dictionaries
     # Defaults are handled in the Python function or class that wraps
@@ -191,6 +191,8 @@ rule parse_output:
     shell: 'echo {wildcards.algorithm} {input} >> {output}'
 
 # Write the mapping from parameter indices to parameter dictionaries
+# TODO: Need this to have input files so it updates
+# Possibly all rules should have the config file as input
 rule log_parameters:
     output:
         logfile = os.path.join(out_dir, 'parameters-{algorithm}.txt')
