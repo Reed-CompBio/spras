@@ -21,6 +21,7 @@ class Runner(object):
         params: dict created in PRRun
 
         '''
+        print("init Runner object")
         self.name = params['name']
         self.inputDir = params['inputDir']
         self.params = params['params']
@@ -28,13 +29,16 @@ class Runner(object):
         self.cellData = params['cellData']
         
     def generateInputs(self):
+        print("Runner: generate Inputs")
         print(self.name)
         InputMapper[self.name](self)
         
         
     def run(self):
+        print("Runner: run ")
         AlgorithmMapper[self.name](self)
 
 
     def parseOutput(self):
+        print("Runner: parse outputs")
         OutputParser[self.name](self)

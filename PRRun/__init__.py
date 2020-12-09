@@ -35,7 +35,7 @@ import os
 class InputSettings(object):
     def __init__(self,
             datadir, datasets, algorithms) -> None:
-
+        print("InputSettings: create input settings")
         self.datadir = datadir
         self.datasets = datasets
         self.algorithms = algorithms
@@ -48,6 +48,7 @@ class OutputSettings(object):
     '''
 
     def __init__(self, base_dir, output_prefix: Path) -> None:
+        print("OutputSettings: create output settings")
         self.base_dir = base_dir
         self.output_prefix = output_prefix
 
@@ -61,7 +62,7 @@ class PRRun(object):
     def __init__(self,
             input_settings: InputSettings,
             output_settings: OutputSettings) -> None:
-
+        print("init PRRun object")
         self.input_settings = input_settings
         self.output_settings = output_settings
         self.runners: Dict[int, Runner] = self.__create_runners()
@@ -74,7 +75,7 @@ class PRRun(object):
         the set of algorithms to be run, and graphspace credentials, in
         addition to the custom parameters each runner may or may not define.
         '''
-        
+        print("PRRun: create runners")
         runners: Dict[int, Runner] = defaultdict(list)
         order = 0
         for dataset in self.input_settings.datasets:
@@ -102,6 +103,7 @@ class PRRun(object):
         Run each of the algorithms
         '''
 
+        print("PRRun: start execution of runners")
         base_output_dir = self.output_settings.base_dir
 
         batches =  self.runners.keys()
@@ -129,6 +131,7 @@ class ConfigParser(object):
     '''
     @staticmethod
     def parse(config_file_handle) -> PRRun:
+        print("ConFigParser: parse config file -> PRun")
         config_map = yaml.load(config_file_handle)
         return PRRun(
             ConfigParser.__parse_input_settings(
@@ -138,6 +141,7 @@ class ConfigParser(object):
 
     @staticmethod
     def __parse_input_settings(input_settings_map) -> InputSettings:
+        print("ConFigParser: parse input settings -> InputSettings")
         input_dir = input_settings_map['input_dir']
         dataset_dir = input_settings_map['dataset_dir']
         datasets = input_settings_map['datasets']
@@ -151,6 +155,7 @@ class ConfigParser(object):
 
     @staticmethod
     def __parse_algorithms(algorithms_list):
+        print("ConFigParser: parse algorithms")
         algorithms = []
         for algorithm in algorithms_list:
                 combos = [dict(zip(algorithm['params'], val))
@@ -165,6 +170,7 @@ class ConfigParser(object):
 
     @staticmethod
     def __parse_output_settings(output_settings_map) -> OutputSettings:
+        print("ConFigParser: parse output settings -> OutputSettings")
         output_dir = Path(output_settings_map['output_dir'])
         output_prefix = Path(output_settings_map['output_prefix'])
 

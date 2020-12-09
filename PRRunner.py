@@ -48,28 +48,38 @@ def parse_arguments():
 def main():
     opts = parse_arguments()
     config_file = opts.config
-
-
+    print("########################## Run PRRunner ##########################")
+    print("print output follows execution of PRRunner \n'*' denotes calls from PRRunner\n")
+    print("* create Evaluation")
     with open(config_file, 'r') as conf:
         evaluation = br.ConfigParser.parse(conf)
     print(evaluation)
-    print('Evaluation started')
+    print("-------------------------------------------")
+    print('* Evaluation started')
     # print("--- runners")
     # print(evaluation.input_settings.algorithms)
     # print(evaluation.input_settings.datasets)
     
 
-
+    print("* --generate Inputs driver loop")
     for idx in range(len(evaluation.runners)):
+        
         evaluation.runners[idx].generateInputs()
+        print("\n")
 
+    print("* --run driver loop")
     for idx in range(len(evaluation.runners)):
+        
         evaluation.runners[idx].run()
+        print("\n")
 
+    print("* --parse outputs driver loop")
     for idx in range(len(evaluation.runners)):
+        
         evaluation.runners[idx].parseOutput()
+        print("\n")
 
-    print('Evaluation complete')
+    print('* Evaluation complete')
 
 
 if __name__ == '__main__':
