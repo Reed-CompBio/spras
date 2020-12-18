@@ -72,7 +72,7 @@
  reconstruction_settings:
 
          #set where everything is saved
-         locations:
+         - locations:
                 #place the path to your interactome here
                 interactome_path: "/path/to/interactome"
 
@@ -82,20 +82,20 @@
                 #place the save path here
                 reconstruction_dir: "/path/to/save"
 
-         run: true
+         - run: true
 
  #Do we want to augment our reconstructions
  augmentation_settings:
         
          #save locations
-         locations:
+         - locations:
                  reconstruction_dir: "/path/to/save"
 
-         PRAUG:
+         - PRAUG:
 
                  run: true
 
-         ensemble:
+         - ensemble:
 
                  run: false
                  rule: "Intersection"
@@ -103,10 +103,10 @@
 
  evaluation_settings:
 
-         locations:
+         - locations:
                  reconstruction_dir: "/path/to/reconstructions"
 
-         PR:
+         - PR:
                  compute: true
                 
                  #the open-world assumption is the denial that being unannotated is to be not in the pathway. 
@@ -126,11 +126,11 @@
  #Plotting
  plot_settings:
 
-         locations:
+         - locations:
                  reconstruction_dir: "/path/to/reconstructions"
                  
                  plot_dir: "/path/to/plots"
-         plots:
+         - plots:
 
                 - name: "example_plot_1"
                   type: "PR"

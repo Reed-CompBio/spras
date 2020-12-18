@@ -9,10 +9,12 @@ import yaml
 import os
 import sys
 
+
 def main(argv):
     f = argv[1]
     with open(f,'r') as g:
         print(yaml.safe_load(g))
+
 
 
 if __name__ == "__main__":
