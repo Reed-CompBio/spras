@@ -86,6 +86,11 @@ def get_runners(algorithm_params):
         ## make a dictionary of all runners.
         i = 0
         for param in param_list:
+            ## QUESTION: should the Runner object get inputs for the algs and set those?
+            ## Right now itis inconsistent: we pass it specific parameters, but NOT input/output
+            ## files. It just pulls inputdir and outputdir, but not specific filenames.
+            ## These seem to be created in the reconstruct rule, but I wonder if it should be
+            ## specified here.
             param_dict = {'name':algorithm,'inputdir':data_dir,'outputdir':out_dir,'params':param}
             key = '{}-{}'.format(algorithm,i)
             ## This should be able to be dynamically specified.
