@@ -177,17 +177,3 @@ class ConfigParser(object):
 
         return OutputSettings(output_dir,
                              output_prefix)
-
-
-class RunnerObj(abc.ABC):
-    @abc.abstractmethod
-    def generateInputs(self):
-        pass
-
-    @abc.abstractmethod
-    def run(self):
-        pass
-
-    @abc.abstractmethod
-    def parseOutput(self):
-        pass

@@ -31,18 +31,3 @@ def parseOutput(RunnerObj):
     print("PATHLINKER: parse output")
 
 
-class PLR(RunnerObject):
-    def __init__(self):
-        pass
-
-    def generateInputs(self):
-        pass
-
-    def run(self):
-        pass
-
-    def parseOutput(self):
-        pass
-
-
-

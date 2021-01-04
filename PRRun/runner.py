@@ -3,14 +3,6 @@ import PRRun.pathlinkerRunner as PATHLINKER
 from pathlib import Path
 
 
-# InputMapper = {'PATHLINKER':PATHLINKER.generateInputs}
-
-# AlgorithmMapper = {'PATHLINKER': PATHLINKER.run}
-
-# OutputParser = {'PATHLINKER': PATHLINKER.parseOutput}
-
-
-
 class Runner(object):
     '''
     A runnable analysis to be incorporated into the pipeline
@@ -30,15 +22,17 @@ class Runner(object):
         
     def generateInputs(self):
         print("Runner: generate Inputs")
-        print(self.name)
-        InputMapper[self.name](self)
+        module = globals()[self.name]
+        getattr(module, 'generateInputs')(self)
         
         
     def run(self):
         print("Runner: run ")
-        AlgorithmMapper[self.name](self)
+        module = globals()[self.name]
+        getattr(module, 'run')(self)
 
 
     def parseOutput(self):
         print("Runner: parse outputs")
-        OutputParser[self.name](self)
+        module = globals()[self.name]
+        getattr(module, 'parseOutput')(self)
