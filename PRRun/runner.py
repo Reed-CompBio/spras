@@ -3,11 +3,11 @@ import PRRun.pathlinkerRunner as PATHLINKER
 from pathlib import Path
 
 
-InputMapper = {'PATHLINKER':PATHLINKER.generateInputs}
+# InputMapper = {'PATHLINKER':PATHLINKER.generateInputs}
 
-AlgorithmMapper = {'PATHLINKER': PATHLINKER.run}
+# AlgorithmMapper = {'PATHLINKER': PATHLINKER.run}
 
-OutputParser = {'PATHLINKER': PATHLINKER.parseOutput}
+# OutputParser = {'PATHLINKER': PATHLINKER.parseOutput}
 
 
 
