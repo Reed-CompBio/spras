@@ -3,6 +3,9 @@
 import itertools as it
 import os
 import numpy as np
+import sys
+
+from PLClass import PathLinker,BowTieBuilder,PCSF
 
 configfile: "Config-Files/config.yaml"
 wildcard_constraints:
@@ -70,17 +73,36 @@ run_options = {}
 run_options["augment"] = False
 run_options["parameter-advise"] = False
 
-# Generate numeric indices for the parameter combinations
-# of each reconstruction algorithms
-def generate_param_counts(algorithm_params):
-    algorithm_param_counts = {}
+# Used to be generate_param_counts(algorithm_params)
+# Now, make a dictionary of (key,Runner object) pairs, where
+#   KEY is algorithm name plus param count index.
+#   RUNNER OBJECT is one of PathLinker, BowTieBuilder, or PCSF instantiated classes with params.
+# Returns this dictionary; keys are used later for algorithms_with_params
+def get_runners(algorithm_params):
+    algorithm_runners = {}
     for algorithm, param_list in algorithm_params.items():
-        algorithm_param_counts[algorithm] = len(param_list)
-    return algorithm_param_counts
 
-algorithm_param_counts = generate_param_counts(algorithm_params)
-#print(algorithm_param_counts)
-algorithms_with_params = [f'{algorithm}-params{index}' for algorithm, count in algorithm_param_counts.items() for index in range(count)]
+        #algorithm_param_counts[algorithm] = len(param_list)
+        ## make a dictionary of all runners.
+        i = 0
+        for param in param_list:
+            param_dict = {'name':algorithm,'inputdir':data_dir,'outputdir':out_dir,'params':param}
+            key = '{}-{}'.format(algorithm,i)
+            ## This should be able to be dynamically specified.
+            ## For now, instantiate the object according to the algorithm name.
+            if algorithm == 'pathlinker':
+                algorithm_runners[key] = PathLinker(param_dict)
+            elif algorithm == 'bowtiebuilder':
+                algorithm_runners[key] = BowTieBuilder(param_dict)
+            elif algorithm == 'pcsf':
+                algorithm_runners[key] = PCSF(param_dict)
+            else:
+                sys.exit('{} not specified. add to the IF/ELIF statement in get_runners() for now.'.format(algorithm))
+            i+=1
+    return algorithm_runners
+
+algorithm_runners = get_runners(algorithm_params)
+algorithms_with_params = list(algorithm_runners.keys())
 #print(algorithms_with_params)
 
 # Get the parameter dictionary for the specified

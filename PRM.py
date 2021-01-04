@@ -1,7 +1,7 @@
 #
 # Implement an abstract PRM class
 #
-# 
+#
 from abc import ABC, abstractmethod
 
 class PRM(ABC):
@@ -10,17 +10,18 @@ class PRM(ABC):
         self.inputdir = params['inputdir']
         self.outputdir = params['outputdir']
         self.params = params['params']
+        # debugging
+        #print('Params:',self.params)
 
 
     @abstractmethod
-    def GenerateInputs(self):
+    def generateInputs(self):
         pass
 
     @abstractmethod
-    def Run(self):
+    def run(self):
         pass
 
     @abstractmethod
-    def parseOutput(Self):
+    def parseOutput(self):
         pass
-
