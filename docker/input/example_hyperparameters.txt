@@ -1,0 +1,4 @@
+--ID 541 --lambda 0.01 --dT 10 --num-lags 5 --kernel-width 2 --replicate 1 --family gaussian --date 01/31/2019 --prob-zero-removal 0 --prob-remove-samples 0.2
+--ID 541 --lambda 0.01 --dT 10 --num-lags 5 --kernel-width 2 --replicate 2 --family gaussian --date 01/31/2019 --prob-zero-removal 0 --prob-remove-samples 0.2
+--ID 542 --lambda 0.01 --dT 5 --num-lags 9 --kernel-width 4 --replicate 1 --family gaussian --date 31-Jan-2019 --prob-zero-removal 0.2 --prob-remove-samples 0.1
+--ID 542 --lambda 0.01 --dT 5 --num-lags 9 --kernel-width 4 --replicate 2 --family gaussian --date 31-Jan-2019 --prob-zero-removal 0.2 --prob-remove-samples 0.1
