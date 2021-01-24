@@ -1,11 +1,13 @@
 import docker
 import os
 
-def run(expression=None, genes=None, out_dir=None, hyperparameters=None):
+DEFAULT_OUT_DIR = 'output'
+
+def run(expression=None, genes=None, out_dir=DEFAULT_OUT_DIR, hyperparameters=None):
     '''
     Run SINGE with the provided arguments
     '''
-    if not expression or not genes or not out_dir or not hyperparameters:
+    if not expression or not genes or not hyperparameters:
         raise ValueError('Required SINGE arguments are missing')
 
     # Initialize a Docker client using environment variables
@@ -40,10 +42,15 @@ def main():
     '''
     Run SINGE in the Docker image using hard-coded arguments.
     '''
+    #args = {'expression': 'input/X_SCODE_data.mat',
+    #        'genes': 'input/gene_list.mat',
+    #        'out_dir': 'output',
+    #        'hyperparameters': 'input/example_hyperparameters.txt'}
+    # Example using a default argument (out_dir)
     args = {'expression': 'input/X_SCODE_data.mat',
             'genes': 'input/gene_list.mat',
-            'out_dir': 'output',
             'hyperparameters': 'input/example_hyperparameters.txt'}
+
     run(**args)
 
 if __name__ == '__main__':
