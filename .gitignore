@@ -133,3 +133,4 @@ dmypy.json
 
 # Output files
 output/
+TempMat.mat
