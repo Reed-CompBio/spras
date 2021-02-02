@@ -5,9 +5,12 @@ import os
 import numpy as np
 import sys
 
-from PLClass import PathLinker,BowTieBuilder,PCSF
+from PLClass import PathLinker as pathlinker
+from PLClass import BowTieBuilder as bowtiebuilder 
+from PLClass import PCSF as pcsf
 
-configfile: "Config-Files/config.yaml"
+# configfile: "Config-Files/config.yaml"
+configfile: "Config-Files/config_test.yaml"
 wildcard_constraints:
     algorithm='\w+'
 
@@ -95,20 +98,23 @@ def get_runners(algorithm_params):
             key = '{}-{}'.format(algorithm,i)
             ## This should be able to be dynamically specified.
             ## For now, instantiate the object according to the algorithm name.
-            if algorithm == 'pathlinker':
-                algorithm_runners[key] = PathLinker(param_dict)
-            elif algorithm == 'bowtiebuilder':
-                algorithm_runners[key] = BowTieBuilder(param_dict)
-            elif algorithm == 'pcsf':
-                algorithm_runners[key] = PCSF(param_dict)
-            else:
-                sys.exit('{} not specified. add to the IF/ELIF statement in get_runners() for now.'.format(algorithm))
+            algorithm_runners[key] = globals()[algorithm](param_dict)
+            # if algorithm == 'pathlinker':
+            #     algorithm_runners[key] = pathlinker(param_dict)
+            # elif algorithm == 'bowtiebuilder':
+            #     algorithm_runners[key] = bowtiebuilder(param_dict)
+            # elif algorithm == 'pcsf':
+            #     algorithm_runners[key] = pcsf(param_dict)
+            # else:
+            #     sys.exit('{} not specified. add to the IF/ELIF statement in get_runners() for now.'.format(algorithm))
             i+=1
     return algorithm_runners
 
 algorithm_runners = get_runners(algorithm_params)
 algorithms_with_params = list(algorithm_runners.keys())
 #print(algorithms_with_params)
+print(algorithm_runners)
+# sys.exit()
 
 # Get the parameter dictionary for the specified
 # algorithm and index
@@ -215,7 +221,7 @@ rule parse_output:
     input: os.path.join(out_dir, 'raw-pathway-{dataset}-{algorithm}-{params}.txt')
     output: os.path.join(out_dir, 'pathway-{dataset}-{algorithm}-{params}.txt')
     # run the post-processing script
-    shell: 'echo {wildcards.algorithm} {input} >> {output}'
+    shell: 'python -c {wildcards.algorithm}.parseOutputs()'   #'echo {wildcards.algorithm} {input} >> {output}'
 
 # Write the mapping from parameter indices to parameter dictionaries
 # TODO: Need this to have input files so it updates
