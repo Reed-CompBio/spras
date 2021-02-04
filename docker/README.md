@@ -22,3 +22,22 @@ SINGE will run inside Docker, which takes a few minutes.
 The output files will be written to the `output` subdirectory.
 
 If the Docker image `agitter/singe:0.4.1` is not already available locally, the script will automatically pull it from [DockerHub](https://hub.docker.com/r/agitter/singe).
+
+## Activating conda inside a Docker container
+
+By default, an installed conda environment will not be activated inside the Docker container.
+Docker does not invoke Bash as a login shell.
+[This blog post](https://pythonspeed.com/articles/activate-conda-dockerfile/) provides a workaround demonstrated here in `Dockerfile` and `env.yml`.
+It defines a custom ENTRYPOINT that uses `conda run` to run the command inside the conda environment.
+
+To create the Docker image run:
+```
+docker build -t conda-test/conda-test -f Dockerfile .
+```
+
+To confirm that commands are run inside the conda environment run:
+```
+winpty docker run conda-test/conda-test conda list
+winpty docker run conda-test/conda-test python -c "import networkx; print(networkx.__version__)"
+```
+The `winpty` prefix is only needed on Windows.
