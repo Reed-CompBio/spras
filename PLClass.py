@@ -34,7 +34,7 @@ class PathLinker(PRM):
         print(data)
         
         try:
-            out = client.containers.run('pathlinker/pr-pathlinker',
+            out = client.containers.run('ajshedivy/pr-pathlinker:example',
                                 command, 
                                 stderr=True,
                                 volumes={data: {'bind': '/home/PathLinker/data', 'mode': 'rw'}},
