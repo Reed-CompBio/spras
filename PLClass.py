@@ -61,7 +61,7 @@ class PathLinker(PRM):
 
         # Need to rename the output file to match the specific output file in the params?
         # Temporarily create a placeholder output file
-        with open(params['output-file'], 'w') as out_file:
+        with open(params['output'], 'w') as out_file:
             out_file.write('PathLinker: run_static() with {}'.format(params))
 
     def parseOutput(self):
