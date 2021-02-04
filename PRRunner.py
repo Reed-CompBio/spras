@@ -17,10 +17,20 @@ import concurrent.futures
 from typing import Dict, List
 from PRRun.runner import Runner
 import os
+from PLClass import PathLinker
 
 import PRRun as br
 yaml.warnings({'YAMLLoadWarning': False})
 
+def run(algorithm, params):
+    """
+    A generic interface to the algorithm-specific run functions
+    """
+    if algorithm.lower() == 'pathlinker':
+        # Assuming the static function version of the running so not creating an instance of the PathLinker class
+        PathLinker.run_static(params)
+    else:
+        raise NotImplementedError('Only PathLinker is currently supported :(')
 
 def get_parser() -> argparse.ArgumentParser:
     '''

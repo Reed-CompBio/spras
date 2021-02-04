@@ -12,21 +12,33 @@ class PathLinker(PRM):
         print('PathLinker: {} generateInputs() from {}'.format(self.name,self.inputdir))
 
     def run(self):
-        '''
-        Run SINGE with the provided arguments
-        '''
+        print('PathLinker: {} run() with {}'.format(self.name,self.params))
+
+    # Temporary name for the static version of the runner
+    # Skips parameter validation step
+    @staticmethod
+    def run_static(params):
+        """
+        params: a dictionary with the input file, output file, and k value
+        """
+        print('PathLinker: run_static() with {}'.format(params))
 
         # Initialize a Docker client using environment variables
         client = docker.from_env()
         print(type(client.containers))
         command = ['python']
         command.append('../run.py')
+        # Use the actual input files from the params here
+        # Need to implement the generate_inputs function first
         command.append('sample-in-net.txt')
         command.append('sample-in-nodetypes.txt')
+        command.extend(['-k', params['k']])
+        print(command)
 
         working_dir = os.getcwd()
 
         data = os.path.join(working_dir, 'docker', 'pathlinker')
+        # Tony can run this example successfully on Git for Windows even with the following lines commented out
         if os.name == 'nt':
             print("running on Windows")
             data = str(data).replace("\\", "/").replace("C:", "//c")
@@ -46,6 +58,11 @@ class PathLinker(PRM):
         finally:
             # Not sure whether this is needed
             client.close()
+
+        # Need to rename the output file to match the specific output file in the params?
+        # Temporarily create a placeholder output file
+        with open(params['output-file'], 'w') as out_file:
+            out_file.write('PathLinker: run_static() with {}'.format(params))
 
     def parseOutput(self):
         print('PathLinker: {} parseOutput() from {}'.format(self.name,self.outputdir))

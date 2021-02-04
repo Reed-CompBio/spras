@@ -8,6 +8,7 @@ import sys
 from PLClass import PathLinker as pathlinker
 from PLClass import BowTieBuilder as bowtiebuilder 
 from PLClass import PCSF as pcsf
+import PRRunner
 
 # configfile: "Config-Files/config.yaml"
 configfile: "Config-Files/config_test.yaml"
@@ -125,7 +126,7 @@ def reconstruction_params(algorithm, index_string):
 # Determine which input files are needed based on the
 # pathway reconstruction algorithm
 # May no longer need a function for this, but keep it because
-# the final implmentation may be more complex than a dictionary
+# the final implementation may be more complex than a dictionary
 def reconstruction_inputs(algorithm):
     return required_inputs[algorithm]
 
@@ -202,19 +203,28 @@ rule reconstruct:
     output: os.path.join(out_dir, 'raw-pathway-{dataset}-{algorithm}-{params}.txt')
     # chain.from_iterable trick from https://stackoverflow.com/questions/3471999/how-do-i-merge-two-lists-into-a-single-list
     run:
-        input_args = ['--' + arg for arg in reconstruction_inputs(wildcards.algorithm)]
+        params = reconstruction_params(wildcards.algorithm, wildcards.params)
+        # Add the input files
+        params.update(dict(zip(reconstruction_inputs(wildcards.algorithm), *{input})))
+        # Add the output file
+        params['output'] = {output}
+        PRRunner.run(wildcards.algorithm, params)
+
+        # No longer plan to call the runner from the shell, none of the below is needed but keep it temporarily for
+        # reference until the new function call-based strategy works
+#         input_args = ['--' + arg for arg in reconstruction_inputs(wildcards.algorithm)]
         # A list of the input file type and filename, for example
         # ['--sources' 'data1-pathlinker-sources.txt' ''--targets' 'data1-pathlinker-targets.txt']
-        input_args = list(it.chain.from_iterable(zip(input_args, *{input})))
-        params = reconstruction_params(wildcards.algorithm, wildcards.params)
+#         input_args = list(it.chain.from_iterable(zip(input_args, *{input})))
+#         params = reconstruction_params(wildcards.algorithm, wildcards.params)
         # A string representation of the parameters as command line arguments,
         # for example '--k=5'
-        params_args = params_to_args(params)
+#         params_args = params_to_args(params)
         # Write the command to a file instead of running it because this
         # functionality has not been implemented
-        shell('''
-            echo python command --algorithm {wildcards.algorithm} {input_args} --output {output} {params_args} >> {output}
-        ''')
+#         shell('''
+#             echo python command --algorithm {wildcards.algorithm} {input_args} --output {output} {params_args} >> {output}
+#         ''')
 
 # Original pathway reconstruction output to universal output
 rule parse_output:
