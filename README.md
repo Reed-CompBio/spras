@@ -13,3 +13,7 @@ Right now, this repo contains all the pieces that are being integrated into a si
 **Python Wrapper for Calling Algorithms**:
 
 Contact Anthony Gitter or Anna Ritz for more information.
+
+## Docker
+The `docker` subdirectory is not used by the main pathway reconstruction framework.
+It serves as a reference for how to set up Dockerfiles and make Docker run calls.
