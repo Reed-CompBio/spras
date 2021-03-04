@@ -5,10 +5,12 @@ import os
 import numpy as np
 import sys
 
-from PLClass import PathLinker as pathlinker
-from PLClass import BowTieBuilder as bowtiebuilder 
-from PLClass import PCSF as pcsf
+# from PLClass import PathLinker as pathlinker
+# from PLClass import BowTieBuilder as bowtiebuilder 
+# from PLClass import PCSF as pcsf
 import PRRunner
+
+from src.pathlinker import PathLinker as pathlinker
 
 # configfile: "Config-Files/config.yaml"
 configfile: "Config-Files/config_test.yaml"
@@ -19,6 +21,7 @@ algorithm_params = dict()
 datasets = []
 data_dir = ""
 out_dir = ""
+
 
 def parse_config_file():
     global datasets
@@ -97,6 +100,7 @@ def get_runners(algorithm_params):
             ## specified here.
             param_dict = {'name':algorithm,'inputdir':data_dir,'outputdir':out_dir,'params':param}
             key = '{}-{}'.format(algorithm,i)
+            print(algorithm)
             ## This should be able to be dynamically specified.
             ## For now, instantiate the object according to the algorithm name.
             algorithm_runners[key] = globals()[algorithm](param_dict)
@@ -203,6 +207,7 @@ rule reconstruct:
     output: os.path.join(out_dir, 'raw-pathway-{dataset}-{algorithm}-{params}.txt')
     # chain.from_iterable trick from https://stackoverflow.com/questions/3471999/how-do-i-merge-two-lists-into-a-single-list
     run:
+        print(f"cur algo: {wildcards.algorithm}")
         params = reconstruction_params(wildcards.algorithm, wildcards.params)
         # Add the input files
         params.update(dict(zip(reconstruction_inputs(wildcards.algorithm), *{input})))
@@ -231,7 +236,7 @@ rule parse_output:
     input: os.path.join(out_dir, 'raw-pathway-{dataset}-{algorithm}-{params}.txt')
     output: os.path.join(out_dir, 'pathway-{dataset}-{algorithm}-{params}.txt')
     # run the post-processing script
-    shell: 'python -c {wildcards.algorithm}.parseOutputs()'   #'echo {wildcards.algorithm} {input} >> {output}'
+    shell:  'echo {wildcards.algorithm} {input} >> {output}'
 
 # Write the mapping from parameter indices to parameter dictionaries
 # TODO: Need this to have input files so it updates

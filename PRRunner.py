@@ -1,23 +1,8 @@
 import yaml
 import argparse
-import itertools
-from collections import defaultdict
-from pathlib import Path
-import multiprocessing
-from multiprocessing import Pool, cpu_count
-import concurrent.futures
-import yaml
-import argparse
-import itertools
-from collections import defaultdict
-from pathlib import Path
-import multiprocessing
-from multiprocessing import Pool, cpu_count
-import concurrent.futures
-from typing import Dict, List
-from PRRun.runner import Runner
-import os
-from PLClass import PathLinker
+
+# supported algorithm imports
+from src.pathlinker import PathLinker as pathlinker
 
 import PRRun as br
 yaml.warnings({'YAMLLoadWarning': False})
@@ -26,10 +11,9 @@ def run(algorithm, params):
     """
     A generic interface to the algorithm-specific run functions
     """
-    if algorithm.lower() == 'pathlinker':
-        # Assuming the static function version of the running so not creating an instance of the PathLinker class
-        PathLinker.run_static(params)
-    else:
+    try:
+        globals()[algorithm.lower()].run(params)
+    except:
         raise NotImplementedError('Only PathLinker is currently supported :(')
 
 def get_parser() -> argparse.ArgumentParser:

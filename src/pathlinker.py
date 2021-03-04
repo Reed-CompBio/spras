@@ -1,23 +1,24 @@
 from docker.utils.utils import convert_volume_binds
-from PRM import *
+from src.PRM import *
 import docker 
 import os
 import sys
 
-### These classes should probably each be in their own file.
-### For initial debugging purposes, they are all listed here.
-class PathLinker(PRM):
+__all__ = ['PathLinker']
 
+
+class PathLinker(PRM):
+    @staticmethod
     def generateInputs(self):
         print('PathLinker: {} generateInputs() from {}'.format(self.name,self.inputdir))
 
-    def run(self):
-        print('PathLinker: {} run() with {}'.format(self.name,self.params))
+    # def run(self):
+    #     print('PathLinker: {} run() with {}'.format(self.name,self.params))
 
     # Temporary name for the static version of the runner
     # Skips parameter validation step
     @staticmethod
-    def run_static(params):
+    def run(params):
         """
         params: a dictionary with the input file, output file, and k value
         """
@@ -64,41 +65,6 @@ class PathLinker(PRM):
         with open(params['output'], 'w') as out_file:
             out_file.write('PathLinker: run_static() with {}'.format(params))
 
+    @staticmethod
     def parseOutput(self):
         print('PathLinker: {} parseOutput() from {}'.format(self.name,self.outputdir))
-
-
-class BowTieBuilder(PRM):
-
-    def generateInputs(self):
-        print('BowTieBuilder: {} generateInputs() from {}'.format(self.name,self.inputdir))
-
-    def run(self):
-        print('BowTieBuilder: {} run() with {}'.format(self.name,self.params))
-
-    def parseOutput(self):
-        print('BowTieBuilder: {} parseOutput() from {}'.format(self.name,self.outputdir))
-
-class PCSF(PRM):
-
-    def generateInputs(self):
-        print('PCSF: {} generateInputs() from {}'.format(self.name,self.inputdir))
-
-    def run(self):
-        print('PCSF: {} run() with {}'.format(self.name,self.params))
-
-    def parseOutput(self):
-        print('PCSF: {} parseOutput() from {}'.format(self.name,self.outputdir))
-
-
-if __name__ == '__main__':
-    params = {
-        'name': "",
-        'inputdir': "",
-        'outputdir': "",
-        'params': {'k': 10}
-    }
-
-    pathlinker = PathLinker(params)
-    pathlinker.run_static(params)
-
