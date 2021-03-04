@@ -1,7 +1,7 @@
 # Docker tests
 
 This subdirectory contains examples of using Docker's Python API https://github.com/docker/docker-py.
-It the SINGE [example data](https://github.com/gitter-lab/SINGE/tree/master/data1) and [Docker image](https://hub.docker.com/r/agitter/singe) with a reduced set of hyperparamters.
+It uses the SINGE [example data](https://github.com/gitter-lab/SINGE/tree/master/data1) and [Docker image](https://hub.docker.com/r/agitter/singe) with a reduced set of hyperparamters.
 The docker-py API is more readable than the similar [BEELINE Docker command](https://github.com/Murali-group/Beeline/blob/7f6e07a3cb784227bf3fa889fe0c36e731c22c5c/BLRun/singeRunner.py#L110-L116) and most likely also more robust across different operating systems.
 
 ## Installation
