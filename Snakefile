@@ -79,6 +79,9 @@ def generate_param_counts(algorithm_params):
         algorithm_param_counts[algorithm] = len(param_list)
     return algorithm_param_counts
 
+algorithm_param_counts = generate_param_counts(algorithm_params)
+algorithms_with_params = [f'{algorithm}-params{index}' for algorithm, count in algorithm_param_counts.items() for index in range(count)]
+
 # Get the parameter dictionary for the specified
 # algorithm and index
 def reconstruction_params(algorithm, index_string):
