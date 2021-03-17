@@ -71,46 +71,13 @@ run_options = {}
 run_options["augment"] = False
 run_options["parameter-advise"] = False
 
-# Used to be generate_param_counts(algorithm_params)
-# Now, make a dictionary of (key,Runner object) pairs, where
-#   KEY is algorithm name plus param count index.
-#   RUNNER OBJECT is one of PathLinker, BowTieBuilder, or PCSF instantiated classes with params.
-# Returns this dictionary; keys are used later for algorithms_with_params
-def get_runners(algorithm_params):
-    algorithm_runners = {}
+# Generate numeric indices for the parameter combinations
+# of each reconstruction algorithms
+def generate_param_counts(algorithm_params):
+    algorithm_param_counts = {}
     for algorithm, param_list in algorithm_params.items():
-
-        #algorithm_param_counts[algorithm] = len(param_list)
-        ## make a dictionary of all runners.
-        i = 0
-        for param in param_list:
-            ## QUESTION: should the Runner object get inputs for the algs and set those?
-            ## Right now itis inconsistent: we pass it specific parameters, but NOT input/output
-            ## files. It just pulls inputdir and outputdir, but not specific filenames.
-            ## These seem to be created in the reconstruct rule, but I wonder if it should be
-            ## specified here.
-            param_dict = {'name':algorithm,'inputdir':data_dir,'outputdir':out_dir,'params':param}
-            key = '{}-{}'.format(algorithm,i)
-            print(algorithm)
-            ## This should be able to be dynamically specified.
-            ## For now, instantiate the object according to the algorithm name.
-            algorithm_runners[key] = globals()[algorithm](param_dict)
-            # if algorithm == 'pathlinker':
-            #     algorithm_runners[key] = pathlinker(param_dict)
-            # elif algorithm == 'bowtiebuilder':
-            #     algorithm_runners[key] = bowtiebuilder(param_dict)
-            # elif algorithm == 'pcsf':
-            #     algorithm_runners[key] = pcsf(param_dict)
-            # else:
-            #     sys.exit('{} not specified. add to the IF/ELIF statement in get_runners() for now.'.format(algorithm))
-            i+=1
-    return algorithm_runners
-
-algorithm_runners = get_runners(algorithm_params)
-algorithms_with_params = list(algorithm_runners.keys())
-#print(algorithms_with_params)
-print(algorithm_runners)
-# sys.exit()
+        algorithm_param_counts[algorithm] = len(param_list)
+    return algorithm_param_counts
 
 # Get the parameter dictionary for the specified
 # algorithm and index
