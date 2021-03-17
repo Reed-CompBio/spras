@@ -15,7 +15,7 @@ class PRM(ABC):
 
 
     @abstractmethod
-    def generateInputs(self):
+    def generate_inputs(self):
         pass
 
     @abstractmethod
@@ -23,5 +23,5 @@ class PRM(ABC):
         pass
 
     @abstractmethod
-    def parseOutput(self):
+    def parse_output(self):
         pass

@@ -1,14 +1,14 @@
-from docker.utils.utils import convert_volume_binds
-from PRM import *
-import docker 
+from src.PRM import PRM
+import docker
 import os
-import sys
 
 ### These classes should probably each be in their own file.
 ### For initial debugging purposes, they are all listed here.
+
+
 class PathLinker(PRM):
 
-    def generateInputs(self):
+    def generate_inputs(self):
         print('PathLinker: {} generateInputs() from {}'.format(self.name,self.inputdir))
 
     def run(self):
@@ -64,30 +64,30 @@ class PathLinker(PRM):
         with open(params['output'], 'w') as out_file:
             out_file.write('PathLinker: run_static() with {}'.format(params))
 
-    def parseOutput(self):
+    def parse_output(self):
         print('PathLinker: {} parseOutput() from {}'.format(self.name,self.outputdir))
 
 
 class BowTieBuilder(PRM):
 
-    def generateInputs(self):
+    def generate_inputs(self):
         print('BowTieBuilder: {} generateInputs() from {}'.format(self.name,self.inputdir))
 
     def run(self):
         print('BowTieBuilder: {} run() with {}'.format(self.name,self.params))
 
-    def parseOutput(self):
+    def parse_output(self):
         print('BowTieBuilder: {} parseOutput() from {}'.format(self.name,self.outputdir))
 
 class PCSF(PRM):
 
-    def generateInputs(self):
+    def generate_inputs(self):
         print('PCSF: {} generateInputs() from {}'.format(self.name,self.inputdir))
 
     def run(self):
         print('PCSF: {} run() with {}'.format(self.name,self.params))
 
-    def parseOutput(self):
+    def parse_output(self):
         print('PCSF: {} parseOutput() from {}'.format(self.name,self.outputdir))
 
 

@@ -9,7 +9,7 @@ __all__ = ['PathLinker']
 
 class PathLinker(PRM):
     @staticmethod
-    def generateInputs(self):
+    def generate_inputs(self):
         print('PathLinker: {} generateInputs() from {}'.format(self.name,self.inputdir))
 
     # def run(self):
@@ -66,5 +66,5 @@ class PathLinker(PRM):
             out_file.write('PathLinker: run_static() with {}'.format(params))
 
     @staticmethod
-    def parseOutput(self):
+    def parse_output(self):
         print('PathLinker: {} parseOutput() from {}'.format(self.name,self.outputdir))
