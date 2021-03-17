@@ -2,18 +2,9 @@
 # They simply echo the input filename into the expected output file
 import itertools as it
 import os
-import numpy as np
-import sys
-
-# from PLClass import PathLinker as pathlinker
-# from PLClass import BowTieBuilder as bowtiebuilder 
-# from PLClass import PCSF as pcsf
 import PRRunner
 
-from src.pathlinker import PathLinker as pathlinker
-
-# configfile: "Config-Files/config.yaml"
-configfile: "Config-Files/config_test.yaml"
+configfile: "config/config.yaml"
 wildcard_constraints:
     algorithm='\w+'
 
@@ -43,26 +34,26 @@ def parse_config_file():
     # Keys in the parameter dictionary are strings
     for alg in config["algorithms"]:
         # Each set of runs should be 1 level down in the config file
-        for r in alg["params"]:
-            allRuns = []
-            if r == "include":
-                if alg["params"][r]:
+        for params in alg["params"]:
+            all_runs = []
+            if params == "include":
+                if alg["params"][params]:
                     # This is trusting that "include" is always first
                     algorithm_params[alg["name"]] = []
                     continue
                 else:
                     break
             # We create a the product of all param combinations for each run
-            paramNameList = []
-            if alg["params"][r] is not None:
-                for p in alg["params"][r]:
-                    paramNameList.append(p)
-                    allRuns.append(eval(str(alg["params"][r][p])))
-            runListTuples = list(it.product(*allRuns))
-            paramNameTuple = tuple(paramNameList)
-            for r in runListTuples:
-                runDict = dict(zip(paramNameTuple,r))
-                algorithm_params[alg["name"]].append(runDict)
+            param_name_list = []
+            if alg["params"][params] is not None:
+                for p in alg["params"][params]:
+                    param_name_list.append(p)
+                    all_runs.append(eval(str(alg["params"][params][p])))
+            run_list_tuples = list(it.product(*all_runs))
+            param_name_tuple = tuple(param_name_list)
+            for r in run_list_tuples:
+                run_dict = dict(zip(param_name_tuple,r))
+                algorithm_params[alg["name"]].append(run_dict)
 
 parse_config_file()
 algorithms = list(algorithm_params.keys())
@@ -153,7 +144,7 @@ def write_parameter_log(algorithm, logfile):
 # be done with the config file
 def make_final_input(wildcards):
     # Right now this lets us do ppa or augmentation, but not both.
-    # An easy solution would be to make a seperate rule for doing both, but
+    # An easy solution would be to make a separate rule for doing both, but
     # if we add more things to do after the fact that will get
     # out of control pretty quickly. Steps run in parallel won't have this problem, just ones
     # whose inputs depend on each other.
