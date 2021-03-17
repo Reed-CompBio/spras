@@ -12,7 +12,7 @@ def run(algorithm, params):
     A generic interface to the algorithm-specific run functions
     """
     try:
-        globals()[algorithm.lower()].run(params)
+        globals()[algorithm.lower()].run_static(**params)
     except:
         raise NotImplementedError('Only PathLinker is currently supported :(')
 

@@ -2,8 +2,8 @@ from src.PRM import PRM
 import docker
 import os
 
-### These classes should probably each be in their own file.
-### For initial debugging purposes, they are all listed here.
+# These classes should probably each be in their own file.
+# For initial debugging purposes, they are all listed here.
 
 
 class PathLinker(PRM):
@@ -17,52 +17,54 @@ class PathLinker(PRM):
     # Temporary name for the static version of the runner
     # Skips parameter validation step
     @staticmethod
-    def run_static(params):
+    def run_static(network=None, nodes=None, output=None, k=None):
         """
-        params: a dictionary with the input file, output file, and k value
+        Run PathLinker with Docker
+        @param network: input network file
+        @param nodes: input node types
+        @param output: output directory
+        @param k: path length (optional)
         """
-        print('PathLinker: run_static() with {}'.format(params))
+        # Add additional parameter validation
+        # Do not require k
+        # Use the PathLinker default
+        # Could consider setting the default here instead
+        if not network or not nodes or not output:
+            raise ValueError('Required PathLinker arguments are missing')
 
         # Initialize a Docker client using environment variables
         client = docker.from_env()
-        print(type(client.containers))
-        command = ['python']
-        command.append('../run.py')
-        # Use the actual input files from the params here
-        # Need to implement the generate_inputs function first
-        command.append('sample-in-net.txt')
-        command.append('sample-in-nodetypes.txt')
-        # command.extend(['-k', params['k']])
-        print(command)
+        command = ['python', '../run.py']
+        if k:
+            command.extend(['-k', str(k)])
+        command.extend([network, nodes])
+        print('PathLinker: run_static() command {}'.format(' '.join(command)))
 
         working_dir = os.getcwd()
 
-        data = os.path.join(working_dir, 'docker', 'pathlinker')
+        data_dir = os.path.join(working_dir, 'docker', 'pathlinker')
         # Tony can run this example successfully on Git for Windows even with the following lines commented out
         if os.name == 'nt':
             print("running on Windows")
-            data = str(data).replace("\\", "/").replace("C:", "//c")
+            data_dir = str(data_dir).replace("\\", "/").replace("C:", "//c")
 
-        print(data)
-        
         try:
-            out = client.containers.run('ajshedivy/pr-pathlinker:example',
-                                command, 
+            container_output = client.containers.run('ajshedivy/pr-pathlinker:example',
+                                command,
                                 stderr=True,
-                                volumes={data: {'bind': '/home/PathLinker/data', 'mode': 'rw'}},
+                                volumes={data_dir: {'bind': '/home/PathLinker/data', 'mode': 'rw'}},
                                 working_dir='/home/PathLinker'
                                 )
-            print(out.decode('utf-8'))
-
+            print(container_output.decode('utf-8'))
 
         finally:
             # Not sure whether this is needed
             client.close()
 
-        # Need to rename the output file to match the specific output file in the params?
+        # Need to rename the output file to match the specific output file in the params
         # Temporarily create a placeholder output file
-        with open(params['output'], 'w') as out_file:
-            out_file.write('PathLinker: run_static() with {}'.format(params))
+        with open(output, 'w') as out_file:
+            out_file.write('PathLinker: run_static() command {}'.format(' '.join(command)))
 
     def parse_output(self):
         print('PathLinker: {} parseOutput() from {}'.format(self.name,self.outputdir))
@@ -93,12 +95,10 @@ class PCSF(PRM):
 
 if __name__ == '__main__':
     params = {
-        'name': "",
-        'inputdir': "",
-        'outputdir': "",
-        'params': {'k': 10}
+        'network': "network.txt",
+        'nodes': "nodes.txt",
+        'output': "outdir",
+        'k': 10
     }
 
-    pathlinker = PathLinker(params)
-    pathlinker.run_static(params)
-
+    PathLinker.run_static(**params)
