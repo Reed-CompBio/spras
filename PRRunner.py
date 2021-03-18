@@ -4,7 +4,6 @@ import argparse
 # supported algorithm imports
 from src.pathlinker import PathLinker as pathlinker
 
-import PRRun as br
 yaml.warnings({'YAMLLoadWarning': False})
 
 def run(algorithm, params):
@@ -12,7 +11,7 @@ def run(algorithm, params):
     A generic interface to the algorithm-specific run functions
     """
     try:
-        globals()[algorithm.lower()].run_static(**params)
+        globals()[algorithm.lower()].run(**params)
     except:
         raise NotImplementedError('Only PathLinker is currently supported :(')
 
