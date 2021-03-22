@@ -65,6 +65,8 @@
  # Here we fix which pathways to run and other file location information. 
  data:
         datasets: ["data1"]
+        otherNodeData: ["PLSourcesList", "PLTargetsList", "UniprotToGeneID"]
+        otherFiles: ["GenericFile"]
         data_dir: "input"
         out_dir:  "output"
 

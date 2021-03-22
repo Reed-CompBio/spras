@@ -2,9 +2,9 @@
 # They simply echo the input filename into the expected output file
 import itertools as it
 import os
-import numpy as np
+import PRRunner
 
-configfile: "Config-Files/config.yaml"
+configfile: "config/config.yaml"
 wildcard_constraints:
     algorithm='\w+'
 
@@ -12,6 +12,7 @@ algorithm_params = dict()
 datasets = []
 data_dir = ""
 out_dir = ""
+
 
 def parse_config_file():
     global datasets
@@ -33,26 +34,26 @@ def parse_config_file():
     # Keys in the parameter dictionary are strings
     for alg in config["algorithms"]:
         # Each set of runs should be 1 level down in the config file
-        for r in alg["params"]:
-            allRuns = []
-            if r == "include":
-                if alg["params"][r]:
+        for params in alg["params"]:
+            all_runs = []
+            if params == "include":
+                if alg["params"][params]:
                     # This is trusting that "include" is always first
                     algorithm_params[alg["name"]] = []
                     continue
                 else:
                     break
             # We create a the product of all param combinations for each run
-            paramNameList = []
-            if alg["params"][r] is not None:
-                for p in alg["params"][r]:
-                    paramNameList.append(p)
-                    allRuns.append(eval(str(alg["params"][r][p])))
-            runListTuples = list(it.product(*allRuns))
-            paramNameTuple = tuple(paramNameList)
-            for r in runListTuples:
-                runDict = dict(zip(paramNameTuple,r))
-                algorithm_params[alg["name"]].append(runDict)
+            param_name_list = []
+            if alg["params"][params] is not None:
+                for p in alg["params"][params]:
+                    param_name_list.append(p)
+                    all_runs.append(eval(str(alg["params"][params][p])))
+            run_list_tuples = list(it.product(*all_runs))
+            param_name_tuple = tuple(param_name_list)
+            for r in run_list_tuples:
+                run_dict = dict(zip(param_name_tuple,r))
+                algorithm_params[alg["name"]].append(run_dict)
 
 parse_config_file()
 algorithms = list(algorithm_params.keys())
@@ -79,9 +80,7 @@ def generate_param_counts(algorithm_params):
     return algorithm_param_counts
 
 algorithm_param_counts = generate_param_counts(algorithm_params)
-#print(algorithm_param_counts)
 algorithms_with_params = [f'{algorithm}-params{index}' for algorithm, count in algorithm_param_counts.items() for index in range(count)]
-#print(algorithms_with_params)
 
 # Get the parameter dictionary for the specified
 # algorithm and index
@@ -92,7 +91,7 @@ def reconstruction_params(algorithm, index_string):
 # Determine which input files are needed based on the
 # pathway reconstruction algorithm
 # May no longer need a function for this, but keep it because
-# the final implmentation may be more complex than a dictionary
+# the final implementation may be more complex than a dictionary
 def reconstruction_inputs(algorithm):
     return required_inputs[algorithm]
 
@@ -115,7 +114,7 @@ def write_parameter_log(algorithm, logfile):
 # be done with the config file
 def make_final_input(wildcards):
     # Right now this lets us do ppa or augmentation, but not both.
-    # An easy solution would be to make a seperate rule for doing both, but
+    # An easy solution would be to make a separate rule for doing both, but
     # if we add more things to do after the fact that will get
     # out of control pretty quickly. Steps run in parallel won't have this problem, just ones
     # whose inputs depend on each other.
@@ -169,26 +168,36 @@ rule reconstruct:
     output: os.path.join(out_dir, 'raw-pathway-{dataset}-{algorithm}-{params}.txt')
     # chain.from_iterable trick from https://stackoverflow.com/questions/3471999/how-do-i-merge-two-lists-into-a-single-list
     run:
-        input_args = ['--' + arg for arg in reconstruction_inputs(wildcards.algorithm)]
+        print(f"cur algo: {wildcards.algorithm}")
+        params = reconstruction_params(wildcards.algorithm, wildcards.params)
+        # Add the input files
+        params.update(dict(zip(reconstruction_inputs(wildcards.algorithm), *{input})))
+        # Add the output file
+        params['output'] = {output}
+        PRRunner.run(wildcards.algorithm, params)
+
+        # No longer plan to call the runner from the shell, none of the below is needed but keep it temporarily for
+        # reference until the new function call-based strategy works
+#         input_args = ['--' + arg for arg in reconstruction_inputs(wildcards.algorithm)]
         # A list of the input file type and filename, for example
         # ['--sources' 'data1-pathlinker-sources.txt' ''--targets' 'data1-pathlinker-targets.txt']
-        input_args = list(it.chain.from_iterable(zip(input_args, *{input})))
-        params = reconstruction_params(wildcards.algorithm, wildcards.params)
+#         input_args = list(it.chain.from_iterable(zip(input_args, *{input})))
+#         params = reconstruction_params(wildcards.algorithm, wildcards.params)
         # A string representation of the parameters as command line arguments,
         # for example '--k=5'
-        params_args = params_to_args(params)
+#         params_args = params_to_args(params)
         # Write the command to a file instead of running it because this
         # functionality has not been implemented
-        shell('''
-            echo python command --algorithm {wildcards.algorithm} {input_args} --output {output} {params_args} >> {output}
-        ''')
+#         shell('''
+#             echo python command --algorithm {wildcards.algorithm} {input_args} --output {output} {params_args} >> {output}
+#         ''')
 
 # Original pathway reconstruction output to universal output
 rule parse_output:
     input: os.path.join(out_dir, 'raw-pathway-{dataset}-{algorithm}-{params}.txt')
     output: os.path.join(out_dir, 'pathway-{dataset}-{algorithm}-{params}.txt')
     # run the post-processing script
-    shell: 'echo {wildcards.algorithm} {input} >> {output}'
+    shell:  'echo {wildcards.algorithm} {input} >> {output}'
 
 # Write the mapping from parameter indices to parameter dictionaries
 # TODO: Need this to have input files so it updates
