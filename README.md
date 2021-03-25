@@ -15,11 +15,12 @@ The latest features can be found on the `development` branch.
 
 **Dockerized pathway reconstruction algorithms**: Pathway reconstruction algorithms are run via Docker images using the docker-py Python package.
 [PathLinker](https://github.com/Murali-group/PathLinker) is the first algorithm to prototype the workflow and design.
+The files to create these Docker images are in the `docker-wrappers` subdirectory.
 
 **Python wrapper for calling algorithms**: Wrapper functions provide an interface between the common file formats for input and output data and the algorithm-specific file formats and reconstruction commands.
 
 Open a [GitHub issue](https://github.com/Reed-CompBio/pathway-reconstruction-enhancer/issues) or contact Anthony Gitter or Anna Ritz for more information.
 
 ## Docker
-The `docker` subdirectory is not used by the main pathway reconstruction framework.
+The `docker-demo` subdirectory is not used by the main pathway reconstruction framework.
 It serves as a reference for how to set up Dockerfiles and make Docker run calls.
