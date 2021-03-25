@@ -17,7 +17,7 @@ docker build -t agitter/omics-integrator-2 -f Dockerfile .
 To confirm that commands are run inside the conda environment run:
 ```
 winpty docker run agitter/omics-integrator-2 conda list
-winpty docker run agitter/omics-integrator-2 OmicsIntegrator
+winpty docker run agitter/omics-integrator-2 OmicsIntegrator -h
 ```
 The `winpty` prefix is only needed on Windows.
 

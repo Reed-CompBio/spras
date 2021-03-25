@@ -18,4 +18,4 @@ dependencies:
   - pcst_fast==1.0.7
   - goenrich==1.7.0
   - axial==0.1.10
-  - git+https://github.com/agitter/OmicsIntegrator2@df9aea6f59afc6551d0c9a1d76a2f2e6b76b6e0a
+  - git+https://github.com/agitter/OmicsIntegrator2@7356b08704402a9134afc619f09e0d5eef9e7300
