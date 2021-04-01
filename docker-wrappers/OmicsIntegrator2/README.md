@@ -31,4 +31,5 @@ python test-oi2.py
 ## TODO
 - Attribute https://github.com/fraenkel-lab/OmicsIntegrator2
 - Modify environment to use fraenkel-lab or [PyPI](https://pypi.org/project/OmicsIntegrator/) version instead of fork
+- Patch bugs  
 - Document usage, required packages

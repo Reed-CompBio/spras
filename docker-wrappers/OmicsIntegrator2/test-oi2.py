@@ -13,7 +13,7 @@ def main():
     prize_file = 'oi2-prizes.txt'
     out_dir = '.'
 
-    command = ['OmicsIntegrator', '-e', edge_file, '-p', prize_file, '-o', out_dir]
+    command = ['OmicsIntegrator', '-e', edge_file, '-p', prize_file, '-o', out_dir, '-g', '0']
 
     print('Running Omics Integrator 2 with arguments: {}'.format(' '.join(command)), flush=True)
 
