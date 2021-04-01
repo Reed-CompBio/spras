@@ -70,10 +70,18 @@ winpty docker run agitter/omics-integrator-1 conda list
 The `winpty` prefix is only needed on Windows.
 
 ## Testing
-In progress
+The Docker wrapper can be tested by running the Omics Integrator tests interactively:
+```
+winpty docker run -it agitter/omics-integrator-1 bash
+conda activate oi1
+python setup.py test -a "--msgpath=$MSGSTEINER_PATH"
+```
 
 ## TODO
 - Attribute https://github.com/fraenkel-lab/OmicsIntegrator
+- Attribute http://staff.polito.it/alfredo.braunstein/code/msgsteiner-1.3.tgz and discuss permission to distribute
+- Optimize order of commands in Dockerfile
+- Delete data files
 - Document usage, required packages
 - Remove testing and setup packages from environment if not needed
-- Etc.
+- Determine how to use MSGSTEINER_PATH when passing in commands, fix ENTRYPOINT and/or CMD
