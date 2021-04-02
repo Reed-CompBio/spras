@@ -70,7 +70,13 @@ winpty docker run agitter/omics-integrator-1 conda list
 The `winpty` prefix is only needed on Windows.
 
 ## Testing
-The Docker wrapper can be tested by running the Omics Integrator tests interactively:
+The `input` directory contains test files `oi1-edges.txt` and `oi2-prizes.txt`.
+The Docker wrapper can be tested with the command
+```
+python test-oi1.py
+```
+
+The Docker wrapper also can be tested by running the Omics Integrator tests interactively:
 ```
 winpty docker run -it agitter/omics-integrator-1 bash
 conda activate oi1
@@ -85,3 +91,4 @@ python setup.py test -a "--msgpath=$MSGSTEINER_PATH"
 - Document usage, required packages
 - Remove testing and setup packages from environment if not needed
 - Determine how to use MSGSTEINER_PATH when passing in commands, fix ENTRYPOINT and/or CMD
+- Decide what to use for working directory and where to map input data
