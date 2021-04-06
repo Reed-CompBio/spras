@@ -20,7 +20,7 @@
  algorithms:
         - name: "bowtiebuilder"
           params:
-                include: true
+                include: false
                 run1:
 
         - name: "pathlinker"
@@ -37,7 +37,7 @@
 
         - name: "pcsf"
           params:
-                include: true
+                include: false
                 run1:
                     r: [5]
                     b: [1,2]
@@ -65,8 +65,8 @@
  # Here we fix which pathways to run and other file location information. 
  data:
         datasets: ["data1"]
-        otherNodeData: ["PLSourcesList", "PLTargetsList", "UniprotToGeneID"]
-        otherFiles: ["GenericFile"]
+        otherNodeData: ["sources.txt", "targets.txt"]
+        otherFiles: []
         data_dir: "input"
         out_dir:  "output"
 
@@ -76,7 +76,7 @@
          #set where everything is saved
          locations:
                 #place the path to your interactome here
-                interactome_path: "/path/to/interactome"
+                interactome_path: "input/network.txt"
 
                 #place the path to your pathway annotation files here
                 pathway_dir: "/path/to/pathways"
