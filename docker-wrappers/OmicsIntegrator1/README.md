@@ -43,3 +43,4 @@ python setup.py test -a "--msgpath=$MSGSTEINER_PATH"
 - Remove testing and setup packages from environment if not needed
 - Determine how to use MSGSTEINER_PATH when passing in commands, fix ENTRYPOINT and/or CMD
 - Decide what to use for working directory and where to map input data
+- Consider `continuumio/miniconda3:4.9.2-alpine` base image

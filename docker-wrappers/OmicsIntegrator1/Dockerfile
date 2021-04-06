@@ -3,7 +3,7 @@
 # Activates the conda environment before running command inside container
 # Uses the strategy from https://pythonspeed.com/articles/activate-conda-dockerfile/
 # by Itamar Turner-Trauring
-FROM continuumio/miniconda3
+FROM continuumio/miniconda3:4.9.2
 
 # Need to install msgsteiner-1.3 and dependencies
 RUN apt-get -qq update && \
