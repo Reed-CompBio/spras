@@ -197,7 +197,8 @@ rule parse_output:
     input: os.path.join(out_dir, 'raw-pathway-{dataset}-{algorithm}-{params}.txt')
     output: os.path.join(out_dir, 'pathway-{dataset}-{algorithm}-{params}.txt')
     # run the post-processing script
-    shell:  'echo {wildcards.algorithm} {input} >> {output}'
+    PRRunner.parse_output({input},{output})
+    #shell:  'echo {wildcards.algorithm} {input} >> {output}'
 
 # Write the mapping from parameter indices to parameter dictionaries
 # TODO: Need this to have input files so it updates

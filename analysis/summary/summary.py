@@ -25,9 +25,12 @@ def produce_statistics(G: nx.Graph,s=None) -> dict:
     return d
 
 
-def load_graph(path: str) -> nx.Graph:
+def load_graph(path: str,directed=False) -> nx.Graph:
     try:
-        G = nx.read_edgelist(path)
+        if not directed:
+            G = nx.read_edgelist(path,data=(('rank',int),))
+        else:
+            G = nx.read_edgelist(path,data=(('rank',int),create_using=nx.DiGraph))
     except:
         print('file format not yet supported. submit a feature request if it ought to be!')
     return G

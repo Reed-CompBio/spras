@@ -3,6 +3,7 @@ from src.PRM import *
 import docker 
 import os
 import sys
+import pandas as pd
 
 __all__ = ['PathLinker']
 
@@ -68,5 +69,13 @@ class PathLinker(PRM):
             out_file.write('PathLinker: run_static() command {}'.format(' '.join(command)))
 
     @staticmethod
-    def parse_output(self):
-        print('PathLinker: {} parseOutput() from {}'.format(self.name,self.outputdir))
+    def parse_output(inpt=None,output=None):
+        """
+        @param input: unprocessed output of run()
+        @param output: path to processed output file
+        """
+        # I suspect there's something wrong with the run method, since the output param it takes is a directory
+        # but on line 68 it's opened as if it were a file. Here I assume output is an actual file path, but 
+        # this is easily changed.
+        df = pd.read_csv(input,sep='\t')
+        df.to_csv(output, header=False,index=False,sep=' ')
