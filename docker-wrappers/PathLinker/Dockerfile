@@ -8,7 +8,10 @@ FROM continuumio/miniconda3
 COPY environment.yml .
 RUN conda env create -f environment.yml
 
+WORKDIR /home/PathLinker
 COPY pathlinker-files.txt .
 RUN wget -i pathlinker-files.txt
+
+WORKDIR /home/PathLinker
 
 ENTRYPOINT ["conda", "run", "--no-capture-output", "-n", "pathlinker"]
