@@ -19,7 +19,6 @@ def main():
 
     working_dir = Path.cwd()
     input_dir = PurePath(working_dir, '..', '..', 'input').as_posix()
-    print(input_dir)
 
     try:
         out = client.containers.run('agitter/omics-integrator-2',
