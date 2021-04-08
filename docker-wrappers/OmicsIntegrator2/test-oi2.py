@@ -1,5 +1,5 @@
 import docker
-import os
+from pathlib import Path, PurePath
 
 
 def main():
@@ -17,8 +17,9 @@ def main():
 
     print('Running Omics Integrator 2 with arguments: {}'.format(' '.join(command)), flush=True)
 
-    working_dir = os.getcwd()
-    input_dir = os.path.join(working_dir, '..', '..', 'input')
+    working_dir = Path.cwd()
+    input_dir = PurePath(working_dir, '..', '..', 'input').as_posix()
+    print(input_dir)
 
     try:
         out = client.containers.run('agitter/omics-integrator-2',
