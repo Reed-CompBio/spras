@@ -18,7 +18,7 @@ The files to create these Docker images are in the `docker-wrappers` subdirector
 
 **Python wrapper for calling algorithms**: Wrapper functions provide an interface between the common file formats for input and output data and the algorithm-specific file formats and reconstruction commands.
 
-**Test code**: Tests for the Docker wrappers.
+**Test code**: Tests for the Docker wrappers. The tests require the conda environment in `environment.yml` and the Docker images. Run the tests with `pytest -s`.
 
 Open a [GitHub issue](https://github.com/Reed-CompBio/pathway-reconstruction-enhancer/issues) or contact Anthony Gitter or Anna Ritz for more information.
 
