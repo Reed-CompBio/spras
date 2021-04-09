@@ -1,4 +1,5 @@
 # Streamlining Signaling Pathway Reconstruction
+[![Test Docker wrappers](https://github.com/Reed-CompBio/pathway-reconstruction-enhancer/actions/workflows/test-docker-wrappers.yml/badge.svg)](https://github.com/Reed-CompBio/pathway-reconstruction-enhancer/actions/workflows/test-docker-wrappers.yml)
 
 This repo is a work-in-progress dockerized library of pathway reconstruction enhancement tools.
 The framework will contain different graph algorithms that connect genes and proteins of interest in the context of a general protein-protein interaction network, allowing users to run multiple algorithms on their inputs.
