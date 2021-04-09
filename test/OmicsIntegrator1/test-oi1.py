@@ -1,5 +1,5 @@
 import docker
-import os
+from pathlib import Path
 
 # TODO accept arguments with the parameters to write to the file
 def write_conf(filename):
@@ -27,21 +27,26 @@ def main():
     """
     # Initialize a Docker client using environment variables
     client = docker.from_env()
+    test_dir = Path(__file__).parent.absolute()
 
-    working_dir = os.getcwd()
-    input_dir = os.path.join(working_dir, '..', '..', 'input')
+    edge_file = Path('input', 'oi1-edges.txt')
+    prize_file = Path('input', 'oi1-prizes.txt')
 
-    edge_file = 'oi1-edges.txt'
-    prize_file = 'oi2-prizes.txt' # Prize file format is the same for versions 1 and 2
-    out_dir = '.'
+    out_dir = Path('output')
+    # Omics Integrator 1 requires that the output directory exist
+    Path(test_dir, out_dir).mkdir(parents=True, exist_ok=True)
 
-    conf_filename = 'oi1-configuration.txt'
-    conf_file = os.path.join(input_dir, conf_filename)
-    write_conf(conf_file)
+    conf_file = 'oi1-configuration.txt'
+    conf_file_abs = Path(test_dir, conf_file)
+    write_conf(conf_file_abs)
 
-    command = ['python', '/OmicsIntegrator/scripts/forest.py', '--edge', edge_file, '--prize', prize_file, '--conf', conf_filename,
+    command = ['python', '/OmicsIntegrator/scripts/forest.py',
+               '--edge', edge_file.as_posix(),
+               '--prize', prize_file.as_posix(),
+               '--conf', conf_file,
                '--msgpath', '/OmicsIntegrator/msgsteiner-1.3/msgsteiner',
-               '--outpath', out_dir, '--outlabel', 'oi1']
+               '--outpath', out_dir.as_posix(),
+               '--outlabel', 'oi1']
 
     print('Running Omics Integrator 1 with arguments: {}'.format(' '.join(command)), flush=True)
 
@@ -49,14 +54,13 @@ def main():
         out = client.containers.run('agitter/omics-integrator-1',
                               command,
                               stderr=True,
-                              volumes={input_dir: {'bind': '/OmicsIntegrator1', 'mode': 'rw'}},
+                              volumes={test_dir: {'bind': '/OmicsIntegrator1', 'mode': 'rw'}},
                               working_dir='/OmicsIntegrator1')
         print(out.decode('utf-8'))
     finally:
         # Not sure whether this is needed
         client.close()
-        if os.path.isfile(conf_file):
-            os.remove(conf_file)
+        conf_file_abs.unlink(missing_ok=True)
 
 
 if __name__ == '__main__':

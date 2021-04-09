@@ -13,6 +13,7 @@ To create the Docker image run:
 ```
 docker build -t agitter/omics-integrator-1 -f Dockerfile .
 ```
+from this directory.
 
 To confirm that commands are run inside the conda environment run:
 ```
@@ -21,10 +22,11 @@ winpty docker run agitter/omics-integrator-1 conda list
 The `winpty` prefix is only needed on Windows.
 
 ## Testing
-The `input` directory contains test files `oi1-edges.txt` and `oi2-prizes.txt`.
-The Docker wrapper can be tested with the command
+Test code is located in `test/OmicsIntegrator1`.
+The `input` subdirectory contains test files `oi1-edges.txt` and `oi1-prizes.txt`.
+The Docker wrapper can be tested from the root directory of this repository with the command
 ```
-python test-oi1.py
+python test/OmicsIntegrator1/test-oi1.py
 ```
 
 The Docker wrapper also can be tested by running the Omics Integrator tests interactively:
