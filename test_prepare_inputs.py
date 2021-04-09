@@ -10,5 +10,5 @@ with open(config_loc) as config_file:
     config = yaml.load(config_file, Loader=yaml.FullLoader)
 data = DataLoader.DataLoader(config)
 print(PRRunner.get_required_inputs("pathlinker"))
-os.mkdir("output") #it is assumed directories will be made upstream
+os.makedirs("output", exist_ok=True) #it is assumed directories will be made upstream
 PRRunner.prepare_inputs("output/","pathlinker",data,"data1",{})
