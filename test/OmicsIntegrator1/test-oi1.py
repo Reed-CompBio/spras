@@ -20,48 +20,44 @@ def write_conf(filename):
         f.write('processes = 1\n')
         f.write('threads = 1\n')
 
+class TestOmicsIntegrator1:
+    def test_oi1(self):
+        """
+        Run Omics Integrator 1 in the Docker image using hard-coded arguments.
+        """
+        # Initialize a Docker client using environment variables
+        client = docker.from_env()
+        test_dir = Path(__file__).parent.absolute()
 
-def main():
-    """
-    Run Omics Integrator 1 in the Docker image using hard-coded arguments.
-    """
-    # Initialize a Docker client using environment variables
-    client = docker.from_env()
-    test_dir = Path(__file__).parent.absolute()
+        edge_file = Path('input', 'oi1-edges.txt')
+        prize_file = Path('input', 'oi1-prizes.txt')
 
-    edge_file = Path('input', 'oi1-edges.txt')
-    prize_file = Path('input', 'oi1-prizes.txt')
+        out_dir = Path('output')
+        # Omics Integrator 1 requires that the output directory exist
+        Path(test_dir, out_dir).mkdir(parents=True, exist_ok=True)
 
-    out_dir = Path('output')
-    # Omics Integrator 1 requires that the output directory exist
-    Path(test_dir, out_dir).mkdir(parents=True, exist_ok=True)
+        conf_file = 'oi1-configuration.txt'
+        conf_file_abs = Path(test_dir, conf_file)
+        write_conf(conf_file_abs)
 
-    conf_file = 'oi1-configuration.txt'
-    conf_file_abs = Path(test_dir, conf_file)
-    write_conf(conf_file_abs)
+        command = ['python', '/OmicsIntegrator/scripts/forest.py',
+                   '--edge', edge_file.as_posix(),
+                   '--prize', prize_file.as_posix(),
+                   '--conf', conf_file,
+                   '--msgpath', '/OmicsIntegrator/msgsteiner-1.3/msgsteiner',
+                   '--outpath', out_dir.as_posix(),
+                   '--outlabel', 'oi1']
 
-    command = ['python', '/OmicsIntegrator/scripts/forest.py',
-               '--edge', edge_file.as_posix(),
-               '--prize', prize_file.as_posix(),
-               '--conf', conf_file,
-               '--msgpath', '/OmicsIntegrator/msgsteiner-1.3/msgsteiner',
-               '--outpath', out_dir.as_posix(),
-               '--outlabel', 'oi1']
+        print('Running Omics Integrator 1 with arguments: {}'.format(' '.join(command)), flush=True)
 
-    print('Running Omics Integrator 1 with arguments: {}'.format(' '.join(command)), flush=True)
-
-    try:
-        out = client.containers.run('agitter/omics-integrator-1',
-                              command,
-                              stderr=True,
-                              volumes={test_dir: {'bind': '/OmicsIntegrator1', 'mode': 'rw'}},
-                              working_dir='/OmicsIntegrator1')
-        print(out.decode('utf-8'))
-    finally:
-        # Not sure whether this is needed
-        client.close()
-        conf_file_abs.unlink(missing_ok=True)
-
-
-if __name__ == '__main__':
-    main()
+        try:
+            out = client.containers.run('agitter/omics-integrator-1',
+                                  command,
+                                  stderr=True,
+                                  volumes={test_dir: {'bind': '/OmicsIntegrator1', 'mode': 'rw'}},
+                                  working_dir='/OmicsIntegrator1')
+            print(out.decode('utf-8'))
+        finally:
+            # Not sure whether this is needed
+            client.close()
+            conf_file_abs.unlink(missing_ok=True)
