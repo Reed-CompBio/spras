@@ -6,7 +6,6 @@ This library is inspired by tools for single-cell transcriptomics such as [BEELI
 
 Right now, this repo contains all the pieces that are being integrated into a single framework.
 This is very much a work in progress.
-The latest features can be found on the `development` branch.
 
 ## Components
 **Configuration file**: Specifies which pathway reconstruction algorithms to run, which hyperparameter combinations to use, and which datasets to run them on.
@@ -18,6 +17,8 @@ The latest features can be found on the `development` branch.
 The files to create these Docker images are in the `docker-wrappers` subdirectory.
 
 **Python wrapper for calling algorithms**: Wrapper functions provide an interface between the common file formats for input and output data and the algorithm-specific file formats and reconstruction commands.
+
+**Test code**: Tests for the Docker wrappers.
 
 Open a [GitHub issue](https://github.com/Reed-CompBio/pathway-reconstruction-enhancer/issues) or contact Anthony Gitter or Anna Ritz for more information.
 
