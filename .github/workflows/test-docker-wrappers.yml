@@ -1,0 +1,38 @@
+name: Test Docker wrappers
+
+on: [push, pull_request]
+
+jobs:
+  # Builds the Docker images and runs their test code
+  docker:
+    name: Test Docker wrappers
+    runs-on: ubuntu-latest
+    steps:
+    - name: Checkout repository
+      uses: actions/checkout@v2
+      # TODO Pull from Docker Hub to use the cache
+      # See SINGE repository for configuration
+    - name: Build Omics Integrator 1 Docker image
+      uses: docker/build-push-action@v1
+      with:
+        path: docker-wrappers/OmicsIntegrator1/.
+        dockerfile: docker-wrappers/OmicsIntegrator1/Dockerfile
+        repository: agitter/omics-integrator-1
+        push: false
+    - name: Build Omics Integrator 2 Docker image
+      uses: docker/build-push-action@v1
+      with:
+        path: docker-wrappers/OmicsIntegrator2/.
+        dockerfile: docker-wrappers/OmicsIntegrator2/Dockerfile
+        repository: agitter/omics-integrator-2
+        push: false
+    - name: Install conda environment
+      uses: conda-incubator/setup-miniconda@v2
+      with:
+        activate-environment: pathway-reconstruction
+        environment-file: environment.yml
+        auto-activate-base: false
+        miniconda-version: 'latest'
+    - name: Run tests
+      shell: bash --login {0}
+      run: pytest -s
