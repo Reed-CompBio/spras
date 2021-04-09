@@ -39,7 +39,7 @@ python setup.py test -a "--msgpath=$MSGSTEINER_PATH"
 - Attribute http://staff.polito.it/alfredo.braunstein/code/msgsteiner-1.3.tgz and discuss permission to distribute
 - Optimize order of commands in Dockerfile
 - Delete data files
-- Document usage, required packages
+- Document usage
 - Remove testing and setup packages from environment if not needed
 - Determine how to use MSGSTEINER_PATH when passing in commands, fix ENTRYPOINT and/or CMD
 - Decide what to use for working directory and where to map input data
