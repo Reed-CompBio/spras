@@ -13,15 +13,19 @@ class PRM(ABC):
         # debugging
         #print('Params:',self.params)
 
+    @property
+    @abstractmethod
+    def required_inputs(self):
+        return NotImplementedError
 
     @abstractmethod
     def generate_inputs(self):
-        pass
+        return NotImplementedError
 
     @abstractmethod
     def run(self):
-        pass
+        return NotImplementedError
 
     @abstractmethod
     def parse_output(self):
-        pass
+        return NotImplementedError

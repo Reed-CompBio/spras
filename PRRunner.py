@@ -10,10 +10,19 @@ def run(algorithm, params):
     """
     A generic interface to the algorithm-specific run functions
     """
-    try:
-        globals()[algorithm.lower()].run(**params)
-    except:
-        raise NotImplementedError('Only PathLinker is currently supported :(')
+    #try:
+    globals()[algorithm.lower()].run(**params)
+    #except:
+    #raise NotImplementedError('Only PathLinker is currently supported :(')
+
+def get_required_inputs(algorithm):
+    return globals()[algorithm.lower()].required_inputs
+
+def prepare_inputs(input_pref, algorithm, data, dataset, params):
+    data.set_data_context(dataset)
+    return_val = globals()[algorithm.lower()].generate_inputs(data, input_pref, params)
+    data.set_data_context(None)
+    return return_val
 
 def get_parser() -> argparse.ArgumentParser:
     '''
@@ -52,23 +61,23 @@ def main():
     # print("--- runners")
     # print(evaluation.input_settings.algorithms)
     # print(evaluation.input_settings.datasets)
-    
+
 
     print("* --generate Inputs driver loop")
     for idx in range(len(evaluation.runners)):
-        
+
         evaluation.runners[idx].generateInputs()
         print("\n")
 
     print("* --run driver loop")
     for idx in range(len(evaluation.runners)):
-        
+
         evaluation.runners[idx].run()
         print("\n")
 
     print("* --parse outputs driver loop")
     for idx in range(len(evaluation.runners)):
-        
+
         evaluation.runners[idx].parseOutput()
         print("\n")
 

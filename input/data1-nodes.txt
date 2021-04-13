@@ -1,2 +1,3 @@
-A
-C
+NODEID	prize
+A	2
+C	5.7
