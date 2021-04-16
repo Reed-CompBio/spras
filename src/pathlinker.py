@@ -1,16 +1,40 @@
 from docker.utils.utils import convert_volume_binds
 from src.PRM import *
-import docker 
+import docker
 import os
 import sys
+import pandas as pd
+import warnings
 
 __all__ = ['PathLinker']
 
-
 class PathLinker(PRM):
+    required_inputs = ['nodetypes.txt','network.txt']
+
     @staticmethod
-    def generate_inputs(self):
-        print('PathLinker: {} generateInputs() from {}'.format(self.name,self.inputdir))
+    def generate_inputs(data, input_prefix, params):
+
+        #Get sources and targets for node input file
+        sources_targets = data.requestNodeColumns(["sources","targets"])
+        if sources_targets is None:
+            return False
+        both_series = sources_targets.sources & sources_targets.targets
+        for index,row in sources_targets[both_series].iterrows():
+            warnMsg = row.NODEID+" has been labeled as both a source and a target."
+            warnings.warn(warnMsg)
+
+        #Create nodetype file
+        input_df = sources_targets[["NODEID"]].copy()
+        input_df.columns = ["#Node"]
+        input_df.loc[sources_targets["sources"] == True,"Node type"]="source"
+        input_df.loc[sources_targets["targets"] == True,"Node type"]="target"
+
+        input_df.to_csv(input_prefix+"nodetypes.txt",sep="\t",index=False,columns=["#Node","Node type"])
+
+        #This is pretty memory intensive. We might want to keep the interactome centralized.
+        data.getInteractome().to_csv(input_prefix+"network.txt",sep="\t",index=False,columns=["Interactor1","Interactor2","Weight"])
+        return True
+
 
     # def run(self):
     #     print('PathLinker: {} run() with {}'.format(self.name,self.params))
@@ -18,11 +42,10 @@ class PathLinker(PRM):
     # Temporary name for the static version of the runner
     # Skips parameter validation step
     @staticmethod
-    def run(network=None, nodes=None, output=None, k=None):
+    def run(output=None, input_pref=None, k=None):
         """
         Run PathLinker with Docker
-        @param network: input network file
-        @param nodes: input node types
+        @param input_loc:  input directory
         @param output: output directory
         @param k: path length (optional)
         """
@@ -30,7 +53,7 @@ class PathLinker(PRM):
         # Do not require k
         # Use the PathLinker default
         # Could consider setting the default here instead
-        if not network or not nodes or not output:
+        if not network or not input_pref or not output:
             raise ValueError('Required PathLinker arguments are missing')
 
         # Initialize a Docker client using environment variables
@@ -68,5 +91,6 @@ class PathLinker(PRM):
             out_file.write('PathLinker: run_static() command {}'.format(' '.join(command)))
 
     @staticmethod
-    def parse_output(self):
+    def parse_output():
         print('PathLinker: {} parseOutput() from {}'.format(self.name,self.outputdir))
+
