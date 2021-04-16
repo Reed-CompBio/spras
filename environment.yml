@@ -1,4 +1,4 @@
-name: pathway-reconstruction
+name: spras
 channels:
   - conda-forge
 dependencies:
