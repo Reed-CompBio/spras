@@ -1,5 +1,7 @@
 import docker
 from pathlib import Path
+from src.util import prepare_path_docker
+
 
 # TODO accept arguments with the parameters to write to the file
 def write_conf(filename):
@@ -54,7 +56,7 @@ class TestOmicsIntegrator1:
             out = client.containers.run('agitter/omics-integrator-1',
                                   command,
                                   stderr=True,
-                                  volumes={test_dir: {'bind': '/OmicsIntegrator1', 'mode': 'rw'}},
+                                  volumes={prepare_path_docker(test_dir): {'bind': '/OmicsIntegrator1', 'mode': 'rw'}},
                                   working_dir='/OmicsIntegrator1')
             print(out.decode('utf-8'))
         finally:

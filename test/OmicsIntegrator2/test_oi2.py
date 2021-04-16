@@ -1,5 +1,6 @@
 import docker
 from pathlib import Path
+from src.util import prepare_path_docker
 
 
 class TestOmicsIntegrator2:
@@ -27,7 +28,7 @@ class TestOmicsIntegrator2:
             out = client.containers.run('agitter/omics-integrator-2',
                                   command,
                                   stderr=True,
-                                  volumes={test_dir.as_posix(): {'bind': '/OmicsIntegrator2', 'mode': 'rw'}},
+                                  volumes={prepare_path_docker(test_dir): {'bind': '/OmicsIntegrator2', 'mode': 'rw'}},
                                   working_dir='/OmicsIntegrator2')
             print(out.decode('utf-8'))
         finally:
