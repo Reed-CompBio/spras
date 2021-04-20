@@ -1,4 +1,4 @@
-import src.PRM as PRM
+from src.PRM import PRM
 import docker
 import os
 import warnings
@@ -52,7 +52,7 @@ class PathLinker(PRM):
         # Initialize a Docker client using environment variables
         client = docker.from_env()
         command = ['python', '../run.py']
-        if k:
+        if k is not None:
             command.extend(['-k', str(k)])
         command.extend([network, nodes])
         print('PathLinker: run_static() command {}'.format(' '.join(command)))
@@ -85,4 +85,4 @@ class PathLinker(PRM):
 
     @staticmethod
     def parse_output():
-        print('PathLinker: {} parseOutput()')
+        print('PathLinker: parseOutput()')
