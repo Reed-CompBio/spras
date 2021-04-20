@@ -1,9 +1,6 @@
-from docker.utils.utils import convert_volume_binds
-from src.PRM import *
+import src.PRM as PRM
 import docker
 import os
-import sys
-import pandas as pd
 import warnings
 
 __all__ = ['PathLinker']
@@ -36,16 +33,12 @@ class PathLinker(PRM):
         return True
 
 
-    # def run(self):
-    #     print('PathLinker: {} run() with {}'.format(self.name,self.params))
-
-    # Temporary name for the static version of the runner
     # Skips parameter validation step
     @staticmethod
     def run(output=None, input_pref=None, k=None):
         """
         Run PathLinker with Docker
-        @param input_loc:  input directory
+        @param input_pref:  input directory prefix
         @param output: output directory
         @param k: path length (optional)
         """
@@ -92,5 +85,4 @@ class PathLinker(PRM):
 
     @staticmethod
     def parse_output():
-        print('PathLinker: {} parseOutput() from {}'.format(self.name,self.outputdir))
-
+        print('PathLinker: {} parseOutput()')
