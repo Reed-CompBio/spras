@@ -69,7 +69,7 @@ class OmicsIntegrator1(PRM):
         print('Running Omics Integrator 1 with arguments: {}'.format(' '.join(command)), flush=True)
 
         try:
-            out = client.containers.run('agitter/omics-integrator-1',
+            out = client.containers.run('reedcompbio/omics-integrator-1',
                                   command,
                                   stderr=True,
                                   volumes={prepare_path_docker(work_dir): {'bind': '/OmicsIntegrator1', 'mode': 'rw'}},

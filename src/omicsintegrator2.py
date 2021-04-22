@@ -41,7 +41,7 @@ class OmicsIntegrator2(PRM):
         print('Running Omics Integrator 2 with arguments: {}'.format(' '.join(command)), flush=True)
 
         try:
-            out = client.containers.run('agitter/omics-integrator-2',
+            out = client.containers.run('reedcompbio/omics-integrator-2',
                                         command,
                                         stderr=True,
                                         volumes={

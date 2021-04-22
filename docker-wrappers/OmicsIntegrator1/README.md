@@ -11,13 +11,13 @@ It defines a custom ENTRYPOINT that uses `conda run` to run the command inside t
 
 To create the Docker image run:
 ```
-docker build -t agitter/omics-integrator-1 -f Dockerfile .
+docker build -t reedcompbio/omics-integrator-1 -f Dockerfile .
 ```
 from this directory.
 
 To confirm that commands are run inside the conda environment run:
 ```
-winpty docker run agitter/omics-integrator-1 conda list
+winpty docker run reedcompbio/omics-integrator-1 conda list
 ```
 The `winpty` prefix is only needed on Windows.
 
@@ -31,7 +31,7 @@ python test/OmicsIntegrator1/test-oi1.py
 
 The Docker wrapper also can be tested by running the Omics Integrator tests interactively:
 ```
-winpty docker run -it agitter/omics-integrator-1 bash
+winpty docker run -it reedcompbio/omics-integrator-1 bash
 conda activate oi1
 python setup.py test -a "--msgpath=$MSGSTEINER_PATH"
 ```

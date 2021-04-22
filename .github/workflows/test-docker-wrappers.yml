@@ -17,7 +17,7 @@ jobs:
       with:
         path: docker-wrappers/OmicsIntegrator1/.
         dockerfile: docker-wrappers/OmicsIntegrator1/Dockerfile
-        repository: agitter/omics-integrator-1
+        repository: reedcompbio/omics-integrator-1
         tags: latest
         push: false
     - name: Build Omics Integrator 2 Docker image
@@ -25,7 +25,7 @@ jobs:
       with:
         path: docker-wrappers/OmicsIntegrator2/.
         dockerfile: docker-wrappers/OmicsIntegrator2/Dockerfile
-        repository: agitter/omics-integrator-2
+        repository: reedcompbio/omics-integrator-2
         tags: latest
         push: false
     - name: Install conda environment
