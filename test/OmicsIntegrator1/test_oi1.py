@@ -1,3 +1,4 @@
+import pytest
 from src.omicsintegrator1 import OmicsIntegrator1
 
 TEST_DIR = 'test/OmicsIntegrator1/'
@@ -18,3 +19,9 @@ class TestOmicsIntegrator1:
                              prize_input=TEST_DIR+'input/oi1-prizes.txt',
                              output_dir=TEST_DIR+'output',
                              out_label='oi1')
+
+        # Test the expected error is raised when required arguments are missing
+        with pytest.raises(ValueError):
+            # No edge_input
+            OmicsIntegrator1.run(prize_input=TEST_DIR + 'input/oi1-prizes.txt',
+                                 output_dir=TEST_DIR + 'output')
