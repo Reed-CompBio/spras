@@ -10,8 +10,13 @@ jobs:
     steps:
     - name: Checkout repository
       uses: actions/checkout@v2
-      # TODO Pull from Docker Hub to use the cache
-      # See SINGE repository for configuration
+      # Pull from Docker Hub to use the cache
+      # https://medium.com/mobileforgood/coding-tips-patterns-for-continuous-integration-with-docker-on-travis-ci-9cedb8348a62
+      # https://github.com/docker/build-push-action/issues/7
+    - name: Pull Docker images
+      run: |
+        docker pull reedcompbio/omics-integrator-1:latest
+        docker pull reedcompbio/omics-integrator-2:latest
     - name: Build Omics Integrator 1 Docker image
       uses: docker/build-push-action@v1
       with:
@@ -19,6 +24,7 @@ jobs:
         dockerfile: docker-wrappers/OmicsIntegrator1/Dockerfile
         repository: reedcompbio/omics-integrator-1
         tags: latest
+        cache_froms: reedcompbio/omics-integrator-1:latest
         push: false
     - name: Build Omics Integrator 2 Docker image
       uses: docker/build-push-action@v1
@@ -27,6 +33,7 @@ jobs:
         dockerfile: docker-wrappers/OmicsIntegrator2/Dockerfile
         repository: reedcompbio/omics-integrator-2
         tags: latest
+        cache_froms: reedcompbio/omics-integrator-2:latest
         push: false
     - name: Install conda environment
       uses: conda-incubator/setup-miniconda@v2
