@@ -10,10 +10,10 @@ class OmicsIntegrator2(PRM):
         print('Omics Integrator 2: generateInputs()')
 
     # TODO add parameter validation
-    # TODO add additional parameters
     # TODO add reasonable default values
     @staticmethod
-    def run(edge_input=None, prize_input=None, output_dir=None, g=None):
+    def run(edge_input=None, prize_input=None, output_dir=None, w=None, b=None, g=None, noise=None, noisy_edges=None,
+            random_terminals=None, dummy_mode=None, seed=None, filename=None):
         """
         Run Omics Integrator 2 in the Docker image with the provided parameters.
         """
@@ -35,8 +35,25 @@ class OmicsIntegrator2(PRM):
                    '-o', out_dir.as_posix()]
 
         # Add optional arguments
+        if w is not None:
+            command.extend(['-w', str(w)])
+        if b is not None:
+            command.extend(['-b', str(b)])
         if g is not None:
             command.extend(['-g', str(g)])
+        if noise is not None:
+            command.extend(['-noise', str(noise)])
+        if noisy_edges is not None:
+            command.extend(['--noisy_edges', str(noisy_edges)])
+        if random_terminals is not None:
+            command.extend(['--random_terminals', str(random_terminals)])
+        if dummy_mode is not None:
+            # This argument does not follow the other naming conventions
+            command.extend(['--dummyMode', str(dummy_mode)])
+        if seed is not None:
+            command.extend(['--seed', str(seed)])
+        if filename is not None:
+            command.extend(['--filename', str(filename)])
 
         print('Running Omics Integrator 2 with arguments: {}'.format(' '.join(command)), flush=True)
 
