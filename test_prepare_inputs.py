@@ -4,7 +4,6 @@ import DataLoader
 import os
 
 config_loc = os.path.join("config","config.yaml")
-config = {}
 
 with open(config_loc) as config_file:
     config = yaml.load(config_file, Loader=yaml.FullLoader)

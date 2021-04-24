@@ -14,8 +14,10 @@ class DataLoader:
     NODE_ID = "NODEID"
     warning_threshold = 0.05 #Threshold for scarcity of columns to warn user
 
+    # TODO refactor variables to eliminate camel case
     def __init__(self, config):
-        self.dataContext = None
+        self.label = None
+        #self.dataContext = None
         self.interactome = None
         self.nodeDatasets = None
         self.nodeTable = None
@@ -24,8 +26,10 @@ class DataLoader:
         self.otherFiles = []
         self.loadFilesFromConfig(config)
         #TODO add ability to generically just grab all files
+        # Is the above feature still needed?
         return
 
+    # TODO when loading the config file, support a list of datasets
     def loadFilesFromConfig(self, config):
         '''
         Loads data files from config, which is assumed to be a nested dictionary
@@ -46,18 +50,23 @@ class DataLoader:
         returns: none
         '''
 
+        self.label = config["datasets"][0]["label"]
+
         #Get file paths from config
-        interactomeLoc = config["reconstruction_settings"]["locations"]["interactome_path"]
-        nodeDatasetFiles = config["data"]["datasets"]
-        nodeDataFiles = config["data"]["otherNodeData"]
+        # TODO support multiple edge files
+        interactomeLoc = config["datasets"][0]["edge_files"][0]
+        # TODO no longer need nodeDatasetFiles
+        nodeDatasetFiles = []
+        nodeDataFiles = config["datasets"][0]["node_files"]
         edgeDataFiles = [""] #Currently None
-        dataLoc = config["data"]["data_dir"]
+        dataLoc = config["datasets"][0]["data_dir"]
 
         #Load everything as pandas tables
-        self.interactome = pd.read_table(interactomeLoc, names = ["Interactor1","Interactor2","Weight"])
+        self.interactome = pd.read_table(os.path.join(dataLoc,interactomeLoc), names = ["Interactor1","Interactor2","Weight"])
         nodeSet = set(self.interactome.Interactor1.unique())
         nodeSet = nodeSet.union(set(self.interactome.Interactor2.unique()))
 
+        # TODO remove, no longer used, all node information is handled below
         #Load node datasets
         self.nodeDatasets = dict()
         for dataset in nodeDatasetFiles:
@@ -86,18 +95,20 @@ class DataLoader:
                 singleNodeTable[newColName] = True
 
             self.nodeTable = self.nodeTable.merge(singleNodeTable, how="left", on=self.NODE_ID, suffixes=("", "_DROP")).filter(regex="^(?!.*DROP)")
-        self.otherFiles = config["data"]["otherFiles"]
+        self.otherFiles = config["datasets"][0]["other_files"]
         return
 
     def requestNodeColumns(self, colNames):
         '''
-        returns: A table containing the requested column names and node ID's
+        returns: A table containing the requested column names and node IDs
         for all nodes with at least 1 of the requested values being non-empty
         '''
-        dataNodeTable = self.nodeTable.merge(self.nodeDatasets[self.dataContext], how="left", on=self.NODE_ID, suffixes=("", "_DROP")).filter(regex="^(?!.*DROP)" )
-        for col in colNames:
-            if col not in dataNodeTable:
-                return None
+        # TODO remove this block if no longer needed
+        dataNodeTable = self.nodeTable
+        #dataNodeTable = self.nodeTable.merge(self.nodeDatasets[self.dataContext], how="left", on=self.NODE_ID, suffixes=("", "_DROP")).filter(regex="^(?!.*DROP)" )
+        #for col in colNames:
+        #    if col not in dataNodeTable:
+        #        return None
         colNames.append(self.NODE_ID)
         filteredTable = dataNodeTable[colNames]
         filteredTable = filteredTable.dropna(axis=0, how='all',subset=filteredTable.columns.difference([self.NODE_ID]))
@@ -115,6 +126,7 @@ class DataLoader:
     def getInteractome(self):
         return self.interactome.copy()
 
-    def set_data_context(self, dataset):
-        self.dataContext = dataset
-        return
+    # TODO decide whether this is still needed
+    #def set_data_context(self, dataset):
+    #    self.dataContext = dataset
+    #    return

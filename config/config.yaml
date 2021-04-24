@@ -62,11 +62,13 @@
                     a: [0.85]
                     t: [0.3]
 
- # Here we fix which pathways to run and other file location information. 
+ # Here we fix which pathways to run and other file location information.
+ # DataLoader.py can currently only load a single dataset
  datasets:
      -
        label: data1
        node_files: ["node-prizes.txt", "sources.txt", "targets.txt"]
+       # DataLoader.py can currently only load a single edge file, which is the primary network
        edge_files: ["network.txt"]
        other_files: []
        # Relative path from the spras directory

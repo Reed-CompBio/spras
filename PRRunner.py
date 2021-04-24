@@ -19,9 +19,10 @@ def get_required_inputs(algorithm):
     return globals()[algorithm.lower()].required_inputs
 
 def prepare_inputs(input_pref, algorithm, data, dataset, params):
-    data.set_data_context(dataset)
+    # TODO Decide whether set_data_context is needed
+    #data.set_data_context(dataset)
     return_val = globals()[algorithm.lower()].generate_inputs(data, input_pref, params)
-    data.set_data_context(None)
+    #data.set_data_context(None)
     return return_val
 
 def get_parser() -> argparse.ArgumentParser:
