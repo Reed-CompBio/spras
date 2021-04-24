@@ -10,22 +10,23 @@ wildcard_constraints:
 
 algorithm_params = dict()
 datasets = []
-data_dir = ""
+#data_dir = ""
 out_dir = ""
 
-
+# TODO move to util.py, no longer use globals
 def parse_config_file():
     global datasets
-    global data_dir
+    #global data_dir
     global out_dir
     global algorithm_params
 
     # Parse dataset information
+    # Datasets is a list, where each list entry has a dataset label and lists of input files
     # Need to work more on input file naming to make less strict assumptions
     # about the filename structure
-    datasets = config["data"]["datasets"]
-    data_dir = config["data"]["data_dir"]
-    out_dir  = config["data"]["out_dir"]
+    datasets = config["datasets"]
+    #data_dir = config["data"]["data_dir"]
+    out_dir  = config["reconstruction_settings"]["locations"]["reconstruction_dir"]
 
     # Parse algorithm information
     # Each algorithm's parameters are provided as a list of dictionaries
@@ -56,10 +57,22 @@ def parse_config_file():
                 algorithm_params[alg["name"]].append(run_dict)
 
 parse_config_file()
+
+# TODO simply this after deciding whether labels are required or optional and whether
+# datasets are a dictionary with the label as the key or a list
+dataset_labels = [dataset.get('label', f'dataset{index}') for index, dataset in enumerate(datasets)]
+# Maps from the dataset label to the dataset list index
+dataset_dict = {dataset.get('label', f'dataset{index}'): index for index, dataset in enumerate(datasets)}
+
+# Return the dataset dictionary from the config file given the label
+def get_dataset(label):
+    return datasets[dataset_dict[label]]
+
 algorithms = list(algorithm_params.keys())
 pathlinker_params = algorithm_params['pathlinker'] # Temporary
 
 # This would be part of our Python package
+# TODO replace with required_inputs from class file
 required_inputs = {
     'pathlinker': ['sources', 'targets', 'network'],
     'pcsf': ['nodes', 'network'],
@@ -122,7 +135,7 @@ def make_final_input(wildcards):
     # when augmenting or advising
     # Changes to the parameter handling may have broken the augment and advising options
     if run_options["augment"]:
-        final_input = expand('{out_dir}{sep}augmented-pathway-{dataset}-{algorithm}-{params}.txt', out_dir=out_dir, sep=os.sep, dataset=datasets, algorithm=algorithms, params=pathlinker_params)
+        final_input = expand('{out_dir}{sep}augmented-pathway-{dataset}-{algorithm}-{params}.txt', out_dir=out_dir, sep=os.sep, dataset=dataset_labels, algorithm=algorithms, params=pathlinker_params)
     elif run_options["parameter-advise"]:
         #not a great name
         final_input = expand('{out_dir}{sep}advised-pathway-{dataset}-{algorithm}.txt', out_dir=out_dir, sep=os.sep, dataset=datasets, algorithm=algorithms)
@@ -146,16 +159,26 @@ rule reconstruct_pathways:
     # separators can cause the pattern matching to fail
     #input: os.path.join(out_dir, 'data1-pathlinker-network.txt')
 
+# Merge all node files and edge files for a dataset into a single node table and edge table
+rule merge_input:
+    input: # gather the information for this dataset label from the datasets list
+    output: os.path.join(data_dir, '{dataset}-merged.pickle')
+    run:
+        # pass the dataset to DataLoader.py where the files will be merged and written to disk (e.g. pickled)
+
 # Universal input to pathway reconstruction-specific input
 # Currently makes a strict assumption about the filename of the input files
 rule prepare_input:
-    input: os.path.join(data_dir, '{dataset}-{type}.txt')
+    input: os.path.join(data_dir, '{dataset}-merged.pickle')
+    # Use required_inputs to determine which output files to write
     output: os.path.join(out_dir, '{dataset}-{algorithm}-{type}.txt')
     # run the preprocessing script for this algorithm
     # With Git Bash on Windows multiline strings are not executed properly
     # https://carpentries-incubator.github.io/workflows-snakemake/07-resources/index.html
     # (No longer applicable for this command, but a good reminder)
     shell:
+        # Use the algorithm's generate_inputs function to load the merged dataset, extract the relevant columns,
+        # and write the output files specified by required_inputs
         '''
         echo Original file: {input} >> {output}
         '''
@@ -173,6 +196,7 @@ rule reconstruct:
         # Add the input files
         params.update(dict(zip(reconstruction_inputs(wildcards.algorithm), *{input})))
         # Add the output file
+        # TODO may need to modify the algorithm run functions to expect the output filename in the same format
         params['output'] = {output}
         PRRunner.run(wildcards.algorithm, params)
 

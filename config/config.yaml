@@ -84,7 +84,7 @@
                 pathway_dir: "/path/to/pathways"
 
                 #place the save path here
-                reconstruction_dir: "/path/to/save"
+                reconstruction_dir: "output"
 
          run: true
 
