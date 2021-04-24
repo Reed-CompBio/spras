@@ -44,4 +44,4 @@ jobs:
         miniconda-version: 'latest'
     - name: Run tests
       shell: bash --login {0}
-      run: pytest -s
+      run: pytest
