@@ -10,10 +10,10 @@ def run(algorithm, params):
     """
     A generic interface to the algorithm-specific run functions
     """
-    #try:
-    globals()[algorithm.lower()].run(**params)
-    #except:
-    #raise NotImplementedError('Only PathLinker is currently supported :(')
+    try:
+        globals()[algorithm.lower()].run(**params)
+    except:
+        raise NotImplementedError(f'{algorithm} is not currently supported :(')
 
 def get_required_inputs(algorithm):
     return globals()[algorithm.lower()].required_inputs
