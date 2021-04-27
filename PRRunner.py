@@ -1,5 +1,6 @@
 import yaml
 import argparse
+import DataLoader
 
 # supported algorithm imports
 from src.pathlinker import PathLinker as pathlinker
@@ -18,11 +19,15 @@ def run(algorithm, params):
 def get_required_inputs(algorithm):
     return globals()[algorithm.lower()].required_inputs
 
-def prepare_inputs(input_pref, algorithm, data, dataset, params):
-    # TODO Decide whether set_data_context is needed
-    #data.set_data_context(dataset)
-    return_val = globals()[algorithm.lower()].generate_inputs(data, input_pref, params)
-    #data.set_data_context(None)
+def merge_input(config, dataset_index, dataset_file):
+    dataset_dict = config["datasets"][dataset_index]
+    dataset = DataLoader.DataLoader(dataset_dict)
+    dataset.to_file(dataset_file)
+    return
+
+def prepare_inputs(input_pref, algorithm, data_file, params):
+    dataset = DataLoader.DataLoader.from_file(data_file)
+    return_val = globals()[algorithm.lower()].generate_inputs(dataset, input_pref, params)
     return return_val
 
 def get_parser() -> argparse.ArgumentParser:
