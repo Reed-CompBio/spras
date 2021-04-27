@@ -18,14 +18,14 @@ class DataLoader:
     # TODO refactor variables to eliminate camel case
     def __init__(self, config):
         self.label = None
-        #self.dataContext = None
+        #self.data_context = None
         self.interactome = None
-        self.nodeDatasets = None
-        self.nodeTable = None
-        self.edgeTable = None
-        self.nodeSet = set()
-        self.otherFiles = []
-        self.loadFilesFromConfig(config)
+        self.node_datasets = None
+        self.node_table = None
+        self.edge_table = None
+        self.node_set = set()
+        self.other_files = []
+        self.load_files_from_config(config)
         #TODO add ability to generically just grab all files
         # Is the above feature still needed?
         return
@@ -49,13 +49,13 @@ class DataLoader:
         return
 
     # TODO when loading the config file, support a list of datasets
-    def loadFilesFromConfig(self, config):
+    def load_files_from_config(self, config):
         '''
         Loads data files from config, which is assumed to be a nested dictionary
         from a loaded yaml config file with the fields in Config-Files/config.yaml.
-        Populates nodeDatasets, nodeTable, edgeTable, and interactome.
+        Populates node_datasets, node_table, edge_table, and interactome.
 
-        nodeDatasets is a dictionary of pandas tables, while nodeTable is a single
+        node_datasets is a dictionary of pandas tables, while node_table is a single
         merged pandas table.
 
         When loading data files, files of only a single column with node
@@ -73,79 +73,79 @@ class DataLoader:
 
         #Get file paths from config
         # TODO support multiple edge files
-        interactomeLoc = config["datasets"][0]["edge_files"][0]
-        # TODO no longer need nodeDatasetFiles
-        nodeDatasetFiles = []
-        nodeDataFiles = config["datasets"][0]["node_files"]
-        edgeDataFiles = [""] #Currently None
-        dataLoc = config["datasets"][0]["data_dir"]
+        interactome_loc = config["datasets"][0]["edge_files"][0]
+        # TODO no longer need node_dataset_files
+        node_dataset_files = []
+        node_data_files = config["datasets"][0]["node_files"]
+        edge_data_files = [""] #Currently None
+        data_loc = config["datasets"][0]["data_dir"]
 
         #Load everything as pandas tables
-        self.interactome = pd.read_table(os.path.join(dataLoc,interactomeLoc), names = ["Interactor1","Interactor2","Weight"])
-        nodeSet = set(self.interactome.Interactor1.unique())
-        nodeSet = nodeSet.union(set(self.interactome.Interactor2.unique()))
+        self.interactome = pd.read_table(os.path.join(data_loc,interactome_loc), names = ["Interactor1","Interactor2","Weight"])
+        node_set = set(self.interactome.Interactor1.unique())
+        node_set = node_set.union(set(self.interactome.Interactor2.unique()))
 
         # TODO remove, no longer used, all node information is handled below
         #Load node datasets
-        self.nodeDatasets = dict()
-        for dataset in nodeDatasetFiles:
-            self.nodeDatasets[dataset] = pd.DataFrame(nodeSet, columns=[self.NODE_ID])
-            for fileName in os.listdir(dataLoc):
-                if fileName.startswith(dataset):
-                    singleNodeTable = pd.read_table(os.path.join(dataLoc,fileName))
+        self.node_datasets = dict()
+        for dataset in node_dataset_files:
+            self.node_datasets[dataset] = pd.DataFrame(node_set, columns=[self.NODE_ID])
+            for file_name in os.listdir(data_loc):
+                if file_name.startswith(dataset):
+                    single_node_table = pd.read_table(os.path.join(data_loc,file_name))
                     #If we have only 1 column, assume this is an indicator variable
-                    if len(singleNodeTable.columns)==1:
-                        singleNodeTable = pd.read_table(os.path.join(dataLoc,fileName),header=None)
-                        singleNodeTable.columns = [self.NODE_ID]
+                    if len(single_node_table.columns)==1:
+                        single_node_table = pd.read_table(os.path.join(data_loc,file_name),header=None)
+                        single_node_table.columns = [self.NODE_ID]
                         #We assume there's a character splitting the dataset name and the rest of the file name
-                        newColName = fileName[len(dataset)+1:].split(".")[0]
-                        singleNodeTable[newColName] = True
-                    self.nodeDatasets[dataset] = self.nodeDatasets[dataset].merge(singleNodeTable, how="left", on=self.NODE_ID, suffixes=("", "_DROP")).filter(regex="^(?!.*DROP)")
+                        new_col_name = file_name[len(dataset)+1:].split(".")[0]
+                        single_node_table[new_col_name] = True
+                    self.node_datasets[dataset] = self.node_datasets[dataset].merge(single_node_table, how="left", on=self.NODE_ID, suffixes=("", "_DROP")).filter(regex="^(?!.*DROP)")
 
         #Load generic node tables
-        self.nodeTable = pd.DataFrame(nodeSet, columns=[self.NODE_ID])
-        for nodeFile in nodeDataFiles:
-            singleNodeTable = pd.read_table(os.path.join(dataLoc,nodeFile))
+        self.node_table = pd.DataFrame(node_set, columns=[self.NODE_ID])
+        for node_file in node_data_files:
+            single_node_table = pd.read_table(os.path.join(data_loc,node_file))
             #If we have only 1 column, assume this is an indicator variable
-            if len(singleNodeTable.columns)==1:
-                singleNodeTable = pd.read_table(os.path.join(dataLoc,nodeFile),header=None)
-                singleNodeTable.columns = [self.NODE_ID]
-                newColName = nodeFile.split(".")[0]
-                singleNodeTable[newColName] = True
+            if len(single_node_table.columns)==1:
+                single_node_table = pd.read_table(os.path.join(data_loc,node_file),header=None)
+                single_node_table.columns = [self.NODE_ID]
+                new_col_name = node_file.split(".")[0]
+                single_node_table[new_col_name] = True
 
-            self.nodeTable = self.nodeTable.merge(singleNodeTable, how="left", on=self.NODE_ID, suffixes=("", "_DROP")).filter(regex="^(?!.*DROP)")
-        self.otherFiles = config["datasets"][0]["other_files"]
+            self.node_table = self.node_table.merge(single_node_table, how="left", on=self.NODE_ID, suffixes=("", "_DROP")).filter(regex="^(?!.*DROP)")
+        self.other_files = config["datasets"][0]["other_files"]
         return
 
-    def requestNodeColumns(self, colNames):
+    def request_node_columns(self, col_names):
         '''
         returns: A table containing the requested column names and node IDs
         for all nodes with at least 1 of the requested values being non-empty
         '''
         # TODO remove this block if no longer needed
-        dataNodeTable = self.nodeTable
-        #dataNodeTable = self.nodeTable.merge(self.nodeDatasets[self.dataContext], how="left", on=self.NODE_ID, suffixes=("", "_DROP")).filter(regex="^(?!.*DROP)" )
-        #for col in colNames:
-        #    if col not in dataNodeTable:
+        data_node_table = self.node_table
+        #data_node_table = self.node_table.merge(self.node_datasets[self.data_context], how="left", on=self.NODE_ID, suffixes=("", "_DROP")).filter(regex="^(?!.*DROP)" )
+        #for col in col_names:
+        #    if col not in data_node_table:
         #        return None
-        colNames.append(self.NODE_ID)
-        filteredTable = dataNodeTable[colNames]
-        filteredTable = filteredTable.dropna(axis=0, how='all',subset=filteredTable.columns.difference([self.NODE_ID]))
-        percentHit = (float(len(filteredTable))/len(dataNodeTable))*100
-        if percentHit <= self.warning_threshold*100:
-            warnings.warn("Only %0.2f of data had one or more of the following columns filled:"%(percentHit) + str(colNames))
-        return filteredTable
+        col_names.append(self.NODE_ID)
+        filtered_table = data_node_table[col_names]
+        filtered_table = filtered_table.dropna(axis=0, how='all',subset=filtered_table.columns.difference([self.NODE_ID]))
+        percent_hit = (float(len(filtered_table))/len(data_node_table))*100
+        if percent_hit <= self.warning_threshold*100:
+            warnings.warn("Only %0.2f of data had one or more of the following columns filled:"%(percent_hit) + str(col_names))
+        return filtered_table
 
-    def requestEdgeColumns(self, colNames):
+    def request_edge_columns(self, col_names):
         return None
 
-    def getOtherFiles(self):
-        return self.otherFiles.copy()
+    def get_other_files(self):
+        return self.other_files.copy()
 
-    def getInteractome(self):
+    def get_interactome(self):
         return self.interactome.copy()
 
     # TODO decide whether this is still needed
     #def set_data_context(self, dataset):
-    #    self.dataContext = dataset
+    #    self.data_context = dataset
     #    return

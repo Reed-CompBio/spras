@@ -15,7 +15,7 @@ class PathLinker(PRM):
     def generate_inputs(data, input_prefix, params):
 
         #Get sources and targets for node input file
-        sources_targets = data.requestNodeColumns(["sources","targets"])
+        sources_targets = data.request_node_columns(["sources","targets"])
         if sources_targets is None:
             return False
         both_series = sources_targets.sources & sources_targets.targets
@@ -32,7 +32,7 @@ class PathLinker(PRM):
         input_df.to_csv(input_prefix+"nodetypes.txt",sep="\t",index=False,columns=["#Node","Node type"])
 
         #This is pretty memory intensive. We might want to keep the interactome centralized.
-        data.getInteractome().to_csv(input_prefix+"network.txt",sep="\t",index=False,columns=["Interactor1","Interactor2","Weight"])
+        data.get_interactome().to_csv(input_prefix+"network.txt",sep="\t",index=False,columns=["Interactor1","Interactor2","Weight"])
         return True
 
 
