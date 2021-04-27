@@ -1,6 +1,7 @@
 import pandas as pd
 import warnings
 import os
+import pickle as pkl
 
 """
 Author: Chris Magnano
@@ -27,6 +28,24 @@ class DataLoader:
         self.loadFilesFromConfig(config)
         #TODO add ability to generically just grab all files
         # Is the above feature still needed?
+        return
+
+    def to_file(self, file_name):
+        '''
+        Saves dataset object to pickle file
+        '''
+        with open(file_name, "wb") as f:
+            pkl.dump(self, f)
+        return
+
+    @classmethod
+    def from_file(cls, file_name):
+        '''
+        Loads dataset object from a pickle file.
+        Usage: dataset = Dataset.from_file(pickle_file)
+        '''
+        with open(file_name, "rb") as f:
+            return pkl.load(f)
         return
 
     # TODO when loading the config file, support a list of datasets
