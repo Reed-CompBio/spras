@@ -1,6 +1,6 @@
 import yaml
 import argparse
-import DataLoader
+import Dataset
 
 # supported algorithm imports
 from src.pathlinker import PathLinker as pathlinker
@@ -21,12 +21,12 @@ def get_required_inputs(algorithm):
 
 def merge_input(config, dataset_index, dataset_file):
     dataset_dict = config["datasets"][dataset_index]
-    dataset = DataLoader.DataLoader(dataset_dict)
+    dataset = Dataset.Dataset(dataset_dict)
     dataset.to_file(dataset_file)
     return
 
 def prepare_inputs(input_pref, algorithm, data_file, params):
-    dataset = DataLoader.DataLoader.from_file(data_file)
+    dataset = Dataset.Dataset.from_file(data_file)
     return_val = globals()[algorithm.lower()].generate_inputs(dataset, input_pref, params)
     return return_val
 

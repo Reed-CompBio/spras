@@ -10,7 +10,7 @@ Author: Chris Magnano
 Methods and intermediate state for loading data and putting it into pandas tables for use by pathway reconstruction algorithms. We'll probably want to eventually roll these up as a part of another class.
 """
 
-class DataLoader:
+class Dataset:
 
     NODE_ID = "NODEID"
     warning_threshold = 0.05 #Threshold for scarcity of columns to warn user
