@@ -1,0 +1,10 @@
+name: spras
+channels:
+  - conda-forge
+dependencies:
+  - bioconda::snakemake-minimal=5.32
+  - docker-py=5.0
+  - networkx=2.5
+  - pandas=1.2
+  - pytest=6.2
+  - python=3.8
