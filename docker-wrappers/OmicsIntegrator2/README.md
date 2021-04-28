@@ -11,24 +11,27 @@ It defines a custom ENTRYPOINT that uses `conda run` to run the command inside t
 
 To create the Docker image run:
 ```
-docker build -t agitter/omics-integrator-2 -f Dockerfile .
+docker build -t reedcompbio/omics-integrator-2 -f Dockerfile .
 ```
+from this directory.
 
 To confirm that commands are run inside the conda environment run:
 ```
-winpty docker run agitter/omics-integrator-2 conda list
-winpty docker run agitter/omics-integrator-2 OmicsIntegrator -h
+winpty docker run reedcompbio/omics-integrator-2 conda list
+winpty docker run reedcompbio/omics-integrator-2 OmicsIntegrator -h
 ```
 The `winpty` prefix is only needed on Windows.
 
 ## Testing
-The `input` directory contains test files `oi2-edges.txt` and `oi2-prizes.txt`.
-The Docker wrapper can be tested with the command
+Test code is located in `test/OmicsIntegrator2`.
+The `input` subdirectory contains test files `oi2-edges.txt` and `oi2-prizes.txt`.
+The Docker wrapper can be tested from the root directory of this repository with the command
 ```
-python test-oi2.py
+python test/OmicsIntegrator2/test-oi2.py
 ```
 
 ## TODO
 - Attribute https://github.com/fraenkel-lab/OmicsIntegrator2
 - Modify environment to use fraenkel-lab or [PyPI](https://pypi.org/project/OmicsIntegrator/) version instead of fork
-- Document usage, required packages
+- Document usage
+- Consider `continuumio/miniconda3:4.9.2-alpine` base image
