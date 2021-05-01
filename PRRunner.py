@@ -20,80 +20,44 @@ def run(algorithm, params):
 
 
 def get_required_inputs(algorithm):
-    return globals()[algorithm.lower()].required_inputs
+    """
+    Get the input files requires to run this algorithm
+    @param algorithm: algorithm name
+    @return: A list of strings of input files types
+    """
+    try:
+        algorithm_runner = globals()[algorithm.lower()]
+    except KeyError:
+        raise NotImplementedError(f'{algorithm} is not currently supported')
+    return algorithm_runner.required_inputs
 
 
 def merge_input(config, dataset_index, dataset_file):
+    """
+    Merge files listed in the config file for this dataset and write
+    the dataset to disk
+    @param config: config file
+    @param dataset_index: index of the dataset to process
+    @param dataset_file: output filename
+    """
     dataset_dict = config["datasets"][dataset_index]
     dataset = Dataset.Dataset(dataset_dict)
     dataset.to_file(dataset_file)
-    return
 
 
 def prepare_inputs(input_pref, algorithm, data_file, params):
+    """
+    Prepare general dataset files for this algorithm
+    @param input_pref:
+    @param algorithm: algorithm name
+    @param data_file:
+    @param params:
+    @return:
+    """
     dataset = Dataset.Dataset.from_file(data_file)
-    return_val = globals()[algorithm.lower()].generate_inputs(dataset, input_pref, params)
+    try:
+        algorithm_runner = globals()[algorithm.lower()]
+    except KeyError:
+        raise NotImplementedError(f'{algorithm} is not currently supported')
+    return_val = algorithm_runner.generate_inputs(dataset, input_pref, params)
     return return_val
-
-def get_parser() -> argparse.ArgumentParser:
-    '''
-    :return: an argparse ArgumentParser object for parsing command
-        line parameters
-    '''
-    parser = argparse.ArgumentParser(
-        description='Run pathway reconstruction pipeline.')
-
-    parser.add_argument('--config', default='config.yaml',
-        help='Path to config file')
-
-    return parser
-
-def parse_arguments():
-    '''
-    Initialize a parser and use it to parse the command line arguments
-    :return: parsed dictionary of command line arguments
-    '''
-    parser = get_parser()
-    opts = parser.parse_args()
-
-    return opts
-
-def main():
-    opts = parse_arguments()
-    config_file = opts.config
-    print("########################## Run PRRunner ##########################")
-    print("print output follows execution of PRRunner \n'*' denotes calls from PRRunner\n")
-    print("* create Evaluation")
-    with open(config_file, 'r') as conf:
-        evaluation = br.ConfigParser.parse(conf)
-    print(evaluation)
-    print("-------------------------------------------")
-    print('* Evaluation started')
-    # print("--- runners")
-    # print(evaluation.input_settings.algorithms)
-    # print(evaluation.input_settings.datasets)
-
-
-    print("* --generate Inputs driver loop")
-    for idx in range(len(evaluation.runners)):
-
-        evaluation.runners[idx].generateInputs()
-        print("\n")
-
-    print("* --run driver loop")
-    for idx in range(len(evaluation.runners)):
-
-        evaluation.runners[idx].run()
-        print("\n")
-
-    print("* --parse outputs driver loop")
-    for idx in range(len(evaluation.runners)):
-
-        evaluation.runners[idx].parseOutput()
-        print("\n")
-
-    print('* Evaluation complete')
-
-
-if __name__ == '__main__':
-    main()
