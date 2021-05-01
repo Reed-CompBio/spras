@@ -36,12 +36,19 @@ def parse_config(config_file):
     with open(config_file) as config_f:
         config = yaml.load(config_f, Loader=yaml.FullLoader)
 
+    out_dir = config["reconstruction_settings"]["locations"]["reconstruction_dir"]
+
     # Parse dataset information
-    # Datasets is a list, where each list entry has a dataset label and lists of input files
+    # Datasets is initially a list, where each list entry has a dataset label and lists of input files
+    # Convert the dataset list into a dict where the label is the key and update the config data structure
+    # TODO allow labels to be optional and assign default labels
+    # TODO check for collisions in dataset labels, warn, and make the labels unique
     # Need to work more on input file naming to make less strict assumptions
     # about the filename structure
-    datasets = config["datasets"]
-    out_dir = config["reconstruction_settings"]["locations"]["reconstruction_dir"]
+    # Currently assumes all datasets have a label and the labels are unique
+    # Could remove label from the dataset after converting to dict
+    datasets = {dataset["label"]: dataset for dataset in config["datasets"]}
+    config["datasets"] = datasets
 
     # Parse algorithm information
     # Each algorithm's parameters are provided as a list of dictionaries

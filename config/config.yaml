@@ -75,7 +75,7 @@
        # Relative path from the spras directory
        data_dir: "input"
      -
-       # Skip the optional dataset label
+       label: data1
        # Reuse some of the same sources file as 'data0' but different network and targets
        node_files: ["sources.txt", "alternative-targets.txt"]
        edge_files: ["alternative-network.txt"]

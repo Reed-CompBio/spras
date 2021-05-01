@@ -7,17 +7,18 @@ wildcard_constraints:
     algorithm='\w+'
 
 config, datasets, out_dir, algorithm_params = parse_config(config_file)
-print(datasets)
 
 # TODO simply this after deciding whether labels are required or optional and whether
 # datasets are a dictionary with the label as the key or a list
-dataset_labels = [dataset.get('label', f'dataset{index}') for index, dataset in enumerate(datasets)]
+# Temporarily require labels
+#dataset_labels = [dataset.get('label', f'dataset{index}') for index, dataset in enumerate(datasets)]
 # Maps from the dataset label to the dataset list index
-dataset_dict = {dataset.get('label', f'dataset{index}'): index for index, dataset in enumerate(datasets)}
+#dataset_dict = {dataset.get('label', f'dataset{index}'): index for index, dataset in enumerate(datasets)}
 
 # Return the dataset dictionary from the config file given the label
 def get_dataset(label):
-    return datasets[dataset_dict[label]]
+    #return datasets[dataset_dict[label]]
+    return datasets[label]
 
 algorithms = list(algorithm_params.keys())
 pathlinker_params = algorithm_params['pathlinker'] # Temporary
