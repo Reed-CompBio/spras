@@ -23,14 +23,6 @@ def get_dataset(label):
 algorithms = list(algorithm_params.keys())
 pathlinker_params = algorithm_params['pathlinker'] # Temporary
 
-# This would be part of our Python package
-# TODO replace with required_inputs from class file
-required_inputs = {
-    'pathlinker': ['sources', 'targets', 'network'],
-    'pcsf': ['nodes', 'network'],
-    'bowtiebuilder': ['nodes', 'network']
-    }
-
 # Eventually we'd store these values in a config file
 run_options = {}
 run_options["augment"] = False
@@ -52,13 +44,6 @@ algorithms_with_params = [f'{algorithm}-params{index}' for algorithm, count in a
 def reconstruction_params(algorithm, index_string):
     index = int(index_string.replace('params', ''))
     return algorithm_params[algorithm][index]
-
-# Determine which input files are needed based on the
-# pathway reconstruction algorithm
-# May no longer need a function for this, but keep it because
-# the final implementation may be more complex than a dictionary
-def reconstruction_inputs(algorithm):
-    return required_inputs[algorithm]
 
 # Convert a parameter dictionary to a string of command line arguments
 def params_to_args(params):
@@ -139,14 +124,14 @@ rule prepare_input:
 # for why the lambda function is required
 # Run PathLinker or other pathway reconstruction algorithm
 rule reconstruct:
-    input: lambda wildcards: expand(os.path.join(out_dir, '{{dataset}}-{{algorithm}}-{type}.txt'), type=reconstruction_inputs(algorithm=wildcards.algorithm))
+    input: lambda wildcards: expand(os.path.join(out_dir, '{{dataset}}-{{algorithm}}-{type}.txt'), type=PRRunner.get_required_inputs(algorithm=wildcards.algorithm))
     output: os.path.join(out_dir, 'raw-pathway-{dataset}-{algorithm}-{params}.txt')
     # chain.from_iterable trick from https://stackoverflow.com/questions/3471999/how-do-i-merge-two-lists-into-a-single-list
     run:
         print(f"cur algo: {wildcards.algorithm}")
         params = reconstruction_params(wildcards.algorithm, wildcards.params)
         # Add the input files
-        params.update(dict(zip(reconstruction_inputs(wildcards.algorithm), *{input})))
+        params.update(dict(zip(PRRunner.get_required_inputs(wildcards.algorithm), *{input})))
         # Add the output file
         # TODO may need to modify the algorithm run functions to expect the output filename in the same format
         params['output'] = {output}
