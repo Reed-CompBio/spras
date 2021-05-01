@@ -1,11 +1,7 @@
-import yaml
-import argparse
 import Dataset
 
 # supported algorithm imports
 from src.pathlinker import PathLinker as pathlinker
-
-yaml.warnings({'YAMLLoadWarning': False})
 
 
 def run(algorithm, params):
