@@ -7,7 +7,7 @@ import pickle as pkl
 Author: Chris Magnano
 02/15/21
 
-Methods and intermediate state for loading data and putting it into pandas tables for use by pathway reconstruction algorithms. We'll probably want to eventually roll these up as a part of another class.
+Methods and intermediate state for loading data and putting it into pandas tables for use by pathway reconstruction algorithms.
 """
 
 class Dataset:
@@ -46,8 +46,8 @@ class Dataset:
     # TODO when loading the config file, support a list of datasets
     def load_files_from_config(self, dataset_dict):
         '''
-        Loads data files from config, which is assumed to be a nested dictionary
-        from a loaded yaml config file with the fields in Config-Files/config.yaml.
+        Loads data files from dataset_dict, which is one dataset dictionary from the list
+        in the config file with the fields in the config file.
         Populates node_table, edge_table, and interactome.
 
         node_table is a single merged pandas table.

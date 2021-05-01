@@ -7,23 +7,28 @@ from src.pathlinker import PathLinker as pathlinker
 
 yaml.warnings({'YAMLLoadWarning': False})
 
+
 def run(algorithm, params):
     """
     A generic interface to the algorithm-specific run functions
     """
     try:
-        globals()[algorithm.lower()].run(**params)
-    except:
-        raise NotImplementedError(f'{algorithm} is not currently supported :(')
+        algorithm_runner = globals()[algorithm.lower()]
+    except KeyError:
+        raise NotImplementedError(f'{algorithm} is not currently supported')
+    algorithm_runner.run(**params)
+
 
 def get_required_inputs(algorithm):
     return globals()[algorithm.lower()].required_inputs
+
 
 def merge_input(config, dataset_index, dataset_file):
     dataset_dict = config["datasets"][dataset_index]
     dataset = Dataset.Dataset(dataset_dict)
     dataset.to_file(dataset_file)
     return
+
 
 def prepare_inputs(input_pref, algorithm, data_file, params):
     dataset = Dataset.Dataset.from_file(data_file)
@@ -91,4 +96,4 @@ def main():
 
 
 if __name__ == '__main__':
-  main()
+    main()
