@@ -22,7 +22,7 @@ class Dataset:
         self.edge_table = None
         self.node_set = set()
         self.other_files = []
-        self.load_files_from_config(dataset_dict)
+        self.load_files_from_dict(dataset_dict)
         return
 
     def to_file(self, file_name):
@@ -31,7 +31,6 @@ class Dataset:
         '''
         with open(file_name, "wb") as f:
             pkl.dump(self, f)
-        return
 
     @classmethod
     def from_file(cls, file_name):
@@ -41,10 +40,8 @@ class Dataset:
         '''
         with open(file_name, "rb") as f:
             return pkl.load(f)
-        return
 
-    # TODO when loading the config file, support a list of datasets
-    def load_files_from_config(self, dataset_dict):
+    def load_files_from_dict(self, dataset_dict):
         '''
         Loads data files from dataset_dict, which is one dataset dictionary from the list
         in the config file with the fields in the config file.
@@ -90,7 +87,6 @@ class Dataset:
 
             self.node_table = self.node_table.merge(single_node_table, how="left", on=self.NODE_ID, suffixes=("", "_DROP")).filter(regex="^(?!.*DROP)")
         self.other_files = dataset_dict["other_files"]
-        return
 
     def request_node_columns(self, col_names):
         '''

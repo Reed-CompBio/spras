@@ -28,15 +28,12 @@ def get_required_inputs(algorithm):
     return algorithm_runner.required_inputs
 
 
-def merge_input(config, dataset_index, dataset_file):
+def merge_input(dataset_dict, dataset_file):
     """
-    Merge files listed in the config file for this dataset and write
-    the dataset to disk
-    @param config: config file
-    @param dataset_index: index of the dataset to process
+    Merge files listed for this dataset and write the dataset to disk
+    @param dataset_dict: dataset to process
     @param dataset_file: output filename
     """
-    dataset_dict = config["datasets"][dataset_index]
     dataset = Dataset.Dataset(dataset_dict)
     dataset.to_file(dataset_file)
 

@@ -16,7 +16,7 @@ config, datasets, out_dir, algorithm_params = parse_config(config_file)
 #dataset_dict = {dataset.get('label', f'dataset{index}'): index for index, dataset in enumerate(datasets)}
 
 # Return the dataset dictionary from the config file given the label
-def get_dataset(label):
+def get_dataset(datasets, label):
     #return datasets[dataset_dict[label]]
     return datasets[label]
 
@@ -77,36 +77,34 @@ def make_final_input(wildcards):
         #not a great name
         final_input = expand('{out_dir}{sep}advised-pathway-{dataset}-{algorithm}.txt', out_dir=out_dir, sep=os.sep, dataset=datasets, algorithm=algorithms)
     else:
+        # Temporary, build up one rule at a time to help debugging
+        final_input = expand('{out_dir}{sep}{dataset}-merged.pickle', out_dir=out_dir, sep=os.sep, dataset=datasets.keys())
         # Use 'params<index>' in the filename instead of describing each of the parameters and its value
-        final_input = expand('{out_dir}{sep}pathway-{dataset}-{algorithm_params}.txt', out_dir=out_dir, sep=os.sep, dataset=datasets, algorithm_params=algorithms_with_params)
+        #final_input = expand('{out_dir}{sep}pathway-{dataset}-{algorithm_params}.txt', out_dir=out_dir, sep=os.sep, dataset=datasets.keys(), algorithm_params=algorithms_with_params)
         # Create log files for the parameter indices
-        final_input.extend(expand('{out_dir}{sep}parameters-{algorithm}.txt', out_dir=out_dir, sep=os.sep, algorithm=algorithms))
+        #final_input.extend(expand('{out_dir}{sep}parameters-{algorithm}.txt', out_dir=out_dir, sep=os.sep, algorithm=algorithms))
+        # TODO Create log files for the datasets
     return final_input
 
 # A rule to define all the expected outputs from all pathway reconstruction
 # algorithms run on all datasets for all arguments
 rule reconstruct_pathways:
-    # Look for a more elegant way to use the OS-specific separator
-    # Probably do not want filenames to dictate which parameters to sweep over,
-    # consider alternative implementations
-    # input: expand('{out_dir}{sep}{dataset}-{algorithm}-{params}-pathway.txt', out_dir=out_dir, sep=os.sep, dataset=datasets, algorithm=algorithms, params=pathlinker_params)
     input: make_final_input
-    # Test only the prepare_input_pathlinker rule
-    # If using os.path.join use it everywhere because having some / and some \
-    # separators can cause the pattern matching to fail
-    #input: os.path.join(out_dir, 'data1-pathlinker-network.txt')
 
 # Merge all node files and edge files for a dataset into a single node table and edge table
-#rule merge_input:
-#    input: # gather the information for this dataset label from the datasets list
-#    output: os.path.join(data_dir, '{dataset}-merged.pickle')
-#    run:
-        # pass the dataset to DataLoader.py where the files will be merged and written to disk (e.g. pickled)
+rule merge_input:
+    # TODO should depend on the node, edge, and other files for this dataset so the rule is rerun if they change
+    input: config_file
+    output: out_file = os.path.join(out_dir, '{dataset}-merged.pickle')
+    run:
+        # pass the dataset to PRRunner where the files will be merged and written to disk (i.e. pickled)
+        dataset_dict = get_dataset(datasets, wildcards.dataset)
+        PRRunner.merge_input(dataset_dict, output.out_file)
 
 # Universal input to pathway reconstruction-specific input
 # Currently makes a strict assumption about the filename of the input files
 rule prepare_input:
-    input: os.path.join(data_dir, '{dataset}-merged.pickle')
+    input: os.path.join(out_dir, '{dataset}-merged.pickle')
     # Use required_inputs to determine which output files to write
     output: os.path.join(out_dir, '{dataset}-{algorithm}-{type}.txt')
     # run the preprocessing script for this algorithm
