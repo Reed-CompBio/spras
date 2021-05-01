@@ -38,13 +38,12 @@ def merge_input(dataset_dict, dataset_file):
     dataset.to_file(dataset_file)
 
 
-def prepare_inputs(input_pref, algorithm, data_file, params):
+def prepare_inputs(algorithm, data_file, filename_map):
     """
     Prepare general dataset files for this algorithm
-    @param input_pref:
     @param algorithm: algorithm name
-    @param data_file:
-    @param params:
+    @param data_file: dataset
+    @param filename_map: a dict mapping file types in the required_inputs to the filename for that type
     @return:
     """
     dataset = Dataset.Dataset.from_file(data_file)
@@ -52,5 +51,4 @@ def prepare_inputs(input_pref, algorithm, data_file, params):
         algorithm_runner = globals()[algorithm.lower()]
     except KeyError:
         raise NotImplementedError(f'{algorithm} is not currently supported')
-    return_val = algorithm_runner.generate_inputs(dataset, input_pref, params)
-    return return_val
+    return algorithm_runner.generate_inputs(data_file, filename_map)

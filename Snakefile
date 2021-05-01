@@ -78,7 +78,8 @@ def make_final_input(wildcards):
         final_input = expand('{out_dir}{sep}advised-pathway-{dataset}-{algorithm}.txt', out_dir=out_dir, sep=os.sep, dataset=datasets, algorithm=algorithms)
     else:
         # Temporary, build up one rule at a time to help debugging
-        final_input = expand('{out_dir}{sep}{dataset}-merged.pickle', out_dir=out_dir, sep=os.sep, dataset=datasets.keys())
+        final_input = expand('{out_dir}{sep}{dataset}-{algorithm}-input{sep}', out_dir=out_dir, sep=os.sep, dataset=datasets.keys(), algorithm=algorithms)
+        print(final_input)
         # Use 'params<index>' in the filename instead of describing each of the parameters and its value
         #final_input = expand('{out_dir}{sep}pathway-{dataset}-{algorithm_params}.txt', out_dir=out_dir, sep=os.sep, dataset=datasets.keys(), algorithm_params=algorithms_with_params)
         # Create log files for the parameter indices
@@ -95,28 +96,33 @@ rule reconstruct_pathways:
 rule merge_input:
     # TODO should depend on the node, edge, and other files for this dataset so the rule is rerun if they change
     input: config_file
-    output: out_file = os.path.join(out_dir, '{dataset}-merged.pickle')
+    output: dataset_file = os.path.join(out_dir, '{dataset}-merged.pickle')
     run:
         # pass the dataset to PRRunner where the files will be merged and written to disk (i.e. pickled)
         dataset_dict = get_dataset(datasets, wildcards.dataset)
-        PRRunner.merge_input(dataset_dict, output.out_file)
+        PRRunner.merge_input(dataset_dict, output.dataset_file)
 
 # Universal input to pathway reconstruction-specific input
-# Currently makes a strict assumption about the filename of the input files
+# Currently uses a directory as the output
+# Functions are not allowed when defining the output file list ("Only input files can be specified as functions" error)
+# An alternative could be to dynamically generate one rule per reconstruction algorithm
+# See https://stackoverflow.com/questions/48993241/varying-known-number-of-outputs-in-snakemake
+# TODO consider alternatives for the output file list
 rule prepare_input:
-    input: os.path.join(out_dir, '{dataset}-merged.pickle')
-    # Use required_inputs to determine which output files to write
-    output: os.path.join(out_dir, '{dataset}-{algorithm}-{type}.txt')
+    input: dataset_file = os.path.join(out_dir, '{dataset}-merged.pickle')
+    # Could ideally use required_inputs to determine which output files to write
+    # That does not seem possible because it requires a function
+    output: prepared_dir = directory(os.path.join(out_dir, '{dataset}-{algorithm}-input'))
     # run the preprocessing script for this algorithm
     # With Git Bash on Windows multiline strings are not executed properly
     # https://carpentries-incubator.github.io/workflows-snakemake/07-resources/index.html
     # (No longer applicable for this command, but a good reminder)
-    shell:
+    run:
         # Use the algorithm's generate_inputs function to load the merged dataset, extract the relevant columns,
         # and write the output files specified by required_inputs
-        '''
-        echo Original file: {input} >> {output}
-        '''
+        filename_map = {input_type: os.path.join(prepared_dir, f'{input_type}.txt') for input_type in PRRunner.get_required_inputs(wildcards.algorithm)}
+        print(filename_map)
+        PRRunner.prepare_inputs(wildcards.algorithm, dataset_file, filename_map)
 
 # See https://stackoverflow.com/questions/46714560/snakemake-how-do-i-use-a-function-that-takes-in-a-wildcard-and-returns-a-value
 # for why the lambda function is required

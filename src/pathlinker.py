@@ -6,19 +6,28 @@ import warnings
 __all__ = ['PathLinker']
 
 class PathLinker(PRM):
-    required_inputs = ['nodetypes.txt','network.txt']
+    required_inputs = ['nodetypes', 'network']
 
     @staticmethod
-    def generate_inputs(data, input_prefix, params):
+    def generate_inputs(data, filename_map):
+        """
+        Access fields from the dataset and write the required input files
+        @param data: dataset
+        @param filename_map: a dict mapping file types in the required_inputs to the filename for that type
+        @return:
+        """
+        for input_type in PathLinker.required_inputs:
+            if input_type not in filename_map:
+                raise ValueError(f"{input_type} filename is missing")
 
         #Get sources and targets for node input file
-        sources_targets = data.request_node_columns(["sources","targets"])
+        sources_targets = data.request_node_columns(["sources", "targets"])
         if sources_targets is None:
             return False
         both_series = sources_targets.sources & sources_targets.targets
         for index,row in sources_targets[both_series].iterrows():
-            warnMsg = row.NODEID+" has been labeled as both a source and a target."
-            warnings.warn(warnMsg)
+            warn_msg = row.NODEID+" has been labeled as both a source and a target."
+            warnings.warn(warn_msg)
 
         #Create nodetype file
         input_df = sources_targets[["NODEID"]].copy()
@@ -26,11 +35,10 @@ class PathLinker(PRM):
         input_df.loc[sources_targets["sources"] == True,"Node type"]="source"
         input_df.loc[sources_targets["targets"] == True,"Node type"]="target"
 
-        input_df.to_csv(input_prefix+"nodetypes.txt",sep="\t",index=False,columns=["#Node","Node type"])
+        input_df.to_csv(filename_map["nodetypes"],sep="\t",index=False,columns=["#Node","Node type"])
 
         #This is pretty memory intensive. We might want to keep the interactome centralized.
-        data.get_interactome().to_csv(input_prefix+"network.txt",sep="\t",index=False,columns=["Interactor1","Interactor2","Weight"])
-        return True
+        data.get_interactome().to_csv(filename_map["network"],sep="\t",index=False,columns=["Interactor1","Interactor2","Weight"])
 
 
     # Skips parameter validation step
