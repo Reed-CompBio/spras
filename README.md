@@ -1,4 +1,5 @@
 # Signaling Pathway Reconstruction Analysis Streamliner (SPRAS)
+[![Test Docker wrappers](https://github.com/Reed-CompBio/spras/actions/workflows/test-docker-wrappers.yml/badge.svg)](https://github.com/Reed-CompBio/spras/actions/workflows/test-docker-wrappers.yml)
 
 This repo is a work-in-progress dockerized library of pathway reconstruction enhancement tools.
 The framework will contain different graph algorithms that connect genes and proteins of interest in the context of a general protein-protein interaction network, allowing users to run multiple algorithms on their inputs.  To read more about the specific pathway reconstruction algorithms, refer to [our list of algorithms](doc/) within the `doc/` directory.
@@ -16,11 +17,14 @@ The latest features can be found on various development branches.
 
 **Dockerized pathway reconstruction algorithms**: Pathway reconstruction algorithms are run via Docker images using the docker-py Python package.
 [PathLinker](https://github.com/Murali-group/PathLinker) is the first algorithm to prototype the workflow and design.
+The files to create these Docker images are in the `docker-wrappers` subdirectory.
 
 **Python wrapper for calling algorithms**: Wrapper functions provide an interface between the common file formats for input and output data and the algorithm-specific file formats and reconstruction commands.
+
+**Test code**: Tests for the Docker wrappers. The tests require the conda environment in `environment.yml` and the Docker images. Run the tests with `pytest -s`.
 
 Open a [GitHub issue](https://github.com/Reed-CompBio/spras/issues) or contact Anthony Gitter or Anna Ritz for more information.
 
 ## Docker
-The `docker` subdirectory is not used by the main pathway reconstruction framework.
+The `docker-demo` subdirectory is not used by the main pathway reconstruction framework.
 It serves as a reference for how to set up Dockerfiles and make Docker run calls.
