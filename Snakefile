@@ -1,19 +1,13 @@
-# Initially the shell commands do not do anything
-# They simply echo the input filename into the expected output file
-import itertools as it
 import os
 import PRRunner
+from src.util import parse_config
 
-configfile: "config/config.yaml"
+config_file = os.path.join('config', 'config.yaml')
 wildcard_constraints:
     algorithm='\w+'
 
-algorithm_params = dict()
-datasets = []
-#data_dir = ""
-out_dir = ""
-
-parse_config_file()
+config, datasets, out_dir, algorithm_params = parse_config(config_file)
+print(datasets)
 
 # TODO simply this after deciding whether labels are required or optional and whether
 # datasets are a dictionary with the label as the key or a list
@@ -117,10 +111,10 @@ rule reconstruct_pathways:
     #input: os.path.join(out_dir, 'data1-pathlinker-network.txt')
 
 # Merge all node files and edge files for a dataset into a single node table and edge table
-rule merge_input:
-    input: # gather the information for this dataset label from the datasets list
-    output: os.path.join(data_dir, '{dataset}-merged.pickle')
-    run:
+#rule merge_input:
+#    input: # gather the information for this dataset label from the datasets list
+#    output: os.path.join(data_dir, '{dataset}-merged.pickle')
+#    run:
         # pass the dataset to DataLoader.py where the files will be merged and written to disk (e.g. pickled)
 
 # Universal input to pathway reconstruction-specific input

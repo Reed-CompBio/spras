@@ -2,8 +2,10 @@
 Utility functions for pathway reconstruction
 """
 
+import itertools as it
 import re
 from pathlib import PurePath
+import yaml
 
 
 def prepare_path_docker(orig_path: PurePath) -> str:
@@ -25,19 +27,20 @@ def prepare_path_docker(orig_path: PurePath) -> str:
     return prepared_path
 
 
-# TODO move to util.py, no longer use globals
-def parse_config_file():
-    global datasets
-    # global data_dir
-    global out_dir
-    global algorithm_params
+def parse_config(config_file):
+    """
+    Parse the config file and return the full yaml structure as well as processed portions
+    @param config_file: the path to the config file
+    @return: (config, datasets, out_dir, algorithm_params)
+    """
+    with open(config_file) as config_f:
+        config = yaml.load(config_f, Loader=yaml.FullLoader)
 
     # Parse dataset information
     # Datasets is a list, where each list entry has a dataset label and lists of input files
     # Need to work more on input file naming to make less strict assumptions
     # about the filename structure
     datasets = config["datasets"]
-    # data_dir = config["data"]["data_dir"]
     out_dir = config["reconstruction_settings"]["locations"]["reconstruction_dir"]
 
     # Parse algorithm information
@@ -45,6 +48,7 @@ def parse_config_file():
     # Defaults are handled in the Python function or class that wraps
     # running that algorithm
     # Keys in the parameter dictionary are strings
+    algorithm_params = dict()
     for alg in config["algorithms"]:
         # Each set of runs should be 1 level down in the config file
         for params in alg["params"]:
@@ -67,3 +71,5 @@ def parse_config_file():
             for r in run_list_tuples:
                 run_dict = dict(zip(param_name_tuple, r))
                 algorithm_params[alg["name"]].append(run_dict)
+
+    return config, datasets, out_dir, algorithm_params
