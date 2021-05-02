@@ -50,6 +50,11 @@ def parse_config(config_file):
     datasets = {dataset["label"]: dataset for dataset in config["datasets"]}
     config["datasets"] = datasets
 
+    # Code snipped from Snakefile that may be useful for assigning default labels
+    # dataset_labels = [dataset.get('label', f'dataset{index}') for index, dataset in enumerate(datasets)]
+    # Maps from the dataset label to the dataset list index
+    # dataset_dict = {dataset.get('label', f'dataset{index}'): index for index, dataset in enumerate(datasets)}
+
     # Parse algorithm information
     # Each algorithm's parameters are provided as a list of dictionaries
     # Defaults are handled in the Python function or class that wraps

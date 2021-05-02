@@ -27,7 +27,7 @@
           params:
                 include: true
                 run1:
-                    k: range(100,501,100)
+                    k: range(100,201,100)
 
         - name: "responsenet"
           params:
@@ -35,6 +35,7 @@
                 run1:
                     y: [20]
 
+        # Convert to omicsintegrator1 and omicsintegrator2
         - name: "pcsf"
           params:
                 include: false

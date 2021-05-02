@@ -12,13 +12,6 @@ wildcard_constraints:
 
 config, datasets, out_dir, algorithm_params = parse_config(config_file)
 
-# TODO simply this after deciding whether labels are required or optional and whether
-# datasets are a dictionary with the label as the key or a list
-# Temporarily require labels
-#dataset_labels = [dataset.get('label', f'dataset{index}') for index, dataset in enumerate(datasets)]
-# Maps from the dataset label to the dataset list index
-#dataset_dict = {dataset.get('label', f'dataset{index}'): index for index, dataset in enumerate(datasets)}
-
 # Return the dataset dictionary from the config file given the label
 def get_dataset(datasets, label):
     #return datasets[dataset_dict[label]]
@@ -94,9 +87,9 @@ def make_final_input(wildcards):
     else:
         # Temporary, build up one rule at a time to help debugging
         # dynamic() may not work when defined in a separate function
-        final_input = dynamic(expand('{out_dir}{sep}{dataset}-{algorithm}-{{type}}.txt', out_dir=out_dir, sep=os.sep, dataset=datasets.keys(), algorithm=algorithms))
+        #final_input = dynamic(expand('{out_dir}{sep}{dataset}-{algorithm}-{{type}}.txt', out_dir=out_dir, sep=os.sep, dataset=datasets.keys(), algorithm=algorithms))
         # Use 'params<index>' in the filename instead of describing each of the parameters and its value
-        #final_input = expand('{out_dir}{sep}pathway-{dataset}-{algorithm_params}.txt', out_dir=out_dir, sep=os.sep, dataset=datasets.keys(), algorithm_params=algorithms_with_params)
+        final_input = expand('{out_dir}{sep}pathway-{dataset}-{algorithm_params}.txt', out_dir=out_dir, sep=os.sep, dataset=datasets.keys(), algorithm_params=algorithms_with_params)
         # Create log files for the parameter indices
         #final_input.extend(expand('{out_dir}{sep}parameters-{algorithm}.txt', out_dir=out_dir, sep=os.sep, algorithm=algorithms))
         # TODO Create log files for the datasets
@@ -105,9 +98,10 @@ def make_final_input(wildcards):
 # A rule to define all the expected outputs from all pathway reconstruction
 # algorithms run on all datasets for all arguments
 rule reconstruct_pathways:
-    #input: make_final_input
-    # dynamic() may not work when defined in a separate function
-    input: dynamic(expand('{out_dir}{sep}{dataset}-{algorithm}-{{type}}.txt', out_dir=out_dir, sep=os.sep, dataset=datasets.keys(), algorithm=algorithms))
+    input: make_final_input
+    # dynamic() may not work when defined in a separate function but may not be needed if not running the
+    # prepare_input rule directly
+    #input: dynamic(expand('{out_dir}{sep}{dataset}-{algorithm}-{{type}}.txt', out_dir=out_dir, sep=os.sep, dataset=datasets.keys(), algorithm=algorithms))
 
 # Merge all node files and edge files for a dataset into a single node table and edge table
 rule merge_input:
@@ -150,35 +144,19 @@ rule prepare_input:
 # Run the pathway reconstruction algorithm
 rule reconstruct:
     input: lambda wildcards: expand(os.path.join(out_dir, '{{dataset}}-{{algorithm}}-{type}.txt'), type=PRRunner.get_required_inputs(algorithm=wildcards.algorithm))
-    output: os.path.join(out_dir, 'raw-pathway-{dataset}-{algorithm}-{params}.txt')
-    # chain.from_iterable trick from https://stackoverflow.com/questions/3471999/how-do-i-merge-two-lists-into-a-single-list
+    output: pathway_file = os.path.join(out_dir, 'raw-pathway-{dataset}-{algorithm}-{params}.txt')
     run:
-        print(f"cur algo: {wildcards.algorithm}")
         params = reconstruction_params(wildcards.algorithm, wildcards.params)
         # Add the input files
         params.update(dict(zip(PRRunner.get_required_inputs(wildcards.algorithm), *{input})))
         # Add the output file
         # TODO may need to modify the algorithm run functions to expect the output filename in the same format
-        params['output'] = {output}
+        # All can accept a relative pathway to the output file that should be written that is called 'output_file'
+        params['output_file'] = output.pathway_file
         PRRunner.run(wildcards.algorithm, params)
 
-        # No longer plan to call the runner from the shell, none of the below is needed but keep it temporarily for
-        # reference until the new function call-based strategy works
-#         input_args = ['--' + arg for arg in reconstruction_inputs(wildcards.algorithm)]
-        # A list of the input file type and filename, for example
-        # ['--sources' 'data1-pathlinker-sources.txt' ''--targets' 'data1-pathlinker-targets.txt']
-#         input_args = list(it.chain.from_iterable(zip(input_args, *{input})))
-#         params = reconstruction_params(wildcards.algorithm, wildcards.params)
-        # A string representation of the parameters as command line arguments,
-        # for example '--k=5'
-#         params_args = params_to_args(params)
-        # Write the command to a file instead of running it because this
-        # functionality has not been implemented
-#         shell('''
-#             echo python command --algorithm {wildcards.algorithm} {input_args} --output {output} {params_args} >> {output}
-#         ''')
-
 # Original pathway reconstruction output to universal output
+# Use PRRunner as a wrapper to call the algorithm-specific parse_output
 rule parse_output:
     input: os.path.join(out_dir, 'raw-pathway-{dataset}-{algorithm}-{params}.txt')
     output: os.path.join(out_dir, 'pathway-{dataset}-{algorithm}-{params}.txt')

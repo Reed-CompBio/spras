@@ -43,18 +43,25 @@ class PathLinker(PRM):
 
     # Skips parameter validation step
     @staticmethod
-    def run(output=None, input_pref=None, k=None):
+    def run(nodetypes = None, network = None, output_file=None, k=None):
         """
         Run PathLinker with Docker
-        @param input_pref:  input directory prefix
-        @param output: output directory
+        @param nodetypes:  input node types with sources and targets (required)
+        @param network:  input network file (required)
+        @param output_file: path to the output pathway file (required)
         @param k: path length (optional)
         """
+
+        # TODO update the run command to use the new arguments provided and write the pathway to output_file
+        # Temporarily create a placeholder output file for Snakemake
+        with open(output_file, 'w') as out_file:
+            out_file.write('PathLinker: run arguments {}'.format(' '.join([nodetypes, network, output_file, str(k)])))
+
         # Add additional parameter validation
         # Do not require k
         # Use the PathLinker default
         # Could consider setting the default here instead
-        if not network or not input_pref or not output:
+        if not nodetypes or not network or not output_file:
             raise ValueError('Required PathLinker arguments are missing')
 
         # Initialize a Docker client using environment variables
@@ -62,7 +69,8 @@ class PathLinker(PRM):
         command = ['python', '../run.py']
         if k is not None:
             command.extend(['-k', str(k)])
-        command.extend([network, nodes])
+        # Currently broken
+        #command.extend([network, nodes])
         print('PathLinker: run_static() command {}'.format(' '.join(command)))
 
         working_dir = os.getcwd()
@@ -87,9 +95,7 @@ class PathLinker(PRM):
             client.close()
 
         # Need to rename the output file to match the specific output file in the params
-        # Temporarily create a placeholder output file
-        with open(output, 'w') as out_file:
-            out_file.write('PathLinker: run_static() command {}'.format(' '.join(command)))
+
 
     @staticmethod
     def parse_output():
