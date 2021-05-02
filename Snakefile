@@ -24,6 +24,11 @@ def get_dataset(datasets, label):
     #return datasets[dataset_dict[label]]
     return datasets[label]
 
+# Return the all_files list from the dataset plus the config file
+# Input preparation needs to be rerun if these files are modified
+def get_dataset_files(datsets, label):
+    return datasets[label]["all_files"] + [config_file]
+
 algorithms = list(algorithm_params.keys())
 pathlinker_params = algorithm_params['pathlinker'] # Temporary
 
@@ -100,8 +105,11 @@ rule reconstruct_pathways:
 
 # Merge all node files and edge files for a dataset into a single node table and edge table
 rule merge_input:
-    # TODO should depend on the node, edge, and other files for this dataset so the rule is rerun if they change
-    input: config_file
+    # Depends on the node, edge, and other files for this dataset so the rule and downstream rules are rerun
+    # if they change
+    # Also depends on the config file
+    # TODO does not need to depend on the entire config file but rather only the input files for this dataset
+    input: lambda wildcards: get_dataset_files(datasets, wildcards.dataset)
     output: dataset_file = os.path.join(out_dir, '{dataset}-merged.pickle')
     run:
         # Pass the dataset to PRRunner where the files will be merged and written to disk (i.e. pickled)
