@@ -47,11 +47,7 @@ def parse_config(config_file):
     # Need to work more on input file naming to make less strict assumptions
     # about the filename structure
     # Currently assumes all datasets have a label and the labels are unique
-    # Could remove label from the dataset after converting to dict
     datasets = {dataset["label"]: dataset for dataset in config["datasets"]}
-    for dataset in datasets.values():
-        all_files = dataset["node_files"] + dataset["edge_files"] + dataset["other_files"]
-        dataset["all_files"] = [os.path.join(dataset["data_dir"], data_file) for data_file in all_files]
     config["datasets"] = datasets
 
     # Parse algorithm information

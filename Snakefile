@@ -24,10 +24,16 @@ def get_dataset(datasets, label):
     #return datasets[dataset_dict[label]]
     return datasets[label]
 
-# Return the all_files list from the dataset plus the config file
+# Return all files used in the dataset plus the config file
+# TODO Consider how to make the dataset depend only on the part of the config file relevant for this dataset
+# instead of the entire config file
 # Input preparation needs to be rerun if these files are modified
-def get_dataset_files(datsets, label):
-    return datasets[label]["all_files"] + [config_file]
+def get_dataset_dependencies(datsets, label):
+    dataset = datasets[label]
+    all_files = dataset["node_files"] + dataset["edge_files"] + dataset["other_files"]
+    # Add the relative file path and config file
+    all_files = [os.path.join(dataset["data_dir"], data_file) for data_file in all_files]
+    return all_files + [config_file]
 
 algorithms = list(algorithm_params.keys())
 pathlinker_params = algorithm_params['pathlinker'] # Temporary
@@ -109,7 +115,7 @@ rule merge_input:
     # if they change
     # Also depends on the config file
     # TODO does not need to depend on the entire config file but rather only the input files for this dataset
-    input: lambda wildcards: get_dataset_files(datasets, wildcards.dataset)
+    input: lambda wildcards: get_dataset_dependencies(datasets, wildcards.dataset)
     output: dataset_file = os.path.join(out_dir, '{dataset}-merged.pickle')
     run:
         # Pass the dataset to PRRunner where the files will be merged and written to disk (i.e. pickled)
