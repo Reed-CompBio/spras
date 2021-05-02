@@ -1,2 +1,3 @@
-C
-D
+NODEID	targets
+C	True
+D	True

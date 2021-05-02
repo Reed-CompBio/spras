@@ -51,4 +51,4 @@ def prepare_inputs(algorithm, data_file, filename_map):
         algorithm_runner = globals()[algorithm.lower()]
     except KeyError:
         raise NotImplementedError(f'{algorithm} is not currently supported')
-    return algorithm_runner.generate_inputs(data_file, filename_map)
+    return algorithm_runner.generate_inputs(dataset, filename_map)

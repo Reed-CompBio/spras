@@ -1,3 +1,7 @@
+# With Git Bash on Windows multiline strings are not executed properly
+# https://carpentries-incubator.github.io/workflows-snakemake/07-resources/index.html
+# (No longer applicable for this command, but a good reminder)
+
 import os
 import PRRunner
 from src.util import parse_config
@@ -78,8 +82,8 @@ def make_final_input(wildcards):
         final_input = expand('{out_dir}{sep}advised-pathway-{dataset}-{algorithm}.txt', out_dir=out_dir, sep=os.sep, dataset=datasets, algorithm=algorithms)
     else:
         # Temporary, build up one rule at a time to help debugging
-        final_input = expand('{out_dir}{sep}{dataset}-{algorithm}-input{sep}', out_dir=out_dir, sep=os.sep, dataset=datasets.keys(), algorithm=algorithms)
-        print(final_input)
+        # dynamic() may not work when defined in a separate function
+        final_input = dynamic(expand('{out_dir}{sep}{dataset}-{algorithm}-{{type}}.txt', out_dir=out_dir, sep=os.sep, dataset=datasets.keys(), algorithm=algorithms))
         # Use 'params<index>' in the filename instead of describing each of the parameters and its value
         #final_input = expand('{out_dir}{sep}pathway-{dataset}-{algorithm_params}.txt', out_dir=out_dir, sep=os.sep, dataset=datasets.keys(), algorithm_params=algorithms_with_params)
         # Create log files for the parameter indices
@@ -90,7 +94,9 @@ def make_final_input(wildcards):
 # A rule to define all the expected outputs from all pathway reconstruction
 # algorithms run on all datasets for all arguments
 rule reconstruct_pathways:
-    input: make_final_input
+    #input: make_final_input
+    # dynamic() may not work when defined in a separate function
+    input: dynamic(expand('{out_dir}{sep}{dataset}-{algorithm}-{{type}}.txt', out_dir=out_dir, sep=os.sep, dataset=datasets.keys(), algorithm=algorithms))
 
 # Merge all node files and edge files for a dataset into a single node table and edge table
 rule merge_input:
@@ -98,35 +104,36 @@ rule merge_input:
     input: config_file
     output: dataset_file = os.path.join(out_dir, '{dataset}-merged.pickle')
     run:
-        # pass the dataset to PRRunner where the files will be merged and written to disk (i.e. pickled)
+        # Pass the dataset to PRRunner where the files will be merged and written to disk (i.e. pickled)
         dataset_dict = get_dataset(datasets, wildcards.dataset)
         PRRunner.merge_input(dataset_dict, output.dataset_file)
 
 # Universal input to pathway reconstruction-specific input
-# Currently uses a directory as the output
 # Functions are not allowed when defining the output file list ("Only input files can be specified as functions" error)
 # An alternative could be to dynamically generate one rule per reconstruction algorithm
 # See https://stackoverflow.com/questions/48993241/varying-known-number-of-outputs-in-snakemake
-# TODO consider alternatives for the output file list
+# Currently using dynamic() to indicate we do not know in advance statically how many {type} values there will be
+# See https://snakemake.readthedocs.io/en/stable/snakefiles/rules.html#dynamic-files
+# See https://groups.google.com/g/snakemake/c/RO71QYIJ49E
+# The number of steps cannot be estimated accurately statically so the Snakemake output contains messages like
+# '6 of 4 steps (150%) done'
+# TODO consider alternatives for the dynamic output file list
 rule prepare_input:
     input: dataset_file = os.path.join(out_dir, '{dataset}-merged.pickle')
     # Could ideally use required_inputs to determine which output files to write
-    # That does not seem possible because it requires a function
-    output: prepared_dir = directory(os.path.join(out_dir, '{dataset}-{algorithm}-input'))
-    # run the preprocessing script for this algorithm
-    # With Git Bash on Windows multiline strings are not executed properly
-    # https://carpentries-incubator.github.io/workflows-snakemake/07-resources/index.html
-    # (No longer applicable for this command, but a good reminder)
+    # That does not seem possible because it requires a function and is not static
+    output: output_files = dynamic(os.path.join(out_dir, '{dataset}-{algorithm}-{type}.txt'))
+    # Run the preprocessing script for this algorithm
     run:
         # Use the algorithm's generate_inputs function to load the merged dataset, extract the relevant columns,
         # and write the output files specified by required_inputs
-        filename_map = {input_type: os.path.join(prepared_dir, f'{input_type}.txt') for input_type in PRRunner.get_required_inputs(wildcards.algorithm)}
-        print(filename_map)
-        PRRunner.prepare_inputs(wildcards.algorithm, dataset_file, filename_map)
+        # The filename_map provides the output file path for each required input file type
+        filename_map = {input_type: os.path.join(out_dir, f'{wildcards.dataset}-{wildcards.algorithm}-{input_type}.txt') for input_type in PRRunner.get_required_inputs(wildcards.algorithm)}
+        PRRunner.prepare_inputs(wildcards.algorithm, input.dataset_file, filename_map)
 
 # See https://stackoverflow.com/questions/46714560/snakemake-how-do-i-use-a-function-that-takes-in-a-wildcard-and-returns-a-value
 # for why the lambda function is required
-# Run PathLinker or other pathway reconstruction algorithm
+# Run the pathway reconstruction algorithm
 rule reconstruct:
     input: lambda wildcards: expand(os.path.join(out_dir, '{{dataset}}-{{algorithm}}-{type}.txt'), type=PRRunner.get_required_inputs(algorithm=wildcards.algorithm))
     output: os.path.join(out_dir, 'raw-pathway-{dataset}-{algorithm}-{params}.txt')
