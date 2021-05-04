@@ -56,6 +56,7 @@ class PathLinker(PRM):
         # Temporarily create a placeholder output file for Snakemake
         with open(output_file, 'w') as out_file:
             out_file.write('PathLinker: run arguments {}'.format(' '.join([nodetypes, network, output_file, str(k)])))
+        return
 
         # Add additional parameter validation
         # Do not require k
