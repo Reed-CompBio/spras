@@ -158,10 +158,11 @@ rule reconstruct:
 # Original pathway reconstruction output to universal output
 # Use PRRunner as a wrapper to call the algorithm-specific parse_output
 rule parse_output:
-    input: os.path.join(out_dir, 'raw-pathway-{dataset}-{algorithm}-{params}.txt')
-    output: os.path.join(out_dir, 'pathway-{dataset}-{algorithm}-{params}.txt')
+    input: raw_file = os.path.join(out_dir, 'raw-pathway-{dataset}-{algorithm}-{params}.txt')
+    output: standardized_file = os.path.join(out_dir, 'pathway-{dataset}-{algorithm}-{params}.txt')
     # run the post-processing script
-    shell:  'echo {wildcards.algorithm} {input} >> {output}'
+    run:
+        PRRunner.parse_output(wildcards.algorithm, input.raw_file, output.standardized_file)
 
 # Write the mapping from parameter indices to parameter dictionaries
 # TODO: Need this to have input files so it updates

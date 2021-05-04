@@ -98,5 +98,13 @@ class PathLinker(PRM):
 
 
     @staticmethod
-    def parse_output():
-        print('PathLinker: parseOutput()')
+    def parse_output(raw_pathway_file, standardized_pathway_file):
+        """
+        Convert a predicted pathway into the universal format
+        @param raw_pathway_file: pathway file produced by an algorithm's run function
+        @param standardized_pathway_file: the same pathway written in the universal format
+        """
+        # TODO update the parse_output command to translate and write the pathway file
+        # Temporarily create a placeholder output file for Snakemake
+        with open(standardized_pathway_file, 'w') as out_file:
+            out_file.write(f'PathLinker converting raw pathway {raw_pathway_file}')
