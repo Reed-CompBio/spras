@@ -76,7 +76,8 @@ class OmicsIntegrator2(PRM):
         @param raw_pathway_file: pathway file produced by an algorithm's run function
         @param standardized_pathway_file: the same pathway written in the universal format
         """
-        # I'm assuming from having read the documentation that we will be passing in edgeattributes.tsv 
+        # I'm assuming from having read the documentation that we will be passing in either optimalforest.sif or 
+        # augmentedforest.sif (see Tony's note)
         # as raw_pathway_file, in which case the format should be edge1 interactiontype edge2.
         # if that assumption is wrong we will need to tweak things
         df = pd.read_csv(raw_pathway_file,sep='\s+')
