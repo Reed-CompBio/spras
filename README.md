@@ -12,6 +12,39 @@ Open a [GitHub issue](https://github.com/Reed-CompBio/spras/issues) or contact [
 
 SPRAS is inspired by tools for single-cell transcriptomics such as [BEELINE](https://github.com/Murali-group/Beeline) and [dynverse](https://github.com/dynverse) that provide a unified interface to many related algorithms.
 
+## Installing and running SPRAS
+SPRAS requires
+- Files in this repository
+- Python
+- The Python packages listed in [`environment.yml`](environment.yml)
+- Docker
+
+First, download or clone this repository so that you have the Snakefile, example config file, and example data.
+
+The easiest way to install Python and the required packages is with [Anaconda](https://www.anaconda.com/download/).
+The Carpentries [Anaconda installation instructions](https://carpentries.github.io/workshop-template/#python) provide guides and videos on how to install Anaconda for your operating system.
+After installing Anaconda, you can run
+```
+conda env create -f environment.yml
+conda activate spras
+```
+to create a conda environment with the required packages and activate that environment.
+If you have a different version of Python already, you can install the specified versions of the required packages in your preferred manner instead of using Anaconda.
+
+You also need to install [Docker](https://docs.docker.com/get-docker/).
+After installing Docker, start Docker before running SPRAS.
+
+Once you have activated the conda environment and started Docker, you can run SPRAS with the example Snakemake workflow.
+From the root directory of the `spras` repository, run the command
+```
+snakemake --cores 1
+```
+This will run the SPRAS workflow with the example config file and input files.
+Output files will be written to the `output` directory.
+
+You do not need to manually download Docker images from DockerHub before running SPRAS.
+The workflow will automatically download any missing images as long as Docker is running.
+
 ## Components
 **Configuration file**: Specifies which pathway reconstruction algorithms to run, which hyperparameter combinations to use, and which datasets to run them on.
 
@@ -19,7 +52,7 @@ SPRAS is inspired by tools for single-cell transcriptomics such as [BEELINE](htt
 
 **Dockerized pathway reconstruction algorithms**: Pathway reconstruction algorithms are run via Docker images using the docker-py Python package.
 [PathLinker](https://github.com/Murali-group/PathLinker), [Omics Integrator](https://github.com/fraenkel-lab/OmicsIntegrator), and [Omics Integrator 2](https://github.com/fraenkel-lab/OmicsIntegrator2) are the first supported algorithms.
-The files to create these Docker images are in the `docker-wrappers` subdirectory.
+The files to create these Docker images are in the `docker-wrappers` subdirectory along with links to algorithms' original repositories.
 The Docker images are available on [DockerHub](https://hub.docker.com/orgs/reedcompbio).
 
 **Python wrapper for calling algorithms**: Wrapper functions provide an interface between the common file formats for input and output data and the algorithm-specific file formats and reconstruction commands.
@@ -32,3 +65,7 @@ Run the tests with `pytest -s`.
 ## Docker demo
 The `docker-demo` subdirectory is not used by the main pathway reconstruction framework.
 It serves as a reference for how to set up Dockerfiles and make Docker run calls.
+
+## Attribution
+SPRAS builds on public datasets and algorithms.
+If you use SPRAS in a research project, please cite the original datasets and algorithms in addition to SPRAS.
