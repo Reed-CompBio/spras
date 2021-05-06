@@ -20,14 +20,14 @@
  algorithms:
         - name: "bowtiebuilder"
           params:
-                include: true
+                include: false
                 run1:
 
         - name: "pathlinker"
           params:
                 include: true
                 run1:
-                    k: range(100,501,100)
+                    k: range(100,201,100)
 
         - name: "responsenet"
           params:
@@ -35,9 +35,10 @@
                 run1:
                     y: [20]
 
+        # Convert to omicsintegrator1 and omicsintegrator2
         - name: "pcsf"
           params:
-                include: true
+                include: false
                 run1:
                     r: [5]
                     b: [1,2]
@@ -62,27 +63,38 @@
                     a: [0.85]
                     t: [0.3]
 
- # Here we fix which pathways to run and other file location information. 
- data:
-        datasets: ["data1"]
-        otherNodeData: ["PLSourcesList", "PLTargetsList", "UniprotToGeneID"]
-        otherFiles: ["GenericFile"]
-        data_dir: "input"
-        out_dir:  "output"
+ # Here we fix which pathways to run and other file location information.
+ # DataLoader.py can currently only load a single dataset
+ datasets:
+     -
+       label: data0
+       node_files: ["node-prizes.txt", "sources.txt", "targets.txt"]
+       # DataLoader.py can currently only load a single edge file, which is the primary network
+       edge_files: ["network.txt"]
+       # Placeholder
+       other_files: []
+       # Relative path from the spras directory
+       data_dir: "input"
+     -
+       label: data1
+       # Reuse some of the same sources file as 'data0' but different network and targets
+       node_files: ["sources.txt", "alternative-targets.txt"]
+       edge_files: ["alternative-network.txt"]
+       other_files: []
+       # Relative path from the spras directory
+       data_dir: "input"
 
- # If we want to reconsruct then we should set run to true.
+ # If we want to reconstruct then we should set run to true.
  reconstruction_settings:
 
          #set where everything is saved
          locations:
-                #place the path to your interactome here
-                interactome_path: "/path/to/interactome"
 
                 #place the path to your pathway annotation files here
                 pathway_dir: "/path/to/pathways"
 
                 #place the save path here
-                reconstruction_dir: "/path/to/save"
+                reconstruction_dir: "output"
 
          run: true
 
@@ -119,7 +131,7 @@
                  #in the case that we use the open-world assumption, we need to tell the program how to negatives.
                  #The options here are "fixed" or "random". In the case that "fixed" is selected the program will use
                  #negative values picked by the authors of this software. If "random" is chosen, the program will sample
-                 #from unannoted interactions/proteins at a rate of 50 negatives to every positive.
+                 #from unannotated interactions/proteins at a rate of 50 negatives to every positive.
         
                  negative_set: "fixed"
 
@@ -140,22 +152,3 @@
                   #      fmax determines whether to display fmax in the legend
                   #      edge determines whether to plot edge PR or node PR
                   params: ["panel=True","fmax=True","edge=True"]
-                
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
