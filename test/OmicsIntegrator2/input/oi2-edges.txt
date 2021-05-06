@@ -1,0 +1,6 @@
+protein1	protein2	cost
+A	B	0.9
+A	C	0.1
+B	D	0.9
+C	D	0.1
+A	D	10

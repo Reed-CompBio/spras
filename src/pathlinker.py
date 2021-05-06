@@ -1,45 +1,79 @@
-from docker.utils.utils import convert_volume_binds
-from src.PRM import *
-import docker 
+from src.PRM import PRM
+import docker
 import os
 import sys
 import pandas as pd
+import warnings
 
 __all__ = ['PathLinker']
 
-
 class PathLinker(PRM):
+    required_inputs = ['nodetypes', 'network']
+
     @staticmethod
-    def generate_inputs(self):
-        print('PathLinker: {} generateInputs() from {}'.format(self.name,self.inputdir))
+    def generate_inputs(data, filename_map):
+        """
+        Access fields from the dataset and write the required input files
+        @param data: dataset
+        @param filename_map: a dict mapping file types in the required_inputs to the filename for that type
+        @return:
+        """
+        for input_type in PathLinker.required_inputs:
+            if input_type not in filename_map:
+                raise ValueError(f"{input_type} filename is missing")
 
-    # def run(self):
-    #     print('PathLinker: {} run() with {}'.format(self.name,self.params))
+        #Get sources and targets for node input file
+        sources_targets = data.request_node_columns(["sources", "targets"])
+        if sources_targets is None:
+            return False
+        both_series = sources_targets.sources & sources_targets.targets
+        for index,row in sources_targets[both_series].iterrows():
+            warn_msg = row.NODEID+" has been labeled as both a source and a target."
+            warnings.warn(warn_msg)
 
-    # Temporary name for the static version of the runner
+        #Create nodetype file
+        input_df = sources_targets[["NODEID"]].copy()
+        input_df.columns = ["#Node"]
+        input_df.loc[sources_targets["sources"] == True,"Node type"]="source"
+        input_df.loc[sources_targets["targets"] == True,"Node type"]="target"
+
+        input_df.to_csv(filename_map["nodetypes"],sep="\t",index=False,columns=["#Node","Node type"])
+
+        #This is pretty memory intensive. We might want to keep the interactome centralized.
+        data.get_interactome().to_csv(filename_map["network"],sep="\t",index=False,columns=["Interactor1","Interactor2","Weight"])
+
+
     # Skips parameter validation step
     @staticmethod
-    def run(network=None, nodes=None, output=None, k=None):
+    def run(nodetypes = None, network = None, output_file=None, k=None):
         """
         Run PathLinker with Docker
-        @param network: input network file
-        @param nodes: input node types
-        @param output: output directory
+        @param nodetypes:  input node types with sources and targets (required)
+        @param network:  input network file (required)
+        @param output_file: path to the output pathway file (required)
         @param k: path length (optional)
         """
+
+        # TODO update the run command to use the new arguments provided and write the pathway to output_file
+        # Temporarily create a placeholder output file for Snakemake
+        with open(output_file, 'w') as out_file:
+            out_file.write('PathLinker: run arguments {}'.format(' '.join([nodetypes, network, output_file, str(k)])))
+        return
+
         # Add additional parameter validation
         # Do not require k
         # Use the PathLinker default
         # Could consider setting the default here instead
-        if not network or not nodes or not output:
+        if not nodetypes or not network or not output_file:
             raise ValueError('Required PathLinker arguments are missing')
 
         # Initialize a Docker client using environment variables
         client = docker.from_env()
         command = ['python', '../run.py']
-        if k:
+        if k is not None:
             command.extend(['-k', str(k)])
-        command.extend([network, nodes])
+        # Currently broken
+        #command.extend([network, nodes])
         print('PathLinker: run_static() command {}'.format(' '.join(command)))
 
         working_dir = os.getcwd()
@@ -64,18 +98,18 @@ class PathLinker(PRM):
             client.close()
 
         # Need to rename the output file to match the specific output file in the params
-        # Temporarily create a placeholder output file
-        with open(output, 'w') as out_file:
-            out_file.write('PathLinker: run_static() command {}'.format(' '.join(command)))
+
 
     @staticmethod
-    def parse_output(inpt=None,output=None):
+    def parse_output(raw_pathway_file, standardized_pathway_file):
         """
-        @param input: unprocessed output of run()
-        @param output: path to processed output file
+        Convert a predicted pathway into the universal format
+        @param raw_pathway_file: pathway file produced by an algorithm's run function
+        @param standardized_pathway_file: the same pathway written in the universal format
         """
-        # I suspect there's something wrong with the run method, since the output param it takes is a directory
-        # but on line 68 it's opened as if it were a file. Here I assume output is an actual file path, but 
-        # this is easily changed.
-        df = pd.read_csv(input,sep='\t')
-        df.to_csv(output, header=False,index=False,sep=' ')
+        # Temporarily create a placeholder output file for Snakemake
+        # Questions: should there be a header/optional columns?
+        # What about multiple raw_pathway_files 
+        df = pd.read_csv(raw_pathway_file,sep='\t')
+        df.to_csv(standardized_pathway_file, header=False,index=False,sep=' ')
+

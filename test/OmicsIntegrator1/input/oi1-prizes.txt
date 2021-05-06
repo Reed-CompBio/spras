@@ -1,0 +1,3 @@
+name	 prize
+A	10.0
+D	10.0
