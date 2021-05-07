@@ -9,21 +9,21 @@ class TestOmicsIntegrator2:
     """
     def test_oi2_required(self):
         # Only include required arguments
-        OmicsIntegrator2.run(edge_input=TEST_DIR+'input/oi2-edges.txt',
-                             prize_input=TEST_DIR+'input/oi2-prizes.txt',
+        OmicsIntegrator2.run(edges=TEST_DIR+'input/oi2-edges.txt',
+                             prizes=TEST_DIR+'input/oi2-prizes.txt',
                              output_dir=TEST_DIR+'output')
 
     def test_oi2_some_optional(self):
         # Include optional argument
-        OmicsIntegrator2.run(edge_input=TEST_DIR+'input/oi2-edges.txt',
-                             prize_input=TEST_DIR+'input/oi2-prizes.txt',
+        OmicsIntegrator2.run(edges=TEST_DIR+'input/oi2-edges.txt',
+                             prizes=TEST_DIR+'input/oi2-prizes.txt',
                              output_dir=TEST_DIR+'output',
                              g=0)
 
     def test_oi2_all_optional(self):
         # Include all optional arguments
-        OmicsIntegrator2.run(edge_input=TEST_DIR+'input/oi2-edges.txt',
-                             prize_input=TEST_DIR+'input/oi2-prizes.txt',
+        OmicsIntegrator2.run(edges=TEST_DIR+'input/oi2-edges.txt',
+                             prizes=TEST_DIR+'input/oi2-prizes.txt',
                              output_dir=TEST_DIR+'output',
                              w=5,
                              b=1,
@@ -39,5 +39,5 @@ class TestOmicsIntegrator2:
         # Test the expected error is raised when required arguments are missing
         with pytest.raises(ValueError):
             # No output_dir
-            OmicsIntegrator2.run(edge_input=TEST_DIR+'input/oi2-edges.txt',
-                                 prize_input=TEST_DIR+'input/oi2-prizes.txt')
+            OmicsIntegrator2.run(edges=TEST_DIR+'input/oi2-edges.txt',
+                                 prizes=TEST_DIR+'input/oi2-prizes.txt')

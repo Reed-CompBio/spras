@@ -33,15 +33,27 @@ def write_conf(filename=Path('config.txt'), w=None, b=None, d=None, mu=None, noi
 
 
 class OmicsIntegrator1(PRM):
+    required_inputs = ['prizes', 'edges']
 
-    def generate_inputs(self):
+    def generate_inputs(data, filename_map):
+        """
+        Access fields from the dataset and write the required input files
+        @param data: dataset
+        @param filename_map: a dict mapping file types in the required_inputs to the filename for that type
+        @return:
+        """
+        for input_type in OmicsIntegrator1.required_inputs:
+            if input_type not in filename_map:
+                raise ValueError(f"{input_type} filename is missing")
+
+        # TODO implement generate_inputs
         print('Omics Integrator 1: generateInputs()')
 
     # TODO add parameter validation
     # TODO add support for knockout argument
     # TODO add reasonable default values
     @staticmethod
-    def run(edge_input=None, prize_input=None, dummy_mode=None, mu_squared=None, exclude_terms=None,
+    def run(edges=None, prizes=None, dummy_mode=None, mu_squared=None, exclude_terms=None,
             outpath=None, outlabel=None, noisy_edges=None, shuffled_prizes=None, random_terminals=None,
             seed=None, w=None, b=None, d=None, mu=None, noise=None, g=None, r=None):
         """
@@ -51,15 +63,15 @@ class OmicsIntegrator1(PRM):
         Does not support the garnetBeta, processes, or threads configuration file parameters.
         The msgpath is not required because msgsteiner is available in the Docker image.
         """
-        if not edge_input or not prize_input or not outpath or not w or not b or not d:
+        if not edges or not prizes or not outpath or not w or not b or not d:
             raise ValueError('Required Omics Integrator 1 arguments are missing')
 
         # Initialize a Docker client using environment variables
         client = docker.from_env()
         work_dir = Path(__file__).parent.parent.absolute()
 
-        edge_file = Path(edge_input)
-        prize_file = Path(prize_input)
+        edge_file = Path(edges)
+        prize_file = Path(prizes)
 
         out_dir = Path(outpath)
         # Omics Integrator 1 requires that the output directory exist

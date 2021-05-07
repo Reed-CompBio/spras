@@ -5,27 +5,39 @@ from src.util import prepare_path_docker
 
 
 class OmicsIntegrator2(PRM):
+    required_inputs = ['prizes', 'edges']
 
-    def generate_inputs(self):
+    def generate_inputs(data, filename_map):
+        """
+        Access fields from the dataset and write the required input files
+        @param data: dataset
+        @param filename_map: a dict mapping file types in the required_inputs to the filename for that type
+        @return:
+        """
+        for input_type in OmicsIntegrator2.required_inputs:
+            if input_type not in filename_map:
+                raise ValueError(f"{input_type} filename is missing")
+
+        # TODO implement generate_inputs
         print('Omics Integrator 2: generateInputs()')
 
     # TODO add parameter validation
     # TODO add reasonable default values
     @staticmethod
-    def run(edge_input=None, prize_input=None, output_dir=None, w=None, b=None, g=None, noise=None, noisy_edges=None,
+    def run(edges=None, prizes=None, output_dir=None, w=None, b=None, g=None, noise=None, noisy_edges=None,
             random_terminals=None, dummy_mode=None, seed=None, filename=None):
         """
         Run Omics Integrator 2 in the Docker image with the provided parameters.
         """
-        if not edge_input or not prize_input or not output_dir:
+        if not edges or not prizes or not output_dir:
             raise ValueError('Required Omics Integrator 2 arguments are missing')
 
         # Initialize a Docker client using environment variables
         client = docker.from_env()
         work_dir = Path(__file__).parent.parent.absolute()
 
-        edge_file = Path(edge_input)
-        prize_file = Path(prize_input)
+        edge_file = Path(edges)
+        prize_file = Path(prizes)
 
         out_dir = Path(output_dir)
         # Omics Integrator 2 requires that the output directory exist
