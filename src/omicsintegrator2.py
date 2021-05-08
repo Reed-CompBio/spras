@@ -23,13 +23,17 @@ class OmicsIntegrator2(PRM):
 
     # TODO add parameter validation
     # TODO add reasonable default values
+    # TODO document required arguments
     @staticmethod
-    def run(edges=None, prizes=None, output_dir=None, w=None, b=None, g=None, noise=None, noisy_edges=None,
-            random_terminals=None, dummy_mode=None, seed=None, filename=None):
+    def run(edges=None, prizes=None, output_file=None, w=None, b=None, g=None, noise=None, noisy_edges=None,
+            random_terminals=None, dummy_mode=None, seed=None):
         """
         Run Omics Integrator 2 in the Docker image with the provided parameters.
+        Only the .tsv output file is retained and then renamed.
+        All other output files are deleted.
+        @param output_file: the name of the output file, which will overwrite any existing file with this name
         """
-        if not edges or not prizes or not output_dir:
+        if not edges or not prizes or not output_file:
             raise ValueError('Required Omics Integrator 2 arguments are missing')
 
         # Initialize a Docker client using environment variables
@@ -39,12 +43,12 @@ class OmicsIntegrator2(PRM):
         edge_file = Path(edges)
         prize_file = Path(prizes)
 
-        out_dir = Path(output_dir)
+        out_dir = Path(output_file).parent
         # Omics Integrator 2 requires that the output directory exist
         Path(work_dir, out_dir).mkdir(parents=True, exist_ok=True)
 
         command = ['OmicsIntegrator', '-e', edge_file.as_posix(), '-p', prize_file.as_posix(),
-                   '-o', out_dir.as_posix()]
+                   '-o', out_dir.as_posix(), '--filename', 'oi2']
 
         # Add optional arguments
         if w is not None:
@@ -64,8 +68,6 @@ class OmicsIntegrator2(PRM):
             command.extend(['--dummyMode', str(dummy_mode)])
         if seed is not None:
             command.extend(['--seed', str(seed)])
-        if filename is not None:
-            command.extend(['--filename', str(filename)])
 
         print('Running Omics Integrator 2 with arguments: {}'.format(' '.join(command)), flush=True)
 
@@ -80,6 +82,15 @@ class OmicsIntegrator2(PRM):
         finally:
             # Not sure whether this is needed
             client.close()
+
+        # TODO do we want to retain other output files?
+        # Rename the primary output file to match the desired output filename
+        Path(output_file).unlink(missing_ok=True)
+        output_tsv = Path(out_dir, 'oi2.tsv')
+        output_tsv.rename(output_file)
+        # Remove the other output files
+        for oi2_output in out_dir.glob('*.html'):
+            oi2_output.unlink(missing_ok=True)
 
     def parse_output(self):
         print('Omics Integrator 2: parseOutput()')

@@ -131,7 +131,6 @@ class OmicsIntegrator1(PRM):
         output_sif.rename(output_file)
         # Remove the other output files
         for oi1_output in out_dir.glob('oi1_*'):
-            print(oi1_output)
             oi1_output.unlink(missing_ok=True)
 
     def parse_output(self):
