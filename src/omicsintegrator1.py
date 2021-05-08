@@ -52,9 +52,10 @@ class OmicsIntegrator1(PRM):
     # TODO add parameter validation
     # TODO add support for knockout argument
     # TODO add reasonable default values
+    # TODO document required arguments
     @staticmethod
     def run(edges=None, prizes=None, dummy_mode=None, mu_squared=None, exclude_terms=None,
-            outpath=None, outlabel=None, noisy_edges=None, shuffled_prizes=None, random_terminals=None,
+            output_file=None, noisy_edges=None, shuffled_prizes=None, random_terminals=None,
             seed=None, w=None, b=None, d=None, mu=None, noise=None, g=None, r=None):
         """
         Run Omics Integrator 1 in the Docker image with the provided parameters.
@@ -62,8 +63,12 @@ class OmicsIntegrator1(PRM):
         The configuration file is generated from the provided arguments.
         Does not support the garnetBeta, processes, or threads configuration file parameters.
         The msgpath is not required because msgsteiner is available in the Docker image.
+        Only the optimal forest sif file is retained.
+        All other output files are deleted.
+        @param output_file: the name of the output sif file for the optimal forest, which will overwrite any
+        existing file with this name
         """
-        if not edges or not prizes or not outpath or not w or not b or not d:
+        if not edges or not prizes or not output_file or not w or not b or not d:
             raise ValueError('Required Omics Integrator 1 arguments are missing')
 
         # Initialize a Docker client using environment variables
@@ -73,7 +78,7 @@ class OmicsIntegrator1(PRM):
         edge_file = Path(edges)
         prize_file = Path(prizes)
 
-        out_dir = Path(outpath)
+        out_dir = Path(output_file).parent
         # Omics Integrator 1 requires that the output directory exist
         Path(work_dir, out_dir).mkdir(parents=True, exist_ok=True)
 
@@ -86,7 +91,8 @@ class OmicsIntegrator1(PRM):
                    '--prize', prize_file.as_posix(),
                    '--conf', conf_file,
                    '--msgpath', '/OmicsIntegrator/msgsteiner-1.3/msgsteiner',
-                   '--outpath', out_dir.as_posix()]
+                   '--outpath', out_dir.as_posix(),
+                   '--outlabel', 'oi1']
 
         # Add optional arguments
         if dummy_mode is not None:
@@ -95,8 +101,6 @@ class OmicsIntegrator1(PRM):
             command.extend(['--musquared'])
         if exclude_terms is not None and exclude_terms:
             command.extend(['--excludeTerms'])
-        if outlabel is not None:
-            command.extend(['--outlabel', str(outlabel)])
         if noisy_edges is not None:
             command.extend(['--noisyEdges', str(noisy_edges)])
         if shuffled_prizes is not None:
@@ -119,6 +123,16 @@ class OmicsIntegrator1(PRM):
             # Not sure whether this is needed
             client.close()
             conf_file_abs.unlink(missing_ok=True)
+
+        # TODO do we want to retain other output files?
+        # Rename the primary output file to match the desired output filename
+        Path(output_file).unlink(missing_ok=True)
+        output_sif = Path(out_dir, 'oi1_optimalForest.sif')
+        output_sif.rename(output_file)
+        # Remove the other output files
+        for oi1_output in out_dir.glob('oi1_*'):
+            print(oi1_output)
+            oi1_output.unlink(missing_ok=True)
 
     def parse_output(self):
         print('Omics Integrator 1: parseOutput()')

@@ -13,7 +13,7 @@ class TestOmicsIntegrator1:
         # Only include required arguments
         OmicsIntegrator1.run(edges=TEST_DIR+'input/oi1-edges.txt',
                              prizes=TEST_DIR+'input/oi1-prizes.txt',
-                             outpath=TEST_DIR + 'output',
+                             output_file=TEST_DIR+'output/test_optimalForest.sif',
                              w=5,
                              b=1,
                              d=10)
@@ -22,11 +22,10 @@ class TestOmicsIntegrator1:
         # Include optional argument
         OmicsIntegrator1.run(edges=TEST_DIR+'input/oi1-edges.txt',
                              prizes=TEST_DIR+'input/oi1-prizes.txt',
-                             outpath=TEST_DIR + 'output',
+                             output_file=TEST_DIR+'output/test_optimalForest.sif',
                              w=5,
                              b=1,
-                             d=10,
-                             outlabel='oi1')
+                             d=10)
 
     def test_oi1_all_optional(self):
         # Include all optional arguments
@@ -35,8 +34,7 @@ class TestOmicsIntegrator1:
                              dummy_mode='terminals',
                              mu_squared=True,
                              exclude_terms=True,
-                             outpath=TEST_DIR + 'output',
-                             outlabel='oi1',
+                             output_file=TEST_DIR+'output/test_optimalForest.sif',
                              noisy_edges=0,
                              shuffled_prizes=0,
                              random_terminals=0,
@@ -54,7 +52,7 @@ class TestOmicsIntegrator1:
         with pytest.raises(ValueError):
             # No edges
             OmicsIntegrator1.run(prizes=TEST_DIR + 'input/oi1-prizes.txt',
-                                 outpath=TEST_DIR + 'output',
+                                 output_file=TEST_DIR+'output/test_optimalForest.sif',
                                  w=5,
                                  b=1,
                                  d=10)
