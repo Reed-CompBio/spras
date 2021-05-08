@@ -3,6 +3,8 @@ import docker
 from pathlib import Path
 from src.util import prepare_path_docker
 
+__all__ = ['OmicsIntegrator2']
+
 
 class OmicsIntegrator2(PRM):
     required_inputs = ['prizes', 'edges']

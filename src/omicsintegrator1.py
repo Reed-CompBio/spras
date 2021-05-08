@@ -3,6 +3,8 @@ import docker
 from pathlib import Path
 from src.util import prepare_path_docker
 
+__all__ = ['OmicsIntegrator1']
+
 
 # TODO decide on default number of processes and threads
 def write_conf(filename=Path('config.txt'), w=None, b=None, d=None, mu=None, noise=None, g=None, r=None):
