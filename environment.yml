@@ -8,5 +8,6 @@ dependencies:
   - pandas=1.2
   - pytest=6.2
   - python=3.8
+  - pip=21.1.1
   - pip:
-    - graphspace-python=1.2.1
+    - graphspace-python==1.2.1
