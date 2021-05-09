@@ -1,5 +1,6 @@
 import sys
 import networkx as nx
+import os
 #import json
 #wrapper functions for nx methods here
 
@@ -46,9 +47,16 @@ def save(data,pth):
 run function that wraps above functions.
 '''
 def run(infile:str,outfile:str,directed=False) -> None:
+    ## if output directory doesn't exist, make it.
+    outdir = os.path.dirname(outfile)
+    if not os.path.exists(outdir):
+        os.makedirs(outdir)
+
+    ## load graph, produce stats, and write to human-readable file.
     G = load_graph(infile,directed=directed)
     dat = produce_statistics(G)
     save(dat,outfile)
+
     return
 
 
