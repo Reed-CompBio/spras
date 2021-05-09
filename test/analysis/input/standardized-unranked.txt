@@ -7,3 +7,4 @@ G D 1
 G A 1
 G H 1
 B E 1
+B C 1

@@ -7,3 +7,4 @@ G D 9
 G A 8
 G H 6
 B E 7
+B C 10

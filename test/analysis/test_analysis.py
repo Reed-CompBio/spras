@@ -1,26 +1,35 @@
 import pytest
 from pathlib import Path
+import os
 import src.analysis.summary.summary as summary
+import src.analysis.viz.graphspace as graphspace
 
 TEST_DIR = 'test/analysis/'
-
 
 class TestAnalysis:
     """
     Test the summary statistics
     """
+    # test a ranked file of ints (1 - 10)
     def test_summary_ranked_ints(self):
-        # Only include required arguments
         summary.run(TEST_DIR+'input/standardized-ranked.txt',TEST_DIR+'output/standardized-ranked-out.txt')
 
+    # test a ranked file of floats (1.0 - 10.0)
     def test_summary_ranked_floats(self):
-        # Only include required arguments
         summary.run(TEST_DIR+'input/standardized-ranked-floats.txt',TEST_DIR+'output/standardized-ranked-floats-out.txt')
 
+    # test an unranked file (all ranks are 1)
     def test_summary_unranked(self):
-        # Only include required arguments
         summary.run(TEST_DIR+'input/standardized-unranked.txt',TEST_DIR+'output/standardized-unranked-out.txt')
 
+    # test a ranked file interpreted as a directed network (e.g. uses nx.DiGraph).
     def test_summary_directed(self):
-        # Only include required arguments
         summary.run(TEST_DIR+'input/standardized-ranked.txt',TEST_DIR+'output/standardized-ranked-directed-out.txt',directed=True)
+
+    # test GraphSpace json output on an undirected graph.
+    def test_graphspace_ranked(self):
+        graphspace.write_json(TEST_DIR+'input/standardized-ranked.txt',TEST_DIR+'output/standardized-ranked-undirected')
+
+    # test GraphSpace json output on a directed graph.
+    def test_graphspace_ranked_directed(self):
+        graphspace.write_json(TEST_DIR+'input/standardized-ranked.txt',TEST_DIR+'output/standardized-ranked-directed',directed=True)
