@@ -20,8 +20,15 @@ class OmicsIntegrator2(PRM):
             if input_type not in filename_map:
                 raise ValueError(f"{input_type} filename is missing")
 
-        # TODO implement generate_inputs
-        print('Omics Integrator 2: generateInputs()')
+        #NODEID is always included in the node table
+        node_df = data.request_node_columns(['prize'])
+
+        #Omics Integrator already gives warnings for strange prize values, so we won't here
+        node_df.to_csv(filename_map['prizes'],sep='\t',index=False,columns=['NODEID','prize'],header=['name','prize'])
+        edges_df = data.get_interactome()
+        edges_df.to_csv(filename_map['edges'],sep='\t',index=False,columns=['Interactor1','Interactor2','Weight'],header=['protein1','protein2','cost'])
+
+
 
     # TODO add parameter validation
     # TODO add reasonable default values
@@ -80,6 +87,7 @@ class OmicsIntegrator2(PRM):
                                         volumes={
                                             prepare_path_docker(work_dir): {'bind': '/OmicsIntegrator2', 'mode': 'rw'}},
                                         working_dir='/OmicsIntegrator2')
+
             print(out.decode('utf-8'))
         finally:
             # Not sure whether this is needed

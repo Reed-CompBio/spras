@@ -48,8 +48,17 @@ class OmicsIntegrator1(PRM):
             if input_type not in filename_map:
                 raise ValueError(f"{input_type} filename is missing")
 
-        # TODO implement generate_inputs
-        print('Omics Integrator 1: generateInputs()')
+        #NODEID is always included in the node table
+        node_df = data.request_node_columns(['prize'])
+
+        #Omics Integrator already gives warnings for strange prize values, so we won't here
+        node_df.to_csv(filename_map['prizes'],sep='\t',index=False,columns=['NODEID','prize'],header=['name','prize'])
+
+        #For now we assume all input networks are undirected until we expand how edge tables work
+        edges_df = data.get_interactome()
+        edges_df['directionality'] = 'U'
+        edges_df.to_csv(filename_map['edges'],sep='\t',index=False,columns=['Interactor1','Interactor2','Weight','directionality'],header=['protein1','protein2','weight','directionality'])
+
 
     # TODO add parameter validation
     # TODO add support for knockout argument

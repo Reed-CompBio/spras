@@ -136,7 +136,7 @@ rule prepare_input:
         # Use the algorithm's generate_inputs function to load the merged dataset, extract the relevant columns,
         # and write the output files specified by required_inputs
         # The filename_map provides the output file path for each required input file type
-        filename_map = {input_type: os.path.join(out_dir, f'{wildcards.dataset}-{wildcards.algorithm}-{input_type}.txt') for input_type in PRRunner.get_required_inputs(wildcards.algorithm)}
+        filename_map = {input_type: os.path.join(out_dir, f'prepared-{wildcards.dataset}-{wildcards.algorithm}-{input_type}.txt') for input_type in PRRunner.get_required_inputs(wildcards.algorithm)}
         PRRunner.prepare_inputs(wildcards.algorithm, input.dataset_file, filename_map)
 
 # See https://stackoverflow.com/questions/46714560/snakemake-how-do-i-use-a-function-that-takes-in-a-wildcard-and-returns-a-value
