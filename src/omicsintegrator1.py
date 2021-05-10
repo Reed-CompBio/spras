@@ -48,8 +48,16 @@ class OmicsIntegrator1(PRM):
             if input_type not in filename_map:
                 raise ValueError(f"{input_type} filename is missing")
 
-        #NODEID is always included in the node table
-        node_df = data.request_node_columns(['prize'])
+        if data.contains_node_columns('prize'):
+            #NODEID is always included in the node table
+            node_df = data.request_node_columns(['prize'])
+        elif data.contains_node_columns(['sources','targets']):
+            #If there aren't prizes but are sources and targets, make prizes based on them
+            node_df = data.request_node_columns(['sources','targets'])
+            node_df.loc[node_df['sources']==True, 'prize'] = 1.0
+            node_df.loc[node_df['targets']==True, 'prize'] = 1.0
+        else:
+            return False
 
         #Omics Integrator already gives warnings for strange prize values, so we won't here
         node_df.to_csv(filename_map['prizes'],sep='\t',index=False,columns=['NODEID','prize'],header=['name','prize'])
