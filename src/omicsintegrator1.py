@@ -132,7 +132,12 @@ class OmicsIntegrator1(PRM):
 
         print('Running Omics Integrator 1 with arguments: {}'.format(' '.join(command)), flush=True)
 
-        uid = os.getuid()
+        #Don't perform this step on systems where permissions aren't an issue like windows
+        need_chown = True
+        try:
+            uid = os.getuid()
+        except AttributeError:
+            need_chown = False
 
         try:
             out = client.containers.run('reedcompbio/omics-integrator-1',
@@ -140,14 +145,14 @@ class OmicsIntegrator1(PRM):
                                   stderr=True,
                                   volumes={prepare_path_docker(work_dir): {'bind': '/OmicsIntegrator1', 'mode': 'rw'}},
                                   working_dir='/OmicsIntegrator1')
-
-            #This command changes the ownership of output files so we don't
-            # get a permissions error when snakemake tries to touch the files
-            out_chown = client.containers.run('reedcompbio/omics-integrator-1',
-                                  "chown "+str(uid)+" output/oi1*",
-                                  stderr=True,
-                                  volumes={prepare_path_docker(work_dir): {'bind': '/OmicsIntegrator1', 'mode': 'rw'}},
-                                  working_dir='/OmicsIntegrator1')
+            if need_chown:
+                #This command changes the ownership of output files so we don't
+                # get a permissions error when snakemake tries to touch the files
+                out_chown = client.containers.run('reedcompbio/omics-integrator-1',
+                                      "chown "+str(uid)+" output/oi1*",
+                                      stderr=True,
+                                      volumes={prepare_path_docker(work_dir): {'bind': '/OmicsIntegrator1', 'mode': 'rw'}},
+                                      working_dir='/OmicsIntegrator1')
 
             print(out.decode('utf-8'))
         finally:

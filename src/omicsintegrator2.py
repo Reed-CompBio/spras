@@ -95,7 +95,12 @@ class OmicsIntegrator2(PRM):
 
         print('Running Omics Integrator 2 with arguments: {}'.format(' '.join(command)), flush=True)
 
-        uid = os.getuid()
+        #Don't perform this step on systems where permissions aren't an issue like windows
+        need_chown = True
+        try:
+            uid = os.getuid()
+        except AttributeError:
+            need_chown = False
 
         try:
             out = client.containers.run('reedcompbio/omics-integrator-2',
@@ -104,14 +109,14 @@ class OmicsIntegrator2(PRM):
                                         volumes={
                                             prepare_path_docker(work_dir): {'bind': '/OmicsIntegrator2', 'mode': 'rw'}},
                                         working_dir='/OmicsIntegrator2')
-
-            #This command changes the ownership of output files so we don't
-            # get a permissions error when snakemake tries to touch the files
-            out_chown = client.containers.run('reedcompbio/omics-integrator-2',
-                                        "chown "+str(uid)+" output/oi2*",
-                                        stderr=True,
-                                        volumes={prepare_path_docker(work_dir): {'bind': '/OmicsIntegrator2', 'mode': 'rw'}},
-                                        working_dir='/OmicsIntegrator2')
+            if need_chown:
+                #This command changes the ownership of output files so we don't
+                # get a permissions error when snakemake tries to touch the files
+                out_chown = client.containers.run('reedcompbio/omics-integrator-2',
+                                            "chown "+str(uid)+" output/oi2*",
+                                            stderr=True,
+                                            volumes={prepare_path_docker(work_dir): {'bind': '/OmicsIntegrator2', 'mode': 'rw'}},
+                                            working_dir='/OmicsIntegrator2')
 
             print(out.decode('utf-8'))
         finally:
