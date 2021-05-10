@@ -118,7 +118,11 @@ class OmicsIntegrator1(PRM):
         # I'm assuming from having read the documentation that we will be passing in optimalForest.sif
         # as raw_pathway_file, in which case the format should be edge1 interactiontype edge2.
         # if that assumption is wrong we will need to tweak things
-        df = pd.read_csv(raw_pathway_file,sep='\s+')
+        try:
+            df = pd.read_csv(raw_pathway_file,sep='\s+')
+        except pd.errors.EmptyDataError:
+            with open(standardized_pathway_file,'w') as emptyFile:
+                pass
+            return
         df = df.take([0,2],axis=1)
         df.to_csv(standardized_pathway_file, header=False,index=False,sep=' ')
-

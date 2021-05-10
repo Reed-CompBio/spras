@@ -76,10 +76,17 @@ class OmicsIntegrator2(PRM):
         @param raw_pathway_file: pathway file produced by an algorithm's run function
         @param standardized_pathway_file: the same pathway written in the universal format
         """
-        # I'm assuming from having read the documentation that we will be passing in either optimalforest.sif or 
+        # I'm assuming from having read the documentation that we will be passing in either optimalforest.sif or
         # augmentedforest.sif (see Tony's note)
         # as raw_pathway_file, in which case the format should be edge1 interactiontype edge2.
         # if that assumption is wrong we will need to tweak things
+
+        #Omicsintegrator2 returns a single line file if no network is found
+        num_lines = sum(1 for line in open(raw_pathway_file))
+        if num_lines < 2:
+            with open(standardized_pathway_file,'w') as emptyFile:
+                pass
+            return
         df = pd.read_csv(raw_pathway_file,sep='\s+')
         df = df.take([0,2],axis=1)
         df.to_csv(standardized_pathway_file, header=False,index=False,sep=' ')
