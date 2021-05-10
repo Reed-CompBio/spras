@@ -21,50 +21,60 @@
         - name: "bowtiebuilder"
           params:
                 include: false
+                directed: true
                 run1:
 
         - name: "pathlinker"
           params:
                 include: true
+                directed: true
                 run1:
                     k: range(100,201,100)
 
         - name: "responsenet"
           params:
                 include: false
+                directed: false
                 run1:
                     y: [20]
 
-        # Convert to omicsintegrator1 and omicsintegrator2
-        - name: "pcsf"
+        - name: "omicsintegrator1"
           params:
-                include: false
+                include: true
+                directed: false
                 run1:
                     r: [5]
                     b: [1,2]
-                    w: np.linspace(0,5,20)
+                    w: np.linspace(0,5,10)
                     g: [3]
+                    d: [10]
+
+        - name: "omicsintegrator2"
+          params:
+                include: true
+                directed: false
+                run1:
+                    b: [1]
+                    g: [0]
                 run2:
-                    r: [5]
-                    b: [1,2]
-                    w: np.linspace(0,5,20)
+                    b: [2]
                     g: [3]
 
         - name: "shortestpaths"
           params:
                 include: false
+                directed: true
                 run1:
-
 
         - name: "rwr"
           params:
                 include: false
+                directed: true
                 run1:
                     a: [0.85]
                     t: [0.3]
 
- # Here we fix which pathways to run and other file location information.
-
+ # Here we specify which pathways to run and other file location information.
  # DataLoader.py can currently only load a single dataset
  datasets:
      -
@@ -123,35 +133,23 @@
 
          PR:
                  compute: true
-                 ##ARCOMMENT: suggestion: have a viz variable that will generate PR plots
-                 ## can we slim down the plot_settngs below for PR up here? Let's touch base about this.
-                 viz: true
 
                  #the open-world assumption is the denial that being unannotated is to be not in the pathway.
                  #it allows for sub-sampling of negatives.
 
-                 ## ARCOMMENT - what happens when open_world is false?
-                 open_world: true
+                 open_word: true
 
                  #in the case that we use the open-world assumption, we need to tell the program how to negatives.
                  #The options here are "fixed" or "random". In the case that "fixed" is selected the program will use
                  #negative values picked by the authors of this software. If "random" is chosen, the program will sample
-
                  #from unannotated interactions/proteins at a rate of 50 negatives to every positive.
-        
+
                  negative_set: "fixed"
-
-                 ##ARCOMMENT - let the above variable be "all" or "subsample". Then have a
-                 ##subsample rate be set.
-                 subsample_rate: 50
-
 
 
 
 
  #Plotting
- ##ARCOMMENT - I think this should be visualization of networks, maybe. Then viz of evaluation
- ## could be inside the eval tag above. Let's talk.
  plot_settings:
 
          locations:
@@ -166,3 +164,10 @@
                   #      fmax determines whether to display fmax in the legend
                   #      edge determines whether to plot edge PR or node PR
                   params: ["panel=True","fmax=True","edge=True"]
+
+ analysis:
+        summary:
+          include: true
+
+        graphspace:
+          include: true

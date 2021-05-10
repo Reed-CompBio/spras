@@ -5,6 +5,8 @@
 import os
 import PRRunner
 from src.util import parse_config
+from src.analysis.summary import summary
+from src.analysis.viz import graphspace
 
 config_file = os.path.join('config', 'config.yaml')
 wildcard_constraints:
@@ -184,6 +186,28 @@ rule parameter_advise:
     input: expand('{out_dir}{sep}pathway-{dataset}-{algorithm}-{params}.txt', out_dir=out_dir, sep=os.sep, dataset=datasets, algorithm=algorithms, params=pathlinker_params)
     output: os.path.join(out_dir, 'advised-pathway-{dataset}-{algorithm}.txt')
     shell: 'echo {input} >> {output}'
+
+# Collect Summary Statistics
+rule output_summary:
+    input:
+        standardized_file = os.path.join(out_dir, 'pathway-{dataset}-{algorithm}-{params}.txt')
+        is_directed = config['{algorithm}']['directed']
+    output:
+        summary_file = os.path.join(out_dir, 'pathway-{dataset}-{algorithm}-{params}-summary.txt')
+    run:
+        summary.run(input,output,directed=is_directed)
+
+# Write GraphSpace JSON Graphs
+rule graphspace:
+    input:
+        standardized_file = os.path.join(out_dir, 'pathway-{dataset}-{algorithm}-{params}.txt')
+        json_prefix = os.path.join(out_dir, 'pathway-{dataset}-{algorithm}-{params}')
+        is_directed = config['{algorithm}']['directed']
+    output:
+        graph_json = os.path.join(out_dir, 'pathway-{dataset}-{algorithm}-{params}-gs.json')
+        style_json = os.path.join(out_dir, 'pathway-{dataset}-{algorithm}-{params}-gs-style.json')
+    run:
+        graphspace.write_json(standardized_file,json_prefix,directed=is_directed)
 
 # Remove the output directory
 rule clean:
