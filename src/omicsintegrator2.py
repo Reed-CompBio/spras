@@ -112,8 +112,9 @@ class OmicsIntegrator2(PRM):
             if need_chown:
                 #This command changes the ownership of output files so we don't
                 # get a permissions error when snakemake tries to touch the files
+                chown_command = " ".join(["chown",str(uid),out_dir.as_posix()+"/oi2*"])
                 out_chown = client.containers.run('reedcompbio/omics-integrator-2',
-                                            "chown "+str(uid)+" output/oi2*",
+                                            chown_command,
                                             stderr=True,
                                             volumes={prepare_path_docker(work_dir): {'bind': '/OmicsIntegrator2', 'mode': 'rw'}},
                                             working_dir='/OmicsIntegrator2')
