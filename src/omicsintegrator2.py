@@ -3,6 +3,7 @@ import docker
 from pathlib import Path
 from src.util import prepare_path_docker
 import os
+import pandas as pd
 
 __all__ = ['OmicsIntegrator2']
 
@@ -57,7 +58,7 @@ class OmicsIntegrator2(PRM):
         All other output files are deleted.
         @param output_file: the name of the output file, which will overwrite any existing file with this name
         """
-        if not edges or not prizes or not output_file:
+        if edges is None or prizes is None or output_file is None:
             raise ValueError('Required Omics Integrator 2 arguments are missing')
 
         # Initialize a Docker client using environment variables

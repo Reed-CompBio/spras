@@ -3,6 +3,7 @@ import docker
 from pathlib import Path
 from src.util import prepare_path_docker
 import os
+import pandas as pd
 
 __all__ = ['OmicsIntegrator1']
 
@@ -14,7 +15,7 @@ def write_conf(filename=Path('config.txt'), w=None, b=None, d=None, mu=None, noi
     See https://github.com/fraenkel-lab/OmicsIntegrator#required-inputs
     filename: the name of the configuration file to write
     """
-    if not w or not b or not d:
+    if w is None or b is None or d is None:
         raise ValueError('Required Omics Integrator 1 configuration file arguments are missing')
 
     with open(filename, 'w') as f:
@@ -88,7 +89,7 @@ class OmicsIntegrator1(PRM):
         @param output_file: the name of the output sif file for the optimal forest, which will overwrite any
         existing file with this name
         """
-        if not edges or not prizes or not output_file or not w or not b or not d:
+        if edges is None or prizes is None or output_file is None or w is None or b is None or d is None:
             raise ValueError('Required Omics Integrator 1 arguments are missing')
 
         # Initialize a Docker client using environment variables
