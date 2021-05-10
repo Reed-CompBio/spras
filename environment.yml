@@ -10,4 +10,4 @@ dependencies:
   - python=3.8
   - pip=21.1.1
   - pip:
-    - graphspace-python==1.2.1
+     - "git+https://github.com/annaritz/graphspace-python@fa9bb4b0adc54de50a956daade82db48a8030f64"
