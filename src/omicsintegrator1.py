@@ -2,6 +2,7 @@ from src.PRM import PRM
 import docker
 from pathlib import Path
 from src.util import prepare_path_docker
+import os
 
 __all__ = ['OmicsIntegrator1']
 
@@ -131,12 +132,23 @@ class OmicsIntegrator1(PRM):
 
         print('Running Omics Integrator 1 with arguments: {}'.format(' '.join(command)), flush=True)
 
+        uid = os.getuid()
+
         try:
             out = client.containers.run('reedcompbio/omics-integrator-1',
                                   command,
                                   stderr=True,
                                   volumes={prepare_path_docker(work_dir): {'bind': '/OmicsIntegrator1', 'mode': 'rw'}},
                                   working_dir='/OmicsIntegrator1')
+
+            #This command changes the ownership of output files so we don't
+            # get a permissions error when snakemake tries to touch the files
+            out_chown = client.containers.run('reedcompbio/omics-integrator-1',
+                                  "chown "+str(uid)+" output/oi1*",
+                                  stderr=True,
+                                  volumes={prepare_path_docker(work_dir): {'bind': '/OmicsIntegrator1', 'mode': 'rw'}},
+                                  working_dir='/OmicsIntegrator1')
+
             print(out.decode('utf-8'))
         finally:
             # Not sure whether this is needed
@@ -147,6 +159,7 @@ class OmicsIntegrator1(PRM):
         # TODO if deleting other output files, write them all to a tmp directory and copy
         # the desired output file instead of using glob to delete files from the actual output directory
         # Rename the primary output file to match the desired output filename
+        print(output_file)
         Path(output_file).unlink(missing_ok=True)
         output_sif = Path(out_dir, 'oi1_optimalForest.sif')
         output_sif.rename(output_file)
