@@ -33,6 +33,7 @@ class OmicsIntegrator2(PRM):
 
         command = ['OmicsIntegrator', '-e', edge_file.as_posix(), '-p', prize_file.as_posix(),
                    '-o', out_dir.as_posix()]
+        
 
         # Add optional arguments
         if w is not None:

@@ -1,4 +1,5 @@
 import pytest
+import sys
 from src.omicsintegrator2 import OmicsIntegrator2
 
 TEST_DIR = 'test/OmicsIntegrator2/'
@@ -12,7 +13,6 @@ class TestOmicsIntegrator2:
         OmicsIntegrator2.run(edge_input=TEST_DIR+'input/oi2-edges.txt',
                              prize_input=TEST_DIR+'input/oi2-prizes.txt',
                              output_dir=TEST_DIR+'output')
-
     def test_oi2_some_optional(self):
         # Include optional argument
         OmicsIntegrator2.run(edge_input=TEST_DIR+'input/oi2-edges.txt',
@@ -34,7 +34,6 @@ class TestOmicsIntegrator2:
                              dummy_mode='terminals',
                              seed=2,
                              filename='test')
-
     def test_oi2_missing(self):
         # Test the expected error is raised when required arguments are missing
         with pytest.raises(ValueError):

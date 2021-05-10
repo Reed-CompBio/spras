@@ -11,7 +11,7 @@ RUN apt-get -qq update && \
 COPY environment.yml .
 RUN conda env create -f environment.yml
 
-WORKDIR /home/PathLinker
+WORKDIR /home
 COPY pathlinker-files.txt .
 RUN export PATHLINKER_COMMIT_SHA=d4a44c9f44f4afe30fd945015d84c1ce8c602c00 && \
     envsubst '${PATHLINKER_COMMIT_SHA}' < pathlinker-files.txt > pathlinker-files-versioned.txt && \
