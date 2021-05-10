@@ -94,6 +94,8 @@ class OmicsIntegrator2(PRM):
             client.close()
 
         # TODO do we want to retain other output files?
+        # TODO if deleting other output files, write them all to a tmp directory and copy
+        # the desired output file instead of using glob to delete files from the actual output directory
         # Rename the primary output file to match the desired output filename
         Path(output_file).unlink(missing_ok=True)
         output_tsv = Path(out_dir, 'oi2.tsv')

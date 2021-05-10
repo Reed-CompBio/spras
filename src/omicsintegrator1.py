@@ -136,6 +136,8 @@ class OmicsIntegrator1(PRM):
             conf_file_abs.unlink(missing_ok=True)
 
         # TODO do we want to retain other output files?
+        # TODO if deleting other output files, write them all to a tmp directory and copy
+        # the desired output file instead of using glob to delete files from the actual output directory
         # Rename the primary output file to match the desired output filename
         Path(output_file).unlink(missing_ok=True)
         output_sif = Path(out_dir, 'oi1_optimalForest.sif')
