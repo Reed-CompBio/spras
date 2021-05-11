@@ -17,6 +17,7 @@ jobs:
       run: |
         docker pull reedcompbio/omics-integrator-1:latest
         docker pull reedcompbio/omics-integrator-2:latest
+        docker pull reedcompbio/pathlinker:latest
     - name: Build Omics Integrator 1 Docker image
       uses: docker/build-push-action@v1
       with:

@@ -1,10 +1,11 @@
 # PathLinker wrapper
-# https://github.com/fraenkel-lab/OmicsIntegrator2
+# https://github.com/Murali-group/PathLinker
 # Activates the conda environment before running command inside container
 # Uses the strategy from https://pythonspeed.com/articles/activate-conda-dockerfile/
 # by Itamar Turner-Trauring
 FROM continuumio/miniconda3:4.9.2
 
+# Required for the envsubst command
 RUN apt-get -qq update && \
     apt-get install -y gettext-base
 
