@@ -2,7 +2,8 @@ import Dataset
 
 # supported algorithm imports
 from src.pathlinker import PathLinker as pathlinker
-
+from src.omicsintegrator1 import OmicsIntegrator1 as omicsintegrator1
+from src.omicsintegrator2 import OmicsIntegrator2 as omicsintegrator2
 
 def run(algorithm, params):
     """
