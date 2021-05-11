@@ -44,8 +44,8 @@
                 directed: false
                 run1:
                     r: [5]
-                    b: [1,2]
-                    w: np.linspace(0,5,10)
+                    b: [5,6]
+                    w: np.linspace(0,5,2)
                     g: [3]
                     d: [10]
 
@@ -54,7 +54,7 @@
                 include: true
                 directed: false
                 run1:
-                    b: [1]
+                    b: [4]
                     g: [0]
                 run2:
                     b: [2]
@@ -143,6 +143,12 @@
                  #The options here are "fixed" or "random". In the case that "fixed" is selected the program will use
                  #negative values picked by the authors of this software. If "random" is chosen, the program will sample
                  #from unannotated interactions/proteins at a rate of 50 negatives to every positive.
+
+                 negative_set: "fixed"
+
+                 ##ARCOMMENT - let the above variable be "all" or "subsample". Then have a
+                 ##subsample rate be set.
+                 subsample_rate: 50
 
                  negative_set: "fixed"
 

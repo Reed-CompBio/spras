@@ -6,7 +6,10 @@ jobs:
   # Builds the Docker images and runs their test code
   docker:
     name: Test Docker wrappers
-    runs-on: ubuntu-latest
+    runs-on: ${{ matrix.os }}
+    strategy:
+      matrix:
+        os: [ubuntu-latest]
     steps:
     - name: Checkout repository
       uses: actions/checkout@v2

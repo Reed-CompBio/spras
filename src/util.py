@@ -4,7 +4,7 @@ Utility functions for pathway reconstruction
 
 import itertools as it
 import re
-import os
+import numpy as np  # Required to eval some forms of parameter ranges
 from pathlib import PurePath
 import yaml
 

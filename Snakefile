@@ -132,20 +132,20 @@ rule prepare_input:
     input: dataset_file = os.path.join(out_dir, '{dataset}-merged.pickle')
     # Could ideally use required_inputs to determine which output files to write
     # That does not seem possible because it requires a function and is not static
-    output: output_files = dynamic(os.path.join(out_dir, '{dataset}-{algorithm}-{type}.txt'))
+    output: output_files = dynamic(os.path.join(out_dir, 'prepared-{dataset}-{algorithm}-{type}.txt'))
     # Run the preprocessing script for this algorithm
     run:
         # Use the algorithm's generate_inputs function to load the merged dataset, extract the relevant columns,
         # and write the output files specified by required_inputs
         # The filename_map provides the output file path for each required input file type
-        filename_map = {input_type: os.path.join(out_dir, f'{wildcards.dataset}-{wildcards.algorithm}-{input_type}.txt') for input_type in PRRunner.get_required_inputs(wildcards.algorithm)}
+        filename_map = {input_type: os.path.join(out_dir, f'prepared-{wildcards.dataset}-{wildcards.algorithm}-{input_type}.txt') for input_type in PRRunner.get_required_inputs(wildcards.algorithm)}
         PRRunner.prepare_inputs(wildcards.algorithm, input.dataset_file, filename_map)
 
 # See https://stackoverflow.com/questions/46714560/snakemake-how-do-i-use-a-function-that-takes-in-a-wildcard-and-returns-a-value
 # for why the lambda function is required
 # Run the pathway reconstruction algorithm
 rule reconstruct:
-    input: lambda wildcards: expand(os.path.join(out_dir, '{{dataset}}-{{algorithm}}-{type}.txt'), type=PRRunner.get_required_inputs(algorithm=wildcards.algorithm))
+    input: lambda wildcards: expand(os.path.join(out_dir, 'prepared-{{dataset}}-{{algorithm}}-{type}.txt'), type=PRRunner.get_required_inputs(algorithm=wildcards.algorithm))
     output: pathway_file = os.path.join(out_dir, 'raw-pathway-{dataset}-{algorithm}-{params}.txt')
     run:
         params = reconstruction_params(wildcards.algorithm, wildcards.params)
