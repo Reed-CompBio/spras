@@ -151,7 +151,6 @@
 
  #Plotting
  plot_settings:
-
          locations:
                  reconstruction_dir: "/path/to/reconstructions"
 
