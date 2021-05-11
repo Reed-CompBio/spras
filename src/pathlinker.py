@@ -1,12 +1,9 @@
 import docker
 import os
-import sys
 import warnings
-import tempfile
 from src.PRM import PRM
 from pathlib import Path
 from src.util import prepare_path_docker
-from shutil import copy, rmtree, copytree
 
 __all__ = ['PathLinker']
 
@@ -97,6 +94,7 @@ class PathLinker(PRM):
                 },
                 working_dir='/home/spras/')
             print(container_output.decode('utf-8'))
+            print(list(work_dir.iterdir()))
             if need_chown:
                 #This command changes the ownership of output files so we don't
                 # get a permissions error when snakemake tries to touch the files
@@ -115,6 +113,7 @@ class PathLinker(PRM):
         # Rename the primary output file to match the desired output filename
         # Currently PathLinker only writes one output file so we do not need to delete others
         Path(output_file).unlink(missing_ok=True)
+        print(list(work_dir.iterdir()))
         # We may not know the value of k that was used
         output_edges = Path(next(work_dir.glob('out*-ranked-edges.txt')))
         output_edges.rename(output_file)

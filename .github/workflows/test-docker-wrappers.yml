@@ -57,7 +57,7 @@ jobs:
         miniconda-version: 'latest'
     - name: Run tests
       shell: bash --login {0}
-      run: pytest
+      run: pytest -s
     - name: Run Snakemake workflow
       shell: bash --login {0}
       run: snakemake --cores 1
