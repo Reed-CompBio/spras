@@ -74,7 +74,7 @@ def parse_config(config_file):
                     break
             # We create the product of all param combinations for each run
             param_name_list = []
-            if alg["params"][params] is not None:
+            if alg["params"][params]:
                 for p in alg["params"][params]:
                     param_name_list.append(p)
                     all_runs.append(eval(str(alg["params"][params][p])))
