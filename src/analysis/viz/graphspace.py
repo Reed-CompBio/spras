@@ -5,24 +5,19 @@ import os
 import sys
 import json
 
-def write_json(graph_file,out_prefix,directed=False) -> None:
-	## if output directory doesn't exist, make it.
-	outdir = os.path.dirname(out_prefix)
-	if not os.path.exists(outdir):
-		os.makedirs(outdir)
+def write_json(graph_file,out_graph,out_style,directed=False) -> None:
 
 	# get GS Graph
-	graph_name = os.path.basename(out_prefix) # name is the prefix specified.
+	graph_name = os.path.basename(out_graph) # name is the prefix specified.
 	G = get_gs_graph(graph_file,graph_name,directed=directed)
 
 	# write graph JSON
-	with open(out_prefix+'-gs.json','w') as f:
+	with open(out_graph,'w') as f:
 		json.dump(G.get_graph_json(),f)
 
 	# write graph style JSON
-	with open(out_prefix+'-gs-style.json','w') as f:
+	with open(out_style,'w') as f:
 		json.dump(G.get_style_json(),f)
-
 	return
 
 '''

@@ -12,7 +12,7 @@ config_file = os.path.join('config', 'config.yaml')
 wildcard_constraints:
     algorithm='\w+'
 
-config, datasets, out_dir, algorithm_params = parse_config(config_file)
+config, datasets, out_dir, algorithm_params, algorithm_directed = parse_config(config_file)
 
 # Return the dataset dictionary from the config file given the label
 def get_dataset(datasets, label):
@@ -23,7 +23,7 @@ def get_dataset(datasets, label):
 # TODO Consider how to make the dataset depend only on the part of the config file relevant for this dataset
 # instead of the entire config file
 # Input preparation needs to be rerun if these files are modified
-def get_dataset_dependencies(datsets, label):
+def get_dataset_dependencies(datasets, label):
     dataset = datasets[label]
     all_files = dataset["node_files"] + dataset["edge_files"] + dataset["other_files"]
     # Add the relative file path and config file
@@ -31,12 +31,12 @@ def get_dataset_dependencies(datsets, label):
     return all_files + [config_file]
 
 algorithms = list(algorithm_params.keys())
-pathlinker_params = algorithm_params['pathlinker'] # Temporary
+#pathlinker_params = algorithm_params['pathlinker'] # Temporary
 
 # Eventually we'd store these values in a config file
-run_options = {}
-run_options["augment"] = False
-run_options["parameter-advise"] = False
+#run_options = {}
+#run_options["augment"] = False
+#run_options["parameter-advise"] = False
 
 # Generate numeric indices for the parameter combinations
 # of each reconstruction algorithms
@@ -73,6 +73,9 @@ def write_parameter_log(algorithm, logfile):
 # Right now this is a static run_options dictionary but would eventually
 # be done with the config file
 def make_final_input(wildcards):
+    '''
+    # Commenting out code that considers augment or parameter advising, since we don't yet handle that.
+    #
     # Right now this lets us do ppa or augmentation, but not both.
     # An easy solution would be to make a separate rule for doing both, but
     # if we add more things to do after the fact that will get
@@ -95,6 +98,26 @@ def make_final_input(wildcards):
         # Create log files for the parameter indices
         final_input.extend(expand('{out_dir}{sep}parameters-{algorithm}.txt', out_dir=out_dir, sep=os.sep, algorithm=algorithms))
         # TODO Create log files for the datasets
+    '''
+    final_input = []
+
+    #TODO analysis could be parsed in the parse_config() function.
+    if config["analysis"]["summary"]["include"]:
+        # add summary output file.
+        final_input.extend(expand('{out_dir}{sep}pathway-{dataset}-{algorithm_params}-summary.txt',out_dir=out_dir,sep=os.sep,dataset=datasets,algorithm_params=algorithms_with_params))
+
+    if config["analysis"]["graphspace"]["include"]:
+        # add graph and style JSON files.
+        final_input.extend(expand('{out_dir}{sep}pathway-{dataset}-{algorithm_params}-gs.json',out_dir=out_dir,sep=os.sep,dataset=datasets,algorithm_params=algorithms_with_params))
+        final_input.extend(expand('{out_dir}{sep}pathway-{dataset}-{algorithm_params}-gs-style.json',out_dir=out_dir,sep=os.sep,dataset=datasets,algorithm_params=algorithms_with_params))
+
+    if len(final_input) == 0:
+        # No analysis added yet, so add reconstruction output files if they exist.
+        # (if analysis is specified, these should be implicity run).
+        final_input.extend(expand('{out_dir}{sep}pathway-{dataset}-{algorithm_params}.txt', out_dir=out_dir, sep=os.sep, dataset=datasets.keys(), algorithm_params=algorithms_with_params))
+    # Create log files for the parameter indices
+    final_input.extend(expand('{out_dir}{sep}parameters-{algorithm}.txt', out_dir=out_dir, sep=os.sep, algorithm=algorithms))
+
     return final_input
 
 # A rule to define all the expected outputs from all pathway reconstruction
@@ -111,6 +134,7 @@ rule merge_input:
     # if they change
     # Also depends on the config file
     # TODO does not need to depend on the entire config file but rather only the input files for this dataset
+    # TODO why does this pass datasets while datasets is in the global frame as well?
     input: lambda wildcards: get_dataset_dependencies(datasets, wildcards.dataset)
     output: dataset_file = os.path.join(out_dir, '{dataset}-merged.pickle')
     run:
@@ -175,6 +199,7 @@ rule log_parameters:
     run:
         write_parameter_log(wildcards.algorithm, output.logfile)
 
+'''
 # Pathway Augmentation
 rule augment_pathway:
     input: os.path.join(out_dir, 'pathway-{dataset}-{algorithm}-{params}.txt')
@@ -186,28 +211,25 @@ rule parameter_advise:
     input: expand('{out_dir}{sep}pathway-{dataset}-{algorithm}-{params}.txt', out_dir=out_dir, sep=os.sep, dataset=datasets, algorithm=algorithms, params=pathlinker_params)
     output: os.path.join(out_dir, 'advised-pathway-{dataset}-{algorithm}.txt')
     shell: 'echo {input} >> {output}'
+'''
 
 # Collect Summary Statistics
-rule output_summary:
+rule summarize:
     input:
         standardized_file = os.path.join(out_dir, 'pathway-{dataset}-{algorithm}-{params}.txt')
     output:
         summary_file = os.path.join(out_dir, 'pathway-{dataset}-{algorithm}-{params}-summary.txt')
     run:
-        # note: config['{algorithm}']['directed'] could be parsed in parse_config()
-        summary.run(input,output,directed=config['{algorithm}']['directed'])
+        summary.run(input.standardized_file,output.summary_file,directed=algorithm_directed[wildcards.algorithm])
 
 # Write GraphSpace JSON Graphs
-rule graphspace:
-    input:
-        standardized_file = os.path.join(out_dir, 'pathway-{dataset}-{algorithm}-{params}.txt'),
-        json_prefix = os.path.join(out_dir, 'pathway-{dataset}-{algorithm}-{params}')
+rule viz_graphspace:
+    input: standardized_file = os.path.join(out_dir, 'pathway-{dataset}-{algorithm}-{params}.txt')
     output:
-        graph_json = os.path.join(out_dir, 'pathway-{dataset}-{algorithm}-{params}-gs.json'),
-        style_json = os.path.join(out_dir, 'pathway-{dataset}-{algorithm}-{params}-gs-style.json')
+        graph_json = os.path.join(out_dir, 'pathway-{dataset}-{algorithm}-{params}-gs.json'), style_json = os.path.join(out_dir, 'pathway-{dataset}-{algorithm}-{params}-gs-style.json')
     run:
-        # note: config['{algorithm}']['directed'] could be parsed in parse_config()
-        graphspace.write_json(standardized_file,json_prefix,directed=config['{algorithm}']['directed'])
+        json_prefix = os.path.join(out_dir, 'pathway-{dataset}-{algorithm}-{params}')
+        graphspace.write_json(input.standardized_file,output.graph_json,output.style_json,directed=algorithm_directed[wildcards.algorithm])
 
 # Remove the output directory
 rule clean:

@@ -61,6 +61,7 @@ def parse_config(config_file):
     # running that algorithm
     # Keys in the parameter dictionary are strings
     algorithm_params = dict()
+    algorithm_directed = dict()
     for alg in config["algorithms"]:
         # Each set of runs should be 1 level down in the config file
         for params in alg["params"]:
@@ -74,10 +75,10 @@ def parse_config(config_file):
                     break
             if params == "directed":
                 if alg["params"][params]:
-                    # algorithm outputs directed graph. For now do nothing.
-                    continue
+                    algorithm_directed[alg["name"]] = True
                 else:
-                    continue
+                    algorithm_directed[alg["name"]] = False
+                continue
             # We create the product of all param combinations for each run
             param_name_list = []
             if alg["params"][params]:
@@ -89,5 +90,5 @@ def parse_config(config_file):
             for r in run_list_tuples:
                 run_dict = dict(zip(param_name_tuple, r))
                 algorithm_params[alg["name"]].append(run_dict)
-                
-    return config, datasets, out_dir, algorithm_params
+
+    return config, datasets, out_dir, algorithm_params, algorithm_directed

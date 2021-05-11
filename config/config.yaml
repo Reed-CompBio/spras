@@ -18,25 +18,12 @@
  # careful: too many parameters might make your runs take a long time.
 
  algorithms:
-        - name: "bowtiebuilder"
-          params:
-                include: false
-                directed: true
-                run1:
-
         - name: "pathlinker"
           params:
                 include: true
                 directed: true
                 run1:
                     k: range(100,201,100)
-
-        - name: "responsenet"
-          params:
-                include: false
-                directed: false
-                run1:
-                    y: [20]
 
         - name: "omicsintegrator1"
           params:
@@ -59,20 +46,6 @@
                 run2:
                     b: [2]
                     g: [3]
-
-        - name: "shortestpaths"
-          params:
-                include: false
-                directed: true
-                run1:
-
-        - name: "rwr"
-          params:
-                include: false
-                directed: true
-                run1:
-                    a: [0.85]
-                    t: [0.3]
 
  # Here we specify which pathways to run and other file location information.
  # DataLoader.py can currently only load a single dataset
@@ -100,9 +73,6 @@
 
          #set where everything is saved
          locations:
-
-                #place the path to your pathway annotation files here
-                pathway_dir: "/path/to/pathways"
 
                 #place the save path here
                 reconstruction_dir: "output"
@@ -172,7 +142,9 @@
 
  analysis:
         summary:
+
           include: true
 
         graphspace:
+
           include: true
