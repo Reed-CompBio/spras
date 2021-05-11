@@ -75,43 +75,31 @@ class PathLinker(PRM):
         network_file = Path(network)
 
         # store output dir for volume mounts
-        out_dir = Path(output_dir).absolute()
+        out_dir = Path(output_dir)
 
         # assert output dir exists
         Path(work_dir, out_dir).mkdir(parents=True, exist_ok=True)
-
-        # create temp directory for input files
-        dir_path = tempfile.mkdtemp()
-        files = [network_file, node_file]
-        for file in files:
-            copy(file, dir_path)
         
-        command = ['python', '../run.py', '/home/files/'+os.path.basename(network_file), 
-                        '/home/files/'+os.path.basename(node_file)]
+        command = ['python', '/home/run.py', '/home/spras/'+network_file.as_posix(), 
+                        '/home/spras/'+node_file.as_posix()]
         if k is not None:
             command.extend(['-k', str(k)])
 
         try:
-            # mount 2 volumes
-            #   tempdir : /home/files
-            #   output dir (on disk) : /home/out
-            # call pathlinker from /home/out dir 
             container_output = client.containers.run(
                 'reedcompbio/pathlinker',
                 command,
                 stderr=True,
                 volumes={
-                    prepare_path_docker(Path(dir_path)): {'bind': '/home/files', 'mode': 'rw'},
-                    prepare_path_docker(out_dir): {'bind': '/home/out', 'mode': 'rw'}
+                    prepare_path_docker(work_dir): {'bind': '/home/spras', 'mode': 'rw'}
                 },
-                working_dir='/home/out'
+                working_dir='/home/spras/'+output_dir
             )
             print(container_output.decode('utf-8'))
 
         finally:
             # Not sure whether this is needed
             client.close()
-            rmtree(dir_path)
 
     @staticmethod
     def parse_output(raw_pathway_file, standardized_pathway_file):
