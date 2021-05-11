@@ -162,6 +162,17 @@ class OmicsIntegrator1(PRM):
             client.close()
             conf_file_abs.unlink(missing_ok=True)
 
+        # TODO do we want to retain other output files?
+        # TODO if deleting other output files, write them all to a tmp directory and copy
+        # the desired output file instead of using glob to delete files from the actual output directory
+        # Rename the primary output file to match the desired output filename
+        Path(output_file).unlink(missing_ok=True)
+        output_sif = Path(out_dir, 'oi1_optimalForest.sif')
+        output_sif.rename(output_file)
+        # Remove the other output files
+        for oi1_output in out_dir.glob('oi1_*'):
+            oi1_output.unlink(missing_ok=True)
+
     @staticmethod
     def parse_output(raw_pathway_file, standardized_pathway_file):
         """
