@@ -35,26 +35,30 @@
                 run1:
                     y: [20]
 
-        # Convert to omicsintegrator1 and omicsintegrator2
-        - name: "pcsf"
+        - name: "omicsintegrator1"
           params:
-                include: false
+                include: true
                 run1:
                     r: [5]
-                    b: [1,2]
-                    w: np.linspace(0,5,20)
+                    b: [5,6]
+                    w: np.linspace(0,5,2)
                     g: [3]
+                    d: [10]
+
+        - name: "omicsintegrator2"
+          params:
+                include: true
+                run1:
+                    b: [4]
+                    g: [0]
                 run2:
-                    r: [5]
-                    b: [1,2]
-                    w: np.linspace(0,5,20)
+                    b: [2]
                     g: [3]
 
         - name: "shortestpaths"
           params:
                 include: false
                 run1:
-
 
         - name: "rwr"
           params:
@@ -63,7 +67,7 @@
                     a: [0.85]
                     t: [0.3]
 
- # Here we fix which pathways to run and other file location information.
+ # Here we specify which pathways to run and other file location information.
  # DataLoader.py can currently only load a single dataset
  datasets:
      -

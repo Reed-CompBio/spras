@@ -11,32 +11,30 @@ class TestOmicsIntegrator1:
     """
     def test_oi1_required(self):
         # Only include required arguments
-        OmicsIntegrator1.run(edge_input=TEST_DIR+'input/oi1-edges.txt',
-                             prize_input=TEST_DIR+'input/oi1-prizes.txt',
-                             outpath=TEST_DIR + 'output',
+        OmicsIntegrator1.run(edges=TEST_DIR+'input/oi1-edges.txt',
+                             prizes=TEST_DIR+'input/oi1-prizes.txt',
+                             output_file=TEST_DIR+'output/test_optimalForest.sif',
                              w=5,
                              b=1,
                              d=10)
 
     def test_oi1_some_optional(self):
         # Include optional argument
-        OmicsIntegrator1.run(edge_input=TEST_DIR+'input/oi1-edges.txt',
-                             prize_input=TEST_DIR+'input/oi1-prizes.txt',
-                             outpath=TEST_DIR + 'output',
+        OmicsIntegrator1.run(edges=TEST_DIR+'input/oi1-edges.txt',
+                             prizes=TEST_DIR+'input/oi1-prizes.txt',
+                             output_file=TEST_DIR+'output/test_optimalForest.sif',
                              w=5,
                              b=1,
-                             d=10,
-                             outlabel='oi1')
+                             d=10)
 
     def test_oi1_all_optional(self):
         # Include all optional arguments
-        OmicsIntegrator1.run(edge_input=TEST_DIR+'input/oi1-edges.txt',
-                             prize_input=TEST_DIR+'input/oi1-prizes.txt',
+        OmicsIntegrator1.run(edges=TEST_DIR+'input/oi1-edges.txt',
+                             prizes=TEST_DIR+'input/oi1-prizes.txt',
                              dummy_mode='terminals',
                              mu_squared=True,
                              exclude_terms=True,
-                             outpath=TEST_DIR + 'output',
-                             outlabel='oi1',
+                             output_file=TEST_DIR+'output/test_optimalForest.sif',
                              noisy_edges=0,
                              shuffled_prizes=0,
                              random_terminals=0,
@@ -52,9 +50,9 @@ class TestOmicsIntegrator1:
     def test_oi1_missing(self):
         # Test the expected error is raised when required arguments are missing
         with pytest.raises(ValueError):
-            # No edge_input
-            OmicsIntegrator1.run(prize_input=TEST_DIR + 'input/oi1-prizes.txt',
-                                 outpath=TEST_DIR + 'output',
+            # No edges
+            OmicsIntegrator1.run(prizes=TEST_DIR + 'input/oi1-prizes.txt',
+                                 output_file=TEST_DIR+'output/test_optimalForest.sif',
                                  w=5,
                                  b=1,
                                  d=10)

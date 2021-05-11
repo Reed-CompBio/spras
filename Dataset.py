@@ -101,6 +101,19 @@ class Dataset:
             warnings.warn("Only %0.2f of data had one or more of the following columns filled:"%(percent_hit) + str(col_names))
         return filtered_table
 
+    def contains_node_columns(self, col_names):
+        '''
+        col_names: A list-like object of column names to check or a string of a single column name to check.
+        returns: Whether or not all columns in col_names exist in the dataset.
+        '''
+        if isinstance(col_names, str):
+            return col_names in self.node_table.columns
+        else:
+            for c in col_names:
+                if c not in self.node_table.columns:
+                    return False
+                return True
+
     def request_edge_columns(self, col_names):
         return None
 
