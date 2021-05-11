@@ -93,7 +93,7 @@ def make_final_input(wildcards):
         # Use 'params<index>' in the filename instead of describing each of the parameters and its value
         final_input = expand('{out_dir}{sep}pathway-{dataset}-{algorithm_params}.txt', out_dir=out_dir, sep=os.sep, dataset=datasets.keys(), algorithm_params=algorithms_with_params)
         # Create log files for the parameter indices
-        #final_input.extend(expand('{out_dir}{sep}parameters-{algorithm}.txt', out_dir=out_dir, sep=os.sep, algorithm=algorithms))
+        final_input.extend(expand('{out_dir}{sep}parameters-{algorithm}.txt', out_dir=out_dir, sep=os.sep, algorithm=algorithms))
         # TODO Create log files for the datasets
     return final_input
 
@@ -191,23 +191,23 @@ rule parameter_advise:
 rule output_summary:
     input:
         standardized_file = os.path.join(out_dir, 'pathway-{dataset}-{algorithm}-{params}.txt')
-        is_directed = config['{algorithm}']['directed']
     output:
         summary_file = os.path.join(out_dir, 'pathway-{dataset}-{algorithm}-{params}-summary.txt')
     run:
-        summary.run(input,output,directed=is_directed)
+        # note: config['{algorithm}']['directed'] could be parsed in parse_config()
+        summary.run(input,output,directed=config['{algorithm}']['directed'])
 
 # Write GraphSpace JSON Graphs
 rule graphspace:
     input:
-        standardized_file = os.path.join(out_dir, 'pathway-{dataset}-{algorithm}-{params}.txt')
+        standardized_file = os.path.join(out_dir, 'pathway-{dataset}-{algorithm}-{params}.txt'),
         json_prefix = os.path.join(out_dir, 'pathway-{dataset}-{algorithm}-{params}')
-        is_directed = config['{algorithm}']['directed']
     output:
-        graph_json = os.path.join(out_dir, 'pathway-{dataset}-{algorithm}-{params}-gs.json')
+        graph_json = os.path.join(out_dir, 'pathway-{dataset}-{algorithm}-{params}-gs.json'),
         style_json = os.path.join(out_dir, 'pathway-{dataset}-{algorithm}-{params}-gs-style.json')
     run:
-        graphspace.write_json(standardized_file,json_prefix,directed=is_directed)
+        # note: config['{algorithm}']['directed'] could be parsed in parse_config()
+        graphspace.write_json(standardized_file,json_prefix,directed=config['{algorithm}']['directed'])
 
 # Remove the output directory
 rule clean:
