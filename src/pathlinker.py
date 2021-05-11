@@ -48,19 +48,19 @@ class PathLinker(PRM):
 
     # Skips parameter validation step
     @staticmethod
-    def run(nodetypes = None, network = None, output_dir=None, k=None):
+    def run(nodetypes=None, network=None, output_file=None, k=None):
         """
         Run PathLinker with Docker
         @param nodetypes:  input node types with sources and targets (required)
         @param network:  input network file (required)
-        @param output_dir: path to the output pathway directory (required)
+        @param output_file: path to the output pathway file (required)
         @param k: path length (optional)
         """
         # Add additional parameter validation
         # Do not require k
         # Use the PathLinker default
         # Could consider setting the default here instead
-        if not nodetypes or not network or not output_dir:
+        if not nodetypes or not network or not output_file:
             raise ValueError('Required PathLinker arguments are missing')
 
         # Initialize a Docker client using environment variables
@@ -68,22 +68,24 @@ class PathLinker(PRM):
 
         # work dir set as the root of the repository
         work_dir = Path(__file__).parent.parent.absolute()
-        print(f"current working dir: {work_dir}")
 
         # create path objects for input files
         node_file = Path(nodetypes)
         network_file = Path(network)
 
-        # store output dir for volume mounts
-        out_dir = Path(output_dir)
-
-        # assert output dir exists
-        Path(work_dir, out_dir).mkdir(parents=True, exist_ok=True)
-        
         command = ['python', '/home/run.py', '/home/spras/'+network_file.as_posix(), 
                         '/home/spras/'+node_file.as_posix()]
+
+        # Add optional argument
         if k is not None:
             command.extend(['-k', str(k)])
+
+        #Don't perform this step on systems where permissions aren't an issue like windows
+        need_chown = True
+        try:
+            uid = os.getuid()
+        except AttributeError:
+            need_chown = False
 
         try:
             container_output = client.containers.run(
@@ -93,13 +95,29 @@ class PathLinker(PRM):
                 volumes={
                     prepare_path_docker(work_dir): {'bind': '/home/spras', 'mode': 'rw'}
                 },
-                working_dir='/home/spras/'+output_dir
-            )
+                working_dir='/home/spras/')
             print(container_output.decode('utf-8'))
+            if need_chown:
+                #This command changes the ownership of output files so we don't
+                # get a permissions error when snakemake tries to touch the files
+                # PathLinker writes output files to the working directory
+                chown_command = " ".join(['chown',str(uid),'./out*-ranked-edges.txt'])
+                client.containers.run('reedcompbio/pathlinker',
+                                      chown_command,
+                                      stderr=True,
+                                      volumes={prepare_path_docker(work_dir): {'bind': '/home/spras', 'mode': 'rw'}},
+                                      working_dir='/home/spras/')
 
         finally:
             # Not sure whether this is needed
             client.close()
+
+        # Rename the primary output file to match the desired output filename
+        # Currently PathLinker only writes one output file so we do not need to delete others
+        Path(output_file).unlink(missing_ok=True)
+        # We may not know the value of k that was used
+        output_edges = Path(next(work_dir.glob('out*-ranked-edges.txt')))
+        output_edges.rename(output_file)
 
     @staticmethod
     def parse_output(raw_pathway_file, standardized_pathway_file):
