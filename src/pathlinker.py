@@ -1,9 +1,11 @@
-from src.PRM import PRM
 import docker
 import os
 import sys
 import pandas as pd
 import warnings
+from src.PRM import PRM
+from pathlib import Path
+from src.util import prepare_path_docker
 
 __all__ = ['PathLinker']
 
@@ -40,12 +42,12 @@ class PathLinker(PRM):
         input_df.to_csv(filename_map["nodetypes"],sep="\t",index=False,columns=["#Node","Node type"])
 
         #This is pretty memory intensive. We might want to keep the interactome centralized.
-        data.get_interactome().to_csv(filename_map["network"],sep="\t",index=False,columns=["Interactor1","Interactor2","Weight"])
+        data.get_interactome().to_csv(filename_map["network"],sep="\t",index=False,columns=["Interactor1","Interactor2","Weight"],header=["#Interactor1","Interactor2","Weight"])
 
 
     # Skips parameter validation step
     @staticmethod
-    def run(nodetypes = None, network = None, output_file=None, k=None):
+    def run(nodetypes=None, network=None, output_file=None, k=None):
         """
         Run PathLinker with Docker
         @param nodetypes:  input node types with sources and targets (required)
@@ -53,13 +55,6 @@ class PathLinker(PRM):
         @param output_file: path to the output pathway file (required)
         @param k: path length (optional)
         """
-
-        # TODO update the run command to use the new arguments provided and write the pathway to output_file
-        # Temporarily create a placeholder output file for Snakemake
-        with open(output_file, 'w') as out_file:
-            out_file.write('PathLinker: run arguments {}'.format(' '.join([nodetypes, network, output_file, str(k)])))
-        return
-
         # Add additional parameter validation
         # Do not require k
         # Use the PathLinker default
@@ -69,36 +64,63 @@ class PathLinker(PRM):
 
         # Initialize a Docker client using environment variables
         client = docker.from_env()
-        command = ['python', '../run.py']
+
+        # work dir set as the root of the repository
+        work_dir = Path(__file__).parent.parent.absolute()
+
+        # create path objects for input files
+        node_file = Path(nodetypes)
+        network_file = Path(network)
+
+        out_dir = Path(output_file).parent
+        # When renaming the output file, the output directory must already exist
+        Path(work_dir, out_dir).mkdir(parents=True, exist_ok=True)
+
+        command = ['python', '/home/run.py', '/home/spras/'+network_file.as_posix(), 
+                        '/home/spras/'+node_file.as_posix()]
+
+        # Add optional argument
         if k is not None:
             command.extend(['-k', str(k)])
-        # Currently broken
-        #command.extend([network, nodes])
-        print('PathLinker: run_static() command {}'.format(' '.join(command)))
 
-        working_dir = os.getcwd()
-
-        data_dir = os.path.join(working_dir, 'docker', 'pathlinker')
-        # Tony can run this example successfully on Git for Windows even with the following lines commented out
-        if os.name == 'nt':
-            print("running on Windows")
-            data_dir = str(data_dir).replace("\\", "/").replace("C:", "//c")
+        #Don't perform this step on systems where permissions aren't an issue like windows
+        need_chown = True
+        try:
+            uid = os.getuid()
+        except AttributeError:
+            need_chown = False
 
         try:
-            container_output = client.containers.run('ajshedivy/pr-pathlinker:example',
-                                command,
-                                stderr=True,
-                                volumes={data_dir: {'bind': '/home/PathLinker/data', 'mode': 'rw'}},
-                                working_dir='/home/PathLinker'
-                                )
+            container_output = client.containers.run(
+                'reedcompbio/pathlinker',
+                command,
+                stderr=True,
+                volumes={
+                    prepare_path_docker(work_dir): {'bind': '/home/spras', 'mode': 'rw'}
+                },
+                working_dir='/home/spras/')
             print(container_output.decode('utf-8'))
+            if need_chown:
+                #This command changes the ownership of output files so we don't
+                # get a permissions error when snakemake tries to touch the files
+                # PathLinker writes output files to the working directory
+                chown_command = " ".join(['chown',str(uid),'./out*-ranked-edges.txt'])
+                client.containers.run('reedcompbio/pathlinker',
+                                      chown_command,
+                                      stderr=True,
+                                      volumes={prepare_path_docker(work_dir): {'bind': '/home/spras', 'mode': 'rw'}},
+                                      working_dir='/home/spras/')
 
         finally:
             # Not sure whether this is needed
             client.close()
 
-        # Need to rename the output file to match the specific output file in the params
-
+        # Rename the primary output file to match the desired output filename
+        # Currently PathLinker only writes one output file so we do not need to delete others
+        Path(output_file).unlink(missing_ok=True)
+        # We may not know the value of k that was used
+        output_edges = Path(next(work_dir.glob('out*-ranked-edges.txt')))
+        output_edges.rename(output_file)
 
     @staticmethod
     def parse_output(raw_pathway_file, standardized_pathway_file):

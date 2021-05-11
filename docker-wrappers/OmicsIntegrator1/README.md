@@ -1,6 +1,6 @@
 # Omics Integrator 1 Docker image
 
-A Docker image for [Omics Integrator](https://github.com/fraenkel-lab/OmicsIntegrator).
+A Docker image for [Omics Integrator](https://github.com/fraenkel-lab/OmicsIntegrator) that is available on [DockerHub](https://hub.docker.com/repository/docker/reedcompbio/omics-integrator-1).
 
 ## Activating conda inside a Docker container
 
@@ -24,10 +24,7 @@ The `winpty` prefix is only needed on Windows.
 ## Testing
 Test code is located in `test/OmicsIntegrator1`.
 The `input` subdirectory contains test files `oi1-edges.txt` and `oi1-prizes.txt`.
-The Docker wrapper can be tested from the root directory of this repository with the command
-```
-python test/OmicsIntegrator1/test-oi1.py
-```
+The Docker wrapper can be tested with `pytest`.
 
 The Docker wrapper also can be tested by running the Omics Integrator tests interactively:
 ```

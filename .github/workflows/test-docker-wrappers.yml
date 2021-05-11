@@ -20,6 +20,7 @@ jobs:
       run: |
         docker pull reedcompbio/omics-integrator-1:latest
         docker pull reedcompbio/omics-integrator-2:latest
+        docker pull reedcompbio/pathlinker:latest
     - name: Build Omics Integrator 1 Docker image
       uses: docker/build-push-action@v1
       with:
@@ -37,6 +38,15 @@ jobs:
         repository: reedcompbio/omics-integrator-2
         tags: latest
         cache_froms: reedcompbio/omics-integrator-2:latest
+        push: false
+    - name: Build PathLinker Docker image
+      uses: docker/build-push-action@v1
+      with:
+        path: docker-wrappers/PathLinker/.
+        dockerfile: docker-wrappers/PathLinker/Dockerfile
+        repository: reedcompbio/pathlinker
+        tags: latest
+        cache_froms: reedcompbio/pathlinker:latest
         push: false
     - name: Install conda environment
       uses: conda-incubator/setup-miniconda@v2
