@@ -119,7 +119,7 @@ class OmicsIntegrator1(PRM):
         # as raw_pathway_file, in which case the format should be edge1 interactiontype edge2.
         # if that assumption is wrong we will need to tweak things
         try:
-            df = pd.read_csv(raw_pathway_file,sep='\s+')
+            df = pd.read_csv(raw_pathway_file,sep='\s+', header=None)
         except pd.errors.EmptyDataError:
             with open(standardized_pathway_file,'w') as emptyFile:
                 pass
