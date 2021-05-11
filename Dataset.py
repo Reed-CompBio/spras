@@ -107,12 +107,10 @@ class Dataset:
         returns: Whether or not all columns in col_names exist in the dataset.
         '''
         if isinstance(col_names, str):
-            if not col_names in self.node_table.columns:
-                return False
-            return True
+            return col_names in self.node_table.columns
         else:
             for c in col_names:
-                if not c in self.node_table.columns:
+                if c not in self.node_table.columns:
                     return False
                 return True
 

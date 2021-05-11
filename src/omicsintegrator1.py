@@ -59,7 +59,7 @@ class OmicsIntegrator1(PRM):
             node_df.loc[node_df['sources']==True, 'prize'] = 1.0
             node_df.loc[node_df['targets']==True, 'prize'] = 1.0
         else:
-            return False
+            raise ValueError("Omics Integrator 1 requires node prizes or sources and targets")
 
         #Omics Integrator already gives warnings for strange prize values, so we won't here
         node_df.to_csv(filename_map['prizes'],sep='\t',index=False,columns=['NODEID','prize'],header=['name','prize'])
