@@ -156,4 +156,5 @@ class OmicsIntegrator2(PRM):
             return
         df = pd.read_csv(raw_pathway_file,sep='\s+')
         df = df.take([0,1],axis=1)
+        df[3] = [1 for _ in range(len(df.index))]
         df.to_csv(standardized_pathway_file, header=False,index=False,sep=' ')
