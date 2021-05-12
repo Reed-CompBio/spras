@@ -121,8 +121,10 @@ def make_final_input(wildcards):
         # No analysis added yet, so add reconstruction output files if they exist.
         # (if analysis is specified, these should be implicity run).
         final_input.extend(expand('{out_dir}{sep}pathway-{dataset}-{algorithm_params}.txt', out_dir=out_dir, sep=os.sep, dataset=datasets.keys(), algorithm_params=algorithms_with_params))
-    # Create log files for the parameter indices
+
+    # Create log files for the parameters and datasets
     final_input.extend(expand('{out_dir}{sep}parameters-{algorithm}.txt', out_dir=out_dir, sep=os.sep, algorithm=algorithms))
+    final_input.extend(expand('{out_dir}{sep}datasets-{dataset}.txt', out_dir=out_dir, sep=os.sep, dataset=datasets.keys()))
 
     return final_input
 
@@ -205,6 +207,15 @@ rule log_parameters:
     run:
         write_parameter_log(wildcards.algorithm, output.logfile)
 
+# Write the datasets (copied from the log_parameters rule)
+# TODO: Need this to have input files so it updates
+# Possibly all rules should have the config file as input
+rule log_datasets:
+    output:
+        logfile = os.path.join(out_dir, 'datasets-{dataset}.txt')
+    run:
+        write_dataset_log(wildcards.dataset, output.logfile)
+        
 '''
 # Pathway Augmentation
 rule augment_pathway:
