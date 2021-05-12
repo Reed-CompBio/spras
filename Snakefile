@@ -69,6 +69,12 @@ def write_parameter_log(algorithm, logfile):
         for index, params in enumerate(algorithm_params[algorithm]):
             f.write(f'params{index}: {params}\n')
 
+def write_dataset_log(dataset,logfile):
+    with open(logfile,'w') as f:
+        for key,value in datasets[dataset].items():
+            f.write(f'{key}: {value}\n')
+
+
 # Choose the final input for reconstruct_pathways based on which options are being run
 # Right now this is a static run_options dictionary but would eventually
 # be done with the config file

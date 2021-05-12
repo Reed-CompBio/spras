@@ -1,6 +1,6 @@
 # Omics Integrator 2 Docker image
 
-A Docker image for [Omics Integrator 2](https://github.com/fraenkel-lab/OmicsIntegrator2).
+A Docker image for [Omics Integrator 2](https://github.com/fraenkel-lab/OmicsIntegrator2) that is available on [DockerHub](https://hub.docker.com/repository/docker/reedcompbio/omics-integrator-2).
 
 ## Activating conda inside a Docker container
 
@@ -25,10 +25,7 @@ The `winpty` prefix is only needed on Windows.
 ## Testing
 Test code is located in `test/OmicsIntegrator2`.
 The `input` subdirectory contains test files `oi2-edges.txt` and `oi2-prizes.txt`.
-The Docker wrapper can be tested from the root directory of this repository with the command
-```
-python test/OmicsIntegrator2/test-oi2.py
-```
+The Docker wrapper can be tested with `pytest`.
 
 ## TODO
 - Attribute https://github.com/fraenkel-lab/OmicsIntegrator2
