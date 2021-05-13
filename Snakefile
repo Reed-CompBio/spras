@@ -102,8 +102,7 @@ def make_final_input(wildcards):
         # Use 'params<index>' in the filename instead of describing each of the parameters and its value
         final_input = expand('{out_dir}{sep}pathway-{dataset}-{algorithm_params}.txt', out_dir=out_dir, sep=os.sep, dataset=datasets.keys(), algorithm_params=algorithms_with_params)
         # Create log files for the parameter indices
-        final_input.extend(expand('{out_dir}{sep}parameters-{algorithm}.txt', out_dir=out_dir, sep=os.sep, algorithm=algorithms))
-        # TODO Create log files for the datasets
+        #final_input.extend(expand('{out_dir}{sep}parameters-{algorithm}.txt', out_dir=out_dir, sep=os.sep, algorithm=algorithms))
     '''
     final_input = []
 
