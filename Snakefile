@@ -30,7 +30,7 @@ def get_dataset_dependencies(datasets, label):
     all_files = [os.path.join(dataset["data_dir"], data_file) for data_file in all_files]
     return all_files + [config_file]
 
-algorithms = list(algorithm_params.keys())
+algorithms = list(algorithm_params)
 #pathlinker_params = algorithm_params['pathlinker'] # Temporary
 
 # Eventually we'd store these values in a config file
@@ -98,9 +98,9 @@ def make_final_input(wildcards):
     else:
         # Temporary, build up one rule at a time to help debugging
         # dynamic() may not work when defined in a separate function
-        #final_input = dynamic(expand('{out_dir}{sep}{dataset}-{algorithm}-{{type}}.txt', out_dir=out_dir, sep=os.sep, dataset=datasets.keys(), algorithm=algorithms))
+        #final_input = dynamic(expand('{out_dir}{sep}{dataset}-{algorithm}-{{type}}.txt', out_dir=out_dir, sep=os.sep, dataset=datasets, algorithm=algorithms))
         # Use 'params<index>' in the filename instead of describing each of the parameters and its value
-        final_input = expand('{out_dir}{sep}pathway-{dataset}-{algorithm_params}.txt', out_dir=out_dir, sep=os.sep, dataset=datasets.keys(), algorithm_params=algorithms_with_params)
+        final_input = expand('{out_dir}{sep}pathway-{dataset}-{algorithm_params}.txt', out_dir=out_dir, sep=os.sep, dataset=datasets, algorithm_params=algorithms_with_params)
         # Create log files for the parameter indices
         #final_input.extend(expand('{out_dir}{sep}parameters-{algorithm}.txt', out_dir=out_dir, sep=os.sep, algorithm=algorithms))
     '''
@@ -119,11 +119,11 @@ def make_final_input(wildcards):
     if len(final_input) == 0:
         # No analysis added yet, so add reconstruction output files if they exist.
         # (if analysis is specified, these should be implicity run).
-        final_input.extend(expand('{out_dir}{sep}pathway-{dataset}-{algorithm_params}.txt', out_dir=out_dir, sep=os.sep, dataset=datasets.keys(), algorithm_params=algorithms_with_params))
+        final_input.extend(expand('{out_dir}{sep}pathway-{dataset}-{algorithm_params}.txt', out_dir=out_dir, sep=os.sep, dataset=datasets, algorithm_params=algorithms_with_params))
 
     # Create log files for the parameters and datasets
     final_input.extend(expand('{out_dir}{sep}parameters-{algorithm}.txt', out_dir=out_dir, sep=os.sep, algorithm=algorithms))
-    final_input.extend(expand('{out_dir}{sep}datasets-{dataset}.txt', out_dir=out_dir, sep=os.sep, dataset=datasets.keys()))
+    final_input.extend(expand('{out_dir}{sep}datasets-{dataset}.txt', out_dir=out_dir, sep=os.sep, dataset=datasets))
 
     return final_input
 
@@ -133,7 +133,7 @@ rule reconstruct_pathways:
     input: make_final_input
     # dynamic() may not work when defined in a separate function but may not be needed if not running the
     # prepare_input rule directly
-    #input: dynamic(expand('{out_dir}{sep}{dataset}-{algorithm}-{{type}}.txt', out_dir=out_dir, sep=os.sep, dataset=datasets.keys(), algorithm=algorithms))
+    #input: dynamic(expand('{out_dir}{sep}{dataset}-{algorithm}-{{type}}.txt', out_dir=out_dir, sep=os.sep, dataset=datasets, algorithm=algorithms))
 
 # Merge all node files and edge files for a dataset into a single node table and edge table
 rule merge_input:
@@ -214,7 +214,7 @@ rule log_datasets:
         logfile = os.path.join(out_dir, 'datasets-{dataset}.txt')
     run:
         write_dataset_log(wildcards.dataset, output.logfile)
-        
+
 '''
 # Pathway Augmentation
 rule augment_pathway:
