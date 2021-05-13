@@ -129,7 +129,6 @@ class PathLinker(PRM):
         @param raw_pathway_file: pathway file produced by an algorithm's run function
         @param standardized_pathway_file: the same pathway written in the universal format
         """
-        # Temporarily create a placeholder output file for Snakemake
         # Questions: should there be a header/optional columns?
         # What about multiple raw_pathway_files
         # We should not allow spaces in the node names if we use space separator.
