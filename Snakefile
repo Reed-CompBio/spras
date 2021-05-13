@@ -109,12 +109,12 @@ def make_final_input(wildcards):
     #TODO analysis could be parsed in the parse_config() function.
     if config["analysis"]["summary"]["include"]:
         # add summary output file.
-        final_input.extend(expand('{out_dir}{sep}pathway-{dataset}-{algorithm_params}-summary.txt',out_dir=out_dir,sep=os.sep,dataset=datasets,algorithm_params=algorithms_with_params))
+        final_input.extend(expand('{out_dir}{sep}summary-{dataset}-{algorithm_params}.txt',out_dir=out_dir,sep=os.sep,dataset=datasets,algorithm_params=algorithms_with_params))
 
     if config["analysis"]["graphspace"]["include"]:
         # add graph and style JSON files.
-        final_input.extend(expand('{out_dir}{sep}pathway-{dataset}-{algorithm_params}-gs.json',out_dir=out_dir,sep=os.sep,dataset=datasets,algorithm_params=algorithms_with_params))
-        final_input.extend(expand('{out_dir}{sep}pathway-{dataset}-{algorithm_params}-gs-style.json',out_dir=out_dir,sep=os.sep,dataset=datasets,algorithm_params=algorithms_with_params))
+        final_input.extend(expand('{out_dir}{sep}gs-{dataset}-{algorithm_params}.json',out_dir=out_dir,sep=os.sep,dataset=datasets,algorithm_params=algorithms_with_params))
+        final_input.extend(expand('{out_dir}{sep}gsstyle-{dataset}-{algorithm_params}.json',out_dir=out_dir,sep=os.sep,dataset=datasets,algorithm_params=algorithms_with_params))
 
     if len(final_input) == 0:
         # No analysis added yet, so add reconstruction output files if they exist.
@@ -234,7 +234,7 @@ rule summarize:
     input:
         standardized_file = os.path.join(out_dir, 'pathway-{dataset}-{algorithm}-{params}.txt')
     output:
-        summary_file = os.path.join(out_dir, 'pathway-{dataset}-{algorithm}-{params}-summary.txt')
+        summary_file = os.path.join(out_dir, 'summary-{dataset}-{algorithm}-{params}.txt')
     run:
         summary.run(input.standardized_file,output.summary_file,directed=algorithm_directed[wildcards.algorithm])
 
@@ -242,7 +242,7 @@ rule summarize:
 rule viz_graphspace:
     input: standardized_file = os.path.join(out_dir, 'pathway-{dataset}-{algorithm}-{params}.txt')
     output:
-        graph_json = os.path.join(out_dir, 'pathway-{dataset}-{algorithm}-{params}-gs.json'), style_json = os.path.join(out_dir, 'pathway-{dataset}-{algorithm}-{params}-gs-style.json')
+        graph_json = os.path.join(out_dir, 'gs-{dataset}-{algorithm}-{params}.json'), style_json = os.path.join(out_dir, 'gsstyle-{dataset}-{algorithm}-{params}.json')
     run:
         json_prefix = os.path.join(out_dir, 'pathway-{dataset}-{algorithm}-{params}')
         graphspace.write_json(input.standardized_file,output.graph_json,output.style_json,directed=algorithm_directed[wildcards.algorithm])
