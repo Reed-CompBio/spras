@@ -18,6 +18,6 @@ The `input` subdirectory contains test files `meo-edges.txt`, `meo-sources.txt`,
 The Docker wrapper can be tested with `pytest`.
 
 ## TODO
-- https://github.com/agitter/meo/
+- Attribute https://github.com/agitter/meo/
 - Document usage
 - Consider Alpine-based base image

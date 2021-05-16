@@ -10,6 +10,7 @@ __all__ = ['MEO']
 
 # Only supports the Random orientation algorithm
 # Does not support MINSAT or MAXCSP
+# TODO add parameter validation
 def write_properties(filename=Path('properties.txt'), edges=None, sources=None, targets=None, edge_output=None,
                      path_output=None, max_path_length=None, local_search=None, rand_restarts=None):
     """
