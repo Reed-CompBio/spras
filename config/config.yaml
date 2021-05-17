@@ -11,6 +11,7 @@
  # - name: "myAlg"
  #   params:
  #         include: true
+ #         directed: true
  #         a: [1,2]
  #         b: [0.5,0.75]
  #
@@ -69,6 +70,8 @@
        data_dir: "input"
 
  # If we want to reconstruct then we should set run to true.
+ # TODO: if include is true above but run is false here, algs are not run.
+ # is this the behavior we want?
  reconstruction_settings:
 
          #set where everything is saved
