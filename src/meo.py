@@ -102,7 +102,7 @@ class MEO(PRM):
             if need_chown:
                 # This command changes the ownership of output files so we don't
                 # get a permissions error when snakemake tries to touch the files
-                chown_command = " ".join(["chown", str(uid), output_file, path_output_file.as_posix()])
+                chown_command = " ".join([str(uid), output_file, path_output_file.as_posix()])
                 # Modify the entrypoint because the command is expected to be a properties file that is passed
                 # to the jar file
                 client.containers.run('reedcompbio/meo',
@@ -110,7 +110,7 @@ class MEO(PRM):
                                       stderr=True,
                                       volumes={prepare_path_docker(work_dir): {'bind': '/spras', 'mode': 'rw'}},
                                       working_dir='/spras',
-                                      entrypoint='/bin/bash')
+                                      entrypoint='/bin/chown')
 
             print(out.decode('utf-8'))
         finally:
