@@ -1,6 +1,6 @@
 # Maximum Edge Orientation Docker image
 
-A Docker image for [Maximum Edge Orientation](https://github.com/agitter/meo/).
+A Docker image for [Maximum Edge Orientation](https://github.com/agitter/meo/) that is available on [DockerHub](https://hub.docker.com/repository/docker/reedcompbio/meo).
 Only supports the Random orientation algorithm, not MINSAT or MAXCSP.
 
 ## Building the Docker image
