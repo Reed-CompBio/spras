@@ -1,5 +1,7 @@
 import docker
 import os
+import sys
+import pandas as pd
 import warnings
 from src.PRM import PRM
 from pathlib import Path
@@ -127,7 +129,8 @@ class PathLinker(PRM):
         @param raw_pathway_file: pathway file produced by an algorithm's run function
         @param standardized_pathway_file: the same pathway written in the universal format
         """
-        # TODO update the parse_output command to translate and write the pathway file
-        # Temporarily create a placeholder output file for Snakemake
-        with open(standardized_pathway_file, 'w') as out_file:
-            out_file.write(f'PathLinker converting raw pathway {raw_pathway_file}')
+        # Questions: should there be a header/optional columns?
+        # What about multiple raw_pathway_files
+        # We should not allow spaces in the node names if we use space separator.
+        df = pd.read_csv(raw_pathway_file,sep='\t').take([0,1,2],axis=1)
+        df.to_csv(standardized_pathway_file, header=False,index=False,sep=' ')

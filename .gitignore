@@ -138,3 +138,6 @@ dmypy.json
 # Output files
 output/
 TempMat.mat
+
+#OSX-specific stuff
+*.DS_Store

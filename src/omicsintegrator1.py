@@ -173,5 +173,22 @@ class OmicsIntegrator1(PRM):
         for oi1_output in out_dir.glob('oi1_*'):
             oi1_output.unlink(missing_ok=True)
 
-    def parse_output(self):
-        print('Omics Integrator 1: parseOutput()')
+    @staticmethod
+    def parse_output(raw_pathway_file, standardized_pathway_file):
+        """
+        Convert a predicted pathway into the universal format
+        @param raw_pathway_file: pathway file produced by an algorithm's run function
+        @param standardized_pathway_file: the same pathway written in the universal format
+        """
+        # I'm assuming from having read the documentation that we will be passing in optimalForest.sif
+        # as raw_pathway_file, in which case the format should be edge1 interactiontype edge2.
+        # if that assumption is wrong we will need to tweak things
+        try:
+            df = pd.read_csv(raw_pathway_file,sep='\s+', header=None)
+        except pd.errors.EmptyDataError:
+            with open(standardized_pathway_file,'w') as emptyFile:
+                pass
+            return
+        df = df.take([0,2],axis=1)
+        df[3] = [1 for _ in range(len(df.index))]
+        df.to_csv(standardized_pathway_file, header=False,index=False,sep=' ')
