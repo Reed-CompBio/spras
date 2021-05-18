@@ -96,8 +96,7 @@ def make_final_input(wildcards):
 
 # A rule to define all the expected outputs from all pathway reconstruction
 # algorithms run on all datasets for all arguments
-# TODO: do we need this rule? Does it kick off all other rules?
-rule reconstruct_pathways:
+rule all:
     input: make_final_input
 
 # Merge all node files and edge files for a dataset into a single node table and edge table
@@ -161,6 +160,8 @@ rule parse_output:
         PRRunner.parse_output(wildcards.algorithm, input.raw_file, output.standardized_file)
 
 # Write the mapping from parameter indices to parameter dictionaries
+# TODO: Need this to have input files so it updates
+# Possibly all rules should have the config file as input
 rule log_parameters:
     output:
         logfile = os.path.join(out_dir, 'parameters-{algorithm}.txt')
@@ -168,6 +169,8 @@ rule log_parameters:
         write_parameter_log(wildcards.algorithm, output.logfile)
 
 # Write the datasets (copied from the log_parameters rule)
+# TODO: Need this to have input files so it updates
+# Possibly all rules should have the config file as input
 rule log_datasets:
     output:
         logfile = os.path.join(out_dir, 'datasets-{dataset}.txt')
