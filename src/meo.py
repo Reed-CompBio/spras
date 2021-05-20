@@ -3,7 +3,6 @@ import docker
 from pathlib import Path
 from src.util import prepare_path_docker
 import os
-import pandas as pd
 
 __all__ = ['MEO']
 
@@ -43,9 +42,41 @@ def write_properties(filename=Path('properties.txt'), edges=None, sources=None, 
 
         # Do not need csp.phase, csp.gen.file, or csp.sol.file because MAXCSP is not supported
 
+
 # TODO add generate_inputs and parse_output
 class MEO(PRM):
     required_inputs = ['sources', 'targets', 'edges']
+
+    @staticmethod
+    def generate_inputs(data, filename_map):
+        """
+        Access fields from the dataset and write the required input files
+        @param data: dataset
+        @param filename_map: a dict mapping file types in the required_inputs to the filename for that type
+        @return:
+        """
+        for input_type in MEO.required_inputs:
+            if input_type not in filename_map:
+                raise ValueError(f"{input_type} filename is missing")
+
+        # Get sources and write to file, repeat for targets
+        # Does not check whether a node is a source and a target
+        for node_type in ['sources', 'targets']:
+            nodes = data.request_node_columns([node_type])
+            if nodes is None:
+                raise ValueError(f'No {node_type} found in the node files')
+
+            # TODO test whether this selection is needed, what values could the column contain that we would want to
+            # include or exclude?
+            nodes = nodes.loc[nodes[node_type]]
+            nodes.to_csv(filename_map[node_type], index=False, columns=['NODEID'], header=False)
+
+        # TODO need to support partially directed graphs
+        # Expected columns are Node1 EdgeType Node2 Weight
+        edges = data.get_interactome()
+        # For now all edges are undirected
+        edges.insert(1, 'EdgeType', '(pp)')
+        edges.to_csv(filename_map['edges'], sep='\t', index=False, columns=['Interactor1', 'EdgeType', 'Interactor2', 'Weight'], header=False)
 
 
     # TODO add parameter validation
