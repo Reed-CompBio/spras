@@ -11,7 +11,6 @@
  # - name: "myAlg"
  #   params:
  #         include: true
- #         directed: true
  #         a: [1,2]
  #         b: [0.5,0.75]
  #
@@ -19,17 +18,26 @@
  # careful: too many parameters might make your runs take a long time.
 
  algorithms:
+        - name: "bowtiebuilder"
+          params:
+                include: false
+                run1:
+
         - name: "pathlinker"
           params:
                 include: true
-                directed: true
                 run1:
                     k: range(100,201,100)
+
+        - name: "responsenet"
+          params:
+                include: false
+                run1:
+                    y: [20]
 
         - name: "omicsintegrator1"
           params:
                 include: true
-                directed: false
                 run1:
                     r: [5]
                     b: [5,6]
@@ -40,13 +48,24 @@
         - name: "omicsintegrator2"
           params:
                 include: true
-                directed: false
                 run1:
                     b: [4]
                     g: [0]
                 run2:
                     b: [2]
                     g: [3]
+
+        - name: "shortestpaths"
+          params:
+                include: false
+                run1:
+
+        - name: "rwr"
+          params:
+                include: false
+                run1:
+                    a: [0.85]
+                    t: [0.3]
 
  # Here we specify which pathways to run and other file location information.
  # DataLoader.py can currently only load a single dataset
@@ -70,23 +89,70 @@
        data_dir: "input"
 
  # If we want to reconstruct then we should set run to true.
- # TODO: if include is true above but run is false here, algs are not run.
- # is this the behavior we want?
  reconstruction_settings:
 
          #set where everything is saved
          locations:
+
+                #place the path to your pathway annotation files here
+                pathway_dir: "/path/to/pathways"
 
                 #place the save path here
                 reconstruction_dir: "output"
 
          run: true
 
- analysis:
-        summary:
+ #Do we want to augment our reconstructions
+ augmentation_settings:
 
-          include: true
+         #save locations
+         locations:
+                 reconstruction_dir: "/path/to/save"
 
-        graphspace:
+         PRAUG:
 
-          include: true
+                 run: true
+
+         ensemble:
+
+                 run: false
+                 rule: "Intersection"
+
+
+ evaluation_settings:
+
+         locations:
+                 reconstruction_dir: "/path/to/reconstructions"
+
+         PR:
+                 compute: true
+
+                 #the open-world assumption is the denial that being unannotated is to be not in the pathway.
+                 #it allows for sub-sampling of negatives.
+
+                 open_word: true
+
+                 #in the case that we use the open-world assumption, we need to tell the program how to negatives.
+                 #The options here are "fixed" or "random". In the case that "fixed" is selected the program will use
+                 #negative values picked by the authors of this software. If "random" is chosen, the program will sample
+                 #from unannotated interactions/proteins at a rate of 50 negatives to every positive.
+
+                 negative_set: "fixed"
+
+
+
+ #Plotting
+ plot_settings:
+
+         locations:
+                 reconstruction_dir: "/path/to/reconstructions"
+
+                 plot_dir: "/path/to/plots"
+         plots:
+
+                - name: "example_plot_1"
+                  type: "PR"
+                  #where panel determines whether many subfigures are used or just 1.
+                  #      fmax determines whether to display fmax in the legend
+                  #      edge determines whether to plot edge PR or node PR
+                  params: ["panel=True","fmax=True","edge=True"]

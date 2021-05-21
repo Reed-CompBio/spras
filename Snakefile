@@ -5,36 +5,31 @@
 import os
 import PRRunner
 from src.util import parse_config
+from src.analysis.summary import summary
+from src.analysis.viz import graphspace
 
 config_file = os.path.join('config', 'config.yaml')
 wildcard_constraints:
     algorithm='\w+'
 
-config, datasets, out_dir, algorithm_params = parse_config(config_file)
+config, datasets, out_dir, algorithm_params, algorithm_directed = parse_config(config_file)
 
 # Return the dataset dictionary from the config file given the label
 def get_dataset(datasets, label):
-    #return datasets[dataset_dict[label]]
     return datasets[label]
 
 # Return all files used in the dataset plus the config file
-# TODO Consider how to make the dataset depend only on the part of the config file relevant for this dataset
-# instead of the entire config file
+# TODO Consider how to make the dataset depend only on the part of the config
+# file relevant for this dataset instead of the entire config file
 # Input preparation needs to be rerun if these files are modified
-def get_dataset_dependencies(datsets, label):
+def get_dataset_dependencies(datasets, label):
     dataset = datasets[label]
     all_files = dataset["node_files"] + dataset["edge_files"] + dataset["other_files"]
     # Add the relative file path and config file
     all_files = [os.path.join(dataset["data_dir"], data_file) for data_file in all_files]
     return all_files + [config_file]
 
-algorithms = list(algorithm_params.keys())
-pathlinker_params = algorithm_params['pathlinker'] # Temporary
-
-# Eventually we'd store these values in a config file
-run_options = {}
-run_options["augment"] = False
-run_options["parameter-advise"] = False
+algorithms = list(algorithm_params)
 
 # Generate numeric indices for the parameter combinations
 # of each reconstruction algorithms
@@ -67,48 +62,49 @@ def write_parameter_log(algorithm, logfile):
         for index, params in enumerate(algorithm_params[algorithm]):
             f.write(f'params{index}: {params}\n')
 
-# Choose the final input for reconstruct_pathways based on which options are being run
-# Right now this is a static run_options dictionary but would eventually
-# be done with the config file
+# Log the datasets specified in the config file.
+def write_dataset_log(dataset,logfile):
+    with open(logfile,'w') as f:
+        for key,value in datasets[dataset].items():
+            f.write(f'{key}: {value}\n')
+
+
+# Choose the final files expected according to the config file options.
 def make_final_input(wildcards):
-    # Right now this lets us do ppa or augmentation, but not both.
-    # An easy solution would be to make a separate rule for doing both, but
-    # if we add more things to do after the fact that will get
-    # out of control pretty quickly. Steps run in parallel won't have this problem, just ones
-    # whose inputs depend on each other.
-    # Currently, this will not re-generate all of the individual pathways
-    # when augmenting or advising
-    # Changes to the parameter handling may have broken the augment and advising options
-    if run_options["augment"]:
-        final_input = expand('{out_dir}{sep}augmented-pathway-{dataset}-{algorithm}-{params}.txt', out_dir=out_dir, sep=os.sep, dataset=dataset_labels, algorithm=algorithms, params=pathlinker_params)
-    elif run_options["parameter-advise"]:
-        #not a great name
-        final_input = expand('{out_dir}{sep}advised-pathway-{dataset}-{algorithm}.txt', out_dir=out_dir, sep=os.sep, dataset=datasets, algorithm=algorithms)
-    else:
-        # Temporary, build up one rule at a time to help debugging
-        # dynamic() may not work when defined in a separate function
-        #final_input = dynamic(expand('{out_dir}{sep}{dataset}-{algorithm}-{{type}}.txt', out_dir=out_dir, sep=os.sep, dataset=datasets.keys(), algorithm=algorithms))
-        # Use 'params<index>' in the filename instead of describing each of the parameters and its value
-        final_input = expand('{out_dir}{sep}pathway-{dataset}-{algorithm_params}.txt', out_dir=out_dir, sep=os.sep, dataset=datasets.keys(), algorithm_params=algorithms_with_params)
-        # Create log files for the parameter indices
-        #final_input.extend(expand('{out_dir}{sep}parameters-{algorithm}.txt', out_dir=out_dir, sep=os.sep, algorithm=algorithms))
-        # TODO Create log files for the datasets
+    final_input = []
+
+    #TODO analysis could be parsed in the parse_config() function.
+    if config["analysis"]["summary"]["include"]:
+        # add summary output file.
+        final_input.extend(expand('{out_dir}{sep}summary-{dataset}-{algorithm_params}.txt',out_dir=out_dir,sep=os.sep,dataset=datasets,algorithm_params=algorithms_with_params))
+
+    if config["analysis"]["graphspace"]["include"]:
+        # add graph and style JSON files.
+        final_input.extend(expand('{out_dir}{sep}gs-{dataset}-{algorithm_params}.json',out_dir=out_dir,sep=os.sep,dataset=datasets,algorithm_params=algorithms_with_params))
+        final_input.extend(expand('{out_dir}{sep}gsstyle-{dataset}-{algorithm_params}.json',out_dir=out_dir,sep=os.sep,dataset=datasets,algorithm_params=algorithms_with_params))
+
+    if len(final_input) == 0:
+        # No analysis added yet, so add reconstruction output files if they exist.
+        # (if analysis is specified, these should be implicity run).
+        final_input.extend(expand('{out_dir}{sep}pathway-{dataset}-{algorithm_params}.txt', out_dir=out_dir, sep=os.sep, dataset=datasets, algorithm_params=algorithms_with_params))
+
+    # Create log files for the parameters and datasets
+    final_input.extend(expand('{out_dir}{sep}parameters-{algorithm}.txt', out_dir=out_dir, sep=os.sep, algorithm=algorithms))
+    final_input.extend(expand('{out_dir}{sep}datasets-{dataset}.txt', out_dir=out_dir, sep=os.sep, dataset=datasets))
+
     return final_input
 
 # A rule to define all the expected outputs from all pathway reconstruction
 # algorithms run on all datasets for all arguments
-rule reconstruct_pathways:
+rule all:
     input: make_final_input
-    # dynamic() may not work when defined in a separate function but may not be needed if not running the
-    # prepare_input rule directly
-    #input: dynamic(expand('{out_dir}{sep}{dataset}-{algorithm}-{{type}}.txt', out_dir=out_dir, sep=os.sep, dataset=datasets.keys(), algorithm=algorithms))
 
 # Merge all node files and edge files for a dataset into a single node table and edge table
 rule merge_input:
-    # Depends on the node, edge, and other files for this dataset so the rule and downstream rules are rerun
-    # if they change
+    # Depends on the node, edge, and other files for this dataset so the rule and downstream rules are rerun if they change
     # Also depends on the config file
     # TODO does not need to depend on the entire config file but rather only the input files for this dataset
+    # TODO why does this pass datasets while datasets is in the global frame as well?
     input: lambda wildcards: get_dataset_dependencies(datasets, wildcards.dataset)
     output: dataset_file = os.path.join(out_dir, '{dataset}-merged.pickle')
     run:
@@ -160,7 +156,6 @@ rule reconstruct:
 rule parse_output:
     input: raw_file = os.path.join(out_dir, 'raw-pathway-{dataset}-{algorithm}-{params}.txt')
     output: standardized_file = os.path.join(out_dir, 'pathway-{dataset}-{algorithm}-{params}.txt')
-    # run the post-processing script
     run:
         PRRunner.parse_output(wildcards.algorithm, input.raw_file, output.standardized_file)
 
@@ -173,17 +168,32 @@ rule log_parameters:
     run:
         write_parameter_log(wildcards.algorithm, output.logfile)
 
-# Pathway Augmentation
-rule augment_pathway:
-    input: os.path.join(out_dir, 'pathway-{dataset}-{algorithm}-{params}.txt')
-    output: os.path.join(out_dir, 'augmented-pathway-{dataset}-{algorithm}-{params}.txt')
-    shell: 'echo {input} >> {output}'
+# Write the datasets (copied from the log_parameters rule)
+# TODO: Need this to have input files so it updates
+# Possibly all rules should have the config file as input
+rule log_datasets:
+    output:
+        logfile = os.path.join(out_dir, 'datasets-{dataset}.txt')
+    run:
+        write_dataset_log(wildcards.dataset, output.logfile)
 
-# Pathway Parameter Advising
-rule parameter_advise:
-    input: expand('{out_dir}{sep}pathway-{dataset}-{algorithm}-{params}.txt', out_dir=out_dir, sep=os.sep, dataset=datasets, algorithm=algorithms, params=pathlinker_params)
-    output: os.path.join(out_dir, 'advised-pathway-{dataset}-{algorithm}.txt')
-    shell: 'echo {input} >> {output}'
+# Collect Summary Statistics
+rule summarize:
+    input:
+        standardized_file = os.path.join(out_dir, 'pathway-{dataset}-{algorithm}-{params}.txt')
+    output:
+        summary_file = os.path.join(out_dir, 'summary-{dataset}-{algorithm}-{params}.txt')
+    run:
+        summary.run(input.standardized_file,output.summary_file,directed=algorithm_directed[wildcards.algorithm])
+
+# Write GraphSpace JSON Graphs
+rule viz_graphspace:
+    input: standardized_file = os.path.join(out_dir, 'pathway-{dataset}-{algorithm}-{params}.txt')
+    output:
+        graph_json = os.path.join(out_dir, 'gs-{dataset}-{algorithm}-{params}.json'), style_json = os.path.join(out_dir, 'gsstyle-{dataset}-{algorithm}-{params}.json')
+    run:
+        json_prefix = os.path.join(out_dir, 'pathway-{dataset}-{algorithm}-{params}')
+        graphspace.write_json(input.standardized_file,output.graph_json,output.style_json,directed=algorithm_directed[wildcards.algorithm])
 
 # Remove the output directory
 rule clean:
