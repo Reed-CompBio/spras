@@ -3,6 +3,7 @@ import docker
 from pathlib import Path
 from src.util import prepare_path_docker
 import os
+import pandas as pd
 
 __all__ = ['MEO']
 
@@ -23,11 +24,11 @@ def write_properties(filename=Path('properties.txt'), edges=None, sources=None, 
 
     with open(filename, 'w') as f:
         # Write the required properties
-        f.write(f'edges.file = {edges}\n')
-        f.write(f'sources.file = {sources}\n')
-        f.write(f'targets.file = {targets}\n')
-        f.write(f'edge.output.file = {edge_output}\n')
-        f.write(f'path.output.file = {path_output}\n')
+        f.write(f'edges.file = {Path(edges).as_posix()}\n')
+        f.write(f'sources.file = {Path(sources).as_posix()}\n')
+        f.write(f'targets.file = {Path(targets).as_posix()}\n')
+        f.write(f'edge.output.file = {Path(edge_output).as_posix()}\n')
+        f.write(f'path.output.file = {Path(path_output).as_posix()}\n')
 
         # Write the optional properties if they were specified
         if max_path_length is not None:
@@ -43,7 +44,6 @@ def write_properties(filename=Path('properties.txt'), edges=None, sources=None, 
         # Do not need csp.phase, csp.gen.file, or csp.sol.file because MAXCSP is not supported
 
 
-# TODO add generate_inputs and parse_output
 class MEO(PRM):
     required_inputs = ['sources', 'targets', 'edges']
 
@@ -110,7 +110,7 @@ class MEO(PRM):
         properties_file = 'meo-properties.txt'
         properties_file_abs = Path(work_dir, properties_file)
         write_properties(filename=properties_file_abs, edges=edges, sources=sources, targets=targets,
-                         edge_output=output_file, path_output=path_output_file.as_posix(),
+                         edge_output=output_file, path_output=path_output_file,
                          max_path_length=max_path_length, local_search=local_search, rand_restarts=rand_restarts)
 
         command = [properties_file]
@@ -153,3 +153,20 @@ class MEO(PRM):
         # TODO if deleting other output files, write them all to a tmp directory and copy
         # the desired output file instead of using glob to delete files from the actual output directory
         path_output_file.unlink(missing_ok=False)
+
+    @staticmethod
+    def parse_output(raw_pathway_file, standardized_pathway_file):
+        """
+        Convert a predicted pathway into the universal format
+        @param raw_pathway_file: pathway file produced by an algorithm's run function
+        @param standardized_pathway_file: the same pathway written in the universal format
+        """
+        # Columns Source Type Target Oriented Weight
+        df = pd.read_csv(raw_pathway_file, sep='\t')
+        # Keep only edges that were assigned an orientation (direction)
+        df = df.loc[df['Oriented']]
+        # TODO what should be the edge rank?
+        # Would need to load the paths output file to rank edges correctly
+        df.insert(5, 'Rank', 1)  # Add a constant rank of 1
+        # TODO switch to tab-delimited once other methods are changed
+        df.to_csv(standardized_pathway_file, columns=['Source', 'Target', 'Rank'], header=False, index=False, sep=' ')
