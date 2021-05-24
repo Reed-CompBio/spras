@@ -20,7 +20,7 @@
  algorithms:
         - name: "pathlinker"
           params:
-                include: true
+                include: false
                 directed: true
                 run1:
                     k: [100,200]

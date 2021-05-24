@@ -1,4 +1,3 @@
-#tail	head	weight
 Q13490	Q9NP84	1
 Q13490	Q12933	1
 Q14790	Q13158	1
