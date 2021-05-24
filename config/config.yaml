@@ -23,7 +23,7 @@
                 include: true
                 directed: true
                 run1:
-                    k: range(100,201,100)
+                    k: [100,200]
 
         - name: "omicsintegrator1"
           params:
@@ -31,8 +31,8 @@
                 directed: false
                 run1:
                     r: [5]
-                    b: [5,6]
-                    w: np.linspace(0,5,2)
+                    b: [5]
+                    w: [1,5]
                     g: [3]
                     d: [10]
 
@@ -41,32 +41,35 @@
                 include: true
                 directed: false
                 run1:
-                    b: [4]
-                    g: [0]
-                run2:
-                    b: [2]
+                    b: [5]
                     g: [3]
 
  # Here we specify which pathways to run and other file location information.
  # DataLoader.py can currently only load a single dataset
  datasets:
      -
-       label: data0
-       node_files: ["node-prizes.txt", "sources.txt", "targets.txt"]
+       label: wnt
+       #node_files: ["node-prizes.txt", "sources.txt", "targets.txt"]
+       node_files: ["sources.wnt.txt", "targets.wnt.txt"]
        # DataLoader.py can currently only load a single edge file, which is the primary network
-       edge_files: ["network.txt"]
+       edge_files: ["np-union.txt"]
        # Placeholder
        other_files: []
+       ground_truth_files: ["wnt-edges.txt", "wnt-nodes.txt"]
        # Relative path from the spras directory
-       data_dir: "input"
+       #data_dir: "input"
+       data_dir: "input/netpath-nets"
      -
-       label: data1
+       label: bcr
        # Reuse some of the same sources file as 'data0' but different network and targets
-       node_files: ["sources.txt", "alternative-targets.txt"]
-       edge_files: ["alternative-network.txt"]
+       #node_files: ["sources.txt", "alternative-targets.txt"]
+       node_files: ["sources.bcr.txt", "targets.bcr.txt"]
+       edge_files: ["np-union.txt"]
        other_files: []
+       ground_truth_files: ["bcr-edges.txt", "bcr-nodes.txt"]
        # Relative path from the spras directory
-       data_dir: "input"
+       #data_dir: "input"
+       data_dir: "input/netpath-nets"
 
  # If we want to reconstruct then we should set run to true.
  reconstruction_settings:
