@@ -18,4 +18,7 @@ dependencies:
   - sphinx=4.0
   - pip:
      - git+https://github.com/annaritz/graphspace-python@fa9bb4b0adc54de50a956daade82db48a8030f64
+     # GraphSpace requires a specific version of requests
+     # https://github.com/adbharadwaj/graphspace-python/blob/42283556eb3a52212cfa9f75dfc694c70069add7/requirements.txt#L3
+     - requests==2.10.0
      - sphinx-rtd-theme==0.5.2
