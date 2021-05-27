@@ -15,7 +15,6 @@ dependencies:
   - jinja2=2.10
   - mock=4.0
   - recommonmark=0.7
-  - requests=2.10.0
   - sphinx=4.0
   - pip:
      - git+https://github.com/annaritz/graphspace-python@fa9bb4b0adc54de50a956daade82db48a8030f64
