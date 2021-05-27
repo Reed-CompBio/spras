@@ -10,7 +10,10 @@ dependencies:
   - python=3.8
   - pip=21.1.1
   # Only required for GraphSpace
+  - commonmark=0.9
+  - docutils=0.17
   - jinja2=2.10
+  - recommonmark=0.7
   - sphinx=4.0
   - pip:
      - git+https://github.com/annaritz/graphspace-python@fa9bb4b0adc54de50a956daade82db48a8030f64
