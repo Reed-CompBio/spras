@@ -23,7 +23,7 @@ jobs:
 
   # Builds the Docker images
   docker:
-    name: Test Docker wrappers
+    name: Test Docker images
     runs-on: ${{ matrix.os }}
     strategy:
       matrix:
@@ -69,7 +69,7 @@ jobs:
 
   # Runs the test code and Snakemake workflow
   test:
-    name: Test Docker wrappers
+    name: Run test cases and workflow
     # This job depends on the conda job but not the docker job
     # Therefore the Docker images will be pulled in both the docker job and the test job
     needs: conda
