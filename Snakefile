@@ -1,6 +1,7 @@
 import os
 import PRRunner
 import shutil
+import yaml
 from src.util import parse_config
 from src.analysis.summary import summary
 from src.analysis.viz import graphspace
@@ -48,21 +49,35 @@ def params_to_args(params):
     args_list = [f'--{param}={value}' for param, value in params.items()]
     return ' '.join(args_list)
 
-# Log the parameter dictionaries and the mapping from indices to parameter values
-# Could write this as a YAML file
+# Log the parameter dictionaries and the mapping from parameter indices to parameter values
+# If the logfile already exists and the contents match the current parameter configurations,
+# do not rewrite the file
+# TODO need a different approach because Snakemake deletes the old version of the logfile before calling this function
+# The cached parameters will always be empty
 def write_parameter_log(algorithm, logfile):
-    with open(logfile, 'w') as f:
-        # May want to use the previously created mapping from parameter indices
-        # instead of recreating it to make sure they always correspond
-        for index, params in enumerate(algorithm_params[algorithm]):
-            f.write(f'params{index}: {params}\n')
+    # May want to use the previously created mapping from parameter indices
+    # instead of recreating it to make sure they always correspond
+    cur_params_dict = {f'params{index}': params for index, params in enumerate(algorithm_params[algorithm])}
+
+    try:
+        cached_params_dict = read_parameter_log(logfile)
+    except OSError as e:
+        cached_params_dict = {}
+
+    if cur_params_dict != cached_params_dict:
+        print(f'Writing {logfile}')
+        with open(logfile,'w') as f:
+            yaml.safe_dump(cur_params_dict,f)
+
+def read_parameter_log(logfile):
+    with open(logfile) as f:
+        return yaml.safe_load(f)
 
 # Log the datasets specified in the config file.
 def write_dataset_log(dataset,logfile):
     with open(logfile,'w') as f:
         for key,value in datasets[dataset].items():
             f.write(f'{key}: {value}\n')
-
 
 # Choose the final files expected according to the config file options.
 def make_final_input(wildcards):
@@ -93,6 +108,24 @@ def make_final_input(wildcards):
 # algorithms run on all datasets for all arguments
 rule all:
     input: make_final_input
+
+
+# Write the mapping from parameter indices to parameter dictionaries
+# TODO: Need this to have input files so it updates
+# Possibly all rules should have the config file as input
+rule log_parameters:
+    input: config_file
+    output: log_file = os.path.join(out_dir, 'parameters-{algorithm}.txt')
+    run:
+        write_parameter_log(wildcards.algorithm, output.log_file)
+
+# Write the datasets (copied from the log_parameters rule)
+# TODO: Need this to have input files so it updates
+# Possibly all rules should have the config file as input
+rule log_datasets:
+    output: log_file = os.path.join(out_dir, 'datasets-{dataset}.txt')
+    run:
+        write_dataset_log(wildcards.dataset, output.log_file)
 
 # Merge all node files and edge files for a dataset into a single node table and edge table
 rule merge_input:
@@ -179,24 +212,6 @@ rule parse_output:
     output: standardized_file = os.path.join(out_dir, 'pathway-{dataset}-{algorithm}-{params}.txt')
     run:
         PRRunner.parse_output(wildcards.algorithm, input.raw_file, output.standardized_file)
-
-# Write the mapping from parameter indices to parameter dictionaries
-# TODO: Need this to have input files so it updates
-# Possibly all rules should have the config file as input
-rule log_parameters:
-    output:
-        logfile = os.path.join(out_dir, 'parameters-{algorithm}.txt')
-    run:
-        write_parameter_log(wildcards.algorithm, output.logfile)
-
-# Write the datasets (copied from the log_parameters rule)
-# TODO: Need this to have input files so it updates
-# Possibly all rules should have the config file as input
-rule log_datasets:
-    output:
-        logfile = os.path.join(out_dir, 'datasets-{dataset}.txt')
-    run:
-        write_dataset_log(wildcards.dataset, output.logfile)
 
 # Collect Summary Statistics
 rule summarize:
