@@ -1,7 +1,3 @@
-# With Git Bash on Windows multiline strings are not executed properly
-# https://carpentries-incubator.github.io/workflows-snakemake/07-resources/index.html
-# (No longer applicable for this command, but a good reminder)
-
 import os
 import PRRunner
 import shutil
@@ -10,8 +6,6 @@ from src.analysis.summary import summary
 from src.analysis.viz import graphspace
 
 config_file = os.path.join('config', 'config.yaml')
-wildcard_constraints:
-    algorithm='\w+'
 
 config, datasets, out_dir, algorithm_params, algorithm_directed = parse_config(config_file)
 
