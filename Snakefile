@@ -112,42 +112,39 @@ rule merge_input:
         dataset_dict = get_dataset(datasets, wildcards.dataset)
         PRRunner.merge_input(dataset_dict, output.dataset_file)
 
-# Universal input to pathway reconstruction-specific input
-# Functions are not allowed when defining the output file list ("Only input files can be specified as functions" error)
-# An alternative could be to dynamically generate one rule per reconstruction algorithm
-# See https://stackoverflow.com/questions/48993241/varying-known-number-of-outputs-in-snakemake
-# Currently using dynamic() to indicate we do not know in advance statically how many {type} values there will be
-# See https://snakemake.readthedocs.io/en/stable/snakefiles/rules.html#dynamic-files
-# See https://groups.google.com/g/snakemake/c/RO71QYIJ49E
-# The number of steps cannot be estimated accurately statically so the Snakemake output contains messages like
-# '6 of 4 steps (150%) done'
-# TODO consider alternatives for the dynamic output file list
-rule prepare_input:
+checkpoint prepare_input:
     input: dataset_file = os.path.join(out_dir, '{dataset}-merged.pickle')
-    # Could ideally use required_inputs to determine which output files to write
-    # That does not seem possible because it requires a function and is not static
-    output: output_files = dynamic(os.path.join(out_dir, 'prepared-{dataset}-{algorithm}-{type}.txt'))
+    # Output is a directory that will contain all prepared files for pathway reconstruction
+    output: output_dir = directory(os.path.join(out_dir, 'prepared', '{dataset}-{algorithm}'))
     # Run the preprocessing script for this algorithm
     run:
+        # Make sure the output subdirectories exist
+        os.makedirs(output.output_dir, exist_ok=True)
         # Use the algorithm's generate_inputs function to load the merged dataset, extract the relevant columns,
         # and write the output files specified by required_inputs
         # The filename_map provides the output file path for each required input file type
-        filename_map = {input_type: os.path.join(out_dir, f'prepared-{wildcards.dataset}-{wildcards.algorithm}-{input_type}.txt') for input_type in PRRunner.get_required_inputs(wildcards.algorithm)}
+        filename_map = {input_type: os.path.join(out_dir, 'prepared', f'{wildcards.dataset}-{wildcards.algorithm}', f'{input_type}.txt') for input_type in PRRunner.get_required_inputs(wildcards.algorithm)}
         PRRunner.prepare_inputs(wildcards.algorithm, input.dataset_file, filename_map)
+
+# TODO document how the checkpoint works
+# Modeled after https://evodify.com/snakemake-checkpoint-tutorial/
+def collect_prepared_input(wildcards):
+    prepared_dir = checkpoints.prepare_input.get(**wildcards).output[0]
+    # Return the list of expected input files for the reconstruction algorithm
+    return expand(os.path.join(prepared_dir,'{type}.txt'),type=PRRunner.get_required_inputs(algorithm=wildcards.algorithm))
 
 # See https://stackoverflow.com/questions/46714560/snakemake-how-do-i-use-a-function-that-takes-in-a-wildcard-and-returns-a-value
 # for why the lambda function is required
 # Run the pathway reconstruction algorithm
 rule reconstruct:
-    input: lambda wildcards: expand(os.path.join(out_dir, 'prepared-{{dataset}}-{{algorithm}}-{type}.txt'), type=PRRunner.get_required_inputs(algorithm=wildcards.algorithm))
+    input: collect_prepared_input
     output: pathway_file = os.path.join(out_dir, 'raw-pathway-{dataset}-{algorithm}-{params}.txt')
     run:
         params = reconstruction_params(wildcards.algorithm, wildcards.params)
         # Add the input files
         params.update(dict(zip(PRRunner.get_required_inputs(wildcards.algorithm), *{input})))
         # Add the output file
-        # TODO may need to modify the algorithm run functions to expect the output filename in the same format
-        # All can accept a relative pathway to the output file that should be written that is called 'output_file'
+        # All run functions can accept a relative path to the output file that should be written that is called 'output_file'
         params['output_file'] = output.pathway_file
         PRRunner.run(wildcards.algorithm, params)
 
