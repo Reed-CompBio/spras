@@ -4,6 +4,7 @@
 
 import os
 import PRRunner
+import shutil
 from src.util import parse_config
 from src.analysis.summary import summary
 from src.analysis.viz import graphspace
@@ -112,6 +113,12 @@ rule merge_input:
         dataset_dict = get_dataset(datasets, wildcards.dataset)
         PRRunner.merge_input(dataset_dict, output.dataset_file)
 
+# The checkpoint is like a rule but can be used in dynamic workflows
+# The workflow directed acyclic graph is re-evaluated after the checkpoint job runs
+# If the checkpoint has not executed for the provided wildcard values, it will be run and then the rest of the
+# workflow will be automatically re-evaluated after if runs
+# The checkpoint produces a directory instead of a list of output files because the number and types of output
+# files is algorithm-dependent
 checkpoint prepare_input:
     input: dataset_file = os.path.join(out_dir, '{dataset}-merged.pickle')
     # Output is a directory that will contain all prepared files for pathway reconstruction
@@ -126,15 +133,38 @@ checkpoint prepare_input:
         filename_map = {input_type: os.path.join(out_dir, 'prepared', f'{wildcards.dataset}-{wildcards.algorithm}', f'{input_type}.txt') for input_type in PRRunner.get_required_inputs(wildcards.algorithm)}
         PRRunner.prepare_inputs(wildcards.algorithm, input.dataset_file, filename_map)
 
-# TODO document how the checkpoint works
+# Collect the prepared input files from the specified directory
+# If the directory does not exist for this dataset-algorithm pair, the checkpoint will detect that
+# prepare_input needs to be run and will then automatically re-rerun downstream rules like reconstruct
+# If the directory does exist but some of the required input files are missing, Snakemake will not automatically
+# run prepare_input
+# It only checks for the output of prepare_input, which is a directory
+# Therefore, manually remove the entire directory if any of the expected prepared input file are missing so that
+# prepare_inputs is run, the directory and prepared input files are re-generated, and the reconstruct rule is run again
 # Modeled after https://evodify.com/snakemake-checkpoint-tutorial/
 def collect_prepared_input(wildcards):
-    prepared_dir = checkpoints.prepare_input.get(**wildcards).output[0]
-    # Return the list of expected input files for the reconstruction algorithm
-    return expand(os.path.join(prepared_dir,'{type}.txt'),type=PRRunner.get_required_inputs(algorithm=wildcards.algorithm))
+    # Need to construct the path in advance because it is needed before it can be obtained from the output
+    # of prepare_input
+    prepared_dir = os.path.join(out_dir, 'prepared', f'{wildcards.dataset}-{wildcards.algorithm}')
 
-# See https://stackoverflow.com/questions/46714560/snakemake-how-do-i-use-a-function-that-takes-in-a-wildcard-and-returns-a-value
-# for why the lambda function is required
+    # Construct the list of expected prepared input files for the reconstruction algorithm
+    prepared_inputs = expand(os.path.join(prepared_dir,'{type}.txt'),type=PRRunner.get_required_inputs(algorithm=wildcards.algorithm))
+    # If the directory is missing, do nothing because the missing output triggers running prepare_input
+    if os.path.isdir(prepared_dir):
+        # If the directory exists, confirm all prepared input files exist as well (as opposed to some or none)
+        missing_inputs = False
+        for input in prepared_inputs:
+            if not os.path.isfile(input):
+                missing_inputs = True
+        # If any expected files were missing, delete the entire directory so the call below triggers running prepare_input
+        if missing_inputs:
+            shutil.rmtree(prepared_dir)
+
+    # Check whether prepare_input has been run for these wildcards (dataset-algorithm pair) and run if needed
+    # The check is executed by checking whether the prepare_input output exists, which is a directory
+    checkpoints.prepare_input.get(**wildcards)
+    return prepared_inputs
+
 # Run the pathway reconstruction algorithm
 rule reconstruct:
     input: collect_prepared_input
