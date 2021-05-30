@@ -44,36 +44,23 @@ def reconstruction_params(algorithm, index_string):
     index = int(index_string.replace('params', ''))
     return algorithm_params[algorithm][index]
 
-# Convert a parameter dictionary to a string of command line arguments
-def params_to_args(params):
-    args_list = [f'--{param}={value}' for param, value in params.items()]
-    return ' '.join(args_list)
-
-# Log the parameter dictionaries and the mapping from parameter indices to parameter values
-# If the logfile already exists and the contents match the current parameter configurations,
-# do not rewrite the file
-# TODO need a different approach because Snakemake deletes the old version of the logfile before calling this function
-# The cached parameters will always be empty
+# Log the parameter dictionaries and the mapping from parameter indices to parameter values in a yaml file
 def write_parameter_log(algorithm, logfile):
     # May want to use the previously created mapping from parameter indices
     # instead of recreating it to make sure they always correspond
     cur_params_dict = {f'params{index}': params for index, params in enumerate(algorithm_params[algorithm])}
 
-    try:
-        cached_params_dict = read_parameter_log(logfile)
-    except OSError as e:
-        cached_params_dict = {}
+    print(f'Writing {logfile}')
+    with open(logfile,'w') as f:
+        yaml.safe_dump(cur_params_dict,f)
 
-    if cur_params_dict != cached_params_dict:
-        print(f'Writing {logfile}')
-        with open(logfile,'w') as f:
-            yaml.safe_dump(cur_params_dict,f)
-
+# Read the cached algorithm parameters from a yaml logfile
 def read_parameter_log(logfile):
     with open(logfile) as f:
         return yaml.safe_load(f)
 
 # Log the datasets specified in the config file.
+# TODO switch to yaml and add caching
 def write_dataset_log(dataset,logfile):
     with open(logfile,'w') as f:
         for key,value in datasets[dataset].items():
@@ -109,23 +96,64 @@ def make_final_input(wildcards):
 rule all:
     input: make_final_input
 
-
-# Write the mapping from parameter indices to parameter dictionaries
-# TODO: Need this to have input files so it updates
-# Possibly all rules should have the config file as input
-rule log_parameters:
+# This checkpoint is used to split log_parameters into two steps so that parameters written to a logfile in a previous
+# run can be used as a disk-based cache
+# The checkpoint runs every time any part of the config file is updated
+# It outputs an empty flag file that log_parameters depends on
+# When the checkpoint executes, it reads the prior parameter logfile from disk if one exists, compares the parameters
+# for this algorithm with the current parameters in the config file, and deletes the cached logfile if the cached and
+# current parameters do not match
+# This creates a dependency such that log_parameters will be missing its output file after this checkpoint runs
+# if the parameter logfile was stale, which ensures log_parameters will run again, writing a fresh parameter logfile
+# that can signal to the reconstruct rule that the parameters changed so the algorithm needs to be run again
+# TODO consider whether approximate parameter matching is needed for floating point parameters
+# Currently is is intentional to have very strict matching criteria
+checkpoint check_cached_parameter_log:
     input: config_file
-    output: log_file = os.path.join(out_dir, 'parameters-{algorithm}.txt')
+    # A Snakemake flag file
+    output: touch(os.path.join(out_dir, '.parameters-{algorithm}.flag'))
     run:
-        write_parameter_log(wildcards.algorithm, output.log_file)
+        logfile = os.path.join(out_dir,f'parameters-{wildcards.algorithm}.txt')
+        # TODO remove print statements before merging but include for now to illustrate the workflow
+        print(f'Cached logfile: {logfile}')
+
+        # May want to use the previously created mapping from parameter indices
+        # instead of recreating it to make sure they always correspond
+        cur_params_dict = {f'params{index}': params for index, params in enumerate(algorithm_params[wildcards.algorithm])}
+
+        # Read the cached parameters from the logfile if it exists and is readable
+        try:
+            cached_params_dict = read_parameter_log(logfile)
+        except OSError as e:
+            print(e)
+            cached_params_dict = {}
+
+        print(f'Current params: {cur_params_dict}')
+        print(f'Cached params: {cached_params_dict}')
+        if cur_params_dict != cached_params_dict:
+            print(f'Deleting stale {logfile}')
+            os.remove(logfile)
+        # TODO remove when removing print statements
+        else:
+            print(f'Reusing cached parameters in {logfile}')
+
+# Write the mapping from parameter indices to parameter dictionaries if the parameters changed
+# TODO update reconstruct rule to depend on the parameter log instead of the entire config file
+rule log_parameters:
+    # Mark the flag as ancient so that its timestamp is always considered to be older than the output file
+    # Therefore, this rule is triggered when the output file is missing but not when the input flag has been updated,
+    # which happens every time any part of the config file is updated
+    input: ancient(os.path.join(out_dir, '.parameters-{algorithm}.flag'))
+    output: logfile = os.path.join(out_dir, 'parameters-{algorithm}.txt')
+    run:
+        write_parameter_log(wildcards.algorithm, output.logfile)
 
 # Write the datasets (copied from the log_parameters rule)
-# TODO: Need this to have input files so it updates
-# Possibly all rules should have the config file as input
+# TODO adapt to use the caching strategy implemented for log_parameters
 rule log_datasets:
-    output: log_file = os.path.join(out_dir, 'datasets-{dataset}.txt')
+    output: logfile = os.path.join(out_dir, 'datasets-{dataset}.txt')
     run:
-        write_dataset_log(wildcards.dataset, output.log_file)
+        write_dataset_log(wildcards.dataset, output.logfile)
 
 # Merge all node files and edge files for a dataset into a single node table and edge table
 rule merge_input:
@@ -197,7 +225,8 @@ rule reconstruct:
     input: collect_prepared_input
     output: pathway_file = os.path.join(out_dir, 'raw-pathway-{dataset}-{algorithm}-{params}.txt')
     run:
-        params = reconstruction_params(wildcards.algorithm, wildcards.params)
+        # Create a copy so that the updates are not written to the parameters logfile
+        params = reconstruction_params(wildcards.algorithm, wildcards.params).copy()
         # Add the input files
         params.update(dict(zip(PRRunner.get_required_inputs(wildcards.algorithm), *{input})))
         # Add the output file
