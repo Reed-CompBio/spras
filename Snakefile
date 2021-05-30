@@ -138,7 +138,6 @@ checkpoint check_cached_parameter_log:
             print(f'Reusing cached parameters in {logfile}')
 
 # Write the mapping from parameter indices to parameter dictionaries if the parameters changed
-# TODO update reconstruct rule to depend on the parameter log instead of the entire config file
 rule log_parameters:
     # Mark the flag as ancient so that its timestamp is always considered to be older than the output file
     # Therefore, this rule is triggered when the output file is missing but not when the input flag has been updated,
@@ -218,9 +217,15 @@ def collect_prepared_input(wildcards):
     # Check whether prepare_input has been run for these wildcards (dataset-algorithm pair) and run if needed
     # The check is executed by checking whether the prepare_input output exists, which is a directory
     checkpoints.prepare_input.get(**wildcards)
+
+    # The reconstruct rule also depends on the parameters
+    # Add the parameter logfile to the list of inputs so that the reconstruct rule is executed if the parameters change
+    prepared_inputs.append(os.path.join(out_dir, f'parameters-{wildcards.algorithm}.txt'))
     return prepared_inputs
 
 # Run the pathway reconstruction algorithm
+# TODO test that the reconstruct rule is not rerun if the config file changes but the parameters for this algorithm
+# do not (requires setting up dataset configuration caching first)
 rule reconstruct:
     input: collect_prepared_input
     output: pathway_file = os.path.join(out_dir, 'raw-pathway-{dataset}-{algorithm}-{params}.txt')
