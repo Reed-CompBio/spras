@@ -9,8 +9,8 @@ with open(config_loc) as config_file:
     config = yaml.load(config_file, Loader=yaml.FullLoader)
 test_file = "test_pickled_dataset.pkl"
 
-for i in [0,1]:
-    PRRunner.merge_input(config["datasets"][i], test_file)
+for dataset in config["datasets"]:
+    PRRunner.merge_input(dataset, test_file)
     os.makedirs("tmp_output", exist_ok=True) #it is assumed directories will be made upstream
 
 #Test pathlinker
