@@ -130,7 +130,7 @@ checkpoint check_cached_parameter_log:
 
         print(f'Current params: {cur_params_dict}')
         print(f'Cached params: {cached_params_dict}')
-        if cur_params_dict != cached_params_dict:
+        if cur_params_dict != cached_params_dict and os.path.isfile(logfile):
             print(f'Deleting stale {logfile}')
             os.remove(logfile)
         # TODO remove when removing print statements
