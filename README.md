@@ -24,7 +24,7 @@ First, download or clone this repository so that you have the Snakefile, example
 
 The easiest way to install Python and the required packages is with [Anaconda](https://www.anaconda.com/download/).
 The Carpentries [Anaconda installation instructions](https://carpentries.github.io/workshop-template/#python) provide guides and videos on how to install Anaconda for your operating system.
-After installing Anaconda, you can run
+After installing Anaconda, you can run the following commands from the root directory of the `spras` repository
 ```
 conda env create -f environment.yml
 conda activate spras
@@ -40,7 +40,7 @@ From the root directory of the `spras` repository, run the command
 ```
 snakemake --cores 1
 ```
-This will run the SPRAS workflow with the example config file and input files.
+This will run the SPRAS workflow with the example config file (`config/config.yaml`) and input files.
 Output files will be written to the `output` directory.
 
 You do not need to manually download Docker images from DockerHub before running SPRAS.
