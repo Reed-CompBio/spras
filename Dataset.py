@@ -1,4 +1,5 @@
 import pandas as pd
+import numpy as np
 import warnings
 import os
 import pickle as pkl
@@ -67,12 +68,25 @@ class Dataset:
         interactome_loc = dataset_dict["edge_files"][0]
         node_data_files = dataset_dict["node_files"]
         edge_data_files = [""] #Currently None
+        ground_truth_files = dataset_dict["ground_truth_files"]
         data_loc = dataset_dict["data_dir"]
 
         #Load everything as pandas tables
         self.interactome = pd.read_table(os.path.join(data_loc,interactome_loc), names = ["Interactor1","Interactor2","Weight"])
         node_set = set(self.interactome.Interactor1.unique())
         node_set = node_set.union(set(self.interactome.Interactor2.unique()))
+
+        # Load generic edge table as UNDIRECTED.
+        self.edge_table = self.interactome[["Interactor1","Interactor2"]]
+        self.edge_table.columns= ["UndirNodeA","UndirNodeB"]
+
+        # sort rows.
+        # this seems slow, but I can't find another way to do this. - AR
+        for index in self.edge_table.index:
+            self.edge_table.loc[index] = sorted(list(self.edge_table.iloc[[index]].values[0]))
+
+        # drop duplicates
+        self.edge_table.drop_duplicates(inplace=True,ignore_index=True)
 
         #Load generic node tables
         self.node_table = pd.DataFrame(node_set, columns=[self.NODE_ID])
@@ -86,6 +100,33 @@ class Dataset:
                 single_node_table[new_col_name] = True
 
             self.node_table = self.node_table.merge(single_node_table, how="left", on=self.NODE_ID, suffixes=("", "_DROP")).filter(regex="^(?!.*DROP)")
+
+        # Load ground truth tables.
+        for gt_file in ground_truth_files:
+            single_gt_table = pd.read_table(os.path.join(data_loc,gt_file),header=None)
+            #If we have only one column, assume it is a NODES list.
+            #print(gt_file,len(single_gt_table.columns))
+            if len(single_gt_table.columns)==1:
+                single_gt_table.columns = [self.NODE_ID]
+                new_col_name = gt_file.split(".")[0]
+                single_gt_table[new_col_name] = True
+
+                self.node_table = self.node_table.merge(single_gt_table, how="left", on=self.NODE_ID, suffixes=("", "_DROP")).filter(regex="^(?!.*DROP)")
+
+            # If we have two columns, assume it is an EDGES list.
+            elif len(single_gt_table.columns)==2:
+                single_gt_table.columns=["UndirNodeA","UndirNodeB"]
+                # make undirected by sorting
+                for index in single_gt_table.index:
+                    single_gt_table.loc[index] = sorted(list(single_gt_table.iloc[[index]].values[0]))
+                # drop duplicates
+                single_gt_table.drop_duplicates(inplace=True,ignore_index=True)
+                new_col_name = gt_file.split(".")[0]
+                single_gt_table[new_col_name] = True
+        
+                self.edge_table = self.edge_table.merge(single_gt_table, how="left", on=["UndirNodeA","UndirNodeB"], suffixes=("", "_DROP")).filter(regex="^(?!.*DROP)")
+
+        # set other files
         self.other_files = dataset_dict["other_files"]
 
     def request_node_columns(self, col_names):

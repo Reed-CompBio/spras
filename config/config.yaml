@@ -110,7 +110,7 @@
                  #the open-world assumption is the denial that being unannotated is to be not in the pathway.
                  #it allows for sub-sampling of negatives.
 
-                 open_word: true
+                 open_world: true
 
                  #in the case that we use the open-world assumption, we need to tell the program how to negatives.
                  #The options here are "fixed" or "random". In the case that "fixed" is selected the program will use
@@ -151,3 +151,10 @@
         graphspace:
 
           include: true
+
+        precrec:
+
+          include: true
+          # subsample negatives: sample <int> times the number of positives,
+          # or "all" for all negatives.
+          subsample_negs: 50

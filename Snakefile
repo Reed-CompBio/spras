@@ -25,7 +25,7 @@ def get_dataset(datasets, label):
 # Input preparation needs to be rerun if these files are modified
 def get_dataset_dependencies(datasets, label):
     dataset = datasets[label]
-    all_files = dataset["node_files"] + dataset["edge_files"] + dataset["other_files"]
+    all_files = dataset["node_files"] + dataset["edge_files"] + dataset["other_files"] + dataset["ground_truth_files"]
     # Add the relative file path and config file
     all_files = [os.path.join(dataset["data_dir"], data_file) for data_file in all_files]
     return all_files + [config_file]
