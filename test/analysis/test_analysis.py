@@ -3,6 +3,8 @@ from pathlib import Path
 import os
 import src.analysis.summary.summary as summary
 import src.analysis.viz.graphspace as graphspace
+import src.analysis.precrec.precrec as precrec
+import Dataset
 
 TEST_DIR = 'test/analysis/'
 
@@ -33,3 +35,14 @@ class TestAnalysis:
     # test GraphSpace json output on a directed graph.
     def test_graphspace_ranked_directed(self):
         graphspace.write_json(TEST_DIR+'input/standardized-ranked.txt',TEST_DIR+'output/standardized-ranked-directed-gs.json',TEST_DIR+'output/standardized-ranked-directed-gs-style.json',directed=True)
+
+    def test_precrec_nodes(self):
+        dataset_dict = {'label': 'wnt', 'node_files': ['sources.wnt.txt', 'targets.wnt.txt'], 'edge_files': ['np-union.txt'], 'other_files': [], 'ground_truth_files': ['wnt-edges.txt', 'wnt-nodes.txt'], 'data_dir': TEST_DIR+'input/wnt/'}
+
+        # compute_precrec(infiles:list,data:Dataset, gt_header:string, outprefix:string,subsample:string)
+        infiles = [TEST_DIR+'input/wnt/pathway-wnt-pathlinker-params1.txt']
+        data = Dataset.Dataset(dataset_dict)
+        gt_header = 'wnt-nodes'
+        outprefix=TEST_DIR+'output/wnt-nodes'
+        subsample='50'
+        precrec.compute_precrec(infiles,data,gt_header,outprefix,subsample)

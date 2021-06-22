@@ -14,6 +14,8 @@ Methods and intermediate state for loading data and putting it into pandas table
 class Dataset:
 
     NODE_ID = "NODEID"
+    EDGE_ID_A = "NODEAID"
+    EDGE_ID_B = "NODEBID"
     warning_threshold = 0.05 #Threshold for scarcity of columns to warn user
 
     def __init__(self, dataset_dict):
@@ -78,15 +80,8 @@ class Dataset:
 
         # Load generic edge table as UNDIRECTED.
         self.edge_table = self.interactome[["Interactor1","Interactor2"]]
-        self.edge_table.columns= ["UndirNodeA","UndirNodeB"]
-
-        # sort rows.
-        # this seems slow, but I can't find another way to do this. - AR
-        for index in self.edge_table.index:
-            self.edge_table.loc[index] = sorted(list(self.edge_table.iloc[[index]].values[0]))
-
-        # drop duplicates
-        self.edge_table.drop_duplicates(inplace=True,ignore_index=True)
+        self.edge_table.columns= [self.EDGE_ID_A,self.EDGE_ID_B]
+        self.edge_table = self.make_edges_undirected(self.edge_table)
 
         #Load generic node tables
         self.node_table = pd.DataFrame(node_set, columns=[self.NODE_ID])
@@ -115,19 +110,26 @@ class Dataset:
 
             # If we have two columns, assume it is an EDGES list.
             elif len(single_gt_table.columns)==2:
-                single_gt_table.columns=["UndirNodeA","UndirNodeB"]
-                # make undirected by sorting
-                for index in single_gt_table.index:
-                    single_gt_table.loc[index] = sorted(list(single_gt_table.iloc[[index]].values[0]))
-                # drop duplicates
-                single_gt_table.drop_duplicates(inplace=True,ignore_index=True)
+                single_gt_table.columns=[self.EDGE_ID_A,self.EDGE_ID_B]
+                single_gt_table = self.make_edges_undirected(single_gt_table)
+
                 new_col_name = gt_file.split(".")[0]
                 single_gt_table[new_col_name] = True
-        
-                self.edge_table = self.edge_table.merge(single_gt_table, how="left", on=["UndirNodeA","UndirNodeB"], suffixes=("", "_DROP")).filter(regex="^(?!.*DROP)")
+
+                self.edge_table = self.edge_table.merge(single_gt_table, how="left", on=[self.EDGE_ID_A,self.EDGE_ID_B], suffixes=("", "_DROP")).filter(regex="^(?!.*DROP)")
 
         # set other files
         self.other_files = dataset_dict["other_files"]
+
+    def make_edges_undirected(self, table):
+        # sort edges (e.g., directed edges u,v and v,u will become undirected u,v).
+        # this seems slow, but I can't find another way to do this. - AR
+        for index in table.index:
+            table.loc[index] = sorted(list(table.iloc[[index]].values[0]))
+
+        # drop duplicates
+        table.drop_duplicates(inplace=True,ignore_index=True)
+        return table
 
     def request_node_columns(self, col_names):
         '''
@@ -156,7 +158,31 @@ class Dataset:
                 return True
 
     def request_edge_columns(self, col_names):
-        return None
+        '''
+        returns: A table containing the requested column names and node IDs
+        for all nodes with at least 1 of the requested values being non-empty
+        '''
+        col_names.append(self.NODE_ID_A)
+        col_names.append(self.NODE_ID_B)
+        filtered_table = self.edge_table[col_names]
+        filtered_table = filtered_table.dropna(axis=0, how='all',subset=filtered_table.columns.difference([self.NODE_ID_A,self.NODE_ID_B]))
+        percent_hit = (float(len(filtered_table))/len(self.edge_table))*100
+        if percent_hit <= self.warning_threshold*100:
+            warnings.warn("Only %0.2f of data had one or more of the following columns filled:"%(percent_hit) + str(col_names))
+        return filtered_table
+
+    def contains_edge_columns(self, col_names):
+        '''
+        col_names: A list-like object of column names to check or a string of a single column name to check.
+        returns: Whether or not all columns in col_names exist in the dataset.
+        '''
+        if isinstance(col_names, str):
+            return col_names in self.edge_table.columns
+        else:
+            for c in col_names:
+                if c not in self.edge_table.columns:
+                    return False
+                return True
 
     def get_other_files(self):
         return self.other_files.copy()
