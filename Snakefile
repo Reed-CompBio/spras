@@ -87,8 +87,8 @@ def make_final_input(wildcards):
         final_input.extend(expand('{out_dir}{sep}pathway-{dataset}-{algorithm_params}.txt', out_dir=out_dir, sep=os.sep, dataset=datasets, algorithm_params=algorithms_with_params))
 
     # Create log files for the parameters and datasets
-    final_input.extend(expand('{out_dir}{sep}parameters-{algorithm}.txt', out_dir=out_dir, sep=os.sep, algorithm=algorithms))
-    final_input.extend(expand('{out_dir}{sep}datasets-{dataset}.txt', out_dir=out_dir, sep=os.sep, dataset=datasets))
+    final_input.extend(expand('{out_dir}{sep}parameters-{algorithm}.yaml', out_dir=out_dir, sep=os.sep, algorithm=algorithms))
+    final_input.extend(expand('{out_dir}{sep}datasets-{dataset}.yaml', out_dir=out_dir, sep=os.sep, dataset=datasets))
 
     return final_input
 
@@ -144,7 +144,7 @@ rule log_parameters:
     # Therefore, this rule is triggered when the output file is missing but not when the input flag has been updated,
     # which happens every time any part of the config file is updated
     input: ancient(os.path.join(out_dir, '.parameters-{algorithm}.flag'))
-    output: logfile = os.path.join(out_dir, 'parameters-{algorithm}.txt')
+    output: logfile = os.path.join(out_dir, 'parameters-{algorithm}.yaml')
     run:
         write_parameter_log(wildcards.algorithm, output.logfile)
 
@@ -163,7 +163,7 @@ checkpoint check_cached_dataset_log:
     # A Snakemake flag file
     output: touch(os.path.join(out_dir, '.datasets-{dataset}.flag'))
     run:
-        logfile = os.path.join(out_dir, f'datasets-{wildcards.dataset}.txt')
+        logfile = os.path.join(out_dir, f'datasets-{wildcards.dataset}.yaml')
         # TODO remove print statements before merging but include for now to illustrate the workflow
         print(f'Cached logfile: {logfile}')
 
@@ -191,7 +191,7 @@ rule log_datasets:
     # Therefore, this rule is triggered when the output file is missing but not when the input flag has been updated,
     # which happens every time any part of the config file is updated
     input: ancient(os.path.join(out_dir,'.datasets-{dataset}.flag'))
-    output: logfile = os.path.join(out_dir, 'datasets-{dataset}.txt')
+    output: logfile = os.path.join(out_dir, 'datasets-{dataset}.yaml')
     run:
         write_dataset_log(wildcards.dataset, output.logfile)
 
