@@ -14,16 +14,15 @@ config, datasets, out_dir, algorithm_params, algorithm_directed = parse_config(c
 def get_dataset(datasets, label):
     return datasets[label]
 
-# Return all files used in the dataset plus the config file
-# TODO Consider how to make the dataset depend only on the part of the config
-# file relevant for this dataset instead of the entire config file
+# Return all files used in the dataset plus the cached dataset file, which represents the relevant part of the
+# config file
 # Input preparation needs to be rerun if these files are modified
 def get_dataset_dependencies(datasets, label):
     dataset = datasets[label]
     all_files = dataset["node_files"] + dataset["edge_files"] + dataset["other_files"]
     # Add the relative file path and config file
     all_files = [os.path.join(dataset["data_dir"], data_file) for data_file in all_files]
-    return all_files + [config_file]
+    return all_files + [os.path.join(out_dir, f'datasets-{dataset}.yaml')]
 
 algorithms = list(algorithm_params)
 
@@ -198,8 +197,7 @@ rule log_datasets:
 # Merge all node files and edge files for a dataset into a single node table and edge table
 rule merge_input:
     # Depends on the node, edge, and other files for this dataset so the rule and downstream rules are rerun if they change
-    # Also depends on the config file
-    # TODO does not need to depend on the entire config file but rather only the input files for this dataset
+    # Also depends on the relevant part of the config file
     # TODO why does this pass datasets while datasets is in the global frame as well?
     input: lambda wildcards: get_dataset_dependencies(datasets, wildcards.dataset)
     output: dataset_file = os.path.join(out_dir, '{dataset}-merged.pickle')
