@@ -22,9 +22,10 @@ def get_dataset_dependencies(datasets, label):
     all_files = dataset["node_files"] + dataset["edge_files"] + dataset["other_files"]
     # Add the relative file path and config file
     all_files = [os.path.join(dataset["data_dir"], data_file) for data_file in all_files]
-    return all_files + [os.path.join(out_dir, f'datasets-{dataset}.yaml')]
+    return all_files + [os.path.join(out_dir, f'datasets-{label}.yaml')]
 
 algorithms = list(algorithm_params)
+dataset_labels = list(datasets.keys())
 
 # Generate numeric indices for the parameter combinations
 # of each reconstruction algorithms
@@ -73,21 +74,21 @@ def make_final_input(wildcards):
     #TODO analysis could be parsed in the parse_config() function.
     if config["analysis"]["summary"]["include"]:
         # add summary output file.
-        final_input.extend(expand('{out_dir}{sep}summary-{dataset}-{algorithm_params}.txt',out_dir=out_dir,sep=os.sep,dataset=datasets,algorithm_params=algorithms_with_params))
+        final_input.extend(expand('{out_dir}{sep}summary-{dataset}-{algorithm_params}.txt',out_dir=out_dir,sep=os.sep,dataset=dataset_labels,algorithm_params=algorithms_with_params))
 
     if config["analysis"]["graphspace"]["include"]:
         # add graph and style JSON files.
-        final_input.extend(expand('{out_dir}{sep}gs-{dataset}-{algorithm_params}.json',out_dir=out_dir,sep=os.sep,dataset=datasets,algorithm_params=algorithms_with_params))
-        final_input.extend(expand('{out_dir}{sep}gsstyle-{dataset}-{algorithm_params}.json',out_dir=out_dir,sep=os.sep,dataset=datasets,algorithm_params=algorithms_with_params))
+        final_input.extend(expand('{out_dir}{sep}gs-{dataset}-{algorithm_params}.json',out_dir=out_dir,sep=os.sep,dataset=dataset_labels,algorithm_params=algorithms_with_params))
+        final_input.extend(expand('{out_dir}{sep}gsstyle-{dataset}-{algorithm_params}.json',out_dir=out_dir,sep=os.sep,dataset=dataset_labels,algorithm_params=algorithms_with_params))
 
     if len(final_input) == 0:
         # No analysis added yet, so add reconstruction output files if they exist.
         # (if analysis is specified, these should be implicity run).
-        final_input.extend(expand('{out_dir}{sep}pathway-{dataset}-{algorithm_params}.txt', out_dir=out_dir, sep=os.sep, dataset=datasets, algorithm_params=algorithms_with_params))
+        final_input.extend(expand('{out_dir}{sep}pathway-{dataset}-{algorithm_params}.txt', out_dir=out_dir, sep=os.sep, dataset=dataset_labels, algorithm_params=algorithms_with_params))
 
     # Create log files for the parameters and datasets
     final_input.extend(expand('{out_dir}{sep}parameters-{algorithm}.yaml', out_dir=out_dir, sep=os.sep, algorithm=algorithms))
-    final_input.extend(expand('{out_dir}{sep}datasets-{dataset}.yaml', out_dir=out_dir, sep=os.sep, dataset=datasets))
+    final_input.extend(expand('{out_dir}{sep}datasets-{dataset}.yaml', out_dir=out_dir, sep=os.sep, dataset=dataset_labels))
 
     return final_input
 
@@ -113,7 +114,7 @@ checkpoint check_cached_parameter_log:
     # A Snakemake flag file
     output: touch(os.path.join(out_dir, '.parameters-{algorithm}.flag'))
     run:
-        logfile = os.path.join(out_dir, f'parameters-{wildcards.algorithm}.txt')
+        logfile = os.path.join(out_dir, f'parameters-{wildcards.algorithm}.yaml')
         # TODO remove print statements before merging but include for now to illustrate the workflow
         print(f'Cached logfile: {logfile}')
 
@@ -259,7 +260,7 @@ def collect_prepared_input(wildcards):
 
     # The reconstruct rule also depends on the parameters
     # Add the parameter logfile to the list of inputs so that the reconstruct rule is executed if the parameters change
-    prepared_inputs.append(os.path.join(out_dir, f'parameters-{wildcards.algorithm}.txt'))
+    prepared_inputs.append(os.path.join(out_dir, f'parameters-{wildcards.algorithm}.yaml'))
     return prepared_inputs
 
 # Run the pathway reconstruction algorithm
