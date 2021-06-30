@@ -52,7 +52,7 @@ The workflow will automatically download any missing images as long as Docker is
 **Snakemake file**: Defines a workflow to run all pathway reconstruction algorithms on all datasets with all specified hyperparameters.
 
 **Dockerized pathway reconstruction algorithms**: Pathway reconstruction algorithms are run via Docker images using the docker-py Python package.
-[PathLinker](https://github.com/Murali-group/PathLinker), [Omics Integrator](https://github.com/fraenkel-lab/OmicsIntegrator), and [Omics Integrator 2](https://github.com/fraenkel-lab/OmicsIntegrator2) are the first supported algorithms.
+[PathLinker](https://github.com/Murali-group/PathLinker), [Omics Integrator](https://github.com/fraenkel-lab/OmicsIntegrator), [Omics Integrator 2](https://github.com/fraenkel-lab/OmicsIntegrator2), and [Maximum Edge Orientation](https://github.com/agitter/meo/) are the first supported algorithms.
 The files to create these Docker images are in the `docker-wrappers` subdirectory along with links to algorithms' original repositories.
 The Docker images are available on [DockerHub](https://hub.docker.com/orgs/reedcompbio).
 
