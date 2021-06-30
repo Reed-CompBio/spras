@@ -54,17 +54,18 @@ def write_parameter_log(algorithm, logfile):
     with open(logfile,'w') as f:
         yaml.safe_dump(cur_params_dict,f)
 
-# Read the cached algorithm parameters from a yaml logfile
-def read_parameter_log(logfile):
+# Read the cached algorithm parameters or dataset contents from a yaml logfile
+def read_yaml_log(logfile):
     with open(logfile) as f:
         return yaml.safe_load(f)
 
-# Log the datasets specified in the config file.
-# TODO switch to yaml and add caching
-def write_dataset_log(dataset,logfile):
+# Log the dataset contents specified in the config file in a yaml file
+def write_dataset_log(dataset, logfile):
+    dataset_contents = get_dataset(datasets,dataset)
+
+    print(f'Writing {logfile}')
     with open(logfile,'w') as f:
-        for key,value in datasets[dataset].items():
-            f.write(f'{key}: {value}\n')
+        yaml.safe_dump(dataset_contents,f)
 
 # Choose the final files expected according to the config file options.
 def make_final_input(wildcards):
@@ -123,7 +124,7 @@ checkpoint check_cached_parameter_log:
 
         # Read the cached parameters from the logfile if it exists and is readable
         try:
-            cached_params_dict = read_parameter_log(logfile)
+            cached_params_dict = read_yaml_log(logfile)
         except OSError as e:
             print(e)
             cached_params_dict = {}
@@ -170,7 +171,7 @@ checkpoint check_cached_dataset_log:
 
         # Read the cached dataset from the logfile if it exists and is readable
         try:
-            cached_dataset_dict = read_dataset_log(logfile)
+            cached_dataset_dict = read_yaml_log(logfile)
         except OSError as e:
             print(e)
             cached_dataset_dict = {}
