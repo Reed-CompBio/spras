@@ -113,7 +113,7 @@ checkpoint check_cached_parameter_log:
     # A Snakemake flag file
     output: touch(os.path.join(out_dir, '.parameters-{algorithm}.flag'))
     run:
-        logfile = os.path.join(out_dir,f'parameters-{wildcards.algorithm}.txt')
+        logfile = os.path.join(out_dir, f'parameters-{wildcards.algorithm}.txt')
         # TODO remove print statements before merging but include for now to illustrate the workflow
         print(f'Cached logfile: {logfile}')
 
@@ -147,9 +147,49 @@ rule log_parameters:
     run:
         write_parameter_log(wildcards.algorithm, output.logfile)
 
-# Write the datasets (copied from the log_parameters rule)
-# TODO adapt to use the caching strategy implemented for log_parameters
+# This checkpoint is used to split log_datasets into two steps so that dataset contents written to a logfile in a
+# previous run can be used as a disk-based cache
+# The checkpoint runs every time any part of the config file is updated
+# It outputs an empty flag file that log_datasets depends on
+# When the checkpoint executes, it reads the prior dataset logfile from disk if one exists, compares the dataset with
+# the current dataset contents in the config file, and deletes the cached logfile if the cached and current dataset
+# do not match
+# This creates a dependency such that log_datasets will be missing its output file after this checkpoint runs
+# if the dataset logfile was stale, which ensures log_datasets will run again, writing a fresh dataset logfile
+# that can signal to the merge_input rule and downstream rules that the dataset changed
+checkpoint check_cached_dataset_log:
+    input: config_file
+    # A Snakemake flag file
+    output: touch(os.path.join(out_dir, '.datasets-{dataset}.flag'))
+    run:
+        logfile = os.path.join(out_dir, f'datasets-{wildcards.dataset}.txt')
+        # TODO remove print statements before merging but include for now to illustrate the workflow
+        print(f'Cached logfile: {logfile}')
+
+        cur_dataset_dict = get_dataset(datasets, wildcards.dataset)
+
+        # Read the cached dataset from the logfile if it exists and is readable
+        try:
+            cached_dataset_dict = read_dataset_log(logfile)
+        except OSError as e:
+            print(e)
+            cached_dataset_dict = {}
+
+        print(f'Current dataset: {cur_dataset_dict}')
+        print(f'Cached dataset: {cached_dataset_dict}')
+        if cur_dataset_dict != cached_dataset_dict and os.path.isfile(logfile):
+            print(f'Deleting stale {logfile}')
+            os.remove(logfile)
+        # TODO remove when removing print statements
+        else:
+            print(f'Reusing cached dataset in {logfile}')
+
+# Write the datasets if the contents changed
 rule log_datasets:
+    # Mark the flag as ancient so that its timestamp is always considered to be older than the output file
+    # Therefore, this rule is triggered when the output file is missing but not when the input flag has been updated,
+    # which happens every time any part of the config file is updated
+    input: ancient(os.path.join(out_dir,'.datasets-{dataset}.flag'))
     output: logfile = os.path.join(out_dir, 'datasets-{dataset}.txt')
     run:
         write_dataset_log(wildcards.dataset, output.logfile)

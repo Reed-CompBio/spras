@@ -47,6 +47,7 @@ def parse_config(config_file):
     # Need to work more on input file naming to make less strict assumptions
     # about the filename structure
     # Currently assumes all datasets have a label and the labels are unique
+    # TODO may want to sort the lists of files so that there are fewer cache misses
     datasets = {dataset["label"]: dataset for dataset in config["datasets"]}
     config["datasets"] = datasets
 
