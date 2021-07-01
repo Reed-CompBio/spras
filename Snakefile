@@ -6,6 +6,9 @@ from src.util import parse_config
 from src.analysis.summary import summary
 from src.analysis.viz import graphspace
 
+# TODO decide whether to use os.sep os.altsep or a fixed character for file paths
+SEP = '/'
+
 config_file = os.path.join('config', 'config.yaml')
 
 config, datasets, out_dir, algorithm_params, algorithm_directed = parse_config(config_file)
@@ -74,21 +77,21 @@ def make_final_input(wildcards):
     #TODO analysis could be parsed in the parse_config() function.
     if config["analysis"]["summary"]["include"]:
         # add summary output file.
-        final_input.extend(expand('{out_dir}{sep}summary-{dataset}-{algorithm_params}.txt',out_dir=out_dir,sep=os.sep,dataset=dataset_labels,algorithm_params=algorithms_with_params))
+        final_input.extend(expand('{out_dir}{sep}summary-{dataset}-{algorithm_params}.txt',out_dir=out_dir,sep=SEP,dataset=dataset_labels,algorithm_params=algorithms_with_params))
 
     if config["analysis"]["graphspace"]["include"]:
         # add graph and style JSON files.
-        final_input.extend(expand('{out_dir}{sep}gs-{dataset}-{algorithm_params}.json',out_dir=out_dir,sep=os.sep,dataset=dataset_labels,algorithm_params=algorithms_with_params))
-        final_input.extend(expand('{out_dir}{sep}gsstyle-{dataset}-{algorithm_params}.json',out_dir=out_dir,sep=os.sep,dataset=dataset_labels,algorithm_params=algorithms_with_params))
+        final_input.extend(expand('{out_dir}{sep}gs-{dataset}-{algorithm_params}.json',out_dir=out_dir,sep=SEP,dataset=dataset_labels,algorithm_params=algorithms_with_params))
+        final_input.extend(expand('{out_dir}{sep}gsstyle-{dataset}-{algorithm_params}.json',out_dir=out_dir,sep=SEP,dataset=dataset_labels,algorithm_params=algorithms_with_params))
 
     if len(final_input) == 0:
         # No analysis added yet, so add reconstruction output files if they exist.
         # (if analysis is specified, these should be implicity run).
-        final_input.extend(expand('{out_dir}{sep}pathway-{dataset}-{algorithm_params}.txt', out_dir=out_dir, sep=os.sep, dataset=dataset_labels, algorithm_params=algorithms_with_params))
+        final_input.extend(expand('{out_dir}{sep}pathway-{dataset}-{algorithm_params}.txt', out_dir=out_dir, sep=SEP, dataset=dataset_labels, algorithm_params=algorithms_with_params))
 
     # Create log files for the parameters and datasets
-    final_input.extend(expand('{out_dir}{sep}parameters-{algorithm}.yaml', out_dir=out_dir, sep=os.sep, algorithm=algorithms))
-    final_input.extend(expand('{out_dir}{sep}datasets-{dataset}.yaml', out_dir=out_dir, sep=os.sep, dataset=dataset_labels))
+    final_input.extend(expand('{out_dir}{sep}parameters-{algorithm}.yaml', out_dir=out_dir, sep=SEP, algorithm=algorithms))
+    final_input.extend(expand('{out_dir}{sep}datasets-{dataset}.yaml', out_dir=out_dir, sep=SEP, dataset=dataset_labels))
 
     return final_input
 
