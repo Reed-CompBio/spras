@@ -217,7 +217,7 @@ def get_dataset_dependencies(wildcards):
 
     dataset = datasets[wildcards.dataset]
     all_files = dataset["node_files"] + dataset["edge_files"] + dataset["other_files"]
-    # Add the relative file path and config file
+    # Add the relative file path and dataset logfile
     all_files = [os.path.join(dataset["data_dir"], data_file) for data_file in all_files]
     return all_files + [out_dir + SEP + f'datasets-{wildcards.dataset}.yaml']
 
@@ -285,7 +285,7 @@ def collect_prepared_input(wildcards):
 
     # The reconstruct rule also depends on the parameters
     # Add the parameter logfile to the list of inputs so that the reconstruct rule is executed if the parameters change
-    prepared_inputs.append(out_dir + SEP + f'parameters-{wildcards.algorithm}.yaml'   )
+    prepared_inputs.append(out_dir + SEP + f'parameters-{wildcards.algorithm}.yaml')
     return prepared_inputs
 
 # Run the pathway reconstruction algorithm
