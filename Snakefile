@@ -7,6 +7,8 @@ from src.analysis.summary import summary
 from src.analysis.viz import graphspace
 
 # TODO decide whether to use os.sep os.altsep or a fixed character for file paths
+# Snakemake updated the behavior in the 6.5.0 release https://github.com/snakemake/snakemake/pull/1037
+# and using the wrong separator prevents Snakemake from matching filenames to the rules that can produce them
 SEP = '/'
 
 config_file = os.path.join('config', 'config.yaml')
@@ -16,16 +18,6 @@ config, datasets, out_dir, algorithm_params, algorithm_directed = parse_config(c
 # Return the dataset dictionary from the config file given the label
 def get_dataset(datasets, label):
     return datasets[label]
-
-# Return all files used in the dataset plus the cached dataset file, which represents the relevant part of the
-# config file
-# Input preparation needs to be rerun if these files are modified
-def get_dataset_dependencies(datasets, label):
-    dataset = datasets[label]
-    all_files = dataset["node_files"] + dataset["edge_files"] + dataset["other_files"]
-    # Add the relative file path and config file
-    all_files = [os.path.join(dataset["data_dir"], data_file) for data_file in all_files]
-    return all_files + [os.path.join(out_dir, f'datasets-{label}.yaml')]
 
 algorithms = list(algorithm_params)
 dataset_labels = list(datasets.keys())
@@ -132,12 +124,16 @@ checkpoint check_cached_parameter_log:
             print(e)
             cached_params_dict = {}
 
+        # TODO could also use this checkpoint to delete downstream files that relied on parameter indices that no
+        # longer exist but it would be difficult to manually identify all of the dependencies
         print(f'Current params: {cur_params_dict}')
         print(f'Cached params: {cached_params_dict}')
         if cur_params_dict != cached_params_dict and os.path.isfile(logfile):
             print(f'Deleting stale {logfile}')
             os.remove(logfile)
         # TODO remove when removing print statements
+        elif not os.path.isfile(logfile):
+            print(f'Logfile {logfile} does not exist')
         else:
             print(f'Reusing cached parameters in {logfile}')
 
@@ -185,6 +181,8 @@ checkpoint check_cached_dataset_log:
             print(f'Deleting stale {logfile}')
             os.remove(logfile)
         # TODO remove when removing print statements
+        elif not os.path.isfile(logfile):
+            print(f'Logfile {logfile} does not exist')
         else:
             print(f'Reusing cached dataset in {logfile}')
 
@@ -198,12 +196,36 @@ rule log_datasets:
     run:
         write_dataset_log(wildcards.dataset, output.logfile)
 
+# Return all files used in the dataset plus the cached dataset file, which represents the relevant part of the
+# config file
+# Input preparation needs to be rerun if these files are modified
+def get_dataset_dependencies(wildcards):
+    # Introduce a dependency between this function (which is used by the merge_input rule) and the
+    # check_cached_dataset_log so that this function is re-evaluated after the checkpoint runs for this
+    # wildcard value (dataset label)
+    # Without the dependency, Snakemake does not rerun merge_input when the datasets contents are modified in the
+    # config file
+    # The dataset logfile already exists on disk, and it is not modified with a newer timestamp until after
+    # the merge_input rule has been analyzed
+    # The Snakemake command has to be run a second time for the merge_input rule to be analyzed again, at which point
+    # Snakemake detects the merge_input input file (the dataset logfile) is newer than the output pickle file
+    # and reruns merge_input and all downstream rules
+    # Introducing the direct dependency here enables rerunning all downstream dependencies in a single Snakemake call
+    # TODO this may be broken, triggering parse_input to rerun too frequently
+    # TODO requires further testing
+    checkpoints.check_cached_dataset_log.get(**wildcards)
+
+    dataset = datasets[wildcards.dataset]
+    all_files = dataset["node_files"] + dataset["edge_files"] + dataset["other_files"]
+    # Add the relative file path and config file
+    all_files = [os.path.join(dataset["data_dir"], data_file) for data_file in all_files]
+    return all_files + [out_dir + SEP + f'datasets-{wildcards.dataset}.yaml']
+
 # Merge all node files and edge files for a dataset into a single node table and edge table
 rule merge_input:
     # Depends on the node, edge, and other files for this dataset so the rule and downstream rules are rerun if they change
     # Also depends on the relevant part of the config file
-    # TODO why does this pass datasets while datasets is in the global frame as well?
-    input: lambda wildcards: get_dataset_dependencies(datasets, wildcards.dataset)
+    input: get_dataset_dependencies
     output: dataset_file = os.path.join(out_dir, '{dataset}-merged.pickle')
     run:
         # Pass the dataset to PRRunner where the files will be merged and written to disk (i.e. pickled)
@@ -227,7 +249,7 @@ checkpoint prepare_input:
         # Use the algorithm's generate_inputs function to load the merged dataset, extract the relevant columns,
         # and write the output files specified by required_inputs
         # The filename_map provides the output file path for each required input file type
-        filename_map = {input_type: os.path.join(out_dir, 'prepared', f'{wildcards.dataset}-{wildcards.algorithm}-inputs', f'{input_type}.txt') for input_type in PRRunner.get_required_inputs(wildcards.algorithm)}
+        filename_map = {input_type: SEP.join([out_dir, 'prepared', f'{wildcards.dataset}-{wildcards.algorithm}-inputs', f'{input_type}.txt']) for input_type in PRRunner.get_required_inputs(wildcards.algorithm)}
         PRRunner.prepare_inputs(wildcards.algorithm, input.dataset_file, filename_map)
 
 # Collect the prepared input files from the specified directory
@@ -242,10 +264,10 @@ checkpoint prepare_input:
 def collect_prepared_input(wildcards):
     # Need to construct the path in advance because it is needed before it can be obtained from the output
     # of prepare_input
-    prepared_dir = os.path.join(out_dir, 'prepared', f'{wildcards.dataset}-{wildcards.algorithm}-inputs')
+    prepared_dir = SEP.join([out_dir, 'prepared', f'{wildcards.dataset}-{wildcards.algorithm}-inputs'])
 
     # Construct the list of expected prepared input files for the reconstruction algorithm
-    prepared_inputs = expand(os.path.join(prepared_dir,'{type}.txt'),type=PRRunner.get_required_inputs(algorithm=wildcards.algorithm))
+    prepared_inputs = expand(f'{prepared_dir}{SEP}{{type}}.txt',type=PRRunner.get_required_inputs(algorithm=wildcards.algorithm))
     # If the directory is missing, do nothing because the missing output triggers running prepare_input
     if os.path.isdir(prepared_dir):
         # If the directory exists, confirm all prepared input files exist as well (as opposed to some or none)
@@ -263,7 +285,7 @@ def collect_prepared_input(wildcards):
 
     # The reconstruct rule also depends on the parameters
     # Add the parameter logfile to the list of inputs so that the reconstruct rule is executed if the parameters change
-    prepared_inputs.append(os.path.join(out_dir, f'parameters-{wildcards.algorithm}.yaml'))
+    prepared_inputs.append(out_dir + SEP + f'parameters-{wildcards.algorithm}.yaml'   )
     return prepared_inputs
 
 # Run the pathway reconstruction algorithm
