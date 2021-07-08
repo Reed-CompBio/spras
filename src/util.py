@@ -28,14 +28,12 @@ def prepare_path_docker(orig_path: PurePath) -> str:
     return prepared_path
 
 
-def parse_config(config_file):
+def process_config(config):
     """
-    Parse the config file and return the full yaml structure as well as processed portions
+    Process the dictionary config and return the full yaml structure as well as processed portions
     @param config_file: the path to the config file
     @return: (config, datasets, out_dir, algorithm_params)
     """
-    with open(config_file) as config_f:
-        config = yaml.load(config_f, Loader=yaml.FullLoader)
 
     out_dir = config["reconstruction_settings"]["locations"]["reconstruction_dir"]
 
