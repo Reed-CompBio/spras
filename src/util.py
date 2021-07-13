@@ -31,7 +31,7 @@ def prepare_path_docker(orig_path: PurePath) -> str:
 def process_config(config):
     """
     Process the dictionary config and return the full yaml structure as well as processed portions
-    @param config_file: the path to the config file
+    @param config: configuration loaded by Snakemake, from config file and any command line arguments
     @return: (config, datasets, out_dir, algorithm_params)
     """
 
