@@ -10,7 +10,6 @@ To create the Docker image run:
 docker build -t reedcompbio/meo -f Dockerfile .
 ```
 from this directory.
-The `winpty` prefix is only needed on Windows.
 
 ## Testing
 Test code is located in `test/meo`.
