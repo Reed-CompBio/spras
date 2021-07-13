@@ -1,0 +1,6 @@
+GeneA	(pp)	GeneC	0.5
+GeneB	(pp)	GeneC	0.5
+GeneC	(pp)	GeneD	0.5
+GeneD	(pp)	GeneE	0.5
+GeneD	(pp)	GeneG	0.5
+GeneE	(pp)	GeneF	0.5

@@ -1,9 +1,10 @@
 import Dataset
 
 # supported algorithm imports
-from src.pathlinker import PathLinker as pathlinker
+from src.meo import MEO as meo
 from src.omicsintegrator1 import OmicsIntegrator1 as omicsintegrator1
 from src.omicsintegrator2 import OmicsIntegrator2 as omicsintegrator2
+from src.pathlinker import PathLinker as pathlinker
 
 def run(algorithm, params):
     """
