@@ -38,7 +38,7 @@ After installing Docker, start Docker before running SPRAS.
 Once you have activated the conda environment and started Docker, you can run SPRAS with the example Snakemake workflow.
 From the root directory of the `spras` repository, run the command
 ```
-snakemake --cores 1
+snakemake --cores 1 --configfile config/config.yaml
 ```
 This will run the SPRAS workflow with the example config file (`config/config.yaml`) and input files.
 Output files will be written to the `output` directory.

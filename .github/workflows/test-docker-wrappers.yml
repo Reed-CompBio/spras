@@ -60,4 +60,4 @@ jobs:
       run: pytest
     - name: Run Snakemake workflow
       shell: bash --login {0}
-      run: snakemake --cores 1
+      run: snakemake --cores 1 --configfile config/config.yaml
