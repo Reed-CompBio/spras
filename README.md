@@ -3,7 +3,7 @@
 
 SPRAS is a work-in-progress dockerized library of pathway reconstruction enhancement tools.
 The framework will contain different pathway reconstruction algorithms that connect genes and proteins of interest in the context of a general protein-protein interaction network, allowing users to run multiple algorithms on their inputs.
-See the [GLBIO 2021 slides](https://doi.org/10.6084/m9.figshare.14551476) for more information.
+See the GLBIO 2021 [slides](https://doi.org/10.6084/m9.figshare.14551476) or [video](https://www.youtube.com/watch?v=nU8EARwMqdM&list=PLmX8XnLr6zeHlqhhxDy4fA5o65Q6m76KX&index=19) for more information.
 To read more about the specific pathway reconstruction algorithms that may be supported in the future, refer to [our list of algorithms](doc/) within the `doc/` directory.
 
 This repository is very much a work in progress and is not yet stable enough for real data analysis.
