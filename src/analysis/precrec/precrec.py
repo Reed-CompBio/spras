@@ -64,13 +64,13 @@ def get_node_items(infiles,data,gt_header):
         node_t = u_table.append(v_table,ignore_index=True)
 
         # collapse table, keeping minimum value for each node.
-        print('BEFORE COLLAPSING')
-        print(node_t.loc[node_t['u']=="Q15750"])
+        #print('BEFORE COLLAPSING')
+        #print(node_t.loc[node_t['u']=="Q15750"])
         #https://stackoverflow.com/questions/12497402/python-pandas-remove-duplicates-by-columns-a-keeping-the-row-with-the-highest
         node_t = node_t.sort_values("rank",ascending=True).drop_duplicates("u").sort_index()
         #print(node_t)
-        print('AFTER COLLAPSING')
-        print(node_t.loc[node_t['u']=="Q15750"])
+        #print('AFTER COLLAPSING')
+        #print(node_t.loc[node_t['u']=="Q15750"])
 
         preds[f] = node_t
 
