@@ -39,12 +39,9 @@ def reconstruction_params(algorithm, index_string):
     index = int(index_string.replace('params', ''))
     return algorithm_params[algorithm][index]
 
-# TODO write parameter logfile for each combination
-# Log the parameter dictionaries and the mapping from parameter indices to parameter values in a yaml file
-def write_parameter_log(algorithm, logfile):
-    # May want to use the previously created mapping from parameter indices
-    # instead of recreating it to make sure they always correspond
-    cur_params_dict = {f'params{index}': params for index, params in enumerate(algorithm_params[algorithm])}
+# Log the parameter dictionary for this parameter configuration in a yaml file
+def write_parameter_log(algorithm, param_label, logfile):
+    cur_params_dict = reconstruction_params(algorithm, param_label)
 
     print(f'Writing {logfile}')
     with open(logfile,'w') as f:
@@ -76,13 +73,12 @@ def make_final_input(wildcards):
 
     if len(final_input) == 0:
         # No analysis added yet, so add reconstruction output files if they exist.
-        # (if analysis is specified, these should be implicity run).
+        # (if analysis is specified, these should be implicitly run).
         final_input.extend(expand('{out_dir}{sep}pathway-{dataset}-{algorithm_params}.txt', out_dir=out_dir, sep=SEP, dataset=dataset_labels, algorithm_params=algorithms_with_params))
 
-    # TODO write parameter logfile for each combination
     # Create log files for the parameters and datasets
-    final_input.extend(expand('{out_dir}{sep}parameters-{algorithm}.yaml', out_dir=out_dir, sep=SEP, algorithm=algorithms))
-    final_input.extend(expand('{out_dir}{sep}datasets-{dataset}.yaml', out_dir=out_dir, sep=SEP, dataset=dataset_labels))
+    final_input.extend(expand('{out_dir}{sep}logs{sep}parameters-{algorithm_params}.yaml', out_dir=out_dir, sep=SEP, algorithm_params=algorithms_with_params))
+    final_input.extend(expand('{out_dir}{sep}logs{sep}datasets-{dataset}.yaml', out_dir=out_dir, sep=SEP, dataset=dataset_labels))
 
     return final_input
 
@@ -93,13 +89,13 @@ rule all:
 
 # Write the mapping from parameter indices to parameter dictionaries
 rule log_parameters:
-    output: logfile = os.path.join(out_dir, 'parameters-{algorithm}.yaml')
+    output: logfile = os.path.join(out_dir, 'logs', 'parameters-{algorithm}-{params}.yaml')
     run:
-        write_parameter_log(wildcards.algorithm, output.logfile)
+        write_parameter_log(wildcards.algorithm, wildcards.params, output.logfile)
 
 # Write the datasets logfiles
 rule log_datasets:
-    output: logfile = os.path.join(out_dir, 'datasets-{dataset}.yaml')
+    output: logfile = os.path.join(out_dir, 'logs', 'datasets-{dataset}.yaml')
     run:
         write_dataset_log(wildcards.dataset, output.logfile)
 
