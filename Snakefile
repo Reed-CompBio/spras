@@ -22,6 +22,7 @@ def get_dataset(datasets, label):
 algorithms = list(algorithm_params)
 dataset_labels = list(datasets.keys())
 
+# TODO may no longer be needed
 # Generate numeric indices for the parameter combinations
 # of each reconstruction algorithms
 def generate_param_counts(algorithm_params):
@@ -33,12 +34,14 @@ def generate_param_counts(algorithm_params):
 algorithm_param_counts = generate_param_counts(algorithm_params)
 algorithms_with_params = [f'{algorithm}-params{index}' for algorithm, count in algorithm_param_counts.items() for index in range(count)]
 
+# TODO update to use hash
 # Get the parameter dictionary for the specified
 # algorithm and index
 def reconstruction_params(algorithm, index_string):
     index = int(index_string.replace('params', ''))
     return algorithm_params[algorithm][index]
 
+# TODO write parameter logfile for each combination
 # Log the parameter dictionaries and the mapping from parameter indices to parameter values in a yaml file
 def write_parameter_log(algorithm, logfile):
     # May want to use the previously created mapping from parameter indices
@@ -81,6 +84,7 @@ def make_final_input(wildcards):
         # (if analysis is specified, these should be implicity run).
         final_input.extend(expand('{out_dir}{sep}pathway-{dataset}-{algorithm_params}.txt', out_dir=out_dir, sep=SEP, dataset=dataset_labels, algorithm_params=algorithms_with_params))
 
+    # TODO write parameter logfile for each combination
     # Create log files for the parameters and datasets
     final_input.extend(expand('{out_dir}{sep}parameters-{algorithm}.yaml', out_dir=out_dir, sep=SEP, algorithm=algorithms))
     final_input.extend(expand('{out_dir}{sep}datasets-{dataset}.yaml', out_dir=out_dir, sep=SEP, dataset=dataset_labels))
@@ -92,6 +96,7 @@ def make_final_input(wildcards):
 rule all:
     input: make_final_input
 
+# TODO remove parameter caching
 # This checkpoint is used to split log_parameters into two steps so that parameters written to a logfile in a previous
 # run can be used as a disk-based cache
 # The checkpoint runs every time any part of the config file is updated
@@ -147,6 +152,7 @@ rule log_parameters:
     run:
         write_parameter_log(wildcards.algorithm, output.logfile)
 
+# TODO remove dataset caching
 # This checkpoint is used to split log_datasets into two steps so that dataset contents written to a logfile in a
 # previous run can be used as a disk-based cache
 # The checkpoint runs every time any part of the config file is updated
@@ -290,8 +296,6 @@ def collect_prepared_input(wildcards):
     return prepared_inputs
 
 # Run the pathway reconstruction algorithm
-# TODO test that the reconstruct rule is not rerun if the config file changes but the parameters for this algorithm
-# do not (requires setting up dataset configuration caching first)
 rule reconstruct:
     input: collect_prepared_input
     output: pathway_file = os.path.join(out_dir, 'raw-pathway-{dataset}-{algorithm}-{params}.txt')
