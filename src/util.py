@@ -6,7 +6,6 @@ import itertools as it
 import re
 import numpy as np  # Required to eval some forms of parameter ranges
 from pathlib import PurePath
-import yaml
 
 
 def prepare_path_docker(orig_path: PurePath) -> str:
@@ -34,7 +33,8 @@ def process_config(config):
     @param config: configuration loaded by Snakemake, from config file and any command line arguments
     @return: (config, datasets, out_dir, algorithm_params)
     """
-
+    if config == {}:
+        raise ValueError("Config file cannot be empty. Use --configfile <filename> to set a config file.")
     out_dir = config["reconstruction_settings"]["locations"]["reconstruction_dir"]
 
     # Parse dataset information
