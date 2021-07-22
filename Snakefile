@@ -55,6 +55,8 @@ def write_dataset_log(dataset, logfile):
     dataset_contents = get_dataset(datasets,dataset)
 
     print(f'Writing {logfile}')
+    # safe_dump gives RepresenterError for an OrderedDict
+    # config file has to convert the dataset from OrderedDict to dict to avoid this
     with open(logfile,'w') as f:
         yaml.safe_dump(dataset_contents,f)
 

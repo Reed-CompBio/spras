@@ -45,8 +45,9 @@ def process_config(config):
     # Need to work more on input file naming to make less strict assumptions
     # about the filename structure
     # Currently assumes all datasets have a label and the labels are unique
-    # TODO may want to sort the lists of files so that there are fewer cache misses
-    datasets = {dataset["label"]: dataset for dataset in config["datasets"]}
+    # When Snakemake parses the config file it loads the datasets as OrderedDicts not dicts
+    # Convert to dicts to simplify the yaml logging
+    datasets = {dataset["label"]: dict(dataset) for dataset in config["datasets"]}
     config["datasets"] = datasets
 
     # Code snipped from Snakefile that may be useful for assigning default labels
