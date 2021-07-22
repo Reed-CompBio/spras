@@ -218,8 +218,9 @@ def get_dataset_dependencies(wildcards):
     dataset = datasets[wildcards.dataset]
     all_files = dataset["node_files"] + dataset["edge_files"] + dataset["other_files"]
     # Add the relative file path and dataset logfile
-    all_files = [os.path.join(dataset["data_dir"], data_file) for data_file in all_files]
-    return all_files + [out_dir + SEP + f'datasets-{wildcards.dataset}.yaml']
+    all_files = [dataset["data_dir"] + SEP + data_file for data_file in all_files]
+    all_files.append(out_dir + SEP + f'datasets-{wildcards.dataset}.yaml')
+    return all_files
 
 # Merge all node files and edge files for a dataset into a single node table and edge table
 rule merge_input:
