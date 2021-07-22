@@ -2,7 +2,7 @@ import os
 import PRRunner
 import shutil
 import yaml
-from src.util import parse_config
+from src.util import process_config
 from src.analysis.summary import summary
 from src.analysis.viz import graphspace
 
@@ -11,9 +11,7 @@ from src.analysis.viz import graphspace
 # and using the wrong separator prevents Snakemake from matching filenames to the rules that can produce them
 SEP = '/'
 
-config_file = os.path.join('config', 'config.yaml')
-
-config, datasets, out_dir, algorithm_params, algorithm_directed = parse_config(config_file)
+config, datasets, out_dir, algorithm_params, algorithm_directed = process_config(config)
 
 # Return the dataset dictionary from the config file given the label
 def get_dataset(datasets, label):

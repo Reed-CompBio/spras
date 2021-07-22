@@ -13,20 +13,26 @@ for dataset in config["datasets"]:
     PRRunner.merge_input(dataset, test_file)
     os.makedirs("tmp_output", exist_ok=True) #it is assumed directories will be made upstream
 
-#Test pathlinker
+    # Test PathLinker
     filename_map = {"nodetypes": os.path.join("tmp_output", "pl-nodetypes.txt"),
                     "network": os.path.join("tmp_output", "pl-network.txt")}
     PRRunner.prepare_inputs("pathlinker",test_file,filename_map)
 
-#Test OmicsIntegrator1
+    # Test OmicsIntegrator1
     filename_map = {"prizes": os.path.join("tmp_output", "oi1-prizes.txt"),
                     "edges": os.path.join("tmp_output", "oi1-network.txt")}
     PRRunner.prepare_inputs("omicsintegrator1",test_file,filename_map)
 
-#Test OmicsIntegrator2
+    # Test OmicsIntegrator2
     filename_map = {"prizes": os.path.join("tmp_output", "oi2-prizes.txt"),
                     "edges": os.path.join("tmp_output", "oi2-network.txt")}
     PRRunner.prepare_inputs("omicsintegrator2",test_file,filename_map)
+
+    # Test MEO
+    filename_map = {"sources": os.path.join("tmp_output", "meo-sources.txt"),
+                    "targets": os.path.join("tmp_output", "meo-targets.txt"),
+                    "edges": os.path.join("tmp_output", "meo-edges.txt")}
+    PRRunner.prepare_inputs("meo", test_file, filename_map)
 
     os.remove(test_file)
     shutil.rmtree("tmp_output")
