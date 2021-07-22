@@ -50,11 +50,6 @@ def write_parameter_log(algorithm, logfile):
     with open(logfile,'w') as f:
         yaml.safe_dump(cur_params_dict,f)
 
-# Read the cached algorithm parameters or dataset contents from a yaml logfile
-def read_yaml_log(logfile):
-    with open(logfile) as f:
-        return yaml.safe_load(f)
-
 # Log the dataset contents specified in the config file in a yaml file
 def write_dataset_log(dataset, logfile):
     dataset_contents = get_dataset(datasets,dataset)
@@ -94,142 +89,35 @@ def make_final_input(wildcards):
 rule all:
     input: make_final_input
 
-# TODO remove parameter caching
-# This checkpoint is used to split log_parameters into two steps so that parameters written to a logfile in a previous
-# run can be used as a disk-based cache
-# The checkpoint runs every time any part of the config file is updated
-# It outputs an empty flag file that log_parameters depends on
-# When the checkpoint executes, it reads the prior parameter logfile from disk if one exists, compares the parameters
-# for this algorithm with the current parameters in the config file, and deletes the cached logfile if the cached and
-# current parameters do not match
-# This creates a dependency such that log_parameters will be missing its output file after this checkpoint runs
-# if the parameter logfile was stale, which ensures log_parameters will run again, writing a fresh parameter logfile
-# that can signal to the reconstruct rule that the parameters changed so the algorithm needs to be run again
-# TODO consider whether approximate parameter matching is needed for floating point parameters
-# Currently is is intentional to have very strict matching criteria
-checkpoint check_cached_parameter_log:
-    input: config_file
-    # A Snakemake flag file
-    output: touch(os.path.join(out_dir, '.parameters-{algorithm}.flag'))
-    run:
-        logfile = os.path.join(out_dir, f'parameters-{wildcards.algorithm}.yaml')
-        # TODO remove print statements before merging but include for now to illustrate the workflow
-        print(f'Cached logfile: {logfile}')
-
-        # May want to use the previously created mapping from parameter indices
-        # instead of recreating it to make sure they always correspond
-        cur_params_dict = {f'params{index}': params for index, params in enumerate(algorithm_params[wildcards.algorithm])}
-
-        # Read the cached parameters from the logfile if it exists and is readable
-        try:
-            cached_params_dict = read_yaml_log(logfile)
-        except OSError as e:
-            print(e)
-            cached_params_dict = {}
-
-        # TODO could also use this checkpoint to delete downstream files that relied on parameter indices that no
-        # longer exist but it would be difficult to manually identify all of the dependencies
-        print(f'Current params: {cur_params_dict}')
-        print(f'Cached params: {cached_params_dict}')
-        if cur_params_dict != cached_params_dict and os.path.isfile(logfile):
-            print(f'Deleting stale {logfile}')
-            os.remove(logfile)
-        # TODO remove when removing print statements
-        elif not os.path.isfile(logfile):
-            print(f'Logfile {logfile} does not exist')
-        else:
-            print(f'Reusing cached parameters in {logfile}')
-
-# Write the mapping from parameter indices to parameter dictionaries if the parameters changed
+# Write the mapping from parameter indices to parameter dictionaries
 rule log_parameters:
-    # Mark the flag as ancient so that its timestamp is always considered to be older than the output file
-    # Therefore, this rule is triggered when the output file is missing but not when the input flag has been updated,
-    # which happens every time any part of the config file is updated
-    input: ancient(os.path.join(out_dir, '.parameters-{algorithm}.flag'))
     output: logfile = os.path.join(out_dir, 'parameters-{algorithm}.yaml')
     run:
         write_parameter_log(wildcards.algorithm, output.logfile)
 
-# TODO remove dataset caching
-# This checkpoint is used to split log_datasets into two steps so that dataset contents written to a logfile in a
-# previous run can be used as a disk-based cache
-# The checkpoint runs every time any part of the config file is updated
-# It outputs an empty flag file that log_datasets depends on
-# When the checkpoint executes, it reads the prior dataset logfile from disk if one exists, compares the dataset with
-# the current dataset contents in the config file, and deletes the cached logfile if the cached and current dataset
-# do not match
-# This creates a dependency such that log_datasets will be missing its output file after this checkpoint runs
-# if the dataset logfile was stale, which ensures log_datasets will run again, writing a fresh dataset logfile
-# that can signal to the merge_input rule and downstream rules that the dataset changed
-checkpoint check_cached_dataset_log:
-    input: config_file
-    # A Snakemake flag file
-    output: touch(os.path.join(out_dir, '.datasets-{dataset}.flag'))
-    run:
-        logfile = os.path.join(out_dir, f'datasets-{wildcards.dataset}.yaml')
-        # TODO remove print statements before merging but include for now to illustrate the workflow
-        print(f'Cached logfile: {logfile}')
-
-        cur_dataset_dict = get_dataset(datasets, wildcards.dataset)
-
-        # Read the cached dataset from the logfile if it exists and is readable
-        try:
-            cached_dataset_dict = read_yaml_log(logfile)
-        except OSError as e:
-            print(e)
-            cached_dataset_dict = {}
-
-        print(f'Current dataset: {cur_dataset_dict}')
-        print(f'Cached dataset: {cached_dataset_dict}')
-        if cur_dataset_dict != cached_dataset_dict and os.path.isfile(logfile):
-            print(f'Deleting stale {logfile}')
-            os.remove(logfile)
-        # TODO remove when removing print statements
-        elif not os.path.isfile(logfile):
-            print(f'Logfile {logfile} does not exist')
-        else:
-            print(f'Reusing cached dataset in {logfile}')
-
-# Write the datasets if the contents changed
+# Write the datasets logfiles
 rule log_datasets:
-    # Mark the flag as ancient so that its timestamp is always considered to be older than the output file
-    # Therefore, this rule is triggered when the output file is missing but not when the input flag has been updated,
-    # which happens every time any part of the config file is updated
-    input: ancient(os.path.join(out_dir,'.datasets-{dataset}.flag'))
     output: logfile = os.path.join(out_dir, 'datasets-{dataset}.yaml')
     run:
         write_dataset_log(wildcards.dataset, output.logfile)
 
-# Return all files used in the dataset plus the cached dataset file, which represents the relevant part of the
-# config file
+# TODO document the assumption that if the dataset label does not change,
+# the files listed in the dataset do not change
+# This assumption is no longer checked by dataset logfile caching
+# Return all files used in the dataset
 # Input preparation needs to be rerun if these files are modified
 def get_dataset_dependencies(wildcards):
-    # Introduce a dependency between this function (which is used by the merge_input rule) and the
-    # check_cached_dataset_log so that this function is re-evaluated after the checkpoint runs for this
-    # wildcard value (dataset label)
-    # Without the dependency, Snakemake does not rerun merge_input when the datasets contents are modified in the
-    # config file
-    # The dataset logfile already exists on disk, and it is not modified with a newer timestamp until after
-    # the merge_input rule has been analyzed
-    # The Snakemake command has to be run a second time for the merge_input rule to be analyzed again, at which point
-    # Snakemake detects the merge_input input file (the dataset logfile) is newer than the output pickle file
-    # and reruns merge_input and all downstream rules
-    # Introducing the direct dependency here enables rerunning all downstream dependencies in a single Snakemake call
-    # TODO this may be broken, triggering parse_input to rerun too frequently
-    # TODO requires further testing
-    checkpoints.check_cached_dataset_log.get(**wildcards)
-
     dataset = datasets[wildcards.dataset]
     all_files = dataset["node_files"] + dataset["edge_files"] + dataset["other_files"]
-    # Add the relative file path and dataset logfile
+    # Add the relative file path
     all_files = [dataset["data_dir"] + SEP + data_file for data_file in all_files]
-    all_files.append(out_dir + SEP + f'datasets-{wildcards.dataset}.yaml')
+    # TODO confirm the logfile no longer needs to be a dependency
+    #all_files.append(out_dir + SEP + f'datasets-{wildcards.dataset}.yaml')
     return all_files
 
 # Merge all node files and edge files for a dataset into a single node table and edge table
 rule merge_input:
     # Depends on the node, edge, and other files for this dataset so the rule and downstream rules are rerun if they change
-    # Also depends on the relevant part of the config file
     input: get_dataset_dependencies
     output: dataset_file = os.path.join(out_dir, '{dataset}-merged.pickle')
     run:
@@ -288,9 +176,10 @@ def collect_prepared_input(wildcards):
     # The check is executed by checking whether the prepare_input output exists, which is a directory
     checkpoints.prepare_input.get(**wildcards)
 
+    # TODO confirm the parameters logfile no longer needs to be included in this list
     # The reconstruct rule also depends on the parameters
     # Add the parameter logfile to the list of inputs so that the reconstruct rule is executed if the parameters change
-    prepared_inputs.append(out_dir + SEP + f'parameters-{wildcards.algorithm}.yaml')
+    #prepared_inputs.append(out_dir + SEP + f'parameters-{wildcards.algorithm}.yaml')
     return prepared_inputs
 
 # Run the pathway reconstruction algorithm
