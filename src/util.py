@@ -2,9 +2,14 @@
 Utility functions for pathway reconstruction
 """
 
+import base64
 import itertools as it
+import hashlib
+import json
 import re
+import zlib
 import numpy as np  # Required to eval some forms of parameter ranges
+from typing import Dict, Any
 from pathlib import PurePath
 
 
@@ -25,6 +30,51 @@ def prepare_path_docker(orig_path: PurePath) -> str:
         prepared_path = match.group(2)
         prepared_path = '//' + drive + prepared_path
     return prepared_path
+
+
+def hash_params_shake(params_dict: Dict[str, Any], length: int) -> str:
+    """
+    Variable length hash of a dictionary.
+    Derived from https://www.doc.ic.ac.uk/~nuric/coding/how-to-hash-a-dictionary-in-python.html
+    by Nuri Cingillioglu
+    Adapted to use variable length shake_128 instead of MD5
+    """
+    params_hash = hashlib.shake_128()
+    params_encoded = json.dumps(params_dict, sort_keys=True).encode()
+    params_hash.update(params_encoded)
+    # length is the length of the hash digest, which is a bytes object of size length
+    # return the hexadecimal representation of the bytes object
+    return params_hash.hexdigest(length)
+
+
+def hash_params_sha1_base32(params_dict: Dict[str, Any]) -> str:
+    """
+    Hash of a dictionary.
+    Derived from https://www.doc.ic.ac.uk/~nuric/coding/how-to-hash-a-dictionary-in-python.html
+    by Nuri Cingillioglu
+    Adapted to use sha1 instead of MD5 and encode in base32
+    Can be truncated to the desired length outside of the function
+    """
+    params_hash = hashlib.sha1()
+    params_encoded = json.dumps(params_dict, sort_keys=True).encode()
+    params_hash.update(params_encoded)
+    # base32 includes capital letters and the numbers 2-7
+    # https://en.wikipedia.org/wiki/Base32#RFC_4648_Base32_alphabet
+    return base64.b32encode(params_hash.digest()).decode('ascii')
+
+
+def hash_params_adler32(params_dict: Dict[str, Any]) -> str:
+    """
+    Checksum of a dictionary.
+    Derived from https://www.doc.ic.ac.uk/~nuric/coding/how-to-hash-a-dictionary-in-python.html
+    by Nuri Cingillioglu
+    Adapted to use adler32 instead of MD5
+    """
+    params_hash = hashlib.sha1()
+    params_encoded = json.dumps(params_dict, sort_keys=True).encode()
+    # Could further reduce the number of characters by encoding in base32
+    #base64.b32encode(zlib.adler32(params_encoded).to_bytes(4, 'big'))
+    return str(zlib.adler32(params_encoded))
 
 
 def process_config(config):
@@ -63,6 +113,7 @@ def process_config(config):
     algorithm_params = dict()
     algorithm_directed = dict()
     for alg in config["algorithms"]:
+        # TODO move to a separate function
         # Each set of runs should be 1 level down in the config file
         for params in alg["params"]:
             all_runs = []
