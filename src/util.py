@@ -15,6 +15,7 @@ from pathlib import PurePath
 # The length of the truncated hash
 HASH_LENGTH = 7
 
+
 def prepare_path_docker(orig_path: PurePath) -> str:
     """
     Prepare an absolute path for mounting as a Docker volume.
