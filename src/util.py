@@ -12,8 +12,8 @@ import numpy as np  # Required to eval some forms of parameter ranges
 from typing import Dict, Any, Optional
 from pathlib import PurePath
 
-# The length of the truncated hash
-HASH_LENGTH = 7
+# The default length of the truncated hash used to identify parameter combinations
+DEFAULT_HASH_LENGTH = 7
 
 
 def prepare_path_docker(orig_path: PurePath) -> str:
@@ -115,6 +115,13 @@ def process_config(config):
     # Maps from the dataset label to the dataset list index
     # dataset_dict = {dataset.get('label', f'dataset{index}'): index for index, dataset in enumerate(datasets)}
 
+    # Override the default parameter hash length if specified in the config file
+    try:
+        hash_length = int(config["hash_length"])
+    except (ValueError, KeyError) as e:
+        hash_length = DEFAULT_HASH_LENGTH
+    prior_params_hashes = set()
+
     # Parse algorithm information
     # Each algorithm's parameters are provided as a list of dictionaries
     # Defaults are handled in the Python function or class that wraps
@@ -151,8 +158,10 @@ def process_config(config):
             param_name_tuple = tuple(param_name_list)
             for r in run_list_tuples:
                 run_dict = dict(zip(param_name_tuple, r))
-                params_hash = hash_params_sha1_base32(run_dict, HASH_LENGTH)
-                # TODO could confirm that the truncated hashes are all unique and use a longer length if needed
+                params_hash = hash_params_sha1_base32(run_dict, hash_length)
+                if params_hash in prior_params_hashes:
+                    raise ValueError(f'Parameter hash collision detected. Increase the hash_length in the config file '
+                                     f'(current length {hash_length}).')
                 algorithm_params[alg["name"]][params_hash] = run_dict
 
     return config, datasets, out_dir, algorithm_params, algorithm_directed
