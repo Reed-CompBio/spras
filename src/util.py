@@ -12,6 +12,8 @@ import numpy as np  # Required to eval some forms of parameter ranges
 from typing import Dict, Any
 from pathlib import PurePath
 
+# The length of the truncated hash
+HASH_LENGTH = 7
 
 def prepare_path_docker(orig_path: PurePath) -> str:
     """
@@ -74,6 +76,7 @@ def hash_params_adler32(params_dict: Dict[str, Any]) -> str:
     params_encoded = json.dumps(params_dict, sort_keys=True).encode()
     # Could further reduce the number of characters by encoding in base32
     #base64.b32encode(zlib.adler32(params_encoded).to_bytes(4, 'big'))
+    # TODO may want to zero pad to a fixed length
     return str(zlib.adler32(params_encoded))
 
 
@@ -120,7 +123,8 @@ def process_config(config):
             if params == "include":
                 if alg["params"][params]:
                     # This is trusting that "include" is always first
-                    algorithm_params[alg["name"]] = []
+                    # This dict maps from parameter combinations hashes to parameter combination dictionaries
+                    algorithm_params[alg["name"]] = dict()
                     continue
                 else:
                     break
@@ -140,6 +144,9 @@ def process_config(config):
             param_name_tuple = tuple(param_name_list)
             for r in run_list_tuples:
                 run_dict = dict(zip(param_name_tuple, r))
-                algorithm_params[alg["name"]].append(run_dict)
+                params_hash = hash_params_sha1_base32(run_dict)
+                # TODO could confirm that the truncated hashes are all unique and use a longer length if needed
+                truncated_params_hash = params_hash[:HASH_LENGTH]
+                algorithm_params[alg["name"]][truncated_params_hash] = run_dict
 
     return config, datasets, out_dir, algorithm_params, algorithm_directed

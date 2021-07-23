@@ -11,6 +11,9 @@ from src.analysis.viz import graphspace
 # and using the wrong separator prevents Snakemake from matching filenames to the rules that can produce them
 SEP = '/'
 
+wildcard_constraints:
+    params="params-\w+"
+
 config, datasets, out_dir, algorithm_params, algorithm_directed = process_config(config)
 
 # Return the dataset dictionary from the config file given the label
@@ -18,25 +21,14 @@ def get_dataset(datasets, label):
     return datasets[label]
 
 algorithms = list(algorithm_params)
+algorithms_with_params = [f'{algorithm}-params-{params_hash}' for algorithm, param_combos in algorithm_params.items() for params_hash in param_combos.keys()]
+
 dataset_labels = list(datasets.keys())
 
-# TODO may no longer be needed
-# Generate numeric indices for the parameter combinations
-# of each reconstruction algorithms
-def generate_param_counts(algorithm_params):
-    algorithm_param_counts = {}
-    for algorithm, param_list in algorithm_params.items():
-        algorithm_param_counts[algorithm] = len(param_list)
-    return algorithm_param_counts
-
-algorithm_param_counts = generate_param_counts(algorithm_params)
-algorithms_with_params = [f'{algorithm}-params{index}' for algorithm, count in algorithm_param_counts.items() for index in range(count)]
-
-# TODO update to use hash
 # Get the parameter dictionary for the specified
-# algorithm and index
-def reconstruction_params(algorithm, index_string):
-    index = int(index_string.replace('params', ''))
+# algorithm and parameter combination hash
+def reconstruction_params(algorithm, params_hash):
+    index = params_hash.replace('params-', '')
     return algorithm_params[algorithm][index]
 
 # Log the parameter dictionary for this parameter configuration in a yaml file

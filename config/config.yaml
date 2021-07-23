@@ -25,7 +25,7 @@
                 directed: true
                 run1:
                     #k: range(100,201,100)
-                    k: [100]
+                    k: [100, 200]
 
         - name: "omicsintegrator1"
           params:
@@ -40,7 +40,7 @@
 
         - name: "omicsintegrator2"
           params:
-                include: false
+                include: true
                 directed: false
                 run1:
                     b: [4]
