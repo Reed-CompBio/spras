@@ -9,7 +9,7 @@ import json
 import re
 import zlib
 import numpy as np  # Required to eval some forms of parameter ranges
-from typing import Dict, Any
+from typing import Dict, Any, Optional
 from pathlib import PurePath
 
 # The length of the truncated hash
@@ -35,6 +35,7 @@ def prepare_path_docker(orig_path: PurePath) -> str:
     return prepared_path
 
 
+# TODO will likely delete this and use sha1_base32
 def hash_params_shake(params_dict: Dict[str, Any], length: int) -> str:
     """
     Variable length hash of a dictionary.
@@ -50,22 +51,27 @@ def hash_params_shake(params_dict: Dict[str, Any], length: int) -> str:
     return params_hash.hexdigest(length)
 
 
-def hash_params_sha1_base32(params_dict: Dict[str, Any]) -> str:
+def hash_params_sha1_base32(params_dict: Dict[str, Any], length: Optional[int] = None) -> str:
     """
     Hash of a dictionary.
     Derived from https://www.doc.ic.ac.uk/~nuric/coding/how-to-hash-a-dictionary-in-python.html
     by Nuri Cingillioglu
     Adapted to use sha1 instead of MD5 and encode in base32
-    Can be truncated to the desired length outside of the function
+    Can be truncated to the desired length
     """
     params_hash = hashlib.sha1()
     params_encoded = json.dumps(params_dict, sort_keys=True).encode()
     params_hash.update(params_encoded)
     # base32 includes capital letters and the numbers 2-7
     # https://en.wikipedia.org/wiki/Base32#RFC_4648_Base32_alphabet
-    return base64.b32encode(params_hash.digest()).decode('ascii')
+    params_base32 = base64.b32encode(params_hash.digest()).decode('ascii')
+    if length is None or length < 1 or length > len(params_base32):
+        return params_base32
+    else:
+        return params_base32[:length]
 
 
+# TODO will likely delete this and use sha1_base32
 def hash_params_adler32(params_dict: Dict[str, Any]) -> str:
     """
     Checksum of a dictionary.
@@ -145,9 +151,8 @@ def process_config(config):
             param_name_tuple = tuple(param_name_list)
             for r in run_list_tuples:
                 run_dict = dict(zip(param_name_tuple, r))
-                params_hash = hash_params_sha1_base32(run_dict)
+                params_hash = hash_params_sha1_base32(run_dict, HASH_LENGTH)
                 # TODO could confirm that the truncated hashes are all unique and use a longer length if needed
-                truncated_params_hash = params_hash[:HASH_LENGTH]
-                algorithm_params[alg["name"]][truncated_params_hash] = run_dict
+                algorithm_params[alg["name"]][params_hash] = run_dict
 
     return config, datasets, out_dir, algorithm_params, algorithm_directed
