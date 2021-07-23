@@ -130,10 +130,10 @@ def process_config(config):
     algorithm_params = dict()
     algorithm_directed = dict()
     for alg in config["algorithms"]:
-        # TODO move to a separate function
         # Each set of runs should be 1 level down in the config file
         for params in alg["params"]:
             all_runs = []
+            # TODO check for this key in the dict and pop
             if params == "include":
                 if alg["params"][params]:
                     # This is trusting that "include" is always first
@@ -142,6 +142,7 @@ def process_config(config):
                     continue
                 else:
                     break
+            # TODO check for this key in the dict and pop
             if params == "directed":
                 if alg["params"][params]:
                     algorithm_directed[alg["name"]] = True
