@@ -9,6 +9,7 @@ dependencies:
   - pytest=6.2
   - python=3.8
   - pip=21.1.1
+  - requests=2.20.0
   # Only required for GraphSpace
   - commonmark=0.9
   - docutils=0.16
@@ -17,8 +18,5 @@ dependencies:
   - recommonmark=0.7
   - sphinx=4.0
   - pip:
-     - git+https://github.com/annaritz/graphspace-python@fa9bb4b0adc54de50a956daade82db48a8030f64
-     # GraphSpace requires a specific version of requests
-     # https://github.com/adbharadwaj/graphspace-python/blob/42283556eb3a52212cfa9f75dfc694c70069add7/requirements.txt#L3
-     - requests==2.10.0
+     - graphspace_python==1.3.0
      - sphinx-rtd-theme==0.5.2
