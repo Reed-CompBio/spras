@@ -9,7 +9,7 @@ dependencies:
   - pytest=6.2
   - python=3.8
   - pip=21.1.1
-  - requests=2.20.0
+  - requests=2.26
   # Only required for GraphSpace
   - commonmark=0.9
   - docutils=0.16
@@ -18,5 +18,5 @@ dependencies:
   - recommonmark=0.7
   - sphinx=4.0
   - pip:
-     - graphspace_python==1.3.0
+     - git+https://github.com/agitter/graphspace-python@1cd57454a8005d76dcd365270c709d25e9bb54aa
      - sphinx-rtd-theme==0.5.2
