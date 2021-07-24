@@ -1,0 +1,7 @@
+matplotlib==2.2
+networkx==1.11
+numpy==1.13
+pytest==2.9
+scipy==0.19
+setuptools==44.0
+wheel==0.36
