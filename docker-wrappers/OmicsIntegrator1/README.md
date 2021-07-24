@@ -41,7 +41,7 @@ It can be built and tested in a manner similar to the conda-based image.
 ```
 docker build -t reedcompbio/omics-integrator-1:no-conda -f Dockerfile_no_conda .
 
-winpty docker run -it reedcompbio/omics-integrator-1:no-conda
+winpty docker run -it reedcompbio/omics-integrator-1:no-conda bash
 python setup.py test -a "--msgpath=$MSGSTEINER_PATH"
 ```
 
