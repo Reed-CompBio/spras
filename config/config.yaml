@@ -47,6 +47,14 @@
                 run2:
                     b: [2]
                     g: [3]
+        - name: "meo"
+          params:
+                include: true
+                directed: true
+                run1:
+                    max_path_length: [3]
+                    local_search: ["Yes"]
+                    rand_restarts: [10]
 
  # Here we specify which pathways to run and other file location information.
  # DataLoader.py can currently only load a single dataset

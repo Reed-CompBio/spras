@@ -44,7 +44,7 @@ jobs:
       run: pytest
     - name: Run Snakemake workflow
       shell: bash --login {0}
-      run: snakemake --cores 1
+      run: snakemake --cores 1 --configfile config/config.yaml
 
   # Builds the Docker images
   docker:
@@ -64,6 +64,7 @@ jobs:
         docker pull reedcompbio/omics-integrator-1:latest
         docker pull reedcompbio/omics-integrator-2:latest
         docker pull reedcompbio/pathlinker:latest
+        docker pull reedcompbio/meo:latest
     - name: Build Omics Integrator 1 Docker image
       uses: docker/build-push-action@v1
       with:
@@ -90,4 +91,13 @@ jobs:
         repository: reedcompbio/pathlinker
         tags: latest
         cache_froms: reedcompbio/pathlinker:latest
+        push: false
+    - name: Build Maximum Edge Orientation Docker image
+      uses: docker/build-push-action@v1
+      with:
+        path: docker-wrappers/MEO/.
+        dockerfile: docker-wrappers/MEO/Dockerfile
+        repository: reedcompbio/meo
+        tags: latest
+        cache_froms: reedcompbio/meo:latest
         push: false

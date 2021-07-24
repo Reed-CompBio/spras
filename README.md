@@ -3,7 +3,7 @@
 
 SPRAS is a work-in-progress dockerized library of pathway reconstruction enhancement tools.
 The framework will contain different pathway reconstruction algorithms that connect genes and proteins of interest in the context of a general protein-protein interaction network, allowing users to run multiple algorithms on their inputs.
-See the [GLBIO 2021 slides](https://doi.org/10.6084/m9.figshare.14551476) for more information.
+See the GLBIO 2021 [slides](https://doi.org/10.6084/m9.figshare.14551476) or [video](https://www.youtube.com/watch?v=nU8EARwMqdM&list=PLmX8XnLr6zeHlqhhxDy4fA5o65Q6m76KX&index=19) for more information.
 To read more about the specific pathway reconstruction algorithms that may be supported in the future, refer to [our list of algorithms](doc/) within the `doc/` directory.
 
 This repository is very much a work in progress and is not yet stable enough for real data analysis.
@@ -24,7 +24,7 @@ First, download or clone this repository so that you have the Snakefile, example
 
 The easiest way to install Python and the required packages is with [Anaconda](https://www.anaconda.com/download/).
 The Carpentries [Anaconda installation instructions](https://carpentries.github.io/workshop-template/#python) provide guides and videos on how to install Anaconda for your operating system.
-After installing Anaconda, you can run
+After installing Anaconda, you can run the following commands from the root directory of the `spras` repository
 ```
 conda env create -f environment.yml
 conda activate spras
@@ -38,9 +38,9 @@ After installing Docker, start Docker before running SPRAS.
 Once you have activated the conda environment and started Docker, you can run SPRAS with the example Snakemake workflow.
 From the root directory of the `spras` repository, run the command
 ```
-snakemake --cores 1
+snakemake --cores 1 --configfile config/config.yaml
 ```
-This will run the SPRAS workflow with the example config file and input files.
+This will run the SPRAS workflow with the example config file (`config/config.yaml`) and input files.
 Output files will be written to the `output` directory.
 
 You do not need to manually download Docker images from DockerHub before running SPRAS.
@@ -52,7 +52,7 @@ The workflow will automatically download any missing images as long as Docker is
 **Snakemake file**: Defines a workflow to run all pathway reconstruction algorithms on all datasets with all specified hyperparameters.
 
 **Dockerized pathway reconstruction algorithms**: Pathway reconstruction algorithms are run via Docker images using the docker-py Python package.
-[PathLinker](https://github.com/Murali-group/PathLinker), [Omics Integrator](https://github.com/fraenkel-lab/OmicsIntegrator), and [Omics Integrator 2](https://github.com/fraenkel-lab/OmicsIntegrator2) are the first supported algorithms.
+[PathLinker](https://github.com/Murali-group/PathLinker), [Omics Integrator](https://github.com/fraenkel-lab/OmicsIntegrator), [Omics Integrator 2](https://github.com/fraenkel-lab/OmicsIntegrator2), and [Maximum Edge Orientation](https://github.com/agitter/meo/) are the first supported algorithms.
 The files to create these Docker images are in the `docker-wrappers` subdirectory along with links to algorithms' original repositories.
 The Docker images are available on [DockerHub](https://hub.docker.com/orgs/reedcompbio).
 

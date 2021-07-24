@@ -4,15 +4,14 @@
 
 import os
 import PRRunner
-from src.util import parse_config
+from src.util import process_config
 from src.analysis.summary import summary
 from src.analysis.viz import graphspace
 
-config_file = os.path.join('config', 'config.yaml')
 wildcard_constraints:
     algorithm='\w+'
 
-config, datasets, out_dir, algorithm_params, algorithm_directed = parse_config(config_file)
+config, datasets, out_dir, algorithm_params, algorithm_directed = process_config(config)
 
 # Return the dataset dictionary from the config file given the label
 def get_dataset(datasets, label):
@@ -27,7 +26,8 @@ def get_dataset_dependencies(datasets, label):
     all_files = dataset["node_files"] + dataset["edge_files"] + dataset["other_files"]
     # Add the relative file path and config file
     all_files = [os.path.join(dataset["data_dir"], data_file) for data_file in all_files]
-    return all_files + [config_file]
+    # TODO Need to restore dependency on the config file
+    return all_files
 
 algorithms = list(algorithm_params)
 
