@@ -141,7 +141,8 @@ class OmicsIntegrator1(PRM):
             need_chown = False
 
         try:
-            out = client.containers.run('reedcompbio/omics-integrator-1',
+            # TODO remove ':no-conda' after testing
+            out = client.containers.run('reedcompbio/omics-integrator-1:no-conda',
                                   command,
                                   stderr=True,
                                   volumes={prepare_path_docker(work_dir): {'bind': '/OmicsIntegrator1', 'mode': 'rw'}},
