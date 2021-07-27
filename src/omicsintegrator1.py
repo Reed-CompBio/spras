@@ -138,7 +138,7 @@ class OmicsIntegrator1(PRM):
         print('Running Omics Integrator 1 with arguments: {}'.format(' '.join(command)), flush=True)
 
         if singularity:
-            singularity_options = ['--cleanenv', '--containall']
+            singularity_options = ['--cleanenv', '--containall', '--pwd', '/OmicsIntegrator1']
             # TODO is try/finally needed for Singularity?
             out = Client.execute('docker://reedcompbio/omics-integrator-1:no-conda',
                                  command,
