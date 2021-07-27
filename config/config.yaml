@@ -22,7 +22,7 @@
  algorithms:
         - name: "pathlinker"
           params:
-                include: true
+                include: false
                 directed: true
                 run1:
                     k: range(100,201,100)
@@ -33,14 +33,14 @@
                 directed: false
                 run1:
                     r: [5]
-                    b: [5,6]
-                    w: np.linspace(0,5,2)
+                    b: [5]
+                    w: [5]
                     g: [3]
                     d: [10]
 
         - name: "omicsintegrator2"
           params:
-                include: true
+                include: false
                 directed: false
                 run1:
                     b: [4]
@@ -50,7 +50,7 @@
                     g: [3]
         - name: "meo"
           params:
-                include: true
+                include: false
                 directed: true
                 run1:
                     max_path_length: [3]

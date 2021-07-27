@@ -4,6 +4,7 @@ from pathlib import Path
 from src.util import prepare_path_docker
 import os
 import pandas as pd
+from spython.main import Client
 
 __all__ = ['OmicsIntegrator1']
 
@@ -74,6 +75,7 @@ class OmicsIntegrator1(PRM):
     # TODO add support for knockout argument
     # TODO add reasonable default values
     # TODO document required arguments
+    # TODO abstract the Docker and Singularity calls to new module to simplify the logic here
     @staticmethod
     def run(edges=None, prizes=None, dummy_mode=None, mu_squared=None, exclude_terms=None,
             output_file=None, noisy_edges=None, shuffled_prizes=None, random_terminals=None,
@@ -93,8 +95,9 @@ class OmicsIntegrator1(PRM):
         if edges is None or prizes is None or output_file is None or w is None or b is None or d is None:
             raise ValueError('Required Omics Integrator 1 arguments are missing')
 
-        # Initialize a Docker client using environment variables
-        client = docker.from_env()
+        if not singularity:
+            # Initialize a Docker client using environment variables
+            client = docker.from_env()
         work_dir = Path(__file__).parent.parent.absolute()
 
         edge_file = Path(edges)
@@ -134,35 +137,44 @@ class OmicsIntegrator1(PRM):
 
         print('Running Omics Integrator 1 with arguments: {}'.format(' '.join(command)), flush=True)
 
-        #Don't perform this step on systems where permissions aren't an issue like windows
-        need_chown = True
-        try:
-            uid = os.getuid()
-        except AttributeError:
-            need_chown = False
+        if singularity:
+            singularity_options = ['--cleanenv', '--containall']
+            # TODO is try/finally needed for Singularity?
+            out = Client.execute('docker://reedcompbio/omics-integrator-1:no-conda',
+                                 command,
+                                 options=singularity_options,
+                                 bind=f'{prepare_path_docker(work_dir)}:/OmicsIntegrator1')
+            print(out)
+            conf_file_abs.unlink(missing_ok=True)
+        else:
+            # Don't perform this step on systems where permissions aren't an issue like windows
+            need_chown = True
+            try:
+                uid = os.getuid()
+            except AttributeError:
+                need_chown = False
 
-        try:
-            # TODO remove ':no-conda' after testing
-            out = client.containers.run('reedcompbio/omics-integrator-1:no-conda',
-                                  command,
-                                  stderr=True,
-                                  volumes={prepare_path_docker(work_dir): {'bind': '/OmicsIntegrator1', 'mode': 'rw'}},
-                                  working_dir='/OmicsIntegrator1')
-            if need_chown:
-                #This command changes the ownership of output files so we don't
-                # get a permissions error when snakemake tries to touch the files
-                chown_command = " ".join(["chown",str(uid),out_dir.as_posix()+"/oi1*"])
-                out_chown = client.containers.run('reedcompbio/omics-integrator-1',
-                                      chown_command,
+            try:
+                out = client.containers.run('reedcompbio/omics-integrator-1',
+                                      command,
                                       stderr=True,
                                       volumes={prepare_path_docker(work_dir): {'bind': '/OmicsIntegrator1', 'mode': 'rw'}},
                                       working_dir='/OmicsIntegrator1')
+                if need_chown:
+                    #This command changes the ownership of output files so we don't
+                    # get a permissions error when snakemake tries to touch the files
+                    chown_command = " ".join(["chown",str(uid),out_dir.as_posix()+"/oi1*"])
+                    out_chown = client.containers.run('reedcompbio/omics-integrator-1',
+                                          chown_command,
+                                          stderr=True,
+                                          volumes={prepare_path_docker(work_dir): {'bind': '/OmicsIntegrator1', 'mode': 'rw'}},
+                                          working_dir='/OmicsIntegrator1')
 
-            print(out.decode('utf-8'))
-        finally:
-            # Not sure whether this is needed
-            client.close()
-            conf_file_abs.unlink(missing_ok=True)
+                print(out.decode('utf-8'))
+            finally:
+                # Not sure whether this is needed
+                client.close()
+                conf_file_abs.unlink(missing_ok=True)
 
         # TODO do we want to retain other output files?
         # TODO if deleting other output files, write them all to a tmp directory and copy
