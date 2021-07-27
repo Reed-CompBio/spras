@@ -47,7 +47,7 @@ class PathLinker(PRM):
 
     # Skips parameter validation step
     @staticmethod
-    def run(nodetypes=None, network=None, output_file=None, k=None):
+    def run(nodetypes=None, network=None, output_file=None, k=None, singularity=False):
         """
         Run PathLinker with Docker
         @param nodetypes:  input node types with sources and targets (required)

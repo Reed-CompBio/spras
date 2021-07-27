@@ -9,5 +9,6 @@ dependencies:
   - pytest=6.2
   - python=3.8
   - pip=21.1.1
+  - spython=0.1
   - pip:
      - git+https://github.com/annaritz/graphspace-python@fa9bb4b0adc54de50a956daade82db48a8030f64

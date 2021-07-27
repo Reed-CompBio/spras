@@ -13,6 +13,13 @@ wildcard_constraints:
 
 config, datasets, out_dir, algorithm_params, algorithm_directed = process_config(config)
 
+# TODO consider the best way to pass global configuration information to the run functions
+SINGULARITY = "singularity" in config and config["singularity"]
+if SINGULARITY:
+    print('Running Singularity containers')
+else:
+    print('Running Docker containers')
+
 # Return the dataset dictionary from the config file given the label
 def get_dataset(datasets, label):
     return datasets[label]
@@ -149,6 +156,9 @@ rule reconstruct:
         # TODO may need to modify the algorithm run functions to expect the output filename in the same format
         # All can accept a relative pathway to the output file that should be written that is called 'output_file'
         params['output_file'] = output.pathway_file
+        # TODO consider the best way to pass global configuration information to the run functions
+        # This approach requires that all run functions support a singularity option
+        params['singularity'] = SINGULARITY
         PRRunner.run(wildcards.algorithm, params)
 
 # Original pathway reconstruction output to universal output

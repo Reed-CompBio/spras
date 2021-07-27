@@ -77,7 +77,7 @@ class OmicsIntegrator1(PRM):
     @staticmethod
     def run(edges=None, prizes=None, dummy_mode=None, mu_squared=None, exclude_terms=None,
             output_file=None, noisy_edges=None, shuffled_prizes=None, random_terminals=None,
-            seed=None, w=None, b=None, d=None, mu=None, noise=None, g=None, r=None):
+            seed=None, w=None, b=None, d=None, mu=None, noise=None, g=None, r=None, singularity=False):
         """
         Run Omics Integrator 1 in the Docker image with the provided parameters.
         Does not support the garnet, cyto30, knockout, cv, or cv-reps arguments.
@@ -88,6 +88,7 @@ class OmicsIntegrator1(PRM):
         All other output files are deleted.
         @param output_file: the name of the output sif file for the optimal forest, which will overwrite any
         existing file with this name
+        @param singularity: if True, run using the Singularity container instead of the Docker container
         """
         if edges is None or prizes is None or output_file is None or w is None or b is None or d is None:
             raise ValueError('Required Omics Integrator 1 arguments are missing')
