@@ -39,10 +39,17 @@ class TestAnalysis:
     def test_precrec_nodes(self):
         dataset_dict = {'label': 'wnt', 'node_files': ['sources.wnt.txt', 'targets.wnt.txt'], 'edge_files': ['np-union.txt'], 'other_files': [], 'ground_truth_files': ['wnt-edges.txt', 'wnt-nodes.txt'], 'data_dir': TEST_DIR+'input/wnt/'}
 
+        # make output directory if it doesn't exist:
+        outdir = TEST_DIR+'output/wnt/'
+        if not os.path.isdir(outdir):
+            print('making output directory.... %s' % (outdir))
+            os.makedirs(outdir)
+
         # compute_precrec(infiles:list,data:Dataset, gt_header:string, outprefix:string,subsample:string)
-        infiles = [TEST_DIR+'input/wnt/pathway-wnt-pathlinker-params1.txt']
+        infiles = [TEST_DIR+'input/wnt/pathway-wnt-pathlinker-params1.txt',TEST_DIR+'input/wnt/pathway-wnt-manual-params0.txt']
+        outfiles = [TEST_DIR+'output/wnt/precrec-pathway-wnt-pathlinker-params1.txt',TEST_DIR+'output/wnt/precrec-pathway-wnt-manual-params0.txt']
         data = Dataset.Dataset(dataset_dict)
         gt_header = 'wnt-nodes'
         outprefix=TEST_DIR+'output/wnt-nodes'
-        subsample='50'
-        precrec.compute_precrec(infiles,data,gt_header,outprefix,subsample)
+        subsample='10'
+        precrec.compute_precrec(infiles,outfiles,data,gt_header,outprefix,subsample)
