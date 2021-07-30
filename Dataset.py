@@ -125,10 +125,18 @@ class Dataset:
         # sort edges (e.g., directed edges u,v and v,u will become undirected u,v).
         # this seems slow, but I can't find another way to do this. - AR
         for index in table.index:
-            table.loc[index] = sorted(list(table.iloc[[index]].values[0]))
+            edge = table.iloc[[index]].values[0][:2]
+            sort_edge = np.array(sorted(list(table.iloc[[index]].values[0][:2])))
+            if not np.array_equal(edge,sort_edge):
+                # errors were emitted when trying to set both Interactor1 &
+                # Interactor2 at the same time; there's probably a better way to set this.
+                table.loc[index,'Interactor1'] = sort_edge[0]
+                table.loc[index,'Interactor2'] = sort_edge[1]
+
 
         # drop duplicates
         table.drop_duplicates(inplace=True,ignore_index=True)
+
         return table
 
     def request_node_columns(self, col_names):
@@ -189,3 +197,6 @@ class Dataset:
 
     def get_interactome(self):
         return self.interactome.copy()
+
+    def get_undirected_interactome(self):
+        return self.make_edges_undirected(self.interactome.copy())
