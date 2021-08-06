@@ -90,3 +90,54 @@ def process_config(config):
                 algorithm_params[alg["name"]].append(run_dict)
 
     return config, datasets, out_dir, algorithm_params, algorithm_directed
+
+def ensemble_networks(file_list, graph_name):
+    '''
+    Arguments:
+    file_list --> a glob.glob list of subnetwork files returned by spras
+    graph_name --> string, name for the ensemble graph, will be used as the output file name 
+    '''
+    # initialize subnetwork count and edge dict 
+    subnetwork_count = 0
+    ensemble_dict = {}
+   
+    for file in file_list:
+        # increment subnetwork counter
+        subnetwork_count = subnetwork_count + 1
+        with open(file) as f:
+            # read each interaction and add to ensemble dict of interactions
+            for line in f.readlines():
+                row = line.split()
+          
+                ### instead of sorting as in make_edges_undirected, sort the tuple before adding it to the dict
+                edge_tuple = tuple(sorted((row[0], row[1])))
+                # if the edge is already in the dict, add 1 to its count
+                if edge_tuple in ensemble_dict:
+                    ensemble_dict[edge_tuple] = ensemble_dict[edge_tuple] + 1
+                # if the edge is not in the dict, add it and initialize its count to 1
+                else:
+                    ensemble_dict[edge_tuple] = 1 
+
+    # change count to frequency out of total number of subnetworks
+    for edge_tuple in ensemble_dict:
+        ensemble_dict[edge_tuple] = ensemble_dict[edge_tuple]/subnetwork_count
+
+    # create ensemble graph
+    graph = nx.Graph(name = graph_name)
+
+    for edge_tuple in ensemble_dict:
+        protein1 = biomart_ensembl_protein_to_gene(edge_tuple[0])
+        protein2 = biomart_ensembl_protein_to_gene(edge_tuple[1])
+        # create edge with weight
+        graph.add_edge(protein1, protein2, weight = ensemble_dict[edge_tuple])  
+    
+    # edge weights
+    edges = graph.edges()
+    weights = [graph[u][v]['weight'] for u,v in edges]
+    
+    # create a tab-delimited file of the graph
+    edge_list = list(edges)
+    ensemble_df = pd.DataFrame(edge_list, columns = ['Protein1', 'Protein2'])
+    ensemble_df['Frequency'] = weights
+    ensemble_df.to_csv('../processed_datasets/'+graph_name+'.txt', sep = '\t', index=False) 
+        
