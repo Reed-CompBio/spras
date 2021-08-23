@@ -36,7 +36,7 @@ class TestAnalysis:
     def test_graphspace_ranked_directed(self):
         graphspace.write_json(TEST_DIR+'input/standardized-ranked.txt',TEST_DIR+'output/standardized-ranked-directed-gs.json',TEST_DIR+'output/standardized-ranked-directed-gs-style.json',directed=True)
 
-    def test_precrec_nodes(self):
+    def test_precrec_nodes_1(self):
         dataset_dict = {'label': 'wnt', 'node_files': ['sources.wnt.txt', 'targets.wnt.txt'], 'edge_files': ['np-union.txt'], 'other_files': [], 'ground_truth_files': ['wnt-edges.txt', 'wnt-nodes.txt'], 'data_dir': TEST_DIR+'input/wnt/'}
 
         # make output directory if it doesn't exist:
@@ -46,10 +46,28 @@ class TestAnalysis:
             os.makedirs(outdir)
 
         # compute_precrec(infiles:list,data:Dataset, gt_header:string, outprefix:string,subsample:string)
-        infiles = [TEST_DIR+'input/wnt/pathway-wnt-pathlinker-params1.txt',TEST_DIR+'input/wnt/pathway-wnt-manual-params0.txt']
-        outfiles = [TEST_DIR+'output/wnt/precrec-pathway-wnt-pathlinker-params1.txt',TEST_DIR+'output/wnt/precrec-pathway-wnt-manual-params0.txt']
+        infiles = [TEST_DIR+'input/wnt/pathway-wnt-pathlinker-params0.txt',TEST_DIR+'input/wnt/pathway-wnt-pathlinker-params1.txt',TEST_DIR+'input/wnt/pathway-wnt-omicsintegrator2-params0.txt',TEST_DIR+'input/wnt/pathway-wnt-manual-params0.txt',TEST_DIR+'input/wnt/pathway-wnt-manual2-params0.txt']
+        outfiles = [TEST_DIR+'output/wnt/precrec-pathway-wnt-pathlinker-params0.txt',TEST_DIR+'output/wnt/precrec-pathway-wnt-pathlinker-params1.txt',TEST_DIR+'output/wnt/precrec-pathway-wnt-omicsintegrator2-params0.txt',TEST_DIR+'output/wnt/precrec-pathway-wnt-manual-params0.txt',TEST_DIR+'output/wnt/precrec-pathway-wnt-manual2-params0.txt']
         data = Dataset.Dataset(dataset_dict)
         gt_header = 'wnt-nodes'
-        outprefix=TEST_DIR+'output/wnt-nodes'
-        subsample='10'
+        outprefix=TEST_DIR+'output/wnt-nodes-2x'
+        subsample='2'
+        precrec.compute_precrec(infiles,outfiles,data,gt_header,outprefix,subsample)
+
+    def test_precrec_nodes_2(self):
+        dataset_dict = {'label': 'wnt', 'node_files': ['sources.wnt.txt', 'targets.wnt.txt'], 'edge_files': ['np-union.txt'], 'other_files': [], 'ground_truth_files': ['wnt-edges.txt', 'wnt-nodes.txt'], 'data_dir': TEST_DIR+'input/wnt/'}
+
+        # make output directory if it doesn't exist:
+        outdir = TEST_DIR+'output/wnt/'
+        if not os.path.isdir(outdir):
+            print('making output directory.... %s' % (outdir))
+            os.makedirs(outdir)
+
+        # compute_precrec(infiles:list,data:Dataset, gt_header:string, outprefix:string,subsample:string)
+        infiles = [TEST_DIR+'input/wnt/pathway-wnt-pathlinker-params0.txt',TEST_DIR+'input/wnt/pathway-wnt-pathlinker-params1.txt',TEST_DIR+'input/wnt/pathway-wnt-omicsintegrator2-params0.txt',TEST_DIR+'input/wnt/pathway-wnt-manual-params0.txt',TEST_DIR+'input/wnt/pathway-wnt-manual2-params0.txt']
+        outfiles = [TEST_DIR+'output/wnt/precrec-pathway-wnt-pathlinker-params0.txt',TEST_DIR+'output/wnt/precrec-pathway-wnt-pathlinker-params1.txt',TEST_DIR+'output/wnt/precrec-pathway-wnt-omicsintegrator2-params0.txt',TEST_DIR+'output/wnt/precrec-pathway-wnt-manual-params0.txt',TEST_DIR+'output/wnt/precrec-pathway-wnt-manual2-params0.txt']
+        data = Dataset.Dataset(dataset_dict)
+        gt_header = 'wnt-nodes'
+        outprefix=TEST_DIR+'output/wnt-nodes-all'
+        subsample='all'
         precrec.compute_precrec(infiles,outfiles,data,gt_header,outprefix,subsample)

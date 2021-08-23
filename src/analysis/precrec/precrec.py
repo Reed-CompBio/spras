@@ -4,6 +4,7 @@ import os
 import numpy as np
 import pandas as pd
 import Dataset
+import matplotlib.pyplot as plt
 
 # Modified from PRAUG's Precision-Recall code.
 def compute_precrec(infiles:list, outfiles:list, data:Dataset, gt_header:str, outprefix:str,subsample:str) -> None:
@@ -16,7 +17,6 @@ def compute_precrec(infiles:list, outfiles:list, data:Dataset, gt_header:str, ou
     if data.contains_node_columns([gt_header]):
         ## items are NODES
         predictions,positives,all_negatives = get_node_items(infiles,outfiles,data,gt_header)
-
     elif data.contains_edge_columns([gt_header]):
         ## items are UNDIRECTED EDGES
         sys.exit('NOT IMPLEMENTED')
@@ -38,22 +38,24 @@ def compute_precrec(infiles:list, outfiles:list, data:Dataset, gt_header:str, ou
             negatives = all_negatives
     except:
         assert subsample=='all'
-        print('using all negatives.')
+        print('using all %d negatives.' % (len(all_negatives)))
         negatives = all_negatives
 
     # for every pred, compute prec-rec, write to file, and store coords.
+    dfs = {} # dict of {outf: DataFrame} key-value pairs
     for outf,pred in predictions.items():
-        pr(pred,positives,negatives,outf)
+        dfs[outf] = pr(pred,positives,negatives,outf)
+    print('%d data frames' % (len(dfs)))
+
+    ## TODO we currently make output files AND plot the prec-rec values as PNGs.
+    ## Make this an option in the config file that reads the output files from above
+    ## to make this more snakemake-friendly...
+    plot_pr(dfs,outprefix)
 
     print('DONE')
     return
 
-def pr(pred:pd.DataFrame,pos:set,negs:set,outfile:str) -> None:
-    print(pred)
-    print(len(pos))
-    print(pos)
-    print(len(negs))
-    print(outfile)
+def pr(pred:pd.DataFrame,pos:set,negs:set,outfile:str) -> pd.DataFrame:
 
     ## NOTE: the output file INCLUDES ALL PREDICTIONS, including those
     ## that are in the ignored set (neither a pos nor a neg)
@@ -64,11 +66,11 @@ def pr(pred:pd.DataFrame,pos:set,negs:set,outfile:str) -> None:
     # precision & recall when necessary. There are cleaner ways to do this
     # but they end up calculating prec & rec for larger and larger subsets
     # of the data...
-
+    vals = [] # valls will be 2-col list of unique [prec,rec] vals.
     counter,num_preds,num_TPs = 0,0,0
-    prev_val,prev_rec,prev_prec = -1,-1,-1
+    prev_rank,prev_prec,prev_rec,prec,rec = -1,-1,-1,-1,-1
+    ties = []
     for index,row in pred.iterrows():
-        print(index,row)
         u = row['u']
         rank = row['rank']
         if u in pos or u in negs: # count if it's not ignored
@@ -82,12 +84,59 @@ def pr(pred:pd.DataFrame,pos:set,negs:set,outfile:str) -> None:
 
         prec = num_TPs/num_preds
         rec = num_TPs/len(pos)
-        print([u,str(rank),tp,fp,'%.4f'%(prec),'%.4f'%(rec)])
-        out.write('\t'.join([u,str(rank),tp,fp,'%.4f'%(prec),'%.4f'%(rec)])+'\n')
 
+        if prev_rank != -1 and rank != prev_rank:
+            # write all previous ties
+            for line in ties:
+                out.write('%s\t%.4f\t%.4f\n' % (line,prev_prec,prev_rec))
+            ties = []
+            # if this is a unique (prec,rec) combo, add it to vals.
+            if prec != prev_prec and rec != prev_rec:
+                vals.append([prec,rec])
+
+        #print([u,str(rank),tp,fp,'%.4f'%(prec),'%.4f'%(rec)])
+        ## add the prefix line to ties list.
+        ties.append('\t'.join([u,str(rank),tp,fp]))
+
+        # update previous PR values.
+        prev_rank = rank
+        prev_prec = prec
+        prev_rec = rec
+
+    # add last point if different from second-to-last.
+    # catches the case where there are ties in the last rank.
+    for line in ties:
+        out.write('%s\t%.4f\t%.4f\n' % (line,prev_prec,prev_rec))
+        # if this is a unique (prec,rec) combo, add it to vals.
+        if len(vals)==0 or vals[-1] != [prec,rec]:
+            vals.append([prec,rec])
+
+    print('wrote to %s' % (outfile))
     out.close()
 
+    # turn vals into a 2-column data frame.
+    df = pd.DataFrame.from_records(vals,columns=['prec','rec'])
+    print(df)
+    return df
+
+def plot_pr(dfs:dict,outprefix:str) -> None:
+    fig = plt.figure()
+    for outf in dfs:
+        if len(dfs[outf]['rec'])>1: #plot line
+            plt.plot(dfs[outf]['rec'],dfs[outf]['prec'],label=outf.split('/')[-1])
+        else: # plot point
+            plt.plot(dfs[outf]['rec'],dfs[outf]['prec'],'o',ms=5,label=outf.split('/')[-1])
+    plt.xlim([0,1])
+    plt.ylim([0,1])
+    plt.xlabel('Recall')
+    plt.ylabel('Precision')
+    plt.title(outprefix.split('/')[-1])
+    plt.legend(loc='best')
+    plt.tight_layout()
+    plt.savefig(outprefix+'.png')
+    print('Wrote to %s.png' % (outprefix))
     return
+
 
 def get_node_items(infiles,outfiles,data,gt_header):
     ## get all items
