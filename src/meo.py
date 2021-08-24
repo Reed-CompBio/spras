@@ -4,6 +4,7 @@ from pathlib import Path
 from src.util import prepare_path_docker
 import os
 import pandas as pd
+import numpy as np
 
 __all__ = ['MEO']
 
@@ -73,7 +74,8 @@ class MEO(PRM):
 
         # TODO need to support partially directed graphs
         # Expected columns are Node1 EdgeType Node2 Weight
-        edges = data.get_interactome()
+        edges = data.get_undirected_interactome()
+        
         # For now all edges are undirected
         edges.insert(1, 'EdgeType', '(pp)')
         edges.to_csv(filename_map['edges'], sep='\t', index=False, columns=['Interactor1', 'EdgeType', 'Interactor2', 'Weight'], header=False)
