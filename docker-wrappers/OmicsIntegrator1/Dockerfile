@@ -6,7 +6,7 @@
 FROM continuumio/miniconda3:4.9.2
 
 # Need to install msgsteiner-1.3 and dependencies
-RUN apt-get -qq update && \
+RUN apt-get -qq update --allow-releaseinfo-change && \
     apt-get install -y build-essential libx11-dev libboost-dev libboost-program-options-dev
 
 RUN commit=0a57ede6beeef6e63b86d19898e560d62015e85d && \
