@@ -28,12 +28,11 @@
                 include: true
                 directed: true
                 run1:
-                    #k: range(100,201,100)
-                    k: [100, 200]
+                    k: range(100,201,100)
 
         - name: "omicsintegrator1"
           params:
-                include: false
+                include: true
                 directed: false
                 run1:
                     r: [5]
@@ -54,7 +53,7 @@
                     g: [3]
         - name: "meo"
           params:
-                include: false
+                include: true
                 directed: true
                 run1:
                     max_path_length: [3]
@@ -73,14 +72,14 @@
        other_files: []
        # Relative path from the spras directory
        data_dir: "input"
-     #-
-     #  label: data1
+     -
+       label: data1
        # Reuse some of the same sources file as 'data0' but different network and targets
-     #  node_files: ["sources.txt", "alternative-targets.txt"]
-     #  edge_files: ["alternative-network.txt"]
-     #  other_files: []
+       node_files: ["sources.txt", "alternative-targets.txt"]
+       edge_files: ["alternative-network.txt"]
+       other_files: []
        # Relative path from the spras directory
-     #  data_dir: "input"
+       data_dir: "input"
 
  # If we want to reconstruct then we should set run to true.
  # TODO: if include is true above but run is false here, algs are not run.
@@ -99,8 +98,8 @@
  analysis:
         summary:
 
-          include: false
+          include: true
 
         graphspace:
 
-          include: false
+          include: true
