@@ -7,7 +7,6 @@ import itertools as it
 import hashlib
 import json
 import re
-import zlib
 import numpy as np  # Required to eval some forms of parameter ranges
 from typing import Dict, Any, Optional
 from pathlib import PurePath
@@ -35,22 +34,6 @@ def prepare_path_docker(orig_path: PurePath) -> str:
     return prepared_path
 
 
-# TODO will likely delete this and use sha1_base32
-def hash_params_shake(params_dict: Dict[str, Any], length: int) -> str:
-    """
-    Variable length hash of a dictionary.
-    Derived from https://www.doc.ic.ac.uk/~nuric/coding/how-to-hash-a-dictionary-in-python.html
-    by Nuri Cingillioglu
-    Adapted to use variable length shake_128 instead of MD5
-    """
-    params_hash = hashlib.shake_128()
-    params_encoded = json.dumps(params_dict, sort_keys=True).encode()
-    params_hash.update(params_encoded)
-    # length is the length of the hash digest, which is a bytes object of size length
-    # return the hexadecimal representation of the bytes object
-    return params_hash.hexdigest(length)
-
-
 def hash_params_sha1_base32(params_dict: Dict[str, Any], length: Optional[int] = None) -> str:
     """
     Hash of a dictionary.
@@ -58,6 +41,8 @@ def hash_params_sha1_base32(params_dict: Dict[str, Any], length: Optional[int] =
     by Nuri Cingillioglu
     Adapted to use sha1 instead of MD5 and encode in base32
     Can be truncated to the desired length
+    @param params_dict: the algorithm parameters dictionary
+    @param length: the length of the returned hash, which is ignored if it is None, < 1, or > the full hash length
     """
     params_hash = hashlib.sha1()
     params_encoded = json.dumps(params_dict, sort_keys=True).encode()
@@ -69,22 +54,6 @@ def hash_params_sha1_base32(params_dict: Dict[str, Any], length: Optional[int] =
         return params_base32
     else:
         return params_base32[:length]
-
-
-# TODO will likely delete this and use sha1_base32
-def hash_params_adler32(params_dict: Dict[str, Any]) -> str:
-    """
-    Checksum of a dictionary.
-    Derived from https://www.doc.ic.ac.uk/~nuric/coding/how-to-hash-a-dictionary-in-python.html
-    by Nuri Cingillioglu
-    Adapted to use adler32 instead of MD5
-    """
-    params_hash = hashlib.sha1()
-    params_encoded = json.dumps(params_dict, sort_keys=True).encode()
-    # Could further reduce the number of characters by encoding in base32
-    #base64.b32encode(zlib.adler32(params_encoded).to_bytes(4, 'big'))
-    # TODO may want to zero pad to a fixed length
-    return str(zlib.adler32(params_encoded))
 
 
 def process_config(config):
