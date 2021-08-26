@@ -78,13 +78,13 @@ rule all:
 
 # Write the mapping from parameter indices to parameter dictionaries
 rule log_parameters:
-    output: logfile = os.path.join(out_dir, 'logs', 'parameters-{algorithm}-{params}.yaml')
+    output: logfile = SEP.join([out_dir, 'logs', 'parameters-{algorithm}-{params}.yaml'])
     run:
         write_parameter_log(wildcards.algorithm, wildcards.params, output.logfile)
 
 # Write the datasets logfiles
 rule log_datasets:
-    output: logfile = os.path.join(out_dir, 'logs', 'datasets-{dataset}.yaml')
+    output: logfile = SEP.join([out_dir, 'logs', 'datasets-{dataset}.yaml'])
     run:
         write_dataset_log(wildcards.dataset, output.logfile)
 
@@ -105,7 +105,7 @@ def get_dataset_dependencies(wildcards):
 rule merge_input:
     # Depends on the node, edge, and other files for this dataset so the rule and downstream rules are rerun if they change
     input: get_dataset_dependencies
-    output: dataset_file = os.path.join(out_dir, '{dataset}-merged.pickle')
+    output: dataset_file = SEP.join([out_dir, '{dataset}-merged.pickle'])
     run:
         # Pass the dataset to PRRunner where the files will be merged and written to disk (i.e. pickled)
         dataset_dict = get_dataset(datasets, wildcards.dataset)
@@ -118,9 +118,9 @@ rule merge_input:
 # The checkpoint produces a directory instead of a list of output files because the number and types of output
 # files is algorithm-dependent
 checkpoint prepare_input:
-    input: dataset_file = os.path.join(out_dir, '{dataset}-merged.pickle')
+    input: dataset_file = SEP.join([out_dir, '{dataset}-merged.pickle'])
     # Output is a directory that will contain all prepared files for pathway reconstruction
-    output: output_dir = directory(os.path.join(out_dir, 'prepared', '{dataset}-{algorithm}-inputs'))
+    output: output_dir = directory(SEP.join([out_dir, 'prepared', '{dataset}-{algorithm}-inputs']))
     # Run the preprocessing script for this algorithm
     run:
         # Make sure the output subdirectories exist
@@ -167,7 +167,7 @@ def collect_prepared_input(wildcards):
 # Run the pathway reconstruction algorithm
 rule reconstruct:
     input: collect_prepared_input
-    output: pathway_file = os.path.join(out_dir, 'raw-pathway-{dataset}-{algorithm}-{params}.txt')
+    output: pathway_file = SEP.join([out_dir, 'raw-pathway-{dataset}-{algorithm}-{params}.txt'])
     run:
         # Create a copy so that the updates are not written to the parameters logfile
         params = reconstruction_params(wildcards.algorithm, wildcards.params).copy()
@@ -181,27 +181,28 @@ rule reconstruct:
 # Original pathway reconstruction output to universal output
 # Use PRRunner as a wrapper to call the algorithm-specific parse_output
 rule parse_output:
-    input: raw_file = os.path.join(out_dir, 'raw-pathway-{dataset}-{algorithm}-{params}.txt')
-    output: standardized_file = os.path.join(out_dir, 'pathway-{dataset}-{algorithm}-{params}.txt')
+    input: raw_file = SEP.join([out_dir, 'raw-pathway-{dataset}-{algorithm}-{params}.txt'])
+    output: standardized_file = SEP.join([out_dir, 'pathway-{dataset}-{algorithm}-{params}.txt'])
     run:
         PRRunner.parse_output(wildcards.algorithm, input.raw_file, output.standardized_file)
 
 # Collect Summary Statistics
 rule summarize:
     input:
-        standardized_file = os.path.join(out_dir, 'pathway-{dataset}-{algorithm}-{params}.txt')
+        standardized_file = SEP.join([out_dir, 'pathway-{dataset}-{algorithm}-{params}.txt'])
     output:
-        summary_file = os.path.join(out_dir, 'summary-{dataset}-{algorithm}-{params}.txt')
+        summary_file = SEP.join([out_dir, 'summary-{dataset}-{algorithm}-{params}.txt'])
     run:
         summary.run(input.standardized_file,output.summary_file,directed=algorithm_directed[wildcards.algorithm])
 
 # Write GraphSpace JSON Graphs
 rule viz_graphspace:
-    input: standardized_file = os.path.join(out_dir, 'pathway-{dataset}-{algorithm}-{params}.txt')
+    input: standardized_file = SEP.join([out_dir, 'pathway-{dataset}-{algorithm}-{params}.txt'])
     output:
-        graph_json = os.path.join(out_dir, 'gs-{dataset}-{algorithm}-{params}.json'), style_json = os.path.join(out_dir, 'gsstyle-{dataset}-{algorithm}-{params}.json')
+        graph_json = SEP.join([out_dir, 'gs-{dataset}-{algorithm}-{params}.json']),
+        style_json = SEP.join([out_dir, 'gsstyle-{dataset}-{algorithm}-{params}.json'])
     run:
-        json_prefix = os.path.join(out_dir, 'pathway-{dataset}-{algorithm}-{params}')
+        json_prefix = SEP.join([out_dir, 'pathway-{dataset}-{algorithm}-{params}'])
         graphspace.write_json(input.standardized_file,output.graph_json,output.style_json,directed=algorithm_directed[wildcards.algorithm])
 
 # Remove the output directory
