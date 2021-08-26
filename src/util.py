@@ -128,6 +128,10 @@ def process_config(config):
             param_name_tuple = tuple(param_name_list)
             for r in run_list_tuples:
                 run_dict = dict(zip(param_name_tuple, r))
+                # TODO temporary workaround for yaml.safe_dump in Snakefile write_parameter_log
+                for param, value in run_dict.copy().items():
+                    if isinstance(value, np.float64):
+                        run_dict[param] = float(value)
                 params_hash = hash_params_sha1_base32(run_dict, hash_length)
                 if params_hash in prior_params_hashes:
                     raise ValueError(f'Parameter hash collision detected. Increase the hash_length in the config file '
