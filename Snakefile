@@ -6,7 +6,6 @@ from src.util import process_config
 from src.analysis.summary import summary
 from src.analysis.viz import graphspace
 
-# TODO decide whether to use os.sep os.altsep or a fixed character for file paths
 # Snakemake updated the behavior in the 6.5.0 release https://github.com/snakemake/snakemake/pull/1037
 # and using the wrong separator prevents Snakemake from matching filenames to the rules that can produce them
 SEP = '/'
@@ -35,7 +34,6 @@ def reconstruction_params(algorithm, params_hash):
 def write_parameter_log(algorithm, param_label, logfile):
     cur_params_dict = reconstruction_params(algorithm, param_label)
 
-    print(f'Writing {logfile}')
     with open(logfile,'w') as f:
         yaml.safe_dump(cur_params_dict,f)
 
@@ -43,7 +41,6 @@ def write_parameter_log(algorithm, param_label, logfile):
 def write_dataset_log(dataset, logfile):
     dataset_contents = get_dataset(datasets,dataset)
 
-    print(f'Writing {logfile}')
     # safe_dump gives RepresenterError for an OrderedDict
     # config file has to convert the dataset from OrderedDict to dict to avoid this
     with open(logfile,'w') as f:
