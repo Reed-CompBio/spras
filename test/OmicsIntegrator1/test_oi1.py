@@ -25,7 +25,10 @@ class TestOmicsIntegrator1:
                              output_file=TEST_DIR+'output/test_optimalForest.sif',
                              w=5,
                              b=1,
-                             d=10)
+                             d=10,
+                             noise=0.333,
+                             g=0.001,
+                             r=0)
 
     def test_oi1_all_optional(self):
         # Include all optional arguments
