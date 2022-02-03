@@ -13,13 +13,13 @@ jobs:
     steps:
     - name: Checkout repository
       uses: actions/checkout@v2
+    - name: Install Singularity
+      uses: eWaterCycle/setup-singularity@v7
+      with:
+        singularity-version: 3.8.5
       # Pull from Docker Hub to use the cache
       # https://medium.com/mobileforgood/coding-tips-patterns-for-continuous-integration-with-docker-on-travis-ci-9cedb8348a62
       # https://github.com/docker/build-push-action/issues/7
-    - name: Install Singularity
-      uses: eWaterCycle/setup-singularity@v6
-      with:
-        singularity-version: 3.7.1
     - name: Pull Docker images
       run: |
         docker pull reedcompbio/omics-integrator-1:latest
