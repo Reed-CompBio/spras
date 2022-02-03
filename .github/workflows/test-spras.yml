@@ -1,11 +1,58 @@
-name: Test Docker wrappers
+name: Test SPRAS
 
 on: [push, pull_request]
 
 jobs:
-  # Builds the Docker images and runs their test code
+  # Installs the conda environment but does not run tests because the tests require Linux Docker images
+  conda-only:
+    name: Test conda environment
+    runs-on: ${{ matrix.os }}
+    strategy:
+      matrix:
+        os: [macos-latest, windows-latest]
+    steps:
+    - name: Checkout repository
+      uses: actions/checkout@v2
+    - name: Install conda environment
+      uses: conda-incubator/setup-miniconda@v2
+      with:
+        activate-environment: spras
+        environment-file: environment.yml
+        auto-activate-base: false
+        miniconda-version: 'latest'
+
+  # Runs the test code and Snakemake workflow in the conda environment
+  test:
+    name: Run test cases and workflow
+    # The Docker images will be pulled in both the docker job and this test job
+    runs-on: ${{ matrix.os }}
+    strategy:
+      matrix:
+        os: [ubuntu-latest]
+    steps:
+    - name: Checkout repository
+      uses: actions/checkout@v2
+    - name: Install conda environment
+      uses: conda-incubator/setup-miniconda@v2
+      with:
+        activate-environment: spras
+        environment-file: environment.yml
+        auto-activate-base: false
+        miniconda-version: 'latest'
+    - name: Install Singularity
+      uses: eWaterCycle/setup-singularity@v7
+      with:
+        singularity-version: 3.8.5
+    - name: Run tests
+      shell: bash --login {0}
+      run: pytest
+    - name: Run Snakemake workflow
+      shell: bash --login {0}
+      run: snakemake --cores 1 --configfile config/config.yaml
+
+  # Builds the Docker images
   docker:
-    name: Test Docker wrappers
+    name: Build Docker images
     runs-on: ${{ matrix.os }}
     strategy:
       matrix:
@@ -62,16 +109,3 @@ jobs:
         tags: latest
         cache_froms: reedcompbio/meo:latest
         push: false
-    - name: Install conda environment
-      uses: conda-incubator/setup-miniconda@v2
-      with:
-        activate-environment: spras
-        environment-file: environment.yml
-        auto-activate-base: false
-        miniconda-version: 'latest'
-    - name: Run tests
-      shell: bash --login {0}
-      run: pytest
-    - name: Run Snakemake workflow
-      shell: bash --login {0}
-      run: snakemake --cores 1 --configfile config/config.yaml

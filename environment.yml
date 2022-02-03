@@ -2,13 +2,22 @@ name: spras
 channels:
   - conda-forge
 dependencies:
-  - bioconda::snakemake-minimal=5.32
+  - bioconda::snakemake-minimal=6.5.1
   - docker-py=5.0
   - networkx=2.5
   - pandas=1.2
   - pytest=6.2
   - python=3.8
   - pip=21.1.1
+  - requests=2.26
   - spython=0.1
+  # Only required for GraphSpace
+  - commonmark=0.9
+  - docutils=0.16
+  - jinja2=2.10
+  - mock=4.0
+  - recommonmark=0.7
+  - sphinx=4.0
   - pip:
-     - git+https://github.com/annaritz/graphspace-python@fa9bb4b0adc54de50a956daade82db48a8030f64
+     - graphspace_python==1.3.1
+     - sphinx-rtd-theme==0.5.2
