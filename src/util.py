@@ -34,6 +34,12 @@ def prepare_path_docker(orig_path: PurePath) -> str:
     return prepared_path
 
 
+# TODO implement
+# TODO standardize argument terminology to match Singularity's execute and Docker's run
+def run_container(framework, container, command, volume_local, volume_container, working_dir, environment):
+    raise NotImplementedError
+
+
 def hash_params_sha1_base32(params_dict: Dict[str, Any], length: Optional[int] = None) -> str:
     """
     Hash of a dictionary.
