@@ -8,6 +8,7 @@ import itertools as it
 import hashlib
 import json
 import re
+import os
 import numpy as np  # Required to eval some forms of parameter ranges
 from typing import Dict, Any, Optional
 from pathlib import PurePath
@@ -36,21 +37,58 @@ def prepare_path_docker(orig_path: PurePath) -> str:
     return prepared_path
 
 
-# TODO implement
 # TODO add types and defaults
 # TODO standardize argument terminology to match Singularity's execute and Docker's run
+# TODO is volume_container always the same as working_dir?
 def run_container(framework, container, command, volume_local, volume_container, working_dir, environment):
     normalized_framework = framework.casefold()
     if normalized_framework == 'docker':
         return run_container_docker(container, command, volume_local, volume_container, working_dir, environment)
     elif normalized_framework == 'singularity':
+        # TODO will the 'docker://' prefix be in the container name or does it need to be added here?
         return run_container_singularity(container, command, volume_local, volume_container, working_dir, environment)
     else:
         raise ValueError(f'{framework} is not a recognized container framework. Choose "docker" or "singularity".')
 
 
+# TODO any issue with creating a new client each time inside this function?
 def run_container_docker(container, command, volume_local, volume_container, working_dir, environment):
-    raise NotImplementedError
+    try:
+        # Initialize a Docker client using environment variables
+        client = docker.from_env()
+        # TODO add support for environment
+        out = client.containers.run(container,
+                                    command,
+                                    stderr=True,
+                                    volumes={prepare_path_docker(volume_local): {'bind': volume_container, 'mode': 'rw'}},
+                                    working_dir=working_dir).decode('utf-8')
+        # TODO does this cleanup need to still run even if there was an error in the above run command?
+        # On Unix, files written by the above Docker run command will be owned by root and cannot be modified
+        # outside the container by a non-root user
+        # Reset the file owner and the group inside the container
+        try:
+            # Only available on Unix
+            uid = os.getuid()
+            gid = os.getgid()
+            # This command changes the ownership of output files so we don't
+            # get a permissions error when snakemake or the user try to touch the files
+            # TODO confirm which files to modify, --recursive is likely too aggressive, track which new files were written?
+            # TODO is str needed?
+            chown_command = ' '.join(['chown', f'{str(uid):str(gid)}', '--recursive', volume_container])
+            client.containers.run(container,
+                                  chown_command,
+                                  stderr=True,
+                                  volumes={prepare_path_docker(volume_local): {'bind': volume_container, 'mode': 'rw'}},
+                                  working_dir=working_dir).decode('utf-8')
+        # Raised on non-Unix systems
+        except AttributeError:
+            pass
+        return out
+    finally:
+        # Not sure whether this is needed
+        client.close()
+        # TODO what to return in this case
+        return None
 
 
 def run_container_singularity(container, command, volume_local, volume_container, working_dir, environment):

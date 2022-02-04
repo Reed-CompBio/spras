@@ -93,9 +93,6 @@ class OmicsIntegrator1(PRM):
         if edges is None or prizes is None or output_file is None or w is None or b is None or d is None:
             raise ValueError('Required Omics Integrator 1 arguments are missing')
 
-        if not singularity:
-            # Initialize a Docker client using environment variables
-            client = docker.from_env()
         work_dir = Path(__file__).parent.parent.absolute()
 
         edge_file = Path(edges)
@@ -148,37 +145,44 @@ class OmicsIntegrator1(PRM):
                                 '/OmicsIntegrator1',
                                 '/OmicsIntegrator1',
                                 'TMPDIR=/OmicsIntegrator1')
-            print(out)
-            conf_file_abs.unlink(missing_ok=True)
+            #print(out)
+            #conf_file_abs.unlink(missing_ok=True)
         else:
-            # Don't perform this step on systems where permissions aren't an issue like windows
-            need_chown = True
-            try:
-                uid = os.getuid()
-            except AttributeError:
-                need_chown = False
+            out = run_container('docker',
+                                'reedcompbio/omics-integrator-1',
+                                command,
+                                work_dir,
+                                '/OmicsIntegrator1',
+                                '/OmicsIntegrator1',
+                                None)
 
-            try:
-                out = client.containers.run('reedcompbio/omics-integrator-1',
-                                      command,
-                                      stderr=True,
-                                      volumes={prepare_path_docker(work_dir): {'bind': '/OmicsIntegrator1', 'mode': 'rw'}},
-                                      working_dir='/OmicsIntegrator1')
-                if need_chown:
+            # Don't perform this step on systems where permissions aren't an issue like windows
+            #need_chown = True
+            #try:
+            #    uid = os.getuid()
+            #except AttributeError:
+            #    need_chown = False
+
+            #try:
+            #    out = client.containers.run('reedcompbio/omics-integrator-1',
+            #                          command,
+            #                          stderr=True,
+            #                          volumes={prepare_path_docker(work_dir): {'bind': '/OmicsIntegrator1', 'mode': 'rw'}},
+            #                          working_dir='/OmicsIntegrator1')
+            #    if need_chown:
                     #This command changes the ownership of output files so we don't
                     # get a permissions error when snakemake tries to touch the files
-                    chown_command = " ".join(["chown",str(uid),out_dir.as_posix()+"/oi1*"])
-                    out_chown = client.containers.run('reedcompbio/omics-integrator-1',
-                                          chown_command,
-                                          stderr=True,
-                                          volumes={prepare_path_docker(work_dir): {'bind': '/OmicsIntegrator1', 'mode': 'rw'}},
-                                          working_dir='/OmicsIntegrator1')
-
-                print(out.decode('utf-8'))
-            finally:
-                # Not sure whether this is needed
-                client.close()
-                conf_file_abs.unlink(missing_ok=True)
+            #        chown_command = " ".join(["chown",str(uid),out_dir.as_posix()+"/oi1*"])
+            #        out_chown = client.containers.run('reedcompbio/omics-integrator-1',
+            #                              chown_command,
+            #                              stderr=True,
+            #                              volumes={prepare_path_docker(work_dir): {'bind': '/OmicsIntegrator1', 'mode': 'rw'}},
+            #                              working_dir='/OmicsIntegrator1')
+            #finally:
+            #    # Not sure whether this is needed
+            #    client.close()
+        print(out)
+        conf_file_abs.unlink(missing_ok=True)
 
         # TODO do we want to retain other output files?
         # TODO if deleting other output files, write them all to a tmp directory and copy
