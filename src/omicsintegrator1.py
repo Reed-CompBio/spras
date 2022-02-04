@@ -1,10 +1,8 @@
 from src.PRM import PRM
-import docker
 from pathlib import Path
-from src.util import prepare_path_docker
+from src.util import prepare_path_docker, run_container
 import os
 import pandas as pd
-from spython.main import Client
 
 __all__ = ['OmicsIntegrator1']
 
@@ -138,12 +136,18 @@ class OmicsIntegrator1(PRM):
         print('Running Omics Integrator 1 with arguments: {}'.format(' '.join(command)), flush=True)
 
         if singularity:
-            singularity_options = ['--cleanenv', '--containall', '--pwd', '/OmicsIntegrator1', '--env', 'TMPDIR=/OmicsIntegrator1']
-            # TODO is try/finally needed for Singularity?
-            out = Client.execute('docker://reedcompbio/omics-integrator-1:no-conda',
-                                 command,
-                                 options=singularity_options,
-                                 bind=f'{prepare_path_docker(work_dir)}:/OmicsIntegrator1')
+            #singularity_options = ['--cleanenv', '--containall', '--pwd', '/OmicsIntegrator1', '--env', 'TMPDIR=/OmicsIntegrator1']
+            #out = Client.execute('docker://reedcompbio/omics-integrator-1:no-conda',
+            #                     command,
+            #                     options=singularity_options,
+            #                     bind=f'{prepare_path_docker(work_dir)}:/OmicsIntegrator1')
+            out = run_container('singularity',
+                                'docker://reedcompbio/omics-integrator-1:no-conda',
+                                command,
+                                work_dir,
+                                '/OmicsIntegrator1',
+                                '/OmicsIntegrator1',
+                                'TMPDIR=/OmicsIntegrator1')
             print(out)
             conf_file_abs.unlink(missing_ok=True)
         else:

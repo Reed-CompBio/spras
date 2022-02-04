@@ -3,6 +3,7 @@ Utility functions for pathway reconstruction
 """
 
 import base64
+import docker
 import itertools as it
 import hashlib
 import json
@@ -10,6 +11,7 @@ import re
 import numpy as np  # Required to eval some forms of parameter ranges
 from typing import Dict, Any, Optional
 from pathlib import PurePath
+from spython.main import Client
 
 # The default length of the truncated hash used to identify parameter combinations
 DEFAULT_HASH_LENGTH = 7
@@ -35,9 +37,29 @@ def prepare_path_docker(orig_path: PurePath) -> str:
 
 
 # TODO implement
+# TODO add types and defaults
 # TODO standardize argument terminology to match Singularity's execute and Docker's run
 def run_container(framework, container, command, volume_local, volume_container, working_dir, environment):
+    normalized_framework = framework.casefold()
+    if normalized_framework == 'docker':
+        return run_container_docker(container, command, volume_local, volume_container, working_dir, environment)
+    elif normalized_framework == 'singularity':
+        return run_container_singularity(container, command, volume_local, volume_container, working_dir, environment)
+    else:
+        raise ValueError(f'{framework} is not a recognized container framework. Choose "docker" or "singularity".')
+
+
+def run_container_docker(container, command, volume_local, volume_container, working_dir, environment):
     raise NotImplementedError
+
+
+def run_container_singularity(container, command, volume_local, volume_container, working_dir, environment):
+    # TODO is try/finally needed for Singularity?
+    singularity_options = ['--cleanenv', '--containall', '--pwd', working_dir, '--env', environment]
+    return Client.execute(container,
+                          command,
+                          options=singularity_options,
+                          bind=f'{prepare_path_docker(volume_local)}:{volume_container}')
 
 
 def hash_params_sha1_base32(params_dict: Dict[str, Any], length: Optional[int] = None) -> str:
