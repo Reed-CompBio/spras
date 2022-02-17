@@ -12,7 +12,6 @@ import os
 import numpy as np  # Required to eval some forms of parameter ranges
 from typing import Dict, Any, Optional
 from pathlib import PurePath
-from spython.main import Client
 
 # The default length of the truncated hash used to identify parameter combinations
 DEFAULT_HASH_LENGTH = 7
@@ -52,16 +51,26 @@ def run_container(framework, container, command, volume_local, volume_container,
 
 
 # TODO any issue with creating a new client each time inside this function?
+# TODO environment currently a single string (e.g. 'TMPDIR=/OmicsIntegrator1'), should it be a list?
 def run_container_docker(container, command, volume_local, volume_container, working_dir, environment):
     try:
         # Initialize a Docker client using environment variables
         client = docker.from_env()
-        # TODO add support for environment
+        # Track the contents of the local directory that will be bound so that new files added can have their owner
+        # changed
+        pre_volume_contents = set(os.listdir(volume_local))
         out = client.containers.run(container,
                                     command,
                                     stderr=True,
                                     volumes={prepare_path_docker(volume_local): {'bind': volume_container, 'mode': 'rw'}},
-                                    working_dir=working_dir).decode('utf-8')
+                                    working_dir=working_dir,
+                                    environment=[environment]).decode('utf-8')
+        # Assumes the Docker run call is the only process that modified the contents
+        # Only considers files that were added, not files that were modified
+        post_volume_contents = set(os.listdir(volume_local))
+        modified_volume_contents = pre_volume_contents - post_volume_contents
+        print(f'Local files modified by Docker run call: {modified_volume_contents}')
+
         # TODO does this cleanup need to still run even if there was an error in the above run command?
         # On Unix, files written by the above Docker run command will be owned by root and cannot be modified
         # outside the container by a non-root user
@@ -74,7 +83,7 @@ def run_container_docker(container, command, volume_local, volume_container, wor
             # get a permissions error when snakemake or the user try to touch the files
             # TODO confirm which files to modify, --recursive is likely too aggressive, track which new files were written?
             # TODO is str needed?
-            chown_command = ' '.join(['chown', f'{str(uid):str(gid)}', '--recursive', volume_container])
+            chown_command = ' '.join(['chown', f'{str(uid)}:{str(gid)}', '--recursive', volume_container])
             client.containers.run(container,
                                   chown_command,
                                   stderr=True,
@@ -92,6 +101,10 @@ def run_container_docker(container, command, volume_local, volume_container, wor
 
 
 def run_container_singularity(container, command, volume_local, volume_container, working_dir, environment):
+    # spython is not compatible with Windows
+    # See https://stackoverflow.com/questions/3095071/in-python-what-happens-when-you-import-inside-of-a-function
+    from spython.main import Client
+
     # TODO is try/finally needed for Singularity?
     singularity_options = ['--cleanenv', '--containall', '--pwd', working_dir, '--env', environment]
     return Client.execute(container,
