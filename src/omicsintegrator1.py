@@ -132,29 +132,31 @@ class OmicsIntegrator1(PRM):
 
         print('Running Omics Integrator 1 with arguments: {}'.format(' '.join(command)), flush=True)
 
-        if singularity:
+        #if singularity:
+        # TODO consider making this a string in the config file instead of a Boolean
+        container_framework = 'singularity' if singularity else 'docker'
             #singularity_options = ['--cleanenv', '--containall', '--pwd', '/OmicsIntegrator1', '--env', 'TMPDIR=/OmicsIntegrator1']
             #out = Client.execute('docker://reedcompbio/omics-integrator-1:no-conda',
             #                     command,
             #                     options=singularity_options,
             #                     bind=f'{prepare_path_docker(work_dir)}:/OmicsIntegrator1')
-            out = run_container('singularity',
-                                'docker://reedcompbio/omics-integrator-1:no-conda',
-                                command,
-                                work_dir,
-                                '/OmicsIntegrator1',
-                                '/OmicsIntegrator1',
-                                'TMPDIR=/OmicsIntegrator1')
+        out = run_container(container_framework,
+                            'docker://reedcompbio/omics-integrator-1:no-conda',
+                            command,
+                            work_dir,
+                            '/OmicsIntegrator1',
+                            '/OmicsIntegrator1',
+                            'TMPDIR=/OmicsIntegrator1')
             #print(out)
             #conf_file_abs.unlink(missing_ok=True)
-        else:
-            out = run_container('docker',
-                                'reedcompbio/omics-integrator-1',
-                                command,
-                                work_dir,
-                                '/OmicsIntegrator1',
-                                '/OmicsIntegrator1',
-                                None)
+        #else:
+        #    out = run_container('docker',
+        #                        'reedcompbio/omics-integrator-1:no-conda',
+        #                        command,
+        #                        work_dir,
+        #                        '/OmicsIntegrator1',
+        #                        '/OmicsIntegrator1',
+        #                        None)
 
             # Don't perform this step on systems where permissions aren't an issue like windows
             #need_chown = True
