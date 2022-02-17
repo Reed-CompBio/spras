@@ -53,6 +53,7 @@ def run_container(framework, container, command, volume_local, volume_container,
 # TODO any issue with creating a new client each time inside this function?
 # TODO environment currently a single string (e.g. 'TMPDIR=/OmicsIntegrator1'), should it be a list?
 def run_container_docker(container, command, volume_local, volume_container, working_dir, environment):
+    out = None
     try:
         # Initialize a Docker client using environment variables
         client = docker.from_env()
@@ -94,11 +95,13 @@ def run_container_docker(container, command, volume_local, volume_container, wor
         except AttributeError:
             pass
         return out
+    except Exception as err:
+        print(err)
     finally:
         # Not sure whether this is needed
         client.close()
         # TODO what to return in this case
-        return None
+        return out
 
 
 def run_container_singularity(container, command, volume_local, volume_container, working_dir, environment):
