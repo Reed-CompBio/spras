@@ -45,7 +45,8 @@ jobs:
         singularity-version: 3.8.3
     - name: Run tests
       shell: bash --login {0}
-      run: pytest
+      # Verbose output and disable stdout and stderr capturing
+      run: pytest -vs
     - name: Run Snakemake workflow
       shell: bash --login {0}
       run: snakemake --cores 1 --configfile config/config.yaml
