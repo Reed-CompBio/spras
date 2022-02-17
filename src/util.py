@@ -66,7 +66,6 @@ def run_container_docker(container, command, volume_local, volume_container, wor
                                     volumes={prepare_path_docker(volume_local): {'bind': volume_container, 'mode': 'rw'}},
                                     working_dir=working_dir,
                                     environment=[environment]).decode('utf-8')
-        print(out)
         # Assumes the Docker run call is the only process that modified the contents
         # Only considers files that were added, not files that were modified
         post_volume_contents = set(os.listdir(volume_local))
@@ -111,7 +110,8 @@ def run_container_singularity(container, command, volume_local, volume_container
 
     # TODO is try/finally needed for Singularity?
     singularity_options = ['--cleanenv', '--containall', '--pwd', working_dir, '--env', environment]
-    return Client.execute(container,
+    # Adding 'docker://' to the container indicates this is a Docker image Singularity must convert
+    return Client.execute('docker://' + container,
                           command,
                           options=singularity_options,
                           bind=f'{prepare_path_docker(volume_local)}:{volume_container}')

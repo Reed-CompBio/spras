@@ -141,7 +141,7 @@ class OmicsIntegrator1(PRM):
             #                     options=singularity_options,
             #                     bind=f'{prepare_path_docker(work_dir)}:/OmicsIntegrator1')
         out = run_container(container_framework,
-                            'docker://reedcompbio/omics-integrator-1:no-conda',
+                            'reedcompbio/omics-integrator-1:no-conda',
                             command,
                             work_dir,
                             '/OmicsIntegrator1',
