@@ -4,7 +4,7 @@ from src.util import prepare_path_docker, run_container
 import os
 import pandas as pd
 
-__all__ = ['OmicsIntegrator1']
+__all__ = ['OmicsIntegrator1', 'write_conf']
 
 
 # TODO decide on default number of processes and threads

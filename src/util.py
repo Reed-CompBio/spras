@@ -9,6 +9,7 @@ import hashlib
 import json
 import re
 import os
+import platform
 import numpy as np  # Required to eval some forms of parameter ranges
 from typing import Dict, Any, Optional
 from pathlib import PurePath
@@ -105,6 +106,9 @@ def run_container_docker(container, command, volume_local, volume_container, wor
 
 def run_container_singularity(container, command, volume_local, volume_container, working_dir, environment):
     # spython is not compatible with Windows
+    if platform.system() != 'Linux':
+        raise NotImplementedError('Singularity support is only available on Linux')
+
     # See https://stackoverflow.com/questions/3095071/in-python-what-happens-when-you-import-inside-of-a-function
     from spython.main import Client
 
