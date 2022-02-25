@@ -39,39 +39,54 @@ def prepare_path_docker(orig_path: PurePath) -> str:
 
 # TODO add types and defaults
 # TODO standardize argument terminology to match Singularity's execute and Docker's run
-# TODO is volume_container always the same as working_dir?
-def run_container(framework, container, command, volume_local, volume_container, working_dir, environment):
+def run_container(framework, container, command, volumes, working_dir, environment):
     normalized_framework = framework.casefold()
     if normalized_framework == 'docker':
-        return run_container_docker(container, command, volume_local, volume_container, working_dir, environment)
+        return run_container_docker(container, command, volumes, working_dir, environment)
     elif normalized_framework == 'singularity':
-        # TODO will the 'docker://' prefix be in the container name or does it need to be added here?
-        return run_container_singularity(container, command, volume_local, volume_container, working_dir, environment)
+        return run_container_singularity(container, command, volumes, working_dir, environment)
     else:
         raise ValueError(f'{framework} is not a recognized container framework. Choose "docker" or "singularity".')
 
 
 # TODO any issue with creating a new client each time inside this function?
 # TODO environment currently a single string (e.g. 'TMPDIR=/OmicsIntegrator1'), should it be a list?
-def run_container_docker(container, command, volume_local, volume_container, working_dir, environment):
+def run_container_docker(container, command, volumes, working_dir, environment):
     out = None
     try:
         # Initialize a Docker client using environment variables
         client = docker.from_env()
-        # Track the contents of the local directory that will be bound so that new files added can have their owner
+        # Track the contents of the local directories that will be bound so that new files added can have their owner
         # changed
-        pre_volume_contents = set(os.listdir(volume_local))
+        pre_volume_contents = {}
+        for src, _ in volumes:
+            src_path = Path(src)
+            if src_path not in pre_volume_contents:
+                # Only list files in the directory, do not walk recursively because it could include
+                # a massive number of files
+                pre_volume_contents[src_path] = set(src_path.iterdir())
+        print(f'Pre-Docker volume contents:\n{pre_volume_contents}')
+
+        bind_paths = [f'{prepare_path_docker(src)}:{dest}' for src, dest in volumes]
+        print(f'Bind paths: {bind_paths}')
+
         out = client.containers.run(container,
                                     command,
                                     stderr=True,
-                                    volumes={prepare_path_docker(volume_local): {'bind': volume_container, 'mode': 'rw'}},
+                                    volumes=bind_paths,
                                     working_dir=working_dir,
                                     environment=[environment]).decode('utf-8')
-        # Assumes the Docker run call is the only process that modified the contents
-        # Only considers files that were added, not files that were modified
-        post_volume_contents = set(os.listdir(volume_local))
-        modified_volume_contents = pre_volume_contents - post_volume_contents
-        print(f'Local files modified by Docker run call: {modified_volume_contents}')
+
+        # TODO may need to modify paths so that they can be referred to using the paths inside the container
+        # May need to convert path tuples to dicts to look up the dest from the src
+        for src_path in pre_volume_contents.keys():
+            # Assumes the Docker run call is the only process that modified the contents
+            # Only considers files that were added, not files that were modified
+            post_volume_contents = set(src_path.iterdir())
+            print(f'Post-Docker volume contents: {post_volume_contents}')
+            modified_volume_contents = post_volume_contents - pre_volume_contents[src_path]
+            print(f'Local files modified by Docker run call: {modified_volume_contents}')
+        # TODO track and update all modified files in set
 
         # TODO does this cleanup need to still run even if there was an error in the above run command?
         # On Unix, files written by the above Docker run command will be owned by root and cannot be modified
@@ -86,6 +101,7 @@ def run_container_docker(container, command, volume_local, volume_container, wor
             # TODO confirm which files to modify, --recursive is likely too aggressive, track which new files were written?
             # TODO is str needed?
             chown_command = ' '.join(['chown', f'{str(uid)}:{str(gid)}', '--recursive', volume_container])
+            # TODO figure out which volume to use (all?)
             client.containers.run(container,
                                   chown_command,
                                   stderr=True,
@@ -104,7 +120,7 @@ def run_container_docker(container, command, volume_local, volume_container, wor
         return out
 
 
-def run_container_singularity(container, command, volume_local, volume_container, working_dir, environment):
+def run_container_singularity(container, command, volumes, working_dir, environment):
     # spython is not compatible with Windows
     if platform.system() != 'Linux':
         raise NotImplementedError('Singularity support is only available on Linux')
@@ -112,13 +128,16 @@ def run_container_singularity(container, command, volume_local, volume_container
     # See https://stackoverflow.com/questions/3095071/in-python-what-happens-when-you-import-inside-of-a-function
     from spython.main import Client
 
+    bind_paths = [f'{prepare_path_docker(src)}:{dest}' for src, dest in volumes]
+    print(f'Bind paths: {bind_paths}')
+
     # TODO is try/finally needed for Singularity?
     singularity_options = ['--cleanenv', '--containall', '--pwd', working_dir, '--env', environment]
     # Adding 'docker://' to the container indicates this is a Docker image Singularity must convert
     return Client.execute('docker://' + container,
                           command,
                           options=singularity_options,
-                          bind=f'{prepare_path_docker(volume_local)}:{volume_container}')
+                          bind=bind_paths)
 
 
 def hash_params_sha1_base32(params_dict: Dict[str, Any], length: Optional[int] = None) -> str:
@@ -154,6 +173,7 @@ def hash_filename(filename: str, length: Optional[int] = None) -> str:
 
 
 # TODO docstring once working as expected
+# TODO because this is called independently for each file, the same local path can be mounted to multiple volumes
 def prepare_volume(filename: str, volume_base: str):
     base_path = PurePosixPath(volume_base)
     if not base_path.is_absolute():
@@ -166,12 +186,14 @@ def prepare_volume(filename: str, volume_base: str):
     container_filename = PurePosixPath(dest, abs_filename.name)
     if abs_filename.is_dir():
         dest = PurePosixPath(dest, abs_filename.name)
-        src = prepare_path_docker(abs_filename)
+        #src = prepare_path_docker(abs_filename)
+        src = abs_filename
     else:
         parent = abs_filename.parent
         if parent.as_posix() == '.':
             parent = Path.cwd()
-        src = prepare_path_docker(parent)
+        #src = prepare_path_docker(parent)
+        src = parent
 
     print(f'Renaming {filename} to {container_filename}')
     print(f'Mounting volume {src} to {dest}')

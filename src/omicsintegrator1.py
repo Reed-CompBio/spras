@@ -1,7 +1,6 @@
 from src.PRM import PRM
 from pathlib import Path
-from src.util import prepare_path_docker, run_container
-import os
+from src.util import prepare_volume, run_container
 import pandas as pd
 
 __all__ = ['OmicsIntegrator1', 'write_conf']
@@ -93,25 +92,39 @@ class OmicsIntegrator1(PRM):
         if edges is None or prizes is None or output_file is None or w is None or b is None or d is None:
             raise ValueError('Required Omics Integrator 1 arguments are missing')
 
-        work_dir = Path(__file__).parent.parent.absolute()
+        #work_dir = Path(__file__).parent.parent.absolute()
+        work_dir = '/spras'
 
-        edge_file = Path(edges)
-        prize_file = Path(prizes)
+        # Each volume is a tuple (src, dest)
+        volumes = list()
+        #edge_file = Path(edges)
+        bind_path, edge_file = prepare_volume(edges, work_dir)
+        volumes.append(bind_path)
+        #prize_file = Path(prizes)
+        bind_path, prize_file = prepare_volume(prizes, work_dir)
+        volumes.append(bind_path)
 
         out_dir = Path(output_file).parent
         # Omics Integrator 1 requires that the output directory exist
-        Path(work_dir, out_dir).mkdir(parents=True, exist_ok=True)
+        # TODO need to call resolve() first?
+        out_dir.mkdir(parents=True, exist_ok=True)
+        bind_path, mapped_out_dir = prepare_volume(str(out_dir), work_dir)
+        volumes.append(bind_path)
 
         conf_file = 'oi1-configuration.txt'
-        conf_file_abs = Path(work_dir, conf_file)
+        conf_file_abs = Path(out_dir, conf_file)
+        # Temporary file that will be deleted after running Omics Integrator 1
         write_conf(conf_file_abs, w=w, b=b, d=d, mu=mu, noise=noise, g=g, r=r)
+        bind_path, conf_file = prepare_volume(str(conf_file_abs), work_dir)
+        volumes.append(bind_path)
+        print(f'Volumes: {volumes}')
 
         command = ['python', '/OmicsIntegrator/scripts/forest.py',
-                   '--edge', edge_file.as_posix(),
-                   '--prize', prize_file.as_posix(),
-                   '--conf', conf_file,
+                   '--edge', str(edge_file),
+                   '--prize', str(prize_file),
+                   '--conf', str(conf_file),
                    '--msgpath', '/OmicsIntegrator/msgsteiner-1.3/msgsteiner',
-                   '--outpath', out_dir.as_posix(),
+                   '--outpath', str(mapped_out_dir),
                    '--outlabel', 'oi1']
 
         # Add optional arguments
@@ -143,9 +156,8 @@ class OmicsIntegrator1(PRM):
         out = run_container(container_framework,
                             'reedcompbio/omics-integrator-1:no-conda',
                             command,
+                            volumes,
                             work_dir,
-                            '/OmicsIntegrator1',
-                            '/OmicsIntegrator1',
                             'TMPDIR=/OmicsIntegrator1')
             #print(out)
             #conf_file_abs.unlink(missing_ok=True)
