@@ -12,7 +12,7 @@ import os
 import platform
 import numpy as np  # Required to eval some forms of parameter ranges
 from typing import Dict, Any, Optional
-from pathlib import PurePath
+from pathlib import Path, PurePath, PurePosixPath
 
 # The default length of the truncated hash used to identify parameter combinations
 DEFAULT_HASH_LENGTH = 7
@@ -141,6 +141,48 @@ def hash_params_sha1_base32(params_dict: Dict[str, Any], length: Optional[int] =
         return params_base32
     else:
         return params_base32[:length]
+
+
+def hash_filename(filename: str, length: Optional[int] = None) -> str:
+    """
+    Hash of a filename using hash_params_sha1_base32
+    @param filename: filename to hash
+    @param length: the length of the returned hash, which is ignored if it is None, < 1, or > the full hash length
+    @return: hash
+    """
+    return hash_params_sha1_base32({'filename': filename}, length)
+
+
+# TODO docstring once working as expected
+def prepare_volume(filename: str, volume_base: str):
+    base_path = PurePosixPath(volume_base)
+    if not base_path.is_absolute():
+        raise ValueError(f'Volume base must be an absolute path: {volume_base}')
+
+    filename_hash = hash_filename(filename, DEFAULT_HASH_LENGTH)
+    dest = PurePosixPath(base_path, filename_hash)
+
+    abs_filename = Path(filename).resolve()
+    container_filename = PurePosixPath(dest, abs_filename.name)
+    if abs_filename.is_dir():
+        dest = PurePosixPath(dest, abs_filename.name)
+        src = prepare_path_docker(abs_filename)
+    else:
+        parent = abs_filename.parent
+        if parent.as_posix() == '.':
+            parent = Path.cwd()
+        src = prepare_path_docker(parent)
+
+    print(f'Renaming {filename} to {container_filename}')
+    print(f'Mounting volume {src} to {dest}')
+    return (src, dest), container_filename
+
+
+# TODO remove test code, convert to test cases
+if __name__ == '__main__':
+    prepare_volume('oi1-edges.txt', '/spras')
+    prepare_volume('test/OmicsIntegrator1/input/oi1-edges.txt', '/spras')
+    prepare_volume('../src', '/spras')
 
 
 def process_config(config):
