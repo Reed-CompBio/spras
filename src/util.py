@@ -37,6 +37,12 @@ def prepare_path_docker(orig_path: PurePath) -> str:
     return prepared_path
 
 
+# Convert a file_path that is in src_path to be in dest_path instead
+def convert_docker_path(src_path, dest_path, file_path):
+    rel_path = file_path.relative_to(src_path)
+    return PurePosixPath(dest_path, rel_path)
+
+
 # TODO add types and defaults
 # TODO standardize argument terminology to match Singularity's execute and Docker's run
 def run_container(framework, container, command, volumes, working_dir, environment):
@@ -59,12 +65,17 @@ def run_container_docker(container, command, volumes, working_dir, environment):
         # Track the contents of the local directories that will be bound so that new files added can have their owner
         # changed
         pre_volume_contents = {}
-        for src, _ in volumes:
+        src_dest_map = {}
+        for src, dest in volumes:
             src_path = Path(src)
+            # The same source path can be in volumes more than once if there were multiple input or output files
+            # in the same directory
+            # Only check each unique source path once and track which of the possible destination paths was used
             if src_path not in pre_volume_contents:
                 # Only list files in the directory, do not walk recursively because it could include
                 # a massive number of files
                 pre_volume_contents[src_path] = set(src_path.iterdir())
+                src_dest_map[src_path] = dest
         print(f'Pre-Docker volume contents:\n{pre_volume_contents}')
 
         bind_paths = [f'{prepare_path_docker(src)}:{dest}' for src, dest in volumes]
@@ -77,17 +88,6 @@ def run_container_docker(container, command, volumes, working_dir, environment):
                                     working_dir=working_dir,
                                     environment=[environment]).decode('utf-8')
 
-        # TODO may need to modify paths so that they can be referred to using the paths inside the container
-        # May need to convert path tuples to dicts to look up the dest from the src
-        for src_path in pre_volume_contents.keys():
-            # Assumes the Docker run call is the only process that modified the contents
-            # Only considers files that were added, not files that were modified
-            post_volume_contents = set(src_path.iterdir())
-            print(f'Post-Docker volume contents: {post_volume_contents}')
-            modified_volume_contents = post_volume_contents - pre_volume_contents[src_path]
-            print(f'Local files modified by Docker run call: {modified_volume_contents}')
-        # TODO track and update all modified files in set
-
         # TODO does this cleanup need to still run even if there was an error in the above run command?
         # On Unix, files written by the above Docker run command will be owned by root and cannot be modified
         # outside the container by a non-root user
@@ -96,17 +96,36 @@ def run_container_docker(container, command, volumes, working_dir, environment):
             # Only available on Unix
             uid = os.getuid()
             gid = os.getgid()
+
+            all_modified_volume_contents = set()
+            for src_path in pre_volume_contents.keys():
+                print(f'Checking source path: {src_path}')
+                # Assumes the Docker run call is the only process that modified the contents
+                # Only considers files that were added, not files that were modified
+                post_volume_contents = set(src_path.iterdir())
+                print(f'Post-Docker volume contents: {post_volume_contents}')
+                modified_volume_contents = post_volume_contents - pre_volume_contents[src_path]
+                print(f'Local files modified by Docker run call: {modified_volume_contents}')
+                modified_volume_contents = [str(convert_docker_path(src_path, src_dest_map[src_path], p)) for p in
+                                            modified_volume_contents]
+                print(f'Converted local files modified by Docker run call: {modified_volume_contents}')
+                all_modified_volume_contents.update(modified_volume_contents)
+            print(f'Found {len(all_modified_volume_contents)} paths to update ownership')
+
             # This command changes the ownership of output files so we don't
             # get a permissions error when snakemake or the user try to touch the files
-            # TODO confirm which files to modify, --recursive is likely too aggressive, track which new files were written?
+            # Use --recursive because new directories could have been created inside the container
             # TODO is str needed?
-            chown_command = ' '.join(['chown', f'{str(uid)}:{str(gid)}', '--recursive', volume_container])
-            # TODO figure out which volume to use (all?)
+            # TODO remove --verbose
+            chown_command = ['chown', f'{str(uid)}:{str(gid)}', '--verbose', '--recursive']
+            chown_command = ' '.join(chown_command.extend(all_modified_volume_contents))
+            print(f'chown command:{chown_command}')
             client.containers.run(container,
                                   chown_command,
                                   stderr=True,
-                                  volumes={prepare_path_docker(volume_local): {'bind': volume_container, 'mode': 'rw'}},
-                                  working_dir=working_dir).decode('utf-8')
+                                  volumes=bind_paths,
+                                  working_dir=working_dir,
+                                  environment=[environment]).decode('utf-8')
         # Raised on non-Unix systems
         except AttributeError:
             pass
