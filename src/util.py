@@ -11,7 +11,7 @@ import re
 import os
 import platform
 import numpy as np  # Required to eval some forms of parameter ranges
-from typing import Dict, Any, Optional
+from typing import Dict, Any, Optional, Union, Tuple, List
 from pathlib import Path, PurePath, PurePosixPath
 
 # The default length of the truncated hash used to identify parameter combinations
@@ -37,15 +37,31 @@ def prepare_path_docker(orig_path: PurePath) -> str:
     return prepared_path
 
 
-# Convert a file_path that is in src_path to be in dest_path instead
-def convert_docker_path(src_path, dest_path, file_path):
+def convert_docker_path(src_path: PurePath, dest_path: PurePath, file_path: Union[str, PurePath]) -> PurePosixPath:
+    """
+    Convert a file_path that is in src_path to be in dest_path instead.
+    For example, convert /usr/mydir and /usr/mydir/myfile and /tmp to /tmp/myfile
+    @param src_path: source path that is a parent of file_path
+    @param dest_path: destination path
+    @param file_path: filename that is in under the source path
+    @return: a new path with the filename relative to the destination path
+    """
     rel_path = file_path.relative_to(src_path)
     return PurePosixPath(dest_path, rel_path)
 
 
-# TODO add types and defaults
 # TODO standardize argument terminology to match Singularity's execute and Docker's run
-def run_container(framework, container, command, volumes, working_dir, environment):
+def run_container(framework: str, container: str, command: List[str], volumes: List[Tuple[PurePath, PurePath]], working_dir: str, environment: str = ''):
+    """
+    Runs a command in the container using Singularity or Docker
+    @param framework: singularity or docker
+    @param container: name of the DockerHub container without the 'docker://' prefix
+    @param command: command to run in the container
+    @param volumes: a list of volumes to mount where each item is a (source, destination) tuple
+    @param working_dir: the working directory in the container
+    @param environment: environment variables to set in the container
+    @return: output from Singularity execute or Docker run
+    """
     normalized_framework = framework.casefold()
     if normalized_framework == 'docker':
         return run_container_docker(container, command, volumes, working_dir, environment)
@@ -57,7 +73,19 @@ def run_container(framework, container, command, volumes, working_dir, environme
 
 # TODO any issue with creating a new client each time inside this function?
 # TODO environment currently a single string (e.g. 'TMPDIR=/OmicsIntegrator1'), should it be a list?
-def run_container_docker(container, command, volumes, working_dir, environment):
+def run_container_docker(container: str, command: List[str], volumes: List[Tuple[PurePath, PurePath]], working_dir: str, environment: str = ''):
+    """
+    Runs a command in the container using Docker.
+    Attempts to automatically correct file owner and group for new files created by the container, setting them to the
+    current owner and group IDs.
+    Does not modify the owner or group for existing files modified by the container.
+    @param container: name of the DockerHub container without the 'docker://' prefix
+    @param command: command to run in the container
+    @param volumes: a list of volumes to mount where each item is a (source, destination) tuple
+    @param working_dir: the working directory in the container
+    @param environment: environment variables to set in the container
+    @return: output from Docker run
+    """
     out = None
     try:
         # Initialize a Docker client using environment variables
@@ -139,7 +167,17 @@ def run_container_docker(container, command, volumes, working_dir, environment):
         return out
 
 
-def run_container_singularity(container, command, volumes, working_dir, environment):
+def run_container_singularity(container: str, command: List[str], volumes: List[Tuple[PurePath, PurePath]], working_dir: str, environment: str = ''):
+    """
+    Runs a command in the container using Singularity.
+    Only available on Linux.
+    @param container: name of the DockerHub container without the 'docker://' prefix
+    @param command: command to run in the container
+    @param volumes: a list of volumes to mount where each item is a (source, destination) tuple
+    @param working_dir: the working directory in the container
+    @param environment: environment variables to set in the container
+    @return: output from Singularity execute
+    """
     # spython is not compatible with Windows
     if platform.system() != 'Linux':
         raise NotImplementedError('Singularity support is only available on Linux')
@@ -191,9 +229,19 @@ def hash_filename(filename: str, length: Optional[int] = None) -> str:
     return hash_params_sha1_base32({'filename': filename}, length)
 
 
-# TODO docstring once working as expected
 # TODO because this is called independently for each file, the same local path can be mounted to multiple volumes
-def prepare_volume(filename: str, volume_base: str):
+def prepare_volume(filename: str, volume_base: str) -> Tuple[Tuple[PurePath, PurePath], str]:
+    """
+    Makes a file on the local file system accessible within a container by mapping the local (source) path to a new
+    container (destination) path and renaming the file to be relative to the destination path.
+    The destination path will be a new path relative to the volume_base that includes a hash identifier derived from the
+    original filename.
+    An example mapped filename looks like '/spras/MG4YPNK/oi1-edges.txt'.
+    @param filename: The file on the local file system to map
+    @param volume_base: The base directory in the container, which must be an absolute directory
+    @return: first returned object is a tuple (source path, destination path) and the second returned object is the
+    updated filename relative to the destination path
+    """
     base_path = PurePosixPath(volume_base)
     if not base_path.is_absolute():
         raise ValueError(f'Volume base must be an absolute path: {volume_base}')
@@ -205,13 +253,11 @@ def prepare_volume(filename: str, volume_base: str):
     container_filename = str(PurePosixPath(dest, abs_filename.name))
     if abs_filename.is_dir():
         dest = PurePosixPath(dest, abs_filename.name)
-        #src = prepare_path_docker(abs_filename)
         src = abs_filename
     else:
         parent = abs_filename.parent
         if parent.as_posix() == '.':
             parent = Path.cwd()
-        #src = prepare_path_docker(parent)
         src = parent
 
     print(f'Renaming {filename} to {container_filename}')
