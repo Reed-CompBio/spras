@@ -202,7 +202,7 @@ def prepare_volume(filename: str, volume_base: str):
     dest = PurePosixPath(base_path, filename_hash)
 
     abs_filename = Path(filename).resolve()
-    container_filename = PurePosixPath(dest, abs_filename.name)
+    container_filename = str(PurePosixPath(dest, abs_filename.name))
     if abs_filename.is_dir():
         dest = PurePosixPath(dest, abs_filename.name)
         #src = prepare_path_docker(abs_filename)
@@ -217,13 +217,6 @@ def prepare_volume(filename: str, volume_base: str):
     print(f'Renaming {filename} to {container_filename}')
     print(f'Mounting volume {src} to {dest}')
     return (src, dest), container_filename
-
-
-# TODO remove test code, convert to test cases
-if __name__ == '__main__':
-    prepare_volume('oi1-edges.txt', '/spras')
-    prepare_volume('test/OmicsIntegrator1/input/oi1-edges.txt', '/spras')
-    prepare_volume('../src', '/spras')
 
 
 def process_config(config):

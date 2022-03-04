@@ -1,5 +1,6 @@
+import pytest
 from pathlib import PurePosixPath, PureWindowsPath
-from src.util import prepare_path_docker, hash_params_sha1_base32
+from src.util import convert_docker_path, prepare_path_docker, prepare_volume, hash_params_sha1_base32
 
 
 class TestUtil:
@@ -24,3 +25,27 @@ class TestUtil:
         assert hash_params_sha1_base32({'k': 1000}, -1) == 'TFORORHE4JUNRSI7QPHCXUUES4DLD6P4'
         assert hash_params_sha1_base32({'k': 1000}, 1000) == 'TFORORHE4JUNRSI7QPHCXUUES4DLD6P4'
         assert hash_params_sha1_base32({'k': 1000}, None) == 'TFORORHE4JUNRSI7QPHCXUUES4DLD6P4'
+
+    # Cannot test the returned src dest mapping as easily because it is an absolute path
+    # prepare_volume uses util.hash_filename so this serves as a test case for that function as well
+    @pytest.mark.parametrize('filename, volume_base, expected_filename',
+                             [('oi1-edges.txt', '/spras', '/spras/MG4YPNK/oi1-edges.txt'),
+                              ('test/OmicsIntegrator1/input/oi1-edges.txt', '/spras', '/spras/ZNNT3GR/oi1-edges.txt'),
+                              ('test/OmicsIntegrator1/output/', '/spras', '/spras/DPCSFJV/output'),
+                              ('../src', '/spras', '/spras/NNBVZ6X/src')])
+    def test_prepare_volume(self, filename, volume_base, expected_filename):
+        _, container_filename = prepare_volume(filename, volume_base)
+        assert container_filename == expected_filename
+
+    def test_convert_docker_path(self):
+        src_path = PureWindowsPath(r'C:/Users/admin/spras/test/OmicsIntegrator1/output/')
+        dest_path = PurePosixPath('/spras/FQAXPPD/output')
+        file_path = PureWindowsPath(r'C:/Users/admin/spras/test/OmicsIntegrator1/output/oi1_dummyForest.sif')
+        expected_path = PurePosixPath('/spras/FQAXPPD/output/oi1_dummyForest.sif')
+        assert convert_docker_path(src_path, dest_path, file_path) == expected_path
+
+        src_path = PurePosixPath('/c/usr/me')
+        dest_path = PurePosixPath('/spras/FQAXPPD/output')
+        file_path = PurePosixPath('/c/usr/me/oi1_dummyForest.sif')
+        expected_path = PurePosixPath('/spras/FQAXPPD/output/oi1_dummyForest.sif')
+        assert convert_docker_path(src_path, dest_path, file_path) == expected_path

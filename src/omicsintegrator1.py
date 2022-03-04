@@ -72,7 +72,6 @@ class OmicsIntegrator1(PRM):
     # TODO add support for knockout argument
     # TODO add reasonable default values
     # TODO document required arguments
-    # TODO abstract the Docker and Singularity calls to new module to simplify the logic here
     @staticmethod
     def run(edges=None, prizes=None, dummy_mode=None, mu_squared=None, exclude_terms=None,
             output_file=None, noisy_edges=None, shuffled_prizes=None, random_terminals=None,
@@ -120,11 +119,11 @@ class OmicsIntegrator1(PRM):
         print(f'Volumes: {volumes}')
 
         command = ['python', '/OmicsIntegrator/scripts/forest.py',
-                   '--edge', str(edge_file),
-                   '--prize', str(prize_file),
-                   '--conf', str(conf_file),
+                   '--edge', edge_file,
+                   '--prize', prize_file,
+                   '--conf', conf_file,
                    '--msgpath', '/OmicsIntegrator/msgsteiner-1.3/msgsteiner',
-                   '--outpath', str(mapped_out_dir),
+                   '--outpath', mapped_out_dir,
                    '--outlabel', 'oi1']
 
         # Add optional arguments
