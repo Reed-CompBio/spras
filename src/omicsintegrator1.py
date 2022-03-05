@@ -91,21 +91,19 @@ class OmicsIntegrator1(PRM):
         if edges is None or prizes is None or output_file is None or w is None or b is None or d is None:
             raise ValueError('Required Omics Integrator 1 arguments are missing')
 
-        #work_dir = Path(__file__).parent.parent.absolute()
         work_dir = '/spras'
 
         # Each volume is a tuple (src, dest)
         volumes = list()
-        #edge_file = Path(edges)
+
         bind_path, edge_file = prepare_volume(edges, work_dir)
         volumes.append(bind_path)
-        #prize_file = Path(prizes)
+
         bind_path, prize_file = prepare_volume(prizes, work_dir)
         volumes.append(bind_path)
 
         out_dir = Path(output_file).parent
         # Omics Integrator 1 requires that the output directory exist
-        # TODO need to call resolve() first?
         out_dir.mkdir(parents=True, exist_ok=True)
         bind_path, mapped_out_dir = prepare_volume(str(out_dir), work_dir)
         volumes.append(bind_path)
@@ -144,56 +142,14 @@ class OmicsIntegrator1(PRM):
 
         print('Running Omics Integrator 1 with arguments: {}'.format(' '.join(command)), flush=True)
 
-        #if singularity:
         # TODO consider making this a string in the config file instead of a Boolean
         container_framework = 'singularity' if singularity else 'docker'
-            #singularity_options = ['--cleanenv', '--containall', '--pwd', '/OmicsIntegrator1', '--env', 'TMPDIR=/OmicsIntegrator1']
-            #out = Client.execute('docker://reedcompbio/omics-integrator-1:no-conda',
-            #                     command,
-            #                     options=singularity_options,
-            #                     bind=f'{prepare_path_docker(work_dir)}:/OmicsIntegrator1')
         out = run_container(container_framework,
                             'reedcompbio/omics-integrator-1:no-conda',
                             command,
                             volumes,
                             work_dir,
                             'TMPDIR=/OmicsIntegrator1')
-            #print(out)
-            #conf_file_abs.unlink(missing_ok=True)
-        #else:
-        #    out = run_container('docker',
-        #                        'reedcompbio/omics-integrator-1:no-conda',
-        #                        command,
-        #                        work_dir,
-        #                        '/OmicsIntegrator1',
-        #                        '/OmicsIntegrator1',
-        #                        None)
-
-            # Don't perform this step on systems where permissions aren't an issue like windows
-            #need_chown = True
-            #try:
-            #    uid = os.getuid()
-            #except AttributeError:
-            #    need_chown = False
-
-            #try:
-            #    out = client.containers.run('reedcompbio/omics-integrator-1',
-            #                          command,
-            #                          stderr=True,
-            #                          volumes={prepare_path_docker(work_dir): {'bind': '/OmicsIntegrator1', 'mode': 'rw'}},
-            #                          working_dir='/OmicsIntegrator1')
-            #    if need_chown:
-                    #This command changes the ownership of output files so we don't
-                    # get a permissions error when snakemake tries to touch the files
-            #        chown_command = " ".join(["chown",str(uid),out_dir.as_posix()+"/oi1*"])
-            #        out_chown = client.containers.run('reedcompbio/omics-integrator-1',
-            #                              chown_command,
-            #                              stderr=True,
-            #                              volumes={prepare_path_docker(work_dir): {'bind': '/OmicsIntegrator1', 'mode': 'rw'}},
-            #                              working_dir='/OmicsIntegrator1')
-            #finally:
-            #    # Not sure whether this is needed
-            #    client.close()
         print(out)
         conf_file_abs.unlink(missing_ok=True)
 
