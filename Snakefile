@@ -174,7 +174,13 @@ def collect_prepared_input(wildcards):
 # Run the pathway reconstruction algorithm
 rule reconstruct:
     input: collect_prepared_input
-    output: pathway_file = SEP.join([out_dir, 'raw-pathway-{dataset}-{algorithm}-{params}.txt'])
+    # TODO decide the preferred subdirectory naming structure and update other rules accordingly
+    # Each reconstruct call should be in a separate output subdirectory that is unique for the parameter combination so
+    # that multiple instances of the container can run simultaneously without overwriting the output files
+    # Overwriting files can happen because the pathway reconstruction algorithms often generate output files with the
+    # same name regardless of the inputs or parameters, and these aren't renamed until after the container command
+    # terminates
+    output: pathway_file = SEP.join([out_dir, '{dataset}-{algorithm}-{params}', 'raw-pathway-{dataset}-{algorithm}-{params}.txt'])
     run:
         # Create a copy so that the updates are not written to the parameters logfile
         params = reconstruction_params(wildcards.algorithm, wildcards.params).copy()
@@ -191,7 +197,7 @@ rule reconstruct:
 # Original pathway reconstruction output to universal output
 # Use PRRunner as a wrapper to call the algorithm-specific parse_output
 rule parse_output:
-    input: raw_file = SEP.join([out_dir, 'raw-pathway-{dataset}-{algorithm}-{params}.txt'])
+    input: raw_file = SEP.join([out_dir, '{dataset}-{algorithm}-{params}', 'raw-pathway-{dataset}-{algorithm}-{params}.txt'])
     output: standardized_file = SEP.join([out_dir, 'pathway-{dataset}-{algorithm}-{params}.txt'])
     run:
         PRRunner.parse_output(wildcards.algorithm, input.raw_file, output.standardized_file)

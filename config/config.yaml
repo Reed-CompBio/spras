@@ -39,7 +39,7 @@
                 directed: false
                 run1:
                     r: [5]
-                    b: [5]
+                    b: [5, 10]
                     w: [5]
                     g: [3]
                     d: [10]
