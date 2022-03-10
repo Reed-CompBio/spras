@@ -104,10 +104,8 @@ def run_container_docker(container: str, command: List[str], volumes: List[Tuple
                 # a massive number of files
                 pre_volume_contents[src_path] = set(src_path.iterdir())
                 src_dest_map[src_path] = dest
-        print(f'Pre-Docker volume contents:\n{pre_volume_contents}')
 
         bind_paths = [f'{prepare_path_docker(src)}:{dest}' for src, dest in volumes]
-        print(f'Bind paths: {bind_paths}')
 
         out = client.containers.run(container,
                                     command,
@@ -127,18 +125,13 @@ def run_container_docker(container: str, command: List[str], volumes: List[Tuple
 
             all_modified_volume_contents = set()
             for src_path in pre_volume_contents.keys():
-                print(f'Checking source path: {src_path}')
                 # Assumes the Docker run call is the only process that modified the contents
                 # Only considers files that were added, not files that were modified
                 post_volume_contents = set(src_path.iterdir())
-                print(f'Post-Docker volume contents: {post_volume_contents}')
                 modified_volume_contents = post_volume_contents - pre_volume_contents[src_path]
-                print(f'Local files modified by Docker run call: {modified_volume_contents}')
                 modified_volume_contents = [str(convert_docker_path(src_path, src_dest_map[src_path], p)) for p in
                                             modified_volume_contents]
-                print(f'Converted local files modified by Docker run call: {modified_volume_contents}')
                 all_modified_volume_contents.update(modified_volume_contents)
-            print(f'Found {len(all_modified_volume_contents)} paths to update ownership')
 
             # This command changes the ownership of output files so we don't
             # get a permissions error when snakemake or the user try to touch the files
@@ -146,7 +139,6 @@ def run_container_docker(container: str, command: List[str], volumes: List[Tuple
             chown_command = ['chown', f'{uid}:{gid}', '--recursive']
             chown_command.extend(all_modified_volume_contents)
             chown_command = ' '.join(chown_command)
-            print(f'chown command: {chown_command}')
             client.containers.run(container,
                                   chown_command,
                                   stderr=True,
@@ -182,9 +174,8 @@ def run_container_singularity(container: str, command: List[str], volumes: List[
 
     # See https://stackoverflow.com/questions/3095071/in-python-what-happens-when-you-import-inside-of-a-function
     from spython.main import Client
-
+ 
     bind_paths = [f'{prepare_path_docker(src)}:{dest}' for src, dest in volumes]
-    print(f'Bind paths: {bind_paths}')
 
     # TODO is try/finally needed for Singularity?
     singularity_options = ['--cleanenv', '--containall', '--pwd', working_dir, '--env', environment]
@@ -258,8 +249,6 @@ def prepare_volume(filename: str, volume_base: str) -> Tuple[Tuple[PurePath, Pur
             parent = Path.cwd()
         src = parent
 
-    print(f'Renaming {filename} to {container_filename}')
-    print(f'Mounting volume {src} to {dest}')
     return (src, dest), container_filename
 
 

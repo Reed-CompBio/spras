@@ -114,7 +114,6 @@ class OmicsIntegrator1(PRM):
         write_conf(conf_file_abs, w=w, b=b, d=d, mu=mu, noise=noise, g=g, r=r)
         bind_path, conf_file = prepare_volume(str(conf_file_abs), work_dir)
         volumes.append(bind_path)
-        print(f'Volumes: {volumes}')
 
         command = ['python', '/OmicsIntegrator/scripts/forest.py',
                    '--edge', edge_file,

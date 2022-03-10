@@ -107,9 +107,8 @@ class OmicsIntegrator2(PRM):
             out = client.containers.run('reedcompbio/omics-integrator-2',
                                         command,
                                         stderr=True,
-                                        #volumes={
-                                        #    prepare_path_docker(work_dir): {'bind': '/OmicsIntegrator2', 'mode': 'rw'}},
-                                        volumes=[f'{prepare_path_docker(work_dir)}:/OmicsIntegrator2'],
+                                        volumes={
+                                            prepare_path_docker(work_dir): {'bind': '/OmicsIntegrator2', 'mode': 'rw'}},
                                         working_dir='/OmicsIntegrator2')
             if need_chown:
                 #This command changes the ownership of output files so we don't
