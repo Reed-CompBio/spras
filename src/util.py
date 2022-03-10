@@ -50,9 +50,10 @@ def convert_docker_path(src_path: PurePath, dest_path: PurePath, file_path: Unio
     return PurePosixPath(dest_path, rel_path)
 
 
+# TODO consider a better default environment variable
 # Follow docker-py's naming conventions (https://docker-py.readthedocs.io/en/stable/containers.html)
 # Technically the argument is an image, not a container, but we use container here.
-def run_container(framework: str, container: str, command: List[str], volumes: List[Tuple[PurePath, PurePath]], working_dir: str, environment: str = ''):
+def run_container(framework: str, container: str, command: List[str], volumes: List[Tuple[PurePath, PurePath]], working_dir: str, environment: str = 'SPRAS=True'):
     """
     Runs a command in the container using Singularity or Docker
     @param framework: singularity or docker
@@ -74,7 +75,7 @@ def run_container(framework: str, container: str, command: List[str], volumes: L
 
 # TODO any issue with creating a new client each time inside this function?
 # TODO environment currently a single string (e.g. 'TMPDIR=/OmicsIntegrator1'), should it be a list?
-def run_container_docker(container: str, command: List[str], volumes: List[Tuple[PurePath, PurePath]], working_dir: str, environment: str = ''):
+def run_container_docker(container: str, command: List[str], volumes: List[Tuple[PurePath, PurePath]], working_dir: str, environment: str = 'SPRAS=True'):
     """
     Runs a command in the container using Docker.
     Attempts to automatically correct file owner and group for new files created by the container, setting them to the
@@ -158,7 +159,7 @@ def run_container_docker(container: str, command: List[str], volumes: List[Tuple
         return out
 
 
-def run_container_singularity(container: str, command: List[str], volumes: List[Tuple[PurePath, PurePath]], working_dir: str, environment: str = ''):
+def run_container_singularity(container: str, command: List[str], volumes: List[Tuple[PurePath, PurePath]], working_dir: str, environment: str = 'SPRAS=True'):
     """
     Runs a command in the container using Singularity.
     Only available on Linux.

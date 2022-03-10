@@ -61,6 +61,9 @@ class OmicsIntegrator2(PRM):
         if edges is None or prizes is None or output_file is None:
             raise ValueError('Required Omics Integrator 2 arguments are missing')
 
+        if singularity:
+            raise NotImplementedError('Omics Integrator 2 does not yet support Singularity')
+
         # Initialize a Docker client using environment variables
         client = docker.from_env()
         work_dir = Path(__file__).parent.parent.absolute()

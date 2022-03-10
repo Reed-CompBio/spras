@@ -36,7 +36,7 @@ class TestMaximumEdgeOrientation:
 
         with pytest.raises(ValueError):
             # No path_output
-            write_properties(Path('.'),
+            write_properties(filename=Path('.'),
                              edges=TEST_DIR + 'input/meo-edges.txt',
                              sources=TEST_DIR + 'input/meo-sources.txt',
                              targets=TEST_DIR + 'input/meo-targets.txt',

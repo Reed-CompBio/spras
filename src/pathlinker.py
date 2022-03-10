@@ -62,6 +62,9 @@ class PathLinker(PRM):
         if not nodetypes or not network or not output_file:
             raise ValueError('Required PathLinker arguments are missing')
 
+        if singularity:
+            raise NotImplementedError('PathLinker does not yet support Singularity')
+
         # Initialize a Docker client using environment variables
         client = docker.from_env()
 

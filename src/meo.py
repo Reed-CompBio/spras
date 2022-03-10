@@ -1,11 +1,10 @@
 from src.PRM import PRM
-import docker
 from pathlib import Path
-from src.util import prepare_path_docker
+from src.util import prepare_volume, run_container
 import os
 import pandas as pd
 
-__all__ = ['MEO']
+__all__ = ['MEO', 'write_properties']
 
 
 # Only supports the Random orientation algorithm
@@ -17,7 +16,9 @@ def write_properties(filename=Path('properties.txt'), edges=None, sources=None, 
     Write the properties file for Maximum Edge Orientation
     See https://github.com/agitter/meo/blob/master/sample.props for property descriptions and the default values at
     https://github.com/agitter/meo/blob/master/src/alg/EOMain.java#L185-L199
-    filename: the name of the properties file to write
+    All file and directory names, except the filename argument, should be converted to container-friendly filenames with
+    util.prepare_volume before passing them to this function
+    filename: the name of the properties file to write on the local file system
     """
     if edges is None or sources is None or targets is None or edge_output is None or path_output is None:
         raise ValueError('Required Maximum Edge Orientation properties file arguments are missing')
@@ -92,62 +93,59 @@ class MEO(PRM):
         Only the edge output file is retained.
         All other output files are deleted.
         @param output_file: the name of the output edge file, which will overwrite any existing file with this name
+        @param singularity: if True, run using the Singularity container instead of the Docker container
         """
         if edges is None or sources is None or targets is None or output_file is None:
             raise ValueError('Required Maximum Edge Orientation arguments are missing')
 
-        # Initialize a Docker client using environment variables
-        client = docker.from_env()
-        work_dir = Path(__file__).parent.parent.absolute()
+        work_dir = '/spras'
+
+        # Each volume is a tuple (src, dest)
+        volumes = list()
+
+        bind_path, edge_file = prepare_volume(edges, work_dir)
+        volumes.append(bind_path)
+
+        bind_path, source_file = prepare_volume(sources, work_dir)
+        volumes.append(bind_path)
+
+        bind_path, target_file = prepare_volume(targets, work_dir)
+        volumes.append(bind_path)
 
         out_dir = Path(output_file).parent
         # Maximum Edge Orientation requires that the output directory exist
-        Path(work_dir, out_dir).mkdir(parents=True, exist_ok=True)
+        out_dir.mkdir(parents=True, exist_ok=True)
+
+        bind_path, mapped_output_file = prepare_volume(str(output_file), work_dir)
+        volumes.append(bind_path)
+
         # Hard code the path output filename, which will be deleted
-        # TODO use a tmp file
         path_output_file = Path(out_dir, 'path-output.txt')
+        bind_path, mapped_path_output = prepare_volume(str(path_output_file), work_dir)
+        volumes.append(bind_path)
 
         properties_file = 'meo-properties.txt'
-        properties_file_abs = Path(work_dir, properties_file)
-        write_properties(filename=properties_file_abs, edges=edges, sources=sources, targets=targets,
-                         edge_output=output_file, path_output=path_output_file,
+        properties_file_local = Path(out_dir, properties_file)
+        write_properties(filename=properties_file_local, edges=edge_file, sources=source_file, targets=target_file,
+                         edge_output=mapped_output_file, path_output=mapped_path_output,
                          max_path_length=max_path_length, local_search=local_search, rand_restarts=rand_restarts)
+        bind_path, properties_file = prepare_volume(str(properties_file_local), work_dir)
+        volumes.append(bind_path)
 
         command = [properties_file]
 
         print('Running Maximum Edge Orientation with arguments: {}'.format(' '.join(command)), flush=True)
 
-        # Don't perform this step on systems where permissions aren't an issue like windows
-        need_chown = True
-        try:
-            uid = os.getuid()
-        except AttributeError:
-            need_chown = False
+        # TODO consider making this a string in the config file instead of a Boolean
+        container_framework = 'singularity' if singularity else 'docker'
+        out = run_container(container_framework,
+                            'reedcompbio/meo',
+                            command,
+                            volumes,
+                            work_dir)
+        print(out)
 
-        try:
-            out = client.containers.run('reedcompbio/meo',
-                                  command,
-                                  stderr=True,
-                                  volumes={prepare_path_docker(work_dir): {'bind': '/spras', 'mode': 'rw'}},
-                                  working_dir='/spras')
-            if need_chown:
-                # This command changes the ownership of output files so we don't
-                # get a permissions error when snakemake tries to touch the files
-                chown_command = " ".join([str(uid), output_file, path_output_file.as_posix()])
-                # Modify the entrypoint because the command is expected to be a properties file that is passed
-                # to the jar file
-                client.containers.run('reedcompbio/meo',
-                                      chown_command,
-                                      stderr=True,
-                                      volumes={prepare_path_docker(work_dir): {'bind': '/spras', 'mode': 'rw'}},
-                                      working_dir='/spras',
-                                      entrypoint='/bin/chown')
-
-            print(out.decode('utf-8'))
-        finally:
-            # Not sure whether this is needed
-            client.close()
-            properties_file_abs.unlink(missing_ok=True)
+        properties_file_local.unlink(missing_ok=True)
 
         # TODO do we want to retain other output files?
         # TODO if deleting other output files, write them all to a tmp directory and copy

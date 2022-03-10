@@ -109,10 +109,10 @@ class OmicsIntegrator1(PRM):
         volumes.append(bind_path)
 
         conf_file = 'oi1-configuration.txt'
-        conf_file_abs = Path(out_dir, conf_file)
+        conf_file_local = Path(out_dir, conf_file)
         # Temporary file that will be deleted after running Omics Integrator 1
-        write_conf(conf_file_abs, w=w, b=b, d=d, mu=mu, noise=noise, g=g, r=r)
-        bind_path, conf_file = prepare_volume(str(conf_file_abs), work_dir)
+        write_conf(conf_file_local, w=w, b=b, d=d, mu=mu, noise=noise, g=g, r=r)
+        bind_path, conf_file = prepare_volume(str(conf_file_local), work_dir)
         volumes.append(bind_path)
 
         command = ['python', '/OmicsIntegrator/scripts/forest.py',
@@ -150,7 +150,8 @@ class OmicsIntegrator1(PRM):
                             work_dir,
                             'TMPDIR=/OmicsIntegrator1')
         print(out)
-        conf_file_abs.unlink(missing_ok=True)
+
+        conf_file_local.unlink(missing_ok=True)
 
         # TODO do we want to retain other output files?
         # TODO if deleting other output files, write them all to a tmp directory and copy
