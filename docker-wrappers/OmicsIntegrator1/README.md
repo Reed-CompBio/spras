@@ -35,7 +35,7 @@ python setup.py test -a "--msgpath=$MSGSTEINER_PATH"
 
 ## No conda alternative
 An alternative version of the Omics Integrator image does not use conda.
-This may simplify conversion to Singularity.
+This simplifies using the same image for Docker and Singularity.
 This version uses `requirements.txt` instead of `enviornment.yml` to specify required Python packages.
 It can be built and tested in a manner similar to the conda-based image.
 ```
@@ -45,7 +45,8 @@ winpty docker run -it reedcompbio/omics-integrator-1:no-conda bash
 python setup.py test -a "--msgpath=$MSGSTEINER_PATH"
 ```
 
-This version is not currently used in SPRAS and is not tested with pytest.
+This version of the image is the default used by SPRAS.
+It is tested with pytest only when `singularity` is available on the test system.
 
 ## TODO
 - Attribute https://github.com/fraenkel-lab/OmicsIntegrator
