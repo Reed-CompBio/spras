@@ -11,6 +11,8 @@ docker build -t reedcompbio/meo -f Dockerfile .
 ```
 from this directory.
 
+This Docker image is compatible with Docker and Singularity.
+
 ## Testing
 Test code is located in `test/meo`.
 The `input` subdirectory contains test files `meo-edges.txt`, `meo-sources.txt`, and `meo-targets.txt`.
