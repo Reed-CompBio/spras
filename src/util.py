@@ -50,7 +50,8 @@ def convert_docker_path(src_path: PurePath, dest_path: PurePath, file_path: Unio
     return PurePosixPath(dest_path, rel_path)
 
 
-# TODO standardize argument terminology to match Singularity's execute and Docker's run
+# Follow docker-py's naming conventions (https://docker-py.readthedocs.io/en/stable/containers.html)
+# Technically the argument is an image, not a container, but we use container here.
 def run_container(framework: str, container: str, command: List[str], volumes: List[Tuple[PurePath, PurePath]], working_dir: str, environment: str = ''):
     """
     Runs a command in the container using Singularity or Docker
@@ -174,7 +175,7 @@ def run_container_singularity(container: str, command: List[str], volumes: List[
 
     # See https://stackoverflow.com/questions/3095071/in-python-what-happens-when-you-import-inside-of-a-function
     from spython.main import Client
- 
+
     bind_paths = [f'{prepare_path_docker(src)}:{dest}' for src, dest in volumes]
 
     # TODO is try/finally needed for Singularity?
@@ -218,7 +219,7 @@ def hash_filename(filename: str, length: Optional[int] = None) -> str:
     return hash_params_sha1_base32({'filename': filename}, length)
 
 
-# TODO because this is called independently for each file, the same local path can be mounted to multiple volumes
+# Because this is called independently for each file, the same local path can be mounted to multiple volumes
 def prepare_volume(filename: str, volume_base: str) -> Tuple[Tuple[PurePath, PurePath], str]:
     """
     Makes a file on the local file system accessible within a container by mapping the local (source) path to a new
