@@ -60,17 +60,17 @@ def make_final_input(wildcards):
     #TODO analysis could be parsed in the parse_config() function.
     if config["analysis"]["summary"]["include"]:
         # add summary output file.
-        final_input.extend(expand('{out_dir}{sep}summary-{dataset}-{algorithm_params}.txt',out_dir=out_dir,sep=SEP,dataset=dataset_labels,algorithm_params=algorithms_with_params))
+        final_input.extend(expand('{out_dir}{sep}{dataset}-{algorithm_params}{sep}summary.txt',out_dir=out_dir,sep=SEP,dataset=dataset_labels,algorithm_params=algorithms_with_params))
 
     if config["analysis"]["graphspace"]["include"]:
         # add graph and style JSON files.
-        final_input.extend(expand('{out_dir}{sep}gs-{dataset}-{algorithm_params}.json',out_dir=out_dir,sep=SEP,dataset=dataset_labels,algorithm_params=algorithms_with_params))
-        final_input.extend(expand('{out_dir}{sep}gsstyle-{dataset}-{algorithm_params}.json',out_dir=out_dir,sep=SEP,dataset=dataset_labels,algorithm_params=algorithms_with_params))
+        final_input.extend(expand('{out_dir}{sep}{dataset}-{algorithm_params}{sep}gs.json',out_dir=out_dir,sep=SEP,dataset=dataset_labels,algorithm_params=algorithms_with_params))
+        final_input.extend(expand('{out_dir}{sep}{dataset}-{algorithm_params}{sep}gsstyle.json',out_dir=out_dir,sep=SEP,dataset=dataset_labels,algorithm_params=algorithms_with_params))
 
     if len(final_input) == 0:
         # No analysis added yet, so add reconstruction output files if they exist.
         # (if analysis is specified, these should be implicitly run).
-        final_input.extend(expand('{out_dir}{sep}pathway-{dataset}-{algorithm_params}.txt', out_dir=out_dir, sep=SEP, dataset=dataset_labels, algorithm_params=algorithms_with_params))
+        final_input.extend(expand('{out_dir}{sep}{dataset}-{algorithm_params}{sep}pathway.txt', out_dir=out_dir, sep=SEP, dataset=dataset_labels, algorithm_params=algorithms_with_params))
 
     # Create log files for the parameters and datasets
     final_input.extend(expand('{out_dir}{sep}logs{sep}parameters-{algorithm_params}.yaml', out_dir=out_dir, sep=SEP, algorithm_params=algorithms_with_params))
@@ -174,13 +174,12 @@ def collect_prepared_input(wildcards):
 # Run the pathway reconstruction algorithm
 rule reconstruct:
     input: collect_prepared_input
-    # TODO decide the preferred subdirectory naming structure and update other rules accordingly
     # Each reconstruct call should be in a separate output subdirectory that is unique for the parameter combination so
     # that multiple instances of the container can run simultaneously without overwriting the output files
     # Overwriting files can happen because the pathway reconstruction algorithms often generate output files with the
     # same name regardless of the inputs or parameters, and these aren't renamed until after the container command
     # terminates
-    output: pathway_file = SEP.join([out_dir, '{dataset}-{algorithm}-{params}', 'raw-pathway-{dataset}-{algorithm}-{params}.txt'])
+    output: pathway_file = SEP.join([out_dir, '{dataset}-{algorithm}-{params}', 'raw-pathway.txt'])
     run:
         # Create a copy so that the updates are not written to the parameters logfile
         params = reconstruction_params(wildcards.algorithm, wildcards.params).copy()
@@ -197,28 +196,27 @@ rule reconstruct:
 # Original pathway reconstruction output to universal output
 # Use PRRunner as a wrapper to call the algorithm-specific parse_output
 rule parse_output:
-    input: raw_file = SEP.join([out_dir, '{dataset}-{algorithm}-{params}', 'raw-pathway-{dataset}-{algorithm}-{params}.txt'])
-    output: standardized_file = SEP.join([out_dir, 'pathway-{dataset}-{algorithm}-{params}.txt'])
+    input: raw_file = SEP.join([out_dir, '{dataset}-{algorithm}-{params}', 'raw-pathway.txt'])
+    output: standardized_file = SEP.join([out_dir, '{dataset}-{algorithm}-{params}', 'pathway.txt'])
     run:
         PRRunner.parse_output(wildcards.algorithm, input.raw_file, output.standardized_file)
 
 # Collect Summary Statistics
 rule summarize:
     input:
-        standardized_file = SEP.join([out_dir, 'pathway-{dataset}-{algorithm}-{params}.txt'])
+        standardized_file = SEP.join([out_dir, '{dataset}-{algorithm}-{params}', 'pathway.txt'])
     output:
-        summary_file = SEP.join([out_dir, 'summary-{dataset}-{algorithm}-{params}.txt'])
+        summary_file = SEP.join([out_dir, '{dataset}-{algorithm}-{params}', 'summary.txt'])
     run:
         summary.run(input.standardized_file,output.summary_file,directed=algorithm_directed[wildcards.algorithm])
 
 # Write GraphSpace JSON Graphs
 rule viz_graphspace:
-    input: standardized_file = SEP.join([out_dir, 'pathway-{dataset}-{algorithm}-{params}.txt'])
+    input: standardized_file = SEP.join([out_dir, '{dataset}-{algorithm}-{params}', 'pathway.txt'])
     output:
-        graph_json = SEP.join([out_dir, 'gs-{dataset}-{algorithm}-{params}.json']),
-        style_json = SEP.join([out_dir, 'gsstyle-{dataset}-{algorithm}-{params}.json'])
+        graph_json = SEP.join([out_dir, '{dataset}-{algorithm}-{params}', 'gs.json']),
+        style_json = SEP.join([out_dir, '{dataset}-{algorithm}-{params}', 'gsstyle.json'])
     run:
-        json_prefix = SEP.join([out_dir, 'pathway-{dataset}-{algorithm}-{params}'])
         graphspace.write_json(input.standardized_file,output.graph_json,output.style_json,directed=algorithm_directed[wildcards.algorithm])
 
 # Remove the output directory
