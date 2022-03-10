@@ -144,8 +144,7 @@ class OmicsIntegrator1(PRM):
         # TODO consider making this a string in the config file instead of a Boolean
         container_framework = 'singularity' if singularity else 'docker'
         out = run_container(container_framework,
-#                            'reedcompbio/omics-integrator-1:no-conda',  # Could make the no-conda version the default
-                            'reedcompbio/omics-integrator-1',  # Test whether the original image works with Singularity
+                            'reedcompbio/omics-integrator-1:no-conda',  # Could make the no-conda version the default
                             command,
                             volumes,
                             work_dir,
