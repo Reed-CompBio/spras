@@ -132,7 +132,7 @@ class MEO(PRM):
         bind_path, properties_file = prepare_volume(str(properties_file_local), work_dir)
         volumes.append(bind_path)
 
-        command = [properties_file]
+        command = ['java', '-jar', '/meo/EOMain.jar', properties_file]
 
         print('Running Maximum Edge Orientation with arguments: {}'.format(' '.join(command)), flush=True)
 

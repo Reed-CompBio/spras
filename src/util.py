@@ -181,6 +181,7 @@ def run_container_singularity(container: str, command: List[str], volumes: List[
 
     # TODO is try/finally needed for Singularity?
     singularity_options = ['--cleanenv', '--containall', '--pwd', working_dir, '--env', environment]
+    # To debug a container add the execute arguments: singularity_options=['--debug'], quiet=False
     # Adding 'docker://' to the container indicates this is a Docker image Singularity must convert
     return Client.execute('docker://' + container,
                           command,
