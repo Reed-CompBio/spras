@@ -104,7 +104,7 @@ class PathLinker(PRM):
                 #This command changes the ownership of output files so we don't
                 # get a permissions error when snakemake tries to touch the files
                 # PathLinker writes output files to the working directory
-                chown_command = " ".join(['chown',str(uid),'./out*-ranked-edges.txt'])
+                chown_command = " ".join(['chown',str(uid),'/home/spras/out*-ranked-edges.txt'])
                 client.containers.run('reedcompbio/pathlinker',
                                       chown_command,
                                       stderr=True,
