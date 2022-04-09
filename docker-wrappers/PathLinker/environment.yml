@@ -1,5 +1,0 @@
-name: pathlinker
-dependencies:
-  - decorator=4.1.2
-  - networkx=1.11
-  - python=3.5
