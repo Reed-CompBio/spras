@@ -4,3 +4,4 @@ https://raw.githubusercontent.com/Murali-group/PathLinker/$PATHLINKER_COMMIT_SHA
 https://raw.githubusercontent.com/Murali-group/PathLinker/$PATHLINKER_COMMIT_SHA/ksp_Astar.py
 https://raw.githubusercontent.com/Murali-group/PathLinker/$PATHLINKER_COMMIT_SHA/parse.py
 https://raw.githubusercontent.com/Murali-group/PathLinker/$PATHLINKER_COMMIT_SHA/run.py
+https://raw.githubusercontent.com/Murali-group/PathLinker/$PATHLINKER_COMMIT_SHA/requirements.txt

@@ -1,22 +1,21 @@
 # PathLinker wrapper
 # https://github.com/Murali-group/PathLinker
-# Activates the conda environment before running command inside container
-# Uses the strategy from https://pythonspeed.com/articles/activate-conda-dockerfile/
-# by Itamar Turner-Trauring
-FROM continuumio/miniconda3:4.9.2
+FROM python:3.5.10-alpine
 
-# Required for the envsubst command
-RUN apt-get -qq update && \
-    apt-get install -y gettext-base
+# gettext is required for the envsubst command
+# See https://github.com/haskell/cabal/issues/6126 regarding wget
+RUN apk add --no-cache ca-certificates gettext wget
 
-COPY environment.yml .
-RUN conda env create -f environment.yml
-
-WORKDIR /home
+WORKDIR /PathLinker
 COPY pathlinker-files.txt .
+
+# Replace the template variable for the commit with the specific commit in the command below
+# Download that version of the PathLinker files from GitHub, including requirements.txt
+# Remove pkg-resources from requirements.txt, which cannot be installed
+# Install the required Python packages with pip
 RUN export PATHLINKER_COMMIT_SHA=d4a44c9f44f4afe30fd945015d84c1ce8c602c00 && \
     envsubst '${PATHLINKER_COMMIT_SHA}' < pathlinker-files.txt > pathlinker-files-versioned.txt && \
     rm pathlinker-files.txt && \
-    wget --input-file pathlinker-files-versioned.txt
-
-ENTRYPOINT ["conda", "run", "--no-capture-output", "-n", "pathlinker"]
+    wget --input-file pathlinker-files-versioned.txt && \
+    sed -i '/pkg-resources/d' requirements.txt && \
+    pip install -r requirements.txt
