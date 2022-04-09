@@ -84,11 +84,11 @@ class PathLinker(PRM):
             command.extend(['-k', str(k)])
 
         #Don't perform this step on systems where permissions aren't an issue like windows
-        need_chown = True
-        try:
-            uid = os.getuid()
-        except AttributeError:
-            need_chown = False
+        #need_chown = True
+        #try:
+        #    uid = os.getuid()
+        #except AttributeError:
+        #    need_chown = False
 
         try:
             container_output = client.containers.run(
@@ -100,16 +100,16 @@ class PathLinker(PRM):
                 },
                 working_dir='/home/spras/')
             print(container_output.decode('utf-8'))
-            if need_chown:
+            #if need_chown:
                 #This command changes the ownership of output files so we don't
                 # get a permissions error when snakemake tries to touch the files
                 # PathLinker writes output files to the working directory
-                chown_command = " ".join(['chown',str(uid),'/home/spras/out*-ranked-edges.txt'])
-                client.containers.run('reedcompbio/pathlinker',
-                                      chown_command,
-                                      stderr=True,
-                                      volumes={prepare_path_docker(work_dir): {'bind': '/home/spras', 'mode': 'rw'}},
-                                      working_dir='/home/spras/')
+                #chown_command = " ".join(['chown',str(uid),'/home/spras/out*-ranked-edges.txt'])
+                #client.containers.run('reedcompbio/pathlinker',
+                #                      chown_command,
+                #                      stderr=True,
+                #                      volumes={prepare_path_docker(work_dir): {'bind': '/home/spras', 'mode': 'rw'}},
+                #                      working_dir='/home/spras/')
 
         finally:
             # Not sure whether this is needed
