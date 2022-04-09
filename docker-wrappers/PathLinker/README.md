@@ -8,7 +8,7 @@ docker build -t reedcompbio/pathlinker -f Dockerfile .
 ```
 from this directory.
 
-To confirm that commands are run inside the conda environment run:
+To inspect the installed Python packages:
 ```
 winpty docker run reedcompbio/pathlinker pip list
 ```
