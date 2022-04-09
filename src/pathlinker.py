@@ -76,7 +76,7 @@ class PathLinker(PRM):
         # When renaming the output file, the output directory must already exist
         Path(work_dir, out_dir).mkdir(parents=True, exist_ok=True)
 
-        command = ['python', '/home/run.py', '/home/spras/'+network_file.as_posix(), 
+        command = ['python', '/PathLinker/run.py', '/home/spras/'+network_file.as_posix(), 
                         '/home/spras/'+node_file.as_posix()]
 
         # Add optional argument
