@@ -17,7 +17,6 @@ from pathlib import Path, PurePath, PurePosixPath
 # The default length of the truncated hash used to identify parameter combinations
 DEFAULT_HASH_LENGTH = 7
 
-
 def prepare_path_docker(orig_path: PurePath) -> str:
     """
     Prepare an absolute path for mounting as a Docker volume.
@@ -48,30 +47,6 @@ def convert_docker_path(src_path: PurePath, dest_path: PurePath, file_path: Unio
     """
     rel_path = file_path.relative_to(src_path)
     return PurePosixPath(dest_path, rel_path)
-
-
-# TODO consider a better default environment variable
-# Follow docker-py's naming conventions (https://docker-py.readthedocs.io/en/stable/containers.html)
-# Technically the argument is an image, not a container, but we use container here.
-def run_container(framework: str, container: str, command: List[str], volumes: List[Tuple[PurePath, PurePath]], working_dir: str, environment: str = 'SPRAS=True'):
-    """
-    Runs a command in the container using Singularity or Docker
-    @param framework: singularity or docker
-    @param container: name of the DockerHub container without the 'docker://' prefix
-    @param command: command to run in the container
-    @param volumes: a list of volumes to mount where each item is a (source, destination) tuple
-    @param working_dir: the working directory in the container
-    @param environment: environment variables to set in the container
-    @return: output from Singularity execute or Docker run
-    """
-    normalized_framework = framework.casefold()
-    if normalized_framework == 'docker':
-        return run_container_docker(container, command, volumes, working_dir, environment)
-    elif normalized_framework == 'singularity':
-        return run_container_singularity(container, command, volumes, working_dir, environment)
-    else:
-        raise ValueError(f'{framework} is not a recognized container framework. Choose "docker" or "singularity".')
-
 
 # TODO any issue with creating a new client each time inside this function?
 # TODO environment currently a single string (e.g. 'TMPDIR=/OmicsIntegrator1'), should it be a list?
@@ -187,6 +162,39 @@ def run_container_singularity(container: str, command: List[str], volumes: List[
                           command,
                           options=singularity_options,
                           bind=bind_paths)
+
+CONTAINERS = {
+    'docker': run_container_docker,
+    'singularity': run_container_singularity
+}
+
+
+# TODO consider a better default environment variable
+# Follow docker-py's naming conventions (https://docker-py.readthedocs.io/en/stable/containers.html)
+# Technically the argument is an image, not a container, but we use container here.
+def run_container(framework: str, container: str, command: List[str], volumes: List[Tuple[PurePath, PurePath]], working_dir: str, environment: str = 'SPRAS=True'):
+    """
+    Runs a command in the container using Singularity or Docker
+    @param framework: singularity or docker
+    @param container: name of the DockerHub container without the 'docker://' prefix
+    @param command: command to run in the container
+    @param volumes: a list of volumes to mount where each item is a (source, destination) tuple
+    @param working_dir: the working directory in the container
+    @param environment: environment variables to set in the container
+    @return: output from Singularity execute or Docker run
+    """
+    normalized_framework = framework.casefold()
+
+    if framework not in CONTAINERS.keys():
+        raise ValueError(f'{framework} is not a recognized container framework. Choose "docker" or "singularity".')
+    return CONTAINERS.get(normalized_framework)(container, command, volumes, working_dir, environment)
+
+    # if normalized_framework == 'docker':
+    #     return run_container_docker(container, command, volumes, working_dir, environment)
+    # elif normalized_framework == 'singularity':
+    #     return run_container_singularity(container, command, volumes, working_dir, environment)
+    # else:
+    #     raise ValueError(f'{framework} is not a recognized container framework. Choose "docker" or "singularity".')
 
 
 def hash_params_sha1_base32(params_dict: Dict[str, Any], length: Optional[int] = None) -> str:
