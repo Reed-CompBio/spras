@@ -49,7 +49,7 @@ jobs:
       run: pytest -vs
     - name: Run Snakemake workflow
       shell: bash --login {0}
-      run: snakemake --cores 1 --configfile config/config.yaml
+      run: snakemake --cores 2 --configfile config/config.yaml
 
   # Builds the Docker images
   docker:
