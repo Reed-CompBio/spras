@@ -71,17 +71,14 @@ class PathLinker(PRM):
         bind_path, network_file = prepare_volume(network, work_dir)
         volumes.append(bind_path)
 
-        ## PathLinker does not use out_dir, need to change the local
-        ## working directory
-        ## Can try setting --output with an absolulte path
+        # PathLinker does not provide an argument to set the output directory
+        # Use its --output argument to set the output file prefix to specify an absolute path and prefix
         out_dir = Path(output_file).parent
         # PathLinker requires that the output directory exist
         out_dir.mkdir(parents=True, exist_ok=True)
         bind_path, mapped_out_dir = prepare_volume(str(out_dir), work_dir)
         volumes.append(bind_path)
-        mapped_out_prefix = mapped_out_dir + '/out'
-        print(volumes)
-        print(out_dir)
+        mapped_out_prefix = mapped_out_dir + '/out'  # Use posix path inside the container
 
         command = ['python',
                    '/PathLinker/run.py',
@@ -106,10 +103,7 @@ class PathLinker(PRM):
 
         # Rename the primary output file to match the desired output filename
         # Currently PathLinker only writes one output file so we do not need to delete others
-        #Path(output_file).unlink(missing_ok=True)
         # We may not know the value of k that was used
-        print('*****************************')
-        print(list(out_dir.glob('out*-ranked-edges.txt')))
         output_edges = Path(next(out_dir.glob('out*-ranked-edges.txt')))
         output_edges.rename(output_file)
 
