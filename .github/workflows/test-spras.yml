@@ -39,12 +39,17 @@ jobs:
         environment-file: environment.yml
         auto-activate-base: false
         miniconda-version: 'latest'
+    - name: Install Singularity
+      uses: eWaterCycle/setup-singularity@v7
+      with:
+        singularity-version: 3.8.3
     - name: Run tests
       shell: bash --login {0}
-      run: pytest
+      # Verbose output and disable stdout and stderr capturing
+      run: pytest -vs
     - name: Run Snakemake workflow
       shell: bash --login {0}
-      run: snakemake --cores 1 --configfile config/config.yaml
+      run: snakemake --cores 2 --configfile config/config.yaml
 
   # Builds the Docker images
   docker:

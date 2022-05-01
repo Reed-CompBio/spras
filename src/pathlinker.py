@@ -1,11 +1,8 @@
-import docker
-import os
-import sys
 import pandas as pd
 import warnings
 from src.PRM import PRM
 from pathlib import Path
-from src.util import prepare_path_docker
+from src.util import prepare_volume, run_container
 
 __all__ = ['PathLinker']
 
@@ -47,13 +44,14 @@ class PathLinker(PRM):
 
     # Skips parameter validation step
     @staticmethod
-    def run(nodetypes=None, network=None, output_file=None, k=None):
+    def run(nodetypes=None, network=None, output_file=None, k=None, singularity=False):
         """
         Run PathLinker with Docker
         @param nodetypes:  input node types with sources and targets (required)
         @param network:  input network file (required)
         @param output_file: path to the output pathway file (required)
         @param k: path length (optional)
+        @param singularity: if True, run using the Singularity container instead of the Docker container
         """
         # Add additional parameter validation
         # Do not require k
@@ -62,64 +60,51 @@ class PathLinker(PRM):
         if not nodetypes or not network or not output_file:
             raise ValueError('Required PathLinker arguments are missing')
 
-        # Initialize a Docker client using environment variables
-        client = docker.from_env()
+        work_dir = '/spras'
 
-        # work dir set as the root of the repository
-        work_dir = Path(__file__).parent.parent.absolute()
+        # Each volume is a tuple (src, dest)
+        volumes = list()
 
-        # create path objects for input files
-        node_file = Path(nodetypes)
-        network_file = Path(network)
+        bind_path, node_file = prepare_volume(nodetypes, work_dir)
+        volumes.append(bind_path)
 
+        bind_path, network_file = prepare_volume(network, work_dir)
+        volumes.append(bind_path)
+
+        # PathLinker does not provide an argument to set the output directory
+        # Use its --output argument to set the output file prefix to specify an absolute path and prefix
         out_dir = Path(output_file).parent
-        # When renaming the output file, the output directory must already exist
-        Path(work_dir, out_dir).mkdir(parents=True, exist_ok=True)
+        # PathLinker requires that the output directory exist
+        out_dir.mkdir(parents=True, exist_ok=True)
+        bind_path, mapped_out_dir = prepare_volume(str(out_dir), work_dir)
+        volumes.append(bind_path)
+        mapped_out_prefix = mapped_out_dir + '/out'  # Use posix path inside the container
 
-        command = ['python', '/PathLinker/run.py', '/home/spras/'+network_file.as_posix(), 
-                        '/home/spras/'+node_file.as_posix()]
+        command = ['python',
+                   '/PathLinker/run.py',
+                   network_file,
+                   node_file,
+                   '--output', mapped_out_prefix]
 
         # Add optional argument
         if k is not None:
             command.extend(['-k', str(k)])
 
-        #Don't perform this step on systems where permissions aren't an issue like windows
-        #need_chown = True
-        #try:
-        #    uid = os.getuid()
-        #except AttributeError:
-        #    need_chown = False
+        print('Running PathLinker with arguments: {}'.format(' '.join(command)), flush=True)
 
-        try:
-            container_output = client.containers.run(
-                'reedcompbio/pathlinker',
-                command,
-                stderr=True,
-                volumes={
-                    prepare_path_docker(work_dir): {'bind': '/home/spras', 'mode': 'rw'}
-                },
-                working_dir='/home/spras/')
-            print(container_output.decode('utf-8'))
-            #if need_chown:
-                #This command changes the ownership of output files so we don't
-                # get a permissions error when snakemake tries to touch the files
-                # PathLinker writes output files to the working directory
-                #chown_command = " ".join(['chown',str(uid),'/home/spras/out*-ranked-edges.txt'])
-                #client.containers.run('reedcompbio/pathlinker',
-                #                      chown_command,
-                #                      stderr=True,
-                #                      volumes={prepare_path_docker(work_dir): {'bind': '/home/spras', 'mode': 'rw'}},
-                #                      working_dir='/home/spras/')
-
-        finally:
-            # Not sure whether this is needed
-            client.close()
+        # TODO consider making this a string in the config file instead of a Boolean
+        container_framework = 'singularity' if singularity else 'docker'
+        out = run_container(container_framework,
+                            'reedcompbio/pathlinker',
+                            command,
+                            volumes,
+                            work_dir)
+        print(out)
 
         # Rename the primary output file to match the desired output filename
         # Currently PathLinker only writes one output file so we do not need to delete others
-        Path(output_file).unlink(missing_ok=True)
         # We may not know the value of k that was used
-        output_edges = Path(next(work_dir.glob('out*-ranked-edges.txt')))
+        output_edges = Path(next(out_dir.glob('out*-ranked-edges.txt')))
         output_edges.rename(output_file)
 
     @staticmethod

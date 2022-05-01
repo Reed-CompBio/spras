@@ -51,7 +51,7 @@ class OmicsIntegrator2(PRM):
     # TODO document required arguments
     @staticmethod
     def run(edges=None, prizes=None, output_file=None, w=None, b=None, g=None, noise=None, noisy_edges=None,
-            random_terminals=None, dummy_mode=None, seed=None):
+            random_terminals=None, dummy_mode=None, seed=None, singularity=False):
         """
         Run Omics Integrator 2 in the Docker image with the provided parameters.
         Only the .tsv output file is retained and then renamed.
@@ -60,6 +60,9 @@ class OmicsIntegrator2(PRM):
         """
         if edges is None or prizes is None or output_file is None:
             raise ValueError('Required Omics Integrator 2 arguments are missing')
+
+        if singularity:
+            raise NotImplementedError('Omics Integrator 2 does not yet support Singularity')
 
         # Initialize a Docker client using environment variables
         client = docker.from_env()

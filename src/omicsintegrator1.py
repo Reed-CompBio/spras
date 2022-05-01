@@ -1,11 +1,9 @@
 from src.PRM import PRM
-import docker
 from pathlib import Path
-from src.util import prepare_path_docker
-import os
+from src.util import prepare_volume, run_container
 import pandas as pd
 
-__all__ = ['OmicsIntegrator1']
+__all__ = ['OmicsIntegrator1', 'write_conf']
 
 
 # TODO decide on default number of processes and threads
@@ -77,7 +75,7 @@ class OmicsIntegrator1(PRM):
     @staticmethod
     def run(edges=None, prizes=None, dummy_mode=None, mu_squared=None, exclude_terms=None,
             output_file=None, noisy_edges=None, shuffled_prizes=None, random_terminals=None,
-            seed=None, w=None, b=None, d=None, mu=None, noise=None, g=None, r=None):
+            seed=None, w=None, b=None, d=None, mu=None, noise=None, g=None, r=None, singularity=False):
         """
         Run Omics Integrator 1 in the Docker image with the provided parameters.
         Does not support the garnet, cyto30, knockout, cv, or cv-reps arguments.
@@ -88,31 +86,41 @@ class OmicsIntegrator1(PRM):
         All other output files are deleted.
         @param output_file: the name of the output sif file for the optimal forest, which will overwrite any
         existing file with this name
+        @param singularity: if True, run using the Singularity container instead of the Docker container
         """
         if edges is None or prizes is None or output_file is None or w is None or b is None or d is None:
             raise ValueError('Required Omics Integrator 1 arguments are missing')
 
-        # Initialize a Docker client using environment variables
-        client = docker.from_env()
-        work_dir = Path(__file__).parent.parent.absolute()
+        work_dir = '/spras'
 
-        edge_file = Path(edges)
-        prize_file = Path(prizes)
+        # Each volume is a tuple (src, dest)
+        volumes = list()
+
+        bind_path, edge_file = prepare_volume(edges, work_dir)
+        volumes.append(bind_path)
+
+        bind_path, prize_file = prepare_volume(prizes, work_dir)
+        volumes.append(bind_path)
 
         out_dir = Path(output_file).parent
         # Omics Integrator 1 requires that the output directory exist
-        Path(work_dir, out_dir).mkdir(parents=True, exist_ok=True)
+        out_dir.mkdir(parents=True, exist_ok=True)
+        bind_path, mapped_out_dir = prepare_volume(str(out_dir), work_dir)
+        volumes.append(bind_path)
 
         conf_file = 'oi1-configuration.txt'
-        conf_file_abs = Path(work_dir, conf_file)
-        write_conf(conf_file_abs, w=w, b=b, d=d, mu=mu, noise=noise, g=g, r=r)
+        conf_file_local = Path(out_dir, conf_file)
+        # Temporary file that will be deleted after running Omics Integrator 1
+        write_conf(conf_file_local, w=w, b=b, d=d, mu=mu, noise=noise, g=g, r=r)
+        bind_path, conf_file = prepare_volume(str(conf_file_local), work_dir)
+        volumes.append(bind_path)
 
         command = ['python', '/OmicsIntegrator/scripts/forest.py',
-                   '--edge', edge_file.as_posix(),
-                   '--prize', prize_file.as_posix(),
+                   '--edge', edge_file,
+                   '--prize', prize_file,
                    '--conf', conf_file,
                    '--msgpath', '/OmicsIntegrator/msgsteiner-1.3/msgsteiner',
-                   '--outpath', out_dir.as_posix(),
+                   '--outpath', mapped_out_dir,
                    '--outlabel', 'oi1']
 
         # Add optional arguments
@@ -133,34 +141,17 @@ class OmicsIntegrator1(PRM):
 
         print('Running Omics Integrator 1 with arguments: {}'.format(' '.join(command)), flush=True)
 
-        #Don't perform this step on systems where permissions aren't an issue like windows
-        need_chown = True
-        try:
-            uid = os.getuid()
-        except AttributeError:
-            need_chown = False
+        # TODO consider making this a string in the config file instead of a Boolean
+        container_framework = 'singularity' if singularity else 'docker'
+        out = run_container(container_framework,
+                            'reedcompbio/omics-integrator-1:no-conda',  # no-conda version is the default
+                            command,
+                            volumes,
+                            work_dir,
+                            'TMPDIR=/OmicsIntegrator1')
+        print(out)
 
-        try:
-            out = client.containers.run('reedcompbio/omics-integrator-1',
-                                  command,
-                                  stderr=True,
-                                  volumes={prepare_path_docker(work_dir): {'bind': '/OmicsIntegrator1', 'mode': 'rw'}},
-                                  working_dir='/OmicsIntegrator1')
-            if need_chown:
-                #This command changes the ownership of output files so we don't
-                # get a permissions error when snakemake tries to touch the files
-                chown_command = " ".join(["chown",str(uid),out_dir.as_posix()+"/oi1*"])
-                out_chown = client.containers.run('reedcompbio/omics-integrator-1',
-                                      chown_command,
-                                      stderr=True,
-                                      volumes={prepare_path_docker(work_dir): {'bind': '/OmicsIntegrator1', 'mode': 'rw'}},
-                                      working_dir='/OmicsIntegrator1')
-
-            print(out.decode('utf-8'))
-        finally:
-            # Not sure whether this is needed
-            client.close()
-            conf_file_abs.unlink(missing_ok=True)
+        conf_file_local.unlink(missing_ok=True)
 
         # TODO do we want to retain other output files?
         # TODO if deleting other output files, write them all to a tmp directory and copy

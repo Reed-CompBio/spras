@@ -33,6 +33,20 @@ conda activate oi1
 python setup.py test -a "--msgpath=$MSGSTEINER_PATH"
 ```
 
+## No conda alternative
+An alternative version of the Omics Integrator image does not use conda.
+This simplifies using the same image for Docker and Singularity.
+This version uses `requirements.txt` instead of `enviornment.yml` to specify required Python packages.
+It can be built and tested in a manner similar to the conda-based image.
+```
+docker build -t reedcompbio/omics-integrator-1:no-conda -f Dockerfile_no_conda .
+
+winpty docker run -it reedcompbio/omics-integrator-1:no-conda bash
+python setup.py test -a "--msgpath=$MSGSTEINER_PATH"
+```
+
+This version of the image is the default used by SPRAS.
+
 ## TODO
 - Attribute https://github.com/fraenkel-lab/OmicsIntegrator
 - Attribute http://staff.polito.it/alfredo.braunstein/code/msgsteiner-1.3.tgz and discuss permission to distribute
@@ -42,4 +56,4 @@ python setup.py test -a "--msgpath=$MSGSTEINER_PATH"
 - Remove testing and setup packages from environment if not needed
 - Determine how to use MSGSTEINER_PATH when passing in commands, fix ENTRYPOINT and/or CMD
 - Decide what to use for working directory and where to map input data
-- Consider `continuumio/miniconda3:4.9.2-alpine` base image
+- Consider Alpine base image
