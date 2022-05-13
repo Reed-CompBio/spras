@@ -4,7 +4,8 @@ import sys
 from pathlib import Path
 # TODO consider refactoring to simplify the import
 # Modify the path because of the - in the directory
-sys.path.append(str(Path('docker-wrappers/LocalNeighborhood').absolute()))
+SPRAS_ROOT = Path(__file__).parent.parent.parent.absolute()
+sys.path.append(str(Path(SPRAS_ROOT, 'docker-wrappers', 'LocalNeighborhood')))
 from local_neighborhood import local_neighborhood
 
 TEST_DIR = Path('test', 'LocalNeighborhood/')
@@ -20,9 +21,9 @@ class TestLocalNeighborhood:
         local_neighborhood(network_file=Path(TEST_DIR, 'input', 'ln-network.txt'),
                            nodes_file=Path(TEST_DIR, 'input', 'ln-nodes.txt'),
                            output_file=OUT_FILE)
-        assert OUT_FILE.exists()
+        assert OUT_FILE.exists(), 'Output file was not written'
         expected_file = Path(TEST_DIR, 'expected_output', 'ln-output.txt')
-        assert filecmp.cmp(OUT_FILE, expected_file, shallow=False)
+        assert filecmp.cmp(OUT_FILE, expected_file, shallow=False), 'Output file does not match expected output file'
 
     """
     Run the local neighborhood algorithm with a missing input file

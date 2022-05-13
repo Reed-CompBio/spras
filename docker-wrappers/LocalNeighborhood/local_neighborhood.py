@@ -47,13 +47,14 @@ def local_neighborhood(network_file: Path, nodes_file: Path, output_file: Path):
     with output_file.open('w') as output_f:
         with network_file.open() as network_f:
             for line in network_f:
+                line = line.strip()
                 in_edge_counter += 1
-                endpoints = line.strip().split("|")
+                endpoints = line.split("|")
                 if len(endpoints) != 2:
                     raise ValueError(f"Edge {line} does not contain 2 nodes separated by '|'")
                 if endpoints[0] in nodes or endpoints[1] in nodes:
                     out_edge_counter += 1
-                    output_f.write(f"{line}")
+                    output_f.write(f"{line}\n")
     print(f"Kept {out_edge_counter} of {in_edge_counter} edges")
 
 
