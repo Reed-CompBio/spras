@@ -1,14 +1,43 @@
+import filecmp
+import pytest
+import sys
 from pathlib import Path
+# TODO consider refactoring to simplify the import
+# Modify the path because of the - in the directory
+sys.path.append(str(Path('docker-wrappers/LocalNeighborhood').absolute()))
+from local_neighborhood import local_neighborhood
 
-TEST_DIR = 'test/LocalNeighborhood/'
-OUT_FILE = TEST_DIR + 'output/edges.txt'
+TEST_DIR = Path('test', 'LocalNeighborhood/')
+OUT_FILE = Path(TEST_DIR, 'output', 'ln-output.txt')
+
 
 class TestLocalNeighborhood:
     """
-
+    Run the local neighborhood algorithm on the example input files and check the output matches the expected output
     """
     def test_ln(self):
-        out_path = Path(OUT_FILE)
-        out_path.unlink(missing_ok=True)
+        OUT_FILE.unlink(missing_ok=True)
+        local_neighborhood(network_file=Path(TEST_DIR, 'input', 'ln-network.txt'),
+                           nodes_file=Path(TEST_DIR, 'input', 'ln-nodes.txt'),
+                           output_file=OUT_FILE)
+        assert OUT_FILE.exists()
+        expected_file = Path(TEST_DIR, 'expected_output', 'ln-output.txt')
+        assert filecmp.cmp(OUT_FILE, expected_file, shallow=False)
 
-        assert out_path.exists()
+    """
+    Run the local neighborhood algorithm with a missing input file
+    """
+    def test_missing_file(self):
+        with pytest.raises(OSError):
+            local_neighborhood(network_file=Path(TEST_DIR, 'input', 'missing.txt'),
+                               nodes_file=Path(TEST_DIR, 'input', 'ln-nodes.txt'),
+                               output_file=OUT_FILE)
+
+    """
+    Run the local neighborhood algorithm with an improperly formatted network file
+    """
+    def test_format_error(self):
+        with pytest.raises(ValueError):
+            local_neighborhood(network_file=Path(TEST_DIR, 'input', 'ln-bad-network.txt'),
+                               nodes_file=Path(TEST_DIR, 'input', 'ln-nodes.txt'),
+                               output_file=OUT_FILE)
