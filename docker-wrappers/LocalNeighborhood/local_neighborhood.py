@@ -1,7 +1,7 @@
 """
 Local neighborhood pathway reconstruction algorithm.
 The algorithm takes a network and a list of nodes as input.
-It outputs all edges in the network.
+It outputs all edges in the network that have a node from the list as an endpoint.
 """
 
 import argparse
