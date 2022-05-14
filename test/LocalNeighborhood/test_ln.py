@@ -42,3 +42,5 @@ class TestLocalNeighborhood:
             local_neighborhood(network_file=Path(TEST_DIR, 'input', 'ln-bad-network.txt'),
                                nodes_file=Path(TEST_DIR, 'input', 'ln-nodes.txt'),
                                output_file=OUT_FILE)
+
+    # Write tests for the Local Neighborhood run function here
