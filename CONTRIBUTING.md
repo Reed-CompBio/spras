@@ -70,6 +70,7 @@ These entries are used to tell Snakemake what input files should be present befo
 Implement the `generate_inputs` function, following the Omics Integrator 1 example.
 The nodes should be any node in the dataset that has a prize set, any node that is a source, or any node that is a target.
 The network should be all of the edges written in the format `<vertex1>|<vertex2>`.
+`Dataset.py` provides functions that provide access to node information.
 
 Implement the `run` function, following the Path Linker example.
 The `prepare_volume` utility function is needed to prepare the network and nodes input files to be mounted and used inside the counter.
@@ -88,6 +89,7 @@ The output should have the format `<vertex1> <vertex2> 1`.
 Import the new class `LocalNeighborhood` in `PRRunner.py` so the wrapper functions can be accessed.
 Add an entry for Local Neighborhood to the configuration file `config/config.yaml` and set `include: true`.
 Local Neighborhood has no other parameters.
+Optionally set `include: false` for the other pathway reconstruction algorithms to make testing faster.
 
 ### Step 5: Add Local Neighborhood to the tests
 Add test functions to the test file `test/test_ln.py`.

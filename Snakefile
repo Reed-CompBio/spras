@@ -188,6 +188,9 @@ rule reconstruct:
         # Add the output file
         # All run functions can accept a relative path to the output file that should be written that is called 'output_file'
         params['output_file'] = output.pathway_file
+        # Remove the default placeholder parameter added for algorithms that have no parameters
+        if 'spras_placeholder' in params:
+            params.pop('spras_placeholder')
         # TODO consider the best way to pass global configuration information to the run functions
         # This approach requires that all run functions support a singularity option
         params['singularity'] = SINGULARITY
