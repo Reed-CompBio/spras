@@ -2,7 +2,6 @@ import pytest
 import sys
 from pathlib import Path
 from src.util import compare_files
-from src.local_neighborhood import LocalNeighborhood
 # TODO consider refactoring to simplify the import
 # Modify the path because of the - in the directory
 SPRAS_ROOT = Path(__file__).parent.parent.parent.absolute()
