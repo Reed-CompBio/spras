@@ -148,7 +148,7 @@ class OmicsIntegrator1(PRM):
                             command,
                             volumes,
                             work_dir,
-                            'TMPDIR=/OmicsIntegrator1')
+                            f'TMPDIR={mapped_out_dir}')
         print(out)
 
         conf_file_local.unlink(missing_ok=True)
