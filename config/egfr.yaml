@@ -13,8 +13,8 @@ algorithms:
       include: true
       run1: 
         k: 
-          - 5
           - 10
+          - 20
   - 
     name: omicsintegrator1
     params: 
@@ -22,15 +22,17 @@ algorithms:
       include: true
       run1: 
         b: 
-          - 1
+          - 0.55
         d: 
           - 10
         g: 
-          - 3
+          - 1e-3
         r: 
-          - 5
+          - 0.01
         w: 
-          - 5
+          - 0.1
+        mu:
+          - 0.008
   - 
     name: omicsintegrator2
     params: 
