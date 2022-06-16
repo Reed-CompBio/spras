@@ -3,8 +3,37 @@ This directory contains example datasets.
 It can also be used to store new input data files.
 There are currently very small toy datasets and one real dataset.
 
+## File formats
+### Node file
+Node files include a header row and rows providing attributes for each node.
+The first column is for the node identifier and has the header value `NODEID`.
+All other columns specify additional node attributes such as prizes.
+For example:
+```
+NODEID	prize	sources	targets
+A	1.0		True
+B	3.3	True	
+C	2.5		True
+D	1.9	True	True
+```
+
+A secondary format provides only a list of node identifiers, as in the example `sources.txt`.
+This format may be deprecated.
+
+### Edge file
+Edge files do not include a header row.
+Each row lists the two nodes that are connected with an undirected edge and a weight for that edge.
+Directed edges are not currently supported.
+The weights are typically in the range [0,1] with 1 being the highest confidence for the edge.
+
+For example:
+```
+A	B	0.98
+B	C	0.77
+```
+
 ## Toy datasets
-The following files are very small toy datasets used to illustrate supported file formats
+The following files are very small toy datasets used to illustrate the supported file formats
 - `alternative-network.txt`
 - `alternative-targets.txt`
 - `network.txt`
