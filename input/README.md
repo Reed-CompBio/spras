@@ -6,8 +6,9 @@ There are currently very small toy datasets and one real dataset.
 ## File formats
 ### Node file
 Node files include a header row and rows providing attributes for each node.
-The first column is for the node identifier and has the header value `NODEID`.
+One column is for the node identifier and must have the header value `NODEID`.
 All other columns specify additional node attributes such as prizes.
+Any nodes that are listed in a node file but are not present in one or more edges in the edge file will be removed.
 For example:
 ```
 NODEID	prize	sources	targets
@@ -17,7 +18,7 @@ C	2.5		True
 D	1.9	True	True
 ```
 
-A secondary format provides only a list of node identifiers, as in the example `sources.txt`.
+A secondary format provides only a list of node identifiers and uses the filename as the node attribute, as in the example `sources.txt`.
 This format may be deprecated.
 
 ### Edge file
