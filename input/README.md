@@ -57,4 +57,13 @@ Ali Sinan Köksal, Kirsten Beck, Dylan R. Cronin, Aaron McKenna, Nathan D. Camp, 
 *Cell Reports* 24(13):3607-3618 2018.
 
 If you use the network file `phosphosite-irefindex13.0-uniprot.txt`, also reference iRefIndex and PhosphoSitePlus.
+
+[iRefIndex: a consolidated protein interaction database with provenance](https://doi.org/10.1186/1471-2105-9-405).
+Sabry Razick, George Magklaras, Ian M Donaldson.
+*BMC Bioinformatics* 9(405) 2008.
+
+[PhosphoSitePlus, 2014: mutations, PTMs and recalibrations](https://doi.org/10.1093/nar/gku1267).
+Peter V Hornbeck, Bin Zhang, Beth Murray, Jon M Kornhauser, Vaughan Latham, Elzbieta Skrzypek.
+*Nucleic Acids Research* 43(Database issue):D512-520 2015.
+
 The TPS [publication](https://doi.org/10.1016/j.celrep.2018.08.085) describes how the network data and protein prizes were prepared.
