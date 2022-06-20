@@ -1,0 +1,82 @@
+# The length of the hash used to identify a parameter combination
+hash_length: 7
+
+# If true, use Singularity instead of Docker
+# Singularity support is only available on Unix
+singularity: false
+
+algorithms: 
+  - 
+    name: pathlinker
+    params: 
+      directed: true
+      include: true
+      run1: 
+        k: 
+          - 10
+          - 20
+  - 
+    name: omicsintegrator1
+    params: 
+      directed: false
+      include: true
+      run1: 
+        b: 
+          - 0.55
+          - 2
+          - 10
+        d: 
+          - 10
+        g: 
+          - 1e-3
+        r: 
+          - 0.01
+        w: 
+          - 0.1
+        mu:
+          - 0.008
+  - 
+    name: omicsintegrator2
+    params: 
+      directed: false
+      include: false
+      run1: 
+        b: 
+          - 4
+        g: 
+          - 0
+      run2: 
+        b: 
+          - 2
+        g: 
+          - 3
+  - 
+    name: meo
+    params: 
+      directed: true
+      include: false
+      run1: 
+        local_search: 
+          - "Yes"
+        max_path_length: 
+          - 3
+        rand_restarts: 
+          - 10
+datasets: 
+  - 
+    data_dir: input
+    edge_files: 
+      - phosphosite-irefindex13.0-uniprot.txt
+    label: tps-egfr
+    node_files: 
+      - tps-egfr-prizes.txt
+    other_files: []
+reconstruction_settings: 
+  locations: 
+    reconstruction_dir: output/egfr
+  run: true
+analysis: 
+  graphspace: 
+    include: false
+  summary: 
+    include: true
