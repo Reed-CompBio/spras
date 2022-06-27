@@ -7,6 +7,8 @@ from src.util import process_config
 from src.analysis.summary import summary
 from src.analysis.viz import graphspace
 
+from src.analysis.cytoscape import cytoscape
+
 # Snakemake updated the behavior in the 6.5.0 release https://github.com/snakemake/snakemake/pull/1037
 # and using the wrong separator prevents Snakemake from matching filenames to the rules that can produce them
 SEP = '/'
@@ -225,6 +227,9 @@ rule viz_graphspace:
         style_json = SEP.join([out_dir, '{dataset}-{algorithm}-{params}', 'gsstyle.json'])
     run:
         graphspace.write_json(input.standardized_file,output.graph_json,output.style_json,directed=algorithm_directed[wildcards.algorithm])
+
+        # just run local cytoscape with graphspace for now
+        cytoscape.viz_cytoscape_local(input.standardized_file, directed=algorithm_directed[wildcards.algorithm])
 
 # Remove the output directory
 rule clean:

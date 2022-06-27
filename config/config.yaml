@@ -29,7 +29,7 @@
         - name: "pathlinker"
           params:
                 include: true
-                directed: true
+                directed: True
                 run1:
                     k: range(100,201,100)
 
@@ -56,7 +56,7 @@
                     g: [3]
         - name: "meo"
           params:
-                include: true
+                include: false
                 directed: true
                 run1:
                     max_path_length: [3]

@@ -5,6 +5,11 @@ if (($# == 0)); then
     exit 0
 fi
 
+if ! docker info > /dev/null 2>&1; then
+  echo "This script uses docker, and it isn't running - please start docker and try again!"
+  exit 1
+fi
+
 POSITIONAL_ARGS=()
 HELP_MSG=NO
 USE_CYTOSCAPE=NO

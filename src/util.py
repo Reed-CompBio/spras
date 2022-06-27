@@ -130,6 +130,7 @@ def run_container_docker(container: str, command: List[str], volumes: List[Tuple
         print(err)
     finally:
         # Not sure whether this is needed
+        
         client.close()
         return out
 
