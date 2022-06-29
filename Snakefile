@@ -77,7 +77,6 @@ def make_final_input(wildcards):
     if len(final_input) == 0:
         # No analysis added yet, so add reconstruction output files if they exist.
         # (if analysis is specified, these should be implicitly run).
-        output = expand('{out_dir}{sep}{dataset}-{algorithm_params}{sep}pathway.txt', out_dir=out_dir, sep=SEP, dataset=dataset_labels, algorithm_params=algorithms_with_params)
         final_input.extend(expand('{out_dir}{sep}{dataset}-{algorithm_params}{sep}pathway.txt', out_dir=out_dir, sep=SEP, dataset=dataset_labels, algorithm_params=algorithms_with_params))
 
     # Create log files for the parameters and datasets
@@ -228,15 +227,11 @@ rule viz_graphspace:
     run:
         graphspace.write_json(input.standardized_file,output.graph_json,output.style_json,directed=algorithm_directed[wildcards.algorithm])
 
-        # just run local cytoscape with graphspace for now
-        # cytoscape.viz_cytoscape_local(input.standardized_file, directed=algorithm_directed[wildcards.algorithm])
-
 rule viz_cytoscape:
     input: pathways = expand('{out_dir}{sep}{dataset}-{algorithm_params}{sep}pathway.txt', out_dir=out_dir, sep=SEP, dataset=dataset_labels, algorithm_params=algorithms_with_params)
 
     output: 
         session = SEP.join([out_dir, 'cytoscape-session.cys'])
-
     run:
         cytoscape.run_cytoscape_container(input.pathways, out_dir)
 

@@ -169,7 +169,6 @@ CONTAINERS = {
     'singularity': run_container_singularity
 }
 
-
 # TODO consider a better default environment variable
 # Follow docker-py's naming conventions (https://docker-py.readthedocs.io/en/stable/containers.html)
 # Technically the argument is an image, not a container, but we use container here.
@@ -189,13 +188,6 @@ def run_container(framework: str, container: str, command: List[str], volumes: L
     if framework not in CONTAINERS.keys():
         raise ValueError(f'{framework} is not a recognized container framework. Choose "docker" or "singularity".')
     return CONTAINERS.get(normalized_framework)(container, command, volumes, working_dir, environment)
-
-    # if normalized_framework == 'docker':
-    #     return run_container_docker(container, command, volumes, working_dir, environment)
-    # elif normalized_framework == 'singularity':
-    #     return run_container_singularity(container, command, volumes, working_dir, environment)
-    # else:
-    #     raise ValueError(f'{framework} is not a recognized container framework. Choose "docker" or "singularity".')
 
 
 def hash_params_sha1_base32(params_dict: Dict[str, Any], length: Optional[int] = None) -> str:

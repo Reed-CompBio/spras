@@ -1,14 +1,8 @@
 from pathlib import PurePath
-import sys
 from typing import List, Union
 from pathlib import PurePath, Path
-import py4cytoscape as p4c
-from py4cytoscape import gen_node_color_map
-from py4cytoscape import gen_edge_arrow_map
 import os
 import docker
-
-from src.util import hash_filename
 
 def run_cytoscape_container(pathways: List[Union[str, PurePath]], out_dir: str) -> None:
     '''
@@ -54,36 +48,3 @@ def run_cytoscape_container(pathways: List[Union[str, PurePath]], out_dir: str) 
     finally:
         # Not sure whether this is needed
         client.close()
-
-    
-
-
-
-
-
-
-def viz_cytoscape_local(file: Union[str, PurePath], directed=False) -> None:
-    suid = p4c.networks.import_network_from_tabular_file(
-        file=file,
-        column_type_list="s,t,x",
-        delimiters=" "
-    )
-    p4c.networks.rename_network(file, network=suid)
-
-    # if directed:
-    #     p4c.set_visual_style("spras-directed", network=suid)
-    # else:
-    #     p4c.set_visual_style("default", network=suid)
-
-
-if __name__ == '__main__':
-    # run_cytoscape_container(['1', '2'])
-    filename = 'output/egfr'
-    hash1 = hash_filename(filename=filename)
-    print(hash1)
-    hash2 = hash_filename(filename=filename)
-    print(hash2)
-
-
-
-
