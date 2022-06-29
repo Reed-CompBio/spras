@@ -107,3 +107,7 @@
         graphspace:
 
           include: true
+        
+        cytoscape:
+
+          include: true
