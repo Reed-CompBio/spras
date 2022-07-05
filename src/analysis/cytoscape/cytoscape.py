@@ -1,8 +1,8 @@
-from pathlib import PurePath
-from typing import List, Union
-from pathlib import PurePath, Path
 import os
+from pathlib import Path, PurePath
+from typing import List, Union
 import docker
+
 
 def run_cytoscape_container(pathways: List[Union[str, PurePath]], out_dir: str) -> None:
     '''

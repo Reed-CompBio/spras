@@ -6,7 +6,6 @@ import sys
 from src.util import process_config
 from src.analysis.summary import summary
 from src.analysis.viz import graphspace
-
 from src.analysis.cytoscape import cytoscape
 
 # Snakemake updated the behavior in the 6.5.0 release https://github.com/snakemake/snakemake/pull/1037
