@@ -1,12 +1,10 @@
 import Dataset
-import os
+
 # supported algorithm imports
 from src.meo import MEO as meo
 from src.omicsintegrator1 import OmicsIntegrator1 as omicsintegrator1
 from src.omicsintegrator2 import OmicsIntegrator2 as omicsintegrator2
 from src.pathlinker import PathLinker as pathlinker
-
-ROOT = os.path.dirname(os.path.abspath(__file__))
 
 def run(algorithm, params):
     """
@@ -69,7 +67,4 @@ def parse_output(algorithm, raw_pathway_file, standardized_pathway_file):
         algorithm_runner = globals()[algorithm.lower()]
     except KeyError:
         raise NotImplementedError(f'{algorithm} is not currently supported')
-
-    with open(os.path.join(ROOT, 'output', 'pathways.txt'), 'a') as f:
-        f.write(f"{standardized_pathway_file}\n")
     return algorithm_runner.parse_output(raw_pathway_file, standardized_pathway_file)
