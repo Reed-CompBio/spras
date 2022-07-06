@@ -29,7 +29,7 @@
         - name: "pathlinker"
           params:
                 include: true
-                directed: True
+                directed: true
                 run1:
                     k: range(100,201,100)
 
@@ -39,14 +39,14 @@
                 directed: false
                 run1:
                     r: [5]
-                    b: [5, 10]
-                    w: [5]
+                    b: [5, 6]
+                    w: np.linspace(0,5,2)
                     g: [3]
                     d: [10]
 
         - name: "omicsintegrator2"
           params:
-                include: false
+                include: true
                 directed: false
                 run1:
                     b: [4]

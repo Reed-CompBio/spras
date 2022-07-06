@@ -42,7 +42,7 @@ def convert_docker_path(src_path: PurePath, dest_path: PurePath, file_path: Unio
     For example, convert /usr/mydir and /usr/mydir/myfile and /tmp to /tmp/myfile
     @param src_path: source path that is a parent of file_path
     @param dest_path: destination path
-    @param file_path: filename that is in under the source path
+    @param file_path: filename that is under the source path
     @return: a new path with the filename relative to the destination path
     """
     rel_path = file_path.relative_to(src_path)
