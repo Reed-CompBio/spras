@@ -101,13 +101,8 @@
 
  analysis:
         summary:
-
           include: true
-
         graphspace:
-
           include: true
-        
         cytoscape:
-
-          include: true
+          include: false
