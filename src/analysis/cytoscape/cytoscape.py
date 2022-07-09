@@ -13,12 +13,12 @@ def run_cytoscape_container(pathways: List[Union[str, PurePath]], out_dir: str) 
     '''
     print(out_dir)
 
-    work_dir        = '/spras'
-    root            = Path(__file__).parent.parent.parent.parent.absolute()
+    work_dir = '/spras'
+    root = Path(__file__).parent.parent.parent.parent.absolute()
 
-    output_dir      = os.path.join(root, out_dir)
+    output_dir = os.path.join(root, out_dir)
     volumes = {
-        output_dir : {'bind': '/spras/'+out_dir, 'mode': 'rw'}
+        output_dir: {'bind': '/spras/' + out_dir, 'mode': 'rw'}
     }
 
     command = ['python', 'cytoscape_util.py', '--outdir', out_dir]
@@ -38,7 +38,7 @@ def run_cytoscape_container(pathways: List[Union[str, PurePath]], out_dir: str) 
             stderr=True,
             stdout=True,
             volumes=volumes,
-            ports={'6080':6080},
+            ports={'6080': 6080},
             working_dir=work_dir,
             detach=True)
         output = container_output.attach(stdout=True, stream=True, logs=True)
