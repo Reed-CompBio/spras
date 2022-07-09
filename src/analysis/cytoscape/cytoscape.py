@@ -5,14 +5,12 @@ import docker
 
 
 def run_cytoscape_container(pathways: List[Union[str, PurePath]], out_dir: str) -> None:
-    '''
+    """
     1. take pathways and create volume mappings
-    2. setup wrapper command 
+    2. setup wrapper command
     3. link cytoscape src at runtime
-    
-    '''
-    print(out_dir)
 
+    """
     work_dir = '/spras'
     root = Path(__file__).parent.parent.parent.parent.absolute()
 
@@ -28,7 +26,6 @@ def run_cytoscape_container(pathways: List[Union[str, PurePath]], out_dir: str) 
     # Initialize a Docker client using environment variables
     client = docker.from_env()
 
-    print('run container')
     try:
         container_output = client.containers.run(
             'ajshedivy/py4cy:python',
