@@ -29,8 +29,9 @@ Confirm that the output files matches expectations.
 
 ### Step 2: Create a Local Neighborhood Docker image
 Complete the `Dockerfile` in the [`docker-wrappers/LocalNeighborhood`](docker-wrappers/LocalNeighborhood) directory to create a Docker image.
-The PathLinker `Dockerfile` demonstrates how to begin with a Python image and copy files in.
+The PathLinker `Dockerfile` demonstrates how to begin with a Python image and copy files into the image with `COPY`.
 Browse the official [Python images](https://hub.docker.com/_/python) to select a recent version of Python based on Alpine Linux, a small Linux distribution.
+Note that the PathLinker example uses an old verison of Python, but this Local Neighborhood Docker image should be based on a recent version of Python.
 The `Dockerfile` does not need an `ENTRYPOINT` or `CMD` line.
 It will be used to run a Python command.
 
