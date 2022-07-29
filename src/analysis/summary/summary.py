@@ -5,26 +5,22 @@ import pandas as pd
 #import json
 #wrapper functions for nx methods here
 
-def summarize_networks(file_paths, node_table):    
+def summarize_networks(file_paths, node_table):
     # Initialize list to store input nodes that have property data
     nodes_by_col = []
     # Save new labels
     nodes_by_col_labs = ("nodes in " + node_table.columns[1:]).tolist()
     # Iterate through each node property column
-    for node_property in range(1,len(node_table.columns)):
+    for col in node_table.columns[1:]:
         # If the property contains numeric data, save the nodes with property values that are not NA and > 0
-        if pd.api.types.is_numeric_dtype(node_table.iloc[:,node_property]):
-            nodes_by_col.append(node_table.loc[node_table.iloc[:,node_property].notna() &
-                                               node_table.iloc[:,node_property] > 0, 'NODEID'].tolist())
         # If the property contains boolean data, save the nodes with property values that are True
-        else:
-            nodes_by_col.append(node_table.loc[node_table.iloc[:,node_property] == True, 'NODEID'].tolist())
+        nodes_by_col.append(set(node_table.loc[node_table[col] > 0, "NODEID"]))
 
     # Initialize list to store network summary data
     nw_info = []
     
     # Iterate through each network file path
-    for idx, file_path in enumerate(file_paths):
+    for file_path in file_paths:
         # Load in the network
         nw = nx.read_edgelist(file_path)
         # Save the network name, number of nodes, number edges, and number of connected components
@@ -32,21 +28,27 @@ def summarize_networks(file_paths, node_table):
         number_nodes = nw.number_of_nodes()
         number_edges = nw.number_of_edges()
         ncc = nx.number_connected_components(nw)
-        nw_info.append([nw_name,
-                        number_nodes,
-                        number_edges,
-                        ncc])
-        
+        # Initialize list to store current network information
+        cur_nw_info = [nw_name, number_nodes, number_edges, ncc]
         # Iterate through each node property and save the intersection with the current network
         for node_list in nodes_by_col:
-            num_nodes = len([node for node in list(nw) if node in node_list])
-            nw_info[idx].append(num_nodes)
-    
+            num_nodes = len(set(nw).intersection(node_list))
+            cur_nw_info.append(num_nodes)
+        # Save the current network information to the network summary list
+        nw_info.append(cur_nw_info)
+
     # Convert the network summary data to pandas dataframe
-    nw_info = pd.DataFrame(nw_info, columns = ['name',
-                                               'number of nodes',
-                                               'number of edges',
-                                               'number of connected components'] + nodes_by_col_labs)
+    nw_info = pd.DataFrame(
+        nw_info,
+        columns = [
+            "name",
+            "number of nodes",
+            "number of edges",
+            "number of connected components"
+            ]
+        +
+        nodes_by_col_labs
+    )
     return nw_info
 
 def degree(G):
