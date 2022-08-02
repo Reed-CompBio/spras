@@ -20,9 +20,15 @@ def summarize_networks(file_paths, node_table):
     nw_info = []
     
     # Iterate through each network file path
+    file_paths.sort()
     for file_path in file_paths:
         # Load in the network
-        nw = nx.read_edgelist(file_path)
+        with open(file_path) as f:
+            line = f.readline()
+        if len(line.split('\t')) == 2:
+            nw = nx.read_edgelist(file_path)
+        else:
+            nw = nx.read_weighted_edgelist(file_path)
         # Save the network name, number of nodes, number edges, and number of connected components
         nw_name = os.path.basename(file_path)
         number_nodes = nw.number_of_nodes()
