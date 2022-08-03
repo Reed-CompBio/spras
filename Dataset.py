@@ -91,6 +91,7 @@ class Dataset:
             # TODO may want to warn about duplicate  before removing them, for instance, if a user loads two files that
             #  both have prizes
             self.node_table = self.node_table.merge(single_node_table, how="left", on=self.NODE_ID, suffixes=(None, "_DROP")).filter(regex="^(?!.*DROP)")
+        self.node_table.insert(0, "NODEID", self.node_table.pop("NODEID"))
         self.other_files = dataset_dict["other_files"]
 
     def request_node_columns(self, col_names):

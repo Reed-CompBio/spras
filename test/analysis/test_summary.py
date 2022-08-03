@@ -16,16 +16,16 @@ if not os.path.isdir("test/analysis/output"):
 
 # Toy networks
 toy_network_files = glob("test/analysis/input/toy/*")
-toy_node_table = pd.read_csv("test/analysis/input/toy_node_table.csv")
-summarize_networks(toy_network_files, toy_node_table).to_csv("test/analysis/output/toy_summary.csv", index = False)
+toy_node_table = pd.read_csv("test/analysis/input/toy_node_table.txt", sep = "\t")
+assert summarize_networks(toy_network_files, toy_node_table).equals(pd.read_csv("test/analysis/output/toy_summary.txt", sep = "\t"))
 
 # Test data from example workflow:
 example_network_files = glob("test/analysis/input/example/*")
-example_node_table = pd.read_csv("test/analysis/input/example_node_table.csv")
-summarize_networks(example_network_files, example_node_table).to_csv("test/analysis/output/example_summary.csv", index = False)
+example_node_table = pd.read_csv("test/analysis/input/example_node_table.txt", sep = "\t")
+assert summarize_networks(example_network_files, example_node_table).equals(pd.read_csv("test/analysis/output/example_summary.txt", sep = "\t"))
 
 
 # Test data from EGFR workflow:
 egfr_network_files = glob("test/analysis/input/egfr/*")
-egfr_node_table = pd.read_csv("test/analysis/input/egfr_node_table.csv")
-summarize_networks(egfr_network_files, egfr_node_table).to_csv("test/analysis/output/egfr_summary.csv", index = False)
+egfr_node_table = pd.read_csv("test/analysis/input/egfr_node_table.txt", sep = "\t")
+assert summarize_networks(egfr_network_files, egfr_node_table).equals(pd.read_csv("test/analysis/output/egfr_summary.txt", sep = "\t"))

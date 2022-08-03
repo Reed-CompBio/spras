@@ -6,12 +6,15 @@ import pandas as pd
 #wrapper functions for nx methods here
 
 def summarize_networks(file_paths, node_table):
+    # Ensure that NODEID is the first column
+    assert node_table.columns[0] == "NODEID"
     # Initialize list to store input nodes that have property data
     nodes_by_col = []
     # Save new labels
-    nodes_by_col_labs = ("nodes in " + node_table.columns[1:]).tolist()
+    nodes_by_col_labs = ("Nodes in " + node_table.columns[1:]).tolist()
     # Iterate through each node property column
     for col in node_table.columns[1:]:
+        # Assumption: property columns only contain NA, boolean, numeric data
         # If the property contains numeric data, save the nodes with property values that are not NA and > 0
         # If the property contains boolean data, save the nodes with property values that are True
         nodes_by_col.append(set(node_table.loc[node_table[col] > 0, "NODEID"]))
@@ -23,12 +26,7 @@ def summarize_networks(file_paths, node_table):
     file_paths.sort()
     for file_path in file_paths:
         # Load in the network
-        with open(file_path) as f:
-            line = f.readline()
-        if len(line.split('\t')) == 2:
-            nw = nx.read_edgelist(file_path)
-        else:
-            nw = nx.read_weighted_edgelist(file_path)
+        nw = nx.read_weighted_edgelist(file_path)
         # Save the network name, number of nodes, number edges, and number of connected components
         nw_name = os.path.basename(file_path)
         number_nodes = nw.number_of_nodes()
@@ -47,10 +45,10 @@ def summarize_networks(file_paths, node_table):
     nw_info = pd.DataFrame(
         nw_info,
         columns = [
-            "name",
-            "number of nodes",
-            "number of edges",
-            "number of connected components"
+            "Name",
+            "Number of nodes",
+            "Number of edges",
+            "Number of connected components"
             ]
         +
         nodes_by_col_labs
