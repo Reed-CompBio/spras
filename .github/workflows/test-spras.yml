@@ -60,7 +60,7 @@ jobs:
       run: python -m test.analysis.test_summary
     - name: Run Snakemake workflow
       shell: bash --login {0}
-      run: snakemake --cores 2 --configfile config/config.yaml
+      run: snakemake --cores 2 --configfile config/config.yaml --show-failed-logs
 
   # Builds the Docker images
   docker:
