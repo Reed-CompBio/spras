@@ -34,9 +34,7 @@ def summarize_networks(file_paths, node_table):
         # Load in the network
         nw = nx.read_weighted_edgelist(file_path)
         # Save the network name, number of nodes, number edges, and number of connected components
-        # TODO Decide how to represent the pathway name in the table, in the workflow pathways have the same basename
         nw_name = str(file_path)
-        #nw_name = os.path.basename(file_path)
         number_nodes = nw.number_of_nodes()
         number_edges = nw.number_of_edges()
         ncc = nx.number_connected_components(nw)

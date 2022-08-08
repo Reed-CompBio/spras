@@ -55,9 +55,6 @@ jobs:
       shell: bash --login {0}
       # Verbose output and disable stdout and stderr capturing
       run: pytest -vs
-    - name: Test summary
-      shell: bash --login {0}
-      run: python -m test.analysis.test_summary
     - name: Run Snakemake workflow
       shell: bash --login {0}
       run: snakemake --cores 2 --configfile config/config.yaml --show-failed-logs
