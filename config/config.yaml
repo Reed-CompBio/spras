@@ -100,10 +100,9 @@
          run: true
 
  analysis:
+        # Create one summary per pathway file and a single summary table for all pathways for each dataset
         summary:
-
           include: true
 
         graphspace:
-
           include: true

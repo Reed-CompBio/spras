@@ -59,8 +59,11 @@ def make_final_input(wildcards):
 
     #TODO analysis could be parsed in the parse_config() function.
     if config["analysis"]["summary"]["include"]:
-        # add summary output file.
+        # add summary output file for each pathway
         final_input.extend(expand('{out_dir}{sep}{dataset}-{algorithm_params}{sep}summary.txt',out_dir=out_dir,sep=SEP,dataset=dataset_labels,algorithm_params=algorithms_with_params))
+        # add table summarizing all pathways for each dataset
+        final_input.extend(expand('{out_dir}{sep}{dataset}-pathway-summary.txt',out_dir=out_dir,sep=SEP,dataset=dataset_labels))
+
 
     if config["analysis"]["graphspace"]["include"]:
         # add graph and style JSON files.
@@ -201,8 +204,8 @@ rule parse_output:
     run:
         PRRunner.parse_output(wildcards.algorithm, input.raw_file, output.standardized_file)
 
-# Collect Summary Statistics
-rule summarize:
+# Collect summary statistics for a single pathway
+rule summarize_pathway:
     input:
         standardized_file = SEP.join([out_dir, '{dataset}-{algorithm}-{params}', 'pathway.txt'])
     output:
@@ -218,6 +221,18 @@ rule viz_graphspace:
         style_json = SEP.join([out_dir, '{dataset}-{algorithm}-{params}', 'gsstyle.json'])
     run:
         graphspace.write_json(input.standardized_file,output.graph_json,output.style_json,directed=algorithm_directed[wildcards.algorithm])
+
+# Write a single summary table for all pathways for each dataset
+rule summary_table:
+    input:
+        # Collect all pathways generated for the dataset
+        pathways = expand('{out_dir}{sep}{dataset}-{algorithm_params}{sep}pathway.txt', out_dir=out_dir, sep=SEP, algorithm_params=algorithms_with_params),
+        dataset_file = SEP.join([out_dir, '{dataset}-merged.pickle'])
+    output: summary_table = SEP.join([out_dir, '{dataset}-pathway-summary.txt'])
+    run:
+        # TODO get the node table from the pickle file
+        # load node_table from dataset_file
+        summary.summarize_networks(pathways, node_table)
 
 # Remove the output directory
 rule clean:
