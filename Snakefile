@@ -2,6 +2,7 @@ import os
 import PRRunner
 import shutil
 import yaml
+from Dataset import Dataset
 from src.util import process_config
 from src.analysis.summary import summary
 from src.analysis.viz import graphspace
@@ -226,13 +227,15 @@ rule viz_graphspace:
 rule summary_table:
     input:
         # Collect all pathways generated for the dataset
-        pathways = expand('{out_dir}{sep}{dataset}-{algorithm_params}{sep}pathway.txt', out_dir=out_dir, sep=SEP, algorithm_params=algorithms_with_params),
+        pathways = expand('{out_dir}{sep}{{dataset}}-{algorithm_params}{sep}pathway.txt', out_dir=out_dir, sep=SEP, algorithm_params=algorithms_with_params),
         dataset_file = SEP.join([out_dir, '{dataset}-merged.pickle'])
     output: summary_table = SEP.join([out_dir, '{dataset}-pathway-summary.txt'])
     run:
-        # TODO get the node table from the pickle file
-        # load node_table from dataset_file
-        summary.summarize_networks(pathways, node_table)
+        # Load the node table from the pickled dataset file
+        node_table = Dataset.from_file(input.dataset_file).node_table
+        summary_df = summary.summarize_networks(input.pathways, node_table)
+        # TODO decide whether to move the table writing inside the summarize_networks function
+        summary_df.to_csv(output.summary_table, sep='\t', index=False)
 
 # Remove the output directory
 rule clean:

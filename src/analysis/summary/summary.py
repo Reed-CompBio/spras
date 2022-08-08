@@ -2,10 +2,17 @@ import sys
 import networkx as nx
 import os
 import pandas as pd
-#import json
 #wrapper functions for nx methods here
 
+
+# TODO complete the docstring
 def summarize_networks(file_paths, node_table):
+    """
+
+    @param file_paths:
+    @param node_table:
+    @return:
+    """
     # Ensure that NODEID is the first column
     assert node_table.columns[0] == "NODEID"
     # Initialize list to store input nodes that have property data
@@ -23,12 +30,13 @@ def summarize_networks(file_paths, node_table):
     nw_info = []
     
     # Iterate through each network file path
-    file_paths.sort()
-    for file_path in file_paths:
+    for file_path in sorted(file_paths):
         # Load in the network
         nw = nx.read_weighted_edgelist(file_path)
         # Save the network name, number of nodes, number edges, and number of connected components
-        nw_name = os.path.basename(file_path)
+        # TODO Decide how to represent the pathway name in the table, in the workflow pathways have the same basename
+        nw_name = str(file_path)
+        #nw_name = os.path.basename(file_path)
         number_nodes = nw.number_of_nodes()
         number_edges = nw.number_of_edges()
         ncc = nx.number_connected_components(nw)
@@ -54,6 +62,7 @@ def summarize_networks(file_paths, node_table):
         nodes_by_col_labs
     )
     return nw_info
+
 
 def degree(G):
     return dict(G.degree)
