@@ -1,8 +1,7 @@
 import pytest
 import pandas as pd
-import os
-from glob import glob
 from src.analysis.summary.summary import summarize_networks
+from pathlib import Path
 
 # Notes:
 # - Column labels are required
@@ -12,18 +11,27 @@ from src.analysis.summary.summary import summarize_networks
 class TestSummary:
 	# Toy networks
 	def test_toy_networks(self):
-		toy_network_files = glob("test/analysis/input/toy/*")
-		toy_node_table = pd.read_csv("test/analysis/input/toy_node_table.txt", sep = "\t")
-		assert summarize_networks(toy_network_files, toy_node_table).equals(pd.read_csv("test/analysis/output/toy_summary.txt", sep = "\t"))
+		toy_network_files = [file for file in Path("test/analysis/input/toy").glob("*.txt")]
+		toy_node_table = pd.read_csv(Path("test/analysis/input/toy_node_table.txt"), sep = "\t")
+		toy_output = pd.read_csv(Path("test/analysis/output/toy_summary.txt"), sep = "\t")
+		toy_output["Name"] = toy_output["Name"].map(convert_path)
+		assert summarize_networks(toy_network_files, toy_node_table).equals(toy_output)
 
 	# Test data from example workflow:
 	def test_example_networks(self):
-		example_network_files = glob("test/analysis/input/example/*")
-		example_node_table = pd.read_csv("test/analysis/input/example_node_table.txt", sep = "\t")
-		assert summarize_networks(example_network_files, example_node_table).equals(pd.read_csv("test/analysis/output/example_summary.txt", sep = "\t"))
+		example_network_files = [file for file in Path("test/analysis/input/example").glob("*.txt")]
+		example_node_table = pd.read_csv(Path("test/analysis/input/example_node_table.txt"), sep = "\t")
+		example_output = pd.read_csv(Path("test/analysis/output/example_summary.txt"), sep = "\t")
+		example_output["Name"] = example_output["Name"].map(convert_path)
+		assert summarize_networks(example_network_files, example_node_table).equals(example_output)
 
 	# Test data from EGFR workflow:
 	def test_egfr_networks(self):
-		egfr_network_files = glob("test/analysis/input/egfr/*")
-		egfr_node_table = pd.read_csv("test/analysis/input/egfr_node_table.txt", sep = "\t")
-		assert summarize_networks(egfr_network_files, egfr_node_table).equals(pd.read_csv("test/analysis/output/egfr_summary.txt", sep = "\t"))
+		egfr_network_files = [file for file in Path("test/analysis/input/egfr").glob("*.txt")]
+		egfr_node_table = pd.read_csv(Path("test/analysis/input/egfr_node_table.txt"), sep = "\t")
+		egfr_output = pd.read_csv(Path("test/analysis/output/egfr_summary.txt"), sep = "\t")
+		egfr_output["Name"] = egfr_output["Name"].map(convert_path)
+		assert summarize_networks(egfr_network_files, egfr_node_table).equals(egfr_output)
+
+def convert_path(file_path):
+	return str(Path(file_path))
