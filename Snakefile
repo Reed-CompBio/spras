@@ -234,7 +234,6 @@ rule summary_table:
         # Load the node table from the pickled dataset file
         node_table = Dataset.from_file(input.dataset_file).node_table
         summary_df = summary.summarize_networks(input.pathways, node_table)
-        # TODO decide whether to move the table writing inside the summarize_networks function
         summary_df.to_csv(output.summary_table, sep='\t', index=False)
 
 # Remove the output directory

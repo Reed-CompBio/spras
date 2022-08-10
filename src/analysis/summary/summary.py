@@ -2,7 +2,6 @@ import sys
 import networkx as nx
 import os
 import pandas as pd
-#wrapper functions for nx methods here
 
 
 # TODO complete the docstring
@@ -48,6 +47,7 @@ def summarize_networks(file_paths, node_table):
         nw_info.append(cur_nw_info)
 
     # Convert the network summary data to pandas dataframe
+    # Could refactor to create the dataframe line by line instead of storing data as lists and then converting
     nw_info = pd.DataFrame(
         nw_info,
         columns = [
