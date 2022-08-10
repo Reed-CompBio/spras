@@ -2,15 +2,17 @@ import sys
 import networkx as nx
 import os
 import pandas as pd
+from typing import Iterable
+from pathlib import Path
 
 
-# TODO complete the docstring
-def summarize_networks(file_paths, node_table):
+def summarize_networks(file_paths: Iterable[Path], node_table: pd.DataFrame) -> pd.DataFrame:
     """
-
-    @param file_paths:
-    @param node_table:
-    @return:
+    Generate a table that aggregates summary information about networks in file_paths, 
+    including which nodes are present in node_table columns.
+    @param file_paths: iterable of edge list files
+    @param node_table: pandas DataFrame containing node attributes
+    @return: pandas DataFrame with summary information
     """
     # Ensure that NODEID is the first column
     assert node_table.columns[0] == "NODEID"
