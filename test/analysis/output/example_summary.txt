@@ -1,4 +1,4 @@
-Name	Number of nodes	Number of edges	Number of connected components	Nodes in sources	Nodes in targets
+Name	Number of nodes	Number of undirected edges	Number of connected components	Nodes in sources	Nodes in targets
 test/analysis/input/example/data0-meo-params-GKEDDFZ_pathway.txt	3	2	1	1	1
 test/analysis/input/example/data0-omicsintegrator1-params-JAZWLAK_pathway.txt	0	0	0	0	0
 test/analysis/input/example/data0-omicsintegrator1-params-PU62FNV_pathway.txt	0	0	0	0	0

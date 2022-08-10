@@ -53,7 +53,7 @@ def summarize_networks(file_paths, node_table):
         columns = [
             "Name",
             "Number of nodes",
-            "Number of edges",
+            "Number of undirected edges",
             "Number of connected components"
             ]
         +
