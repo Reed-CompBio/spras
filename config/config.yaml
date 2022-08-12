@@ -100,9 +100,12 @@
          run: true
 
  analysis:
+        # Create one summary per pathway file and a single summary table for all pathways for each dataset
         summary:
           include: true
+        # Create output files for each pathway that can be visualized with GraphSpace
         graphspace:
           include: true
+        # Create Cytoscape session file with all pathway graphs
         cytoscape:
           include: true

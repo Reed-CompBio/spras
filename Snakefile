@@ -3,6 +3,7 @@ import PRRunner
 import shutil
 import yaml
 import sys
+from Dataset import Dataset
 from src.util import process_config
 from src.analysis.summary import summary
 from src.analysis.viz import graphspace
@@ -62,8 +63,11 @@ def make_final_input(wildcards):
 
     #TODO analysis could be parsed in the parse_config() function.
     if config["analysis"]["summary"]["include"]:
-        # add summary output file.
+        # add summary output file for each pathway
         final_input.extend(expand('{out_dir}{sep}{dataset}-{algorithm_params}{sep}summary.txt',out_dir=out_dir,sep=SEP,dataset=dataset_labels,algorithm_params=algorithms_with_params))
+        # add table summarizing all pathways for each dataset
+        final_input.extend(expand('{out_dir}{sep}{dataset}-pathway-summary.txt',out_dir=out_dir,sep=SEP,dataset=dataset_labels))
+
 
     if config["analysis"]["graphspace"]["include"]:
         # add graph and style JSON files.
@@ -208,8 +212,8 @@ rule parse_output:
     run:
         PRRunner.parse_output(wildcards.algorithm, input.raw_file, output.standardized_file)
 
-# Collect Summary Statistics
-rule summarize:
+# Collect summary statistics for a single pathway
+rule summarize_pathway:
     input:
         standardized_file = SEP.join([out_dir, '{dataset}-{algorithm}-{params}', 'pathway.txt'])
     output:
@@ -217,7 +221,7 @@ rule summarize:
     run:
         summary.run(input.standardized_file,output.summary_file,directed=algorithm_directed[wildcards.algorithm])
 
-# Write GraphSpace JSON Graphs
+# Write GraphSpace JSON graphs
 rule viz_graphspace:
     input: standardized_file = SEP.join([out_dir, '{dataset}-{algorithm}-{params}', 'pathway.txt'])
     output:
@@ -226,6 +230,8 @@ rule viz_graphspace:
     run:
         graphspace.write_json(input.standardized_file,output.graph_json,output.style_json,directed=algorithm_directed[wildcards.algorithm])
 
+
+# Write Cytoscape session file with all pathways
 rule viz_cytoscape:
     input: pathways = expand('{out_dir}{sep}{dataset}-{algorithm_params}{sep}pathway.txt', out_dir=out_dir, sep=SEP, dataset=dataset_labels, algorithm_params=algorithms_with_params)
 
@@ -233,6 +239,21 @@ rule viz_cytoscape:
         session = SEP.join([out_dir, 'cytoscape-session.cys'])
     run:
         cytoscape.run_cytoscape_container(input.pathways, out_dir)
+
+
+# Write a single summary table for all pathways for each dataset
+rule summary_table:
+    input:
+        # Collect all pathways generated for the dataset
+        pathways = expand('{out_dir}{sep}{{dataset}}-{algorithm_params}{sep}pathway.txt', out_dir=out_dir, sep=SEP, algorithm_params=algorithms_with_params),
+        dataset_file = SEP.join([out_dir, '{dataset}-merged.pickle'])
+    output: summary_table = SEP.join([out_dir, '{dataset}-pathway-summary.txt'])
+    run:
+        # Load the node table from the pickled dataset file
+        node_table = Dataset.from_file(input.dataset_file).node_table
+        summary_df = summary.summarize_networks(input.pathways, node_table)
+        summary_df.to_csv(output.summary_table, sep='\t', index=False)
+
 
 # Remove the output directory
 rule clean:
