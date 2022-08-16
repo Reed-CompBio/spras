@@ -36,15 +36,38 @@ def allpairs(network_file: Path, nodes_file: Path, output_file: Path):
     output_file.parent.mkdir(parents=True, exist_ok=True)
 
     # Read the list of nodes
-    nodes = set()
+    graph = nx.Graph()
+    sources = set()
+    targets = set()
     with nodes_file.open() as nodes_f:
         for line in nodes_f:
-            nodes.add(line.strip())
-    print(f"Read {len(nodes)} unique nodes")
+            row = line.strip().split()
+            if row[1] == 'source':
+                sources.add(row[0])
+            elif row[1] == 'target':
+                targets.add(row[0])
 
-    path = nx.all_pairs_shortest_path(network_file, cutoff=None)
-    print(path)
-    nx.write_edgelist(path, output_file)
+
+    with network_file.open() as net_f:
+        for line in net_f:
+            if line[0] == '#':
+                continue
+            e = line.strip().split()
+            print(e)
+            graph.add_edge(e[0], e[1])
+
+    print(graph)
+
+    output = nx.Graph()
+    for source in sources:
+            p = nx.single_source_shortest_path(graph, source, cutoff=None)
+            for target in targets:
+                print(source, target, p[target])
+                nx.add_path(output, p[target])
+                print(output)
+
+    nx.write_edgelist(output, output_file, data=False)
+    print(output)
     print(f"Wrote output file to {str(output_file)}")
 
 
