@@ -37,7 +37,7 @@ def run_cytoscape_container(pathways: List[Union[str, PurePath]], out_dir: str) 
     container_framework = 'docker'
     # TODO set name, set remove=True?
     out = run_container(container_framework,
-                        'ajshedivy/py4cy:python', # TODO switch to reedcompbio
+                        'reedcompbio/py4cytoscape',
                         command,
                         volumes,
                         work_dir)
