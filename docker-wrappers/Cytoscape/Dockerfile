@@ -29,4 +29,4 @@ RUN cd /cytoscape-unix-${CYTOSCAPE_VERSION}/framework/system/org/cytoscape/prope
 RUN echo 'JAVA_HOME="/usr/lib/jvm/java-11-openjdk-amd64"' >> /etc/environment
 
 COPY supervisord.conf /etc/supervisor/conf.d/supervisord.conf
-COPY cytoscape_util.py /spras/cytoscape_util.py
+COPY cytoscape_util.py /py4cytoscape/cytoscape_util.py
