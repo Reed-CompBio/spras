@@ -2,7 +2,6 @@ import os
 import PRRunner
 import shutil
 import yaml
-import sys
 from Dataset import Dataset
 from src.util import process_config
 from src.analysis.summary import summary
@@ -12,7 +11,6 @@ from src.analysis.cytoscape import cytoscape
 # Snakemake updated the behavior in the 6.5.0 release https://github.com/snakemake/snakemake/pull/1037
 # and using the wrong separator prevents Snakemake from matching filenames to the rules that can produce them
 SEP = '/'
-ROOT = os.path.abspath(__file__)
 
 wildcard_constraints:
     params="params-\w+"
@@ -85,7 +83,6 @@ def make_final_input(wildcards):
     # Create log files for the parameters and datasets
     final_input.extend(expand('{out_dir}{sep}logs{sep}parameters-{algorithm_params}.yaml', out_dir=out_dir, sep=SEP, algorithm_params=algorithms_with_params))
     final_input.extend(expand('{out_dir}{sep}logs{sep}datasets-{dataset}.yaml', out_dir=out_dir, sep=SEP, dataset=dataset_labels))
-
 
     return final_input
 
@@ -231,10 +228,9 @@ rule viz_graphspace:
         graphspace.write_json(input.standardized_file,output.graph_json,output.style_json,directed=algorithm_directed[wildcards.algorithm])
 
 
-# Write Cytoscape session file with all pathways
+# Write Cytoscape session file with all pathways for all datasets
 rule viz_cytoscape:
     input: pathways = expand('{out_dir}{sep}{dataset}-{algorithm_params}{sep}pathway.txt', out_dir=out_dir, sep=SEP, dataset=dataset_labels, algorithm_params=algorithms_with_params)
-
     output: 
         session = SEP.join([out_dir, 'cytoscape-session.cys'])
     run:
