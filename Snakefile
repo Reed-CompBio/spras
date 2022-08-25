@@ -5,8 +5,7 @@ import yaml
 from Dataset import Dataset
 from src.util import process_config
 from src.analysis.summary import summary
-from src.analysis.viz import graphspace
-from src.analysis.cytoscape import cytoscape
+from src.analysis.viz import graphspace, cytoscape
 
 # Snakemake updated the behavior in the 6.5.0 release https://github.com/snakemake/snakemake/pull/1037
 # and using the wrong separator prevents Snakemake from matching filenames to the rules that can produce them
