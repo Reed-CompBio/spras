@@ -19,20 +19,30 @@ def get_parser() -> argparse.ArgumentParser:
         description='Visualize pathway files from SPRAS.')
 
     parser.add_argument(
-        "--files",
-        dest='files',
+        "--pathway",
+        dest='pathways',
         type=str,
         action='append',
-        required=True
+        required=True,
+        help='The path to a pathway file. Add the argument multiple times to visualize multiple pathways. '
+             'Optionally use a | to append a label for the pathway such as path/to/file.txt|pathway_label'
     )
 
     parser.add_argument(
         "--outdir",
         dest='outdir',
         type=str,
-        default='output'
+        default='output',
+        help='The output directory of the session file. Default: output'
     )
 
+    parser.add_argument(
+        "--outlabel",
+        dest='outlabel',
+        type=str,
+        default='cytoscape-session',
+        help='The output filename of the session file, which will have the extension .cys. Default: cytoscape-session'
+    )
     return parser
 
 
@@ -74,25 +84,41 @@ def start_remote_cytoscape() -> None:
             time.sleep(SLEEP_INTERVAL)
 
 
-def load_pathways(files: List[str], out_dir: str) -> None:
-    if len(files) == 0:
+def parse_name(pathway: str) -> (str, str):
+    """
+    Extract the optional label from the pathway argument
+    @param pathway: the command line pathway argument, which may contain a | separated label
+    @return: a tuple with the file path and the label
+    """
+    parts = pathway.split('|')
+    # No label provided or empty label provided so the file path is the label
+    if len(parts) == 1 or len(parts[1]) == 0:
+        return parts[0], parts[0]
+    # A valid label was provided
+    else:
+        return parts[0], parts[1]
+
+
+def load_pathways(pathways: List[str], out_dir: str, out_label: str) -> None:
+    if len(pathways) == 0:
         raise ValueError('One or more pathway files are required')
 
     start_remote_cytoscape()
-    for file in files:
+    for pathway in pathways:
+        path, name = parse_name(pathway)
         suid = p4c.networks.import_network_from_tabular_file(
-            file=file,
+            file=path,
             column_type_list="s,t,x",
             delimiters=" "
         )
-        p4c.networks.rename_network(file, network=suid)
+        p4c.networks.rename_network(name, network=suid)
 
-    p4c.session.save_session(os.path.join(out_dir, 'cytoscape-session'))
+    p4c.session.save_session(os.path.join(out_dir, out_label))
 
 
 def main():
     opts = parse_arguments()
-    load_pathways(opts.files, opts.outdir)
+    load_pathways(opts.pathways, opts.outdir, opts.outlabel)
 
 
 if __name__ == '__main__':

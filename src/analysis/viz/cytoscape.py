@@ -21,14 +21,15 @@ def run_cytoscape_container(pathways: List[Union[str, PurePath]], out_dir: str) 
 
     # Create the initial part of the Python command to run inside the container
     command = ['python', '/py4cytoscape/cytoscape_util.py',
-               '--outdir', out_dir]
+               '--outdir', out_dir,
+               '--outlabel', 'cytoscape-session']
 
     # Map the pathway filenames and add them to the Python command
-    # TODO need a way to preserve the original pathway names in Cytoscape
     for pathway in pathways:
         bind_path, mapped_pathway = prepare_volume(pathway, work_dir)
         volumes.append(bind_path)
-        command.extend(['--files', mapped_pathway])
+        # Provided the mapped pathway file path and the original file path as the label Cytoscape
+        command.extend(['--pathway', f'{mapped_pathway}|{pathway}'])
 
     print('Running Cytoscape with arguments: {}'.format(' '.join(command)), flush=True)
 
