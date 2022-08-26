@@ -54,17 +54,15 @@ def allpairs(network_file: Path, nodes_file: Path, output_file: Path):
                 continue
             e = line.strip().split()
             print(e)
-            graph.add_edge(e[0], e[1])
+            graph.add_edge(e[0], e[1], weight=float(e[2]))
 
     print(graph)
 
     output = nx.Graph()
     for source in sources:
-            p = nx.single_source_shortest_path(graph, source, cutoff=None)
-            for target in targets:
-                print(source, target, p[target])
-                nx.add_path(output, p[target])
-                print(output)
+        for target in targets:
+            p = nx.shortest_path(graph, source, target, weight=None)
+            nx.add_path(output, p)
 
     nx.write_edgelist(output, output_file, data=False)
     print(output)
