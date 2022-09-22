@@ -44,7 +44,10 @@ class PathLinker(PRM):
 
     # Skips parameter validation step
     @staticmethod
-    def run(nodetypes=None, network=None, output_file=None, k=None, singularity=False):
+    def run(nodetypes=None, network=None, output_file=None, k=None, singularity=False): # snakemake will pass the edges, sources, and targets, args will be from required inputs
+       
+       #flow capacity (optional ish) and output file needed 
+       
         """
         Run PathLinker with Docker
         @param nodetypes:  input node types with sources and targets (required)
@@ -58,49 +61,60 @@ class PathLinker(PRM):
         # Use the PathLinker default
         # Could consider setting the default here instead
         if not nodetypes or not network or not output_file:
-            raise ValueError('Required PathLinker arguments are missing')
+            raise ValueError('Required PathLinker arguments are missing') #error checks the None and makes sure it is not None
 
-        work_dir = '/spras'
+        work_dir = '/spras' #make this the working directory so the data files are mapped within the container
 
-        # Each volume is a tuple (src, dest)
+        # Each volume is a tuple (src, dest) 
+        #the volume mapping for edges, sources, and targets
         volumes = list()
 
-        bind_path, node_file = prepare_volume(nodetypes, work_dir)
-        volumes.append(bind_path)
+        bind_path, node_file = prepare_volume(nodetypes, work_dir) #prepare volume will map the nodetypes whereever it may be
+        volumes.append(bind_path) #all pairs of source and target path (need for sources, targets, and edges)
+        #node_file = working directory/iafbejkb/nodes.txt (which is nodetypes)
+        #track the path source file
 
         bind_path, network_file = prepare_volume(network, work_dir)
-        volumes.append(bind_path)
+        volumes.append(bind_path) 
 
         # PathLinker does not provide an argument to set the output directory
         # Use its --output argument to set the output file prefix to specify an absolute path and prefix
         out_dir = Path(output_file).parent
         # PathLinker requires that the output directory exist
         out_dir.mkdir(parents=True, exist_ok=True)
-        bind_path, mapped_out_dir = prepare_volume(str(out_dir), work_dir)
+        bind_path, mapped_out_dir = prepare_volume(str(out_dir), work_dir) # take the name I put in and do more volume mapping
         volumes.append(bind_path)
         mapped_out_prefix = mapped_out_dir + '/out'  # Use posix path inside the container
 
+        #this is the python command to run the command in the container
         command = ['python',
-                   '/PathLinker/run.py',
+                   '/PathLinker/run.py', #MinCostFlow/mincostflow.py
                    network_file,
                    node_file,
-                   '--output', mapped_out_prefix]
+                   '--output', mapped_out_prefix] 
 
-        # Add optional argument
+        # Add optional argument 
+        # add for flow and capacity 
         if k is not None:
             command.extend(['-k', str(k)])
 
+        # debugging
         print('Running PathLinker with arguments: {}'.format(' '.join(command)), flush=True)
 
         # TODO consider making this a string in the config file instead of a Boolean
         container_framework = 'singularity' if singularity else 'docker'
+        #constructs a docker run call
         out = run_container(container_framework,
-                            'reedcompbio/pathlinker',
-                            command,
-                            volumes,
-                            work_dir)
+                            'reedcompbio/pathlinker', # ntalluri2/mincostflow
+                            command, # command from before
+                            volumes, # list of volumes I built
+                            work_dir) #/mincostflow
+        
+        # output of the executable script 
         print(out)
+        # helpers in util.py
 
+        #mincostflow lets us name things, so we don't need this
         # Rename the primary output file to match the desired output filename
         # Currently PathLinker only writes one output file so we do not need to delete others
         # We may not know the value of k that was used

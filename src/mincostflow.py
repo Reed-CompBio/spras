@@ -16,15 +16,14 @@ class MinCostFlow (PRM):
                 raise ValueError(f"{input_type} filename is missing")
 
         for node_type in ['sources', 'targets']:
-            nodes = data.request_node_columns([node_type])
+            nodes = data.request_node_columns([node_type]) #has one column
             if nodes is None:
                 raise ValueError(f'No {node_type} found in the node files')
             
-            nodes = nodes.loc[nodes[node_type]]
+            nodes = nodes.loc[nodes[node_type]] # take nodes one column data frame, call sources/ target series/ vector
             nodes.to_csv(filename_map[node_type], index=False, columns=['NODEID'], header=False)
 
         edges = data.get_interactome()
-        # edges.insert(1, 'EdgeType', '(pp)') what does this do? do I need this?
         edges.to_csv(filename_map['edges'], sep='\t', index=False, columns=['Interactor1', 'Interactor2', 'Weight'], header=False)
 
 
