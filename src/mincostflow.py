@@ -28,22 +28,25 @@ class MinCostFlow (PRM):
 
         # create the network of edges 
         edges = data.get_interactome()
-        # creates the edges files that contains the head and tail nodes and the weights between them
+        # creates the edges files that contains the head and tail nodes and the weights after them
         edges.to_csv(filename_map['edges'], sep='\t', index=False, columns=['Node1', 'Node2', 'Weight'], header=False)
 
     @staticmethod
     def run (sources = None, targets = None, edges= None, output = None, flow = None, capacity = None, singularity=False):
         
+        # ensures that these parameters are required
         if not sources or not targets or not edges or not output:
             raise ValueError('Required PathLinker arguments are missing')
 
+        # the data files will be mapped within this directory within the container
         work_dir = '/mincostflow'
 
+        # the tuple is for mapping the sources, targets, edges, and output 
         volumes = list()
 
         # required arguments 
 
-        bind_path, sources_file = prepare_volume(sources, work_dir)
+        bind_path, sources_file = prepare_volume(sources, work_dir) # sources_file = workingdirectory/joiefhowihfj/sources.txt (which is sources)
         volumes.append(bind_path)
 
         bind_path, targets_file = prepare_volume(targets, work_dir)
@@ -55,7 +58,7 @@ class MinCostFlow (PRM):
         bind_path, output_file = prepare_volume(output, work_dir)
         volumes.append(bind_path)
 
-        # makes the command
+        # makes the python command to run within in the container
         command = ['python',
                     'MinCostFlow/mincostflow.py',
                     sources_file,
@@ -63,23 +66,28 @@ class MinCostFlow (PRM):
                     edges_file,
                     output_file]
 
-        #optional arguments
+        #optional arguments (extend the command if available)
 
         if flow is not None:
             command.extend (['--flow', str(flow)])
         if capacity is not None:
             command.extend (['--capacity', str(capacity)])
 
+        # choosing to run in docker or sigularity container
         container_framework = 'singularity' if singularity else 'docker'
 
+        # constructs a docker run call 
         out = run_container(container_framework,
                             'ntalluri/mincostflow',
                             command, 
                             volumes, 
                             work_dir)
 
+        # output of the executable script
         print(out)
 
     @staticmethod
-    def parse_output():
-        None
+    def parse_output(raw_pathway_file, standardized_pathway_file):
+        
+        df = pd.read_csv(raw_pathway_file, sep = '\t')
+        df.to_csv (standardized_pathway_file, header=False, index=False, sep='\t')
