@@ -10,6 +10,11 @@ class MinCostFlow (PRM):
 
     @staticmethod
     def generate_inputs(data, filename_map):
+        """
+        Access fields from the dataset and write the required input files
+        @param data: dataset
+        @param filename_map: a dict mapping file types in the required_inputs to the filename for that type
+        """
         
         # ensures the required input are within the filename_map 
         for input_type in MinCostFlow.required_inputs:
@@ -33,7 +38,17 @@ class MinCostFlow (PRM):
 
     @staticmethod
     def run (sources = None, targets = None, edges= None, output = None, flow = None, capacity = None, singularity=False):
-        
+        """
+        Run min cost flow with Docker (or singularity)
+        @param sources:  input sources (required)
+        @param targets: input targets (required)
+        @param edges:  input network file (required)
+        @param output: output file name (required)
+        @param flow: amount of flow going through the graph (optional)
+        @capacity: amount of capacity allowed on each edge (optional)
+        @param singularity: if True, run using the Singularity container instead of the Docker container
+        """
+
         # ensures that these parameters are required
         if not sources or not targets or not edges or not output:
             raise ValueError('Required PathLinker arguments are missing')
@@ -55,7 +70,7 @@ class MinCostFlow (PRM):
         bind_path, edges_file = prepare_volume (edges, work_dir)
         volumes.append(bind_path)
 
-        bind_path, output_file = prepare_volume(output, work_dir)
+        bind_path, output_file = prepare_volume(output, work_dir) # feel like this won't work because the output is a name not a file
         volumes.append(bind_path)
 
         # makes the python command to run within in the container
@@ -88,6 +103,11 @@ class MinCostFlow (PRM):
 
     @staticmethod
     def parse_output(raw_pathway_file, standardized_pathway_file):
+        """
+        Convert a predicted pathway into the universal format
+        @param raw_pathway_file: pathway file produced by an algorithm's run function
+        @param standardized_pathway_file: the same pathway written in the universal format
+        """
         
         df = pd.read_csv(raw_pathway_file, sep = '\t')
         df.to_csv (standardized_pathway_file, header=False, index=False, sep='\t')
