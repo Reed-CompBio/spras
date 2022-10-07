@@ -110,4 +110,5 @@ class MinCostFlow (PRM):
         """
         
         df = pd.read_csv(raw_pathway_file, sep = '\t')
-        df.to_csv (standardized_pathway_file, header=False, index=False, sep='\t')
+        df.insert(5, 'Rank', 1) # adds in a rank column of 1's
+        df.to_csv (standardized_pathway_file, header=False, index=False, sep=' ')
