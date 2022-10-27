@@ -1,3 +1,4 @@
+from codeop import CommandCompiler
 from src.PRM import PRM
 from pathlib import Path
 from src.util import prepare_volume, run_container
@@ -33,11 +34,12 @@ class MinCostFlow (PRM):
 
         # create the network of edges 
         edges = data.get_interactome()
+        
         # creates the edges files that contains the head and tail nodes and the weights after them
-        edges.to_csv(filename_map['edges'], sep='\t', index=False, columns=['Node1', 'Node2', 'Weight'], header=False)
+        edges.to_csv(filename_map['edges'], sep='\t',index=False, columns = ["Interactor1","Interactor2","Weight"], header=False) #removed columns and now it works columns = [Node1, Node2, Weight]
 
     @staticmethod
-    def run (sources = None, targets = None, edges= None, output = None, flow = None, capacity = None, singularity=False):
+    def run (sources = None, targets = None, edges= None, output_file = None, flow = None, capacity = None, singularity=False):
         """
         Run min cost flow with Docker (or singularity)
         @param sources:  input sources (required)
@@ -50,7 +52,7 @@ class MinCostFlow (PRM):
         """
 
         # ensures that these parameters are required
-        if not sources or not targets or not edges or not output:
+        if not sources or not targets or not edges or not output_file:
             raise ValueError('Required PathLinker arguments are missing')
 
         # the data files will be mapped within this directory within the container
@@ -60,7 +62,6 @@ class MinCostFlow (PRM):
         volumes = list()
 
         # required arguments 
-
         bind_path, sources_file = prepare_volume(sources, work_dir) # sources_file = workingdirectory/joiefhowihfj/sources.txt (which is sources)
         volumes.append(bind_path)
 
@@ -70,19 +71,21 @@ class MinCostFlow (PRM):
         bind_path, edges_file = prepare_volume (edges, work_dir)
         volumes.append(bind_path)
 
-        bind_path, output_file = prepare_volume(output, work_dir) # feel like this won't work because the output is a name not a file
+        out_dir = Path(output_file).parent
+        out_dir.mkdir(parents=True, exist_ok=True)
+        bind_path, mapped_out_dir = prepare_volume(str(out_dir), work_dir)
         volumes.append(bind_path)
-
+        mapped_out_prefix = mapped_out_dir + '/out'
+       
         # makes the python command to run within in the container
         command = ['python',
-                    'MinCostFlow/mincostflow.py',
-                    sources_file,
-                    targets_file,
-                    edges_file,
-                    output_file]
-
+                    '/MinCostFlow/minCostFlow.py',
+                    '--sources_file',sources_file,
+                    '--targets_file',targets_file,
+                    '--edges_file', edges_file,
+                    '--output', mapped_out_prefix]
+        
         #optional arguments (extend the command if available)
-
         if flow is not None:
             command.extend (['--flow', str(flow)])
         if capacity is not None:
@@ -93,13 +96,14 @@ class MinCostFlow (PRM):
 
         # constructs a docker run call 
         out = run_container(container_framework,
-                            'ntalluri/mincostflow',
+                            'ntalluri2/mincostflow',
                             command, 
-                            volumes, 
+                            volumes,
                             work_dir)
-
+  
         # output of the executable script
-        print(out)
+        output_edges = Path(next(out_dir.glob('*.sif')))
+        output_edges.rename(output_file)
 
     @staticmethod
     def parse_output(raw_pathway_file, standardized_pathway_file):
@@ -109,6 +113,6 @@ class MinCostFlow (PRM):
         @param standardized_pathway_file: the same pathway written in the universal format
         """
         
-        df = pd.read_csv(raw_pathway_file, sep = '\t')
-        df.insert(5, 'Rank', 1) # adds in a rank column of 1's
+        df = pd.read_csv(raw_pathway_file, sep = '\t', header=None)
+        df.insert(2, 'Rank', 1) # adds in a rank column of 1's
         df.to_csv (standardized_pathway_file, header=False, index=False, sep=' ')
