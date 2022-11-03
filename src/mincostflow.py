@@ -1,4 +1,3 @@
-from codeop import CommandCompiler
 from src.PRM import PRM
 from pathlib import Path
 from src.util import prepare_volume, run_container
@@ -36,7 +35,7 @@ class MinCostFlow (PRM):
         edges = data.get_interactome()
         
         # creates the edges files that contains the head and tail nodes and the weights after them
-        edges.to_csv(filename_map['edges'], sep='\t',index=False, columns = ["Interactor1","Interactor2","Weight"], header=False) #removed columns and now it works columns = [Node1, Node2, Weight]
+        edges.to_csv(filename_map['edges'], sep='\t',index=False, columns = ["Interactor1","Interactor2","Weight"], header=False)
 
     @staticmethod
     def run (sources = None, targets = None, edges= None, output_file = None, flow = None, capacity = None, singularity=False):
@@ -45,23 +44,22 @@ class MinCostFlow (PRM):
         @param sources:  input sources (required)
         @param targets: input targets (required)
         @param edges:  input network file (required)
-        @param output: output file name (required)
+        @param output_file: output file name (required)
         @param flow: amount of flow going through the graph (optional)
-        @capacity: amount of capacity allowed on each edge (optional)
+        @param capacity: amount of capacity allowed on each edge (optional)
         @param singularity: if True, run using the Singularity container instead of the Docker container
         """
 
         # ensures that these parameters are required
         if not sources or not targets or not edges or not output_file:
-            raise ValueError('Required PathLinker arguments are missing')
+            raise ValueError('Required MinCostFlow arguments are missing')
 
         # the data files will be mapped within this directory within the container
         work_dir = '/mincostflow'
 
         # the tuple is for mapping the sources, targets, edges, and output 
         volumes = list()
-
-        # required arguments 
+ 
         bind_path, sources_file = prepare_volume(sources, work_dir) # sources_file = workingdirectory/joiefhowihfj/sources.txt (which is sources)
         volumes.append(bind_path)
 
@@ -102,8 +100,17 @@ class MinCostFlow (PRM):
                             work_dir)
   
         # output of the executable script
-        output_edges = Path(next(out_dir.glob('*.sif')))
-        output_edges.rename(output_file)
+        out_dir_content = sorted(out_dir.glob('*.sif'))
+
+        print(type(out_dir_content))
+
+        if len(out_dir_content) == 1: 
+            output_edges = Path(next(out_dir.glob('*.sif')))
+            output_edges.rename(output_file)
+        elif len(out_dir_content) > 1: 
+            raise RuntimeError('min cost flow produced multiple output networks')
+        else: 
+            raise RuntimeError('min cost flow did not produce an output network')
 
     @staticmethod
     def parse_output(raw_pathway_file, standardized_pathway_file):
