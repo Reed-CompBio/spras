@@ -94,7 +94,7 @@ class MinCostFlow (PRM):
 
         # constructs a docker run call 
         out = run_container(container_framework,
-                            'ntalluri2/mincostflow',
+                            'reedcompbio/mincostflow',
                             command, 
                             volumes,
                             work_dir)
