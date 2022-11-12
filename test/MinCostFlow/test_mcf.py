@@ -6,8 +6,11 @@ from src.mincostflow import MinCostFlow
 TEST_DIR = 'test/MinCostFlow/'
 OUT_FILE = TEST_DIR+'output/mincostflow-output.txt'
 
+
 class TestMinCostFlow:
 
+    # Speed up the tests by only running this test on all input graphs
+    # The remaining tests run only on graph1
     @pytest.mark.parametrize('graph',['graph1', 'graph2','graph3','graph4'])
     def test_mincostflow_required(self, graph):
         out_path = Path(OUT_FILE)
@@ -18,9 +21,9 @@ class TestMinCostFlow:
             edges=TEST_DIR + 'input/' + graph + '/edges.txt',
             output_file=OUT_FILE)
         assert out_path.exists()
-        #TODO: assert for the output .equals expexcted_output 
+        #TODO: assert for the output .equals expected_output
 
-    @pytest.mark.parametrize('graph',['graph1', 'graph2','graph3','graph4'])
+    @pytest.mark.parametrize('graph',['graph1'])
     def test_mincostflow_missing_capacity(self, graph):
         out_path = Path(OUT_FILE)
         out_path.unlink(missing_ok=True)
@@ -32,7 +35,7 @@ class TestMinCostFlow:
             flow=1)
         assert out_path.exists()
 
-    @pytest.mark.parametrize('graph',['graph1', 'graph2','graph3','graph4'])
+    @pytest.mark.parametrize('graph',['graph1'])
     def test_mincostflow_missing_flow(self, graph):
         out_path = Path(OUT_FILE)
         out_path.unlink(missing_ok=True)
@@ -44,7 +47,7 @@ class TestMinCostFlow:
             capacity=1)
         assert out_path.exists()
 
-    @pytest.mark.parametrize('graph',['graph1', 'graph2','graph3','graph4'])
+    @pytest.mark.parametrize('graph',['graph1'])
     def test_mincostflow_too_much_flow(self,graph):
         out_path = Path(OUT_FILE)
         out_path.unlink(missing_ok=True)
@@ -58,7 +61,7 @@ class TestMinCostFlow:
                 capacity=1)
         
 
-    @pytest.mark.parametrize('graph',['graph1', 'graph2','graph3','graph4'])
+    @pytest.mark.parametrize('graph',['graph1'])
     def test_mincostflow_no_flow(self,graph):
         out_path = Path(OUT_FILE)
         out_path.unlink(missing_ok=True)
@@ -71,7 +74,7 @@ class TestMinCostFlow:
             capacity=1)
         assert out_path.exists()
 
-    @pytest.mark.parametrize('graph',['graph1', 'graph2','graph3','graph4'])
+    @pytest.mark.parametrize('graph',['graph1'])
     def test_mincostflow_all_optional(self, graph):
         out_path = Path(OUT_FILE)
         out_path.unlink(missing_ok=True)
@@ -85,7 +88,7 @@ class TestMinCostFlow:
             singularity=False)
         assert out_path.exists()
 
-    @pytest.mark.parametrize('graph',['graph1', 'graph2','graph3','graph4'])
+    @pytest.mark.parametrize('graph',['graph1'])
     def test_mincostflow_missing(self, graph):
         # Test the expected error is raised when required arguments are missing
         with pytest.raises(ValueError):
@@ -93,7 +96,7 @@ class TestMinCostFlow:
                 targets=TEST_DIR + 'input/' + graph + '/targets.txt',
                 output_file=OUT_FILE)
 
-    @pytest.mark.parametrize('graph',['graph1', 'graph2','graph3','graph4'])
+    @pytest.mark.parametrize('graph',['graph1'])
     @pytest.mark.skipif(not shutil.which('singularity'), reason='Singularity not found on system')
     def test_mincostflow_singularity(self, graph):
         out_path = Path(OUT_FILE)
