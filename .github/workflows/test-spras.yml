@@ -78,6 +78,7 @@ jobs:
         docker pull reedcompbio/omics-integrator-2:latest
         docker pull reedcompbio/pathlinker:latest
         docker pull reedcompbio/meo:latest
+        docker pull reedcompbio/mincostflow:latest
     - name: Build Omics Integrator 1 Docker image
       uses: docker/build-push-action@v1
       with:
@@ -113,4 +114,13 @@ jobs:
         repository: reedcompbio/meo
         tags: latest
         cache_froms: reedcompbio/meo:latest
+        push: false
+    - name: Build MinCostFlow Docker image
+      uses: docker/build-push-action@v1
+      with:
+        path: docker-wrappers/MinCostFlow/.
+        dockerfile: docker-wrappers/MinCostFlow/Dockerfile
+        repository: reedcompbio/mincostflow
+        tags: latest
+        cache_froms: reedcompbio/mincostflow:latest
         push: false
