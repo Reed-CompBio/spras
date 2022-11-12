@@ -108,7 +108,7 @@ def run_container_docker(container: str, command: List[str], volumes: List[Tuple
                 src_dest_map[src_path] = dest
 
         bind_paths = [f'{prepare_path_docker(src)}:{dest}' for src, dest in volumes]
-        
+
         out = client.containers.run(container,
                                     command,
                                     stderr=True,
@@ -116,7 +116,6 @@ def run_container_docker(container: str, command: List[str], volumes: List[Tuple
                                     working_dir=working_dir,
                                     environment=[environment]).decode('utf-8')
 
-    
         # TODO does this cleanup need to still run even if there was an error in the above run command?
         # On Unix, files written by the above Docker run command will be owned by root and cannot be modified
         # outside the container by a non-root user
@@ -139,8 +138,8 @@ def run_container_docker(container: str, command: List[str], volumes: List[Tuple
             # This command changes the ownership of output files so we don't
             # get a permissions error when snakemake or the user try to touch the files
             # Use --recursive because new directories could have been created inside the container
-            
-            if len(all_modified_volume_contents):
+            # Do not run the command if no files were modified
+            if len(all_modified_volume_contents) > 0:
                 chown_command = ['chown', f'{uid}:{gid}', '--recursive']
                 chown_command.extend(all_modified_volume_contents)
                 chown_command = ' '.join(chown_command)

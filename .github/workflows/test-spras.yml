@@ -115,7 +115,7 @@ jobs:
         tags: latest
         cache_froms: reedcompbio/meo:latest
         push: false
-    - name: Build Min Cost Flow Docker image
+    - name: Build MinCostFlow Docker image
       uses: docker/build-push-action@v1
       with:
         path: docker-wrappers/MinCostFlow/.

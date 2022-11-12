@@ -66,9 +66,9 @@
         - name: "mincostflow"
           params:
                 include: true
-                directed: true
+                directed: false
                 run1:
-                    flow: [1] #the flow must be an int
+                    flow: [1] # The flow must be an int
                     capacity: [1]
                     
 
