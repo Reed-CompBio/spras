@@ -7,7 +7,7 @@ import networkx as nx
 __all__ = ['AllPairs']
 
 class AllPairs(PRM):
-    required_inputs = ['nodetypes', 'network']
+    required_inputs = ['sources', 'tagets', 'edges']
 
     @staticmethod
     def generate_inputs(data, filename_map):
