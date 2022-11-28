@@ -8,7 +8,6 @@ import argparse
 from pathlib import Path
 import networkx as nx
 
-
 def parse_arguments():
     """
     Process command line arguments.
@@ -17,9 +16,9 @@ def parse_arguments():
     parser = argparse.ArgumentParser(
         description="AllPairs pathway reconstruction"
     )
-    parser.add_argument("--network", type=Path, required=True, help="Path to the network file with '|' delimited node pairs")
-    parser.add_argument("--nodes", type=Path, required=True, help="Path to the nodes file")
-    parser.add_argument("--output", type=Path, required=True, help="Path to the output file that will be written")
+    parser.add_argument("--network", type=Path, required=True, help="Network file of the form <node1> <node2> <weight>")
+    parser.add_argument("--nodes", type=Path, required=True, help="Nodes file of the form <node> <source-or-target>")
+    parser.add_argument("--output", type=Path, required=True, help="Output file")
 
     return parser.parse_args()
 
@@ -30,13 +29,12 @@ def allpairs(network_file: Path, nodes_file: Path, output_file: Path):
     if not nodes_file.exists():
         raise OSError(f"Nodes file {str(nodes_file)} does not exist")
     if output_file.exists():
-        print(f"Output files {str(output_file)} will be overwritten")
+        print(f"Output file {str(output_file)} will be overwritten")
 
     # Create the parent directories for the output file if needed
     output_file.parent.mkdir(parents=True, exist_ok=True)
 
     # Read the list of nodes
-    graph = nx.Graph()
     sources = set()
     targets = set()
     with nodes_file.open() as nodes_f:
@@ -47,27 +45,26 @@ def allpairs(network_file: Path, nodes_file: Path, output_file: Path):
             elif row[1] == 'target':
                 targets.add(row[0])
 
+    # there should be at least one source and one target.
+    assert len(sources) > 0, 'There are no sources.'
+    assert len(targets) > 0, 'There are no targets.'
+    assert len(sources.intersection(targets)) == 0, 'There is at least one source that is also a target.'
 
-    with network_file.open() as net_f:
-        for line in net_f:
-            if line[0] == '#':
-                continue
-            e = line.strip().split()
-            print(e)
-            graph.add_edge(e[0], e[1], weight=float(e[2]))
+    # Read graph & assert that sources/targets are in network
+    graph = nx.read_weighted_edgelist(network_file)
+    assert len(sources.intersection(graph.nodes())) == len(sources), 'At least one source is not in the interactome.'
+    assert len(targets.intersection(graph.nodes())) == len(targets), 'At least one target is not in the interactome.'
 
-    print(graph)
-
+    # Finally, compute all-pairs-shortest-paths and record the subgraph.
     output = nx.Graph()
     for source in sources:
         for target in targets:
-            p = nx.shortest_path(graph, source, target, weight=None)
+            p = nx.shortest_path(graph, source, target, weight='weight')
             nx.add_path(output, p)
 
+    # Write the subgraph as a list of edges.
     nx.write_edgelist(output, output_file, data=False)
-    print(output)
     print(f"Wrote output file to {str(output_file)}")
-
 
 def main():
     """

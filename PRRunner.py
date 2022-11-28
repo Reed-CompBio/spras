@@ -6,7 +6,7 @@ from src.omicsintegrator1 import OmicsIntegrator1 as omicsintegrator1
 from src.omicsintegrator2 import OmicsIntegrator2 as omicsintegrator2
 from src.pathlinker import PathLinker as pathlinker
 from src.mincostflow import MinCostFlow as mincostflow
-from src.all-pairs-shortest-paths import AllPairs as allpairs
+from src.allpairs import AllPairs as allpairs
 
 def run(algorithm, params):
     """

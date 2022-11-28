@@ -126,3 +126,12 @@ jobs:
         tags: latest
         cache_froms: reedcompbio/mincostflow:latest
         push: false
+    - name: Build AllPairs Docker image
+      uses: docker/build-push-action@v1
+      with:
+        path: docker-wrappers/AllPairs/.
+        dockerfile: docker-wrappers/AllPairs/Dockerfile
+        repository: annaritz/allpairs
+        tags: latest
+        cache_froms: annaritz/allpairs:latest
+        push: false

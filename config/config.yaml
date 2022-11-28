@@ -28,14 +28,14 @@
  algorithms:
         - name: "pathlinker"
           params:
-                include: true
+                include: false
                 directed: true
                 run1:
                     k: range(100,201,100)
 
         - name: "omicsintegrator1"
           params:
-                include: true
+                include: false
                 directed: false
                 run1:
                     r: [5]
@@ -46,7 +46,7 @@
 
         - name: "omicsintegrator2"
           params:
-                include: true
+                include: false
                 directed: false
                 run1:
                     b: [4]
@@ -56,21 +56,25 @@
                     g: [3]
         - name: "meo"
           params:
-                include: true
+                include: false
                 directed: true
                 run1:
                     max_path_length: [3]
                     local_search: ["Yes"]
                     rand_restarts: [10]
-      
+
         - name: "mincostflow"
           params:
-                include: true
+                include: false
                 directed: false
                 run1:
                     flow: [1] # The flow must be an int
                     capacity: [1]
-                    
+
+        - name: "allpairs"
+          params:
+                include: true
+                directed: false
 
  # Here we specify which pathways to run and other file location information.
  # DataLoader.py can currently only load a single dataset

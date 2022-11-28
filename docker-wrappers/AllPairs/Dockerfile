@@ -1,4 +1,7 @@
 # AllPairs wrapper
-FROM alpine:3.16
+FROM python:3.9-alpine3.16
 
-COPY sample-in-net.txt sample-in-nodetypes.txt .
+WORKDIR /AllPairs
+
+RUN pip install networkx==2.6.3
+COPY all-pairs-shortest-paths.py /AllPairs/all-pairs-shortest-paths.py
