@@ -15,7 +15,7 @@ Before following this guide, a contributor will need
 - A [Docker Hub](https://hub.docker.com/) account
 
 It is not necessary to have experience with Snakemake or Python testing before getting started, but it may help with more complex SPRAS contributions:
-- Snakemake [Carpentries introduction](https://carpentries-incubator.github.io/workflows-snakemake/)
+- Snakemake [Carpentries introduction](https://carpentries-incubator.github.io/workflows-snakemake/) or [beginner's guide](http://ivory.idyll.org/blog/2023-snakemake-slithering-section-1.html)
 - pytest [getting started](https://docs.pytest.org/en/7.1.x/getting-started.html) and [how-to guides](https://docs.pytest.org/en/7.1.x/how-to/index.html)
 
 ### Step 1: Practice with the Local Neighborhood algorithm
