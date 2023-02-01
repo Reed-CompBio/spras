@@ -45,7 +45,7 @@ def parse_files(edge_files):
             
         result = [''.join(sorted(ele)) for ele in line]
             
-        print (result)
+        # print (result)
         list_of_tuples.append((file, result))
     
     return list_of_tuples
