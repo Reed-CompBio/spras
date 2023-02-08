@@ -11,6 +11,8 @@ from sklearn.cluster import AgglomerativeClustering
 from scipy.cluster.hierarchy import dendrogram
 import numpy as np
 
+# import argparse
+
 def summarize_networks(file_paths: Iterable[Path]) -> pd.DataFrame:
 
     # nw = nx.read_weighted_edgelist(file_path) (already tested and works with spras) 
@@ -43,16 +45,15 @@ def summarize_networks(file_paths: Iterable[Path]) -> pd.DataFrame:
         edge_dataframes.append(dataframe)
 
     concated_df = pd.concat(edge_dataframes, axis= 1, join = 'outer')
-    concated_df = concated_df.fillna(0)
+    concated_df = concated_df.fillna(0) 
+    concated_df = concated_df.astype('int64')
+   
+    return concated_df
+    
+def pca(dataframe: pd.DataFrame, output_png: str, output_file: str):
 
-    return concated_df 
-
-# pass in file name to write the image and a second file name for a text file (anticpate this)
-def pca(dataframe: pd.DataFrame):
-    # turn the result returned prior into a csv file
-    dataframe.to_csv('concatdf.csv',index=False)
-    df = pd.read_csv('concatdf.csv')
-    df = df.transpose() #based on the algortihms
+    df = dataframe.reset_index(drop=True)
+    df = df.transpose() #based on the algortihms rather than the edges 
     X = df.values
     print(X.shape)
 
@@ -61,22 +62,28 @@ def pca(dataframe: pd.DataFrame):
     scaler.fit(X) # calc mean and standard deviation 
     X_scaled = scaler.transform(X)
 
-
     # chosing the PCA
     pca_2 = PCA(n_components=2)
     pca_2.fit(X_scaled)
     X_pca_2 = pca_2.transform(X_scaled)
+    variance = pca_2.explained_variance_ratio_ *100
 
-    fig = plt.figure(figsize = (10,7))
+    # making the plot
+    plt.figure(figsize = (10,7))
     sns.scatterplot(x = X_pca_2[:,0], y = X_pca_2[:,1], s = 70, palette  = ['pink', 'blue'])
-
-    print(pca_2.explained_variance_ratio_ *100)
     plt.title("PCA")
-    plt.xlabel("principal component 1") # put the first component of explained variance
-    plt.ylabel("principal component 2")
+    plt.xlabel("pc1 (" + str(variance[0]) +")")
+    plt.ylabel("pc2 (" + str(variance[1]) +")")
     
-    return fig
+    # saving the pca plot
+    plt.savefig(output_png)
 
+    # saving the principal components
+    f = open(output_file, "w")
+    f.write(str(variance))
+    f.close()
+    # error checking?
+   
 def plot_dendrogram(model, **kwargs):
     # Create linkage matrix and then plot the dendrogram
 
@@ -99,23 +106,46 @@ def plot_dendrogram(model, **kwargs):
     # Plot the corresponding dendrogram
     dendrogram (linkage_matrix, **kwargs)
 
-def hac(dataframe: pd.DataFrame):
+def hac(dataframe: pd.DataFrame, output_png: str):
     # turn the result returned prior into a csv file
 
-    dataframe.to_csv('concatdf.csv',index=False)
-    X = pd.read_csv('concatdf.csv')
+    X = dataframe.reset_index(drop=True)
     X = X.transpose()
     model = AgglomerativeClustering(linkage='complete', distance_threshold=0, n_clusters=None)
     model = model.fit(X)
 
-    fig = plt.title("Algorithm HAC Dendrogram")
+    data_top = X.head()
+    plt.title("Algorithm HAC Dendrogram")
+
+    algo_names = list(dataframe.columns)
 
     # plot the top three levels of the dendrogram
-    plot_dendrogram(model, truncate_mode="level", p=3)
+    plot_dendrogram(model, truncate_mode="level", p=3, labels=algo_names)
 
-    plt.xlabel("algorithms") # not the names of the algos at this moment 
+    plt.xlabel("algorithms")
     
-    return fig
+    # how to make the leaf nodes be labeled with the algorithm names
+    plt.savefig(output_png)
 
+    
+    
+# def main(args):
+    
+#     dataframe = summarize_networks(args.edge_files)
+#     print(dataframe)
+#     pca(dataframe, 'pca.png', 'pca.py')
+#     hac(dataframe, 'hac.png')
 
+# if __name__ == "__main__":
+#     parser = argparse.ArgumentParser()
+  
+#     parser.add_argument('--edge_files',
+#                         nargs='+',
+#                         type = str, 
+#                         required=True)
+    
+#     # python similarity_matrix.py --edge_files s1.txt /Users/nehatalluri/Desktop/jobs/research/spras/output/data0-mincostflow-params-SZPZVU6/pathway.txt
+    
+#     args = parser.parse_args()
 
+# main(args)
