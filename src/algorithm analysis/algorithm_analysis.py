@@ -11,7 +11,7 @@ from sklearn.cluster import AgglomerativeClustering
 from scipy.cluster.hierarchy import dendrogram
 import numpy as np
 
-# import argparse
+import argparse
 
 def summarize_networks(file_paths: Iterable[Path]) -> pd.DataFrame:
 
@@ -55,7 +55,6 @@ def pca(dataframe: pd.DataFrame, output_png: str, output_file: str):
     df = dataframe.reset_index(drop=True)
     df = df.transpose() #based on the algortihms rather than the edges 
     X = df.values
-    print(X.shape)
 
     # standardize the df because if not in the same scale (rn it is 4,7)
     scaler = StandardScaler()
@@ -114,38 +113,30 @@ def hac(dataframe: pd.DataFrame, output_png: str):
     model = AgglomerativeClustering(linkage='complete', distance_threshold=0, n_clusters=None)
     model = model.fit(X)
 
-    data_top = X.head()
+    plt.figure(figsize = (10,7))
     plt.title("Algorithm HAC Dendrogram")
-
     algo_names = list(dataframe.columns)
-
-    # plot the top three levels of the dendrogram
     plot_dendrogram(model, truncate_mode="level", p=3, labels=algo_names)
-
     plt.xlabel("algorithms")
-    
-    # how to make the leaf nodes be labeled with the algorithm names
     plt.savefig(output_png)
 
     
+def main(args):
     
-# def main(args):
-    
-#     dataframe = summarize_networks(args.edge_files)
-#     print(dataframe)
-#     pca(dataframe, 'pca.png', 'pca.py')
-#     hac(dataframe, 'hac.png')
+    dataframe = summarize_networks(args.edge_files)
+    pca(dataframe, 'pca_image.png', 'pca_components.txt')
+    hac(dataframe, 'hac_image.png')
 
-# if __name__ == "__main__":
-#     parser = argparse.ArgumentParser()
+if __name__ == "__main__":
+    parser = argparse.ArgumentParser()
   
-#     parser.add_argument('--edge_files',
-#                         nargs='+',
-#                         type = str, 
-#                         required=True)
+    parser.add_argument('--edge_files',
+                        nargs='+',
+                        type = str, 
+                        required=True)
     
-#     # python similarity_matrix.py --edge_files s1.txt /Users/nehatalluri/Desktop/jobs/research/spras/output/data0-mincostflow-params-SZPZVU6/pathway.txt
+    # python algorithm_analysis.py --edge_files s1.txt /Users/nehatalluri/Desktop/jobs/research/spras/output/data0-mincostflow-params-SZPZVU6/pathway.txt
     
-#     args = parser.parse_args()
+    args = parser.parse_args()
 
-# main(args)
+main(args)
