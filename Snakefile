@@ -246,7 +246,7 @@ rul ml:
     output: 
         pca_image = SEP.join([out_dir, '{dataset}-{algorithm}-{params}', 'pca_image.png']),
         pca_components= SEP.join([out_dir, '{dataset}-{algorithm}-{params}', 'pca_components.txt']),
-        hac_image = SEP.join([out_dir, '{dataset}-{algorithm}-{params}', 'hac_image.png']),
+        hac_image = SEP.join([out_dir, '{dataset}-{algorithm}-{params}', 'hac_image.png'])
     run: 
         summary_df = algorithm_analysis.summarize_networks(input.pathways)
         algorithm_analysis.pca(input.pathways, pca_image, pca_components)

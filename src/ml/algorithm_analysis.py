@@ -36,6 +36,7 @@ def summarize_networks(file_paths: Iterable[Path]) -> pd.DataFrame:
             
         e = [''.join(sorted(ele)) for ele in line]
 
+        # for smaller labels (havent put it yet because of the tester files, but will be changed to this)
         # parts = file.split('/')
         # edge_tuples.append((parts[-2], e))
 
