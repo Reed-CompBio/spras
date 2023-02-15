@@ -67,13 +67,16 @@ def make_final_input(wildcards):
         final_input.extend(expand('{out_dir}{sep}{dataset}-pathway-summary.txt',out_dir=out_dir,sep=SEP,dataset=dataset_labels))
 
 
-    if config["analysis"]["graphspace"]["ml"]["include"]:
+    if config["analysis"]["graphspace"]["include"]:
         # add graph and style JSON files.
         final_input.extend(expand('{out_dir}{sep}{dataset}-{algorithm_params}{sep}gs.json',out_dir=out_dir,sep=SEP,dataset=dataset_labels,algorithm_params=algorithms_with_params))
         final_input.extend(expand('{out_dir}{sep}{dataset}-{algorithm_params}{sep}gsstyle.json',out_dir=out_dir,sep=SEP,dataset=dataset_labels,algorithm_params=algorithms_with_params))
+    
+    if config["analysis"]["ml"]["include"]:  
         final_input.extend(expand('{out_dir}{sep}{dataset}-{algorithm_params}{sep}pca_image.png',out_dir=out_dir,sep=SEP,dataset=dataset_labels,algorithm_params=algorithms_with_params))
         final_input.extend(expand('{out_dir}{sep}{dataset}-{algorithm_params}{sep}pca_components.txt',out_dir=out_dir,sep=SEP,dataset=dataset_labels,algorithm_params=algorithms_with_params))
         final_input.extend(expand('{out_dir}{sep}{dataset}-{algorithm_params}{sep}hac_image.png',out_dir=out_dir,sep=SEP,dataset=dataset_labels,algorithm_params=algorithms_with_params))
+    
     
     if len(final_input) == 0:
         # No analysis added yet, so add reconstruction output files if they exist.
@@ -249,8 +252,8 @@ rule ml:
         hac_image = SEP.join([out_dir, '{dataset}-{algorithm}-{params}', 'hac_image.png'])
     run: 
         summary_df = algorithm_analysis.summarize_networks(input.pathways)
-        algorithm_analysis.pca(input.pathways, pca_image, pca_components)
-        algorithm_analysis.hac(input.pathways, hac_image)
+        algorithm_analysis.pca(summary_df, output.pca_image, output.pca_components)
+        algorithm_analysis.hac(summary_df, output.hac_image)
 
 
 # Remove the output directory

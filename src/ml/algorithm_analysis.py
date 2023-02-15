@@ -3,7 +3,7 @@ from typing import Iterable
 from pathlib import Path
 import os
 
-from matplotlib import pyplot as plt
+import matplotlib.pyplot as plt
 from sklearn.decomposition import PCA
 from sklearn.preprocessing import StandardScaler
 import seaborn as sns
@@ -23,25 +23,26 @@ def summarize_networks(file_paths: Iterable[Path]) -> pd.DataFrame:
     
     for file in file_paths:
         
-        if (is_file_empty(file)):
+        try:
+           
+            with open(file,'r') as f:
+                lines = [line[:3] for line in f.readlines()]
+            
+            line = []
+            for char in lines:
+                newChar = char.replace(' ','')
+                line.append(newChar)
+                
+            e = [''.join(sorted(ele)) for ele in line]
+
+            # for smaller labels (havent put it yet because of the tester files, but will be changed to this)
+            parts = file.split('/')
+            edge_tuples.append((parts[-2], e))
+  
+        except FileNotFoundError:
+            print(file, ' DOES NOT EXIST') # should hopefully not hit
             continue
         
-        with open(file,'r') as f:
-            lines = [line[:3] for line in f.readlines()]
-        
-        line = []
-        for char in lines:
-            newChar = char.replace(' ','')
-            line.append(newChar)
-            
-        e = [''.join(sorted(ele)) for ele in line]
-
-        # for smaller labels (havent put it yet because of the tester files, but will be changed to this)
-        # parts = file.split('/')
-        # edge_tuples.append((parts[-2], e))
-
-        edge_tuples.append((file, e))
-
     edge_dataframes = []
     
     for tuple in edge_tuples:
@@ -128,22 +129,3 @@ def hac(dataframe: pd.DataFrame, output_png: str):
     plot_dendrogram(model, truncate_mode="level", p=3, labels=algo_names, leaf_rotation=90, leaf_font_size=10)
     plt.xlabel("algorithms")
     plt.savefig(output_png)
-
-def main(args):
-    
-    dataframe = summarize_networks(args.edge_files)
-    pca(dataframe, 'pca_image.png', 'pca_components.txt')
-    hac(dataframe, 'hac_image.png')
-
-if __name__ == "__main__":
-    parser = argparse.ArgumentParser()
-  
-    parser.add_argument('--edge_files',
-                        nargs='+',
-                        type = str, 
-                        required=True)
-    
-    # python algorithm_analysis.py --edge_files /Users/nehatalluri/Desktop/jobs/research/spras/output/data0-mincostflow-params-SZPZVU6/pathway.txt s1.txt empty.txt
-    args = parser.parse_args()
-
-main(args)
