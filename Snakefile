@@ -6,6 +6,7 @@ from Dataset import Dataset
 from src.util import process_config
 from src.analysis.summary import summary
 from src.analysis.viz import graphspace
+from src.ml import algorithm_analysis
 
 # Snakemake updated the behavior in the 6.5.0 release https://github.com/snakemake/snakemake/pull/1037
 # and using the wrong separator prevents Snakemake from matching filenames to the rules that can produce them
@@ -66,11 +67,14 @@ def make_final_input(wildcards):
         final_input.extend(expand('{out_dir}{sep}{dataset}-pathway-summary.txt',out_dir=out_dir,sep=SEP,dataset=dataset_labels))
 
 
-    if config["analysis"]["graphspace"]["include"]:
+    if config["analysis"]["graphspace"]["ml"]["include"]:
         # add graph and style JSON files.
         final_input.extend(expand('{out_dir}{sep}{dataset}-{algorithm_params}{sep}gs.json',out_dir=out_dir,sep=SEP,dataset=dataset_labels,algorithm_params=algorithms_with_params))
         final_input.extend(expand('{out_dir}{sep}{dataset}-{algorithm_params}{sep}gsstyle.json',out_dir=out_dir,sep=SEP,dataset=dataset_labels,algorithm_params=algorithms_with_params))
-
+        final_input.extend(expand('{out_dir}{sep}{dataset}-{algorithm_params}{sep}pca_image.png',out_dir=out_dir,sep=SEP,dataset=dataset_labels,algorithm_params=algorithms_with_params))
+        final_input.extend(expand('{out_dir}{sep}{dataset}-{algorithm_params}{sep}pca_components.txt',out_dir=out_dir,sep=SEP,dataset=dataset_labels,algorithm_params=algorithms_with_params))
+        final_input.extend(expand('{out_dir}{sep}{dataset}-{algorithm_params}{sep}hac_image.png',out_dir=out_dir,sep=SEP,dataset=dataset_labels,algorithm_params=algorithms_with_params))
+    
     if len(final_input) == 0:
         # No analysis added yet, so add reconstruction output files if they exist.
         # (if analysis is specified, these should be implicitly run).
@@ -235,6 +239,19 @@ rule summary_table:
         node_table = Dataset.from_file(input.dataset_file).node_table
         summary_df = summary.summarize_networks(input.pathways, node_table)
         summary_df.to_csv(output.summary_table, sep='\t', index=False)
+
+rul ml: 
+    input: 
+        pathways = expand('{out_dir}{sep}{{dataset}}-{algorithm_params}{sep}pathway.txt', out_dir=out_dir, sep=SEP, algorithm_params=algorithms_with_params)
+    output: 
+        pca_image = SEP.join([out_dir, '{dataset}-{algorithm}-{params}', 'pca_image.png']),
+        pca_components= SEP.join([out_dir, '{dataset}-{algorithm}-{params}', 'pca_components.txt']),
+        hac_image = SEP.join([out_dir, '{dataset}-{algorithm}-{params}', 'hac_image.png']),
+    run: 
+        summary_df = algorithm_analysis.summarize_networks(input.pathways)
+        algorithm_analysis.pca(input.pathways, pca_image, pca_components)
+        algorithm_analysis.hac(input.pathways, hac_image)
+
 
 # Remove the output directory
 rule clean:

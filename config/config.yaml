@@ -115,3 +115,5 @@
         # Create output files for each pathway that can be visualized with GraphSpace
         graphspace:
           include: true
+        ml:
+          include: true
