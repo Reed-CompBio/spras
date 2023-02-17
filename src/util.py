@@ -138,15 +138,18 @@ def run_container_docker(container: str, command: List[str], volumes: List[Tuple
             # This command changes the ownership of output files so we don't
             # get a permissions error when snakemake or the user try to touch the files
             # Use --recursive because new directories could have been created inside the container
-            chown_command = ['chown', f'{uid}:{gid}', '--recursive']
-            chown_command.extend(all_modified_volume_contents)
-            chown_command = ' '.join(chown_command)
-            client.containers.run(container,
-                                  chown_command,
-                                  stderr=True,
-                                  volumes=bind_paths,
-                                  working_dir=working_dir,
-                                  environment=[environment]).decode('utf-8')
+            # Do not run the command if no files were modified
+            if len(all_modified_volume_contents) > 0:
+                chown_command = ['chown', f'{uid}:{gid}', '--recursive']
+                chown_command.extend(all_modified_volume_contents)
+                chown_command = ' '.join(chown_command)
+                client.containers.run(container,
+                                    chown_command,
+                                    stderr=True,
+                                    volumes=bind_paths,
+                                    working_dir=working_dir,
+                                    environment=[environment]).decode('utf-8')
+            
         # Raised on non-Unix systems
         except AttributeError:
             pass

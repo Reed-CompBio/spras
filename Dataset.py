@@ -85,7 +85,14 @@ class Dataset:
                 new_col_name = node_file.split(".")[0]
                 single_node_table[new_col_name] = True
 
-            self.node_table = self.node_table.merge(single_node_table, how="left", on=self.NODE_ID, suffixes=("", "_DROP")).filter(regex="^(?!.*DROP)")
+            # Use only keys from the existing node table so that nodes that are not in the interactome are ignored
+            # If there duplicate columns, keep the existing column and add the suffix '_DROP' to the new column so it
+            # will be ignored
+            # TODO may want to warn about duplicate before removing them, for instance, if a user loads two files that
+            #  both have prizes
+            self.node_table = self.node_table.merge(single_node_table, how="left", on=self.NODE_ID, suffixes=(None, "_DROP")).filter(regex="^(?!.*DROP)")
+        # Ensure that the NODEID column always appears first, which is required for some downstream analyses
+        self.node_table.insert(0, "NODEID", self.node_table.pop("NODEID"))
         self.other_files = dataset_dict["other_files"]
 
     def request_node_columns(self, col_names):
