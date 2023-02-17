@@ -24,14 +24,15 @@ The readme in that directory describes the usage and the three required argument
 This algorithm does not require any third-party packages, only Python 3.x.
 Run `local_neighborhood.py` from the command line.
 There are example input files `ln-network.txt` and `ln-nodes.txt` in [`test/LocalNeighborhood/input`](test/LocalNeighborhood/input).
-Either provide the relative path to these files or copy them to the `LocalNeighborhood` directory.
-Confirm that the output files matches expectations.
+Copy them to the `LocalNeighborhood` directory for testing.
+Confirm that the output file matches expectations.
 
 ### Step 2: Create a Local Neighborhood Docker image
 Complete the `Dockerfile` in the [`docker-wrappers/LocalNeighborhood`](docker-wrappers/LocalNeighborhood) directory to create a Docker image.
 The PathLinker `Dockerfile` demonstrates how to begin with a Python image and copy files into the image with `COPY`.
 Browse the official [Python images](https://hub.docker.com/_/python) to select a recent version of Python based on Alpine Linux, a small Linux distribution.
-Note that the PathLinker example uses an old verison of Python, but this Local Neighborhood Docker image should be based on a recent version of Python.
+Note that the PathLinker example uses an old version of Python, but this Local Neighborhood Docker image should be based on a more modern version of Python.
+In addition, not all pathway reconstruction algorithms are compatible with Alpine Linux, so the default Debian-based Python image is required.
 The `Dockerfile` does not need an `ENTRYPOINT` or `CMD` line.
 It will be used to run a Python command.
 
@@ -50,8 +51,13 @@ docker run -w /data --mount type=bind,source=/${PWD},target=/data \
   --output /data/ln-output.txt
 ```
 This will mount the current working directory to the directory `/data` inside the container so that the input files can be read and the output file can be written.
+It will set the working directory inside the container to `/data`.
+`<username>/local-neighborhood` specifies which container to run the command in.
+
+The parts of the command starting with `python` are the command run inside the container, which is why the file paths like `/data/ln-network.txt` are relative to the container's file system instead of your local file system.
+The command assumes the test files have already been copied into the current working directory.
 Windows users may need to escape the absolute paths so that `/data` becomes `//data`, etc.
-Confirm that the output files matches expectations.
+Confirm that the output file matches expectations.
 
 Push the new image to Docker Hub:
 ```
@@ -61,22 +67,23 @@ Pushing an image requires being logged in, so run `docker login` first if needed
 
 ### Step 3: Write the Local Neighborhood wrapper functions
 Add a new Python file `src/local_neighborhood.py` to implement the wrapper functions for the Local Neighborhood algorithm.
-**This may need a different name to avoid conflicts with the actual implementation of the algorithm.**
 Use `pathlinker.py` as an example.
 
-Call the new class within `local_neighborhood.py` `LocalNeighborhood` and set `__all__` so the class can be imported.
+Call the new class within `local_neighborhood.py` `LocalNeighborhood` and set `__all__` so the class can be [imported](https://docs.python.org/3/tutorial/modules.html#importing-from-a-package).
 Specify the list of `required_input` files to be `network` and `nodes`.
 These entries are used to tell Snakemake what input files should be present before running the Local Neighborhood algorithm.
 
-Implement the `generate_inputs` function, following the Omics Integrator 1 example.
+Implement the `generate_inputs` function, following the `omicsintegrator1.py` example.
 The nodes should be any node in the dataset that has a prize set, any node that is a source, or any node that is a target.
 The network should be all of the edges written in the format `<vertex1>|<vertex2>`.
-`Dataset.py` provides functions that provide access to node information.
+`Dataset.py` provides functions that provide access to node information and the interactome (edge list).
 
 Implement the `run` function, following the Path Linker example.
-The `prepare_volume` utility function is needed to prepare the network and nodes input files to be mounted and used inside the counter.
+The `prepare_volume` utility function is needed to prepare the network and nodes input files to be mounted and used inside the container.
 It is also needed to prepare the path for the output file.
+This is similar to how you had to manually specify paths relative to the container's file system when you interactive tested the container in Step 2.
 It is not necessary to create the output directory in advance because the Local Neighborhood algorithm will create it if it does not exist.
+
 Prepare the command to run inside the container, which will resemble the command used when running Local Neighborhood in Step 1.
 Use the `run_container` utility function to run the command in the container `<username>/local-neighborhood` that was pushed to Docker Hub in Step 2.
 
@@ -84,7 +91,6 @@ Implement the `parse_output` function.
 The edges in the Local Neighborhood output have the same format as the input, `<vertex1>|<vertex2>`.
 Convert these to be space-separated vertex pairs followed by a space and a `1` at the end of every line, which indicates all edges have the same rank.
 The output should have the format `<vertex1> <vertex2> 1`.
-**Why are these space separated and not tab-separated?**
 
 ### Step 4: Make the Local Neighborhood wrapper accessible through SPRAS
 Import the new class `LocalNeighborhood` in `PRRunner.py` so the wrapper functions can be accessed.
