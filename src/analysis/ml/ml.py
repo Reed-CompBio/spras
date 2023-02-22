@@ -4,6 +4,7 @@ from pathlib import Path, PurePath
 import os
 
 import matplotlib.pyplot as plt
+plt.switch_backend('Agg')
 from sklearn.decomposition import PCA
 from sklearn.preprocessing import StandardScaler
 import seaborn as sns
@@ -11,7 +12,6 @@ import seaborn as sns
 from sklearn.cluster import AgglomerativeClustering
 from scipy.cluster.hierarchy import dendrogram
 import numpy as np
-
 
 def summarize_networks(file_paths: Iterable[Path]) -> pd.DataFrame:
 
@@ -24,6 +24,9 @@ def summarize_networks(file_paths: Iterable[Path]) -> pd.DataFrame:
            
            # collecting and sorting the edge pairs per algortihm
             with open(file,'r') as f:
+                # under the assumption that it is single chars (maybe)
+                # split on space char 
+                # take the first and 0th elements and sort those 
                 lines = [line[:3] for line in f.readlines()]
             
             line = []
@@ -31,6 +34,7 @@ def summarize_networks(file_paths: Iterable[Path]) -> pd.DataFrame:
                 newChar = char.replace(' ','')
                 line.append(newChar)
                 
+            # to deal with edges are the same but not ordered the same
             e = [''.join(sorted(ele)) for ele in line]
 
             
