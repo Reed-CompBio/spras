@@ -115,5 +115,6 @@
         # Create output files for each pathway that can be visualized with GraphSpace
         graphspace:
           include: true
+        # Machine learning analysis between each algorithm for each dataset
         ml:
           include: true

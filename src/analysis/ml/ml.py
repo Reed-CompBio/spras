@@ -1,6 +1,6 @@
 import pandas as pd
 from typing import Iterable
-from pathlib import Path
+from pathlib import Path, PurePath
 import os
 
 import matplotlib.pyplot as plt
@@ -12,19 +12,17 @@ from sklearn.cluster import AgglomerativeClustering
 from scipy.cluster.hierarchy import dendrogram
 import numpy as np
 
-import argparse
-
-def is_file_empty(filepath):
-    return os.path.getsize(filepath)==0
 
 def summarize_networks(file_paths: Iterable[Path]) -> pd.DataFrame:
 
+    # creating a tuple that contains the algorithm column name and edge pairs
     edge_tuples = []
     
     for file in file_paths:
         
         try:
            
+           # collecting and sorting the edge pairs per algortihm
             with open(file,'r') as f:
                 lines = [line[:3] for line in f.readlines()]
             
@@ -35,26 +33,31 @@ def summarize_networks(file_paths: Iterable[Path]) -> pd.DataFrame:
                 
             e = [''.join(sorted(ele)) for ele in line]
 
-            # for smaller labels (havent put it yet because of the tester files, but will be changed to this)
-            parts = file.split('/')
-            edge_tuples.append((parts[-2], e))
+            
+            # getting the algorithm name
+            p = PurePath(file)
+            p.parts[-2]
+            edge_tuples.append((p.parts[-2], e))
+
   
         except FileNotFoundError:
             print(file, ' DOES NOT EXIST') # should hopefully not hit
             continue
         
+    # the dataframes per algorithm
     edge_dataframes = []
     
+    # the data frame is set up per algorithm and a 1 is set for the edge pair that exists in the algorithm
     for tuple in edge_tuples:
-        col_label = str(tuple[0])
 
         dataframe = pd.DataFrame(
             {
-                col_label: 1,
+                str(tuple[0]): 1,
             }, index= tuple[1]
         )
         edge_dataframes.append(dataframe)
 
+    # concating all the data frames together (0 is set for all the edge pairs that don't exist per algorithm)
     concated_df = pd.concat(edge_dataframes, axis= 1, join = 'outer')
     concated_df = concated_df.fillna(0) 
     concated_df = concated_df.astype('int64')
@@ -67,7 +70,6 @@ def pca(dataframe: pd.DataFrame, output_png: str, output_file: str):
     df = df.transpose() #based on the algortihms rather than the edges 
     X = df.values
 
-    # standardize the df because if not in the same scale (rn it is 4,7)
     scaler = StandardScaler()
     scaler.fit(X) # calc mean and standard deviation 
     X_scaled = scaler.transform(X)
@@ -80,18 +82,18 @@ def pca(dataframe: pd.DataFrame, output_png: str, output_file: str):
 
     # making the plot
     plt.figure(figsize = (10,7))
-    sns.scatterplot(x = X_pca_2[:,0], y = X_pca_2[:,1], s = 70, palette  = ['pink', 'blue'])
+    sns.set(font_scale = 1.5)
+    sns.scatterplot(x = X_pca_2[:,0], y = X_pca_2[:,1], s = 70)
     plt.title("PCA")
-    plt.xlabel("pc1 (" + str(variance[0]) +")")
-    plt.ylabel("pc2 (" + str(variance[1]) +")")
+    plt.xlabel(f"PC1 ({variance[0]:.1f}% variance)")
+    plt.ylabel(f"PC2 ({variance[1]:.1f}% variance)")
     
     # saving the pca plot
     plt.savefig(output_png)
 
     # saving the principal components
-    f = open(output_file, "w")
-    f.write(str(variance))
-    f.close()
+    with open(output_file, "w") as f: 
+        f.write(str(variance))
    
 # site sckit learn 
 def plot_dendrogram(model, **kwargs):
@@ -114,7 +116,7 @@ def plot_dendrogram(model, **kwargs):
     ).astype(float)
 
     # Plot the corresponding dendrogram
-    dendrogram (linkage_matrix, **kwargs)
+    dendrogram(linkage_matrix, **kwargs)
 
 def hac(dataframe: pd.DataFrame, output_png: str):
 
@@ -123,9 +125,9 @@ def hac(dataframe: pd.DataFrame, output_png: str):
     model = AgglomerativeClustering(linkage='complete', distance_threshold=0, n_clusters=None)
     model = model.fit(X)
 
-    plt.figure(figsize=(20,20))
-    plt.title("Algorithm HAC Dendrogram")
+    plt.figure(figsize=(10,7))
+    plt.title("Hierarchical Agglomerative Clustering Dendrogram")
     algo_names = list(dataframe.columns)
     plot_dendrogram(model, truncate_mode="level", p=3, labels=algo_names, leaf_rotation=90, leaf_font_size=10)
     plt.xlabel("algorithms")
-    plt.savefig(output_png)
+    plt.savefig(output_png, bbox_inches="tight")

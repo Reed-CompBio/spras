@@ -6,7 +6,7 @@ from Dataset import Dataset
 from src.util import process_config
 from src.analysis.summary import summary
 from src.analysis.viz import graphspace
-from src.ml import algorithm_analysis
+from src.analysis.ml import ml
 
 # Snakemake updated the behavior in the 6.5.0 release https://github.com/snakemake/snakemake/pull/1037
 # and using the wrong separator prevents Snakemake from matching filenames to the rules that can produce them
@@ -73,9 +73,9 @@ def make_final_input(wildcards):
         final_input.extend(expand('{out_dir}{sep}{dataset}-{algorithm_params}{sep}gsstyle.json',out_dir=out_dir,sep=SEP,dataset=dataset_labels,algorithm_params=algorithms_with_params))
     
     if config["analysis"]["ml"]["include"]:  
-        final_input.extend(expand('{out_dir}{sep}{dataset}-{algorithm_params}{sep}pca_image.png',out_dir=out_dir,sep=SEP,dataset=dataset_labels,algorithm_params=algorithms_with_params))
-        final_input.extend(expand('{out_dir}{sep}{dataset}-{algorithm_params}{sep}pca_components.txt',out_dir=out_dir,sep=SEP,dataset=dataset_labels,algorithm_params=algorithms_with_params))
-        final_input.extend(expand('{out_dir}{sep}{dataset}-{algorithm_params}{sep}hac_image.png',out_dir=out_dir,sep=SEP,dataset=dataset_labels,algorithm_params=algorithms_with_params))
+        final_input.extend(expand('{out_dir}{sep}{dataset}-pca.png',out_dir=out_dir,sep=SEP,dataset=dataset_labels,algorithm_params=algorithms_with_params))
+        final_input.extend(expand('{out_dir}{sep}{dataset}-pca_components.txt',out_dir=out_dir,sep=SEP,dataset=dataset_labels,algorithm_params=algorithms_with_params))
+        final_input.extend(expand('{out_dir}{sep}{dataset}-hac.png',out_dir=out_dir,sep=SEP,dataset=dataset_labels,algorithm_params=algorithms_with_params))
     
     
     if len(final_input) == 0:
@@ -247,13 +247,13 @@ rule ml:
     input: 
         pathways = expand('{out_dir}{sep}{{dataset}}-{algorithm_params}{sep}pathway.txt', out_dir=out_dir, sep=SEP, algorithm_params=algorithms_with_params)
     output: 
-        pca_image = SEP.join([out_dir, '{dataset}-{algorithm}-{params}', 'pca_image.png']),
-        pca_components= SEP.join([out_dir, '{dataset}-{algorithm}-{params}', 'pca_components.txt']),
-        hac_image = SEP.join([out_dir, '{dataset}-{algorithm}-{params}', 'hac_image.png'])
+        pca_image = SEP.join([out_dir, '{dataset}-pca.png']),
+        pca_components= SEP.join([out_dir, '{dataset}-pca_components.txt']),
+        hac_image = SEP.join([out_dir, '{dataset}-hac.png'])
     run: 
-        summary_df = algorithm_analysis.summarize_networks(input.pathways)
-        algorithm_analysis.pca(summary_df, output.pca_image, output.pca_components)
-        algorithm_analysis.hac(summary_df, output.hac_image)
+        summary_df = ml.summarize_networks(input.pathways)
+        ml.pca(summary_df, output.pca_image, output.pca_components)
+        ml.hac(summary_df, output.hac_image)
 
 
 # Remove the output directory
