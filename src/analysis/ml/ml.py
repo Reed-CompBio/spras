@@ -86,7 +86,7 @@ def pca(dataframe: pd.DataFrame, output_png: str, output_file: str):
 
     # making the plot
     plt.figure(figsize = (10,7))
-    sns.set(font_scale = 1.5)
+    # sns.set(font_scale = 1.5)
     sns.scatterplot(x = X_pca_2[:,0], y = X_pca_2[:,1], s = 70)
     plt.title("PCA")
     plt.xlabel(f"PC1 ({variance[0]:.1f}% variance)")
