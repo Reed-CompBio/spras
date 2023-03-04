@@ -78,3 +78,6 @@ It serves as a reference for how to set up Dockerfiles and make Docker run calls
 ## Attribution
 SPRAS builds on public datasets and algorithms.
 If you use SPRAS in a research project, please cite the original datasets and algorithms in addition to SPRAS.
+
+Part of `ml.py` is taken from the [scikit-learn example code](https://scikit-learn.org/stable/auto_examples/cluster/plot_agglomerative_dendrogram.html).
+The original third-party code is available under the BSD 3-Clause License, Copyright © 2007 - 2023, scikit-learn developers.

@@ -98,8 +98,11 @@ def pca(dataframe: pd.DataFrame, output_png: str, output_file: str):
     # saving the principal components
     with open(output_file, "w") as f: 
         f.write(str(variance))
-   
-# site sckit learn 
+
+
+# This function is taken from the scikit-learn version 1.2.1 example code
+# https://scikit-learn.org/stable/auto_examples/cluster/plot_agglomerative_dendrogram.html
+# available under the BSD 3-Clause License, Copyright 2007 - 2023, scikit-learn developers
 def plot_dendrogram(model, **kwargs):
     # Create linkage matrix and then plot the dendrogram
 
