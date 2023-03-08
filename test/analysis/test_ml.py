@@ -20,7 +20,9 @@ class TestML:
         assert(filecmp.cmp(OUT_DIR+ '/pca/pca-coordinates.txt', EXPECT_DIR+ '/expected_coords.txt'))
         assert(filecmp.cmp(OUT_DIR+'/pca/pca-components.txt', EXPECT_DIR+'/expected_components.txt'))
     
-    # def test_hac(self):
-    #     None
+    def test_hac(self):
+        dataframe = ml.summarize_networks([TEST_DIR+'s1.txt',TEST_DIR+'s2.txt',TEST_DIR+'s3.txt'])
+        ml.hac(dataframe,OUT_DIR+'/hac/hac.png', OUT_DIR+'/hac/hac-clusters.txt' )
+        assert(filecmp.cmp(OUT_DIR+'/hac/hac-clusters.txt', EXPECT_DIR+'/expected_clusters.txt'))
 
         

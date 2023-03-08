@@ -141,7 +141,6 @@ def hac(dataframe: pd.DataFrame, output_png: str, output_file: str):
     plt.title("Hierarchical Agglomerative Clustering Dendrogram")
     algo_names = list(dataframe.columns)
     plot_dendrogram(model, truncate_mode=None, labels=algo_names, leaf_rotation=90, leaf_font_size=10, color_threshold=0)
-
     plt.xlabel("algorithms")
     plt.savefig(output_png, bbox_inches="tight")
 
