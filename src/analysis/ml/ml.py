@@ -99,6 +99,7 @@ def pca(dataframe: pd.DataFrame, output_png: str, output_file: str, output_coord
     with open(output_file, "w") as f: 
         f.write(str(variance))
 
+<<<<<<< HEAD
     # saving the coordinates of each algorithm
     columns = dataframe.columns.tolist()
     data = {'algorithm': columns, 'x': X_pca_2[:, 0], 'y': X_pca_2[:, 1]}
@@ -119,6 +120,12 @@ def pca(dataframe: pd.DataFrame, output_png: str, output_file: str, output_coord
   pages = {108--122},
 } 
 """
+=======
+
+# This function is taken from the scikit-learn version 1.2.1 example code
+# https://scikit-learn.org/stable/auto_examples/cluster/plot_agglomerative_dendrogram.html
+# available under the BSD 3-Clause License, Copyright 2007 - 2023, scikit-learn developers
+>>>>>>> 7a975f62b473173f2963d9b46d0dff4344bf0acf
 def plot_dendrogram(model, **kwargs):
     # Create linkage matrix and then plot the dendrogram
 
@@ -165,9 +172,12 @@ def hac(dataframe: pd.DataFrame, output_png: str, output_file: str):
 
     plt.xlabel("algorithms")
     plt.savefig(output_png, bbox_inches="tight")
+<<<<<<< HEAD
 
 
     columns = dataframe.columns.tolist()
     data = {'algorithm': columns, 'labels': model.labels_}
     df = pd.DataFrame(data)
     df.to_csv(output_file, sep='\t', index=False)
+=======
+>>>>>>> 7a975f62b473173f2963d9b46d0dff4344bf0acf
