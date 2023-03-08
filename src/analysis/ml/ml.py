@@ -99,33 +99,15 @@ def pca(dataframe: pd.DataFrame, output_png: str, output_file: str, output_coord
     with open(output_file, "w") as f: 
         f.write(str(variance))
 
-<<<<<<< HEAD
     # saving the coordinates of each algorithm
     columns = dataframe.columns.tolist()
     data = {'algorithm': columns, 'x': X_pca_2[:, 0], 'y': X_pca_2[:, 1]}
     df = pd.DataFrame(data)
     df.to_csv(output_coord, sep='\t', index=False)
    
-"""
-@inproceedings{sklearn_api,
-  author    = {Lars Buitinck and Gilles Louppe and Mathieu Blondel and
-               Fabian Pedregosa and Andreas Mueller and Olivier Grisel and
-               Vlad Niculae and Peter Prettenhofer and Alexandre Gramfort
-               and Jaques Grobler and Robert Layton and Jake VanderPlas and
-               Arnaud Joly and Brian Holt and Ga{\"{e}}l Varoquaux},
-  title     = {{API} design for machine learning software: experiences from the scikit-learn
-               project},
-  booktitle = {ECML PKDD Workshop: Languages for Data Mining and Machine Learning},
-  year      = {2013},
-  pages = {108--122},
-} 
-"""
-=======
-
 # This function is taken from the scikit-learn version 1.2.1 example code
 # https://scikit-learn.org/stable/auto_examples/cluster/plot_agglomerative_dendrogram.html
 # available under the BSD 3-Clause License, Copyright 2007 - 2023, scikit-learn developers
->>>>>>> 7a975f62b473173f2963d9b46d0dff4344bf0acf
 def plot_dendrogram(model, **kwargs):
     # Create linkage matrix and then plot the dendrogram
 
@@ -155,29 +137,15 @@ def hac(dataframe: pd.DataFrame, output_png: str, output_file: str):
     model = AgglomerativeClustering(distance_threshold = 0.5, n_clusters= None) # n_clusters = 2 and distance_threshold = None
     model = model.fit(X)
 
-    # dist_matrix = squareform(model.distances_)
-    # Z = linkage(np.reshape(model.distances_, (len(model.distances_), 1)), method='complete')
-    # Z = linkage(model, method='complete')
-    # Z = linkage(model.distances_, method='complete')
-
-    # Z = linkage(model.children_, method= 'complete')
-
-    # here for right now to make code work, but this may not be what we need to do
     plt.figure(figsize=(10,7))
     plt.title("Hierarchical Agglomerative Clustering Dendrogram")
     algo_names = list(dataframe.columns)
-    plot_dendrogram(model, truncate_mode="level", p=3, labels=algo_names, leaf_rotation=90, leaf_font_size=10)
-    # Z = linkage(model.children_, method= 'complete')
-    # dendrogram(Z, leaf_font_size=10) #, labels=algo_names, leaf_rotation=90)
+    plot_dendrogram(model, truncate_mode=None, labels=algo_names, leaf_rotation=90, leaf_font_size=10, color_threshold=0)
 
     plt.xlabel("algorithms")
     plt.savefig(output_png, bbox_inches="tight")
-<<<<<<< HEAD
-
 
     columns = dataframe.columns.tolist()
     data = {'algorithm': columns, 'labels': model.labels_}
     df = pd.DataFrame(data)
     df.to_csv(output_file, sep='\t', index=False)
-=======
->>>>>>> 7a975f62b473173f2963d9b46d0dff4344bf0acf
