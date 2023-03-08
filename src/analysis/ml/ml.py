@@ -10,7 +10,8 @@ from sklearn.preprocessing import StandardScaler
 import seaborn as sns
 
 from sklearn.cluster import AgglomerativeClustering
-from scipy.cluster.hierarchy import dendrogram
+from scipy.cluster.hierarchy import dendrogram, linkage
+from scipy.spatial.distance import squareform
 import numpy as np
 
 def summarize_networks(file_paths: Iterable[Path]) -> pd.DataFrame:
@@ -40,12 +41,11 @@ def summarize_networks(file_paths: Iterable[Path]) -> pd.DataFrame:
             
             # getting the algorithm name
             p = PurePath(file)
-            p.parts[-2]
             edge_tuples.append((p.parts[-2], e))
 
   
         except FileNotFoundError:
-            print(file, ' DOES NOT EXIST') # should hopefully not hit
+            print(file, 'not found during ML analysis') # should hopefully not hit
             continue
         
     # the dataframes per algorithm
@@ -65,10 +65,10 @@ def summarize_networks(file_paths: Iterable[Path]) -> pd.DataFrame:
     concated_df = pd.concat(edge_dataframes, axis= 1, join = 'outer')
     concated_df = concated_df.fillna(0) 
     concated_df = concated_df.astype('int64')
-   
+    
     return concated_df
     
-def pca(dataframe: pd.DataFrame, output_png: str, output_file: str):
+def pca(dataframe: pd.DataFrame, output_png: str, output_file: str, output_coord: str):
 
     df = dataframe.reset_index(drop=True)
     df = df.transpose() #based on the algortihms rather than the edges 
@@ -83,7 +83,7 @@ def pca(dataframe: pd.DataFrame, output_png: str, output_file: str):
     pca_2.fit(X_scaled)
     X_pca_2 = pca_2.transform(X_scaled)
     variance = pca_2.explained_variance_ratio_ *100
-
+    
     # making the plot
     plt.figure(figsize = (10,7))
     # sns.set(font_scale = 1.5)
@@ -98,8 +98,27 @@ def pca(dataframe: pd.DataFrame, output_png: str, output_file: str):
     # saving the principal components
     with open(output_file, "w") as f: 
         f.write(str(variance))
+
+    # saving the coordinates of each algorithm
+    columns = dataframe.columns.tolist()
+    data = {'algorithm': columns, 'x': X_pca_2[:, 0], 'y': X_pca_2[:, 1]}
+    df = pd.DataFrame(data)
+    df.to_csv(output_coord, sep='\t', index=False)
    
-# site sckit learn 
+"""
+@inproceedings{sklearn_api,
+  author    = {Lars Buitinck and Gilles Louppe and Mathieu Blondel and
+               Fabian Pedregosa and Andreas Mueller and Olivier Grisel and
+               Vlad Niculae and Peter Prettenhofer and Alexandre Gramfort
+               and Jaques Grobler and Robert Layton and Jake VanderPlas and
+               Arnaud Joly and Brian Holt and Ga{\"{e}}l Varoquaux},
+  title     = {{API} design for machine learning software: experiences from the scikit-learn
+               project},
+  booktitle = {ECML PKDD Workshop: Languages for Data Mining and Machine Learning},
+  year      = {2013},
+  pages = {108--122},
+} 
+"""
 def plot_dendrogram(model, **kwargs):
     # Create linkage matrix and then plot the dendrogram
 
@@ -122,16 +141,33 @@ def plot_dendrogram(model, **kwargs):
     # Plot the corresponding dendrogram
     dendrogram(linkage_matrix, **kwargs)
 
-def hac(dataframe: pd.DataFrame, output_png: str):
+def hac(dataframe: pd.DataFrame, output_png: str, output_file: str):
 
     X = dataframe.reset_index(drop=True)
     X = X.transpose()
-    model = AgglomerativeClustering(linkage='complete', distance_threshold=0, n_clusters=None)
+    model = AgglomerativeClustering(distance_threshold = 0.5, n_clusters= None) # n_clusters = 2 and distance_threshold = None
     model = model.fit(X)
 
+    # dist_matrix = squareform(model.distances_)
+    # Z = linkage(np.reshape(model.distances_, (len(model.distances_), 1)), method='complete')
+    # Z = linkage(model, method='complete')
+    # Z = linkage(model.distances_, method='complete')
+
+    # Z = linkage(model.children_, method= 'complete')
+
+    # here for right now to make code work, but this may not be what we need to do
     plt.figure(figsize=(10,7))
     plt.title("Hierarchical Agglomerative Clustering Dendrogram")
     algo_names = list(dataframe.columns)
     plot_dendrogram(model, truncate_mode="level", p=3, labels=algo_names, leaf_rotation=90, leaf_font_size=10)
+    # Z = linkage(model.children_, method= 'complete')
+    # dendrogram(Z, leaf_font_size=10) #, labels=algo_names, leaf_rotation=90)
+
     plt.xlabel("algorithms")
     plt.savefig(output_png, bbox_inches="tight")
+
+
+    columns = dataframe.columns.tolist()
+    data = {'algorithm': columns, 'labels': model.labels_}
+    df = pd.DataFrame(data)
+    df.to_csv(output_file, sep='\t', index=False)
