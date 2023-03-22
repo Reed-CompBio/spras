@@ -12,6 +12,8 @@ from sklearn.cluster import AgglomerativeClustering
 from scipy.cluster.hierarchy import dendrogram
 import numpy as np
 
+
+
 def summarize_networks(file_paths: Iterable[Path]) -> pd.DataFrame:
 
     # creating a tuple that contains the algorithm column name and edge pairs
@@ -91,7 +93,8 @@ def pca(dataframe: pd.DataFrame, output_png: str, output_file: str, output_coord
 
     # saving the principal components
     with open(output_file, "w") as f: 
-        f.write(str(variance))
+        for component in variance:
+            f.write("%s\n" % component)
 
     # saving the coordinates of each algorithm
     columns = dataframe.columns.tolist()

@@ -18,10 +18,12 @@ class TestML:
 
     def test_pca(self):
         dataframe = ml.summarize_networks([TEST_DIR+'s1.txt',TEST_DIR+'s2.txt',TEST_DIR+'s3.txt'])
-        ml.pca(dataframe, OUT_DIR+'pca/pca.png', OUT_DIR+'pca/pca-components.txt', OUT_DIR+ 'pca/pca-coordinates.txt')
-        comp = pd.read_csv(OUT_DIR+'pca/pca-coordinates.txt').round(5)
-        excepted = pd.read_csv(EXPECT_DIR+ 'expected_coords.txt').round(5)
-        assert(comp.equals(excepted))
+        ml.pca(dataframe, OUT_DIR+'pca/pca.png', OUT_DIR+'pca/pca-components.txt', OUT_DIR+ 'pca/pca-coordinates.csv')
+        coord = pd.read_table(OUT_DIR+'pca/pca-coordinates.csv')
+        coord = coord.round(5)
+        expected = pd.read_table(EXPECT_DIR+ 'expected_coords.csv')
+        expected = expected.round(5)
+        assert(coord.equals(expected))
     
     def test_hac(self):
         dataframe = ml.summarize_networks([TEST_DIR+'s1.txt',TEST_DIR+'s2.txt',TEST_DIR+'s3.txt'])
