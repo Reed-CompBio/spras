@@ -18,20 +18,17 @@ def summarize_networks(file_paths: Iterable[Path]) -> pd.DataFrame:
     edge_tuples = []
     
     for file in file_paths:
-        
         try:
            
            # collecting and sorting the edge pairs per algortihm
             with open(file,'r') as f:
-
                 lines = f.readlines()
             
             edge = []
             for line in lines: 
-                
                 parts = line.split()
                
-                if (len(parts) > 0): #had to add this because for some reason some of the outputs had empty lines
+                if (len(parts) > 0): #had to add this because for some reason some of the outputs had empty
                     node1 = parts[0]
                     node2 = parts[1]
                     edge.append(''.join(sorted([node1, node2])))
