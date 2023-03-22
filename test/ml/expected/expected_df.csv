@@ -1,0 +1,13 @@
+,test,test,test,test,test,test
+AB,1,1,0,0,0,0
+CD,1,1,0,0,0,0
+EF,1,1,0,0,0,0
+LM,0,1,1,0,0,0
+MN,0,0,1,0,0,0
+OP,0,0,1,0,0,0
+PQ,0,0,1,0,0,0
+node1node2,0,0,0,1,0,0
+node1node3,0,0,0,1,1,0
+node4node5,0,0,0,1,1,0
+LONGERNAMESTEST,0,0,0,1,1,0
+node2node3,0,0,0,0,1,0

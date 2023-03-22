@@ -1,7 +1,6 @@
 import pandas as pd
 from typing import Iterable
 from pathlib import Path, PurePath
-import os
 
 import matplotlib.pyplot as plt
 plt.switch_backend('Agg')
@@ -10,8 +9,7 @@ from sklearn.preprocessing import StandardScaler
 import seaborn as sns
 
 from sklearn.cluster import AgglomerativeClustering
-from scipy.cluster.hierarchy import dendrogram, linkage
-from scipy.spatial.distance import squareform
+from scipy.cluster.hierarchy import dendrogram
 import numpy as np
 
 def summarize_networks(file_paths: Iterable[Path]) -> pd.DataFrame:
@@ -25,25 +23,24 @@ def summarize_networks(file_paths: Iterable[Path]) -> pd.DataFrame:
            
            # collecting and sorting the edge pairs per algortihm
             with open(file,'r') as f:
-                # under the assumption that it is single chars (maybe)
-                # split on space char 
-                # take the first and 0th elements and sort those 
-                lines = [line[:3] for line in f.readlines()]
-            
-            line = []
-            for char in lines:
-                newChar = char.replace(' ','')
-                line.append(newChar)
-                
-            # to deal with edges are the same but not ordered the same
-            e = [''.join(sorted(ele)) for ele in line]
 
+                lines = f.readlines()
             
+            edge = []
+            for line in lines: 
+                
+                parts = line.split()
+               
+                if (len(parts) > 0): #had to add this because for some reason some of the outputs had empty lines
+                    node1 = parts[0]
+                    node2 = parts[1]
+                    edge.append(''.join(sorted([node1, node2])))
+           
             # getting the algorithm name
             p = PurePath(file)
-            edge_tuples.append((p.parts[-2], e))
+            edge_tuples.append((p.parts[-2], edge))
+            
 
-  
         except FileNotFoundError:
             print(file, 'not found during ML analysis') # should hopefully not hit
             continue
@@ -140,7 +137,7 @@ def hac(dataframe: pd.DataFrame, output_png: str, output_file: str):
     plt.figure(figsize=(10,7))
     plt.title("Hierarchical Agglomerative Clustering Dendrogram")
     algo_names = list(dataframe.columns)
-    plot_dendrogram(model, labels=algo_names, leaf_rotation=90, leaf_font_size=10, color_threshold=0)
+    plot_dendrogram(model, labels=algo_names, leaf_rotation=90, leaf_font_size=10, color_threshold=0, truncate_mode=None)
     plt.xlabel("algorithms")
     plt.savefig(output_png, bbox_inches="tight")
 
