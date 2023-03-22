@@ -1,27 +1,29 @@
 import pandas as pd
 from typing import Iterable
 from pathlib import Path, PurePath
-
 import matplotlib.pyplot as plt
-plt.switch_backend('Agg')
 from sklearn.decomposition import PCA
 from sklearn.preprocessing import StandardScaler
 import seaborn as sns
-
 from sklearn.cluster import AgglomerativeClustering
 from scipy.cluster.hierarchy import dendrogram
 import numpy as np
-
+plt.switch_backend('Agg')
 
 
 def summarize_networks(file_paths: Iterable[Path]) -> pd.DataFrame:
-
+    '''
+    will take in a list of filepaths and creates a binary dataframe where each 
+    row corresponds to an edge and each column corresponds to an algorithm. 
+    The values in the dataframe are 1 if the edge is present in 
+    the algorithm and 0 otherwise.
+    @param file_paths: file paths of algorithm outputs 
+    '''
     # creating a tuple that contains the algorithm column name and edge pairs
     edge_tuples = []
     
     for file in file_paths:
         try:
-           
            # collecting and sorting the edge pairs per algortihm
             with open(file,'r') as f:
                 lines = f.readlines()
@@ -29,8 +31,7 @@ def summarize_networks(file_paths: Iterable[Path]) -> pd.DataFrame:
             edge = []
             for line in lines: 
                 parts = line.split()
-               
-                if (len(parts) > 0): #had to add this because for some reason some of the outputs had empty
+                if (len(parts) > 0): # incase of empty line in file
                     node1 = parts[0]
                     node2 = parts[1]
                     edge.append(''.join(sorted([node1, node2])))
@@ -39,7 +40,6 @@ def summarize_networks(file_paths: Iterable[Path]) -> pd.DataFrame:
             p = PurePath(file)
             edge_tuples.append((p.parts[-2], edge))
             
-
         except FileNotFoundError:
             print(file, 'not found during ML analysis') # should hopefully not hit
             continue
@@ -63,9 +63,20 @@ def summarize_networks(file_paths: Iterable[Path]) -> pd.DataFrame:
     concated_df = concated_df.astype('int64')
     
     return concated_df
-    
+
+
 def pca(dataframe: pd.DataFrame, output_png: str, output_file: str, output_coord: str):
 
+    '''
+    performs PCA on the data and creates a scatterplot of the top two principal components. 
+    It saves the plot, the variance of each component, and the 
+    coordinates corresponding to the plot of each algorithm in a separate file.
+    @param dataframe: binary dataframe of edge comparison between algorithms
+    @param output_png: the filename to save the scatterplot 
+    @param output_file: the filename to save the variance explained by each component
+    @param output_coord: the filename to save the coordinates of each algorithm
+
+    '''
     df = dataframe.reset_index(drop=True)
     df = df.transpose() #based on the algortihms rather than the edges 
     X = df.values
@@ -127,7 +138,16 @@ def plot_dendrogram(model, **kwargs):
     # Plot the corresponding dendrogram
     dendrogram(linkage_matrix, **kwargs)
 
+
 def hac(dataframe: pd.DataFrame, output_png: str, output_file: str):
+    '''
+    performs hierarchical agglomerative clustering on the data, 
+    creates a dendrogram of the resulting tree, 
+    and saves the dendrogram and the cluster labels of said dendrogram in separate files.
+    @param dataframe: binary dataframe of edge comparison between algorithms
+    @param output_png: the file name to save the dendrogram
+    @param output_file: the file name to save the clustering labels
+    '''
 
     X = dataframe.reset_index(drop=True)
     X = X.transpose()
