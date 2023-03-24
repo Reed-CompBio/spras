@@ -34,7 +34,7 @@ def summarize_networks(file_paths: Iterable[Path]) -> pd.DataFrame:
                 if (len(parts) > 0): # incase of empty line in file
                     node1 = parts[0]
                     node2 = parts[1]
-                    edge.append(''.join(sorted([node1, node2])))
+                    edge.append('|||'.join(sorted([node1, node2])))
            
             # getting the algorithm name
             p = PurePath(file)
