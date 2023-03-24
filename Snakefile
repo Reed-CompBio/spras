@@ -66,7 +66,6 @@ def make_final_input(wildcards):
         # add table summarizing all pathways for each dataset
         final_input.extend(expand('{out_dir}{sep}{dataset}-pathway-summary.txt',out_dir=out_dir,sep=SEP,dataset=dataset_labels))
 
-
     if config["analysis"]["graphspace"]["include"]:
         # add graph and style JSON files.
         final_input.extend(expand('{out_dir}{sep}{dataset}-{algorithm_params}{sep}gs.json',out_dir=out_dir,sep=SEP,dataset=dataset_labels,algorithm_params=algorithms_with_params))
@@ -78,6 +77,7 @@ def make_final_input(wildcards):
         final_input.extend(expand('{out_dir}{sep}{dataset}-hac.png',out_dir=out_dir,sep=SEP,dataset=dataset_labels,algorithm_params=algorithms_with_params))
         final_input.extend(expand('{out_dir}{sep}{dataset}-hac-clusters.txt',out_dir=out_dir,sep=SEP,dataset=dataset_labels,algorithm_params=algorithms_with_params))
         final_input.extend(expand('{out_dir}{sep}{dataset}-pca-coordinates.txt',out_dir=out_dir,sep=SEP,dataset=dataset_labels,algorithm_params=algorithms_with_params))
+
     if len(final_input) == 0:
         # No analysis added yet, so add reconstruction output files if they exist.
         # (if analysis is specified, these should be implicitly run).
@@ -243,6 +243,7 @@ rule summary_table:
         summary_df = summary.summarize_networks(input.pathways, node_table)
         summary_df.to_csv(output.summary_table, sep='\t', index=False)
 
+# Cluster the output pathways for each dataset
 rule ml: 
     input: 
         pathways = expand('{out_dir}{sep}{{dataset}}-{algorithm_params}{sep}pathway.txt', out_dir=out_dir, sep=SEP, algorithm_params=algorithms_with_params)
