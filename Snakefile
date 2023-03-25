@@ -6,6 +6,7 @@ from Dataset import Dataset
 from src.util import process_config
 from src.analysis.summary import summary
 from src.analysis.viz import graphspace
+from src.analysis.ml import ml
 
 # Snakemake updated the behavior in the 6.5.0 release https://github.com/snakemake/snakemake/pull/1037
 # and using the wrong separator prevents Snakemake from matching filenames to the rules that can produce them
@@ -65,11 +66,17 @@ def make_final_input(wildcards):
         # add table summarizing all pathways for each dataset
         final_input.extend(expand('{out_dir}{sep}{dataset}-pathway-summary.txt',out_dir=out_dir,sep=SEP,dataset=dataset_labels))
 
-
     if config["analysis"]["graphspace"]["include"]:
         # add graph and style JSON files.
         final_input.extend(expand('{out_dir}{sep}{dataset}-{algorithm_params}{sep}gs.json',out_dir=out_dir,sep=SEP,dataset=dataset_labels,algorithm_params=algorithms_with_params))
         final_input.extend(expand('{out_dir}{sep}{dataset}-{algorithm_params}{sep}gsstyle.json',out_dir=out_dir,sep=SEP,dataset=dataset_labels,algorithm_params=algorithms_with_params))
+    
+    if config["analysis"]["ml"]["include"]:  
+        final_input.extend(expand('{out_dir}{sep}{dataset}-pca.png',out_dir=out_dir,sep=SEP,dataset=dataset_labels,algorithm_params=algorithms_with_params))
+        final_input.extend(expand('{out_dir}{sep}{dataset}-pca-components.txt',out_dir=out_dir,sep=SEP,dataset=dataset_labels,algorithm_params=algorithms_with_params))
+        final_input.extend(expand('{out_dir}{sep}{dataset}-hac.png',out_dir=out_dir,sep=SEP,dataset=dataset_labels,algorithm_params=algorithms_with_params))
+        final_input.extend(expand('{out_dir}{sep}{dataset}-hac-clusters.txt',out_dir=out_dir,sep=SEP,dataset=dataset_labels,algorithm_params=algorithms_with_params))
+        final_input.extend(expand('{out_dir}{sep}{dataset}-pca-coordinates.txt',out_dir=out_dir,sep=SEP,dataset=dataset_labels,algorithm_params=algorithms_with_params))
 
     if len(final_input) == 0:
         # No analysis added yet, so add reconstruction output files if they exist.
@@ -238,6 +245,22 @@ rule summary_table:
         node_table = Dataset.from_file(input.dataset_file).node_table
         summary_df = summary.summarize_networks(input.pathways, node_table)
         summary_df.to_csv(output.summary_table, sep='\t', index=False)
+
+# Cluster the output pathways for each dataset
+rule ml: 
+    input: 
+        pathways = expand('{out_dir}{sep}{{dataset}}-{algorithm_params}{sep}pathway.txt', out_dir=out_dir, sep=SEP, algorithm_params=algorithms_with_params)
+    output: 
+        pca_image = SEP.join([out_dir, '{dataset}-pca.png']),
+        pca_components= SEP.join([out_dir, '{dataset}-pca-components.txt']),
+        pca_coordinates = SEP.join([out_dir, '{dataset}-pca-coordinates.txt']),
+        hac_image = SEP.join([out_dir, '{dataset}-hac.png']),
+        hac_clusters = SEP.join([out_dir, '{dataset}-hac-clusters.txt'])
+    run: 
+        summary_df = ml.summarize_networks(input.pathways)
+        ml.pca(summary_df, output.pca_image, output.pca_components, output.pca_coordinates)
+        ml.hac(summary_df, output.hac_image, output.hac_clusters)
+
 
 # Remove the output directory
 rule clean:

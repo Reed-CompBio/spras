@@ -1,0 +1,4 @@
+node1 node2 1
+node1 node3 1
+node4 node5 1
+TEST LONGERNAMES 1

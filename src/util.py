@@ -357,3 +357,13 @@ def compare_files(file1, file2) -> bool:
         contents2 = list(f2)
 
     return contents1 == contents2
+
+
+def make_required_dirs(path: str):
+    """
+    Create the directory and parent directories required before an output file can be written to the specified path.
+    Existing directories will not raise an error.
+    @param path: the filename that is to be written
+    """
+    out_path = Path(path).parent
+    out_path.mkdir(parents=True, exist_ok=True)
