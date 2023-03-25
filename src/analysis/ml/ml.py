@@ -11,6 +11,8 @@ from sklearn.cluster import AgglomerativeClustering
 from sklearn.decomposition import PCA
 from sklearn.preprocessing import StandardScaler
 
+from src.util import make_required_dirs
+
 plt.switch_backend('Agg')
 
 NODE_SEP = '|||'  # separator between nodes when forming edges in the dataframe
@@ -103,9 +105,11 @@ def pca(dataframe: pd.DataFrame, output_png: str, output_file: str, output_coord
     plt.ylabel(f"PC2 ({variance[1]:.1f}% variance)")
 
     # saving the PCA plot
+    make_required_dirs(output_png)
     plt.savefig(output_png)
 
     # saving the principal components
+    make_required_dirs(output_file)
     with open(output_file, "w") as f:
         for component in variance:
             f.write("%s\n" % component)
@@ -114,6 +118,7 @@ def pca(dataframe: pd.DataFrame, output_png: str, output_file: str, output_coord
     columns = dataframe.columns.tolist()
     data = {'algorithm': columns, 'x': X_pca_2[:, 0], 'y': X_pca_2[:, 1]}
     df = pd.DataFrame(data)
+    make_required_dirs(output_coord)
     df.to_csv(output_coord, sep='\t', index=False)
 
 
@@ -168,9 +173,11 @@ def hac(dataframe: pd.DataFrame, output_png: str, output_file: str):
     plot_dendrogram(model, labels=algo_names, leaf_rotation=90, leaf_font_size=10, color_threshold=0,
                     truncate_mode=None)
     plt.xlabel("algorithms")
+    make_required_dirs(output_png)
     plt.savefig(output_png, bbox_inches="tight")
 
     columns = dataframe.columns.tolist()
     data = {'algorithm': columns, 'labels': model.labels_}
     df = pd.DataFrame(data)
+    make_required_dirs(output_file)
     df.to_csv(output_file, sep='\t', index=False)
