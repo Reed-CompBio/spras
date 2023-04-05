@@ -1,7 +1,6 @@
 from os import PathLike
 from pathlib import PurePath
 from typing import Iterable, Union
-
 import matplotlib.pyplot as plt
 import numpy as np
 import pandas as pd
@@ -10,7 +9,7 @@ from scipy.cluster.hierarchy import dendrogram
 from sklearn.cluster import AgglomerativeClustering
 from sklearn.decomposition import PCA
 from sklearn.preprocessing import StandardScaler
-
+from adjustText import adjust_text
 from src.util import make_required_dirs
 
 plt.switch_backend('Agg')
@@ -84,6 +83,8 @@ def pca(dataframe: pd.DataFrame, output_png: str, output_file: str, output_coord
     @param output_coord: the filename to save the coordinates of each algorithm
     """
     df = dataframe.reset_index(drop=True)
+    column_names = df.head()
+    column_names = [element.split()[0].split('-')[1] for element in column_names]
     df = df.transpose()  # based on the algorithms rather than the edges
     X = df.values
 
@@ -99,20 +100,10 @@ def pca(dataframe: pd.DataFrame, output_png: str, output_file: str, output_coord
 
     # making the plot
     plt.figure(figsize=(10, 7))
-    sns.scatterplot(x=X_pca_2[:, 0], y=X_pca_2[:, 1], s=70)
+    sns.scatterplot(x=X_pca_2[:, 0], y=X_pca_2[:, 1], s=70, hue=column_names, legend=True);
     plt.title("PCA")
     plt.xlabel(f"PC1 ({variance[0]:.1f}% variance)")
     plt.ylabel(f"PC2 ({variance[1]:.1f}% variance)")
-
-    # saving the PCA plot
-    make_required_dirs(output_png)
-    plt.savefig(output_png)
-
-    # saving the principal components
-    make_required_dirs(output_file)
-    with open(output_file, "w") as f:
-        for component in variance:
-            f.write("%s\n" % component)
 
     # saving the coordinates of each algorithm
     columns = dataframe.columns.tolist()
@@ -121,6 +112,29 @@ def pca(dataframe: pd.DataFrame, output_png: str, output_file: str, output_coord
     make_required_dirs(output_coord)
     df.to_csv(output_coord, sep='\t', index=False)
 
+    # labeling the graph
+    algorithm_names = df['algorithm'].to_numpy()
+    algorithm_names = [element.split()[0].split('-')[1] for element in algorithm_names]
+    x_coord = df['x'].to_numpy()
+    y_coord = df['y'].to_numpy()
+
+    texts = []
+    for i, algorithm in enumerate(algorithm_names):
+        # TODO: can add a threshold here to allow for labeled points
+        texts.append(plt.text(x_coord[i], y_coord[i], algorithm, size=9))
+    
+    adjust_text(texts, force_points= [2.5,3])
+
+     # saving the principal components
+    make_required_dirs(output_file)
+    with open(output_file, "w") as f:
+        for component in variance:
+            f.write("%s\n" % component)
+
+    # saving the PCA plot
+    make_required_dirs(output_png)
+    plt.savefig(output_png)
+    
 
 # This function is taken from the scikit-learn version 1.2.1 example code
 # https://scikit-learn.org/stable/auto_examples/cluster/plot_agglomerative_dendrogram.html
@@ -163,16 +177,32 @@ def hac(dataframe: pd.DataFrame, output_png: str, output_file: str):
     @param output_file: the file name to save the clustering labels
     """
     X = dataframe.reset_index(drop=True)
-    X = X.transpose()
-    model = AgglomerativeClustering(distance_threshold=0.5, n_clusters=None)
+    column_names = X.head()
+    column_names = [element.split()[0].split('-')[1] for element in column_names]
+    X = X.transpose() 
+    
+    # using seaborn
+    color_dict = {'pathlinker': 'red', 'omicsintegrator1': 'green', 'omicsintegrator2': 'blue', 'meo': 'orange', 'mincostflow': 'purple'}
+    plt.figure(figsize=(10, 7))
+    row_colors = pd.Series(column_names, index=X.index).map(color_dict)
+    clustergrid = sns.clustermap(X, metric='euclidean', method="ward", row_colors=row_colors, col_cluster=False)
+    clustergrid.ax_heatmap.remove()
+    clustergrid.cax.remove()
+    legend_labels = [plt.Rectangle((0,0),0,0, color=color_dict[label]) for label in color_dict]
+    plt.legend(legend_labels, color_dict.keys(), loc='lower left')
+    # plt.savefig(output_png, bbox_inches="tight")
+
+    # using sckit learn and dendrogram 
+    model = AgglomerativeClustering(linkage='ward', affinity='euclidean',distance_threshold=0.5, n_clusters=None)
     model = model.fit(X)
 
     plt.figure(figsize=(10, 7))
     plt.title("Hierarchical Agglomerative Clustering Dendrogram")
-    algo_names = list(dataframe.columns)
-    plot_dendrogram(model, labels=algo_names, leaf_rotation=90, leaf_font_size=10, color_threshold=0,
-                    truncate_mode=None)
     plt.xlabel("algorithms")
+    # algo_names = list(dataframe.columns)
+    plot_dendrogram(model, labels=column_names, leaf_rotation=90, leaf_font_size=10, color_threshold=0,
+                    truncate_mode=None)
+
     make_required_dirs(output_png)
     plt.savefig(output_png, bbox_inches="tight")
 
