@@ -71,10 +71,6 @@ Some computing environments are unable to run Docker and prefer Singularity as t
 SPRAS has limited experimental support for Singularity instead of Docker, and only for some pathway reconstruction algorithms.
 SPRAS uses the spython package to interface with Singularity, which only supports Linux.
 
-## Docker demo
-The `docker-demo` subdirectory is not used by the main pathway reconstruction framework.
-It serves as a reference for how to set up Dockerfiles and make Docker run calls.
-
 ## Attribution
 SPRAS builds on public datasets and algorithms.
 If you use SPRAS in a research project, please cite the original datasets and algorithms in addition to SPRAS.
