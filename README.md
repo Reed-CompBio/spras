@@ -62,7 +62,7 @@ The Docker images are available on [DockerHub](https://hub.docker.com/orgs/reedc
 **Python wrapper for calling algorithms**: Wrapper functions provide an interface between the common file formats for input and output data and the algorithm-specific file formats and reconstruction commands.
 These wrappers are in the `src/` subdirectory.
 
-**Test code**: Tests for the Docker wrappers.
+**Test code**: Tests for the Docker wrappers and SPRAS code.
 The tests require the conda environment in `environment.yml` and Docker.
 Run the tests with `pytest -s`.
 
