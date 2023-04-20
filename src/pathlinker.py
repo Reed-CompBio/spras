@@ -116,6 +116,5 @@ class PathLinker(PRM):
         """
         # Questions: should there be a header/optional columns?
         # What about multiple raw_pathway_files
-        # We should not allow spaces in the node names if we use space separator.
-        df = pd.read_csv(raw_pathway_file,sep='\t').take([0,1,2],axis=1)
-        df.to_csv(standardized_pathway_file, header=False,index=False,sep=' ')
+        df = pd.read_csv(raw_pathway_file, sep='\t').take([0, 1, 2], axis=1)
+        df.to_csv(standardized_pathway_file, header=False, index=False, sep='\t')

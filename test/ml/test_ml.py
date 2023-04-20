@@ -20,7 +20,7 @@ class TestML:
     def test_summarize_networks(self):
         dataframe = ml.summarize_networks([INPUT_DIR + 's1/s1.txt', INPUT_DIR + 's2/s2.txt', INPUT_DIR + 's3/s3.txt',
                                            INPUT_DIR + 'longName/longName.txt', INPUT_DIR + 'longName2/longName2.txt',
-                                           INPUT_DIR + 'empty/empty.txt'])
+                                           INPUT_DIR + 'empty/empty.txt', INPUT_DIR + 'spaces/spaces.txt'])
         dataframe.to_csv(OUT_DIR + 'dataframe.csv')
         assert filecmp.cmp(OUT_DIR + 'dataframe.csv', EXPECT_DIR + 'expected_df.csv')
 
