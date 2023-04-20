@@ -1,9 +1,9 @@
-import PRRunner
+from src import PRRunner
 import shutil
 import yaml
 import os
 
-config_loc = os.path.join("config","config.yaml")
+config_loc = os.path.join("config", "config.yaml")
 
 with open(config_loc) as config_file:
     config = yaml.load(config_file, Loader=yaml.FullLoader)
@@ -16,17 +16,17 @@ for dataset in config["datasets"]:
     # Test PathLinker
     filename_map = {"nodetypes": os.path.join("tmp_output", "pl-nodetypes.txt"),
                     "network": os.path.join("tmp_output", "pl-network.txt")}
-    PRRunner.prepare_inputs("pathlinker",test_file,filename_map)
+    PRRunner.prepare_inputs("pathlinker", test_file, filename_map)
 
     # Test OmicsIntegrator1
     filename_map = {"prizes": os.path.join("tmp_output", "oi1-prizes.txt"),
                     "edges": os.path.join("tmp_output", "oi1-network.txt")}
-    PRRunner.prepare_inputs("omicsintegrator1",test_file,filename_map)
+    PRRunner.prepare_inputs("omicsintegrator1", test_file, filename_map)
 
     # Test OmicsIntegrator2
     filename_map = {"prizes": os.path.join("tmp_output", "oi2-prizes.txt"),
                     "edges": os.path.join("tmp_output", "oi2-network.txt")}
-    PRRunner.prepare_inputs("omicsintegrator2",test_file,filename_map)
+    PRRunner.prepare_inputs("omicsintegrator2", test_file, filename_map)
 
     # Test MEO
     filename_map = {"sources": os.path.join("tmp_output", "meo-sources.txt"),

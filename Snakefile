@@ -1,8 +1,8 @@
 import os
-import PRRunner
+from src import PRRunner
 import shutil
 import yaml
-from Dataset import Dataset
+from src.dataset import Dataset
 from src.util import process_config
 from src.analysis.summary import summary
 from src.analysis.viz import graphspace
@@ -247,7 +247,7 @@ rule summary_table:
         summary_df.to_csv(output.summary_table, sep='\t', index=False)
 
 # Cluster the output pathways for each dataset
-rule ml: 
+rule ml:
     input: 
         pathways = expand('{out_dir}{sep}{{dataset}}-{algorithm_params}{sep}pathway.txt', out_dir=out_dir, sep=SEP, algorithm_params=algorithms_with_params)
     output: 
