@@ -153,7 +153,7 @@ class OmicsIntegrator2(PRM):
                 pass
             return
         df = pd.read_csv(raw_pathway_file, sep='\t')
-        df = df[df['in_solution'] is True]
+        df = df[df['in_solution'] == True]  # Check whether this column can be empty before revising this line
         df = df.take([0, 1], axis=1)
         df[3] = [1 for _ in range(len(df.index))]
         df.to_csv(standardized_pathway_file, header=False, index=False, sep='\t')
