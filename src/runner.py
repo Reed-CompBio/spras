@@ -7,6 +7,7 @@ from src.omicsintegrator2 import OmicsIntegrator2 as omicsintegrator2
 from src.pathlinker import PathLinker as pathlinker
 from src.mincostflow import MinCostFlow as mincostflow
 
+
 def run(algorithm, params):
     """
     A generic interface to the algorithm-specific run functions

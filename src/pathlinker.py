@@ -1,6 +1,6 @@
 import pandas as pd
 import warnings
-from src.PRM import PRM
+from src.prm import PRM
 from pathlib import Path
 from src.util import prepare_volume, run_container
 
