@@ -89,7 +89,7 @@ Use the `run_container` utility function to run the command in the container `<u
 
 Implement the `parse_output` function.
 The edges in the Local Neighborhood output have the same format as the input, `<vertex1>|<vertex2>`.
-Convert these to be space-separated vertex pairs followed by a space and a `1` at the end of every line, which indicates all edges have the same rank.
+Convert these to be tab-separated vertex pairs followed by a tab and a `1` at the end of every line, which indicates all edges have the same rank.
 The output should have the format `<vertex1> <vertex2> 1`.
 
 ### Step 4: Make the Local Neighborhood wrapper accessible through SPRAS
