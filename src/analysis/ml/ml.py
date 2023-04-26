@@ -17,6 +17,14 @@ plt.switch_backend('Agg')
 
 linkage_methods = ["ward", "complete", "average", "single"]
 distance_metrics = ["euclidean", "l1", "l2", "manhattan", "cosine", "precomputed"]
+color_dict = {
+        'pathlinker': 'red', 
+        'omicsintegrator1': 'green', 
+        'omicsintegrator2': 'blue', 
+        'meo': 'orange', 
+        'mincostflow': 'purple'
+    }  # currently will need to manually update this
+
 NODE_SEP = '|||'  # separator between nodes when forming edges in the dataframe
 
 
@@ -85,8 +93,6 @@ def pca(dataframe: pd.DataFrame, output_png: str, output_file: str, output_coord
     @param output_file: the filename to save the variance explained by each component
     @param output_coord: the filename to save the coordinates of each algorithm
     """
-
-
 
     df = dataframe.reset_index(drop=True)
     column_names = df.head()
@@ -187,10 +193,11 @@ def plot_dendrogram(model, **kwargs):
     dendrogram(linkage_matrix, **kwargs)
 
 # make hac_v and hac_h
-def hac(dataframe: pd.DataFrame, output_png: str, output_file: str, linkage='ward', metric='euclidean'):
+
+def hac_vertical(dataframe: pd.DataFrame, output_png: str, output_file: str, linkage='ward', metric='euclidean'):
     """
     Performs hierarchical agglomerative clustering on the dataframe,
-    creates a dendrogram of the resulting tree,
+    creates a dendrogram of the resulting tree USING SEABORN and SCKIT-LEARN for the cluster groups,
     and saves the dendrogram and the cluster labels of said dendrogram in separate files.
     @param dataframe: binary dataframe of edge comparison between algorithms from summarize_networks
     @param output_png: the file name to save the dendrogram image
@@ -213,15 +220,6 @@ def hac(dataframe: pd.DataFrame, output_png: str, output_file: str, linkage='war
     column_names = [element.split()[0].split('-')[1] for element in column_names]
     X = X.transpose() 
     
-    # using seaborn
-    color_dict = {
-        'pathlinker': 'red', 
-        'omicsintegrator1': 'green', 
-        'omicsintegrator2': 'blue', 
-        'meo': 'orange', 
-        'mincostflow': 'purple'
-    }  # currently will need to manually update this
-
     plt.figure(figsize=(10, 7))
     row_colors = pd.Series(column_names, index=X.index).map(color_dict)
     clustergrid = sns.clustermap(X, metric=metric, method=linkage, row_colors=row_colors, col_cluster=False)
@@ -231,9 +229,45 @@ def hac(dataframe: pd.DataFrame, output_png: str, output_file: str, linkage='war
     clustergrid.ax_col_dendrogram.set_visible(False)
     legend_labels = [plt.Rectangle((0,0),0,0, color=color_dict[label]) for label in color_dict]
     plt.legend(legend_labels, color_dict.keys(), bbox_to_anchor=(1.02,1), loc='upper left')
+    make_required_dirs(output_png)
     plt.savefig(output_png, bbox_inches="tight")
 
-    # using sckit learn and dendrogram 
+    model = AgglomerativeClustering(linkage=linkage, affinity=metric,distance_threshold=0.5, n_clusters=None)
+    model = model.fit(X)
+    columns = dataframe.columns.tolist()
+    data = {'algorithm': columns, 'labels': model.labels_}
+    df = pd.DataFrame(data)
+    make_required_dirs(output_file)
+    df.to_csv(output_file, sep='\t', index=False)
+
+
+def hac_horizontal(dataframe: pd.DataFrame, output_png: str, output_file: str, linkage='ward', metric='euclidean'):
+    """
+    Performs hierarchical agglomerative clustering on the dataframe,
+    creates a dendrogram of the resulting tree USING SCKIT LEARN and makes cluster groups USING SCKIT LEARN,
+    and saves the dendrogram and the cluster labels of said dendrogram in separate files.
+    @param dataframe: binary dataframe of edge comparison between algorithms from summarize_networks
+    @param output_png: the file name to save the dendrogram image
+    @param output_file: the file name to save the clustering labels
+    """
+
+    if linkage not in linkage_methods:
+        raise ValueError(f"linkage={linkage} must be one of {linkage_methods}")
+    
+    if linkage == "ward":
+        if metric != "euclidean":
+            print("For linkage='ward', the metric must be 'euclidean'; setting metric = 'euclidean")
+            metric = "euclidean"
+    
+    if metric not in distance_metrics:
+        raise ValueError(f"metric={metric} must be one of {distance_metrics}")
+        
+    X = dataframe.reset_index(drop=True)
+    column_names = X.head()
+    column_names = [element.split()[0].split('-')[1] for element in column_names]
+    X = X.transpose() 
+    
+    plt.figure(figsize=(10, 7))
     model = AgglomerativeClustering(linkage=linkage, affinity=metric,distance_threshold=0.5, n_clusters=None)
     model = model.fit(X)
     plt.figure(figsize=(10, 7))
@@ -243,7 +277,7 @@ def hac(dataframe: pd.DataFrame, output_png: str, output_file: str, linkage='war
     plot_dendrogram(model, labels=algo_names, leaf_rotation=90, leaf_font_size=10, color_threshold=0,
                     truncate_mode=None)
     make_required_dirs(output_png)
-    # plt.savefig(output_png, bbox_inches="tight")
+    plt.savefig(output_png, bbox_inches="tight")
 
     columns = dataframe.columns.tolist()
     data = {'algorithm': columns, 'labels': model.labels_}

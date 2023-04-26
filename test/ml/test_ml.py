@@ -17,8 +17,6 @@ class TestML:
         """
         Path(OUT_DIR).mkdir(parents=True, exist_ok=True)
 
-        
-
     def test_summarize_networks(self):
         dataframe = ml.summarize_networks([INPUT_DIR + 'test-s1/s1.txt', INPUT_DIR + 'test-s2/s2.txt', INPUT_DIR + 'test-s3/s3.txt',
                                            INPUT_DIR + 'test-longName/longName.txt', INPUT_DIR + 'test-longName2/test-longName2.txt',
@@ -37,8 +35,15 @@ class TestML:
 
         assert coord.equals(expected)
 
-    def test_hac(self):
+    def test_hac_horizontal(self):
         dataframe = ml.summarize_networks([INPUT_DIR + 'test-s1/s1.txt', INPUT_DIR + 'test-s2/s2.txt', INPUT_DIR + 'test-s3/s3.txt'])
-        ml.hac(dataframe, OUT_DIR + 'hac.png', OUT_DIR + 'hac-clusters.txt')
+        ml.hac_horizontal(dataframe, OUT_DIR + 'hac-horizontal.png', OUT_DIR + 'hac-clusters-horizontal.txt')
 
-        assert filecmp.cmp(OUT_DIR + 'hac-clusters.txt', EXPECT_DIR + 'expected_clusters.txt')
+        assert filecmp.cmp(OUT_DIR + 'hac-clusters-horizontal.txt', EXPECT_DIR + 'expected_clusters.txt')
+
+    def test_hac_vertical(self):
+        dataframe = ml.summarize_networks([INPUT_DIR + 'test-s1/s1.txt', INPUT_DIR + 'test-s2/s2.txt', INPUT_DIR + 'test-s3/s3.txt'])
+        ml.hac_vertical(dataframe, OUT_DIR + 'hac-vertical.png', OUT_DIR + 'hac-clusters-vertical.txt')
+
+        assert filecmp.cmp(OUT_DIR + 'hac-clusters-vertical.txt', EXPECT_DIR + 'expected_clusters.txt')
+
