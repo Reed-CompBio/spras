@@ -14,6 +14,9 @@ from src.util import make_required_dirs
 
 plt.switch_backend('Agg')
 
+
+linkage_methods = ["ward", "complete", "average", "single"]
+distance_metrics = ["euclidean", "l1", "l2", "manhattan", "cosine", "precomputed"]
 NODE_SEP = '|||'  # separator between nodes when forming edges in the dataframe
 
 
@@ -72,7 +75,7 @@ def summarize_networks(file_paths: Iterable[Union[str, PathLike]]) -> pd.DataFra
     return concated_df
 
 
-def pca(dataframe: pd.DataFrame, output_png: str, output_file: str, output_coord: str):
+def pca(dataframe: pd.DataFrame, output_png: str, output_file: str, output_coord: str, components=2, labels=True):
     """
     Performs PCA on the data and creates a scatterplot of the top two principal components.
     It saves the plot, the variance explained by each component, and the
@@ -82,54 +85,71 @@ def pca(dataframe: pd.DataFrame, output_png: str, output_file: str, output_coord
     @param output_file: the filename to save the variance explained by each component
     @param output_coord: the filename to save the coordinates of each algorithm
     """
+
+
+
     df = dataframe.reset_index(drop=True)
     column_names = df.head()
     column_names = [element.split()[0].split('-')[1] for element in column_names]
     df = df.transpose()  # based on the algorithms rather than the edges
     X = df.values
 
+    min_shape = min(df.shape)
+    if components < 2:
+        raise ValueError(f"components={components} must be greater than or equal to 2 in the config file.")
+    elif components > min_shape:
+        print(f"n_components={components} is not valid. Setting components to {min_shape}.")
+        components = min_shape
+
+    if not isinstance(labels, bool):
+        raise ValueError(f"labels={labels} must be True or False")
+
+    
     scaler = StandardScaler()
     scaler.fit(X)  # calc mean and standard deviation
     X_scaled = scaler.transform(X)
 
     # choosing the PCA
-    pca_2 = PCA(n_components=2)
-    pca_2.fit(X_scaled)
-    X_pca_2 = pca_2.transform(X_scaled)
-    variance = pca_2.explained_variance_ratio_ * 100
+    pca = PCA(n_components=components)
+    pca.fit(X_scaled)
+    X_pca = pca.transform(X_scaled)
+    variance = pca.explained_variance_ratio_ * 100
 
     # making the plot
     plt.figure(figsize=(10, 7))
-    sns.scatterplot(x=X_pca_2[:, 0], y=X_pca_2[:, 1], s=70, hue=column_names, legend=True);
+    sns.scatterplot(x=X_pca[:, 0], y=X_pca[:, 1], s=70, hue=column_names, legend=True);
     plt.title("PCA")
     plt.xlabel(f"PC1 ({variance[0]:.1f}% variance)")
     plt.ylabel(f"PC2 ({variance[1]:.1f}% variance)")
 
     # saving the coordinates of each algorithm
     columns = dataframe.columns.tolist()
-    data = {'algorithm': columns, 'x': X_pca_2[:, 0], 'y': X_pca_2[:, 1]}
+    data = {'algorithm': columns, 'x': X_pca[:, 0], 'y': X_pca[:, 1]}
     df = pd.DataFrame(data)
     make_required_dirs(output_coord)
     df.to_csv(output_coord, sep='\t', index=False)
 
-    # labeling the graph
-    algorithm_names = df['algorithm'].to_numpy()
-    algorithm_names = [element.split()[0].split('-')[1] for element in algorithm_names]
-    x_coord = df['x'].to_numpy()
-    y_coord = df['y'].to_numpy()
-
-    texts = []
-    for i, algorithm in enumerate(algorithm_names):
-        # TODO: can add a threshold here to allow for labeled points
-        texts.append(plt.text(x_coord[i], y_coord[i], algorithm, size=9))
-    
-    adjust_text(texts, force_points= [2.5,3])
-
-     # saving the principal components
+    # saving the principal components
     make_required_dirs(output_file)
     with open(output_file, "w") as f:
         for component in variance:
             f.write("%s\n" % component)
+
+    # labeling the graphs
+
+    if (labels):
+        algorithm_names = df['algorithm'].to_numpy()
+        algorithm_names = [element.split()[0].split('-')[1] for element in algorithm_names]
+        x_coord = df['x'].to_numpy()
+        y_coord = df['y'].to_numpy()
+
+        texts = []
+        for i, algorithm in enumerate(algorithm_names):
+            # TODO: can add a threshold here to allow for labeled points
+            texts.append(plt.text(x_coord[i], y_coord[i], algorithm, size=9))
+        
+        adjust_text(texts, force_points= [5,5], arrowprops=dict(arrowstyle='->', color='red'))
+
 
     # saving the PCA plot
     make_required_dirs(output_png)
@@ -166,8 +186,8 @@ def plot_dendrogram(model, **kwargs):
     # Plot the corresponding dendrogram
     dendrogram(linkage_matrix, **kwargs)
 
-
-def hac(dataframe: pd.DataFrame, output_png: str, output_file: str):
+# make hac_v and hac_h
+def hac(dataframe: pd.DataFrame, output_png: str, output_file: str, linkage='ward', metric='euclidean'):
     """
     Performs hierarchical agglomerative clustering on the dataframe,
     creates a dendrogram of the resulting tree,
@@ -176,35 +196,54 @@ def hac(dataframe: pd.DataFrame, output_png: str, output_file: str):
     @param output_png: the file name to save the dendrogram image
     @param output_file: the file name to save the clustering labels
     """
+
+    if linkage not in linkage_methods:
+        raise ValueError(f"linkage={linkage} must be one of {linkage_methods}")
+    
+    if linkage == "ward":
+        if metric != "euclidean":
+            print("For linkage='ward', the metric must be 'euclidean'; setting metric = 'euclidean")
+            metric = "euclidean"
+    
+    if metric not in distance_metrics:
+        raise ValueError(f"metric={metric} must be one of {distance_metrics}")
+        
     X = dataframe.reset_index(drop=True)
     column_names = X.head()
     column_names = [element.split()[0].split('-')[1] for element in column_names]
     X = X.transpose() 
     
     # using seaborn
-    color_dict = {'pathlinker': 'red', 'omicsintegrator1': 'green', 'omicsintegrator2': 'blue', 'meo': 'orange', 'mincostflow': 'purple'}
+    color_dict = {
+        'pathlinker': 'red', 
+        'omicsintegrator1': 'green', 
+        'omicsintegrator2': 'blue', 
+        'meo': 'orange', 
+        'mincostflow': 'purple'
+    }  # currently will need to manually update this
+
     plt.figure(figsize=(10, 7))
     row_colors = pd.Series(column_names, index=X.index).map(color_dict)
-    clustergrid = sns.clustermap(X, metric='euclidean', method="ward", row_colors=row_colors, col_cluster=False)
+    clustergrid = sns.clustermap(X, metric=metric, method=linkage, row_colors=row_colors, col_cluster=False)
     clustergrid.ax_heatmap.remove()
     clustergrid.cax.remove()
+    clustergrid.ax_row_dendrogram.set_visible(True)
+    clustergrid.ax_col_dendrogram.set_visible(False)
     legend_labels = [plt.Rectangle((0,0),0,0, color=color_dict[label]) for label in color_dict]
-    plt.legend(legend_labels, color_dict.keys(), loc='lower left')
-    # plt.savefig(output_png, bbox_inches="tight")
+    plt.legend(legend_labels, color_dict.keys(), bbox_to_anchor=(1.02,1), loc='upper left')
+    plt.savefig(output_png, bbox_inches="tight")
 
     # using sckit learn and dendrogram 
-    model = AgglomerativeClustering(linkage='ward', affinity='euclidean',distance_threshold=0.5, n_clusters=None)
+    model = AgglomerativeClustering(linkage=linkage, affinity=metric,distance_threshold=0.5, n_clusters=None)
     model = model.fit(X)
-
     plt.figure(figsize=(10, 7))
     plt.title("Hierarchical Agglomerative Clustering Dendrogram")
     plt.xlabel("algorithms")
-    # algo_names = list(dataframe.columns)
-    plot_dendrogram(model, labels=column_names, leaf_rotation=90, leaf_font_size=10, color_threshold=0,
+    algo_names = list(dataframe.columns)
+    plot_dendrogram(model, labels=algo_names, leaf_rotation=90, leaf_font_size=10, color_threshold=0,
                     truncate_mode=None)
-
     make_required_dirs(output_png)
-    plt.savefig(output_png, bbox_inches="tight")
+    # plt.savefig(output_png, bbox_inches="tight")
 
     columns = dataframe.columns.tolist()
     data = {'algorithm': columns, 'labels': model.labels_}

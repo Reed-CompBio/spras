@@ -31,15 +31,17 @@
                 include: true
                 directed: true
                 run1:
-                    k: range(100,201,100)
+                    k: range(100,201,10)
+                run2: 
+                    k: range(100,201,20)
 
         - name: "omicsintegrator1"
           params:
                 include: true
                 directed: false
                 run1:
-                    r: [5]
-                    b: [5, 6]
+                    r: [0.01]
+                    b: [0.55, 2, 10]
                     w: np.linspace(0,5,2)
                     g: [3]
                     d: [10]
@@ -59,9 +61,9 @@
                 include: true
                 directed: true
                 run1:
-                    max_path_length: [3]
+                    max_path_length: [2, 3]
                     local_search: ["Yes"]
-                    rand_restarts: [10]
+                    rand_restarts: [5, 10]
       
         - name: "mincostflow"
           params:
@@ -70,6 +72,7 @@
                 run1:
                     flow: [1] # The flow must be an int
                     capacity: [1]
+                
                     
 
  # Here we specify which pathways to run and other file location information.
@@ -117,4 +120,13 @@
           include: true
         # Machine learning analysis (e.g. clustering) of the pathway output files for each dataset
         ml:
-          include: true
+          include: true 
+          # specify how many components to calculate
+          components: 4
+          # boolean to show the labels on the pca graph
+          labels: true
+          # 'ward', 'complete', 'average', 'single'
+          # if linkage: ward, MUST USE metric: euclidean 
+          linkage: 'ward'
+          # 'euclidean', 'l1', 'l2', 'manhattan', 'cosine', or 'precomputed'
+          metric: 'euclidean'

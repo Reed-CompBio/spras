@@ -15,7 +15,7 @@ SEP = '/'
 wildcard_constraints:
     params="params-\w+"
 
-config, datasets, out_dir, algorithm_params, algorithm_directed = process_config(config)
+config, datasets, out_dir, algorithm_params, algorithm_directed, pca_params, hac_params = process_config(config)
 
 # TODO consider the best way to pass global configuration information to the run functions
 SINGULARITY = "singularity" in config and config["singularity"]
@@ -258,8 +258,8 @@ rule ml:
         hac_clusters = SEP.join([out_dir, '{dataset}-hac-clusters.txt'])
     run: 
         summary_df = ml.summarize_networks(input.pathways)
-        ml.pca(summary_df, output.pca_image, output.pca_components, output.pca_coordinates)
-        ml.hac(summary_df, output.hac_image, output.hac_clusters)
+        ml.pca(summary_df, output.pca_image, output.pca_components, output.pca_coordinates, **pca_params)
+        ml.hac(summary_df, output.hac_image, output.hac_clusters, **hac_params)
 
 
 # Remove the output directory
