@@ -2,7 +2,7 @@ import filecmp
 from pathlib import Path
 
 import pandas as pd
-import src.analysis.ml.ml as ml
+import src.analysis.ml as ml
 
 INPUT_DIR = 'test/ml/input/'
 OUT_DIR = 'test/ml/output/'
@@ -20,7 +20,7 @@ class TestML:
     def test_summarize_networks(self):
         dataframe = ml.summarize_networks([INPUT_DIR + 'test-s1/s1.txt', INPUT_DIR + 'test-s2/s2.txt', INPUT_DIR + 'test-s3/s3.txt',
                                            INPUT_DIR + 'test-longName/longName.txt', INPUT_DIR + 'test-longName2/longName2.txt',
-                                           INPUT_DIR + 'test-empty/empty.txt'])
+                                           INPUT_DIR + 'test-empty/empty.txt', INPUT_DIR + 'test-test-spaces/test-spaces.txt'])
         dataframe.to_csv(OUT_DIR + 'dataframe.csv')
         assert filecmp.cmp(OUT_DIR + 'dataframe.csv', EXPECT_DIR + 'expected_df.csv')
 
