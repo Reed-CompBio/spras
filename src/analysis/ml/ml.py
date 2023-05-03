@@ -14,11 +14,9 @@ from src.util import make_required_dirs
 
 plt.switch_backend('Agg')
 
-
 linkage_methods = ["ward", "complete", "average", "single"]
 distance_metrics = ["euclidean", "l1", "l2", "manhattan", "cosine", "precomputed"]
 NODE_SEP = '|||'  # separator between nodes when forming edges in the dataframe
-
 
 def summarize_networks(file_paths: Iterable[Union[str, PathLike]]) -> pd.DataFrame:
     """
@@ -31,7 +29,6 @@ def summarize_networks(file_paths: Iterable[Union[str, PathLike]]) -> pd.DataFra
     """
     # creating a tuple that contains the algorithm column name and edge pairs
     edge_tuples = []
-
     for file in file_paths:
         try:
             # collecting and sorting the edge pairs per algortihm
@@ -56,7 +53,6 @@ def summarize_networks(file_paths: Iterable[Union[str, PathLike]]) -> pd.DataFra
 
     # initially construct separate dataframes per algorithm
     edge_dataframes = []
-
     # the dataframe is set up per algorithm and a 1 is set for the edge pair that exists in the algorithm
     for tup in edge_tuples:
         dataframe = pd.DataFrame(
@@ -73,7 +69,6 @@ def summarize_networks(file_paths: Iterable[Union[str, PathLike]]) -> pd.DataFra
     concated_df = concated_df.astype('int64')
 
     return concated_df
-
 
 def pca(dataframe: pd.DataFrame, output_png: str, output_file: str, output_coord: str, components=2, labels=True):
     """
@@ -98,11 +93,9 @@ def pca(dataframe: pd.DataFrame, output_png: str, output_file: str, output_coord
     elif components > min_shape:
         print(f"n_components={components} is not valid. Setting components to {min_shape}.")
         components = min_shape
-
     if not isinstance(labels, bool):
         raise ValueError(f"labels={labels} must be True or False")
 
-    
     scaler = StandardScaler()
     scaler.fit(X)  # calc mean and standard deviation
     X_scaled = scaler.transform(X)
@@ -134,7 +127,6 @@ def pca(dataframe: pd.DataFrame, output_png: str, output_file: str, output_coord
             f.write("%s\n" % component)
 
     # labeling the graphs
-
     if (labels):
         algorithm_names = df['algorithm'].to_numpy()
         algorithm_names = [element.split()[0].split('-')[1] for element in algorithm_names]
@@ -147,7 +139,6 @@ def pca(dataframe: pd.DataFrame, output_png: str, output_file: str, output_coord
             texts.append(plt.text(x_coord[i], y_coord[i], algorithm, size=9))
         
         adjust_text(texts, force_points= [5,5], arrowprops=dict(arrowstyle='->', color='red'))
-
 
     # saving the PCA plot
     make_required_dirs(output_png)
@@ -184,8 +175,6 @@ def plot_dendrogram(model, **kwargs):
     # Plot the corresponding dendrogram
     dendrogram(linkage_matrix, **kwargs)
 
-# make hac_v and hac_h
-
 def hac_vertical(dataframe: pd.DataFrame, output_png: str, output_file: str, linkage='ward', metric='euclidean'):
     """
     Performs hierarchical agglomerative clustering on the dataframe,
@@ -198,12 +187,10 @@ def hac_vertical(dataframe: pd.DataFrame, output_png: str, output_file: str, lin
 
     if linkage not in linkage_methods:
         raise ValueError(f"linkage={linkage} must be one of {linkage_methods}")
-    
     if linkage == "ward":
         if metric != "euclidean":
             print("For linkage='ward', the metric must be 'euclidean'; setting metric = 'euclidean")
             metric = "euclidean"
-    
     if metric not in distance_metrics:
         raise ValueError(f"metric={metric} must be one of {distance_metrics}")
         
@@ -217,6 +204,7 @@ def hac_vertical(dataframe: pd.DataFrame, output_png: str, output_file: str, lin
     label_color_map = {label: color for label, color in zip(column_names, custom_palette)}
     row_colors = pd.Series(column_names, index=X.index).map(label_color_map)
 
+    #plotting the seaborn figure
     plt.figure(figsize=(10, 7))
     clustergrid = sns.clustermap(X, metric=metric, method=linkage, row_colors=row_colors, col_cluster=False)
     clustergrid.ax_heatmap.remove()
@@ -229,6 +217,7 @@ def hac_vertical(dataframe: pd.DataFrame, output_png: str, output_file: str, lin
     make_required_dirs(output_png)
     plt.savefig(output_png, bbox_inches="tight")
 
+    # getting the label of which group each algorithm combination falls under
     model = AgglomerativeClustering(linkage=linkage, affinity=metric,distance_threshold=0.5, n_clusters=None)
     model = model.fit(X)
     columns = dataframe.columns.tolist()
@@ -250,12 +239,10 @@ def hac_horizontal(dataframe: pd.DataFrame, output_png: str, output_file: str, l
 
     if linkage not in linkage_methods:
         raise ValueError(f"linkage={linkage} must be one of {linkage_methods}")
-    
     if linkage == "ward":
         if metric != "euclidean":
             print("For linkage='ward', the metric must be 'euclidean'; setting metric = 'euclidean")
             metric = "euclidean"
-    
     if metric not in distance_metrics:
         raise ValueError(f"metric={metric} must be one of {distance_metrics}")
         
