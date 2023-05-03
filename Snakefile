@@ -1,11 +1,10 @@
 import os
-import PRRunner
+from src import runner
 import shutil
 import yaml
-from Dataset import Dataset
+from src.dataset import Dataset
 from src.util import process_config
-from src.analysis.summary import summary
-from src.analysis.viz import graphspace, cytoscape
+from src.analysis import ml, summary, graphspace, cytoscape
 
 # Snakemake updated the behavior in the 6.5.0 release https://github.com/snakemake/snakemake/pull/1037
 # and using the wrong separator prevents Snakemake from matching filenames to the rules that can produce them
@@ -65,14 +64,20 @@ def make_final_input(wildcards):
         # add table summarizing all pathways for each dataset
         final_input.extend(expand('{out_dir}{sep}{dataset}-pathway-summary.txt',out_dir=out_dir,sep=SEP,dataset=dataset_labels))
 
-
     if config["analysis"]["graphspace"]["include"]:
         # add graph and style JSON files.
         final_input.extend(expand('{out_dir}{sep}{dataset}-{algorithm_params}{sep}gs.json',out_dir=out_dir,sep=SEP,dataset=dataset_labels,algorithm_params=algorithms_with_params))
         final_input.extend(expand('{out_dir}{sep}{dataset}-{algorithm_params}{sep}gsstyle.json',out_dir=out_dir,sep=SEP,dataset=dataset_labels,algorithm_params=algorithms_with_params))
-    
+
     if config["analysis"]["cytoscape"]["include"]:
         final_input.extend(expand('{out_dir}{sep}cytoscape-session.cys',out_dir=out_dir,sep=SEP))
+
+    if config["analysis"]["ml"]["include"]:  
+        final_input.extend(expand('{out_dir}{sep}{dataset}-pca.png',out_dir=out_dir,sep=SEP,dataset=dataset_labels,algorithm_params=algorithms_with_params))
+        final_input.extend(expand('{out_dir}{sep}{dataset}-pca-components.txt',out_dir=out_dir,sep=SEP,dataset=dataset_labels,algorithm_params=algorithms_with_params))
+        final_input.extend(expand('{out_dir}{sep}{dataset}-hac.png',out_dir=out_dir,sep=SEP,dataset=dataset_labels,algorithm_params=algorithms_with_params))
+        final_input.extend(expand('{out_dir}{sep}{dataset}-hac-clusters.txt',out_dir=out_dir,sep=SEP,dataset=dataset_labels,algorithm_params=algorithms_with_params))
+        final_input.extend(expand('{out_dir}{sep}{dataset}-pca-coordinates.txt',out_dir=out_dir,sep=SEP,dataset=dataset_labels,algorithm_params=algorithms_with_params))
 
     if len(final_input) == 0:
         # No analysis added yet, so add reconstruction output files if they exist.
@@ -123,7 +128,7 @@ rule merge_input:
     run:
         # Pass the dataset to PRRunner where the files will be merged and written to disk (i.e. pickled)
         dataset_dict = get_dataset(datasets, wildcards.dataset)
-        PRRunner.merge_input(dataset_dict, output.dataset_file)
+        runner.merge_input(dataset_dict, output.dataset_file)
 
 # The checkpoint is like a rule but can be used in dynamic workflows
 # The workflow directed acyclic graph is re-evaluated after the checkpoint job runs
@@ -142,8 +147,8 @@ checkpoint prepare_input:
         # Use the algorithm's generate_inputs function to load the merged dataset, extract the relevant columns,
         # and write the output files specified by required_inputs
         # The filename_map provides the output file path for each required input file type
-        filename_map = {input_type: SEP.join([out_dir, 'prepared', f'{wildcards.dataset}-{wildcards.algorithm}-inputs', f'{input_type}.txt']) for input_type in PRRunner.get_required_inputs(wildcards.algorithm)}
-        PRRunner.prepare_inputs(wildcards.algorithm, input.dataset_file, filename_map)
+        filename_map = {input_type: SEP.join([out_dir, 'prepared', f'{wildcards.dataset}-{wildcards.algorithm}-inputs', f'{input_type}.txt']) for input_type in runner.get_required_inputs(wildcards.algorithm)}
+        runner.prepare_inputs(wildcards.algorithm, input.dataset_file, filename_map)
 
 # Collect the prepared input files from the specified directory
 # If the directory does not exist for this dataset-algorithm pair, the checkpoint will detect that
@@ -160,7 +165,7 @@ def collect_prepared_input(wildcards):
     prepared_dir = SEP.join([out_dir, 'prepared', f'{wildcards.dataset}-{wildcards.algorithm}-inputs'])
 
     # Construct the list of expected prepared input files for the reconstruction algorithm
-    prepared_inputs = expand(f'{prepared_dir}{SEP}{{type}}.txt',type=PRRunner.get_required_inputs(algorithm=wildcards.algorithm))
+    prepared_inputs = expand(f'{prepared_dir}{SEP}{{type}}.txt',type=runner.get_required_inputs(algorithm=wildcards.algorithm))
     # If the directory is missing, do nothing because the missing output triggers running prepare_input
     if os.path.isdir(prepared_dir):
         # If the directory exists, confirm all prepared input files exist as well (as opposed to some or none)
@@ -191,14 +196,17 @@ rule reconstruct:
         # Create a copy so that the updates are not written to the parameters logfile
         params = reconstruction_params(wildcards.algorithm, wildcards.params).copy()
         # Add the input files
-        params.update(dict(zip(PRRunner.get_required_inputs(wildcards.algorithm), *{input})))
+        params.update(dict(zip(runner.get_required_inputs(wildcards.algorithm), *{input})))
         # Add the output file
         # All run functions can accept a relative path to the output file that should be written that is called 'output_file'
         params['output_file'] = output.pathway_file
+        # Remove the default placeholder parameter added for algorithms that have no parameters
+        if 'spras_placeholder' in params:
+            params.pop('spras_placeholder')
         # TODO consider the best way to pass global configuration information to the run functions
         # This approach requires that all run functions support a singularity option
         params['singularity'] = SINGULARITY
-        PRRunner.run(wildcards.algorithm, params)
+        runner.run(wildcards.algorithm, params)
 
 # Original pathway reconstruction output to universal output
 # Use PRRunner as a wrapper to call the algorithm-specific parse_output
@@ -206,7 +214,7 @@ rule parse_output:
     input: raw_file = SEP.join([out_dir, '{dataset}-{algorithm}-{params}', 'raw-pathway.txt'])
     output: standardized_file = SEP.join([out_dir, '{dataset}-{algorithm}-{params}', 'pathway.txt'])
     run:
-        PRRunner.parse_output(wildcards.algorithm, input.raw_file, output.standardized_file)
+        runner.parse_output(wildcards.algorithm, input.raw_file, output.standardized_file)
 
 # Collect summary statistics for a single pathway
 rule summarize_pathway:
@@ -248,6 +256,21 @@ rule summary_table:
         node_table = Dataset.from_file(input.dataset_file).node_table
         summary_df = summary.summarize_networks(input.pathways, node_table)
         summary_df.to_csv(output.summary_table, sep='\t', index=False)
+
+# Cluster the output pathways for each dataset
+rule ml_analysis:
+    input: 
+        pathways = expand('{out_dir}{sep}{{dataset}}-{algorithm_params}{sep}pathway.txt', out_dir=out_dir, sep=SEP, algorithm_params=algorithms_with_params)
+    output: 
+        pca_image = SEP.join([out_dir, '{dataset}-pca.png']),
+        pca_components= SEP.join([out_dir, '{dataset}-pca-components.txt']),
+        pca_coordinates = SEP.join([out_dir, '{dataset}-pca-coordinates.txt']),
+        hac_image = SEP.join([out_dir, '{dataset}-hac.png']),
+        hac_clusters = SEP.join([out_dir, '{dataset}-hac-clusters.txt'])
+    run: 
+        summary_df = ml.summarize_networks(input.pathways)
+        ml.pca(summary_df, output.pca_image, output.pca_components, output.pca_coordinates)
+        ml.hac(summary_df, output.hac_image, output.hac_clusters)
 
 
 # Remove the output directory

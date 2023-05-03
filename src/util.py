@@ -138,15 +138,18 @@ def run_container_docker(container: str, command: List[str], volumes: List[Tuple
             # This command changes the ownership of output files so we don't
             # get a permissions error when snakemake or the user try to touch the files
             # Use --recursive because new directories could have been created inside the container
-            chown_command = ['chown', f'{uid}:{gid}', '--recursive']
-            chown_command.extend(all_modified_volume_contents)
-            chown_command = ' '.join(chown_command)
-            client.containers.run(container,
-                                  chown_command,
-                                  stderr=True,
-                                  volumes=bind_paths,
-                                  working_dir=working_dir,
-                                  environment=[environment]).decode('utf-8')
+            # Do not run the command if no files were modified
+            if len(all_modified_volume_contents) > 0:
+                chown_command = ['chown', f'{uid}:{gid}', '--recursive']
+                chown_command.extend(all_modified_volume_contents)
+                chown_command = ' '.join(chown_command)
+                client.containers.run(container,
+                                    chown_command,
+                                    stderr=True,
+                                    volumes=bind_paths,
+                                    working_dir=working_dir,
+                                    environment=[environment]).decode('utf-8')
+            
         # Raised on non-Unix systems
         except AttributeError:
             pass
@@ -298,31 +301,31 @@ def process_config(config):
     algorithm_params = dict()
     algorithm_directed = dict()
     for alg in config["algorithms"]:
+        cur_params = alg["params"]
+        if "include" in cur_params and cur_params.pop("include"):
+            # This dict maps from parameter combinations hashes to parameter combination dictionaries
+            algorithm_params[alg["name"]] = dict()
+        else:
+            # Do not parse the rest of the parameters for this algorithm if it is not included
+            continue
+
+        if "directed" in cur_params:
+            algorithm_directed[alg["name"]] = cur_params.pop("directed")
+
+        # The algorithm has no named arguments so create a default placeholder
+        if len(cur_params) == 0:
+            cur_params["run1"] = {"spras_placeholder": ["no parameters"]}
+
         # Each set of runs should be 1 level down in the config file
-        for params in alg["params"]:
+        for run_params in cur_params:
             all_runs = []
-            # TODO check for this key in the dict and pop
-            if params == "include":
-                if alg["params"][params]:
-                    # This is trusting that "include" is always first
-                    # This dict maps from parameter combinations hashes to parameter combination dictionaries
-                    algorithm_params[alg["name"]] = dict()
-                    continue
-                else:
-                    break
-            # TODO check for this key in the dict and pop
-            if params == "directed":
-                if alg["params"][params]:
-                    algorithm_directed[alg["name"]] = True
-                else:
-                    algorithm_directed[alg["name"]] = False
-                continue
+
             # We create the product of all param combinations for each run
             param_name_list = []
-            if alg["params"][params]:
-                for p in alg["params"][params]:
+            if cur_params[run_params]:
+                for p in cur_params[run_params]:
                     param_name_list.append(p)
-                    all_runs.append(eval(str(alg["params"][params][p])))
+                    all_runs.append(eval(str(cur_params[run_params][p])))
             run_list_tuples = list(it.product(*all_runs))
             param_name_tuple = tuple(param_name_list)
             for r in run_list_tuples:
@@ -338,3 +341,29 @@ def process_config(config):
                 algorithm_params[alg["name"]][params_hash] = run_dict
 
     return config, datasets, out_dir, algorithm_params, algorithm_directed
+
+
+def compare_files(file1, file2) -> bool:
+    """
+    Compare files by reading the contents into lists. Only recommended for small files.
+    @param file1: first file to compare
+    @param file2: second file to compare
+    @return: True or False
+    """
+    with open(file1) as f1:
+        contents1 = list(f1)
+
+    with open(file2) as f2:
+        contents2 = list(f2)
+
+    return contents1 == contents2
+
+
+def make_required_dirs(path: str):
+    """
+    Create the directory and parent directories required before an output file can be written to the specified path.
+    Existing directories will not raise an error.
+    @param path: the filename that is to be written
+    """
+    out_path = Path(path).parent
+    out_path.mkdir(parents=True, exist_ok=True)

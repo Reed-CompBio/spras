@@ -1,5 +1,5 @@
 import pandas as pd
-from src.analysis.summary.summary import summarize_networks
+from src.analysis.summary import summarize_networks
 from pathlib import Path
 
 # Notes:
