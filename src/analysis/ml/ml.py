@@ -17,14 +17,6 @@ plt.switch_backend('Agg')
 
 linkage_methods = ["ward", "complete", "average", "single"]
 distance_metrics = ["euclidean", "l1", "l2", "manhattan", "cosine", "precomputed"]
-color_dict = {
-        'pathlinker': 'red', 
-        'omicsintegrator1': 'green', 
-        'omicsintegrator2': 'blue', 
-        'meo': 'orange', 
-        'mincostflow': 'purple'
-    }  # currently will need to manually update this
-
 NODE_SEP = '|||'  # separator between nodes when forming edges in the dataframe
 
 
@@ -96,7 +88,7 @@ def pca(dataframe: pd.DataFrame, output_png: str, output_file: str, output_coord
 
     df = dataframe.reset_index(drop=True)
     column_names = df.head()
-    column_names = [element.split()[0].split('-')[1] for element in column_names]
+    column_names = [element.split('-')[1] for element in column_names]
     df = df.transpose()  # based on the algorithms rather than the edges
     X = df.values
 
@@ -217,18 +209,23 @@ def hac_vertical(dataframe: pd.DataFrame, output_png: str, output_file: str, lin
         
     X = dataframe.reset_index(drop=True)
     column_names = X.head()
-    column_names = [element.split()[0].split('-')[1] for element in column_names]
+    column_names = [element.split('-')[1] for element in column_names]
     X = X.transpose() 
-    
+
+    # creating the colors per algorithms
+    custom_palette = sns.color_palette("tab10", len(column_names))
+    label_color_map = {label: color for label, color in zip(column_names, custom_palette)}
+    row_colors = pd.Series(column_names, index=X.index).map(label_color_map)
+
     plt.figure(figsize=(10, 7))
-    row_colors = pd.Series(column_names, index=X.index).map(color_dict)
     clustergrid = sns.clustermap(X, metric=metric, method=linkage, row_colors=row_colors, col_cluster=False)
     clustergrid.ax_heatmap.remove()
     clustergrid.cax.remove()
     clustergrid.ax_row_dendrogram.set_visible(True)
     clustergrid.ax_col_dendrogram.set_visible(False)
-    legend_labels = [plt.Rectangle((0,0),0,0, color=color_dict[label]) for label in color_dict]
-    plt.legend(legend_labels, color_dict.keys(), bbox_to_anchor=(1.02,1), loc='upper left')
+    legend_labels = [plt.Rectangle((0, 0), 0, 0, color=label_color_map[label]) for label in label_color_map]
+    plt.legend(legend_labels, label_color_map.keys(), bbox_to_anchor=(1.02, 1), loc='upper left')
+    
     make_required_dirs(output_png)
     plt.savefig(output_png, bbox_inches="tight")
 
@@ -276,6 +273,7 @@ def hac_horizontal(dataframe: pd.DataFrame, output_png: str, output_file: str, l
     algo_names = list(dataframe.columns)
     plot_dendrogram(model, labels=algo_names, leaf_rotation=90, leaf_font_size=10, color_threshold=0,
                     truncate_mode=None)
+    
     make_required_dirs(output_png)
     plt.savefig(output_png, bbox_inches="tight")
 
