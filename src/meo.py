@@ -1,4 +1,4 @@
-from src.PRM import PRM
+from src.prm import PRM
 from pathlib import Path
 from src.util import prepare_volume, run_container
 import pandas as pd
@@ -165,5 +165,4 @@ class MEO(PRM):
         # TODO what should be the edge rank?
         # Would need to load the paths output file to rank edges correctly
         df.insert(5, 'Rank', 1)  # Add a constant rank of 1
-        # TODO switch to tab-delimited once other methods are changed
-        df.to_csv(standardized_pathway_file, columns=['Source', 'Target', 'Rank'], header=False, index=False, sep=' ')
+        df.to_csv(standardized_pathway_file, columns=['Source', 'Target', 'Rank'], header=False, index=False, sep='\t')

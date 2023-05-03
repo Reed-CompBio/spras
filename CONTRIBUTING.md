@@ -76,7 +76,7 @@ These entries are used to tell Snakemake what input files should be present befo
 Implement the `generate_inputs` function, following the `omicsintegrator1.py` example.
 The nodes should be any node in the dataset that has a prize set, any node that is a source, or any node that is a target.
 The network should be all of the edges written in the format `<vertex1>|<vertex2>`.
-`Dataset.py` provides functions that provide access to node information and the interactome (edge list).
+`src/dataset.py` provides functions that provide access to node information and the interactome (edge list).
 
 Implement the `run` function, following the Path Linker example.
 The `prepare_volume` utility function is needed to prepare the network and nodes input files to be mounted and used inside the container.
@@ -89,7 +89,7 @@ Use the `run_container` utility function to run the command in the container `<u
 
 Implement the `parse_output` function.
 The edges in the Local Neighborhood output have the same format as the input, `<vertex1>|<vertex2>`.
-Convert these to be space-separated vertex pairs followed by a space and a `1` at the end of every line, which indicates all edges have the same rank.
+Convert these to be tab-separated vertex pairs followed by a tab and a `1` at the end of every line, which indicates all edges have the same rank.
 The output should have the format `<vertex1> <vertex2> 1`.
 
 ### Step 4: Make the Local Neighborhood wrapper accessible through SPRAS
@@ -130,7 +130,7 @@ The pull request will be closed so that future contributors can practice with th
 1. Add a new subdirectory to `docker-wrappers` with the name `<algorithm>`, write a `Dockerfile` to build an image for `<algorithm>`, and include any other files required to build that image in the subdirectory
 1. Build and push the Docker image to the [reedcompbio](https://hub.docker.com/orgs/reedcompbio) Docker organization (SPRAS maintainer required)
 1. Add a new Python file `src/<algorithm>.py` to implement the wrapper functions for `<algorithm>`: specify the list of `required_input` files and the `generate_inputs`, `run`, and `parse_output` functions
-1. Import the new class in `PRRunner.py` so the wrapper functions can be accessed
+1. Import the new class in `runner.py` so the wrapper functions can be accessed
 1. Document the usage of the Docker wrapper and the assumptions made when implementing the wrapper
 1. Add example usage for the new algorithm and its parameters to the template config file
 1. Write test functions and provide example input data in a new test subdirectory `test/<algorithm>`

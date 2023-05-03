@@ -29,7 +29,7 @@ def summarize_networks(file_paths: Iterable[Path], node_table: pd.DataFrame) -> 
 
     # Initialize list to store network summary data
     nw_info = []
-    
+
     # Iterate through each network file path
     for file_path in sorted(file_paths):
         # Load in the network
@@ -52,83 +52,80 @@ def summarize_networks(file_paths: Iterable[Path], node_table: pd.DataFrame) -> 
     # Could refactor to create the dataframe line by line instead of storing data as lists and then converting
     nw_info = pd.DataFrame(
         nw_info,
-        columns = [
-            "Name",
-            "Number of nodes",
-            "Number of undirected edges",
-            "Number of connected components"
-            ]
-        +
-        nodes_by_col_labs
+        columns=[
+                    "Name",
+                    "Number of nodes",
+                    "Number of undirected edges",
+                    "Number of connected components"
+                ]
+                +
+                nodes_by_col_labs
     )
     return nw_info
 
 
-def degree(G):
-    return dict(G.degree)
+def degree(g):
+    return dict(g.degree)
 
-#stats is just a list of functions to apply to the graph. They should take as input a networkx graph or digraph but may have any output.
-stats = [degree,nx.clustering,nx.betweenness_centrality]
 
-def produce_statistics(G: nx.Graph,s=None) -> dict:
+# stats is just a list of functions to apply to the graph.
+# They should take as input a networkx graph or digraph but may have any output.
+stats = [degree, nx.clustering, nx.betweenness_centrality]
+
+
+def produce_statistics(g: nx.Graph, s=None) -> dict:
     global stats
-    if s != None:
+    if s is not None:
         stats = s
     d = dict()
     for s in stats:
         sname = s.__name__
-        d[sname] = s(G)
+        d[sname] = s(g)
     return d
 
-def load_graph(path: str,directed=False) -> nx.Graph:
-    #try:
+
+def load_graph(path: str, directed=False) -> nx.Graph:
     if not directed:
-        G = nx.read_edgelist(path,data=(('rank',float),))
+        g = nx.read_edgelist(path, data=(('rank', float),))
     else:
-        # note - self-edges are not allowed in DiGraphs.
-        G = nx.read_edgelist(path,data=(('rank',float),),create_using=nx.DiGraph)
-    #except:
-    #    print('file format not yet supported. submit a feature request if it ought to be!')
-    return G
+        # self-edges are not allowed in DiGraphs.
+        g = nx.read_edgelist(path, data=(('rank', float),), create_using=nx.DiGraph)
+    return g
 
-def save_json(data,pth):
-    with open(pth,'w') as f:
-        json.dump(data,f)
 
-def save(data,pth):
-    fout = open (pth,'w')
+def save(data, pth):
+    fout = open(pth, 'w')
     fout.write('#node\t%s\n' % '\t'.join([s.__name__ for s in stats]))
     for node in data[stats[0].__name__]:
         row = [data[s.__name__][node] for s in stats]
-        fout.write('%s\t%s\n'% (node,'\t'.join([str(d) for d in row])))
+        fout.write('%s\t%s\n' % (node, '\t'.join([str(d) for d in row])))
     fout.close()
 
-'''
-run function that wraps above functions.
-'''
-def run(infile:str,outfile:str,directed=False) -> None:
-    ## if output directory doesn't exist, make it.
+
+def run(infile: str, outfile: str, directed=False) -> None:
+    """
+    run function that wraps above functions.
+    """
+    # if output directory doesn't exist, make it.
     outdir = os.path.dirname(outfile)
     if not os.path.exists(outdir):
         os.makedirs(outdir)
 
-    ## load graph, produce stats, and write to human-readable file.
-    G = load_graph(infile,directed=directed)
-    dat = produce_statistics(G)
-    save(dat,outfile)
-
-    return
+    # load graph, produce stats, and write to human-readable file.
+    g = load_graph(infile, directed=directed)
+    dat = produce_statistics(g)
+    save(dat, outfile)
 
 
-'''
-for testing
-'''
 def main(argv):
-    G = load_graph(argv[1])
-    print(G.nodes)
-    dat = produce_statistics(G)
+    """
+    for testing
+    """
+    g = load_graph(argv[1])
+    print(g.nodes)
+    dat = produce_statistics(g)
     print(dat)
-    save(dat,argv[2])
+    save(dat, argv[2])
 
 
 if __name__ == "__main__":

@@ -62,7 +62,7 @@ The Docker images are available on [DockerHub](https://hub.docker.com/orgs/reedc
 **Python wrapper for calling algorithms**: Wrapper functions provide an interface between the common file formats for input and output data and the algorithm-specific file formats and reconstruction commands.
 These wrappers are in the `src/` subdirectory.
 
-**Test code**: Tests for the Docker wrappers.
+**Test code**: Tests for the Docker wrappers and SPRAS code.
 The tests require the conda environment in `environment.yml` and Docker.
 Run the tests with `pytest -s`.
 
@@ -70,10 +70,6 @@ Run the tests with `pytest -s`.
 Some computing environments are unable to run Docker and prefer Singularity as the container runtime.
 SPRAS has limited experimental support for Singularity instead of Docker, and only for some pathway reconstruction algorithms.
 SPRAS uses the spython package to interface with Singularity, which only supports Linux.
-
-## Docker demo
-The `docker-demo` subdirectory is not used by the main pathway reconstruction framework.
-It serves as a reference for how to set up Dockerfiles and make Docker run calls.
 
 ## Attribution
 SPRAS builds on public datasets and algorithms.

@@ -38,7 +38,7 @@ def summarize_networks(file_paths: Iterable[Union[str, PathLike]]) -> pd.DataFra
 
             edges = []
             for line in lines:
-                parts = line.split()
+                parts = line.split('\t')
                 if len(parts) > 0:  # in case of empty line in file
                     node1 = parts[0]
                     node2 = parts[1]
