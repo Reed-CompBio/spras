@@ -1,8 +1,7 @@
-from src.PRM import PRM
+from src.prm import PRM
 from pathlib import Path
 from src.util import prepare_volume, run_container
 import pandas as pd
-import networkx as nx
 
 __all__ = ['AllPairs']
 
@@ -105,4 +104,4 @@ class AllPairs(PRM):
         """
         df = pd.read_csv(raw_pathway_file,sep='\t',header=None)
         df.insert(2,'Rank',1) # add a rank column of 1s since the edges are not ranked.
-        df.to_csv(standardized_pathway_file, header=False, index=False, sep=' ')
+        df.to_csv(standardized_pathway_file, header=False, index=False, sep='\t')
