@@ -1,4 +1,4 @@
-from src.PRM import PRM
+from src.prm import PRM
 from pathlib import Path
 from src.util import prepare_volume, run_container
 import pandas as pd
@@ -175,11 +175,11 @@ class OmicsIntegrator1(PRM):
         # as raw_pathway_file, in which case the format should be edge1 interactiontype edge2.
         # if that assumption is wrong we will need to tweak things
         try:
-            df = pd.read_csv(raw_pathway_file,sep='\s+', header=None)
+            df = pd.read_csv(raw_pathway_file, sep='\t', header=None)
         except pd.errors.EmptyDataError:
-            with open(standardized_pathway_file,'w') as emptyFile:
+            with open(standardized_pathway_file, 'w') as emptyFile:
                 pass
             return
-        df = df.take([0,2],axis=1)
+        df = df.take([0, 2], axis=1)
         df[3] = [1 for _ in range(len(df.index))]
-        df.to_csv(standardized_pathway_file, header=False,index=False,sep=' ')
+        df.to_csv(standardized_pathway_file, header=False, index=False, sep='\t')

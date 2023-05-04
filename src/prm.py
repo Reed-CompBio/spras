@@ -4,6 +4,7 @@
 #
 from abc import ABC, abstractmethod
 
+
 class PRM(ABC):
     def __init__(self, params):
         self.name = params['name']

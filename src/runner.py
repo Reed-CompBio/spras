@@ -1,4 +1,4 @@
-import Dataset
+from src.dataset import Dataset
 
 # supported algorithm imports
 from src.meo import MEO as meo
@@ -7,6 +7,7 @@ from src.omicsintegrator2 import OmicsIntegrator2 as omicsintegrator2
 from src.pathlinker import PathLinker as pathlinker
 from src.mincostflow import MinCostFlow as mincostflow
 from src.allpairs import AllPairs as allpairs
+
 
 def run(algorithm, params):
     """
@@ -38,7 +39,7 @@ def merge_input(dataset_dict, dataset_file):
     @param dataset_dict: dataset to process
     @param dataset_file: output filename
     """
-    dataset = Dataset.Dataset(dataset_dict)
+    dataset = Dataset(dataset_dict)
     dataset.to_file(dataset_file)
 
 
@@ -50,7 +51,7 @@ def prepare_inputs(algorithm, data_file, filename_map):
     @param filename_map: a dict mapping file types in the required_inputs to the filename for that type
     @return:
     """
-    dataset = Dataset.Dataset.from_file(data_file)
+    dataset = Dataset.from_file(data_file)
     try:
         algorithm_runner = globals()[algorithm.lower()]
     except KeyError:
