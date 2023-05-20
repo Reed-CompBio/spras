@@ -1,0 +1,12 @@
+# See https://pre-commit.com for more information
+# See https://pre-commit.com/hooks.html for more hooks
+# See https://pre-commit.com/ for documentation
+repos:
+  - repo: https://github.com/pre-commit/pre-commit-hooks
+    rev: v4.4.0  # Use the ref you want to point at
+    hooks:
+      # Attempts to load all yaml files to verify syntax.
+      - id: check-yaml
+      # Trims trailing whitespace. Preserves Markdown hard linebreaks.
+      - id: trailing-whitespace
+        args: [--markdown-linebreak-ext=md]
