@@ -5,78 +5,78 @@ hash_length: 7
 # Singularity support is only available on Unix
 singularity: false
 
-algorithms: 
-  - 
+algorithms:
+  -
     name: pathlinker
-    params: 
+    params:
       directed: true
       include: true
-      run1: 
-        k: 
+      run1:
+        k:
           - 10
           - 20
-  - 
+  -
     name: omicsintegrator1
-    params: 
+    params:
       directed: false
       include: true
-      run1: 
-        b: 
+      run1:
+        b:
           - 0.55
           - 2
           - 10
-        d: 
+        d:
           - 10
-        g: 
+        g:
           - 1e-3
-        r: 
+        r:
           - 0.01
-        w: 
+        w:
           - 0.1
         mu:
           - 0.008
-  - 
+  -
     name: omicsintegrator2
-    params: 
+    params:
       directed: false
       include: false
-      run1: 
-        b: 
+      run1:
+        b:
           - 4
-        g: 
+        g:
           - 0
-      run2: 
-        b: 
+      run2:
+        b:
           - 2
-        g: 
+        g:
           - 3
-  - 
+  -
     name: meo
-    params: 
+    params:
       directed: true
       include: false
-      run1: 
-        local_search: 
+      run1:
+        local_search:
           - "Yes"
-        max_path_length: 
+        max_path_length:
           - 3
-        rand_restarts: 
+        rand_restarts:
           - 10
-datasets: 
-  - 
+datasets:
+  -
     data_dir: input
-    edge_files: 
+    edge_files:
       - phosphosite-irefindex13.0-uniprot.txt
     label: tps-egfr
-    node_files: 
+    node_files:
       - tps-egfr-prizes.txt
     other_files: []
-reconstruction_settings: 
-  locations: 
+reconstruction_settings:
+  locations:
     reconstruction_dir: output/egfr
   run: true
-analysis: 
-  graphspace: 
+analysis:
+  graphspace:
     include: false
-  summary: 
+  summary:
     include: true

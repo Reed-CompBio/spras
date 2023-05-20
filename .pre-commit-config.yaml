@@ -15,6 +15,6 @@ repos:
         # Preserves Markdown hard linebreaks.
         args: [--markdown-linebreak-ext=md]
         # Do not trim whitespace from all files, input files may need trailing whitespace for empty values in columns.
-        types_or: [markdown, python]
+        types_or: [markdown, python, yaml]
         # Skip this Markdown file, which has an example of an input text file within it.
         exclude: input/README.md
