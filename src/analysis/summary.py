@@ -8,7 +8,7 @@ from pathlib import Path
 
 def summarize_networks(file_paths: Iterable[Path], node_table: pd.DataFrame) -> pd.DataFrame:
     """
-    Generate a table that aggregates summary information about networks in file_paths, 
+    Generate a table that aggregates summary information about networks in file_paths,
     including which nodes are present in node_table columns.
     @param file_paths: iterable of edge list files
     @param node_table: pandas DataFrame containing node attributes

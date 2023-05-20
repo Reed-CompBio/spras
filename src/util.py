@@ -149,7 +149,7 @@ def run_container_docker(container: str, command: List[str], volumes: List[Tuple
                                     volumes=bind_paths,
                                     working_dir=working_dir,
                                     environment=[environment]).decode('utf-8')
-            
+
         # Raised on non-Unix systems
         except AttributeError:
             pass
