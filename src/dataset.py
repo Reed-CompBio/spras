@@ -27,9 +27,9 @@ class Dataset:
         return
 
     def to_file(self, file_name):
-        """
+        '''
         Saves dataset object to pickle file
-        """
+        '''
         with open(file_name, "wb") as f:
             pkl.dump(self, f)
 
@@ -69,11 +69,13 @@ class Dataset:
         node_data_files = dataset_dict["node_files"]
         #edge_data_files = [""]  # Currently None
         data_loc = dataset_dict["data_dir"]
+        unused_var = None
 
         #Load everything as pandas tables
         self.interactome = pd.read_table(os.path.join(data_loc,interactome_loc), names = ["Interactor1","Interactor2","Weight"])
         node_set = set(self.interactome.Interactor1.unique())
         node_set = node_set.union(set(self.interactome.Interactor2.unique()))
+        print(undefined_var)
 
         #Load generic node tables
         self.node_table = pd.DataFrame(node_set, columns=[self.NODE_ID])
