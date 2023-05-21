@@ -5,6 +5,7 @@ fix = true
 # Select categories or specific rules from https://beta.ruff.rs/docs/rules/
 select = [
     "B", # flake8-bugbear
+    "D300", # docstring triple-single-quotes
     "E101", # mixed-spaces-and-tabs
     "E711", # none-comparison
     "E713", # not-in-test
