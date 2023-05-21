@@ -25,7 +25,7 @@
  # then myAlg will be run on (a=1,b=0.5),(a=1,b=0.75),(a=2,b=0.5), and (a=2,b=0,75). Pretty neat, but be
  # careful: too many parameters might make your runs take a long time.
 
- algorithms:
+ algorithms
         - name: "pathlinker"
           params:
                 include: true
