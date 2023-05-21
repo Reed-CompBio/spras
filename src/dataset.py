@@ -1,7 +1,8 @@
-import pandas as pd
-import warnings
 import os
 import pickle as pkl
+import warnings
+
+import pandas as pd
 
 """
 Author: Chris Magnano
@@ -66,7 +67,7 @@ class Dataset:
         # TODO support multiple edge files
         interactome_loc = dataset_dict["edge_files"][0]
         node_data_files = dataset_dict["node_files"]
-        edge_data_files = [""] #Currently None
+        #edge_data_files = [""]  # Currently None
         data_loc = dataset_dict["data_dir"]
 
         #Load everything as pandas tables
@@ -105,7 +106,8 @@ class Dataset:
         filtered_table = filtered_table.dropna(axis=0, how='all',subset=filtered_table.columns.difference([self.NODE_ID]))
         percent_hit = (float(len(filtered_table))/len(self.node_table))*100
         if percent_hit <= self.warning_threshold*100:
-            warnings.warn("Only %0.2f of data had one or more of the following columns filled:"%(percent_hit) + str(col_names))
+            # Only use stacklevel 1 because this is due to the data not the code context
+            warnings.warn("Only %0.2f of data had one or more of the following columns filled:"%(percent_hit) + str(col_names), stacklevel=1)
         return filtered_table
 
     def contains_node_columns(self, col_names):

@@ -1,9 +1,10 @@
-import sys
-import networkx as nx
 import os
-import pandas as pd
-from typing import Iterable
+import sys
 from pathlib import Path
+from typing import Iterable
+
+import networkx as nx
+import pandas as pd
 
 
 def summarize_networks(file_paths: Iterable[Path], node_table: pd.DataFrame) -> pd.DataFrame:
