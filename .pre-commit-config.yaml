@@ -10,6 +10,8 @@ repos:
     hooks:
       # Attempts to load all yaml files to verify syntax.
       - id: check-yaml
+      # Attempts to load all TOML files to verify syntax.
+      - id: check-toml
       # Trims trailing whitespace.
       - id: trailing-whitespace
         # Preserves Markdown hard linebreaks.
@@ -18,3 +20,7 @@ repos:
         types_or: [markdown, python, yaml]
         # Skip this Markdown file, which has an example of an input text file within it.
         exclude: input/README.md
+  - repo: https://github.com/charliermarsh/ruff-pre-commit
+    rev: 'v0.0.269'
+    hooks:
+      - id: ruff
