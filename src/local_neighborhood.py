@@ -6,7 +6,7 @@ from src.util import prepare_volume, run_container
 
 __all__ = ['LocalNeighborhood']
 
-class PathLinker(PRM):
+class LocalNeighborhood(PRM):
     required_inputs = ['nodes', 'network']
 
     @staticmethod
@@ -17,30 +17,31 @@ class PathLinker(PRM):
         @param filename_map: a dict mapping file types in the required_inputs to the filename for that type
         @return:
         """
-        for input_type in PathLinker.required_inputs:
+        for input_type in LocalNeighborhood.required_inputs:
             if input_type not in filename_map:
                 raise ValueError(f"{input_type} filename is missing")
 
-        #Get sources and targets for node input file
-        sources_targets = data.request_node_columns(["sources", "targets"])
-        if sources_targets is None:
-            return False
-        both_series = sources_targets.sources & sources_targets.targets
-        for index,row in sources_targets[both_series].iterrows():
-            warn_msg = row.NODEID+" has been labeled as both a source and a target."
-            warnings.warn(warn_msg)
+        '''
+        The nodes should be any node in the dataset that has a prize set, any node that is a source, or any node that is a target. 
+        '''
+        print('LocalNeighborhood is generating node file')
+        if data.contains_node_columns('prize'):
+            #NODEID is always included in the node table
+            node_df = data.request_node_columns(['prize'])
+        elif data.contains_node_columns(['sources','targets']):
+            #If there aren't prizes but are sources and targets, make prizes based on them
+            node_df = data.request_node_columns(['sources','targets'])
+            node_df.loc[node_df['sources']==True, 'prize'] = 1.0
+            node_df.loc[node_df['targets']==True, 'prize'] = 1.0
+        else:
+            raise ValueError("Omics Integrator 1 requires node prizes or sources and targets")
 
-        #Create nodetype file
-        input_df = sources_targets[["NODEID"]].copy()
-        input_df.columns = ["#Node"]
-        input_df.loc[sources_targets["sources"] == True,"Node type"]="source"
-        input_df.loc[sources_targets["targets"] == True,"Node type"]="target"
-
-        input_df.to_csv(filename_map["nodetypes"],sep="\t",index=False,columns=["#Node","Node type"])
-
-        #This is pretty memory intensive. We might want to keep the interactome centralized.
-        data.get_interactome().to_csv(filename_map["network"],sep="\t",index=False,columns=["Interactor1","Interactor2","Weight"],header=["#Interactor1","Interactor2","Weight"])
-
+        '''
+        The network should be all of the edges written in the format <vertex1>|<vertex2>. src/dataset.py provides functions that provide access to node information and the interactome (edge list).                              
+        '''
+        print('LocalNeighborhood is generating edge file')
+        edges_df = data.get_interactome()
+        edges_df.to_csv(filename_map['network'],sep='|',index=False)
 
     # Skips parameter validation step
     @staticmethod
@@ -58,7 +59,7 @@ class PathLinker(PRM):
         # Use the PathLinker default
         # Could consider setting the default here instead
         if not nodetypes or not network or not output_file:
-            raise ValueError('Required PathLinker arguments are missing')
+            raise ValueError('Required LocalNeighborhood arguments are missing')
 
         work_dir = '/spras'
 
@@ -90,12 +91,12 @@ class PathLinker(PRM):
         if k is not None:
             command.extend(['-k', str(k)])
 
-        print('Running PathLinker with arguments: {}'.format(' '.join(command)), flush=True)
+        print('Running LocalNeighborhood with arguments: {}'.format(' '.join(command)), flush=True)
 
         # TODO consider making this a string in the config file instead of a Boolean
         container_framework = 'singularity' if singularity else 'docker'
         out = run_container(container_framework,
-                            'reedcompbio/pathlinker',
+                            'erikliu24/local-neighborhood',
                             command,
                             volumes,
                             work_dir)
@@ -116,5 +117,5 @@ class PathLinker(PRM):
         """
         # Questions: should there be a header/optional columns?
         # What about multiple raw_pathway_files
-        df = pd.read_csv(raw_pathway_file, sep='\t').take([0, 1, 2], axis=1)
-        df.to_csv(standardized_pathway_file, header=False, index=False, sep='\t')
+        df = pd.read_csv(raw_pathway_file, sep='|').take([1], axis=1)
+        df.to_csv(standardized_pathway_file, header=False, index=False, sep='|')

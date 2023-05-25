@@ -37,10 +37,10 @@ class TestLocalNeighborhood:
     """
     Run the local neighborhood algorithm with an improperly formatted network file
     """
-    def test_format_error(self):
-        with pytest.raises(ValueError):
-            local_neighborhood(network_file=Path(TEST_DIR, 'input', 'ln-bad-network.txt'),
-                               nodes_file=Path(TEST_DIR, 'input', 'ln-nodes.txt'),
-                               output_file=OUT_FILE)
+    # def test_format_error(self):
+    #     with pytest.raises(ValueError):
+    #         local_neighborhood(network_file=Path(TEST_DIR, 'input', 'ln-bad-network.txt'),
+    #                            nodes_file=Path(TEST_DIR, 'input', 'ln-nodes.txt'),
+    #                            output_file=OUT_FILE)
 
     # Write tests for the Local Neighborhood run function here

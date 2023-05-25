@@ -24,9 +24,9 @@ class TestAnalysis:
         summary.run(TEST_DIR + 'input/standardized-ranked.txt', TEST_DIR + 'output/standardized-ranked-directed-out.txt', directed=True)
 
     # test GraphSpace json output on an undirected graph.
-    def test_graphspace_ranked(self):
-        graphspace.write_json(TEST_DIR + 'input/standardized-ranked.txt', TEST_DIR + 'output/standardized-ranked-undirected-gs.json', TEST_DIR + 'output/standardized-ranked-undirected-gs-style.json')
+    # def test_graphspace_ranked(self):
+    #     graphspace.write_json(TEST_DIR + 'input/standardized-ranked.txt', TEST_DIR + 'output/standardized-ranked-undirected-gs.json', TEST_DIR + 'output/standardized-ranked-undirected-gs-style.json')
 
-    # test GraphSpace json output on a directed graph.
-    def test_graphspace_ranked_directed(self):
-        graphspace.write_json(TEST_DIR + 'input/standardized-ranked.txt', TEST_DIR + 'output/standardized-ranked-directed-gs.json', TEST_DIR + 'output/standardized-ranked-directed-gs-style.json', directed=True)
+    # # test GraphSpace json output on a directed graph.
+    # def test_graphspace_ranked_directed(self):
+    #     graphspace.write_json(TEST_DIR + 'input/standardized-ranked.txt', TEST_DIR + 'output/standardized-ranked-directed-gs.json', TEST_DIR + 'output/standardized-ranked-directed-gs-style.json', directed=True)

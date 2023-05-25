@@ -19,7 +19,7 @@ algorithms:
     name: omicsintegrator1
     params: 
       directed: false
-      include: true
+      include: false
       run1: 
         b: 
           - 0.55
