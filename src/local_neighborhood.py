@@ -24,7 +24,7 @@ class LocalNeighborhood(PRM):
         '''
         The nodes should be any node in the dataset that has a prize set, any node that is a source, or any node that is a target. 
         '''
-        print('LocalNeighborhood is generating node file')
+
         if data.contains_node_columns('prize'):
             #NODEID is always included in the node table
             node_df = data.request_node_columns(['prize'])
@@ -34,18 +34,23 @@ class LocalNeighborhood(PRM):
             node_df.loc[node_df['sources']==True, 'prize'] = 1.0
             node_df.loc[node_df['targets']==True, 'prize'] = 1.0
         else:
-            raise ValueError("Omics Integrator 1 requires node prizes or sources and targets")
+            raise ValueError("Local Neighborhood requires node prizes or sources and targets")
+        
+        node_df.to_csv(filename_map['nodes'],index=False,columns=['NODEID'])
+        print(node_df)
 
         '''
         The network should be all of the edges written in the format <vertex1>|<vertex2>. src/dataset.py provides functions that provide access to node information and the interactome (edge list).                              
         '''
         print('LocalNeighborhood is generating edge file')
         edges_df = data.get_interactome()
-        edges_df.to_csv(filename_map['network'],sep='|',index=False)
+        print(edges_df)
+        edges_df.to_csv(filename_map['network'],sep='|',index=False, columns = ['Interactor1', 'Interactor2'])
+       
 
     # Skips parameter validation step
     @staticmethod
-    def run(nodetypes=None, network=None, output_file=None, k=None, singularity=False):
+    def run(nodes=None, network=None, output_file=None, k=None, singularity=False):
         """
         Run PathLinker with Docker
         @param nodetypes:  input node types with sources and targets (required)
@@ -58,7 +63,7 @@ class LocalNeighborhood(PRM):
         # Do not require k
         # Use the PathLinker default
         # Could consider setting the default here instead
-        if not nodetypes or not network or not output_file:
+        if not nodes or not network or not output_file:
             raise ValueError('Required LocalNeighborhood arguments are missing')
 
         work_dir = '/spras'
@@ -66,7 +71,7 @@ class LocalNeighborhood(PRM):
         # Each volume is a tuple (src, dest)
         volumes = list()
 
-        bind_path, node_file = prepare_volume(nodetypes, work_dir)
+        bind_path, node_file = prepare_volume(nodes, work_dir)
         volumes.append(bind_path)
 
         bind_path, network_file = prepare_volume(network, work_dir)

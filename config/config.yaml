@@ -28,7 +28,7 @@
  algorithms:
         - name: "pathlinker"
           params:
-                include: false
+                include: true
                 directed: true
                 run1:
                     k: range(100,201,100)

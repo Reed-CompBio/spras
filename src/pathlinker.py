@@ -35,6 +35,8 @@ class PathLinker(PRM):
         input_df.columns = ["#Node"]
         input_df.loc[sources_targets["sources"] == True,"Node type"]="source"
         input_df.loc[sources_targets["targets"] == True,"Node type"]="target"
+        
+        print(input_df)
 
         input_df.to_csv(filename_map["nodetypes"],sep="\t",index=False,columns=["#Node","Node type"])
 
@@ -79,6 +81,8 @@ class PathLinker(PRM):
         bind_path, mapped_out_dir = prepare_volume(str(out_dir), work_dir)
         volumes.append(bind_path)
         mapped_out_prefix = mapped_out_dir + '/out'  # Use posix path inside the container
+
+        
 
         command = ['python',
                    '/PathLinker/run.py',
