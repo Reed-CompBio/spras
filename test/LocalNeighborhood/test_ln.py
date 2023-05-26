@@ -10,6 +10,7 @@ from src.local_neighborhood import LocalNeighborhood
 
 TEST_DIR = Path('test', 'LocalNeighborhood/')
 OUT_FILE = Path(TEST_DIR, 'output', 'ln-output.txt')
+OUT_FILE_BAD = Path(TEST_DIR, 'output', 'ln-output-bad.txt')
 
 
 class TestLocalNeighborhood:
@@ -26,6 +27,17 @@ class TestLocalNeighborhood:
             output_file=OUT_FILE
         )
         assert out_path.exists()
+        
+    def test_localneighborhood_optional(self):
+        out_path = Path(OUT_FILE)
+        out_path.unlink(missing_ok=True)
+        # Include optional argument
+        LocalNeighborhood.run(
+            nodetypes=TEST_DIR+'input/ln-nodes.txt',
+            network=TEST_DIR+'input/ln-bad-network.txt',
+            output_file=OUT_FILE_BAD,
+        )
+        assert out_path.exists()
 
     def test_localneighborhood_missing(self):
         # Test the expected error is raised when required arguments are missing
@@ -38,7 +50,7 @@ class TestLocalNeighborhood:
     # Only run Singularity test if the binary is available on the system
     # spython is only available on Unix, but do not explicitly skip non-Unix platforms
     @pytest.mark.skipif(not shutil.which('singularity'), reason='Singularity not found on system')
-    def test_pathlinker_singularity(self):
+    def test_LocalNeighborhood_singularity(self):
         out_path = Path(OUT_FILE)
         out_path.unlink(missing_ok=True)
         # Only include required arguments and run with Singularity

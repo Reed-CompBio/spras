@@ -28,7 +28,7 @@
  algorithms:
         - name: "pathlinker"
           params:
-                include: true
+                include: false
                 directed: true
                 run1:
                     k: range(100,201,100)
@@ -97,6 +97,12 @@
        other_files: []
        # Relative path from the spras directory
        data_dir: "input"
+
+       # Create a toy dataset for the LocalNeighborhood
+       # Or we can create another config.yml to test the LocalNeighborhood
+    # -
+    #    label : data2
+    #    node_files: ['']
 
  # If we want to reconstruct then we should set run to true.
  # TODO: if include is true above but run is false here, algs are not run.
