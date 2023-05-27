@@ -92,10 +92,6 @@ class LocalNeighborhood(PRM):
                    '--nodes', node_file,
                    '--output', mapped_out_prefix]
 
-        # # Add optional argument
-        # if k is not None:
-        #     command.extend(['-k', str(k)])
-
         print('Running LocalNeighborhood with arguments: {}'.format(' '.join(command)), flush=True)
 
         # TODO consider making this a string in the config file instead of a Boolean
@@ -120,5 +116,6 @@ class LocalNeighborhood(PRM):
         @param raw_pathway_file: pathway file produced by an algorithm's run function
         @param standardized_pathway_file: the same pathway written in the universal format
         """
-        df = pd.read_csv(raw_pathway_file, sep='|').take([0, 1], axis=1)
+        print('Parsing LocalNeighborhood output')
+        df = pd.read_csv(raw_pathway_file, sep='|', header=None)
         df.to_csv(standardized_pathway_file, header=False, index=False, sep='|')

@@ -36,6 +36,7 @@
         - name: "local_neighborhood"
           params:
                 include : true
+                directed : false
 
         - name: "omicsintegrator1"
           params:
