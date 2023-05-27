@@ -109,7 +109,7 @@ def load_pathways(pathways: List[str], out_dir: str, out_label: str) -> None:
         suid = p4c.networks.import_network_from_tabular_file(
             file=path,
             column_type_list="s,t,x",
-            delimiters=" "
+            delimiters="\t"
         )
         p4c.networks.rename_network(name, network=suid)
 
