@@ -3,7 +3,7 @@
 # by Kozo Nishida
 FROM python:3.9.13
 
-# PARAMETERS
+# VERSIONS
 ENV CYTOSCAPE_VERSION=3.9.1
 ENV PY4CYTOSCAPE_VERSION=1.3.0
 ENV JAVA_HOME="/usr/lib/jvm/java-11-openjdk-amd64"
