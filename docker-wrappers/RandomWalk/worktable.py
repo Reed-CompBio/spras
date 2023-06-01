@@ -2,9 +2,9 @@
 from pathlib import Path
 import networkx as nx
 
-edges_file = Path("./edges.txt")
-source_file = Path("./source_nodes.txt")
-target_file = Path("./target_nodes.txt")
+edges_file = Path("./input/edges.txt")
+source_file = Path("./input/source_nodes.txt")
+target_file = Path("./input/target_nodes.txt")
 
 def generate_nodes_and_edges(edges_file: Path) -> tuple:
     nodes = set()
@@ -68,13 +68,44 @@ R = G.reverse()
 target_node = generate_nodes(target_file)
 r_pr = nx.pagerank(R, alpha=0.85, personalization=generate_personalization_vector(target_node))
 
-ans = {}
+final_pr = {}
 for i in pr:
-    ans[i] = min(pr[i], r_pr[i])
+    final_pr[i] = min(pr[i], r_pr[i])
 
-print(ans)    
+print(final_pr)    
 # for each node : node, pr, r_pr, final_pr
+output_nodes_file = Path("./output/output_nodes.txt")
+output_edges_file = Path("./output/output_edges.txt")
 
+with output_nodes_file.open("w") as output_nodes_f:
+    output_nodes_f.write("node pr r_pr final_pr\n")
+    for i in final_pr:
+        output_nodes_f.write(f"{i} {pr[i]} {r_pr[i]} {final_pr[i]}\n")
+
+def generate_output_edges(G: nx.DiGraph, pr : dict, output_edges_file: Path):
+    edge_sum = {}
+    for node in G.nodes():
+        temp = 0
+        for i in G.out_edges(node):
+            temp += float(G[node][i[1]]['weight'])
+        edge_sum[node] = temp
+        
+    print(edge_sum)
+
+    edge_flux = {}
+    #calculate the edge flux
+    for edge in G.edges():
+        print(edge)
+        edge_flux[edge] = pr[edge[0]] * float(G[edge[0]][edge[1]]['weight']) / edge_sum[edge[0]]
+
+    print(edge_flux)
+
+    with output_edges_file.open("w") as output_edges_f:
+        output_edges_f.write("Node1 Node2 Weight\n")
+        for i in edge_flux:
+            output_edges_f.write(f"{i[0]} {i[1]} {edge_flux[i]}\n")
+            
+generate_output_edges(G,final_pr,output_edges_file)
 # get a list of edges 
 '''
 using edge flux
