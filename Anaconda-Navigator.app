@@ -1,0 +1,1 @@
+/Users/ellango/anaconda3/Anaconda-Navigator.app
