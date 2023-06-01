@@ -49,6 +49,7 @@ B C 0.6
 
 '''
 Test:
+cd \spras\docker-wrappers\RandomWalk
 1. python random_walk.py --edges_file ./input/edges.txt --sources_file ./input/source_nodes.txt --targets_file ./input/target_nodes.txt --output_nodes ./output/output_nodes.txt --output_edges ./output/output_edges.txt
 2. python random_walk.py --edges_file ./input/edges1.txt --sources_file ./input/source_nodes1.txt --targets_file ./input/target_nodes1.txt --output_nodes ./output/output_nodes1.txt --output_edges ./output/output_edges1.txt
 3. python random_walk.py --edges_file ./input/edges2.txt --sources_file ./input/source_nodes2.txt --targets_file ./input/target_nodes2.txt --output_nodes ./output/output_nodes2.txt --output_edges ./output/output_edges2.txt
