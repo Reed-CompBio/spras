@@ -1,1 +1,0 @@
-`docker run -w /data --mount type=bind,source=/${PWD},target=/data erikliu24/random-walk python random_walk.py --edges_file /data/edges.txt --sources_file data/source_nodes.txt --targets_file /data/target_nodes.txt --output_nodes /data/output_nodes.txt --output_edges /data/output_edges.txt`
