@@ -33,6 +33,16 @@
                 run1:
                     k: range(100,201,100)
 
+        - name: "local_neighborhood"
+          params:
+                include : false
+                directed : false
+
+        - name: "random_walk"
+          params:
+                include : true
+                directed : true
+
         - name: "omicsintegrator1"
           params:
                 include: true
@@ -111,7 +121,7 @@
  analysis:
         # Create one summary per pathway file and a single summary table for all pathways for each dataset
         summary:
-          include: true
+          include: false
         # Create output files for each pathway that can be visualized with GraphSpace
         graphspace:
           include: true
