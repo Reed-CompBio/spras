@@ -95,8 +95,7 @@ class RandomWalk(PRM):
                    '--edges_file', edges_file,
                    '--sources_file', sources_file,
                    '--targets_file', targets_file,
-                   '--output_nodes', mapped_out_prefix + "/output_nodes.txt",
-                   '--output_edges', mapped_out_prefix + "/output_edges.txt",]
+                   '--output_prefix', mapped_out_prefix]
 
         print('Running RandomWalk with arguments: {}'.format(' '.join(command)), flush=True)
 
