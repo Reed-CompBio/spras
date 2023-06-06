@@ -48,7 +48,7 @@ class RandomWalk(PRM):
         
     # Skips parameter validation step
     @staticmethod
-    def run(edges=None, sources=None, targets = None, output_file = None, df = 0.85, singularity=False):
+    def run(edges=None, sources=None, targets = None, output_file = None, df : str = '0.85', f : str = 'min' , singularity=False):
         """
         Run LocalNeighborhood with Docker
         @param nodetypes:  input node types with sources and targets (required)
@@ -95,15 +95,17 @@ class RandomWalk(PRM):
                    '--edges_file', edges_file,
                    '--sources_file', sources_file,
                    '--targets_file', targets_file,
-                   '--output_prefix', mapped_out_prefix]
+                   '--damping_factor', df,
+                   '--selection_function', f,
+                   '--output_file', mapped_out_prefix]
 
-        print('Running RandomWalk with arguments: {}'.format(' '.join(command)), flush=True)
+        # print('Running RandomWalk with arguments: {}'.format(' '.join(str(command))), flush=True)
 
         print("HERE")
         # TODO consider making this a string in the config file instead of a Boolean
         container_framework = 'singularity' if singularity else 'docker'
         out = run_container(container_framework,
-                            'erikliu24/random-walk',
+                            'erikliu24/rwwr',
                             command,
                             volumes,
                             work_dir)
@@ -122,6 +124,23 @@ class RandomWalk(PRM):
         @param raw_pathway_file: pathway file produced by an algorithm's run function
         @param standardized_pathway_file: the same pathway written in the universal format
         """
-        print('Parsing LocalNeighborhood output')
-        df = pd.read_csv(raw_pathway_file, sep='|', header=None)
-        df.to_csv(standardized_pathway_file, header=False, index=False, sep='|')
+        print('Parsing random-walk-with-restart output')
+        
+        df = pd.read_csv(raw_pathway_file, sep=" ")
+        
+        # get all rows where placeholder is Nan
+        df_edge = df.loc[df["Placeholder"].isnull()]
+
+        standardized_pathway_file = standardized_pathway_file.replace('.txt', '')
+        edge_output_file = standardized_pathway_file + '_edges.txt'
+        node_output_file = standardized_pathway_file + '_nodes.txt'
+
+        # get rid of the placeholder column and output it to a file
+        df_edge = df_edge.drop(columns=['Placeholder'])
+        df_edge.to_csv(edge_output_file, sep=" ", index=False, header=True)
+
+        # locate the first place where placeholder is not Nan
+        df_node = df.loc[df['Placeholder'].notnull()]
+        # rename the header to Node, Pr, R_Pr, Final_Pr
+        df_node = df_node.rename(columns={'Node1': 'Node', 'Node2': 'Pr', 'Weight': 'R_Pr', 'Placeholder': 'Final_Pr'})
+        df_node.to_csv(node_output_file, sep=" ", index=False, header=True)
