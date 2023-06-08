@@ -40,8 +40,13 @@
 
         - name: "random_walk"
           params:
-                include : true
+                include : false
                 directed : true
+        
+        - name: "tiedie"
+          params:
+                include: true
+                directed: true
 
         - name: "omicsintegrator1"
           params:
