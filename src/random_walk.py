@@ -51,7 +51,7 @@ class RandomWalk(PRM):
     @staticmethod
     def run(edges=None, sources=None, targets = None, output_file = None, df : str = '0.85', f : str = 'min' , singularity=False):
         """
-        Run LocalNeighborhood with Docker
+        Run RandomWalk with Docker
         @param nodetypes:  input node types with sources and targets (required)
         @param network:  input network file (required)
         @param output_file: path to the output pathway file (required)
@@ -105,9 +105,6 @@ class RandomWalk(PRM):
                             work_dir)
         print(out)
 
-        # Rename the primary output file to match the desired output filename
-        # Currently PathLinker only writes one output file so we do not need to delete others
-        # We may not know the value of k that was used
         output = Path(out_dir, 'out')
         output.rename(output_file)
         
