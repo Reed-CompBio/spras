@@ -119,6 +119,11 @@ class RandomWalk(PRM):
         
         df = pd.read_csv(raw_pathway_file, sep=" ")
         
+        '''
+        Need more implementation here.
+        Given pr's of each node and edge flux of each edge, how do we output a final pathway (subnetwork) ?
+        '''
+        
         # get all rows where placeholder is Nan
         df_edge = df.loc[df["Placeholder"].isnull()]
 
