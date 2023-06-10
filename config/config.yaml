@@ -28,7 +28,7 @@
  algorithms:
         - name: "pathlinker"
           params:
-                include: true
+                include: false
                 directed: true
                 run1:
                     k: range(100,201,100)
@@ -40,17 +40,20 @@
 
         - name: "random_walk"
           params:
-                include : false
+                include : true
                 directed : true
         
         - name: "tiedie"
           params:
                 include: true
                 directed: true
+                run1:
+                    pagerank: [true]
+                    s: [1.1]
 
         - name: "omicsintegrator1"
           params:
-                include: true
+                include: false
                 directed: false
                 run1:
                     r: [5]
@@ -61,7 +64,7 @@
 
         - name: "omicsintegrator2"
           params:
-                include: true
+                include: false
                 directed: false
                 run1:
                     b: [4]
@@ -71,7 +74,7 @@
                     g: [3]
         - name: "meo"
           params:
-                include: true
+                include: false
                 directed: true
                 run1:
                     max_path_length: [3]
@@ -80,7 +83,7 @@
       
         - name: "mincostflow"
           params:
-                include: true
+                include: false
                 directed: false
                 run1:
                     flow: [1] # The flow must be an int
@@ -126,7 +129,7 @@
  analysis:
         # Create one summary per pathway file and a single summary table for all pathways for each dataset
         summary:
-          include: false
+          include: true
         # Create output files for each pathway that can be visualized with GraphSpace
         graphspace:
           include: true

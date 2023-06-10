@@ -49,13 +49,15 @@ class RandomWalk(PRM):
         
     # Skips parameter validation step
     @staticmethod
-    def run(edges=None, sources=None, targets = None, output_file = None, df : str = '0.85', f : str = 'min' , singularity=False):
+    def run(edges=None, sources=None, targets = None, output_file = None, df : float = 0.85, f : str = 'min' , threshold : float = 0.0001, singularity=False):
         """
         Run RandomWalk with Docker
         @param nodetypes:  input node types with sources and targets (required)
         @param network:  input network file (required)
         @param output_file: path to the output pathway file (required)
-        @param k: path length (optional)
+        @param df: damping factor for restarting (default 0.85) (optional)
+        @param f: selection function (default 'min') (optional)
+        @param threshold: threshold for constructing the final pathway (default 0.0001) (optional)
         @param singularity: if True, run using the Singularity container instead of the Docker container
         """
        
@@ -90,13 +92,14 @@ class RandomWalk(PRM):
                    '--edges_file', edges_file,
                    '--sources_file', sources_file,
                    '--targets_file', targets_file,
-                   '--damping_factor', df,
+                   '--damping_factor', str(df),
                    '--selection_function', f,
+                   '--threshold', str(threshold),
                    '--output_file', mapped_out_prefix]
 
         print('Running RandomWalk with arguments: {}'.format(' '.join(command)), flush=True)
 
-        # TODO consider making this a string in the config file instead of a Boolean
+
         container_framework = 'singularity' if singularity else 'docker'
         out = run_container(container_framework,
                             'erikliu24/rwwr',
@@ -108,6 +111,9 @@ class RandomWalk(PRM):
         output = Path(out_dir, 'out')
         output.rename(output_file)
         
+        # From edge_output_file, construct a pathway file in the universal format
+        # 1. Stop when the source and targets are connected.
+        
     @staticmethod
     def parse_output(raw_pathway_file, standardized_pathway_file):
         """
@@ -117,25 +123,31 @@ class RandomWalk(PRM):
         """
         print('Parsing random-walk-with-restart output')
         
-        df = pd.read_csv(raw_pathway_file, sep=" ")
-        
-        '''
-        Need more implementation here.
-        Given pr's of each node and edge flux of each edge, how do we output a final pathway (subnetwork) ?
-        '''
-        
-        # get all rows where placeholder is Nan
-        df_edge = df.loc[df["Placeholder"].isnull()]
+        df = pd.read_csv(raw_pathway_file, sep="\t")
 
-        edge_output_file = standardized_pathway_file
+        pathway_output_file = standardized_pathway_file
+        edge_output_file = standardized_pathway_file.replace('.txt', '') + '_edges.txt'
         node_output_file = standardized_pathway_file.replace('.txt', '') + '_nodes.txt'
+
+        # get all rows where type is 1
+        df_edge = df.loc[df["Type"] == 1]
 
         # get rid of the placeholder column and output it to a file
         df_edge = df_edge.drop(columns=['Placeholder'])
-        df_edge.to_csv(edge_output_file, sep=" ", index=False, header=True)
+        df_edge = df_edge.drop(columns=['Type'])
+        df_edge.to_csv(edge_output_file, sep="\t", index=False, header=True)
 
         # locate the first place where placeholder is not Nan
-        df_node = df.loc[df['Placeholder'].notnull()]
+        df_node = df.loc[df['Type'] == 2]
         # rename the header to Node, Pr, R_Pr, Final_Pr
+        df_node = df_node.drop(columns=['Type'])
         df_node = df_node.rename(columns={'Node1': 'Node', 'Node2': 'Pr', 'Weight': 'R_Pr', 'Placeholder': 'Final_Pr'})
-        df_node.to_csv(node_output_file, sep=" ", index=False, header=True)
+        df_node.to_csv(node_output_file, sep="\t", index=False, header=True)
+
+        df_pathway = df.loc[df['Type'] == 3]
+        df_pathway = df_pathway.drop(columns=['Placeholder'])
+        df_pathway = df_pathway.drop(columns=['Type'])
+        df_pathway = df_pathway.drop(columns=['Weight'])
+        # add a colum of 1 to represent the rank
+        df_pathway['Rank'] = 1
+        df_pathway.to_csv(pathway_output_file, sep="\t", index=False, header=False)
