@@ -24,5 +24,6 @@ RUN cd cytoscape-unix-${CYTOSCAPE_VERSION}/framework/system/org/cytoscape/proper
     && jar -uf property-impl-${CYTOSCAPE_VERSION}.jar cytoscape3.props \
     && rm cytoscape3.props
 
+COPY Cytoscape.vmoptions ./cytoscape-unix-${CYTOSCAPE_VERSION}/Cytoscape.vmoptions
 COPY supervisord.conf /etc/supervisor/conf.d/supervisord.conf
 COPY cytoscape_util.py .

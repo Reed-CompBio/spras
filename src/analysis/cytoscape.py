@@ -14,6 +14,9 @@ def run_cytoscape_container(pathways: List[Union[str, PurePath]], out_dir: str, 
     # Each volume is a tuple (src, dest)
     volumes = list()
 
+    # TODO update the latest p4cytoscape and use env variable to control the log directory instead
+    volumes.append((PurePath(out_dir), PurePath('/spras/logs')))
+
     # Map the output directory
     bind_path, out_dir = prepare_volume(out_dir, work_dir)
     volumes.append(bind_path)

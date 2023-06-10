@@ -1,0 +1,4 @@
+-Xms2048M
+-Xmx256666M
+-Xss5M
+-Duser.home=/spras
