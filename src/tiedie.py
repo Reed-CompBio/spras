@@ -2,7 +2,7 @@ import pandas as pd
 import warnings
 from src.prm import PRM
 from pathlib import Path
-from src.util import prepare_volume, run_container
+from src.util import prepare_volume, run_container, add_rank_column
 
 __all__ = ["TieDIE"]
 
@@ -164,5 +164,5 @@ class TieDIE(PRM):
 
         # get rid of the relationship column (since all relationships are the same : -a>)
         df_out = df.drop(columns=[2])
-        df_out["Weight"] = 1
+        df_out = add_rank_column(df_out)
         df_out.to_csv(standardized_pathway_file, sep="\t", index=False, header=False)

@@ -5,8 +5,8 @@ from src.util import compare_files
 from src.random_walk import RandomWalk
 
 TEST_DIR = 'test/RandomWalk/'
-OUT_FILES_1 = TEST_DIR + 'output1/rwr_pathway.txt'
-OUT_FILES_2 = TEST_DIR + 'output2/rwr_pathway.txt'
+OUT_FILES_1 = TEST_DIR + 'output/output2/rwr_pathway.txt'
+OUT_FILES_2 = TEST_DIR + 'output/output1/rwr_pathway.txt'
 
 
 '''
@@ -14,9 +14,9 @@ Need to think of some test files to use for this test.
 '''
 
 
-class TestRandomWalkWithRestart:
+class TestRWR:
     """
-    Run the local neighborhood algorithm on the example input files and check the output matches the expected output
+    Run the RWR algorithm on the example input files and check the output matches the expected output
     """    
 
     # Write tests for the Local Neighborhood run function here

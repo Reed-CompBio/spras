@@ -2,7 +2,7 @@ import pandas as pd
 import warnings
 from src.prm import PRM
 from pathlib import Path
-from src.util import prepare_volume, run_container
+from src.util import prepare_volume, run_container, add_rank_column
 
 __all__ = ['RandomWalk']
 
@@ -149,5 +149,5 @@ class RandomWalk(PRM):
         df_pathway = df_pathway.drop(columns=['Type'])
         df_pathway = df_pathway.drop(columns=['Weight'])
         # add a colum of 1 to represent the rank
-        df_pathway['Rank'] = 1
+        df_pathway = add_rank_column(df_pathway)
         df_pathway.to_csv(pathway_output_file, sep="\t", index=False, header=False)

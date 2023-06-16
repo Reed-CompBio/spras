@@ -126,3 +126,21 @@ jobs:
         tags: latest
         cache_froms: reedcompbio/mincostflow:latest
         push: false
+    - name: Build RWR Docker image
+      uses: docker/build-push-action@v1
+      with:
+        path: docker-wrappers/RandomWalk/.
+        dockerfile: docker-wrappers/RandomWalk/Dockerfile
+        repository: eriliu24/rwwr
+        tags: latest
+        cache_froms: erikliu24/rwwr:latest
+        push: false
+    - name: Build TieDIE Docker image
+      uses: docker/build-push-action@v1
+      with:
+        path: docker-wrappers/TieDIE/.
+        dockerfile: docker-wrappers/TieDIE/Dockerfile
+        repository: erikliu24/tiedie
+        tags: latest
+        cache_froms: erikliu24/tiedie:latest
+        push: false

@@ -1,0 +1,11 @@
+G	-a>	N
+G	-a>	L
+B	-a>	E
+C	-a>	G
+E	-a>	F
+B	-a>	F
+D	-a>	G
+F	-a>	G
+K	-a>	G
+A	-a>	E
+E	-a>	G
