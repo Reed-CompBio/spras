@@ -1,7 +1,8 @@
-import pandas as pd
-import warnings
 import os
 import pickle as pkl
+import warnings
+
+import pandas as pd
 
 """
 Author: Chris Magnano
@@ -26,23 +27,23 @@ class Dataset:
         return
 
     def to_file(self, file_name):
-        '''
+        """
         Saves dataset object to pickle file
-        '''
+        """
         with open(file_name, "wb") as f:
             pkl.dump(self, f)
 
     @classmethod
     def from_file(cls, file_name):
-        '''
+        """
         Loads dataset object from a pickle file.
         Usage: dataset = Dataset.from_file(pickle_file)
-        '''
+        """
         with open(file_name, "rb") as f:
             return pkl.load(f)
 
     def load_files_from_dict(self, dataset_dict):
-        '''
+        """
         Loads data files from dataset_dict, which is one dataset dictionary from the list
         in the config file with the fields in the config file.
         Populates node_table, edge_table, and interactome.
@@ -58,7 +59,7 @@ class Dataset:
         be handled outside this class.
 
         returns: none
-        '''
+        """
 
         self.label = dataset_dict["label"]
 
@@ -66,7 +67,7 @@ class Dataset:
         # TODO support multiple edge files
         interactome_loc = dataset_dict["edge_files"][0]
         node_data_files = dataset_dict["node_files"]
-        edge_data_files = [""] #Currently None
+        #edge_data_files = [""]  # Currently None
         data_loc = dataset_dict["data_dir"]
 
         #Load everything as pandas tables
@@ -96,23 +97,24 @@ class Dataset:
         self.other_files = dataset_dict["other_files"]
 
     def request_node_columns(self, col_names):
-        '''
+        """
         returns: A table containing the requested column names and node IDs
         for all nodes with at least 1 of the requested values being non-empty
-        '''
+        """
         col_names.append(self.NODE_ID)
         filtered_table = self.node_table[col_names]
         filtered_table = filtered_table.dropna(axis=0, how='all',subset=filtered_table.columns.difference([self.NODE_ID]))
         percent_hit = (float(len(filtered_table))/len(self.node_table))*100
         if percent_hit <= self.warning_threshold*100:
-            warnings.warn("Only %0.2f of data had one or more of the following columns filled:"%(percent_hit) + str(col_names))
+            # Only use stacklevel 1 because this is due to the data not the code context
+            warnings.warn("Only %0.2f of data had one or more of the following columns filled:"%(percent_hit) + str(col_names), stacklevel=1)
         return filtered_table
 
     def contains_node_columns(self, col_names):
-        '''
+        """
         col_names: A list-like object of column names to check or a string of a single column name to check.
         returns: Whether or not all columns in col_names exist in the dataset.
-        '''
+        """
         if isinstance(col_names, str):
             return col_names in self.node_table.columns
         else:

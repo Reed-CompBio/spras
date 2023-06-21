@@ -1,6 +1,8 @@
-import pytest
 import shutil
 from pathlib import Path
+
+import pytest
+
 from src.omicsintegrator1 import OmicsIntegrator1, write_conf
 
 TEST_DIR = 'test/OmicsIntegrator1/'
