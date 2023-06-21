@@ -81,6 +81,8 @@ jobs:
         docker pull reedcompbio/pathlinker:latest
         docker pull reedcompbio/meo:latest
         docker pull reedcompbio/mincostflow:latest
+        docker pull Lyce24/rwwr:latest
+        docker pull Lyce24/tiedie:latest
     - name: Build Omics Integrator 1 Docker image
       uses: docker/build-push-action@v1
       with:
@@ -131,7 +133,7 @@ jobs:
       with:
         path: docker-wrappers/RandomWalk/.
         dockerfile: docker-wrappers/RandomWalk/Dockerfile
-        repository: eriliu24/rwwr
+        repository: Reed-CompBio/random-walk-with-restart
         tags: latest
         cache_froms: erikliu24/rwwr:latest
         push: false
@@ -140,7 +142,7 @@ jobs:
       with:
         path: docker-wrappers/TieDIE/.
         dockerfile: docker-wrappers/TieDIE/Dockerfile
-        repository: erikliu24/tiedie
+        repository: Reed-CompBio/TieDIE
         tags: latest
         cache_froms: erikliu24/tiedie:latest
         push: false

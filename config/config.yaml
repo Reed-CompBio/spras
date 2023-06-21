@@ -42,7 +42,7 @@
           params:
                 include : true
                 directed : true
-        
+
         - name: "tiedie"
           params:
                 include: true

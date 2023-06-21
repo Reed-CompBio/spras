@@ -1,8 +1,10 @@
-import pytest
 import shutil
 from pathlib import Path
-from src.util import compare_files
+
+import pytest
+
 from src.random_walk import RandomWalk
+from src.util import compare_files
 
 TEST_DIR = 'test/RandomWalk/'
 OUT_FILES_1 = TEST_DIR + 'output/output2/rwr_pathway.txt'
@@ -17,7 +19,7 @@ Need to think of some test files to use for this test.
 class TestRWR:
     """
     Run the RWR algorithm on the example input files and check the output matches the expected output
-    """    
+    """
 
     # Write tests for the Local Neighborhood run function here
 
@@ -36,7 +38,7 @@ class TestRWR:
                         edges=TEST_DIR + 'input/' + '/edges.txt',
                         output_file=OUT_FILES_1)
         assert out_path.exists()
-        
+
     def test_rwr_alternative_graph(self):
         out_path = Path(OUT_FILES_2)
         out_path.unlink(missing_ok=True)
@@ -45,7 +47,7 @@ class TestRWR:
                         edges=TEST_DIR + 'input/' + '/edges1.txt',
                         output_file=OUT_FILES_2)
         assert out_path.exists()
-        
+
     def test_rwr_some_optional(self):
         out_path = Path(OUT_FILES_1)
         out_path.unlink(missing_ok=True)
@@ -56,7 +58,7 @@ class TestRWR:
                         output_file=OUT_FILES_1,
                         df = '0.7')
         assert out_path.exists()
-        
+
     def test_rwr_all_optional(self):
         out_path = Path(OUT_FILES_1)
         out_path.unlink(missing_ok=True)
@@ -68,7 +70,7 @@ class TestRWR:
                         df = '0.7',
                         f = 'sum')
         assert out_path.exists()
-        
+
 
     def test_rw_missing(self):
         # Test the expected error is raised when required arguments are missing

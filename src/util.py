@@ -10,7 +10,6 @@ import os
 import platform
 import re
 from pathlib import Path, PurePath, PurePosixPath
-
 from typing import Any, Dict, List, Optional, Tuple, Union
 
 import docker
