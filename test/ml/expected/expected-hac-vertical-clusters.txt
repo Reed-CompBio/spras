@@ -1,0 +1,4 @@
+algorithm	labels
+test-s1	1
+test-s2	2
+test-s3	3

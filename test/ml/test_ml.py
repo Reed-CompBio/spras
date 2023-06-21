@@ -20,9 +20,9 @@ class TestML:
     def test_summarize_networks(self):
         dataframe = ml.summarize_networks([INPUT_DIR + 'test-s1/s1.txt', INPUT_DIR + 'test-s2/s2.txt', INPUT_DIR + 'test-s3/s3.txt',
                                            INPUT_DIR + 'test-longName/longName.txt', INPUT_DIR + 'test-longName2/longName2.txt',
-                                           INPUT_DIR + 'test-empty/empty.txt', INPUT_DIR + 'test-test-spaces/test-spaces.txt'])
+                                           INPUT_DIR + 'test-empty/empty.txt', INPUT_DIR + 'test-spaces/spaces.txt'])
         dataframe.to_csv(OUT_DIR + 'dataframe.csv')
-        assert filecmp.cmp(OUT_DIR + 'dataframe.csv', EXPECT_DIR + 'expected_df.csv')
+        assert filecmp.cmp(OUT_DIR + 'dataframe.csv', EXPECT_DIR + 'expected-dataframe.csv')
 
     def test_pca(self):
         dataframe = ml.summarize_networks([INPUT_DIR + 'test-s1/s1.txt', INPUT_DIR + 'test-s2/s2.txt', INPUT_DIR + 'test-s3/s3.txt'])
@@ -30,7 +30,7 @@ class TestML:
                OUT_DIR + 'pca-coordinates.csv')
         coord = pd.read_table(OUT_DIR + 'pca-coordinates.csv')
         coord = coord.round(5)  # round values to 5 digits to account for numeric differences across machines
-        expected = pd.read_table(EXPECT_DIR + 'expected_coords.csv')
+        expected = pd.read_table(EXPECT_DIR + 'expected-pca-coordinates.csv')
         expected = expected.round(5)
 
         assert coord.equals(expected)
@@ -39,11 +39,11 @@ class TestML:
         dataframe = ml.summarize_networks([INPUT_DIR + 'test-s1/s1.txt', INPUT_DIR + 'test-s2/s2.txt', INPUT_DIR + 'test-s3/s3.txt'])
         ml.hac_horizontal(dataframe, OUT_DIR + 'hac-horizontal.png', OUT_DIR + 'hac-clusters-horizontal.txt')
 
-        assert filecmp.cmp(OUT_DIR + 'hac-clusters-horizontal.txt', EXPECT_DIR + 'expected_clusters.txt')
+        assert filecmp.cmp(OUT_DIR + 'hac-clusters-horizontal.txt', EXPECT_DIR + 'expected-hac-horizontal-clusters.txt')
 
     def test_hac_vertical(self):
         dataframe = ml.summarize_networks([INPUT_DIR + 'test-s1/s1.txt', INPUT_DIR + 'test-s2/s2.txt', INPUT_DIR + 'test-s3/s3.txt'])
         ml.hac_vertical(dataframe, OUT_DIR + 'hac-vertical.png', OUT_DIR + 'hac-clusters-vertical.txt')
 
-        assert filecmp.cmp(OUT_DIR + 'hac-clusters-vertical.txt', EXPECT_DIR + 'expected_clusters.txt')
+        assert filecmp.cmp(OUT_DIR + 'hac-clusters-vertical.txt', EXPECT_DIR + 'expected-hac-vertical-clusters.txt')
 

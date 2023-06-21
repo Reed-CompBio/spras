@@ -5,7 +5,7 @@ import matplotlib.pyplot as plt
 import numpy as np
 import pandas as pd
 import seaborn as sns
-from scipy.cluster.hierarchy import dendrogram
+from scipy.cluster.hierarchy import dendrogram, fcluster
 from sklearn.cluster import AgglomerativeClustering
 from sklearn.decomposition import PCA
 from sklearn.preprocessing import StandardScaler
@@ -15,7 +15,7 @@ from src.util import make_required_dirs
 plt.switch_backend('Agg')
 
 linkage_methods = ["ward", "complete", "average", "single"]
-distance_metrics = ["euclidean", "l1", "l2", "manhattan", "cosine", "precomputed"]
+distance_metrics = ["euclidean", "l1", "l2", "manhattan", "cosine"]
 NODE_SEP = '|||'  # separator between nodes when forming edges in the dataframe
 
 def summarize_networks(file_paths: Iterable[Union[str, PathLike]]) -> pd.DataFrame:
@@ -70,7 +70,7 @@ def summarize_networks(file_paths: Iterable[Union[str, PathLike]]) -> pd.DataFra
 
     return concated_df
 
-def pca(dataframe: pd.DataFrame, output_png: str, output_file: str, output_coord: str, components=2, labels=True):
+def pca(dataframe: pd.DataFrame, output_png: str, output_file: str, output_coord: str, components: int=2, labels: bool=True):
     """
     Performs PCA on the data and creates a scatterplot of the top two principal components.
     It saves the plot, the variance explained by each component, and the
@@ -79,6 +79,8 @@ def pca(dataframe: pd.DataFrame, output_png: str, output_file: str, output_coord
     @param output_png: the filename to save the scatterplot
     @param output_file: the filename to save the variance explained by each component
     @param output_coord: the filename to save the coordinates of each algorithm
+    @param components: the number of principal components to calculate (Default is 2)
+    @param labels: determines if labels will be included in the scatterplot (Default is True)
     """
 
     df = dataframe.reset_index(drop=True)
@@ -91,7 +93,7 @@ def pca(dataframe: pd.DataFrame, output_png: str, output_file: str, output_coord
     if components < 2:
         raise ValueError(f"components={components} must be greater than or equal to 2 in the config file.")
     elif components > min_shape:
-        print(f"n_components={components} is not valid. Setting components to {min_shape}.")
+        print(f"components={components} is not valid. Setting components to {min_shape}.")
         components = min_shape
     if not isinstance(labels, bool):
         raise ValueError(f"labels={labels} must be True or False")
@@ -135,10 +137,8 @@ def pca(dataframe: pd.DataFrame, output_png: str, output_file: str, output_coord
 
         texts = []
         for i, algorithm in enumerate(algorithm_names):
-            # TODO: can add a threshold here to allow for labeled points
             texts.append(plt.text(x_coord[i], y_coord[i], algorithm, size=9))
-        
-        adjust_text(texts, force_points= [5,5], arrowprops=dict(arrowstyle='->', color='red'))
+        adjust_text(texts, force_points= [5,5], arrowprops=dict(arrowstyle='->', color='black'))
 
     # saving the PCA plot
     make_required_dirs(output_png)
@@ -175,28 +175,30 @@ def plot_dendrogram(model, **kwargs):
     # Plot the corresponding dendrogram
     dendrogram(linkage_matrix, **kwargs)
 
-def hac_vertical(dataframe: pd.DataFrame, output_png: str, output_file: str, linkage='ward', metric='euclidean'):
+def hac_vertical(dataframe: pd.DataFrame, output_png: str, output_file: str, linkage: str='ward', metric: str='euclidean'):
     """
     Performs hierarchical agglomerative clustering on the dataframe,
-    creates a dendrogram of the resulting tree USING SEABORN and SCKIT-LEARN for the cluster groups,
+    creates a dendrogram of the resulting tree using seaborn and scipy for the cluster groups,
     and saves the dendrogram and the cluster labels of said dendrogram in separate files.
     @param dataframe: binary dataframe of edge comparison between algorithms from summarize_networks
     @param output_png: the file name to save the dendrogram image
     @param output_file: the file name to save the clustering labels
+    @param linkage: methods for calculating the distance between clusters
+    @param metric: used for distance computation between instances of clusters
     """
 
     if linkage not in linkage_methods:
         raise ValueError(f"linkage={linkage} must be one of {linkage_methods}")
+    if metric not in distance_metrics:
+        raise ValueError(f"metric={metric} must be one of {distance_metrics}")
     if linkage == "ward":
         if metric != "euclidean":
             print("For linkage='ward', the metric must be 'euclidean'; setting metric = 'euclidean")
             metric = "euclidean"
-    if metric not in distance_metrics:
-        raise ValueError(f"metric={metric} must be one of {distance_metrics}")
-        
+
     X = dataframe.reset_index(drop=True)
-    column_names = X.head()
-    column_names = [element.split('-')[1] for element in column_names]
+    columns = X.head()
+    column_names = [element.split('-')[1] for element in columns]
     X = X.transpose() 
 
     # creating the colors per algorithms
@@ -213,28 +215,32 @@ def hac_vertical(dataframe: pd.DataFrame, output_png: str, output_file: str, lin
     clustergrid.ax_col_dendrogram.set_visible(False)
     legend_labels = [plt.Rectangle((0, 0), 0, 0, color=label_color_map[label]) for label in label_color_map]
     plt.legend(legend_labels, label_color_map.keys(), bbox_to_anchor=(1.02, 1), loc='upper left')
-    
+
+    # Use linkage matrix from seaborn clustergrid to generate cluster assignments 
+    # then using fcluster with a distance thershold(t) to make the clusters 
+    linkage_matrix = clustergrid.dendrogram_row.linkage 
+    clusters = fcluster(linkage_matrix, t=0.5, criterion='distance')
+    columns = dataframe.columns.tolist()
+    data = {'algorithm': columns, 'labels': clusters}
+    clusters_df = pd.DataFrame(data)
+   
+    # saving files
+    make_required_dirs(output_file)
+    clusters_df.to_csv(output_file, sep='\t', index=False)   
     make_required_dirs(output_png)
     plt.savefig(output_png, bbox_inches="tight")
 
-    # getting the label of which group each algorithm combination falls under
-    model = AgglomerativeClustering(linkage=linkage, affinity=metric,distance_threshold=0.5, n_clusters=None)
-    model = model.fit(X)
-    columns = dataframe.columns.tolist()
-    data = {'algorithm': columns, 'labels': model.labels_}
-    df = pd.DataFrame(data)
-    make_required_dirs(output_file)
-    df.to_csv(output_file, sep='\t', index=False)
 
-
-def hac_horizontal(dataframe: pd.DataFrame, output_png: str, output_file: str, linkage='ward', metric='euclidean'):
+def hac_horizontal(dataframe: pd.DataFrame, output_png: str, output_file: str, linkage: str='ward', metric: str='euclidean'):
     """
     Performs hierarchical agglomerative clustering on the dataframe,
-    creates a dendrogram of the resulting tree USING SCKIT LEARN and makes cluster groups USING SCKIT LEARN,
+    creates a dendrogram of the resulting tree using sckit learn and makes cluster groups scipy,
     and saves the dendrogram and the cluster labels of said dendrogram in separate files.
     @param dataframe: binary dataframe of edge comparison between algorithms from summarize_networks
     @param output_png: the file name to save the dendrogram image
     @param output_file: the file name to save the clustering labels
+    @param linkage: methods for calculating the distance between clusters
+    @param metric: used for distance computation between instances of clusters
     """
 
     if linkage not in linkage_methods:
@@ -247,8 +253,6 @@ def hac_horizontal(dataframe: pd.DataFrame, output_png: str, output_file: str, l
         raise ValueError(f"metric={metric} must be one of {distance_metrics}")
         
     X = dataframe.reset_index(drop=True)
-    column_names = X.head()
-    column_names = [element.split()[0].split('-')[1] for element in column_names]
     X = X.transpose() 
     
     plt.figure(figsize=(10, 7))
@@ -261,11 +265,11 @@ def hac_horizontal(dataframe: pd.DataFrame, output_png: str, output_file: str, l
     plot_dendrogram(model, labels=algo_names, leaf_rotation=90, leaf_font_size=10, color_threshold=0,
                     truncate_mode=None)
     
-    make_required_dirs(output_png)
-    plt.savefig(output_png, bbox_inches="tight")
-
-    columns = dataframe.columns.tolist()
-    data = {'algorithm': columns, 'labels': model.labels_}
+    data = {'algorithm': algo_names, 'labels': model.labels_}
     df = pd.DataFrame(data)
+
+    # saving files
     make_required_dirs(output_file)
     df.to_csv(output_file, sep='\t', index=False)
+    make_required_dirs(output_png)
+    plt.savefig(output_png, bbox_inches="tight")
