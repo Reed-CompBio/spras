@@ -1,4 +1,5 @@
 import pytest
+
 from src.omicsintegrator2 import OmicsIntegrator2
 
 TEST_DIR = 'test/OmicsIntegrator2/'

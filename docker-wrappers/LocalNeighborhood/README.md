@@ -9,7 +9,7 @@ New contributors complete the `Dockerfile` to wrap the implementation in `local_
 ## Usage
 ```
 $ python local_neighborhood.py -h
-usage: local_neighborhood.py [-h] --network NETWORK --nodes NODES --output OUTPUT        
+usage: local_neighborhood.py [-h] --network NETWORK --nodes NODES --output OUTPUT  
 
 Local neighborhood pathway reconstruction
 

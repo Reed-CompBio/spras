@@ -1,9 +1,11 @@
-from graphspace_python.api.client import GraphSpace
-from graphspace_python.graphs.classes.gsgraph import GSGraph
-import networkx as nx
+import json
 import os
 import sys
-import json
+
+import networkx as nx
+from graphspace_python.api.client import GraphSpace
+from graphspace_python.graphs.classes.gsgraph import GSGraph
+
 
 def write_json(graph_file,out_graph,out_style,directed=False) -> None:
 
@@ -28,9 +30,9 @@ files before we post to GraphSpace.
 def post_graph(G:GSGraph,username:str,password:str,directed=False) -> None:
 	gs = GraphSpace(username,password)
 	try:
-		graph = gs.update_graph(G)
+		gs.update_graph(G)
 	except:
-		graph = gs.post_graph(G)
+		gs.post_graph(G)
 	print('posted graph')
 	return
 

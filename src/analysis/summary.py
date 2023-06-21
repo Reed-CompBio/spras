@@ -1,14 +1,15 @@
-import sys
-import networkx as nx
 import os
-import pandas as pd
-from typing import Iterable
+import sys
 from pathlib import Path
+from typing import Iterable
+
+import networkx as nx
+import pandas as pd
 
 
 def summarize_networks(file_paths: Iterable[Path], node_table: pd.DataFrame) -> pd.DataFrame:
     """
-    Generate a table that aggregates summary information about networks in file_paths, 
+    Generate a table that aggregates summary information about networks in file_paths,
     including which nodes are present in node_table columns.
     @param file_paths: iterable of edge list files
     @param node_table: pandas DataFrame containing node attributes
