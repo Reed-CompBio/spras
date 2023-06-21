@@ -1,6 +1,8 @@
-import pytest
 import shutil
 from pathlib import Path
+
+import pytest
+
 from src.pathlinker import PathLinker
 
 TEST_DIR = 'test/PathLinker/'

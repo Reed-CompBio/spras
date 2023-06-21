@@ -29,7 +29,7 @@ The expected output graphs for different flow and capacity values are in the `ex
 The Docker wrapper can be tested with `pytest -k test_mcf.py` from the root of the SPRAS repository.
 
 Alternatively, to run the Docker image directly, run the following command from the root of the `spras` repository
-``` 
+```
 docker run -w /data --mount type=bind,source=/${PWD},target=/data reedcompbio/mincostflow python /MinCostFlow/minCostFlow.py --edges_file /data/test/MinCostFlow/input/graph1/edges.txt --sources_file /data/test/MinCostFlowinput/graph1/sources.txt --targets_file /data/test/MinCostFlowinput/graph1/targets.txt --flow 1 --output graph1 --capacity 1  
 ```
 
