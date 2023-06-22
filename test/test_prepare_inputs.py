@@ -1,7 +1,9 @@
-from src import runner
-import shutil
-import yaml
 import os
+import shutil
+
+import yaml
+
+from src import runner
 
 config_loc = os.path.join("config", "config.yaml")
 

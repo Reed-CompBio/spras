@@ -1,7 +1,9 @@
-from src.prm import PRM
 from pathlib import Path
-from src.util import prepare_volume, run_container
+
 import pandas as pd
+
+from src.prm import PRM
+from src.util import prepare_volume, run_container
 
 __all__ = ['OmicsIntegrator1', 'write_conf']
 
@@ -177,7 +179,7 @@ class OmicsIntegrator1(PRM):
         try:
             df = pd.read_csv(raw_pathway_file, sep='\t', header=None)
         except pd.errors.EmptyDataError:
-            with open(standardized_pathway_file, 'w') as emptyFile:
+            with open(standardized_pathway_file, 'w'):
                 pass
             return
         df = df.take([0, 2], axis=1)

@@ -2,6 +2,7 @@ import filecmp
 from pathlib import Path
 
 import pandas as pd
+
 import src.analysis.ml as ml
 
 INPUT_DIR = 'test/ml/input/'

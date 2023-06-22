@@ -1,5 +1,5 @@
-import src.analysis.summary as summary
 import src.analysis.graphspace as graphspace
+import src.analysis.summary as summary
 
 TEST_DIR = 'test/analysis/'
 

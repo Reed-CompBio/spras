@@ -1,7 +1,9 @@
-import pandas as pd
 import warnings
-from src.prm import PRM
 from pathlib import Path
+
+import pandas as pd
+
+from src.prm import PRM
 from src.util import prepare_volume, run_container
 
 __all__ = ['PathLinker']
@@ -26,9 +28,10 @@ class PathLinker(PRM):
         if sources_targets is None:
             return False
         both_series = sources_targets.sources & sources_targets.targets
-        for index,row in sources_targets[both_series].iterrows():
+        for _index,row in sources_targets[both_series].iterrows():
             warn_msg = row.NODEID+" has been labeled as both a source and a target."
-            warnings.warn(warn_msg)
+            # Only use stacklevel 1 because this is due to the data not the code context
+            warnings.warn(warn_msg, stacklevel=1)
 
         #Create nodetype file
         input_df = sources_targets[["NODEID"]].copy()
