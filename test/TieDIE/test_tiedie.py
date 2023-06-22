@@ -93,5 +93,6 @@ class TestTieDIE:
                         output_file=OUT_FILES,
                         s = 1.1,
                         p = 2000,
-                        pagerank = True)
+                        pagerank = True,
+                        singularity = True)
         assert out_path.exists()

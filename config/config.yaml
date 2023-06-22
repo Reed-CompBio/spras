@@ -33,12 +33,7 @@
                 run1:
                     k: range(100,201,100)
 
-        - name: "local_neighborhood"
-          params:
-                include : false
-                directed : false
-
-        - name: "random_walk"
+        - name: "randomwalk"
           params:
                 include : true
                 directed : true

@@ -375,12 +375,8 @@ def make_required_dirs(path: str):
 
 def add_rank_column(df: pd.DataFrame) -> pd.DataFrame:
     """
-    Add a column to the dataframe that ranks the rows by the group_cols.
-    @param df: the dataframe to add the rank column to
-    @param rank_col: the name of the column to add
-    @param group_cols: the columns to group by
-    @param ascending: whether to sort the rows in ascending or descending order
-    @return: the dataframe with the rank column added
+    Add a column of 1s to the dataframe
+    @param df: the dataframe to add the rank column of 1s to
     """
     df['rank'] = 1
     return df
