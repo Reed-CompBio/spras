@@ -17,3 +17,4 @@ This Docker image is compatible with Docker but not yet Singularity.
 ## TODO
 - Finish this readme
 - Add an auth file for `xvfb-run`
+- Java initial heap size, maximum Java heap size, and thread stack size are hard-coded in `Cytoscape.vmoptions` file
