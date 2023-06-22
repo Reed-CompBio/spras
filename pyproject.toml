@@ -1,0 +1,18 @@
+[tool.ruff]
+target-version = "py38"
+# Autofix errors when possible
+fix = true
+# Select categories or specific rules from https://beta.ruff.rs/docs/rules/
+select = [
+    "B", # flake8-bugbear
+    "D300", # docstring triple-single-quotes
+    "E101", # mixed-spaces-and-tabs
+    "E711", # none-comparison
+    "E713", # not-in-test
+    "E714" , # not-is-test
+    "F821", # undefined-name
+    "F823", # undefined-local
+    "F841", # unused-variable
+    "I", # isort
+    "W292", # missing-newline-at-end-of-file
+]

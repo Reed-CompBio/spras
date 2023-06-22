@@ -135,3 +135,20 @@ The pull request will be closed so that future contributors can practice with th
 1. Add example usage for the new algorithm and its parameters to the template config file
 1. Write test functions and provide example input data in a new test subdirectory `test/<algorithm>`
 1. Extend `.github/workflows/test-spras.yml` to pull and build the new Docker image
+
+## Pre-commit hooks
+SPRAS uses [pre-commit hooks](https://github.com/pre-commit/pre-commit-hooks) to automatically catch certain types of formatting and programming errors in source files.
+Example errors include a yaml file that cannot be parsed or a local variable that is referenced before assignment.
+These tests are run automatically on every commit through the GitHub Actions.
+However, developers will benefit from setting up their environment to run the same tests locally while they modify the SPRAS source.
+
+The `pre-commit` package is installed as part of the conda environment in `environment.yml`.
+From there, the pre-commit [quick start](https://pre-commit.com/#quick-start) guide explains two primary ways to use it locally:
+- run against all source files with `pre-commit run --all-files` to identify errors and automatically fix them when possible
+- configure `git` to run the hooks before every `git commit` so that a commit will only succeed if the tests pass, ensuring new errors are not introduced
+
+Currently, SPRAS only enforces a small number of Python formatting conventions and runs a small number of tests.
+Additional hooks are [available](https://github.com/pre-commit/pre-commit-hooks#hooks-available).
+These are configured in `.pre-commit-config.yaml`.
+SPRAS also runs [`ruff`](https://github.com/charliermarsh/ruff) as part of the pre-commit hooks to perform the Python code analysis, which supports many more [rules](https://beta.ruff.rs/docs/rules/).
+These are configured in `pyproject.toml`.

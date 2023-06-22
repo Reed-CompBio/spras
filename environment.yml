@@ -7,7 +7,8 @@ dependencies:
   - matplotlib=3.5
   - networkx=2.8
   - pandas=1.4
-  - pytest=7.1
+  - pre-commit=2.20 # Only required for development
+  - pytest=7.1 # Only required for development
   - python=3.8
   - pip=22.1
   - requests=2.28

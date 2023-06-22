@@ -1,6 +1,8 @@
-import pytest
 import shutil
 from pathlib import Path
+
+import pytest
+
 from src.meo import MEO, write_properties
 
 TEST_DIR = 'test/MEO/'
