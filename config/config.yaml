@@ -120,7 +120,7 @@
         ml:
           include: true 
           # specify how many principal components to calculate
-          components: 4
+          components: 2
           # boolean to show the labels on the pca graph
           labels: true
           # 'ward', 'complete', 'average', 'single'

@@ -5,11 +5,11 @@ import matplotlib.pyplot as plt
 import numpy as np
 import pandas as pd
 import seaborn as sns
+from adjustText import adjust_text
 from scipy.cluster.hierarchy import dendrogram, fcluster
 from sklearn.cluster import AgglomerativeClustering
 from sklearn.decomposition import PCA
 from sklearn.preprocessing import StandardScaler
-from adjustText import adjust_text
 from src.util import make_required_dirs
 
 plt.switch_backend('Agg')
@@ -82,10 +82,9 @@ def pca(dataframe: pd.DataFrame, output_png: str, output_file: str, output_coord
     @param components: the number of principal components to calculate (Default is 2)
     @param labels: determines if labels will be included in the scatterplot (Default is True)
     """
-
     df = dataframe.reset_index(drop=True)
-    column_names = df.head()
-    column_names = [element.split('-')[1] for element in column_names]
+    columns = dataframe.columns
+    column_names = [element.split('-')[1] for element in columns]
     df = df.transpose()  # based on the algorithms rather than the edges
     X = df.values
 
@@ -110,17 +109,17 @@ def pca(dataframe: pd.DataFrame, output_png: str, output_file: str, output_coord
 
     # making the plot
     plt.figure(figsize=(10, 7))
+    # TODO: see if we can have the same color palette for pca and hac
     sns.scatterplot(x=X_pca[:, 0], y=X_pca[:, 1], s=70, hue=column_names, legend=True);
     plt.title("PCA")
     plt.xlabel(f"PC1 ({variance[0]:.1f}% variance)")
     plt.ylabel(f"PC2 ({variance[1]:.1f}% variance)")
 
     # saving the coordinates of each algorithm
-    columns = dataframe.columns.tolist()
-    data = {'algorithm': columns, 'x': X_pca[:, 0], 'y': X_pca[:, 1]}
-    df = pd.DataFrame(data)
     make_required_dirs(output_coord)
-    df.to_csv(output_coord, sep='\t', index=False)
+    data = {'algorithm': columns.tolist(), 'x': X_pca[:, 0], 'y': X_pca[:, 1]}
+    coord_df = pd.DataFrame(data)
+    coord_df.to_csv(output_coord, sep='\t', index=False)
 
     # saving the principal components
     make_required_dirs(output_file)
@@ -130,21 +129,17 @@ def pca(dataframe: pd.DataFrame, output_png: str, output_file: str, output_coord
 
     # labeling the graphs
     if (labels):
-        algorithm_names = df['algorithm'].to_numpy()
-        algorithm_names = [element.split()[0].split('-')[1] for element in algorithm_names]
-        x_coord = df['x'].to_numpy()
-        y_coord = df['y'].to_numpy()
-
+        x_coord = coord_df['x'].to_numpy()
+        y_coord = coord_df['y'].to_numpy()
         texts = []
-        for i, algorithm in enumerate(algorithm_names):
-            texts.append(plt.text(x_coord[i], y_coord[i], algorithm, size=9))
+        for i, algorithm in enumerate(column_names):
+            texts.append(plt.text(x_coord[i], y_coord[i], algorithm, size=10))
         adjust_text(texts, force_points= [5,5], arrowprops=dict(arrowstyle='->', color='black'))
 
     # saving the PCA plot
     make_required_dirs(output_png)
     plt.savefig(output_png)
     
-
 # This function is taken from the scikit-learn version 1.2.1 example code
 # https://scikit-learn.org/stable/auto_examples/cluster/plot_agglomerative_dendrogram.html
 # available under the BSD 3-Clause License, Copyright 2007 - 2023, scikit-learn developers
@@ -186,7 +181,6 @@ def hac_vertical(dataframe: pd.DataFrame, output_png: str, output_file: str, lin
     @param linkage: methods for calculating the distance between clusters
     @param metric: used for distance computation between instances of clusters
     """
-
     if linkage not in linkage_methods:
         raise ValueError(f"linkage={linkage} must be one of {linkage_methods}")
     if metric not in distance_metrics:
@@ -196,19 +190,19 @@ def hac_vertical(dataframe: pd.DataFrame, output_png: str, output_file: str, lin
             print("For linkage='ward', the metric must be 'euclidean'; setting metric = 'euclidean")
             metric = "euclidean"
 
-    X = dataframe.reset_index(drop=True)
-    columns = X.head()
+    df = dataframe.reset_index(drop=True)
+    columns = df.columns
     column_names = [element.split('-')[1] for element in columns]
-    X = X.transpose() 
+    df = df.transpose() 
 
     # creating the colors per algorithms
     custom_palette = sns.color_palette("tab10", len(column_names))
     label_color_map = {label: color for label, color in zip(column_names, custom_palette)}
-    row_colors = pd.Series(column_names, index=X.index).map(label_color_map)
+    row_colors = pd.Series(column_names, index=df.index).map(label_color_map)
 
     #plotting the seaborn figure
     plt.figure(figsize=(10, 7))
-    clustergrid = sns.clustermap(X, metric=metric, method=linkage, row_colors=row_colors, col_cluster=False)
+    clustergrid = sns.clustermap(df, metric=metric, method=linkage, row_colors=row_colors, col_cluster=False)
     clustergrid.ax_heatmap.remove()
     clustergrid.cax.remove()
     clustergrid.ax_row_dendrogram.set_visible(True)
@@ -220,16 +214,14 @@ def hac_vertical(dataframe: pd.DataFrame, output_png: str, output_file: str, lin
     # then using fcluster with a distance thershold(t) to make the clusters 
     linkage_matrix = clustergrid.dendrogram_row.linkage 
     clusters = fcluster(linkage_matrix, t=0.5, criterion='distance')
-    columns = dataframe.columns.tolist()
-    data = {'algorithm': columns, 'labels': clusters}
-    clusters_df = pd.DataFrame(data)
+    cluster_data = {'algorithm': columns.tolist(), 'labels': clusters}
+    clusters_df = pd.DataFrame(cluster_data)
    
     # saving files
     make_required_dirs(output_file)
     clusters_df.to_csv(output_file, sep='\t', index=False)   
     make_required_dirs(output_png)
     plt.savefig(output_png, bbox_inches="tight")
-
 
 def hac_horizontal(dataframe: pd.DataFrame, output_png: str, output_file: str, linkage: str='ward', metric: str='euclidean'):
     """
@@ -242,7 +234,6 @@ def hac_horizontal(dataframe: pd.DataFrame, output_png: str, output_file: str, l
     @param linkage: methods for calculating the distance between clusters
     @param metric: used for distance computation between instances of clusters
     """
-
     if linkage not in linkage_methods:
         raise ValueError(f"linkage={linkage} must be one of {linkage_methods}")
     if linkage == "ward":
@@ -252,12 +243,13 @@ def hac_horizontal(dataframe: pd.DataFrame, output_png: str, output_file: str, l
     if metric not in distance_metrics:
         raise ValueError(f"metric={metric} must be one of {distance_metrics}")
         
-    X = dataframe.reset_index(drop=True)
-    X = X.transpose() 
+    df = dataframe.reset_index(drop=True)
+    df = df.transpose() 
     
+    # plotting figure
     plt.figure(figsize=(10, 7))
     model = AgglomerativeClustering(linkage=linkage, affinity=metric,distance_threshold=0.5, n_clusters=None)
-    model = model.fit(X)
+    model = model.fit(df)
     plt.figure(figsize=(10, 7))
     plt.title("Hierarchical Agglomerative Clustering Dendrogram")
     plt.xlabel("algorithms")
@@ -265,11 +257,12 @@ def hac_horizontal(dataframe: pd.DataFrame, output_png: str, output_file: str, l
     plot_dendrogram(model, labels=algo_names, leaf_rotation=90, leaf_font_size=10, color_threshold=0,
                     truncate_mode=None)
     
-    data = {'algorithm': algo_names, 'labels': model.labels_}
-    df = pd.DataFrame(data)
+    # saving cluster assignments
+    cluster_data = {'algorithm': algo_names, 'labels': model.labels_}
+    clusters_df = pd.DataFrame(cluster_data)
 
     # saving files
     make_required_dirs(output_file)
-    df.to_csv(output_file, sep='\t', index=False)
+    clusters_df.to_csv(output_file, sep='\t', index=False)
     make_required_dirs(output_png)
     plt.savefig(output_png, bbox_inches="tight")
