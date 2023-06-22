@@ -350,17 +350,17 @@ def process_config(config):
 
     pca_params = {}
     if "components" in ml_params:
-        pca_params["components"] = ml_params["components"] 
+        pca_params["components"] = ml_params["components"]
     if "labels" in ml_params:
         pca_params["labels"] = ml_params["labels"]
-    
+
     hac_params = {}
     if "linkage" in ml_params:
         hac_params["linkage"] = ml_params["linkage"]
     if "metric" in ml_params:
         hac_params["metric"] = ml_params ["metric"]
 
-    return config, datasets, out_dir, algorithm_params, algorithm_directed, pca_params, hac_params 
+    return config, datasets, out_dir, algorithm_params, algorithm_directed, pca_params, hac_params
 
 def compare_files(file1, file2) -> bool:
     """

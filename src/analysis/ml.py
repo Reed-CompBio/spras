@@ -1,6 +1,7 @@
 from os import PathLike
 from pathlib import PurePath
 from typing import Iterable, Union
+
 import matplotlib.pyplot as plt
 import numpy as np
 import pandas as pd
@@ -10,6 +11,7 @@ from scipy.cluster.hierarchy import dendrogram, fcluster
 from sklearn.cluster import AgglomerativeClustering
 from sklearn.decomposition import PCA
 from sklearn.preprocessing import StandardScaler
+
 from src.util import make_required_dirs
 
 plt.switch_backend('Agg')
@@ -139,7 +141,7 @@ def pca(dataframe: pd.DataFrame, output_png: str, output_file: str, output_coord
     # saving the PCA plot
     make_required_dirs(output_png)
     plt.savefig(output_png)
-    
+
 # This function is taken from the scikit-learn version 1.2.1 example code
 # https://scikit-learn.org/stable/auto_examples/cluster/plot_agglomerative_dendrogram.html
 # available under the BSD 3-Clause License, Copyright 2007 - 2023, scikit-learn developers
@@ -193,7 +195,7 @@ def hac_vertical(dataframe: pd.DataFrame, output_png: str, output_file: str, lin
     df = dataframe.reset_index(drop=True)
     columns = df.columns
     column_names = [element.split('-')[1] for element in columns]
-    df = df.transpose() 
+    df = df.transpose()
 
     # creating the colors per algorithms
     custom_palette = sns.color_palette("tab10", len(column_names))
@@ -210,16 +212,16 @@ def hac_vertical(dataframe: pd.DataFrame, output_png: str, output_file: str, lin
     legend_labels = [plt.Rectangle((0, 0), 0, 0, color=label_color_map[label]) for label in label_color_map]
     plt.legend(legend_labels, label_color_map.keys(), bbox_to_anchor=(1.02, 1), loc='upper left')
 
-    # Use linkage matrix from seaborn clustergrid to generate cluster assignments 
-    # then using fcluster with a distance thershold(t) to make the clusters 
-    linkage_matrix = clustergrid.dendrogram_row.linkage 
+    # Use linkage matrix from seaborn clustergrid to generate cluster assignments
+    # then using fcluster with a distance thershold(t) to make the clusters
+    linkage_matrix = clustergrid.dendrogram_row.linkage
     clusters = fcluster(linkage_matrix, t=0.5, criterion='distance')
     cluster_data = {'algorithm': columns.tolist(), 'labels': clusters}
     clusters_df = pd.DataFrame(cluster_data)
-   
+
     # saving files
     make_required_dirs(output_file)
-    clusters_df.to_csv(output_file, sep='\t', index=False)   
+    clusters_df.to_csv(output_file, sep='\t', index=False)
     make_required_dirs(output_png)
     plt.savefig(output_png, bbox_inches="tight")
 
@@ -242,10 +244,10 @@ def hac_horizontal(dataframe: pd.DataFrame, output_png: str, output_file: str, l
             metric = "euclidean"
     if metric not in distance_metrics:
         raise ValueError(f"metric={metric} must be one of {distance_metrics}")
-        
+
     df = dataframe.reset_index(drop=True)
-    df = df.transpose() 
-    
+    df = df.transpose()
+
     # plotting figure
     plt.figure(figsize=(10, 7))
     model = AgglomerativeClustering(linkage=linkage, affinity=metric,distance_threshold=0.5, n_clusters=None)
@@ -256,7 +258,7 @@ def hac_horizontal(dataframe: pd.DataFrame, output_png: str, output_file: str, l
     algo_names = list(dataframe.columns)
     plot_dendrogram(model, labels=algo_names, leaf_rotation=90, leaf_font_size=10, color_threshold=0,
                     truncate_mode=None)
-    
+
     # saving cluster assignments
     cluster_data = {'algorithm': algo_names, 'labels': model.labels_}
     clusters_df = pd.DataFrame(cluster_data)
