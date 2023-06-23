@@ -77,6 +77,7 @@ def create_palette(column_names):
     generates a dictionary mapping each column name (algorithm name)
     to a unique color from the specified palette.
     """
+    #TODO: could add a way for the user to customize the color palette?
     custom_palette = sns.color_palette("husl", len(column_names))
     label_color_map = {label: color for label, color in zip(column_names, custom_palette)}
     return label_color_map
