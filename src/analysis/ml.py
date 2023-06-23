@@ -72,6 +72,15 @@ def summarize_networks(file_paths: Iterable[Union[str, PathLike]]) -> pd.DataFra
 
     return concated_df
 
+def create_palette(column_names):
+    """
+    generates a dictionary mapping each column name (algorithm name)
+    to a unique color from the specified palette.
+    """
+    custom_palette = sns.color_palette("husl", len(column_names))
+    label_color_map = {label: color for label, color in zip(column_names, custom_palette)}
+    return label_color_map
+
 def pca(dataframe: pd.DataFrame, output_png: str, output_file: str, output_coord: str, components: int=2, labels: bool=True):
     """
     Performs PCA on the data and creates a scatterplot of the top two principal components.
@@ -110,9 +119,9 @@ def pca(dataframe: pd.DataFrame, output_png: str, output_file: str, output_coord
     variance = pca.explained_variance_ratio_ * 100
 
     # making the plot
+    label_color_map = create_palette(column_names)
     plt.figure(figsize=(10, 7))
-    # TODO: see if we can have the same color palette for pca and hac
-    sns.scatterplot(x=X_pca[:, 0], y=X_pca[:, 1], s=70, hue=column_names, legend=True);
+    sns.scatterplot(x=X_pca[:, 0], y=X_pca[:, 1], s=70, hue=column_names, legend=True, palette=label_color_map);
     plt.title("PCA")
     plt.xlabel(f"PC1 ({variance[0]:.1f}% variance)")
     plt.ylabel(f"PC2 ({variance[1]:.1f}% variance)")
@@ -197,9 +206,9 @@ def hac_vertical(dataframe: pd.DataFrame, output_png: str, output_file: str, lin
     column_names = [element.split('-')[1] for element in columns]
     df = df.transpose()
 
-    # creating the colors per algorithms
-    custom_palette = sns.color_palette("tab10", len(column_names))
-    label_color_map = {label: color for label, color in zip(column_names, custom_palette)}
+    # create a color map for the given labels
+    # and map it to the dataframe's index for row coloring in the plot
+    label_color_map = create_palette(column_names)
     row_colors = pd.Series(column_names, index=df.index).map(label_color_map)
 
     #plotting the seaborn figure
