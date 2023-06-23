@@ -6,7 +6,7 @@ from src.mincostflow import MinCostFlow as mincostflow
 from src.omicsintegrator1 import OmicsIntegrator1 as omicsintegrator1
 from src.omicsintegrator2 import OmicsIntegrator2 as omicsintegrator2
 from src.pathlinker import PathLinker as pathlinker
-from src.random_walk import RandomWalk as random_walk
+from src.rwr import RWR as rwr
 from src.tiedie import TieDIE as tiedie
 
 

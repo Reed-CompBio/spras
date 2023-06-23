@@ -33,7 +33,7 @@
                 run1:
                     k: range(100,201,100)
 
-        - name: "randomwalk"
+        - name: "rwr"
           params:
                 include : true
                 directed : true

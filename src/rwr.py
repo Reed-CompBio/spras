@@ -8,7 +8,7 @@ from src.util import add_rank_column, prepare_volume, run_container
 
 __all__ = ['RandomWalk']
 
-class RandomWalk(PRM):
+class RWR(PRM):
     # we need edges (weighted), source set (with prizes), and target set (with prizes).
     required_inputs = ['edges', 'sources', 'targets']
 
@@ -21,7 +21,7 @@ class RandomWalk(PRM):
         @return:
         """
         # ensures the required input are within the filename_map
-        for input_type in RandomWalk.required_inputs:
+        for input_type in RWR.required_inputs:
             if input_type not in filename_map:
                 raise ValueError(f"{input_type} filename is missing")
 

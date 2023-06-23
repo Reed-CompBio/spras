@@ -3,10 +3,10 @@ from pathlib import Path
 
 import pytest
 
-from src.random_walk import RandomWalk
+from src.rwr import RWR
 from src.util import compare_files
 
-TEST_DIR = 'test/RandomWalk/'
+TEST_DIR = 'test/RWR/'
 OUT_FILES_1 = TEST_DIR + 'output/output2/rwr_pathway.txt'
 OUT_FILES_2 = TEST_DIR + 'output/output1/rwr_pathway.txt'
 
@@ -33,7 +33,7 @@ class TestRWR:
         out_path = Path(OUT_FILES_1)
         out_path.unlink(missing_ok=True)
         # Only include required arguments
-        RandomWalk.run(sources=TEST_DIR + 'input/'  + '/source_nodes.txt',
+        RWR.run(sources=TEST_DIR + 'input/'  + '/source_nodes.txt',
                         targets=TEST_DIR + 'input/' + '/target_nodes.txt',
                         edges=TEST_DIR + 'input/' + '/edges.txt',
                         output_file=OUT_FILES_1)
@@ -42,7 +42,7 @@ class TestRWR:
     def test_rwr_alternative_graph(self):
         out_path = Path(OUT_FILES_2)
         out_path.unlink(missing_ok=True)
-        RandomWalk.run(sources=TEST_DIR + 'input/'  + '/source_nodes1.txt',
+        RWR.run(sources=TEST_DIR + 'input/'  + '/source_nodes1.txt',
                         targets=TEST_DIR + 'input/' + '/target_nodes1.txt',
                         edges=TEST_DIR + 'input/' + '/edges1.txt',
                         output_file=OUT_FILES_2)
@@ -52,7 +52,7 @@ class TestRWR:
         out_path = Path(OUT_FILES_1)
         out_path.unlink(missing_ok=True)
         # Include optional argument
-        RandomWalk.run(sources=TEST_DIR + 'input/'  + '/source_nodes.txt',
+        RWR.run(sources=TEST_DIR + 'input/'  + '/source_nodes.txt',
                         targets=TEST_DIR + 'input/' + '/target_nodes.txt',
                         edges=TEST_DIR + 'input/' + '/edges.txt',
                         output_file=OUT_FILES_1,
@@ -63,7 +63,7 @@ class TestRWR:
         out_path = Path(OUT_FILES_1)
         out_path.unlink(missing_ok=True)
         # Include all optional arguments
-        RandomWalk.run(sources=TEST_DIR + 'input/'  + '/source_nodes.txt',
+        RWR.run(sources=TEST_DIR + 'input/'  + '/source_nodes.txt',
                         targets=TEST_DIR + 'input/' + '/target_nodes.txt',
                         edges=TEST_DIR + 'input/' + '/edges.txt',
                         output_file=OUT_FILES_1,
@@ -76,7 +76,7 @@ class TestRWR:
         # Test the expected error is raised when required arguments are missing
         with pytest.raises(ValueError):
             # No edges file
-            RandomWalk.run(sources=TEST_DIR + 'input/'  + '/source_nodes.txt',
+            RWR.run(sources=TEST_DIR + 'input/'  + '/source_nodes.txt',
                             targets=TEST_DIR + 'input/' + '/target_nodes.txt',
                             output_file=OUT_FILES_1)
 
@@ -85,7 +85,7 @@ class TestRWR:
         out_path = Path(OUT_FILES_1)
         out_path.unlink(missing_ok=True)
         # Only include required arguments and run with Singularity
-        RandomWalk.run(sources=TEST_DIR + 'input/'  + '/source_nodes.txt',
+        RWR.run(sources=TEST_DIR + 'input/'  + '/source_nodes.txt',
                         targets=TEST_DIR + 'input/' + '/target_nodes.txt',
                         edges=TEST_DIR + 'input/' + '/edges.txt',
                         output_file=OUT_FILES_1,
