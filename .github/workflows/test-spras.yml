@@ -131,8 +131,8 @@ jobs:
     - name: Build RWR Docker image
       uses: docker/build-push-action@v1
       with:
-        path: docker-wrappers/RandomWalk/.
-        dockerfile: docker-wrappers/RandomWalk/Dockerfile
+        path: docker-wrappers/RWR/.
+        dockerfile: docker-wrappers/RWR/Dockerfile
         repository: eriliu24/rwwr
         tags: latest
         cache_froms: erikliu24/rwwr:latest
