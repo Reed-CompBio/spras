@@ -125,5 +125,5 @@
           # 'ward', 'complete', 'average', 'single'
           # if linkage: ward, MUST USE metric: euclidean
           linkage: 'ward'
-          # 'euclidean', 'l1', 'l2', 'manhattan', 'cosine'
+          # 'euclidean', 'manhattan', 'cosine'
           metric: 'euclidean'

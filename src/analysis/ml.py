@@ -17,7 +17,7 @@ from src.util import make_required_dirs
 plt.switch_backend('Agg')
 
 linkage_methods = ["ward", "complete", "average", "single"]
-distance_metrics = ["euclidean", "l1", "l2", "manhattan", "cosine"]
+distance_metrics = ["euclidean", "manhattan", "cosine"]
 NODE_SEP = '|||'  # separator between nodes when forming edges in the dataframe
 
 def summarize_networks(file_paths: Iterable[Union[str, PathLike]]) -> pd.DataFrame:
@@ -197,6 +197,8 @@ def hac_vertical(dataframe: pd.DataFrame, output_png: str, output_file: str, lin
         raise ValueError(f"linkage={linkage} must be one of {linkage_methods}")
     if metric not in distance_metrics:
         raise ValueError(f"metric={metric} must be one of {distance_metrics}")
+    if metric == "manhattan":
+        metric = "cityblock"
     if linkage == "ward":
         if metric != "euclidean":
             print("For linkage='ward', the metric must be 'euclidean'; setting metric = 'euclidean")
