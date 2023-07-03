@@ -19,6 +19,7 @@ plt.switch_backend('Agg')
 linkage_methods = ["ward", "complete", "average", "single"]
 distance_metrics = ["euclidean", "manhattan", "cosine"]
 NODE_SEP = '|||'  # separator between nodes when forming edges in the dataframe
+DPI = 300
 
 def summarize_networks(file_paths: Iterable[Union[str, PathLike]]) -> pd.DataFrame:
     """
@@ -150,7 +151,7 @@ def pca(dataframe: pd.DataFrame, output_png: str, output_var: str, output_coord:
 
     # saving the PCA plot
     make_required_dirs(output_png)
-    plt.savefig(output_png)
+    plt.savefig(output_png, dpi=DPI)
 
 # This function is taken from the scikit-learn version 1.2.1 example code
 # https://scikit-learn.org/stable/auto_examples/cluster/plot_agglomerative_dendrogram.html
@@ -235,7 +236,7 @@ def hac_vertical(dataframe: pd.DataFrame, output_png: str, output_file: str, lin
     make_required_dirs(output_file)
     clusters_df.to_csv(output_file, sep='\t', index=False)
     make_required_dirs(output_png)
-    plt.savefig(output_png, bbox_inches="tight")
+    plt.savefig(output_png, bbox_inches="tight", dpi=DPI)
 
 def hac_horizontal(dataframe: pd.DataFrame, output_png: str, output_file: str, linkage: str='ward', metric: str='euclidean'):
     """
@@ -279,4 +280,4 @@ def hac_horizontal(dataframe: pd.DataFrame, output_png: str, output_file: str, l
     make_required_dirs(output_file)
     clusters_df.to_csv(output_file, sep='\t', index=False)
     make_required_dirs(output_png)
-    plt.savefig(output_png, bbox_inches="tight")
+    plt.savefig(output_png, bbox_inches="tight", dpi=DPI)
