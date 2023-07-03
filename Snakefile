@@ -71,7 +71,7 @@ def make_final_input(wildcards):
     
     if config["analysis"]["ml"]["include"]:  
         final_input.extend(expand('{out_dir}{sep}{dataset}-pca.png',out_dir=out_dir,sep=SEP,dataset=dataset_labels,algorithm_params=algorithms_with_params))
-        final_input.extend(expand('{out_dir}{sep}{dataset}-pca-components.txt',out_dir=out_dir,sep=SEP,dataset=dataset_labels,algorithm_params=algorithms_with_params))
+        final_input.extend(expand('{out_dir}{sep}{dataset}-pca-variance.txt',out_dir=out_dir,sep=SEP,dataset=dataset_labels,algorithm_params=algorithms_with_params))
         final_input.extend(expand('{out_dir}{sep}{dataset}-hac-vertical.png',out_dir=out_dir,sep=SEP,dataset=dataset_labels,algorithm_params=algorithms_with_params))
         final_input.extend(expand('{out_dir}{sep}{dataset}-hac-clusters-vertical.txt',out_dir=out_dir,sep=SEP,dataset=dataset_labels,algorithm_params=algorithms_with_params))
         final_input.extend(expand('{out_dir}{sep}{dataset}-pca-coordinates.txt',out_dir=out_dir,sep=SEP,dataset=dataset_labels,algorithm_params=algorithms_with_params))
@@ -252,7 +252,7 @@ rule ml_analysis:
         pathways = expand('{out_dir}{sep}{{dataset}}-{algorithm_params}{sep}pathway.txt', out_dir=out_dir, sep=SEP, algorithm_params=algorithms_with_params)
     output: 
         pca_image = SEP.join([out_dir, '{dataset}-pca.png']),
-        pca_components= SEP.join([out_dir, '{dataset}-pca-components.txt']),
+        pca_variance= SEP.join([out_dir, '{dataset}-pca-variance.txt']),
         pca_coordinates = SEP.join([out_dir, '{dataset}-pca-coordinates.txt']),
         hac_image_vertical = SEP.join([out_dir, '{dataset}-hac-vertical.png']),
         hac_clusters_vertical = SEP.join([out_dir, '{dataset}-hac-clusters-vertical.txt']),
@@ -261,7 +261,7 @@ rule ml_analysis:
 
     run: 
         summary_df = ml.summarize_networks(input.pathways)
-        ml.pca(summary_df, output.pca_image, output.pca_components, output.pca_coordinates, **pca_params)
+        ml.pca(summary_df, output.pca_image, output.pca_variance, output.pca_coordinates, **pca_params)
         ml.hac_vertical(summary_df, output.hac_image_vertical, output.hac_clusters_vertical, **hac_params)
         ml.hac_horizontal(summary_df, output.hac_image_horizontal, output.hac_clusters_horizontal, **hac_params)
 

@@ -27,7 +27,7 @@ class TestML:
 
     def test_pca(self):
         dataframe = ml.summarize_networks([INPUT_DIR + 'test-s1/s1.txt', INPUT_DIR + 'test-s2/s2.txt', INPUT_DIR + 'test-s3/s3.txt'])
-        ml.pca(dataframe, OUT_DIR + 'pca.png', OUT_DIR + 'pca-components.txt',
+        ml.pca(dataframe, OUT_DIR + 'pca.png', OUT_DIR + 'pca-variance.txt',
                OUT_DIR + 'pca-coordinates.csv')
         coord = pd.read_table(OUT_DIR + 'pca-coordinates.csv')
         coord = coord.round(5)  # round values to 5 digits to account for numeric differences across machines

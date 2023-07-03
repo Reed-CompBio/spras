@@ -82,14 +82,14 @@ def create_palette(column_names):
     label_color_map = {label: color for label, color in zip(column_names, custom_palette)}
     return label_color_map
 
-def pca(dataframe: pd.DataFrame, output_png: str, output_file: str, output_coord: str, components: int=2, labels: bool=True):
+def pca(dataframe: pd.DataFrame, output_png: str, output_var: str, output_coord: str, components: int=2, labels: bool=True):
     """
     Performs PCA on the data and creates a scatterplot of the top two principal components.
     It saves the plot, the variance explained by each component, and the
     coordinates corresponding to the plot of each algorithm in a separate file.
     @param dataframe: binary dataframe of edge comparison between algorithms from summarize_networks
     @param output_png: the filename to save the scatterplot
-    @param output_file: the filename to save the variance explained by each component
+    @param output_var: the filename to save the variance explained by each component
     @param output_coord: the filename to save the coordinates of each algorithm
     @param components: the number of principal components to calculate (Default is 2)
     @param labels: determines if labels will be included in the scatterplot (Default is True)
@@ -134,8 +134,8 @@ def pca(dataframe: pd.DataFrame, output_png: str, output_file: str, output_coord
     coord_df.to_csv(output_coord, sep='\t', index=False)
 
     # saving the principal components
-    make_required_dirs(output_file)
-    with open(output_file, "w") as f:
+    make_required_dirs(output_var)
+    with open(output_var, "w") as f:
         for component in variance:
             f.write("%s\n" % component)
 
