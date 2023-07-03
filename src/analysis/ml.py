@@ -21,6 +21,7 @@ distance_metrics = ["euclidean", "manhattan", "cosine"]
 NODE_SEP = '|||'  # separator between nodes when forming edges in the dataframe
 DPI = 300
 
+
 def summarize_networks(file_paths: Iterable[Union[str, PathLike]]) -> pd.DataFrame:
     """
     Takes in a list of file paths and creates a binary dataframe where each
@@ -73,17 +74,19 @@ def summarize_networks(file_paths: Iterable[Union[str, PathLike]]) -> pd.DataFra
 
     return concated_df
 
+
 def create_palette(column_names):
     """
-    generates a dictionary mapping each column name (algorithm name)
+    Generates a dictionary mapping each column name (algorithm name)
     to a unique color from the specified palette.
     """
-    #TODO: could add a way for the user to customize the color palette?
+    # TODO: could add a way for the user to customize the color palette?
     custom_palette = sns.color_palette("husl", len(column_names))
     label_color_map = {label: color for label, color in zip(column_names, custom_palette)}
     return label_color_map
 
-def pca(dataframe: pd.DataFrame, output_png: str, output_var: str, output_coord: str, components: int=2, labels: bool=True):
+
+def pca(dataframe: pd.DataFrame, output_png: str, output_var: str, output_coord: str, components: int = 2, labels: bool = True):
     """
     Performs PCA on the data and creates a scatterplot of the top two principal components.
     It saves the plot, the variance explained by each component, and the
@@ -115,15 +118,15 @@ def pca(dataframe: pd.DataFrame, output_png: str, output_var: str, output_coord:
     X_scaled = scaler.transform(X)
 
     # choosing the PCA
-    pca = PCA(n_components=components)
-    pca.fit(X_scaled)
-    X_pca = pca.transform(X_scaled)
-    variance = pca.explained_variance_ratio_ * 100
+    pca_instance = PCA(n_components=components)
+    pca_instance.fit(X_scaled)
+    X_pca = pca_instance.transform(X_scaled)
+    variance = pca_instance.explained_variance_ratio_ * 100
 
     # making the plot
     label_color_map = create_palette(column_names)
     plt.figure(figsize=(10, 7))
-    sns.scatterplot(x=X_pca[:, 0], y=X_pca[:, 1], s=70, hue=column_names, legend=True, palette=label_color_map);
+    sns.scatterplot(x=X_pca[:, 0], y=X_pca[:, 1], s=70, hue=column_names, legend=True, palette=label_color_map)
     plt.title("PCA")
     plt.xlabel(f"PC1 ({variance[0]:.1f}% variance)")
     plt.ylabel(f"PC2 ({variance[1]:.1f}% variance)")
@@ -141,17 +144,18 @@ def pca(dataframe: pd.DataFrame, output_png: str, output_var: str, output_coord:
             f.write("%s\n" % component)
 
     # labeling the graphs
-    if (labels):
+    if labels:
         x_coord = coord_df['x'].to_numpy()
         y_coord = coord_df['y'].to_numpy()
         texts = []
         for i, algorithm in enumerate(column_names):
             texts.append(plt.text(x_coord[i], y_coord[i], algorithm, size=10))
-        adjust_text(texts, force_points= [5,5], arrowprops=dict(arrowstyle='->', color='black'))
+        adjust_text(texts, force_points=(5.0, 5.0), arrowprops=dict(arrowstyle='->', color='black'))
 
     # saving the PCA plot
     make_required_dirs(output_png)
     plt.savefig(output_png, dpi=DPI)
+
 
 # This function is taken from the scikit-learn version 1.2.1 example code
 # https://scikit-learn.org/stable/auto_examples/cluster/plot_agglomerative_dendrogram.html
@@ -183,7 +187,8 @@ def plot_dendrogram(model, **kwargs):
     # Plot the corresponding dendrogram
     dendrogram(linkage_matrix, **kwargs)
 
-def hac_vertical(dataframe: pd.DataFrame, output_png: str, output_file: str, linkage: str='ward', metric: str='euclidean'):
+
+def hac_vertical(dataframe: pd.DataFrame, output_png: str, output_file: str, linkage: str = 'ward', metric: str = 'euclidean'):
     """
     Performs hierarchical agglomerative clustering on the dataframe,
     creates a dendrogram of the resulting tree using seaborn and scipy for the cluster groups,
@@ -199,6 +204,8 @@ def hac_vertical(dataframe: pd.DataFrame, output_png: str, output_file: str, lin
     if metric not in distance_metrics:
         raise ValueError(f"metric={metric} must be one of {distance_metrics}")
     if metric == "manhattan":
+        # clustermap does not support manhattan as a metric but cityblock is equivalent per
+        # https://docs.scipy.org/doc/scipy/reference/generated/scipy.spatial.distance.pdist.html#scipy.spatial.distance.pdist
         metric = "cityblock"
     if linkage == "ward":
         if metric != "euclidean":
@@ -215,7 +222,7 @@ def hac_vertical(dataframe: pd.DataFrame, output_png: str, output_file: str, lin
     label_color_map = create_palette(column_names)
     row_colors = pd.Series(column_names, index=df.index).map(label_color_map)
 
-    #plotting the seaborn figure
+    # plotting the seaborn figure
     plt.figure(figsize=(10, 7))
     clustergrid = sns.clustermap(df, metric=metric, method=linkage, row_colors=row_colors, col_cluster=False)
     clustergrid.ax_heatmap.remove()
@@ -238,7 +245,8 @@ def hac_vertical(dataframe: pd.DataFrame, output_png: str, output_file: str, lin
     make_required_dirs(output_png)
     plt.savefig(output_png, bbox_inches="tight", dpi=DPI)
 
-def hac_horizontal(dataframe: pd.DataFrame, output_png: str, output_file: str, linkage: str='ward', metric: str='euclidean'):
+
+def hac_horizontal(dataframe: pd.DataFrame, output_png: str, output_file: str, linkage: str = 'ward', metric: str = 'euclidean'):
     """
     Performs hierarchical agglomerative clustering on the dataframe,
     creates a dendrogram of the resulting tree using sckit learn and makes cluster groups scipy,
