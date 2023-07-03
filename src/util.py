@@ -344,7 +344,6 @@ def process_config(config):
                                      f'(current length {hash_length}).')
                 algorithm_params[alg["name"]][params_hash] = run_dict
 
-
     analysis_params = config["analysis"] if "analysis" in config else {}
     ml_params = analysis_params["ml"] if "ml" in analysis_params else {}
 
