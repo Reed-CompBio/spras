@@ -73,7 +73,31 @@ Call the new class within `local_neighborhood.py` `LocalNeighborhood` and set `_
 Specify the list of `required_input` files to be `network` and `nodes`.
 These entries are used to tell Snakemake what input files should be present before running the Local Neighborhood algorithm.
 
-Implement the `generate_inputs` function, following the `omicsintegrator1.py` example.
+Before implementing the `generate_inputs` function, explore the structure of the `Dataset` class interactively.
+In an interactive Python session, run the following commands to load the `data0` dataset and explore the nodes and interactome.
+```python
+> from src.dataset import Dataset
+> dataset_dict = {'label': 'data0', 'node_files': ['node-prizes.txt', 'sources.txt', 'targets.txt'], 'edge_files': ['network.txt'], 'other_files': [], 'data_dir': 'input'}
+> data = Dataset(dataset_dict)
+> data.node_table.head()
+  NODEID  prize sources targets
+0      A    2.0    True     NaN
+1      B    NaN     NaN     NaN
+2      C    5.7     NaN    True
+> data.interactome.head()
+  Interactor1 Interactor2  Weight
+0           A           B    0.98
+1           B           C    0.77
+```
+Also test the functions available in the `Dataset` class.
+```python
+> data.request_node_columns(['sources'])
+  sources NODEID
+0    True      A
+```
+Note the behavior of the `request_node_columns` function when there are missing values in that column of the node table.
+
+Now implement the `generate_inputs` function, following the `omicsintegrator1.py` example.
 The nodes should be any node in the dataset that has a prize set, any node that is a source, or any node that is a target.
 The network should be all of the edges written in the format `<vertex1>|<vertex2>`.
 `src/dataset.py` provides functions that provide access to node information and the interactome (edge list).
