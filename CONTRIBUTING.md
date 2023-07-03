@@ -14,9 +14,10 @@ Before following this guide, a contributor will need
 - Familiarity with Docker and Dockerfiles to create images ([Carpentries introduction](https://carpentries-incubator.github.io/docker-introduction/))
 - A [Docker Hub](https://hub.docker.com/) account
 
-It is not necessary to have experience with Snakemake or Python testing before getting started, but it may help with more complex SPRAS contributions:
+It is not necessary to have experience with Snakemake, Python testing, or pandas before getting started, but it may help with more complex SPRAS contributions:
 - Snakemake [Carpentries introduction](https://carpentries-incubator.github.io/workflows-snakemake/) or [beginner's guide](http://ivory.idyll.org/blog/2023-snakemake-slithering-section-1.html)
 - pytest [getting started](https://docs.pytest.org/en/7.1.x/getting-started.html) and [how-to guides](https://docs.pytest.org/en/7.1.x/how-to/index.html)
+- pandas [Carpentries introduction](https://datacarpentry.org/python-ecology-lesson/02-starting-with-data.html) or [10 minutes to pandas](https://pandas.pydata.org/pandas-docs/stable/user_guide/10min.html)
 
 ### Step 1: Practice with the Local Neighborhood algorithm
 The Local Neighborhood pathway reconstruction is implemented and described in the [`docker-wrappers/LocalNeighborhood`](docker-wrappers/LocalNeighborhood) directory.
