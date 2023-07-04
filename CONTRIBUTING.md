@@ -22,7 +22,7 @@ It is not necessary to have experience with Snakemake, Python testing, or pandas
 ### Step 0: Fork the repository and create a branch
 From the [SPRAS repository](https://github.com/Reed-CompBio/spras), click the "Fork" button in the upper right corner to create a copy of the repository in your own GitHub account.
 Do not change the "Repository name".
-Then, click the green "Create fork" button.
+Then click the green "Create fork" button.
 
 The simplest way to set up SPRAS for local development is to clone your fork of the repository to your local machine.
 You can do that with a graphical development environment or from the command line.
@@ -32,7 +32,7 @@ In the following commands, replace the example username `agitter` with your GitH
 git clone https://github.com/agitter/spras.git
 git checkout -b local-neighborhood
 ```
-Then, you can make commits and push them to your fork of the repository on the `local-neighborhood` branch
+Then you can make commits and push them to your fork of the repository on the `local-neighborhood` branch
 ```bash
 git push origin local-neighborhood
 ```
@@ -47,7 +47,7 @@ git remote add agitter https://github.com/agitter/spras.git
 git remote -v
 ```
 The second line adds a new remote named `agitter` in addition to the default `origin` remote.
-Then, it is possible to push commits to `origin` or `agitter`.
+Then it is possible to push commits to `origin` or `agitter`.
 This provides more flexibility.
 The third line shows all available remotes.
 
@@ -153,7 +153,7 @@ Use the `run_container` utility function to run the command in the container `<u
 Implement the `parse_output` function.
 The edges in the Local Neighborhood output have the same format as the input, `<vertex1>|<vertex2>`.
 Convert these to be tab-separated vertex pairs followed by a tab and a `1` at the end of every line, which indicates all edges have the same rank.
-You can use the `add_rank_column` function in `src.util.py`.
+See the `add_rank_column` function in `src.util.py`.
 The output should have the format `<vertex1> <vertex2> 1`.
 
 ### Step 4: Make the Local Neighborhood wrapper accessible through SPRAS
@@ -161,6 +161,12 @@ Import the new class `LocalNeighborhood` in `src/runner.py` so the wrapper funct
 Add an entry for Local Neighborhood to the configuration file `config/config.yaml` and set `include: true`.
 Local Neighborhood has no other parameters.
 Optionally set `include: false` for the other pathway reconstruction algorithms to make testing faster.
+
+After completing this step, try running the Local Neighborhood algorithm through SPRAS with
+```bash
+snakemake --cores 1 --configfile config/config.yaml
+```
+Make sure to run the command inside the `spras` conda environment.
 
 ### Step 5: Add Local Neighborhood to the tests
 Add test functions to the test file `test/test_ln.py`.
@@ -184,7 +190,7 @@ If you are not already in communication with them, you can open a [GitHub issue]
 However, once the pull request has been approved, it will **not** be merged as usual.
 The pull request will be closed so that the `master` branch of the fork stays synchronized with the `master` branch of the main SPRAS repository.
 
-## Contributing a new pathway reconstruction algorithm summary
+## General steps for contributing a new pathway reconstruction algorithm
 1. Open a [GitHub issue](https://github.com/Reed-CompBio/spras/issues/new/choose) to propose adding a new algorithm and discuss it with the SPRAS maintainers
 1. Add a new subdirectory to `docker-wrappers` with the name `<algorithm>`, write a `Dockerfile` to build an image for `<algorithm>`, and include any other files required to build that image in the subdirectory
 1. Build and push the Docker image to the [reedcompbio](https://hub.docker.com/orgs/reedcompbio) Docker organization (SPRAS maintainer required)
@@ -194,6 +200,15 @@ The pull request will be closed so that the `master` branch of the fork stays sy
 1. Add example usage for the new algorithm and its parameters to the template config file
 1. Write test functions and provide example input data in a new test subdirectory `test/<algorithm>`
 1. Extend `.github/workflows/test-spras.yml` to pull and build the new Docker image
+
+When adding new algorithms, there are many other considerations that are not relevant with the simple Local Neighborhood example.
+Most algorithms require dependencies that need to be installed in the `Dockerfile`.
+See the linked Carpentries Docker introduction above for instructions on creating a `Dockerfile` and the `OmicsIntegrator1` example for an example of specifying Python dependencies.
+
+Some algorithms may be custom implementations that are not available and maintained elsewhere.
+In that case, create a separate repository for the core pathway reconstruction algorithm source code and download it into the Docker image.
+See the `MinCostFlow` example.
+Note that when downloading code directly from GitHub that does not have versioned releases, it is recommended to specify a git commit hash.
 
 ## Pre-commit hooks
 SPRAS uses [pre-commit hooks](https://github.com/pre-commit/pre-commit-hooks) to automatically catch certain types of formatting and programming errors in source files.
