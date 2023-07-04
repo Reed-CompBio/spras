@@ -17,7 +17,7 @@ The `winpty` prefix is only needed on Windows.
 ## Testing
 Test code is located in `test/RandomWalk`.
 The `input` subdirectory contains test files `source_nodes.txt`, `target_nodes.txt` and `edges.txt`.
-The Docker wrapper can be tested with `pytest`.
+The Docker wrapper can be tested with `pytest` or a unit test with `pytest -k test_rwr.py`.
 
 Alternatively, to test the Docker image directly, run the following command from the root of the `spras` repository
 ```

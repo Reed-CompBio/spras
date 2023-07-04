@@ -73,18 +73,7 @@ class TieDIE(PRM):
 
     # Skips parameter validation step
     @staticmethod
-    def run(
-        edges=None,
-        sources=None,
-        targets=None,
-        output_file=None,
-        s : float = 1.0,
-        c : int = 3,
-        p : int = 1000,
-        pagerank : bool = False,
-        all_paths : bool = False,
-        singularity=False,
-    ):
+    def run(edges=None,sources=None,targets=None,output_file=None,s : float = 1.0,c : int = 3, p : int = 1000, pagerank : bool = False, all_paths : bool = False, singularity=False):
         """
         Run TieDIE with Docker
         @param source:  input node types with sources (required)
@@ -149,7 +138,7 @@ class TieDIE(PRM):
         print(out)
 
         # Rename the primary output file to match the desired output filename
-        output = Path(out_dir, "tiedie.cn.sif")
+        output = Path(out_dir, "tiedie.sif")
         target = Path(output_file)
         output.rename(target)
 

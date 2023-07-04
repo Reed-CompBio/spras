@@ -6,7 +6,7 @@ import pandas as pd
 from src.prm import PRM
 from src.util import add_rank_column, prepare_volume, run_container
 
-__all__ = ['RandomWalk']
+__all__ = ['RWR']
 
 class RWR(PRM):
     # we need edges (weighted), source set (with prizes), and target set (with prizes).
@@ -33,38 +33,39 @@ class RWR(PRM):
                 node_df = data.request_node_columns(['prize'])
                 nodes = pd.merge(nodes, node_df, on='NODEID')
                 # creates with the node type without headers
-                nodes.to_csv(filename_map[node_type], index=False, sep= " ", columns=['NODEID', 'prize'])
+                nodes.to_csv(filename_map[node_type], index=False, sep= "\t", columns=['NODEID', 'prize'])
             else:
                 #If there aren't prizes but are sources and targets, make prizes based on them
                 nodes = data.request_node_columns([node_type])
                 # make all nodes have a prize of 1
                 nodes['prize'] = 1.0
                 # creates with the node type without headers
-                nodes.to_csv(filename_map[node_type], index=False, sep= " ", columns=['NODEID', 'prize'])
+                nodes.to_csv(filename_map[node_type], index=False, sep= "\t", columns=['NODEID', 'prize'])
 
         # create the network of edges
         edges = data.get_interactome()
 
         # creates the edges files that contains the head and tail nodes and the weights after them
-        edges.to_csv(filename_map['edges'], sep=" ", index=False, columns=["Interactor1","Interactor2","Weight"])
+        edges.to_csv(filename_map['edges'], sep="\t", index=False, columns=["Interactor1","Interactor2","Weight"])
 
 
     # Skips parameter validation step
     @staticmethod
-    def run(edges=None, sources=None, targets = None, output_file = None, df : float = 0.85, f : str = 'min' , threshold : float = 0.0001, singularity=False):
+    def run(edges=None, sources=None, targets = None, output_file = None, df : float = 0.85, w : float = 0.00, f : str = 'min' , threshold : float = 0.0001, singularity=False):
         """
         Run RandomWalk with Docker
         @param nodetypes:  input node types with sources and targets (required)
         @param network:  input network file (required)
         @param output_file: path to the output pathway file (required)
         @param df: damping factor for restarting (default 0.85) (optional)
+        @param w: lower bound to filter the edges based on the edge confidence (default 0.00) (optional)
         @param f: selection function (default 'min') (optional)
         @param threshold: threshold for constructing the final pathway (default 0.0001) (optional)
         @param singularity: if True, run using the Singularity container instead of the Docker container
         """
 
         if not edges or not sources or not targets or not output_file:
-            raise ValueError('Required RandomWalk arguments are missing')
+            raise ValueError('Required RWR arguments are missing')
 
         work_dir = '/spras'
 
@@ -90,16 +91,17 @@ class RWR(PRM):
 
 
         command = ['python',
-                   '/RandomWalk/random_walk.py',
+                   '/RWR/random_walk.py',
                    '--edges_file', edges_file,
                    '--sources_file', sources_file,
                    '--targets_file', targets_file,
                    '--damping_factor', str(df),
                    '--selection_function', f,
+                   '--w', str(w),
                    '--threshold', str(threshold),
                    '--output_file', mapped_out_prefix]
 
-        print('Running RandomWalk with arguments: {}'.format(' '.join(command)), flush=True)
+        print('Running RWR with arguments: {}'.format(' '.join(command)), flush=True)
 
 
         container_framework = 'singularity' if singularity else 'docker'
@@ -113,8 +115,6 @@ class RWR(PRM):
         output = Path(out_dir, 'out')
         output.rename(output_file)
 
-        # From edge_output_file, construct a pathway file in the universal format
-        # 1. Stop when the source and targets are connected.
 
     @staticmethod
     def parse_output(raw_pathway_file, standardized_pathway_file):

@@ -17,5 +17,4 @@ The `winpty` prefix is only needed on Windows.
 ## Testing
 Test code is located in `test/TieDIE`.
 The `input` subdirectory contains test files `pathway.txt`, `target.txt` and `source.txt`.
-The Docker wrapper can be tested with `pytest`.
-
+The Docker wrapper can be tested with `pytest` or a unit test with `pytest -k test_rwr.py`.

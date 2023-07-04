@@ -56,7 +56,7 @@ class TestRWR:
                         targets=TEST_DIR + 'input/' + '/target_nodes.txt',
                         edges=TEST_DIR + 'input/' + '/edges.txt',
                         output_file=OUT_FILES_1,
-                        df = '0.7')
+                        df = 0.7)
         assert out_path.exists()
 
     def test_rwr_all_optional(self):
@@ -67,8 +67,9 @@ class TestRWR:
                         targets=TEST_DIR + 'input/' + '/target_nodes.txt',
                         edges=TEST_DIR + 'input/' + '/edges.txt',
                         output_file=OUT_FILES_1,
-                        df = '0.7',
-                        f = 'sum')
+                        df = 0.8,
+                        f = 'sum',
+                        w = 0.3)
         assert out_path.exists()
 
 
