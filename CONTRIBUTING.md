@@ -56,7 +56,6 @@ With this configuration, you push commits to your fork and then make a pull requ
 git push agitter local-neighborhood
 ```
 
-
 ### Step 1: Practice with the Local Neighborhood algorithm
 The Local Neighborhood pathway reconstruction is implemented and described in the [`docker-wrappers/LocalNeighborhood`](docker-wrappers/LocalNeighborhood) directory.
 The readme in that directory describes the usage and the three required arguments.
@@ -176,26 +175,21 @@ Follow the example for any of the other pathway reconstruction algorithm.
 First pull the image `<username>/local-neighborhood` from Docker Hub.
 Then build the Docker image using the `Dockerfile` that was completed in Step 2.
 
-### Step 6: Create a pull request to add Local Neighborhood to the SPRAS repository
-These instructions assume the `spras` repository has already been cloned locally and the contributor has their own fork that has been added as a remote.
-Create a new branch in the `spras` repository:
-```
-git checkout -b local-neighborhood
-```
-Commit all of the new and modified files.
-It may be preferable to make several smaller commits while working on Steps 1 through 5 instead of waiting to commit them all in Step 6.
-Push the branch to the contributor's fork.
-Visit <https://github.com/Reed-CompBio/spras/pulls> to create a new pull request.
+### Step 6: Work with SPRAS maintainers to revise the pull request
+Step 0 previously described how to create a `local-neighborhood` branch and create a pull request.
+Make sure to commit all of the new and modified files and push them to the `local-neighborhood` branch on your fork.
+
 The SPRAS maintainers will review the pull request and provide feedback and suggested changes.
+If you are not already in communication with them, you can open a [GitHub issue](https://github.com/Reed-CompBio/spras/issues/new/choose) to request feedback.
 However, once the pull request has been approved, it will **not** be merged as usual.
-The pull request will be closed so that future contributors can practice with the Local Neighborhood algorithm.
+The pull request will be closed so that the `master` branch of the fork stays synchronized with the `master` branch of the main SPRAS repository.
 
 ## Contributing a new pathway reconstruction algorithm summary
 1. Open a [GitHub issue](https://github.com/Reed-CompBio/spras/issues/new/choose) to propose adding a new algorithm and discuss it with the SPRAS maintainers
 1. Add a new subdirectory to `docker-wrappers` with the name `<algorithm>`, write a `Dockerfile` to build an image for `<algorithm>`, and include any other files required to build that image in the subdirectory
 1. Build and push the Docker image to the [reedcompbio](https://hub.docker.com/orgs/reedcompbio) Docker organization (SPRAS maintainer required)
 1. Add a new Python file `src/<algorithm>.py` to implement the wrapper functions for `<algorithm>`: specify the list of `required_input` files and the `generate_inputs`, `run`, and `parse_output` functions
-1. Import the new class in `runner.py` so the wrapper functions can be accessed
+1. Import the new class in `src/runner.py` so the wrapper functions can be accessed
 1. Document the usage of the Docker wrapper and the assumptions made when implementing the wrapper
 1. Add example usage for the new algorithm and its parameters to the template config file
 1. Write test functions and provide example input data in a new test subdirectory `test/<algorithm>`
