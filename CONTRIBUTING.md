@@ -19,6 +19,44 @@ It is not necessary to have experience with Snakemake, Python testing, or pandas
 - pytest [getting started](https://docs.pytest.org/en/7.1.x/getting-started.html) and [how-to guides](https://docs.pytest.org/en/7.1.x/how-to/index.html)
 - pandas [Carpentries introduction](https://datacarpentry.org/python-ecology-lesson/02-starting-with-data.html) or [10 minutes to pandas](https://pandas.pydata.org/pandas-docs/stable/user_guide/10min.html)
 
+### Step 0: Fork the repository and create a branch
+From the [SPRAS repository](https://github.com/Reed-CompBio/spras), click the "Fork" button in the upper right corner to create a copy of the repository in your own GitHub account.
+Do not change the "Repository name".
+Then, click the green "Create fork" button.
+
+The simplest way to set up SPRAS for local development is to clone your fork of the repository to your local machine.
+You can do that with a graphical development environment or from the command line.
+After cloning the repository, create a new git branch called `local-neighborhood` for local neighborhood development.
+In the following commands, replace the example username `agitter` with your GitHub username.
+```bash
+git clone https://github.com/agitter/spras.git
+git checkout -b local-neighborhood
+```
+Then, you can make commits and push them to your fork of the repository on the `local-neighborhood` branch
+```bash
+git push origin local-neighborhood
+```
+For this local neighborhood example only, you will not merge the changes back to the original SPRAS repository.
+Instead, you can open a pull request to your fork so that the SPRAS maintainers can still provide feedback.
+For example, use the "New pull request" button from <https://github.com/agitter/spras/pulls> and set `agitter/spras` as both the base repository and the head repository with `local-neighborhood` as the compare branch.
+
+An alternative way to set up SPRAS for local development is to  clone the Reed-CompBio version of the repository to your local machine and add your fork as another git remote so your can push changes to both.
+```bash
+git clone https://github.com/Reed-CompBio/spras.git
+git remote add agitter https://github.com/agitter/spras.git
+git remote -v
+```
+The second line adds a new remote named `agitter` in addition to the default `origin` remote.
+Then, it is possible to push commits to `origin` or `agitter`.
+This provides more flexibility.
+The third line shows all available remotes.
+
+With this configuration, you push commits to your fork and then make a pull request to your fork as above, except now the remote has a different name.
+```bash
+git push agitter local-neighborhood
+```
+
+
 ### Step 1: Practice with the Local Neighborhood algorithm
 The Local Neighborhood pathway reconstruction is implemented and described in the [`docker-wrappers/LocalNeighborhood`](docker-wrappers/LocalNeighborhood) directory.
 The readme in that directory describes the usage and the three required arguments.
