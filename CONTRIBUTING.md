@@ -138,6 +138,7 @@ Note the behavior of the `request_node_columns` function when there are missing 
 
 Now implement the `generate_inputs` function, following the `omicsintegrator1.py` example.
 The nodes should be any node in the dataset that has a prize set, any node that is a source, or any node that is a target.
+A "prize" is a term for a score on a node in a network, so nodes that have non-empty prizes are considered relevant nodes for the Local Neighborhood algorithm along with sources and targets.
 The network should be all of the edges written in the format `<vertex1>|<vertex2>`.
 `src/dataset.py` provides functions that provide access to node information and the interactome (edge list).
 
@@ -153,10 +154,11 @@ Use the `run_container` utility function to run the command in the container `<u
 Implement the `parse_output` function.
 The edges in the Local Neighborhood output have the same format as the input, `<vertex1>|<vertex2>`.
 Convert these to be tab-separated vertex pairs followed by a tab and a `1` at the end of every line, which indicates all edges have the same rank.
+You can use the `add_rank_column` function in `src.util.py`.
 The output should have the format `<vertex1> <vertex2> 1`.
 
 ### Step 4: Make the Local Neighborhood wrapper accessible through SPRAS
-Import the new class `LocalNeighborhood` in `PRRunner.py` so the wrapper functions can be accessed.
+Import the new class `LocalNeighborhood` in `src/runner.py` so the wrapper functions can be accessed.
 Add an entry for Local Neighborhood to the configuration file `config/config.yaml` and set `include: true`.
 Local Neighborhood has no other parameters.
 Optionally set `include: false` for the other pathway reconstruction algorithms to make testing faster.
