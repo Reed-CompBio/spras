@@ -123,7 +123,7 @@
           # boolean to show the labels on the pca graph
           labels: true
           # 'ward', 'complete', 'average', 'single'
-          # if linkage: ward, MUST USE metric: euclidean
+          # if linkage: ward, must use metric: euclidean
           linkage: 'ward'
           # 'euclidean', 'manhattan', 'cosine'
           metric: 'euclidean'
