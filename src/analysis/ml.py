@@ -147,7 +147,6 @@ def pca(dataframe: pd.DataFrame, output_png: str, output_var: str, output_coord:
     if (labels):
         x_coord = coordinates_df['PC1'].to_numpy()
         y_coord = coordinates_df['PC2'].to_numpy()
-
         texts = []
         for i, algorithm in enumerate(column_names):
             texts.append(plt.text(x_coord[i], y_coord[i], algorithm, size=10))
