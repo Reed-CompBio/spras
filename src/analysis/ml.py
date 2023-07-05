@@ -129,20 +129,20 @@ def pca(dataframe: pd.DataFrame, output_png: str, output_file: str, output_coord
 
     # saving the coordinates of each algorithm
     make_required_dirs(output_coord)
-    data = {'algorithm': columns.tolist(), 'x': X_pca[:, 0], 'y': X_pca[:, 1]}
-    coord_df = pd.DataFrame(data)
-    coord_df.to_csv(output_coord, sep='\t', index=False)
+    coordinates_df = pd.DataFrame(X_pca, columns = ['PC' + str(i) for i in range(1, components+1)])
+    coordinates_df.insert(0, 'algorithm', columns.tolist())
+    coordinates_df.to_csv(output_coord, sep='\t', index=False)
 
     # saving the principal components
     make_required_dirs(output_file)
     with open(output_file, "w") as f:
-        for component in variance:
-            f.write("%s\n" % component)
+        for component in range(len(variance)):
+            f.write("PC%d: %s\n" % (component+1, variance[component]))
 
     # labeling the graphs
     if (labels):
-        x_coord = coord_df['x'].to_numpy()
-        y_coord = coord_df['y'].to_numpy()
+        x_coord = coordinates_df['PC1'].to_numpy()
+        y_coord = coordinates_df['PC2'].to_numpy()
         texts = []
         for i, algorithm in enumerate(column_names):
             texts.append(plt.text(x_coord[i], y_coord[i], algorithm, size=10))
