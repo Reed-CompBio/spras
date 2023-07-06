@@ -1,4 +1,4 @@
 algorithm	labels
-test-s1	2
-test-s2	1
-test-s3	0
+test-data-s1	2
+test-data-s2	1
+test-data-s3	0
