@@ -100,7 +100,7 @@ def pca(dataframe: pd.DataFrame, output_png: str, output_var: str, output_coord:
     """
     df = dataframe.reset_index(drop=True)
     columns = dataframe.columns
-    column_names = [element.split('-')[1] for element in columns]
+    column_names = [element.split('-')[-3] for element in columns]  # assume algorithm names do not contain '-'
     df = df.transpose()  # based on the algorithms rather than the edges
     X = df.values
 
@@ -144,7 +144,7 @@ def pca(dataframe: pd.DataFrame, output_png: str, output_var: str, output_coord:
             f.write("PC%d: %s\n" % (component+1, variance[component]))
 
     # labeling the graphs
-    if (labels):
+    if labels:
         x_coord = coordinates_df['PC1'].to_numpy()
         y_coord = coordinates_df['PC2'].to_numpy()
         texts = []
@@ -214,7 +214,7 @@ def hac_vertical(dataframe: pd.DataFrame, output_png: str, output_file: str, lin
 
     df = dataframe.reset_index(drop=True)
     columns = df.columns
-    column_names = [element.split('-')[1] for element in columns]
+    column_names = [element.split('-')[-3] for element in columns]  # assume algorithm names do not contain '-'
     df = df.transpose()
 
     # create a color map for the given labels
