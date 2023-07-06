@@ -344,8 +344,22 @@ def process_config(config):
                                      f'(current length {hash_length}).')
                 algorithm_params[alg["name"]][params_hash] = run_dict
 
-    return config, datasets, out_dir, algorithm_params, algorithm_directed
+    analysis_params = config["analysis"] if "analysis" in config else {}
+    ml_params = analysis_params["ml"] if "ml" in analysis_params else {}
 
+    pca_params = {}
+    if "components" in ml_params:
+        pca_params["components"] = ml_params["components"]
+    if "labels" in ml_params:
+        pca_params["labels"] = ml_params["labels"]
+
+    hac_params = {}
+    if "linkage" in ml_params:
+        hac_params["linkage"] = ml_params["linkage"]
+    if "metric" in ml_params:
+        hac_params["metric"] = ml_params ["metric"]
+
+    return config, datasets, out_dir, algorithm_params, algorithm_directed, pca_params, hac_params
 
 def compare_files(file1, file2) -> bool:
     """

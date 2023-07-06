@@ -2,6 +2,7 @@ name: spras
 channels:
   - conda-forge
 dependencies:
+  - adjusttext=0.7.3.1
   - bioconda::snakemake-minimal=7.18.2
   - docker-py=5.0
   - matplotlib=3.5
