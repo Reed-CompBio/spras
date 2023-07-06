@@ -133,7 +133,8 @@ Also test the functions available in the `Dataset` class.
   sources NODEID
 0    True      A
 ```
-Note the behavior of the `request_node_columns` function when there are missing values in that column of the node table.
+Note the behaviors of the `request_node_columns` function when there are missing values in that column of the node table and when multiple columns are requested.
+`request_node_columns` always returns the `NODEID` column in addition to the requested columns.
 
 Now implement the `generate_inputs` function, following the `omicsintegrator1.py` example.
 The nodes should be any node in the dataset that has a prize set, any node that is a source, or any node that is a target.
@@ -159,6 +160,7 @@ The output should have the format `<vertex1> <vertex2> 1`.
 ### Step 4: Make the Local Neighborhood wrapper accessible through SPRAS
 Import the new class `LocalNeighborhood` in `src/runner.py` so the wrapper functions can be accessed.
 Add an entry for Local Neighborhood to the configuration file `config/config.yaml` and set `include: true`.
+As a convention, algorithm names are written in all lowercase without special characters.
 Local Neighborhood has no other parameters.
 Optionally set `include: false` for the other pathway reconstruction algorithms to make testing faster.
 
