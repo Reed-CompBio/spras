@@ -48,3 +48,9 @@ class TestML:
 
         assert filecmp.cmp(OUT_DIR + 'hac-clusters-vertical.txt', EXPECT_DIR + 'expected-hac-vertical-clusters.txt')
 
+    def test_ensemble_network(self):
+        dataframe = ml.summarize_networks([INPUT_DIR + 'test-data-s1/s1.txt', INPUT_DIR + 'test-data-s2/s2.txt', INPUT_DIR + 'test-data-s3/s3.txt'])
+        ml.ensemble_network(dataframe, OUT_DIR + 'ensemble-network.txt')
+
+        assert filecmp.cmp(OUT_DIR + 'ensemble-network.txt', EXPECT_DIR + 'expected-ensemble-network.txt')
+

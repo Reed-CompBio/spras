@@ -71,9 +71,7 @@ def summarize_networks(file_paths: Iterable[Union[str, PathLike]]) -> pd.DataFra
     concated_df = pd.concat(edge_dataframes, axis=1, join='outer')
     concated_df = concated_df.fillna(0)
     concated_df = concated_df.astype('int64')
-
     return concated_df
-
 
 def create_palette(column_names):
     """
@@ -289,3 +287,14 @@ def hac_horizontal(dataframe: pd.DataFrame, output_png: str, output_file: str, l
     clusters_df.to_csv(output_file, sep='\t', index=False)
     make_required_dirs(output_png)
     plt.savefig(output_png, bbox_inches="tight", dpi=DPI)
+
+def ensemble_network(dataframe: pd.DataFrame, output_file:str):
+    # Compute row sums, then reset the index to turn index into column
+    row_sums = np.sum(dataframe, axis=1).reset_index()
+    # Rename the columns
+    row_sums.columns = ['Edges', 'Frequency']
+
+    make_required_dirs(output_file)
+    #TODO: user won't be able to open this up in excel (as well as some of the other files in this file)
+    # should we care about that, or should I change everything to comma seperated
+    row_sums.to_csv(output_file, sep='\t', index=False)

@@ -1,0 +1,8 @@
+Edges	Frequency
+A|||B	2
+C|||D	2
+E|||F	2
+L|||M	2
+M|||N	1
+O|||P	1
+P|||Q	1
