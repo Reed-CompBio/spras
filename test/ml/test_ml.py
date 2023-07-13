@@ -50,7 +50,12 @@ class TestML:
 
     def test_ensemble_network(self):
         dataframe = ml.summarize_networks([INPUT_DIR + 'test-data-s1/s1.txt', INPUT_DIR + 'test-data-s2/s2.txt', INPUT_DIR + 'test-data-s3/s3.txt'])
-        ml.ensemble_network(dataframe, OUT_DIR + 'ensemble-network.txt')
+        ml.ensemble_network(dataframe, OUT_DIR + 'ensemble-network.csv')
 
-        assert filecmp.cmp(OUT_DIR + 'ensemble-network.txt', EXPECT_DIR + 'expected-ensemble-network.txt')
+        en = pd.read_table(OUT_DIR + 'ensemble-network.csv')
+        en = en.round(5)  # round values to 5 digits to account for numeric differences across machines
+        expected = pd.read_table(EXPECT_DIR + 'expected-ensemble-network.csv')
+        expected = expected.round(5)
+
+        assert en.equals(expected)
 
