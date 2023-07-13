@@ -296,5 +296,5 @@ def ensemble_network(dataframe: pd.DataFrame, output_file:str):
 
     make_required_dirs(output_file)
     #TODO: user won't be able to open this up in excel  (as well as some of the other files in this code)
-    # should we care about that, or should I change everything to comma seperated and save as csv 
+    # should we care about that, or should I change everything to comma seperated and save as csv
     row_sums.to_csv(output_file, sep='\t', index=False)
