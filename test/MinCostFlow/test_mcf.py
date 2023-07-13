@@ -1,6 +1,8 @@
-import pytest
 import shutil
 from pathlib import Path
+
+import pytest
+
 from src.mincostflow import MinCostFlow
 
 TEST_DIR = 'test/MinCostFlow/'

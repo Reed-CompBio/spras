@@ -1,0 +1,26 @@
+# See https://pre-commit.com for more information
+# See https://pre-commit.com/hooks.html for more hooks
+# See https://pre-commit.com/ for documentation
+default_language_version:
+  # Match this to the version specified in environment.yml
+  python: python3.8
+repos:
+  - repo: https://github.com/pre-commit/pre-commit-hooks
+    rev: v4.4.0  # Use the ref you want to point at
+    hooks:
+      # Attempts to load all yaml files to verify syntax.
+      - id: check-yaml
+      # Attempts to load all TOML files to verify syntax.
+      - id: check-toml
+      # Trims trailing whitespace.
+      - id: trailing-whitespace
+        # Preserves Markdown hard linebreaks.
+        args: [--markdown-linebreak-ext=md]
+        # Do not trim whitespace from all files, input files may need trailing whitespace for empty values in columns.
+        types_or: [markdown, python, yaml]
+        # Skip this Markdown file, which has an example of an input text file within it.
+        exclude: input/README.md
+  - repo: https://github.com/charliermarsh/ruff-pre-commit
+    rev: 'v0.0.269'
+    hooks:
+      - id: ruff

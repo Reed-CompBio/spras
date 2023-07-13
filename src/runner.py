@@ -1,12 +1,11 @@
-from src.dataset import Dataset
-
 # supported algorithm imports
+from src.allpairs import AllPairs as allpairs
+from src.dataset import Dataset
 from src.meo import MEO as meo
+from src.mincostflow import MinCostFlow as mincostflow
 from src.omicsintegrator1 import OmicsIntegrator1 as omicsintegrator1
 from src.omicsintegrator2 import OmicsIntegrator2 as omicsintegrator2
 from src.pathlinker import PathLinker as pathlinker
-from src.mincostflow import MinCostFlow as mincostflow
-from src.allpairs import AllPairs as allpairs
 
 
 def run(algorithm, params):
@@ -15,8 +14,8 @@ def run(algorithm, params):
     """
     try:
         algorithm_runner = globals()[algorithm.lower()]
-    except KeyError:
-        raise NotImplementedError(f'{algorithm} is not currently supported')
+    except KeyError as exc:
+        raise NotImplementedError(f'{algorithm} is not currently supported') from exc
     algorithm_runner.run(**params)
 
 
@@ -28,8 +27,8 @@ def get_required_inputs(algorithm):
     """
     try:
         algorithm_runner = globals()[algorithm.lower()]
-    except KeyError:
-        raise NotImplementedError(f'{algorithm} is not currently supported')
+    except KeyError as exc:
+        raise NotImplementedError(f'{algorithm} is not currently supported') from exc
     return algorithm_runner.required_inputs
 
 
@@ -54,8 +53,8 @@ def prepare_inputs(algorithm, data_file, filename_map):
     dataset = Dataset.from_file(data_file)
     try:
         algorithm_runner = globals()[algorithm.lower()]
-    except KeyError:
-        raise NotImplementedError(f'{algorithm} is not currently supported')
+    except KeyError as exc:
+        raise NotImplementedError(f'{algorithm} is not currently supported') from exc
     return algorithm_runner.generate_inputs(dataset, filename_map)
 
 
@@ -68,6 +67,6 @@ def parse_output(algorithm, raw_pathway_file, standardized_pathway_file):
     """
     try:
         algorithm_runner = globals()[algorithm.lower()]
-    except KeyError:
-        raise NotImplementedError(f'{algorithm} is not currently supported')
+    except KeyError as exc:
+        raise NotImplementedError(f'{algorithm} is not currently supported') from exc
     return algorithm_runner.parse_output(raw_pathway_file, standardized_pathway_file)
