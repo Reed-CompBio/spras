@@ -290,19 +290,18 @@ def hac_horizontal(dataframe: pd.DataFrame, output_png: str, output_file: str, l
 
 def ensemble_network(dataframe: pd.DataFrame, output_file:str):
     """
-    this method will sum up the binary values in the provided dataframe
-    -  we're counting the number of times an edge appears in a set of pathway reconstruction networks
+    this method will calculate the mean of the binary values in the provided dataframe
+    -  we're counting the number of times an edge appears in a set of pathway reconstruction networks / by the length of the set
     edges that appear more frequently will have a higher number, thus are more likey to be robust,
     so this information can be used to include an edge to include in a final network
     @param datafram: binary dataframe of edge comparison between algorithms from summarize_networks
     @param output_file: the file name to save the ensemble network
     """
-    # Compute row sums, then dropped the index
-    row_sums = np.sum(dataframe, axis=1).reset_index()
-    # Rename the columns
-    row_sums.columns = ['Edges', 'Frequency']
-
+    row_means = np.mean(dataframe, axis=1).reset_index()
+    row_means.columns = ['Edges', 'Frequency']
+    row_means[['Node1', 'Node2']] = row_means['Edges'].str.split('\|\|\|',expand=True)
+    row_means = row_means.drop('Edges', axis=1)
+    row_means = row_means[['Node1', 'Node2', 'Frequency']]
     make_required_dirs(output_file)
-    #TODO: user won't be able to open this up in excel  (as well as some of the other files in this code)
-    # should we care about that, or should I change everything to comma seperated and save as csv
-    row_sums.to_csv(output_file, sep='\t', index=False)
+    row_means.to_csv(output_file, sep='\t', index=False, header=False)
+
