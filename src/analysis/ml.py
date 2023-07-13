@@ -290,10 +290,10 @@ def hac_horizontal(dataframe: pd.DataFrame, output_png: str, output_file: str, l
 
 def ensemble_network(dataframe: pd.DataFrame, output_file:str):
     """
-    this method will sum up the binary values in the provided dataframe 
-    -  we're counting the number of times each edge appears in a set of pathway reconstruction networks 
-    edges that appear more frequently will have a higher number, thus are more likey to be robust, so
-    this information can be used to include an edge to include in a final network 
+    this method will sum up the binary values in the provided dataframe
+    -  we're counting the number of times an edge appears in a set of pathway reconstruction networks
+    edges that appear more frequently will have a higher number, thus are more likey to be robust,
+    so this information can be used to include an edge to include in a final network
     @param datafram: binary dataframe of edge comparison between algorithms from summarize_networks
     @param output_file: the file name to save the ensemble network
     """
