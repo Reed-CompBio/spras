@@ -13,7 +13,7 @@ class TestTieDIE:
     """
     Run the TieDIE algorithm on the example input files
     """
-    
+
     def test_tiedie_required(self):
         out_path = Path(OUT_FILES)
         out_path.unlink(missing_ok=True)

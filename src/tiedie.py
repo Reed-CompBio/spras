@@ -88,7 +88,7 @@ class TieDIE(PRM):
         volumes.append(bind_path)
 
         out_dir = Path(output_file).parent
-        
+
         # TieDIE requires that the output directory exist
         out_dir.mkdir(parents=True, exist_ok=True)
         bind_path, mapped_out_dir = prepare_volume(str(out_dir), work_dir)
@@ -113,10 +113,10 @@ class TieDIE(PRM):
 
         # TODO consider making this a string in the config file instead of a Boolean
         container_framework = "singularity" if singularity else "docker"
-        out = run_container(container_framework, 
-                            "reedcompbio/tiedie", 
-                            command, 
-                            volumes, 
+        out = run_container(container_framework,
+                            "reedcompbio/tiedie",
+                            command,
+                            volumes,
                             work_dir)
         print(out)
 

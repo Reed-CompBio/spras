@@ -82,7 +82,7 @@ class RWR(PRM):
 
 
         out_dir = Path(output_file).parent
-        
+
         # RWR requires that the output directory exist
         out_dir.mkdir(parents=True, exist_ok=True)
         bind_path, mapped_out_dir = prepare_volume(str(out_dir), work_dir)
