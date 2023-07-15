@@ -18,7 +18,6 @@ class RWR(PRM):
         Access fields from the dataset and write the required input files
         @param data: dataset
         @param filename_map: a dict mapping file types in the required_inputs to the filename for that type
-        @return:
         """
         # ensures the required input are within the filename_map
         for input_type in RWR.required_inputs:
@@ -83,7 +82,8 @@ class RWR(PRM):
 
 
         out_dir = Path(output_file).parent
-        # RandomWalk requires that the output directory exist
+        
+        # RWR requires that the output directory exist
         out_dir.mkdir(parents=True, exist_ok=True)
         bind_path, mapped_out_dir = prepare_volume(str(out_dir), work_dir)
         volumes.append(bind_path)
@@ -106,7 +106,7 @@ class RWR(PRM):
 
         container_framework = 'singularity' if singularity else 'docker'
         out = run_container(container_framework,
-                            'erikliu24/rwwr',
+                            'reedcompbio/random-walk-with-restart',
                             command,
                             volumes,
                             work_dir)
@@ -123,7 +123,6 @@ class RWR(PRM):
         @param raw_pathway_file: pathway file produced by an algorithm's run function
         @param standardized_pathway_file: the same pathway written in the universal format
         """
-        print('Parsing random-walk-with-restart output')
 
         df = pd.read_csv(raw_pathway_file, sep="\t")
 

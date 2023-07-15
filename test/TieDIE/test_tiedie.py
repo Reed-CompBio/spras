@@ -4,29 +4,16 @@ from pathlib import Path
 import pytest
 
 from src.tiedie import TieDIE
-from src.util import compare_files
 
 TEST_DIR = 'test/TieDIE/'
 OUT_FILES = TEST_DIR + 'output/output1/tiedie_pathway.txt'
 OUT_FILES_1 = TEST_DIR + 'output/output2/tiedie_pathway_alternative.txt'
-'''
-Need to think of some test files to use for this test.
-'''
-
 
 class TestTieDIE:
     """
-    Run the TieDIE algorithm on the example input files and check the output matches the expected output
+    Run the TieDIE algorithm on the example input files
     """
-
-    # Write tests for the Local Neighborhood run function here
-
-    # Speed up the tests by only running this test on all input graphs
-    # The remaining tests run only on graph1
-
-    """
-    Run TieDIE in the Docker image
-    """
+    
     def test_tiedie_required(self):
         out_path = Path(OUT_FILES)
         out_path.unlink(missing_ok=True)
@@ -83,7 +70,7 @@ class TestTieDIE:
                             output_file=OUT_FILES)
 
     @pytest.mark.skipif(not shutil.which('singularity'), reason='Singularity not found on system')
-    def test_rwr_singularity(self):
+    def test_tiedie_singularity(self):
         out_path = Path(OUT_FILES)
         out_path.unlink(missing_ok=True)
         # Only include required arguments and run with Singularity

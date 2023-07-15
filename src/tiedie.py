@@ -8,7 +8,6 @@ from src.util import add_rank_column, prepare_volume, run_container
 
 __all__ = ["TieDIE"]
 
-
 class TieDIE(PRM):
     # we need edges (weighted), source set (with prizes), and target set (with prizes).
     required_inputs = ["edges", "sources", "targets"]
@@ -19,7 +18,6 @@ class TieDIE(PRM):
         Access fields from the dataset and write the required input files
         @param data: dataset
         @param filename_map: a dict mapping file types in the required_inputs to the filename for that type
-        @return:
         """
         # ensures the required input are within the filename_map
         for input_type in TieDIE.required_inputs:
@@ -35,13 +33,7 @@ class TieDIE(PRM):
                 nodes = pd.merge(nodes, node_df, on="NODEID")
                 nodes["sign"] = "+"
                 # creates with the node type without headers
-                nodes.to_csv(
-                    filename_map[node_type],
-                    index=False,
-                    sep="\t",
-                    columns=["NODEID", "prize", "sign"],
-                    header=False,
-                )
+                nodes.to_csv(filename_map[node_type],index=False,sep="\t",columns=["NODEID", "prize", "sign"],header=False)
             else:
                 # If there aren't prizes but are sources and targets, make prizes based on them
                 nodes = data.request_node_columns([node_type])
@@ -49,13 +41,7 @@ class TieDIE(PRM):
                 nodes["prize"] = 1.0
                 nodes["sign"] = "+"
                 # creates with the node type without headers
-                nodes.to_csv(
-                    filename_map[node_type],
-                    index=False,
-                    sep="\t",
-                    columns=["NODEID", "prize", "sign"],
-                    header=False,
-                )
+                nodes.to_csv(filename_map[node_type],index=False,sep="\t",columns=["NODEID", "prize", "sign"],header=False)
 
         # create the network of edges
         edges = data.get_interactome()
@@ -63,13 +49,7 @@ class TieDIE(PRM):
         # drop the weight column
         edges = edges.drop(columns=["Weight"])
         # creates the edges files that contains the head and tail nodes and the weights after them
-        edges.to_csv(
-            filename_map["edges"],
-            sep="\t",
-            index=False,
-            columns=["Interactor1", "type", "Interactor2"],
-            header=False,
-        )
+        edges.to_csv(filename_map["edges"],sep="\t",index=False,columns=["Interactor1", "type", "Interactor2"],header=False)
 
     # Skips parameter validation step
     @staticmethod
@@ -108,6 +88,7 @@ class TieDIE(PRM):
         volumes.append(bind_path)
 
         out_dir = Path(output_file).parent
+        
         # TieDIE requires that the output directory exist
         out_dir.mkdir(parents=True, exist_ok=True)
         bind_path, mapped_out_dir = prepare_volume(str(out_dir), work_dir)
@@ -127,14 +108,16 @@ class TieDIE(PRM):
             "--output_folder", mapped_out_dir,
         ]
 
-        print('Running RandomWalk with arguments: {}'.format(' '.join(command)), flush=True)
+        print('Running TieDIE with arguments: {}'.format(' '.join(command)), flush=True)
 
 
         # TODO consider making this a string in the config file instead of a Boolean
         container_framework = "singularity" if singularity else "docker"
-        out = run_container(
-            container_framework, "erikliu24/tiedie", command, volumes, work_dir
-        )
+        out = run_container(container_framework, 
+                            "reedcompbio/tiedie", 
+                            command, 
+                            volumes, 
+                            work_dir)
         print(out)
 
         # Rename the primary output file to match the desired output filename

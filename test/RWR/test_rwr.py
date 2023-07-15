@@ -4,31 +4,17 @@ from pathlib import Path
 import pytest
 
 from src.rwr import RWR
-from src.util import compare_files
 
 TEST_DIR = 'test/RWR/'
 OUT_FILES_1 = TEST_DIR + 'output/output2/rwr_pathway.txt'
 OUT_FILES_2 = TEST_DIR + 'output/output1/rwr_pathway.txt'
 
 
-'''
-Need to think of some test files to use for this test.
-'''
-
-
 class TestRWR:
     """
-    Run the RWR algorithm on the example input files and check the output matches the expected output
+    Run the RWR algorithm on the example input files
     """
 
-    # Write tests for the Local Neighborhood run function here
-
-    # Speed up the tests by only running this test on all input graphs
-    # The remaining tests run only on graph1
-
-    """
-    Run Random walk with restart in the Docker image
-    """
     def test_rwr_required(self):
         out_path = Path(OUT_FILES_1)
         out_path.unlink(missing_ok=True)

@@ -81,8 +81,8 @@ jobs:
         docker pull reedcompbio/pathlinker:latest
         docker pull reedcompbio/meo:latest
         docker pull reedcompbio/mincostflow:latest
-        docker pull erikliu24/rwwr:latest
-        docker pull erikliu24/tiedie:latest
+        docker pull reedcompbio/random-walk-with-restart:latest
+        docker pull reedcompbio/tiedie:latest
     - name: Build Omics Integrator 1 Docker image
       uses: docker/build-push-action@v1
       with:
@@ -133,18 +133,18 @@ jobs:
       with:
         path: docker-wrappers/RWR/.
         dockerfile: docker-wrappers/RWR/Dockerfile
-        repository: eriliu24/rwwr
+        repository: reedcompbio/random-walk-with-restart:latest
         tags: latest
-        cache_froms: erikliu24/rwwr:latest
+        cache_froms: reedcompbio/random-walk-with-restart:latest
         push: false
     - name: Build TieDIE Docker image
       uses: docker/build-push-action@v1
       with:
         path: docker-wrappers/TieDIE/.
         dockerfile: docker-wrappers/TieDIE/Dockerfile
-        repository: erikliu24/tiedie
+        repository: reedcompbio/tiedie
         tags: latest
-        cache_froms: erikliu24/tiedie:latest
+        cache_froms: reedcompbio/tiedie:latest
         push: false
 
   # Run pre-commit checks on source files
