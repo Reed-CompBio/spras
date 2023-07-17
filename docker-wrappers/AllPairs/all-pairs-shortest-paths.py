@@ -45,12 +45,12 @@ def allpairs(network_file: Path, nodes_file: Path, output_file: Path):
             elif row[1] == 'target':
                 targets.add(row[0])
 
-    # there should be at least one source and one target.
+    # there should be at least one source and one target
     assert len(sources) > 0, 'There are no sources.'
     assert len(targets) > 0, 'There are no targets.'
     assert len(sources.intersection(targets)) == 0, 'There is at least one source that is also a target.'
 
-    # Read graph & assert that sources/targets are in network
+    # Read graph & assert all the sources/targets are in network
     graph = nx.read_weighted_edgelist(network_file)
     assert len(sources.intersection(graph.nodes())) == len(sources), 'At least one source is not in the interactome.'
     assert len(targets.intersection(graph.nodes())) == len(targets), 'At least one target is not in the interactome.'

@@ -1,9 +1,11 @@
-import pytest
 import docker
+from pathlib import Path
+import pytest
+import shutil
 from src.allpairs import AllPairs
 
 TEST_DIR = 'test/AllPairs/'
-OUT_FILE = TEST_DIR+'out.txt'
+OUT_FILE = TEST_DIR+'output/out.txt'
 
 EXPECTED_FILE = TEST_DIR+'/expected/out.txt' ## TODO not currently checked.
 

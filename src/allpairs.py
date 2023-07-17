@@ -75,7 +75,7 @@ class AllPairs(PRM):
         mapped_out_file = mapped_out_dir + '/out.txt'  # Use posix path inside the container
 
         command = ['python',
-                   'all-pairs-shortest-paths.py',
+                   '/AllPairs/all-pairs-shortest-paths.py',
                    '--network', network_file,
                    '--nodes', node_file,
                    '--output', mapped_out_file]
@@ -103,5 +103,5 @@ class AllPairs(PRM):
         @param standardized_pathway_file: the same pathway written in the universal format
         """
         df = pd.read_csv(raw_pathway_file,sep='\t',header=None)
-        df.insert(2,'Rank',1) # add a rank column of 1s since the edges are not ranked.
+        df.insert(1,'Rank',1) # add a rank column of 1s since the edges are not ranked.
         df.to_csv(standardized_pathway_file, header=False, index=False, sep='\t')
