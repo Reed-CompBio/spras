@@ -1,7 +1,10 @@
-from src.prm import PRM
+import warnings
 from pathlib import Path
-from src.util import prepare_volume, run_container
+
 import pandas as pd
+
+from src.prm import PRM
+from src.util import prepare_volume, run_container
 
 __all__ = ['AllPairs']
 
@@ -26,9 +29,9 @@ class AllPairs(PRM):
         if sources_targets is None:
             return False
         both_series = sources_targets.sources & sources_targets.targets
-        for index,row in sources_targets[both_series].iterrows():
+        for _index,row in sources_targets[both_series].iterrows():
             warn_msg = row.NODEID+" has been labeled as both a source and a target."
-            warnings.warn(warn_msg)
+            warnings.warn(warn_msg, stacklevel=2)
 
         #Create nodetype file
         input_df = sources_targets[["NODEID"]].copy()

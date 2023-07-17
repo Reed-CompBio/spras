@@ -1,8 +1,10 @@
 # Test wrapper function as a part of the contributor tutorial #
-import pandas as pd
 import warnings
-from src.PRM import PRM
 from pathlib import Path
+
+import pandas as pd
+
+from src.PRM import PRM
 from src.util import prepare_volume, run_container
 
 __all__ = ['LocalNeighborhood']

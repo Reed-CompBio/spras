@@ -1,7 +1,9 @@
-import docker
-from pathlib import Path
-import pytest
 import shutil
+from pathlib import Path
+
+import docker
+import pytest
+
 from src.allpairs import AllPairs
 
 TEST_DIR = 'test/AllPairs/'
