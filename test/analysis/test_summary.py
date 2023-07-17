@@ -1,6 +1,8 @@
-import pandas as pd
-from src.analysis.summary import summarize_networks
 from pathlib import Path
+
+import pandas as pd
+
+from src.analysis.summary import summarize_networks
 
 # Notes:
 # - Column labels are required in the node table
