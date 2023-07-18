@@ -1,6 +1,8 @@
 import shutil
 from pathlib import Path
+
 import pytest
+
 from src.allpairs import AllPairs
 
 TEST_DIR = 'test/AllPairs/'
@@ -53,7 +55,7 @@ class TestAllPairs:
         """
         out_path = Path(OUT_FILE)
         out_path.unlink(missing_ok=True)
-        
+
         AllPairs.run(
             nodetypes=TEST_DIR+'input/correctness-nodetypes.txt',
             network=TEST_DIR+'input/correctness-network.txt',
