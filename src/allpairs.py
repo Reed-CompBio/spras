@@ -17,7 +17,6 @@ class AllPairs(PRM):
         Access fields from the dataset and write the required input files
         @param data: dataset
         @param filename_map: a dict mapping file types in the required_inputs to the filename for that type
-        @return:
         """
         for input_type in AllPairs.required_inputs:
             if input_type not in filename_map:
@@ -52,7 +51,6 @@ class AllPairs(PRM):
         @param nodetypes:  input node types with sources and targets (required)
         @param network:  input network file (required)
         @param output_file: path to the output pathway file (required)
-        @param singularity: currently inactive, implement later?
         """
         if not nodetypes or not network or not output_file:
             raise ValueError('Required AllPairs arguments are missing')
@@ -85,7 +83,7 @@ class AllPairs(PRM):
 
         print('Running AllPairs with arguments: {}'.format(' '.join(command)), flush=True)
 
-        # TODO consider making this a string in the config file instead of a Boolean
+        #TODO: chang the docker image once pushed to readcompbio
         container_framework = 'singularity' if singularity else 'docker'
         out = run_container(container_framework,
                             'annaritz/allpairs',
