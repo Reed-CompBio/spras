@@ -299,7 +299,7 @@ def ensemble_network(dataframe: pd.DataFrame, output_file:str):
     """
     row_means = np.mean(dataframe, axis=1).reset_index()
     row_means.columns = ['Edges', 'Frequency']
-    row_means[['Node1', 'Node2']] = row_means['Edges'].str.split('\|\|\|',expand=True)
+    row_means[['Node1', 'Node2']] = row_means['Edges'].str.split(NODE_SEP,expand=True, regex=False)
     row_means = row_means.drop('Edges', axis=1)
     row_means = row_means[['Node1', 'Node2', 'Frequency']]
     make_required_dirs(output_file)
