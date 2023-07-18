@@ -1,0 +1,4 @@
+#Node1	Node2
+A   B   1
+B   C   1
+C   D   1
