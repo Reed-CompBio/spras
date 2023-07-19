@@ -2,11 +2,21 @@
 Utility functions for pathway reconstruction
 """
 
+import base64
+import hashlib
 import itertools as it
+import json
+import os
+import platform
 import re
+from pathlib import Path, PurePath, PurePosixPath
+from typing import Any, Dict, List, Optional, Tuple, Union
+
+import docker
 import numpy as np  # Required to eval some forms of parameter ranges
-from pathlib import PurePath
-import yaml
+
+# The default length of the truncated hash used to identify parameter combinations
+DEFAULT_HASH_LENGTH = 7
 
 
 def prepare_path_docker(orig_path: PurePath) -> str:
@@ -28,13 +38,238 @@ def prepare_path_docker(orig_path: PurePath) -> str:
     return prepared_path
 
 
+def convert_docker_path(src_path: PurePath, dest_path: PurePath, file_path: Union[str, PurePath]) -> PurePosixPath:
+    """
+    Convert a file_path that is in src_path to be in dest_path instead.
+    For example, convert /usr/mydir and /usr/mydir/myfile and /tmp to /tmp/myfile
+    @param src_path: source path that is a parent of file_path
+    @param dest_path: destination path
+    @param file_path: filename that is under the source path
+    @return: a new path with the filename relative to the destination path
+    """
+    rel_path = file_path.relative_to(src_path)
+    return PurePosixPath(dest_path, rel_path)
+
+
+# TODO consider a better default environment variable
+# Follow docker-py's naming conventions (https://docker-py.readthedocs.io/en/stable/containers.html)
+# Technically the argument is an image, not a container, but we use container here.
+def run_container(framework: str, container: str, command: List[str], volumes: List[Tuple[PurePath, PurePath]], working_dir: str, environment: str = 'SPRAS=True'):
+    """
+    Runs a command in the container using Singularity or Docker
+    @param framework: singularity or docker
+    @param container: name of the DockerHub container without the 'docker://' prefix
+    @param command: command to run in the container
+    @param volumes: a list of volumes to mount where each item is a (source, destination) tuple
+    @param working_dir: the working directory in the container
+    @param environment: environment variables to set in the container
+    @return: output from Singularity execute or Docker run
+    """
+    normalized_framework = framework.casefold()
+    if normalized_framework == 'docker':
+        return run_container_docker(container, command, volumes, working_dir, environment)
+    elif normalized_framework == 'singularity':
+        return run_container_singularity(container, command, volumes, working_dir, environment)
+    else:
+        raise ValueError(f'{framework} is not a recognized container framework. Choose "docker" or "singularity".')
+
+
+# TODO any issue with creating a new client each time inside this function?
+# TODO environment currently a single string (e.g. 'TMPDIR=/OmicsIntegrator1'), should it be a list?
+def run_container_docker(container: str, command: List[str], volumes: List[Tuple[PurePath, PurePath]], working_dir: str, environment: str = 'SPRAS=True'):
+    """
+    Runs a command in the container using Docker.
+    Attempts to automatically correct file owner and group for new files created by the container, setting them to the
+    current owner and group IDs.
+    Does not modify the owner or group for existing files modified by the container.
+    @param container: name of the DockerHub container without the 'docker://' prefix
+    @param command: command to run in the container
+    @param volumes: a list of volumes to mount where each item is a (source, destination) tuple
+    @param working_dir: the working directory in the container
+    @param environment: environment variables to set in the container
+    @return: output from Docker run
+    """
+    out = None
+    try:
+        # Initialize a Docker client using environment variables
+        client = docker.from_env()
+        # Track the contents of the local directories that will be bound so that new files added can have their owner
+        # changed
+        pre_volume_contents = {}
+        src_dest_map = {}
+        for src, dest in volumes:
+            src_path = Path(src)
+            # The same source path can be in volumes more than once if there were multiple input or output files
+            # in the same directory
+            # Only check each unique source path once and track which of the possible destination paths was used
+            if src_path not in pre_volume_contents:
+                # Only list files in the directory, do not walk recursively because it could include
+                # a massive number of files
+                pre_volume_contents[src_path] = set(src_path.iterdir())
+                src_dest_map[src_path] = dest
+
+        bind_paths = [f'{prepare_path_docker(src)}:{dest}' for src, dest in volumes]
+
+        out = client.containers.run(container,
+                                    command,
+                                    stderr=True,
+                                    volumes=bind_paths,
+                                    working_dir=working_dir,
+                                    environment=[environment]).decode('utf-8')
+
+        # TODO does this cleanup need to still run even if there was an error in the above run command?
+        # On Unix, files written by the above Docker run command will be owned by root and cannot be modified
+        # outside the container by a non-root user
+        # Reset the file owner and the group inside the container
+        try:
+            # Only available on Unix
+            uid = os.getuid()
+            gid = os.getgid()
+
+            all_modified_volume_contents = set()
+            for src_path in pre_volume_contents.keys():
+                # Assumes the Docker run call is the only process that modified the contents
+                # Only considers files that were added, not files that were modified
+                post_volume_contents = set(src_path.iterdir())
+                modified_volume_contents = post_volume_contents - pre_volume_contents[src_path]
+                modified_volume_contents = [str(convert_docker_path(src_path, src_dest_map[src_path], p)) for p in
+                                            modified_volume_contents]
+                all_modified_volume_contents.update(modified_volume_contents)
+
+            # This command changes the ownership of output files so we don't
+            # get a permissions error when snakemake or the user try to touch the files
+            # Use --recursive because new directories could have been created inside the container
+            # Do not run the command if no files were modified
+            if len(all_modified_volume_contents) > 0:
+                chown_command = ['chown', f'{uid}:{gid}', '--recursive']
+                chown_command.extend(all_modified_volume_contents)
+                chown_command = ' '.join(chown_command)
+                client.containers.run(container,
+                                    chown_command,
+                                    stderr=True,
+                                    volumes=bind_paths,
+                                    working_dir=working_dir,
+                                    environment=[environment]).decode('utf-8')
+
+        # Raised on non-Unix systems
+        except AttributeError:
+            pass
+
+        # TODO: Not sure whether this is needed or where to close the client
+        client.close()
+
+    except Exception as err:
+        print(err)
+    # Removed the finally block to address bugbear B012
+    # "`return` inside `finally` blocks cause exceptions to be silenced"
+    # finally:
+    return out
+
+
+def run_container_singularity(container: str, command: List[str], volumes: List[Tuple[PurePath, PurePath]], working_dir: str, environment: str = 'SPRAS=True'):
+    """
+    Runs a command in the container using Singularity.
+    Only available on Linux.
+    @param container: name of the DockerHub container without the 'docker://' prefix
+    @param command: command to run in the container
+    @param volumes: a list of volumes to mount where each item is a (source, destination) tuple
+    @param working_dir: the working directory in the container
+    @param environment: environment variables to set in the container
+    @return: output from Singularity execute
+    """
+    # spython is not compatible with Windows
+    if platform.system() != 'Linux':
+        raise NotImplementedError('Singularity support is only available on Linux')
+
+    # See https://stackoverflow.com/questions/3095071/in-python-what-happens-when-you-import-inside-of-a-function
+    from spython.main import Client
+
+    bind_paths = [f'{prepare_path_docker(src)}:{dest}' for src, dest in volumes]
+
+    # TODO is try/finally needed for Singularity?
+    singularity_options = ['--cleanenv', '--containall', '--pwd', working_dir, '--env', environment]
+    # To debug a container add the execute arguments: singularity_options=['--debug'], quiet=False
+    # Adding 'docker://' to the container indicates this is a Docker image Singularity must convert
+    return Client.execute('docker://' + container,
+                          command,
+                          options=singularity_options,
+                          bind=bind_paths)
+
+
+def hash_params_sha1_base32(params_dict: Dict[str, Any], length: Optional[int] = None) -> str:
+    """
+    Hash of a dictionary.
+    Derived from https://www.doc.ic.ac.uk/~nuric/coding/how-to-hash-a-dictionary-in-python.html
+    by Nuri Cingillioglu
+    Adapted to use sha1 instead of MD5 and encode in base32
+    Can be truncated to the desired length
+    @param params_dict: the algorithm parameters dictionary
+    @param length: the length of the returned hash, which is ignored if it is None, < 1, or > the full hash length
+    """
+    params_hash = hashlib.sha1()
+    params_encoded = json.dumps(params_dict, sort_keys=True).encode()
+    params_hash.update(params_encoded)
+    # base32 includes capital letters and the numbers 2-7
+    # https://en.wikipedia.org/wiki/Base32#RFC_4648_Base32_alphabet
+    params_base32 = base64.b32encode(params_hash.digest()).decode('ascii')
+    if length is None or length < 1 or length > len(params_base32):
+        return params_base32
+    else:
+        return params_base32[:length]
+
+
+def hash_filename(filename: str, length: Optional[int] = None) -> str:
+    """
+    Hash of a filename using hash_params_sha1_base32
+    @param filename: filename to hash
+    @param length: the length of the returned hash, which is ignored if it is None, < 1, or > the full hash length
+    @return: hash
+    """
+    return hash_params_sha1_base32({'filename': filename}, length)
+
+
+# Because this is called independently for each file, the same local path can be mounted to multiple volumes
+def prepare_volume(filename: str, volume_base: str) -> Tuple[Tuple[PurePath, PurePath], str]:
+    """
+    Makes a file on the local file system accessible within a container by mapping the local (source) path to a new
+    container (destination) path and renaming the file to be relative to the destination path.
+    The destination path will be a new path relative to the volume_base that includes a hash identifier derived from the
+    original filename.
+    An example mapped filename looks like '/spras/MG4YPNK/oi1-edges.txt'.
+    @param filename: The file on the local file system to map
+    @param volume_base: The base directory in the container, which must be an absolute directory
+    @return: first returned object is a tuple (source path, destination path) and the second returned object is the
+    updated filename relative to the destination path
+    """
+    base_path = PurePosixPath(volume_base)
+    if not base_path.is_absolute():
+        raise ValueError(f'Volume base must be an absolute path: {volume_base}')
+
+    filename_hash = hash_filename(filename, DEFAULT_HASH_LENGTH)
+    dest = PurePosixPath(base_path, filename_hash)
+
+    abs_filename = Path(filename).resolve()
+    container_filename = str(PurePosixPath(dest, abs_filename.name))
+    if abs_filename.is_dir():
+        dest = PurePosixPath(dest, abs_filename.name)
+        src = abs_filename
+    else:
+        parent = abs_filename.parent
+        if parent.as_posix() == '.':
+            parent = Path.cwd()
+        src = parent
+
+    return (src, dest), container_filename
+
+
 def process_config(config):
     """
     Process the dictionary config and return the full yaml structure as well as processed portions
     @param config: configuration loaded by Snakemake, from config file and any command line arguments
     @return: (config, datasets, out_dir, algorithm_params)
     """
-
+    if config == {}:
+        raise ValueError("Config file cannot be empty. Use --configfile <filename> to set a config file.")
     out_dir = config["reconstruction_settings"]["locations"]["reconstruction_dir"]
 
     # Parse dataset information
@@ -45,13 +280,22 @@ def process_config(config):
     # Need to work more on input file naming to make less strict assumptions
     # about the filename structure
     # Currently assumes all datasets have a label and the labels are unique
-    datasets = {dataset["label"]: dataset for dataset in config["datasets"]}
+    # When Snakemake parses the config file it loads the datasets as OrderedDicts not dicts
+    # Convert to dicts to simplify the yaml logging
+    datasets = {dataset["label"]: dict(dataset) for dataset in config["datasets"]}
     config["datasets"] = datasets
 
     # Code snipped from Snakefile that may be useful for assigning default labels
     # dataset_labels = [dataset.get('label', f'dataset{index}') for index, dataset in enumerate(datasets)]
     # Maps from the dataset label to the dataset list index
     # dataset_dict = {dataset.get('label', f'dataset{index}'): index for index, dataset in enumerate(datasets)}
+
+    # Override the default parameter hash length if specified in the config file
+    try:
+        hash_length = int(config["hash_length"])
+    except (ValueError, KeyError):
+        hash_length = DEFAULT_HASH_LENGTH
+    prior_params_hashes = set()
 
     # Parse algorithm information
     # Each algorithm's parameters are provided as a list of dictionaries
@@ -61,83 +305,83 @@ def process_config(config):
     algorithm_params = dict()
     algorithm_directed = dict()
     for alg in config["algorithms"]:
+        cur_params = alg["params"]
+        if "include" in cur_params and cur_params.pop("include"):
+            # This dict maps from parameter combinations hashes to parameter combination dictionaries
+            algorithm_params[alg["name"]] = dict()
+        else:
+            # Do not parse the rest of the parameters for this algorithm if it is not included
+            continue
+
+        if "directed" in cur_params:
+            algorithm_directed[alg["name"]] = cur_params.pop("directed")
+
+        # The algorithm has no named arguments so create a default placeholder
+        if len(cur_params) == 0:
+            cur_params["run1"] = {"spras_placeholder": ["no parameters"]}
+
         # Each set of runs should be 1 level down in the config file
-        for params in alg["params"]:
+        for run_params in cur_params:
             all_runs = []
-            if params == "include":
-                if alg["params"][params]:
-                    # This is trusting that "include" is always first
-                    algorithm_params[alg["name"]] = []
-                    continue
-                else:
-                    break
-            if params == "directed":
-                if alg["params"][params]:
-                    algorithm_directed[alg["name"]] = True
-                else:
-                    algorithm_directed[alg["name"]] = False
-                continue
+
             # We create the product of all param combinations for each run
             param_name_list = []
-            if alg["params"][params]:
-                for p in alg["params"][params]:
+            if cur_params[run_params]:
+                for p in cur_params[run_params]:
                     param_name_list.append(p)
-                    all_runs.append(eval(str(alg["params"][params][p])))
+                    all_runs.append(eval(str(cur_params[run_params][p])))
             run_list_tuples = list(it.product(*all_runs))
             param_name_tuple = tuple(param_name_list)
             for r in run_list_tuples:
                 run_dict = dict(zip(param_name_tuple, r))
-                algorithm_params[alg["name"]].append(run_dict)
+                # TODO temporary workaround for yaml.safe_dump in Snakefile write_parameter_log
+                for param, value in run_dict.copy().items():
+                    if isinstance(value, np.float64):
+                        run_dict[param] = float(value)
+                params_hash = hash_params_sha1_base32(run_dict, hash_length)
+                if params_hash in prior_params_hashes:
+                    raise ValueError(f'Parameter hash collision detected. Increase the hash_length in the config file '
+                                     f'(current length {hash_length}).')
+                algorithm_params[alg["name"]][params_hash] = run_dict
 
-    return config, datasets, out_dir, algorithm_params, algorithm_directed
+    analysis_params = config["analysis"] if "analysis" in config else {}
+    ml_params = analysis_params["ml"] if "ml" in analysis_params else {}
 
-def ensemble_networks(file_list, graph_name):
-    '''
-    Arguments:
-    file_list --> a glob.glob list of subnetwork files returned by spras
-    graph_name --> string, name for the ensemble graph, will be used as the output file name 
-    '''
-    # initialize subnetwork count and edge dict 
-    subnetwork_count = 0
-    ensemble_dict = {}
-   
-    for file in file_list:
-        # increment subnetwork counter
-        subnetwork_count = subnetwork_count + 1
-        with open(file) as f:
-            # read each interaction and add to ensemble dict of interactions
-            for line in f.readlines():
-                row = line.split()
-          
-                ### instead of sorting as in make_edges_undirected, sort the tuple before adding it to the dict
-                edge_tuple = tuple(sorted((row[0], row[1])))
-                # if the edge is already in the dict, add 1 to its count
-                if edge_tuple in ensemble_dict:
-                    ensemble_dict[edge_tuple] = ensemble_dict[edge_tuple] + 1
-                # if the edge is not in the dict, add it and initialize its count to 1
-                else:
-                    ensemble_dict[edge_tuple] = 1 
+    pca_params = {}
+    if "components" in ml_params:
+        pca_params["components"] = ml_params["components"]
+    if "labels" in ml_params:
+        pca_params["labels"] = ml_params["labels"]
 
-    # change count to frequency out of total number of subnetworks
-    for edge_tuple in ensemble_dict:
-        ensemble_dict[edge_tuple] = ensemble_dict[edge_tuple]/subnetwork_count
+    hac_params = {}
+    if "linkage" in ml_params:
+        hac_params["linkage"] = ml_params["linkage"]
+    if "metric" in ml_params:
+        hac_params["metric"] = ml_params ["metric"]
 
-    # create ensemble graph
-    graph = nx.Graph(name = graph_name)
+    return config, datasets, out_dir, algorithm_params, algorithm_directed, pca_params, hac_params
 
-    for edge_tuple in ensemble_dict:
-        protein1 = biomart_ensembl_protein_to_gene(edge_tuple[0])
-        protein2 = biomart_ensembl_protein_to_gene(edge_tuple[1])
-        # create edge with weight
-        graph.add_edge(protein1, protein2, weight = ensemble_dict[edge_tuple])  
-    
-    # edge weights
-    edges = graph.edges()
-    weights = [graph[u][v]['weight'] for u,v in edges]
-    
-    # create a tab-delimited file of the graph
-    edge_list = list(edges)
-    ensemble_df = pd.DataFrame(edge_list, columns = ['Protein1', 'Protein2'])
-    ensemble_df['Frequency'] = weights
-    ensemble_df.to_csv('../processed_datasets/'+graph_name+'.txt', sep = '\t', index=False) 
-        
+def compare_files(file1, file2) -> bool:
+    """
+    Compare files by reading the contents into lists. Only recommended for small files.
+    @param file1: first file to compare
+    @param file2: second file to compare
+    @return: True or False
+    """
+    with open(file1) as f1:
+        contents1 = list(f1)
+
+    with open(file2) as f2:
+        contents2 = list(f2)
+
+    return contents1 == contents2
+
+
+def make_required_dirs(path: str):
+    """
+    Create the directory and parent directories required before an output file can be written to the specified path.
+    Existing directories will not raise an error.
+    @param path: the filename that is to be written
+    """
+    out_path = Path(path).parent
+    out_path.mkdir(parents=True, exist_ok=True)
