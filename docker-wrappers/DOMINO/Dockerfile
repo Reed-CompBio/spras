@@ -2,7 +2,7 @@
 # https://github.com/Shamir-Lab/DOMINO
 FROM python:3.7
 
-RUN pip install domino-python
+RUN pip install domino-python==0.1.1
 
 RUN cd /usr/local/lib/python3.7/site-packages/src/data && \
     wget https://raw.githubusercontent.com/Shamir-Lab/DOMINO/master/src/data/ensg2gene_symbol.txt && \
