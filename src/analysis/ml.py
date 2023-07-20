@@ -288,20 +288,20 @@ def hac_horizontal(dataframe: pd.DataFrame, output_png: str, output_file: str, l
     make_required_dirs(output_png)
     plt.savefig(output_png, bbox_inches="tight", dpi=DPI)
 
-def ensemble_network(dataframe: pd.DataFrame, output_file:str):
+
+def ensemble_network(dataframe: pd.DataFrame, output_file: str):
     """
-    this method will calculate the mean of the binary values in the provided dataframe
-    -  we're counting the number of times an edge appears in a set of pathway reconstruction networks / by the length of the set
-    edges that appear more frequently will have a higher number, thus are more likey to be robust,
-    so this information can be used to include an edge to include in a final network
-    @param datafram: binary dataframe of edge comparison between algorithms from summarize_networks
-    @param output_file: the file name to save the ensemble network
+    Calculates the mean of the binary values in the provided dataframe to create an ensemble pathway.
+    Counts the number of times an edge appears in a set of pathways and divides by the total number of pathways.
+    Edges that appear more frequently across pathways are more likely to be robust,
+    so this information can be used to filter edges in a final network.
+    @param dataframe: binary dataframe of edge presence and absence in each pathway from summarize_networks
+    @param output_file: the filename to save the ensemble network
     """
-    row_means = np.mean(dataframe, axis=1).reset_index()
+    row_means = dataframe.mean(axis=1, numeric_only=True).reset_index()
     row_means.columns = ['Edges', 'Frequency']
-    row_means[['Node1', 'Node2']] = row_means['Edges'].str.split(NODE_SEP,expand=True, regex=False)
+    row_means[['Node1', 'Node2']] = row_means['Edges'].str.split(NODE_SEP, expand=True, regex=False)
     row_means = row_means.drop('Edges', axis=1)
     row_means = row_means[['Node1', 'Node2', 'Frequency']]
     make_required_dirs(output_file)
     row_means.to_csv(output_file, sep='\t', index=False, header=False)
-
