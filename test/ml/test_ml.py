@@ -28,10 +28,10 @@ class TestML:
     def test_pca(self):
         dataframe = ml.summarize_networks([INPUT_DIR + 'test-data-s1/s1.txt', INPUT_DIR + 'test-data-s2/s2.txt', INPUT_DIR + 'test-data-s3/s3.txt'])
         ml.pca(dataframe, OUT_DIR + 'pca.png', OUT_DIR + 'pca-variance.txt',
-               OUT_DIR + 'pca-coordinates.csv')
-        coord = pd.read_table(OUT_DIR + 'pca-coordinates.csv')
+               OUT_DIR + 'pca-coordinates.tsv')
+        coord = pd.read_table(OUT_DIR + 'pca-coordinates.tsv')
         coord = coord.round(5)  # round values to 5 digits to account for numeric differences across machines
-        expected = pd.read_table(EXPECT_DIR + 'expected-pca-coordinates.csv')
+        expected = pd.read_table(EXPECT_DIR + 'expected-pca-coordinates.tsv')
         expected = expected.round(5)
 
         assert coord.equals(expected)
@@ -48,3 +48,13 @@ class TestML:
 
         assert filecmp.cmp(OUT_DIR + 'hac-clusters-vertical.txt', EXPECT_DIR + 'expected-hac-vertical-clusters.txt')
 
+    def test_ensemble_network(self):
+        dataframe = ml.summarize_networks([INPUT_DIR + 'test-data-s1/s1.txt', INPUT_DIR + 'test-data-s2/s2.txt', INPUT_DIR + 'test-data-s3/s3.txt'])
+        ml.ensemble_network(dataframe, OUT_DIR + 'ensemble-network.tsv')
+
+        en = pd.read_table(OUT_DIR + 'ensemble-network.tsv')
+        en = en.round(5)  # round values to 5 digits to account for numeric differences across machines
+        expected = pd.read_table(EXPECT_DIR + 'expected-ensemble-network.tsv')
+        expected = expected.round(5)
+
+        assert en.equals(expected)
