@@ -2,7 +2,6 @@ from src.prm import PRM
 from pathlib import Path
 from src.util import prepare_volume, run_container
 
-import subprocess
 import json
 import pandas as pd
 
@@ -40,10 +39,10 @@ class DOMINO(PRM):
 
 
     @staticmethod
-    def run(network=None, active_genes=None, output_folder=None, use_cache=true, slices_threshold=None, module_threshold=None, singularity=false):
+    def run(network=None, active_genes=None, output_folder=None, use_cache=True, slices_threshold=None, module_threshold=None, singularity=False):
         """
         Run DOMINO with Docker
-        Let visualization always true, parallelization always 1
+        Let visualization be always true, parallelization be always 1 thread
         @param network:  input network file (required)
         @param active_genes:  input active genes (required)
         @param output_folder: path to the output pathway file (required)
@@ -59,7 +58,7 @@ class DOMINO(PRM):
 
         work_dir = '/spras'
 
-        # Each volume is a tuple (src, dest)
+        # Each volume is a tuple (source, destination)
         volumes = list()
 
         bind_path, network_file = prepare_volume(network, work_dir)
@@ -73,10 +72,9 @@ class DOMINO(PRM):
 
         ########
 
-        bind_path, mapped_slices_file = prepare_volume(str(output_folder), work_dir)
-        volumes.append(bind_path)
+        mapped_slices_file = mapped_output_folder + '/slices.txt'
 
-        # Make the slicer command to run within in the container
+        # Make the slicer command to run within the container
         slicer_command = ['slicer',
             '--network_file', network_file,
             '--output_file', mapped_slices_file]
@@ -92,22 +90,22 @@ class DOMINO(PRM):
         ########
 
 
-        # Makes the Python command to run within in the container
+        # Make the Python command to run within the container
         command = ['domino',
                    '--active_genes_files', node_file,
                    '--network_file', network_file,
-                   '--slices_file', slices_file,
-                   '--output_folder', mapped_output_folder
-                   '--parallelization, '1'
+                   '--slices_file', mapped_slices_file,
+                   '--output_folder', mapped_output_folder,
+                   '--parallelization', '1',
                    '--visualization', 'true']
 
         # Add optional arguments
-        if use_cache is not true:
-            command.extend(['-c', false])
+        if use_cache is not True:
+            command.extend(['-c', 'false'])
         if slices_threshold is not None:
             command.extend(['-sth', str(slices_threshold)])
         if module_threshold is not None:
-            command.extend(['-mth', str(slices_threshold)])
+            command.extend(['-mth', str(module_threshold)])
 
         print('Running DOMINO with arguments: {}'.format(' '.join(command)), flush=True)
 
@@ -119,9 +117,17 @@ class DOMINO(PRM):
                             work_dir)
         print(out)
 
-        # delete modules.out
-        # shutil library
-        # append one html to end of another (argu)
+        # remove output_folder/modules.out
+        file_to_rem = Path(output_folder + "/modules.out")
+        file_to_rem.unlink()
+
+        # concatenate each module html file into one big file
+        htmlfiles = Path(next(output_folder.glob('module_*.html')))
+        with open("bigfile.txt", "w") as fo:
+            for tempfile in htmlfiles:
+                with open(tempfile,'r') as fi: fo.write(fi.read())
+
+        # put bigfile.txt in output_folder?
 
 
     @staticmethod
@@ -131,38 +137,27 @@ class DOMINO(PRM):
         @param raw_pathway_file: pathway file produced by an algorithm's run function
         @param standardized_pathway_file: the same pathway written in the universal format
         """
-        # edges dataframe
-        # read html file
+        edges = pd.DataFrame()
+
         with open(raw_pathway_file, 'r') as file:
-            html = file.read()
-            # for loop over lines of the file
-                # if line starts with '      let data'
-                     
+            for line in file:
+                if line.strip().startswith("let data = ["):
+                    line2 = line.replace('let data = ', '')
+                    line3 = line2.replace(';', '')
 
-        # Find the starting index of the line
-        start_index = html.find('let data = [')
-        # Find the ending index of the line
-        end_index = html.find('];', start_index) + 1 # '+ 1' omits the semicolon
+                    data = json.loads(line3)
 
-        # Extract the line as a string
-        line = html[start_index:end_index]
-        # remove beginning of the line to leave the json formatted string
-        line2 = line.replace('let data = ', '')
+                    entries = []
+                    for entry in data:
+                        tmp = entry['data']
+                        entries.append(tmp)
 
-        data = json.loads(line2)
+                    df = pd.DataFrame(entries)
+                    newdf = df.loc[:,['source', 'target']].dropna()
 
-        entries = []
-        for entry in data:
-            tmp = entry['data']
-            entries.append(tmp)
+                    edges = pd.concat([edges, newdf], axis=0)
 
-        df = pd.DataFrame(entries)
-        newDf = df.loc[:,['source', 'target']].dropna()
-        
-        # concatenate modules dataframe to bottom of outerloop data frame
-        
+        edges['rank'] = 1 # adds in a rank column of 1s because the edges are not ranked
 
-        newDf['rank'] = 1 # adds in a rank column of 1s because the edges are not ranked
-
-        newDf.to_csv(standardized_pathway_file, header=False, index=False)
+        edges.to_csv(standardized_pathway_file, header=False, index=False)
 
