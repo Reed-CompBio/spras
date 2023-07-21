@@ -1,4 +1,0 @@
-node	prize
-E	1
-F	1
-G	1
