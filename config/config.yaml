@@ -37,6 +37,11 @@
           params:
                 include : true
                 directed : true
+                run1:
+                    single_source: [1, 0]
+                    df: [0.85, 0.75]
+                    threshold: [0.01, 0.05]
+                    w : [0.02, 0.05]
 
         - name: "tiedie"
           params:

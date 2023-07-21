@@ -10,7 +10,7 @@ __all__ = ['RWR']
 
 class RWR(PRM):
     # we need edges (weighted), source set (with prizes), and target set (with prizes).
-    required_inputs = ['edges', 'sources', 'targets']
+    required_inputs = ['edges', 'prizes']
 
     @staticmethod
     def generate_inputs(data, filename_map):
@@ -24,22 +24,28 @@ class RWR(PRM):
             if input_type not in filename_map:
                 raise ValueError(f"{input_type} filename is missing")
 
-        # will take the sources and write them to files, and repeats with targets
-        for node_type in ['sources', 'targets']:
-            nodes = data.request_node_columns([node_type])
-            # check if the nodes have prizes or not
-            if data.contains_node_columns('prize'):
-                node_df = data.request_node_columns(['prize'])
-                nodes = pd.merge(nodes, node_df, on='NODEID')
-                # creates with the node type without headers
-                nodes.to_csv(filename_map[node_type], index=False, sep= "\t", columns=['NODEID', 'prize'])
-            else:
-                #If there aren't prizes but are sources and targets, make prizes based on them
-                nodes = data.request_node_columns([node_type])
-                # make all nodes have a prize of 1
-                nodes['prize'] = 1.0
-                # creates with the node type without headers
-                nodes.to_csv(filename_map[node_type], index=False, sep= "\t", columns=['NODEID', 'prize'])
+        sources_targets = data.request_node_columns(["sources", "targets"])
+        if sources_targets is None:
+            return False
+        both_series = sources_targets.sources & sources_targets.targets
+        for _index,row in sources_targets[both_series].iterrows():
+            warn_msg = row.NODEID+" has been labeled as both a source and a target."
+            # Only use stacklevel 1 because this is due to the data not the code context
+            warnings.warn(warn_msg, stacklevel=1)
+
+        #Create nodetype file
+        input_df = sources_targets[["NODEID"]].copy()
+        input_df.loc[sources_targets["sources"] == True,"Node type"]="source"
+        input_df.loc[sources_targets["targets"] == True,"Node type"]="target"
+
+        if data.contains_node_columns('prize'):
+            node_df = data.request_node_columns(['prize'])
+            input_df = pd.merge(input_df, node_df, on='NODEID')
+        elif data.contains_node_columns(['sources','targets']):
+            #If there aren't prizes but are sources and targets, make prizes based on them
+            input_df['prize'] = 1.0
+        print(input_df)
+        input_df.to_csv(filename_map["prizes"],sep="\t",index=False,columns=["NODEID", "prize", "Node type"])
 
         # create the network of edges
         edges = data.get_interactome()
@@ -50,7 +56,7 @@ class RWR(PRM):
 
     # Skips parameter validation step
     @staticmethod
-    def run(edges=None, sources=None, targets = None, output_file = None, df : float = 0.85, w : float = 0.00, f : str = 'min' , threshold : float = 0.0001, singularity=False):
+    def run(edges=None, prizes = None, output_file = None, single_source : str = '1', df : float = 0.85, w : float = 0.00, f : str = 'min' , threshold : float = 0.0001, singularity=False):
         """
         Run RandomWalk with Docker
         @param nodetypes:  input node types with sources and targets (required)
@@ -63,7 +69,7 @@ class RWR(PRM):
         @param singularity: if True, run using the Singularity container instead of the Docker container
         """
 
-        if not edges or not sources or not targets or not output_file:
+        if not edges or not prizes or not output_file:
             raise ValueError('Required RWR arguments are missing')
 
         work_dir = '/spras'
@@ -74,10 +80,7 @@ class RWR(PRM):
         bind_path, edges_file = prepare_volume(edges, work_dir)
         volumes.append(bind_path)
 
-        bind_path, sources_file = prepare_volume(sources, work_dir)
-        volumes.append(bind_path)
-
-        bind_path, targets_file = prepare_volume(targets, work_dir)
+        bind_path, prizes_file = prepare_volume(prizes, work_dir)
         volumes.append(bind_path)
 
 
@@ -93,8 +96,8 @@ class RWR(PRM):
         command = ['python',
                    '/RWR/random_walk.py',
                    '--edges_file', edges_file,
-                   '--sources_file', sources_file,
-                   '--targets_file', targets_file,
+                   '--prizes_file', prizes_file,
+                   '--single_source', str(single_source),
                    '--damping_factor', str(df),
                    '--selection_function', f,
                    '--w', str(w),
@@ -134,7 +137,6 @@ class RWR(PRM):
         df_edge = df.loc[df["Type"] == 1]
 
         # get rid of the placeholder column and output it to a file
-        df_edge = df_edge.drop(columns=['Placeholder'])
         df_edge = df_edge.drop(columns=['Type'])
         df_edge.to_csv(edge_output_file, sep="\t", index=False, header=True)
 
@@ -142,13 +144,14 @@ class RWR(PRM):
         df_node = df.loc[df['Type'] == 2]
         # rename the header to Node, Pr, R_Pr, Final_Pr
         df_node = df_node.drop(columns=['Type'])
-        df_node = df_node.rename(columns={'Node1': 'Node', 'Node2': 'Pr', 'Weight': 'R_Pr', 'Placeholder': 'Final_Pr'})
+        df_node = df_node.rename(columns={'Node1': 'Node', 'Node2': 'Pr', 'Edge Flux': 'R_Pr', 'Weight': 'Final_Pr', 'InNetwork' : 'InNetwork'})
         df_node.to_csv(node_output_file, sep="\t", index=False, header=True)
 
         df_pathway = df.loc[df['Type'] == 3]
-        df_pathway = df_pathway.drop(columns=['Placeholder'])
+        df_pathway = df_pathway.drop(columns=['InNetwork'])
         df_pathway = df_pathway.drop(columns=['Type'])
         df_pathway = df_pathway.drop(columns=['Weight'])
+        df_pathway = df_pathway.drop(columns=['Edge Flux'])
         # add a colum of 1 to represent the rank
         df_pathway = add_rank_column(df_pathway)
         df_pathway.to_csv(pathway_output_file, sep="\t", index=False, header=False)

@@ -133,7 +133,7 @@ jobs:
       with:
         path: docker-wrappers/RWR/.
         dockerfile: docker-wrappers/RWR/Dockerfile
-        repository: reedcompbio/random-walk-with-restart:latest
+        repository: reedcompbio/random-walk-with-restart
         tags: latest
         cache_froms: reedcompbio/random-walk-with-restart:latest
         push: false
