@@ -3,6 +3,7 @@ from pathlib import Path
 from src.util import prepare_volume, run_container
 
 import json
+import shutil
 import pandas as pd
 
 __all__ = ['DOMINO']
@@ -39,13 +40,13 @@ class DOMINO(PRM):
 
 
     @staticmethod
-    def run(network=None, active_genes=None, output_folder=None, use_cache=True, slices_threshold=None, module_threshold=None, singularity=False):
+    def run(network=None, active_genes=None, output_file=None, use_cache=True, slices_threshold=None, module_threshold=None, singularity=False):
         """
         Run DOMINO with Docker
         Let visualization be always true, parallelization be always 1 thread
         @param network:  input network file (required)
         @param active_genes:  input active genes (required)
-        @param output_folder: path to the output pathway file (required)
+        @param output_file: path to the output pathway file (required)
         @param use_cache: if True, use auto-generated cache network files (*.pkl) from previous executions with the same network (optional)
         @param slices_threshold: the threshold for considering a slice as relevant (optional)
         @param module_threshold: the threshold for considering a putative module as final module (optional)
@@ -53,7 +54,7 @@ class DOMINO(PRM):
         """
         # Assuming defaults are: use_cache=true
 
-        if not network or not active_genes or not output_folder:
+        if not network or not active_genes or not output_file:
             raise ValueError('Required DOMINO arguments are missing')
 
         work_dir = '/spras'
@@ -67,17 +68,21 @@ class DOMINO(PRM):
         bind_path, node_file = prepare_volume(active_genes, work_dir)
         volumes.append(bind_path)
 
-        bind_path, mapped_output_folder = prepare_volume(str(output_folder), work_dir)
+        # Use its --output_folder argument to set the output file prefix to specify an absolute path and prefix
+        out_dir = Path(output_file).parent
+        out_dir.mkdir(parents=True, exist_ok=True)
+        bind_path, mapped_out_dir = prepare_volume(str(out_dir), work_dir)
         volumes.append(bind_path)
 
         ########
 
-        mapped_slices_file = mapped_output_folder + '/slices.txt'
+        bind_path, mapped_slices_dir = prepare_volume('slices_dir', work_dir)
+        volumes.append(bind_path)
+        slices_file = mapped_slices_dir + '/slices.txt'
 
-        # Make the slicer command to run within the container
         slicer_command = ['slicer',
             '--network_file', network_file,
-            '--output_file', mapped_slices_file]
+            '--output_file', slices_file]
 
         container_framework = 'singularity' if singularity else 'docker'
         slicer_out = run_container(container_framework,
@@ -87,6 +92,7 @@ class DOMINO(PRM):
                             work_dir)
         print(slicer_out)
 
+
         ########
 
 
@@ -94,8 +100,8 @@ class DOMINO(PRM):
         command = ['domino',
                    '--active_genes_files', node_file,
                    '--network_file', network_file,
-                   '--slices_file', mapped_slices_file,
-                   '--output_folder', mapped_output_folder,
+                   '--slices_file', slices_file,
+                   '--output_folder', mapped_out_dir,
                    '--parallelization', '1',
                    '--visualization', 'true']
 
@@ -117,17 +123,22 @@ class DOMINO(PRM):
                             work_dir)
         print(out)
 
-        # remove output_folder/modules.out
-        file_to_rem = Path(output_folder + "/modules.out")
-        file_to_rem.unlink()
+
+        ########
+
+        slices_file.unlink(missing_ok=True)
+        for domino_output in out_dir.glob('modules.out'):
+            domino_output.unlink(missing_ok=True)
 
         # concatenate each module html file into one big file
-        htmlfiles = Path(next(output_folder.glob('module_*.html')))
-        with open("bigfile.txt", "w") as fo:
-            for tempfile in htmlfiles:
-                with open(tempfile,'r') as fi: fo.write(fi.read())
+        bigfile = "bigfile.txt"
 
-        # put bigfile.txt in output_folder?
+        with open(bigfile, "w") as fo:
+            for tempfile in out_dir.glob('module_*.html'):
+                with open(tempfile,'r') as fi: fo.write(fi.read())
+                Path(tempfile).unlink(missing_ok=True)
+
+        shutil.move(bigfile, output_file)
 
 
     @staticmethod
