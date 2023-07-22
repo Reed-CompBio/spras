@@ -1,0 +1,4 @@
+algorithm	labels
+test-data-s1	2
+test-data-s2	1
+test-data-s3	0

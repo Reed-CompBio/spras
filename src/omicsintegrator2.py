@@ -1,9 +1,11 @@
-from src.prm import PRM
-import docker
-from pathlib import Path
-from src.util import prepare_path_docker
 import os
+from pathlib import Path
+
+import docker
 import pandas as pd
+
+from src.prm import PRM
+from src.util import prepare_path_docker
 
 __all__ = ['OmicsIntegrator2']
 
@@ -117,7 +119,7 @@ class OmicsIntegrator2(PRM):
                 #This command changes the ownership of output files so we don't
                 # get a permissions error when snakemake tries to touch the files
                 chown_command = " ".join(["chown",str(uid),out_dir.as_posix()+"/oi2*"])
-                out_chown = client.containers.run('reedcompbio/omics-integrator-2',
+                client.containers.run('reedcompbio/omics-integrator-2',
                                             chown_command,
                                             stderr=True,
                                             volumes={prepare_path_docker(work_dir): {'bind': '/OmicsIntegrator2', 'mode': 'rw'}},
@@ -149,7 +151,7 @@ class OmicsIntegrator2(PRM):
         # Omicsintegrator2 returns a single line file if no network is found
         num_lines = sum(1 for line in open(raw_pathway_file))
         if num_lines < 2:
-            with open(standardized_pathway_file, 'w') as emptyFile:
+            with open(standardized_pathway_file, 'w'):
                 pass
             return
         df = pd.read_csv(raw_pathway_file, sep='\t')

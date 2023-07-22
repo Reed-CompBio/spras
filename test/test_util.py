@@ -1,6 +1,13 @@
-import pytest
 from pathlib import PurePosixPath, PureWindowsPath
-from src.util import convert_docker_path, prepare_path_docker, prepare_volume, hash_params_sha1_base32
+
+import pytest
+
+from src.util import (
+    convert_docker_path,
+    hash_params_sha1_base32,
+    prepare_path_docker,
+    prepare_volume,
+)
 
 
 class TestUtil:

@@ -126,3 +126,17 @@ jobs:
         tags: latest
         cache_froms: reedcompbio/mincostflow:latest
         push: false
+
+  # Run pre-commit checks on source files
+  pre-commit:
+    name: Run pre-commit checks
+    runs-on: ubuntu-latest
+    steps:
+    - name: Checkout repository
+      uses: actions/checkout@v3
+    - name: Setup Python
+      uses: actions/setup-python@v4
+      with:
+        python-version: '3.8' # Match this to the version specified in environment.yml
+    - name: Run pre-commit checks
+      uses: pre-commit/action@v3.0.0
