@@ -20,7 +20,6 @@ class TestRWR:
         out_path.unlink(missing_ok=True)
         # Only include required arguments
         RWR.run(edges=TEST_DIR + 'input/' + '/edges.txt',
-                        single_source='1',
                         prizes=TEST_DIR + 'input/' + '/prizes.txt',
                         output_file=OUT_FILES_1)
         assert out_path.exists()
@@ -29,12 +28,11 @@ class TestRWR:
         out_path = Path(OUT_FILES_2)
         out_path.unlink(missing_ok=True)
         RWR.run(edges=TEST_DIR + 'input/' + '/edges1.txt',
-                        single_source='1',
                         prizes=TEST_DIR + 'input/' + '/prizes1.txt',
                         output_file=OUT_FILES_2)
         assert out_path.exists()
 
-    def test_rwr_alternative_graph(self):
+    def test_rwr_optional(self):
         out_path = Path(OUT_FILES_2)
         out_path.unlink(missing_ok=True)
         RWR.run(edges=TEST_DIR + 'input/' + '/edges1.txt',
@@ -64,8 +62,8 @@ class TestRWR:
         # Test the expected error is raised when required arguments are missing
         with pytest.raises(ValueError):
             # No edges file
-            RWR.run(single_source='1',
-                            output_file=OUT_FILES_1)
+            RWR.run(edges=TEST_DIR + 'input/' + '/edges1.txt',
+                        output_file=OUT_FILES_2)
 
     @pytest.mark.skipif(not shutil.which('singularity'), reason='Singularity not found on system')
     def test_rwr_singularity(self):

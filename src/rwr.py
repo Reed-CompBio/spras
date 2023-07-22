@@ -26,25 +26,31 @@ class RWR(PRM):
 
         sources_targets = data.request_node_columns(["sources", "targets"])
         if sources_targets is None:
-            return False
-        both_series = sources_targets.sources & sources_targets.targets
-        for _index,row in sources_targets[both_series].iterrows():
-            warn_msg = row.NODEID+" has been labeled as both a source and a target."
-            # Only use stacklevel 1 because this is due to the data not the code context
-            warnings.warn(warn_msg, stacklevel=1)
+            if data.contains_node_columns('prize'):
+                sources_targets = data.request_node_columns(['prize'])
+                input_df = sources_targets[["NODEID"]].copy()
+                input_df["Node type"] = "source"
+            else:
+                raise ValueError("No sources, targets, or prizes found in dataset")
+        else:
+            both_series = sources_targets.sources & sources_targets.targets
+            for _index,row in sources_targets[both_series].iterrows():
+                warn_msg = row.NODEID+" has been labeled as both a source and a target."
+                # Only use stacklevel 1 because this is due to the data not the code context
+                warnings.warn(warn_msg, stacklevel=1)
 
-        #Create nodetype file
-        input_df = sources_targets[["NODEID"]].copy()
-        input_df.loc[sources_targets["sources"] == True,"Node type"]="source"
-        input_df.loc[sources_targets["targets"] == True,"Node type"]="target"
+            #Create nodetype file
+            input_df = sources_targets[["NODEID"]].copy()
+            input_df.loc[sources_targets["sources"] == True,"Node type"]="source"
+            input_df.loc[sources_targets["targets"] == True,"Node type"]="target"
 
-        if data.contains_node_columns('prize'):
-            node_df = data.request_node_columns(['prize'])
-            input_df = pd.merge(input_df, node_df, on='NODEID')
-        elif data.contains_node_columns(['sources','targets']):
-            #If there aren't prizes but are sources and targets, make prizes based on them
-            input_df['prize'] = 1.0
-        print(input_df)
+            if data.contains_node_columns('prize'):
+                node_df = data.request_node_columns(['prize'])
+                input_df = pd.merge(input_df, node_df, on='NODEID')
+            else:
+                #If there aren't prizes but are sources and targets, make prizes based on them
+                input_df['prize'] = 1.0
+
         input_df.to_csv(filename_map["prizes"],sep="\t",index=False,columns=["NODEID", "prize", "Node type"])
 
         # create the network of edges
@@ -56,13 +62,14 @@ class RWR(PRM):
 
     # Skips parameter validation step
     @staticmethod
-    def run(edges=None, prizes = None, output_file = None, single_source : str = '1', df : float = 0.85, w : float = 0.00, f : str = 'min' , threshold : float = 0.0001, singularity=False):
+    def run(edges=None, prizes = None, output_file = None, single_source = None, df = None, w = None, f = None, threshold = None, singularity = False):
         """
         Run RandomWalk with Docker
-        @param nodetypes:  input node types with sources and targets (required)
-        @param network:  input network file (required)
+        @param edges:  input network file (required)
+        @param prizes:  input node prizes with sources and targets (required)
         @param output_file: path to the output pathway file (required)
         @param df: damping factor for restarting (default 0.85) (optional)
+        @param single_source: 1 for single source, 0 for source-target (default 1) (optional)
         @param w: lower bound to filter the edges based on the edge confidence (default 0.00) (optional)
         @param f: selection function (default 'min') (optional)
         @param threshold: threshold for constructing the final pathway (default 0.0001) (optional)
@@ -97,12 +104,18 @@ class RWR(PRM):
                    '/RWR/random_walk.py',
                    '--edges_file', edges_file,
                    '--prizes_file', prizes_file,
-                   '--single_source', str(single_source),
-                   '--damping_factor', str(df),
-                   '--selection_function', f,
-                   '--w', str(w),
-                   '--threshold', str(threshold),
                    '--output_file', mapped_out_prefix]
+
+        if single_source is not None:
+            command.extend(['--single_source', str(single_source)])
+        if df is not None:
+            command.extend(['--damping_factor', str(df)])
+        if f is not None:
+            command.extend(['--selection_function', str(f)])
+        if w is not None:
+            command.extend(['--w', str(w)])
+        if threshold is not None:
+            command.extend(['--threshold', str(threshold)])
 
         print('Running RWR with arguments: {}'.format(' '.join(command)), flush=True)
 
