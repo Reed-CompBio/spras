@@ -76,13 +76,15 @@ class DOMINO(PRM):
 
         ########
 
-        bind_path, mapped_slices_dir = prepare_volume('slices_dir', work_dir)
+        bind_path, mapped_slices_dir = prepare_volume('slices.txt', work_dir)
         volumes.append(bind_path)
-        slices_file = mapped_slices_dir + '/slices.txt'
+        # /spras/ADFJGFD/slices.txt
 
         slicer_command = ['slicer',
             '--network_file', network_file,
-            '--output_file', slices_file]
+            '--output_file', mapped_slices_dir]
+
+        print('Running slicer with arguments: {}'.format(' '.join(slicer_command)), flush=True)
 
         container_framework = 'singularity' if singularity else 'docker'
         slicer_out = run_container(container_framework,
@@ -90,8 +92,6 @@ class DOMINO(PRM):
                             slicer_command,
                             volumes,
                             work_dir)
-        print(slicer_out)
-
 
         ########
 
@@ -100,7 +100,7 @@ class DOMINO(PRM):
         command = ['domino',
                    '--active_genes_files', node_file,
                    '--network_file', network_file,
-                   '--slices_file', slices_file,
+                   '--slices_file', mapped_slices_dir,
                    '--output_folder', mapped_out_dir,
                    '--parallelization', '1',
                    '--visualization', 'true']
@@ -126,18 +126,19 @@ class DOMINO(PRM):
 
         ########
 
-        slices_file.unlink(missing_ok=True)
-        for domino_output in out_dir.glob('modules.out'):
-            domino_output.unlink(missing_ok=True)
+        Path(mapped_slices_dir).unlink(missing_ok=True)
+        Path(out_dir, 'modules.out').unlink(missing_ok=True)
+        #for domino_output in out_dir.glob('modules.out'):
+        #    domino_output.unlink(missing_ok=True)
 
         # concatenate each module html file into one big file
-        bigfile = "bigfile.txt"
-
         with open(bigfile, "w") as fo:
-            for tempfile in out_dir.glob('module_*.html'):
-                with open(tempfile,'r') as fi: fo.write(fi.read())
-                Path(tempfile).unlink(missing_ok=True)
+            for html_file in out_dir.glob('module_*.html'):
+                with open(html_file,'r') as fi:
+                    fo.write(fi.read())
+                Path(html_file).unlink(missing_ok=True)
 
+        Path(out_dir, bigfile)
         shutil.move(bigfile, output_file)
 
 
