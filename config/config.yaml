@@ -62,7 +62,7 @@
                     max_path_length: [3]
                     local_search: ["Yes"]
                     rand_restarts: [10]
-      
+
         - name: "mincostflow"
           params:
                 include: true
@@ -70,7 +70,7 @@
                 run1:
                     flow: [1] # The flow must be an int
                     capacity: [1]
-                    
+
 
  # Here we specify which pathways to run and other file location information.
  # DataLoader.py can currently only load a single dataset
@@ -118,3 +118,12 @@
         # Machine learning analysis (e.g. clustering) of the pathway output files for each dataset
         ml:
           include: true
+          # specify how many principal components to calculate
+          components: 2
+          # boolean to show the labels on the pca graph
+          labels: true
+          # 'ward', 'complete', 'average', 'single'
+          # if linkage: ward, must use metric: euclidean
+          linkage: 'ward'
+          # 'euclidean', 'manhattan', 'cosine'
+          metric: 'euclidean'
