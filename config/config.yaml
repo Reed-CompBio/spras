@@ -54,6 +54,7 @@
                 run2:
                     b: [2]
                     g: [3]
+
         - name: "meo"
           params:
                 include: true
@@ -71,6 +72,14 @@
                     flow: [1] # The flow must be an int
                     capacity: [1]
 
+        - name: "domino"
+          params:
+                include: true
+                directed: false
+                run1:
+                    use_cache: ["true"]
+                    slices_threshold: [0.3]
+                    modules_threshold: [0.05]
 
  # Here we specify which pathways to run and other file location information.
  # DataLoader.py can currently only load a single dataset
