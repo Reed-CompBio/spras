@@ -133,14 +133,11 @@ class DOMINO(PRM):
         #    domino_output.unlink(missing_ok=True)
 
         # concatenate each module html file into one big file
-        with open(bigfile, "w") as fo:
+        with open(output_file, "w") as fo:
             for html_file in out_dir.glob('module_*.html'):
                 with open(html_file,'r') as fi:
                     fo.write(fi.read())
                 Path(html_file).unlink(missing_ok=True)
-
-        Path(out_dir, bigfile)
-        shutil.move(bigfile, output_file)
 
 
     @staticmethod
