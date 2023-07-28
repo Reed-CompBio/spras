@@ -104,11 +104,12 @@ class DOMINO(PRM):
         print('Running slicer with arguments: {}'.format(' '.join(slicer_command)), flush=True)
 
         container_framework = 'singularity' if singularity else 'docker'
-        run_container(container_framework,
+        slicer_out = run_container(container_framework,
                             'otjohnson/domino',
                             slicer_command,
                             volumes,
                             work_dir)
+        print(slicer_out)
 
         ########
 
@@ -132,12 +133,12 @@ class DOMINO(PRM):
         print('Running DOMINO with arguments: {}'.format(' '.join(command)), flush=True)
 
         # container_framework = 'singularity' if singularity else 'docker'
-        run_container(container_framework,
+        domino_out = run_container(container_framework,
                             'otjohnson/domino',
                             command,
                             volumes,
                             work_dir)
-        #print(out)
+        print(domino_out)
 
         ########
 
