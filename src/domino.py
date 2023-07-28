@@ -147,7 +147,7 @@ class DOMINO(PRM):
         #for domino_output in out_dir.glob('modules.out'):
         #    domino_output.unlink(missing_ok=True)
 
-        # domino creates a new folder in out_dir to output its modules files into
+        # domino creates a new folder in out_dir to output its modules files into /active_genes
         out_modules_dir = Path(out_dir, 'active_genes')
 
         # concatenate each module html file into one big file
@@ -156,11 +156,6 @@ class DOMINO(PRM):
                 with open(html_file,'r') as fi:
                     fo.write(fi.read())
                 # Path(html_file).unlink(missing_ok=True)
-
-
-
-
-
 
 
     @staticmethod
@@ -172,8 +167,6 @@ class DOMINO(PRM):
         """
         edges = pd.DataFrame()
 
-        print("##############")
-        print("rawpathways:", raw_pathway_file)
         with open(raw_pathway_file, 'r') as file:
             for line in file:
                 if line.strip().startswith("let data = ["):
@@ -186,15 +179,11 @@ class DOMINO(PRM):
                     for entry in data:
                         tmp = entry['data']
                         entries.append(tmp)
-                        print("tmp:", tmp)
 
                     df = pd.DataFrame(entries)
-                    print("df:", df)
                     newdf = df.loc[:,['source', 'target']].dropna()
-                    print("newdf:", newdf)
 
                     edges = pd.concat([edges, newdf], axis=0)
-        print("edges:", edges)
 
         edges['rank'] = 1 # adds in a rank column of 1s because the edges are not ranked
 
@@ -202,7 +191,7 @@ class DOMINO(PRM):
         edges['source'] = edges['source'].apply(post_domino_id_transform)
         edges['target'] = edges['target'].apply(post_domino_id_transform)
 
-        edges.to_csv(standardized_pathway_file, header=False, index=False)
+        edges.to_csv(standardized_pathway_file, sep='\t',header=False, index=False)
 
 
 def pre_domino_id_transform(node_id):
@@ -211,7 +200,7 @@ def pre_domino_id_transform(node_id):
     @param node_id: the node id to transformed
     """
     node_id = node_id.replace('.', PERIOD_SUB)
-    return ID_PREFIX + node_id + ID_SUFFIX
+    return ID_PREFIX + node_id #+ ID_SUFFIX
 
 
 def post_domino_id_transform(node_id):
@@ -219,7 +208,7 @@ def post_domino_id_transform(node_id):
     Remove prefix and suffix, replace PERIOD_SUB with .
     @param node_id: the node id to transformed
     """
-    node_id = node_id.str[5:-1]
-    node_id = node_id.str.replace(PERIOD_SUB, '.')
+    node_id = node_id[5:-3]
+    node_id = node_id.replace(PERIOD_SUB, '.')
     return node_id
 
