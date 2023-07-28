@@ -104,7 +104,7 @@ class DOMINO(PRM):
         print('Running slicer with arguments: {}'.format(' '.join(slicer_command)), flush=True)
 
         container_framework = 'singularity' if singularity else 'docker'
-        slicer_out = run_container(container_framework,
+        run_container(container_framework,
                             'otjohnson/domino',
                             slicer_command,
                             volumes,
@@ -132,7 +132,7 @@ class DOMINO(PRM):
         print('Running DOMINO with arguments: {}'.format(' '.join(command)), flush=True)
 
         # container_framework = 'singularity' if singularity else 'docker'
-        out = run_container(container_framework,
+        run_container(container_framework,
                             'otjohnson/domino',
                             command,
                             volumes,
@@ -146,12 +146,12 @@ class DOMINO(PRM):
         #for domino_output in out_dir.glob('modules.out'):
         #    domino_output.unlink(missing_ok=True)
 
-        # domino creates a new folder in mapped_out_dir to output its modules files into
-        out_modules = mapped_out_dir + '/active_genes'
+        # domino creates a new folder in out_dir to output its modules files into
+        out_modules_dir = Path(out_dir, 'active_genes')
 
         # concatenate each module html file into one big file
         with open(output_file, "w") as fo:
-            for html_file in Path(out_modules).glob('module_*.html'):
+            for html_file in out_modules_dir.glob('module_*.html'):
                 with open(html_file,'r') as fi:
                     fo.write(fi.read())
                 # Path(html_file).unlink(missing_ok=True)
