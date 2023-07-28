@@ -9,9 +9,7 @@ from src.util import prepare_volume, run_container
 
 __all__ = ['DOMINO']
 
-PERIOD_SUB = '♥' # U+2665
 ID_PREFIX = 'ENSG0'
-ID_SUFFIX = '☺.1'
 
 class DOMINO(PRM):
     required_inputs = ['network', 'active_genes']
@@ -36,19 +34,18 @@ class DOMINO(PRM):
             raise ValueError("DOMINO requires active genes")
         node_df = node_df[node_df['active'] == True]
 
-        # Replace periods in each node id with PERIOD_SUB and transform with a prefix and suffix
+        # transform each node id with a prefix
         node_df['NODEID'] = node_df['NODEID'].apply(pre_domino_id_transform)
-        # e.g., ENSG0[node_id♥]☺.1
+        # e.g., ENSG0[node_id]
 
         #Create active_genes file
         node_df.to_csv(filename_map['active_genes'],sep="\t",index=False,columns=['NODEID'], header=False)
-
 
         #Create network file
         edges_df = data.get_interactome()
         edges_df['ppi'] = 'ppi'
 
-        # Replace periods in each node id with PERIOD_SUB and transform with a prefix and suffix
+        # transform each node id with a prefix
         edges_df['Interactor1'] = edges_df['Interactor1'].apply(pre_domino_id_transform)
         edges_df['Interactor2'] = edges_df['Interactor2'].apply(pre_domino_id_transform)
 
@@ -187,7 +184,7 @@ class DOMINO(PRM):
 
         edges['rank'] = 1 # adds in a rank column of 1s because the edges are not ranked
 
-        # Remove the prefix and unicode of suffix only, restore the period
+        # Remove the prefix
         edges['source'] = edges['source'].apply(post_domino_id_transform)
         edges['target'] = edges['target'].apply(post_domino_id_transform)
 
@@ -196,19 +193,16 @@ class DOMINO(PRM):
 
 def pre_domino_id_transform(node_id):
     """
-    Replace periods with PERIOD_SUB, prepend each node id with ID_PREFIX and append each node with ID_SUFFIX
+    Prepend each node id with ID_PREFIX
     @param node_id: the node id to transformed
     """
-    node_id = node_id.replace('.', PERIOD_SUB)
-    return ID_PREFIX + node_id #+ ID_SUFFIX
+    return ID_PREFIX + node_id
 
 
 def post_domino_id_transform(node_id):
     """
-    Remove prefix and suffix, replace PERIOD_SUB with .
+    Remove prefix
     @param node_id: the node id to transformed
     """
-    node_id = node_id[5:-3]
-    node_id = node_id.replace(PERIOD_SUB, '.')
+    node_id = node_id[len(ID_PREFIX):]
     return node_id
-
