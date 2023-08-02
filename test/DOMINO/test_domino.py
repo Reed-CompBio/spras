@@ -6,6 +6,8 @@ from src.domino import DOMINO
 TEST_DIR = 'test/DOMINO/'
 OUT_FILE_DEFAULT = TEST_DIR+'output/domino-output.txt'
 OUT_FILE_OPTIONAL = TEST_DIR+'output/domino-output-thresholds.txt'
+OUT_FILE_PARSE = TEST_DIR+'output/domino-parse-output.txt'
+OUT_FILE_PARSE_EXP = TEST_DIR+'expected_output/domino-parse-output.txt'
 
 class TestDOMINO:
     """
@@ -20,6 +22,7 @@ class TestDOMINO:
             network=TEST_DIR+'input/domino-network.txt',
             active_genes=TEST_DIR+'input/domino-active-genes.txt',
             output_file=OUT_FILE_DEFAULT)
+        # output_file should be empty
         assert out_path.exists()
 
     def test_domino_optional(self):
@@ -33,6 +36,7 @@ class TestDOMINO:
             use_cache=False,
             slices_threshold=0.4,
             module_threshold=0.06)
+        # output_file should be empty
         assert out_path.exists()
 
     def test_domino_missing_active_genes(self):
@@ -50,6 +54,25 @@ class TestDOMINO:
             DOMINO.run(
                 active_genes=TEST_DIR+'input/domino-active-genes.txt',
                 output_file=OUT_FILE_DEFAULT)
+
+    def test_domino_parse_output(self):
+        # Show how the complicated file formats work in terms of input and expected output
+        # Concatenated module_0.html and module_1.html file as input
+        # Output is an edge dataframe
+        # Expected output is stored in repo and the test will
+        # confirm the generated output matches the expected output.
+        out_path = Path(OUT_FILE_PARSE)
+        out_path.unlink(missing_ok=True)
+        out_path_exp = Path(OUT_FILE_PARSE_EXP)
+        DOMINO.parse_output(
+            TEST_DIR+'input/domino-concat-modules.txt',
+            OUT_FILE_PARSE)
+        # assert out_path.exists()
+        with open(out_path, 'r') as output_file:
+            generated_output = output_file.read()
+        with open(out_path_exp, 'r') as output_file:
+            expected_output = output_file.read()
+        assert generated_output == expected_output
 
     # Only run Singularity test if the binary is available on the system
     # spython is only available on Unix, but do not explicitly skip non-Unix platforms
