@@ -28,14 +28,14 @@
  algorithms:
         - name: "pathlinker"
           params:
-                include: false
+                include: true
                 directed: true
                 run1:
                     k: range(100,201,100)
 
         - name: "omicsintegrator1"
           params:
-                include: false
+                include: true
                 directed: false
                 run1:
                     r: [5]
@@ -46,7 +46,7 @@
 
         - name: "omicsintegrator2"
           params:
-                include: false
+                include: true
                 directed: false
                 run1:
                     b: [4]
@@ -57,7 +57,7 @@
 
         - name: "meo"
           params:
-                include: false
+                include: true
                 directed: true
                 run1:
                     max_path_length: [3]
@@ -66,7 +66,7 @@
 
         - name: "mincostflow"
           params:
-                include: false
+                include: true
                 directed: false
                 run1:
                     flow: [1] # The flow must be an int
@@ -77,7 +77,7 @@
                 include: true
                 directed: false
                 run1:
-                    use_cache: ["true"]
+                    use_cache: ["false"]
                     slices_threshold: [0.3]
                     module_threshold: [0.05]
 
@@ -126,7 +126,7 @@
           include: true
         # Machine learning analysis (e.g. clustering) of the pathway output files for each dataset
         ml:
-          include: true
+          include: false
           # specify how many principal components to calculate
           components: 2
           # boolean to show the labels on the pca graph
