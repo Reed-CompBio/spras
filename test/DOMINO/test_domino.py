@@ -1,5 +1,7 @@
 import pytest
 import shutil
+import filecmp
+
 from pathlib import Path
 from src.domino import DOMINO
 
@@ -11,7 +13,12 @@ OUT_FILE_PARSE_EXP = TEST_DIR+'expected_output/domino-parse-output.txt'
 
 class TestDOMINO:
     """
-    Run test for the DOMINO run function
+    Run test for the DOMINO run and parse_output function. 
+    We intentionally omit a DOMINO run correctness test. The output 
+    of DOMINO changes between runs without an option to set a seed for 
+    the algorithm. The variability makes it difficult to compare 
+    generated output to expected output.
+
     """
 
     def test_domino_required(self):
@@ -56,23 +63,17 @@ class TestDOMINO:
                 output_file=OUT_FILE_DEFAULT)
 
     def test_domino_parse_output(self):
-        # Show how the complicated file formats work in terms of input and expected output
-        # Concatenated module_0.html and module_1.html file as input
-        # Output is an edge dataframe
-        # Expected output is stored in repo and the test will
-        # confirm the generated output matches the expected output.
+        # Input is the concatenated module_0.html and module_1.html file from
+        # the DOMINO output of the network dip.sif and the nodes tnfa_active_genes_file.txt 
+        # from https://github.com/Shamir-Lab/DOMINO/tree/master/examples
+        # Confirms the generated output matches the expected output
         out_path = Path(OUT_FILE_PARSE)
         out_path.unlink(missing_ok=True)
         out_path_exp = Path(OUT_FILE_PARSE_EXP)
         DOMINO.parse_output(
             TEST_DIR+'input/domino-concat-modules.txt',
             OUT_FILE_PARSE)
-        # assert out_path.exists()
-        with open(out_path, 'r') as output_file:
-            generated_output = output_file.read()
-        with open(out_path_exp, 'r') as output_file:
-            expected_output = output_file.read()
-        assert generated_output == expected_output
+        assert filecmp.cmp(OUT_FILE_PARSE, OUT_FILE_PARSE_EXP)
 
     # Only run Singularity test if the binary is available on the system
     # spython is only available on Unix, but do not explicitly skip non-Unix platforms
