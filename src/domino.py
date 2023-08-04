@@ -58,6 +58,7 @@ class DOMINO(PRM):
         """
         Run DOMINO with Docker
         Let visualization be always true, parallelization be always 1 thread
+        DOMINO produces multiple output module files. We concatenate these files into one file, which we will extract edges from to produce one dataframe
         @param network:  input network file (required)
         @param active_genes:  input active genes (required)
         @param output_file: path to the output pathway file (required)
@@ -88,8 +89,6 @@ class DOMINO(PRM):
         bind_path, mapped_out_dir = prepare_volume(str(out_dir), work_dir)
         volumes.append(bind_path)
 
-        ########
-
         bind_path, mapped_slices_dir = prepare_volume('slices.txt', work_dir)
         volumes.append(bind_path)
         # /spras/ADFJGFD/slices.txt
@@ -107,8 +106,6 @@ class DOMINO(PRM):
                             volumes,
                             work_dir)
         print(slicer_out)
-
-        ########
 
         # Make the Python command to run within the container
         command = ['domino',
@@ -137,22 +134,16 @@ class DOMINO(PRM):
                             work_dir)
         print(domino_out)
 
-        ########
-
-        # Path(mapped_slices_dir).unlink(missing_ok=True)
-        # Path(out_dir, 'modules.out').unlink(missing_ok=True)
-        #for domino_output in out_dir.glob('modules.out'):
-        #    domino_output.unlink(missing_ok=True)
-
-        # domino creates a new folder in out_dir to output its modules files into /active_genes
+        # DOMINO creates a new folder in out_dir to output its modules files into /active_genes
         out_modules_dir = Path(out_dir, 'active_genes')
+        #Path(out_modules_dir, 'modules.out').unlink(missing_ok=True)
 
-        # concatenate each module html file into one big file
+        # Concatenate each produced module html file into one big file
         with open(output_file, "w") as fo:
             for html_file in out_modules_dir.glob('module_*.html'):
                 with open(html_file,'r') as fi:
                     fo.write(fi.read())
-                # Path(html_file).unlink(missing_ok=True)
+                #Path(html_file).unlink(missing_ok=True)
 
 
     @staticmethod
@@ -193,6 +184,7 @@ class DOMINO(PRM):
 
 def pre_domino_id_transform(node_id):
     """
+    DOMINO algorithm requires module edges have 'ENSG0' string.
     Prepend each node id with ID_PREFIX
     @param node_id: the node id to transformed
     """
