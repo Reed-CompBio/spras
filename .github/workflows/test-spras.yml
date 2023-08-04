@@ -81,7 +81,7 @@ jobs:
         docker pull reedcompbio/pathlinker:latest
         docker pull reedcompbio/meo:latest
         docker pull reedcompbio/mincostflow:latest
-        docker pull otjohnson/domino:latest
+        docker pull reedcompbio/domino:latest
     - name: Build Omics Integrator 1 Docker image
       uses: docker/build-push-action@v1
       with:
@@ -132,9 +132,9 @@ jobs:
       with:
         path: docker-wrappers/DOMINO/.
         dockerfile: docker-wrappers/DOMINO/Dockerfile
-        repository: otjohnson/domino
+        repository: reedcompbio/domino
         tags: latest
-        cache_froms: otjohnson/domino:latest
+        cache_froms: reedcompbio/domino:latest
         push: false
 
   # Run pre-commit checks on source files
