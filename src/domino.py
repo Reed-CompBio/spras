@@ -1,5 +1,4 @@
 import json
-import shutil
 from pathlib import Path
 
 import pandas as pd
@@ -10,6 +9,7 @@ from src.util import prepare_volume, run_container
 __all__ = ['DOMINO']
 
 ID_PREFIX = 'ENSG0'
+
 
 class DOMINO(PRM):
     required_inputs = ['network', 'active_genes']
@@ -28,7 +28,7 @@ class DOMINO(PRM):
 
         # Get active genes for node input file
         if data.contains_node_columns('active'):
-            #NODEID is always included in the node table
+            # NODEID is always included in the node table
             node_df = data.request_node_columns(['active'])
         else:
             raise ValueError("DOMINO requires active genes")
@@ -38,33 +38,33 @@ class DOMINO(PRM):
         node_df['NODEID'] = node_df['NODEID'].apply(pre_domino_id_transform)
         # e.g., ENSG0[node_id]
 
-        #Create active_genes file
+        # Create active_genes file
         node_df.to_csv(filename_map['active_genes'],sep="\t",index=False,columns=['NODEID'], header=False)
 
-        #Create network file
+        # Create network file
         edges_df = data.get_interactome()
         edges_df['ppi'] = 'ppi'
 
-        # transform each node id with a prefix
+        # Transform each node id with a prefix
         edges_df['Interactor1'] = edges_df['Interactor1'].apply(pre_domino_id_transform)
         edges_df['Interactor2'] = edges_df['Interactor2'].apply(pre_domino_id_transform)
 
-        edges_df.to_csv(filename_map['network'],sep='\t',index=False,columns=['Interactor1','ppi','Interactor2'],header=['ID_interactor_A','ppi','ID_interactor_B'])
-
-
+        edges_df.to_csv(filename_map['network'], sep='\t', index=False, columns=['Interactor1', 'ppi', 'Interactor2'],
+                        header=['ID_interactor_A', 'ppi', 'ID_interactor_B'])
 
     @staticmethod
     def run(network=None, active_genes=None, output_file=None, use_cache=True, slices_threshold=None, module_threshold=None, singularity=False):
         """
         Run DOMINO with Docker
         Let visualization be always true, parallelization be always 1 thread
-        DOMINO produces multiple output module files. We concatenate these files into one file, which we will extract edges from to produce one dataframe
+        DOMINO produces multiple output module files in an HTML format. SPRAS concatenates these files into one file,
+        which from which it will extract edges from to produce one pathway.
         @param network:  input network file (required)
         @param active_genes:  input active genes (required)
         @param output_file: path to the output pathway file (required)
         @param use_cache: if True, use auto-generated cache network files (*.pkl) from previous executions with the same network (optional)
-        @param slices_threshold: the threshold for considering a slice as relevant (optional)
-        @param module_threshold: the threshold for considering a putative module as final module (optional)
+        @param slices_threshold: the p-value threshold for considering a slice as relevant (optional)
+        @param module_threshold: the p-value threshold for considering a putative module as final module (optional)
         @param singularity: if True, run using the Singularity container instead of the Docker container (optional)
         """
         # Assuming defaults are: use_cache=true
@@ -94,17 +94,17 @@ class DOMINO(PRM):
         # /spras/ADFJGFD/slices.txt
 
         slicer_command = ['slicer',
-            '--network_file', network_file,
-            '--output_file', mapped_slices_dir]
+                          '--network_file', network_file,
+                          '--output_file', mapped_slices_dir]
 
         print('Running slicer with arguments: {}'.format(' '.join(slicer_command)), flush=True)
 
         container_framework = 'singularity' if singularity else 'docker'
         slicer_out = run_container(container_framework,
-                            'otjohnson/domino',
-                            slicer_command,
-                            volumes,
-                            work_dir)
+                                   'otjohnson/domino',
+                                   slicer_command,
+                                   volumes,
+                                   work_dir)
         print(slicer_out)
 
         # Make the Python command to run within the container
@@ -128,10 +128,10 @@ class DOMINO(PRM):
 
         # container_framework = 'singularity' if singularity else 'docker'
         domino_out = run_container(container_framework,
-                            'otjohnson/domino',
-                            command,
-                            volumes,
-                            work_dir)
+                                   'otjohnson/domino',
+                                   command,
+                                   volumes,
+                                   work_dir)
         print(domino_out)
 
         # DOMINO creates a new folder in out_dir to output its modules files into /active_genes
@@ -144,7 +144,6 @@ class DOMINO(PRM):
                 with open(html_file,'r') as fi:
                     fo.write(fi.read())
                 #Path(html_file).unlink(missing_ok=True)
-
 
     @staticmethod
     def parse_output(raw_pathway_file, standardized_pathway_file):
@@ -169,17 +168,17 @@ class DOMINO(PRM):
                         entries.append(tmp)
 
                     df = pd.DataFrame(entries)
-                    newdf = df.loc[:,['source', 'target']].dropna()
+                    newdf = df.loc[:, ['source', 'target']].dropna()
 
                     edges = pd.concat([edges, newdf], axis=0)
 
-        edges['rank'] = 1 # adds in a rank column of 1s because the edges are not ranked
+        edges['rank'] = 1  # Adds in a rank column of 1s because the edges are not ranked
 
         # Remove the prefix
         edges['source'] = edges['source'].apply(post_domino_id_transform)
         edges['target'] = edges['target'].apply(post_domino_id_transform)
 
-        edges.to_csv(standardized_pathway_file, sep='\t',header=False, index=False)
+        edges.to_csv(standardized_pathway_file, sep='\t', header=False, index=False)
 
 
 def pre_domino_id_transform(node_id):

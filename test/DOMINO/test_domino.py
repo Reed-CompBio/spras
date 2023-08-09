@@ -1,8 +1,9 @@
-import pytest
-import shutil
 import filecmp
-
+import shutil
 from pathlib import Path
+
+import pytest
+
 from src.domino import DOMINO
 
 TEST_DIR = 'test/DOMINO/'
@@ -11,14 +12,14 @@ OUT_FILE_OPTIONAL = TEST_DIR+'output/domino-output-thresholds.txt'
 OUT_FILE_PARSE = TEST_DIR+'output/domino-parse-output.txt'
 OUT_FILE_PARSE_EXP = TEST_DIR+'expected_output/domino-parse-output.txt'
 
+
 class TestDOMINO:
     """
-    Run test for the DOMINO run and parse_output function. 
-    We intentionally omit a DOMINO run correctness test. The output 
-    of DOMINO changes between runs without an option to set a seed for 
-    the algorithm. The variability makes it difficult to compare 
+    Run test for the DOMINO run and parse_output function.
+    We intentionally omit a DOMINO run correctness test. The output
+    of DOMINO changes between runs without an option to set a seed for
+    the algorithm. The variability makes it difficult to compare
     generated output to expected output.
-
     """
 
     def test_domino_required(self):
@@ -64,12 +65,11 @@ class TestDOMINO:
 
     def test_domino_parse_output(self):
         # Input is the concatenated module_0.html and module_1.html file from
-        # the DOMINO output of the network dip.sif and the nodes tnfa_active_genes_file.txt 
+        # the DOMINO output of the network dip.sif and the nodes tnfa_active_genes_file.txt
         # from https://github.com/Shamir-Lab/DOMINO/tree/master/examples
         # Confirms the generated output matches the expected output
         out_path = Path(OUT_FILE_PARSE)
         out_path.unlink(missing_ok=True)
-        out_path_exp = Path(OUT_FILE_PARSE_EXP)
         DOMINO.parse_output(
             TEST_DIR+'input/domino-concat-modules.txt',
             OUT_FILE_PARSE)
