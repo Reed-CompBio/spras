@@ -20,6 +20,7 @@ class TestDOMINO:
     of DOMINO changes between runs without an option to set a seed for
     the algorithm. The variability makes it difficult to compare
     generated output to expected output.
+    See https://github.com/Shamir-Lab/DOMINO/issues/5
     """
 
     def test_domino_required(self):

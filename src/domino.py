@@ -172,11 +172,14 @@ class DOMINO(PRM):
 
                     edges = pd.concat([edges, newdf], axis=0)
 
-        edges['rank'] = 1  # Adds in a rank column of 1s because the edges are not ranked
+        # DOMINO produces empty output files in some settings such as when it is run with small input files
+        # and generates a ValueError
+        if len(edges) > 0:
+            edges['rank'] = 1  # Adds in a rank column of 1s because the edges are not ranked
 
-        # Remove the prefix
-        edges['source'] = edges['source'].apply(post_domino_id_transform)
-        edges['target'] = edges['target'].apply(post_domino_id_transform)
+            # Remove the prefix
+            edges['source'] = edges['source'].apply(post_domino_id_transform)
+            edges['target'] = edges['target'].apply(post_domino_id_transform)
 
         edges.to_csv(standardized_pathway_file, sep='\t', header=False, index=False)
 
