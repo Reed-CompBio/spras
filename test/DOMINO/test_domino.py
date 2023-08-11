@@ -4,7 +4,7 @@ from pathlib import Path
 
 import pytest
 
-from src.domino import DOMINO
+from src.domino import DOMINO, post_domino_id_transform, pre_domino_id_transform
 
 TEST_DIR = 'test/DOMINO/'
 OUT_FILE_DEFAULT = TEST_DIR+'output/domino-output.txt'
@@ -42,8 +42,7 @@ class TestDOMINO:
             network=TEST_DIR+'input/domino-network.txt',
             active_genes=TEST_DIR+'input/domino-active-genes.txt',
             output_file=OUT_FILE_OPTIONAL,
-            use_cache=False,
-            slices_threshold=0.4,
+            slice_threshold=0.4,
             module_threshold=0.06)
         # output_file should be empty
         assert out_path.exists()
@@ -89,3 +88,18 @@ class TestDOMINO:
             output_file=OUT_FILE_DEFAULT,
             singularity=True)
         assert out_path.exists()
+
+    def test_pre_id_transform(self):
+        """
+        Test the node ID transformation run before DOMINO executes
+        """
+        assert pre_domino_id_transform('123') == 'ENSG0123'
+        assert pre_domino_id_transform('xyz') == 'ENSG0xyz'
+
+    def test_post_id_transform(self):
+        """
+        Test the node ID transformation run after DOMINO executes
+        """
+        assert post_domino_id_transform('ENSG0123') == '123'
+        assert post_domino_id_transform('ENSG0xyz') == 'xyz'
+        assert post_domino_id_transform('123') == '123'

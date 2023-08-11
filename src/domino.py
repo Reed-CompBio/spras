@@ -6,9 +6,10 @@ import pandas as pd
 from src.prm import PRM
 from src.util import prepare_volume, run_container
 
-__all__ = ['DOMINO']
+__all__ = ['DOMINO', 'pre_domino_id_transform', 'post_domino_id_transform']
 
 ID_PREFIX = 'ENSG0'
+ID_PREFIX_LEN = len(ID_PREFIX)
 
 
 class DOMINO(PRM):
@@ -143,7 +144,7 @@ class DOMINO(PRM):
                     fo.write(fi.read())
 
         # Clean up DOMINO intermediate and pickle files
-        Path(slices_file).unlink(missing_ok=True)
+        slices_file.unlink(missing_ok=True)
         Path(out_dir, 'network.slices.pkl').unlink(missing_ok=True)
         Path(network + '.pkl').unlink(missing_ok=True)
 
@@ -188,17 +189,23 @@ class DOMINO(PRM):
 
 def pre_domino_id_transform(node_id):
     """
-    DOMINO algorithm requires module edges have 'ENSG0' string.
-    Prepend each node id with ID_PREFIX
-    @param node_id: the node id to transformed
+    DOMINO requires module edges to have the 'ENSG0' string as a prefix.
+    Prepend each node id with this ID_PREFIX.
+    @param node_id: the node id to transform
+    @return the node id with the prefix added
     """
     return ID_PREFIX + node_id
 
 
 def post_domino_id_transform(node_id):
     """
-    Remove prefix
-    @param node_id: the node id to transformed
+    Remove ID_PREFIX from the beginning of the node id if it is present.
+    @param node_id: the node id to transform
+    @return the node id without the prefix, if it was present
     """
-    node_id = node_id[len(ID_PREFIX):]
-    return node_id
+    # Use removeprefix if SPRAS ever requires Python >= 3.9
+    # https://docs.python.org/3/library/stdtypes.html#str.removeprefix
+    if node_id.startswith(ID_PREFIX):
+        return node_id[ID_PREFIX_LEN:]
+    else:
+        return node_id
