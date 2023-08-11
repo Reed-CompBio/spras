@@ -39,7 +39,7 @@ class DOMINO(PRM):
         # e.g., ENSG0[node_id]
 
         # Create active_genes file
-        node_df.to_csv(filename_map['active_genes'],sep="\t",index=False,columns=['NODEID'], header=False)
+        node_df.to_csv(filename_map['active_genes'], sep="\t", index=False, columns=['NODEID'], header=False)
 
         # Create network file
         edges_df = data.get_interactome()
@@ -53,21 +53,19 @@ class DOMINO(PRM):
                         header=['ID_interactor_A', 'ppi', 'ID_interactor_B'])
 
     @staticmethod
-    def run(network=None, active_genes=None, output_file=None, use_cache=True, slices_threshold=None, module_threshold=None, singularity=False):
+    def run(network=None, active_genes=None, output_file=None, slices_threshold=None, module_threshold=None, singularity=False):
         """
-        Run DOMINO with Docker
-        Let visualization be always true, parallelization be always 1 thread
+        Run DOMINO with Docker.
+        Let visualization be always true, parallelization be always 1 thread, and use_cache be always false.
         DOMINO produces multiple output module files in an HTML format. SPRAS concatenates these files into one file,
         which from which it will extract edges from to produce one pathway.
         @param network:  input network file (required)
         @param active_genes:  input active genes (required)
         @param output_file: path to the output pathway file (required)
-        @param use_cache: if True, use auto-generated cache network files (*.pkl) from previous executions with the same network (optional)
         @param slices_threshold: the p-value threshold for considering a slice as relevant (optional)
         @param module_threshold: the p-value threshold for considering a putative module as final module (optional)
         @param singularity: if True, run using the Singularity container instead of the Docker container (optional)
         """
-        # Assuming defaults are: use_cache=true
 
         if not network or not active_genes or not output_file:
             raise ValueError('Required DOMINO arguments are missing')
@@ -89,13 +87,14 @@ class DOMINO(PRM):
         bind_path, mapped_out_dir = prepare_volume(str(out_dir), work_dir)
         volumes.append(bind_path)
 
-        bind_path, mapped_slices_dir = prepare_volume('slices.txt', work_dir)
+        slices_files = Path(out_dir, 'slices.txt')
+        bind_path, mapped_slices_file = prepare_volume(str(slices_files), work_dir)
         volumes.append(bind_path)
         # /spras/ADFJGFD/slices.txt
 
         slicer_command = ['slicer',
                           '--network_file', network_file,
-                          '--output_file', mapped_slices_dir]
+                          '--output_file', mapped_slices_file]
 
         print('Running slicer with arguments: {}'.format(' '.join(slicer_command)), flush=True)
 
@@ -111,18 +110,17 @@ class DOMINO(PRM):
         command = ['domino',
                    '--active_genes_files', node_file,
                    '--network_file', network_file,
-                   '--slices_file', mapped_slices_dir,
+                   '--slices_file', mapped_slices_file,
                    '--output_folder', mapped_out_dir,
+                   '--use_cache', 'false',
                    '--parallelization', '1',
                    '--visualization', 'true']
 
         # Add optional arguments
-        if use_cache is not True:
-            command.extend(['-c', 'false'])
         if slices_threshold is not None:
-            command.extend(['-sth', str(slices_threshold)])
+            command.extend(['--slices_threshold', str(slices_threshold)])
         if module_threshold is not None:
-            command.extend(['-mth', str(module_threshold)])
+            command.extend(['--module_threshold', str(module_threshold)])
 
         print('Running DOMINO with arguments: {}'.format(' '.join(command)), flush=True)
 
