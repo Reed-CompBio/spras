@@ -53,7 +53,7 @@ class DOMINO(PRM):
                         header=['ID_interactor_A', 'ppi', 'ID_interactor_B'])
 
     @staticmethod
-    def run(network=None, active_genes=None, output_file=None, slices_threshold=None, module_threshold=None, singularity=False):
+    def run(network=None, active_genes=None, output_file=None, slice_threshold=None, module_threshold=None, singularity=False):
         """
         Run DOMINO with Docker.
         Let visualization be always true, parallelization be always 1 thread, and use_cache be always false.
@@ -62,7 +62,7 @@ class DOMINO(PRM):
         @param network:  input network file (required)
         @param active_genes:  input active genes (required)
         @param output_file: path to the output pathway file (required)
-        @param slices_threshold: the p-value threshold for considering a slice as relevant (optional)
+        @param slice_threshold: the p-value threshold for considering a slice as relevant (optional)
         @param module_threshold: the p-value threshold for considering a putative module as final module (optional)
         @param singularity: if True, run using the Singularity container instead of the Docker container (optional)
         """
@@ -87,10 +87,9 @@ class DOMINO(PRM):
         bind_path, mapped_out_dir = prepare_volume(str(out_dir), work_dir)
         volumes.append(bind_path)
 
-        slices_files = Path(out_dir, 'slices.txt')
-        bind_path, mapped_slices_file = prepare_volume(str(slices_files), work_dir)
+        slices_file = Path(out_dir, 'slices.txt')
+        bind_path, mapped_slices_file = prepare_volume(str(slices_file), work_dir)
         volumes.append(bind_path)
-        # /spras/ADFJGFD/slices.txt
 
         slicer_command = ['slicer',
                           '--network_file', network_file,
@@ -117,8 +116,9 @@ class DOMINO(PRM):
                    '--visualization', 'true']
 
         # Add optional arguments
-        if slices_threshold is not None:
-            command.extend(['--slices_threshold', str(slices_threshold)])
+        if slice_threshold is not None:
+            # DOMINO readme has the wrong argument https://github.com/Shamir-Lab/DOMINO/issues/12
+            command.extend(['--slice_threshold', str(slice_threshold)])
         if module_threshold is not None:
             command.extend(['--module_threshold', str(module_threshold)])
 
@@ -133,15 +133,20 @@ class DOMINO(PRM):
         print(domino_out)
 
         # DOMINO creates a new folder in out_dir to output its modules files into /active_genes
+        # The filename is determined by the input active_genes and cannot be configured
+        # Leave these HTML files for user inspection
         out_modules_dir = Path(out_dir, 'active_genes')
-        #Path(out_modules_dir, 'modules.out').unlink(missing_ok=True)
 
-        # Concatenate each produced module html file into one big file
-        with open(output_file, "w") as fo:
+        # Concatenate each produced module HTML file into one file
+        with open(output_file, 'w') as fo:
             for html_file in out_modules_dir.glob('module_*.html'):
-                with open(html_file,'r') as fi:
+                with open(html_file, 'r') as fi:
                     fo.write(fi.read())
-                #Path(html_file).unlink(missing_ok=True)
+
+        # Clean up DOMINO intermediate and pickle files
+        Path(slices_file).unlink(missing_ok=True)
+        Path(out_dir, 'network.slices.pkl').unlink(missing_ok=True)
+        Path(network + '.pkl').unlink(missing_ok=True)
 
     @staticmethod
     def parse_output(raw_pathway_file, standardized_pathway_file):

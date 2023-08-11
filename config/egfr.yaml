@@ -10,7 +10,7 @@ algorithms:
     name: pathlinker
     params:
       directed: true
-      include: true
+      include: false
       run1:
         k:
           - 10
@@ -68,7 +68,7 @@ algorithms:
       directed: false
       include: true
       run1:
-        slices_threshold:
+        slice_threshold:
           - 0.3
         module_threshold:
           - 0.05

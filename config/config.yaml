@@ -77,7 +77,7 @@
                 include: true
                 directed: false
                 run1:
-                    slices_threshold: [0.3]
+                    slice_threshold: [0.3]
                     module_threshold: [0.05]
 
  # Here we specify which pathways to run and other file location information.
