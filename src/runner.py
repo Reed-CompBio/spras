@@ -1,7 +1,7 @@
 from src.dataset import Dataset
-from src.domino import DOMINO as domino
 
 # supported algorithm imports
+from src.domino import DOMINO as domino
 from src.meo import MEO as meo
 from src.mincostflow import MinCostFlow as mincostflow
 from src.omicsintegrator1 import OmicsIntegrator1 as omicsintegrator1
