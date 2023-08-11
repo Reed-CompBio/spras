@@ -73,7 +73,7 @@ class TestDOMINO:
         DOMINO.parse_output(
             TEST_DIR+'input/domino-concat-modules.txt',
             OUT_FILE_PARSE)
-        assert filecmp.cmp(OUT_FILE_PARSE, OUT_FILE_PARSE_EXP)
+        assert filecmp.cmp(OUT_FILE_PARSE, OUT_FILE_PARSE_EXP, shallow=False)
 
     # Only run Singularity test if the binary is available on the system
     # spython is only available on Unix, but do not explicitly skip non-Unix platforms
