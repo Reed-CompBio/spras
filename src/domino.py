@@ -32,15 +32,14 @@ class DOMINO(PRM):
             # NODEID is always included in the node table
             node_df = data.request_node_columns(['active'])
         else:
-            raise ValueError("DOMINO requires active genes")
+            raise ValueError('DOMINO requires active genes')
         node_df = node_df[node_df['active'] == True]
 
-        # transform each node id with a prefix
+        # Transform each node id with a prefix
         node_df['NODEID'] = node_df['NODEID'].apply(pre_domino_id_transform)
-        # e.g., ENSG0[node_id]
 
         # Create active_genes file
-        node_df.to_csv(filename_map['active_genes'], sep="\t", index=False, columns=['NODEID'], header=False)
+        node_df.to_csv(filename_map['active_genes'], sep='\t', index=False, columns=['NODEID'], header=False)
 
         # Create network file
         edges_df = data.get_interactome()
@@ -58,10 +57,9 @@ class DOMINO(PRM):
         """
         Run DOMINO with Docker.
         Let visualization be always true, parallelization be always 1 thread, and use_cache be always false.
-        DOMINO produces multiple output module files in an HTML format. SPRAS concatenates these files into one file,
-        which from which it will extract edges from to produce one pathway.
-        @param network:  input network file (required)
-        @param active_genes:  input active genes (required)
+        DOMINO produces multiple output module files in an HTML format. SPRAS concatenates these files into one file.
+        @param network: input network file (required)
+        @param active_genes: input active genes (required)
         @param output_file: path to the output pathway file (required)
         @param slice_threshold: the p-value threshold for considering a slice as relevant (optional)
         @param module_threshold: the p-value threshold for considering a putative module as final module (optional)
@@ -82,7 +80,6 @@ class DOMINO(PRM):
         bind_path, node_file = prepare_volume(active_genes, work_dir)
         volumes.append(bind_path)
 
-        # Use its --output_folder argument to set the output file prefix to specify an absolute path and prefix
         out_dir = Path(output_file).parent
         out_dir.mkdir(parents=True, exist_ok=True)
         bind_path, mapped_out_dir = prepare_volume(str(out_dir), work_dir)
@@ -92,6 +89,7 @@ class DOMINO(PRM):
         bind_path, mapped_slices_file = prepare_volume(str(slices_file), work_dir)
         volumes.append(bind_path)
 
+        # Make the Python command to run within the container
         slicer_command = ['slicer',
                           '--network_file', network_file,
                           '--output_file', mapped_slices_file]
@@ -107,7 +105,7 @@ class DOMINO(PRM):
         print(slicer_out)
 
         # Make the Python command to run within the container
-        command = ['domino',
+        domino_command = ['domino',
                    '--active_genes_files', node_file,
                    '--network_file', network_file,
                    '--slices_file', mapped_slices_file,
@@ -119,20 +117,20 @@ class DOMINO(PRM):
         # Add optional arguments
         if slice_threshold is not None:
             # DOMINO readme has the wrong argument https://github.com/Shamir-Lab/DOMINO/issues/12
-            command.extend(['--slice_threshold', str(slice_threshold)])
+            domino_command.extend(['--slice_threshold', str(slice_threshold)])
         if module_threshold is not None:
-            command.extend(['--module_threshold', str(module_threshold)])
+            domino_command.extend(['--module_threshold', str(module_threshold)])
 
-        print('Running DOMINO with arguments: {}'.format(' '.join(command)), flush=True)
+        print('Running DOMINO with arguments: {}'.format(' '.join(domino_command)), flush=True)
 
         domino_out = run_container(container_framework,
                                    'reedcompbio/domino',
-                                   command,
+                                   domino_command,
                                    volumes,
                                    work_dir)
         print(domino_out)
 
-        # DOMINO creates a new folder in out_dir to output its modules files into /active_genes
+        # DOMINO creates a new folder in out_dir to output its modules HTML files into called active_genes
         # The filename is determined by the input active_genes and cannot be configured
         # Leave these HTML files for user inspection
         out_modules_dir = Path(out_dir, 'active_genes')
@@ -151,45 +149,51 @@ class DOMINO(PRM):
     @staticmethod
     def parse_output(raw_pathway_file, standardized_pathway_file):
         """
-        Convert a predicted pathway into the universal format
-        @param raw_pathway_file: pathway file produced by an algorithm's run function
-        @param standardized_pathway_file: the same pathway written in the universal format
+        Convert the merged HTML modules into the universal pathway format
+        @param raw_pathway_file: the merged HTML modules file
+        @param standardized_pathway_file: the edges from the modules written in the universal format
         """
-        edges = pd.DataFrame()
+        edges_df = pd.DataFrame()
 
         with open(raw_pathway_file, 'r') as file:
             for line in file:
-                if line.strip().startswith("let data = ["):
-                    line2 = line.replace('let data = ', '')
-                    line3 = line2.replace(';', '')
+                clean_line = line.strip()
+                # The pattern in the HTML that indicates the JSON data
+                if clean_line.startswith('let data = ['):
+                    clean_line = clean_line.replace('let data = ', '')  # Start of the line
+                    clean_line = clean_line.replace(';', '')  # End of the line
 
-                    data = json.loads(line3)
+                    data = json.loads(clean_line)
 
                     entries = []
+                    # Iterate over the JSON entries, which contain both node information and edge information
                     for entry in data:
-                        tmp = entry['data']
-                        entries.append(tmp)
+                        entries.append(entry['data'])
 
-                    df = pd.DataFrame(entries)
-                    newdf = df.loc[:, ['source', 'target']].dropna()
+                    # Create a dataframe with all the data from the JSON row, keep only the source and target
+                    # columns that indicate edges
+                    # Dropping the other rows eliminates the node information
+                    module_df = pd.DataFrame(entries)
+                    module_df = module_df.loc[:, ['source', 'target']].dropna()
 
-                    edges = pd.concat([edges, newdf], axis=0)
+                    # Add the edges from this module to the cumulative pathway edges
+                    edges_df = pd.concat([edges_df, module_df], axis=0)
 
         # DOMINO produces empty output files in some settings such as when it is run with small input files
         # and generates a ValueError
-        if len(edges) > 0:
-            edges['rank'] = 1  # Adds in a rank column of 1s because the edges are not ranked
+        if len(edges_df) > 0:
+            edges_df['rank'] = 1  # Adds in a rank column of 1s because the edges are not ranked
 
             # Remove the prefix
-            edges['source'] = edges['source'].apply(post_domino_id_transform)
-            edges['target'] = edges['target'].apply(post_domino_id_transform)
+            edges_df['source'] = edges_df['source'].apply(post_domino_id_transform)
+            edges_df['target'] = edges_df['target'].apply(post_domino_id_transform)
 
-        edges.to_csv(standardized_pathway_file, sep='\t', header=False, index=False)
+        edges_df.to_csv(standardized_pathway_file, sep='\t', header=False, index=False)
 
 
 def pre_domino_id_transform(node_id):
     """
-    DOMINO requires module edges to have the 'ENSG0' string as a prefix.
+    DOMINO requires module edges to have the 'ENSG0' string as a prefix for visualization.
     Prepend each node id with this ID_PREFIX.
     @param node_id: the node id to transform
     @return the node id with the prefix added
@@ -201,7 +205,7 @@ def post_domino_id_transform(node_id):
     """
     Remove ID_PREFIX from the beginning of the node id if it is present.
     @param node_id: the node id to transform
-    @return the node id without the prefix, if it was present
+    @return the node id without the prefix, if it was present, otherwise the original node id
     """
     # Use removeprefix if SPRAS ever requires Python >= 3.9
     # https://docs.python.org/3/library/stdtypes.html#str.removeprefix

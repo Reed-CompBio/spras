@@ -15,8 +15,8 @@ OUT_FILE_PARSE_EXP = TEST_DIR+'expected_output/domino-parse-output.txt'
 
 class TestDOMINO:
     """
-    Run test for the DOMINO run and parse_output function.
-    We intentionally omit a DOMINO run correctness test. The output
+    Run tests for the DOMINO run, parse_output, and id processing functions.
+    Intentionally omits a DOMINO run correctness test. The output
     of DOMINO changes between runs without an option to set a seed for
     the algorithm. The variability makes it difficult to compare
     generated output to expected output.
@@ -35,7 +35,7 @@ class TestDOMINO:
         assert out_path.exists()
 
     def test_domino_optional(self):
-        # Include optional argument
+        # Include optional arguments
         out_path = Path(OUT_FILE_OPTIONAL)
         out_path.unlink(missing_ok=True)
         DOMINO.run(

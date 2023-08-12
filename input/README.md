@@ -11,11 +11,11 @@ All other columns specify additional node attributes such as prizes.
 Any nodes that are listed in a node file but are not present in one or more edges in the edge file will be removed.
 For example:
 ```
-NODEID	prize	sources	targets
-A	1.0		True
-B	3.3	True	
-C	2.5		True
-D	1.9	True	True
+NODEID	prize	sources	targets	active
+A	1.0		True	True
+B	3.3	True		True
+C	2.5		True	True
+D	1.9	True	True	True
 ```
 
 A secondary format provides only a list of node identifiers and uses the filename as the node attribute, as in the example `sources.txt`.
@@ -49,6 +49,7 @@ The files are originally from the [Temporal Pathway Synthesizer (TPS)](https://g
 They have been lightly modified for SPRAS by lowering one edge weight that was greater than 1, removing a PSEUDONODE prize, adding a prize of 10.0 to EGF_HUMAN, and converting all edges to undirected edges.
 The only source is EGF_HUMAN.
 All proteins with phosphorylation-based prizes are also labeled as targets.
+All nodes are considered active.
 
 If you use any of the input files `tps-egfr-prizes.txt` or `phosphosite-irefindex13.0-uniprot.txt`, reference the publication
 
