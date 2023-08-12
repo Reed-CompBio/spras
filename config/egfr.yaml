@@ -39,7 +39,7 @@ algorithms:
     name: omicsintegrator2
     params:
       directed: false
-      include: true
+      include: false
       run1:
         b:
           - 4
@@ -54,7 +54,7 @@ algorithms:
     name: meo
     params:
       directed: true
-      include: true
+      include: false
       run1:
         local_search:
           - "Yes"
