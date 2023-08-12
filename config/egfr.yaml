@@ -10,7 +10,7 @@ algorithms:
     name: pathlinker
     params:
       directed: true
-      include: false
+      include: true
       run1:
         k:
           - 10
@@ -19,7 +19,7 @@ algorithms:
     name: omicsintegrator1
     params:
       directed: false
-      include: false
+      include: true
       run1:
         b:
           - 0.55
@@ -39,7 +39,7 @@ algorithms:
     name: omicsintegrator2
     params:
       directed: false
-      include: false
+      include: true
       run1:
         b:
           - 4
@@ -54,7 +54,7 @@ algorithms:
     name: meo
     params:
       directed: true
-      include: false
+      include: true
       run1:
         local_search:
           - "Yes"
