@@ -2,5 +2,3 @@
 A   B   1
 B   C   1
 C   D   1
-D   E   1
-A   E   1
