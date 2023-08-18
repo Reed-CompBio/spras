@@ -86,7 +86,7 @@ class AllPairs(PRM):
         #TODO: chang the docker image once pushed to readcompbio
         container_framework = 'singularity' if singularity else 'docker'
         out = run_container(container_framework,
-                            'annaritz/allpairs',
+                            'reedcompbio/allpairs',
                             command,
                             volumes,
                             work_dir)

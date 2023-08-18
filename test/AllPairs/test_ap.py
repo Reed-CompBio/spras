@@ -8,7 +8,8 @@ from src.allpairs import AllPairs
 TEST_DIR = 'test/AllPairs/'
 OUT_DIR = TEST_DIR+'output/'
 
-EXPECTED_DIR = TEST_DIR+'/expected/' ## TODO not currently checked.
+EXPECTED_DIR = TEST_DIR+'/expected/'  # TODO not currently checked.
+
 
 class TestAllPairs:
     """
@@ -49,7 +50,7 @@ class TestAllPairs:
         )
         assert out_path.exists()
 
-    def test_correctness(self):
+    def test_allpairs_correctness(self):
         """
         Tests algorithm correctness of all_pairs_shortest_path.py by using AllPairs.run
         """
@@ -80,6 +81,3 @@ class TestAllPairs:
             correct_edges.append((node1, node2))
 
         assert output_edges == correct_edges
-
-
-

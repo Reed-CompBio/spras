@@ -16,10 +16,10 @@ def parse_arguments():
     @return arguments
     """
     parser = argparse.ArgumentParser(
-        description="AllPairs pathway reconstruction"
+        description="All Pairs Shortest Paths pathway reconstruction"
     )
     parser.add_argument("--network", type=Path, required=True, help="Network file of the form <node1> <node2> <weight>")
-    parser.add_argument("--nodes", type=Path, required=True, help="Nodes file of the form <node> <source-or-target>")
+    parser.add_argument("--nodes", type=Path, required=True, help="Nodes file of the form <node> <source-or-target>.")
     parser.add_argument("--output", type=Path, required=True, help="Output file")
 
     return parser.parse_args()
@@ -42,15 +42,15 @@ def allpairs(network_file: Path, nodes_file: Path, output_file: Path):
     with nodes_file.open() as nodes_f:
         for line in nodes_f:
             row = line.strip().split()
+            # Assumes the file is formatted properly with two whitespace-delimited columns
             if row[1] == 'source':
                 sources.add(row[0])
             elif row[1] == 'target':
                 targets.add(row[0])
 
-    # there should be at least one source and one target
+    # There should be at least one source and one target
     assert len(sources) > 0, 'There are no sources.'
     assert len(targets) > 0, 'There are no targets.'
-    assert len(sources.intersection(targets)) == 0, 'There is at least one source that is also a target.'
 
     # Read graph & assert all the sources/targets are in network
     graph = nx.read_weighted_edgelist(network_file)
@@ -67,6 +67,7 @@ def allpairs(network_file: Path, nodes_file: Path, output_file: Path):
     # Write the subgraph as a list of edges.
     nx.write_edgelist(output, output_file, data=False)
     print(f"Wrote output file to {str(output_file)}")
+
 
 def main():
     """
