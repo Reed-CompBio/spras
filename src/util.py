@@ -361,21 +361,6 @@ def process_config(config):
 
     return config, datasets, out_dir, algorithm_params, algorithm_directed, pca_params, hac_params
 
-def compare_files(file1, file2) -> bool:
-    """
-    Compare files by reading the contents into lists. Only recommended for small files.
-    @param file1: first file to compare
-    @param file2: second file to compare
-    @return: True or False
-    """
-    with open(file1) as f1:
-        contents1 = list(f1)
-
-    with open(file2) as f2:
-        contents2 = list(f2)
-
-    return contents1 == contents2
-
 
 def make_required_dirs(path: str):
     """
