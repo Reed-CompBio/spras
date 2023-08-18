@@ -8,7 +8,7 @@ from src.allpairs import AllPairs
 TEST_DIR = 'test/AllPairs/'
 OUT_DIR = TEST_DIR+'output/'
 
-EXPECTED_DIR = TEST_DIR+'/expected/'  # TODO not currently checked.
+EXPECTED_DIR = TEST_DIR+'expected/'  # TODO not currently checked.
 
 
 class TestAllPairs:

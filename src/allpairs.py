@@ -1,4 +1,5 @@
 import warnings
+from pathlib import Path
 
 import pandas as pd
 
@@ -67,7 +68,10 @@ class AllPairs(PRM):
         bind_path, network_file = prepare_volume(network, work_dir)
         volumes.append(bind_path)
 
+        # Create the parent directories for the output file if needed
+        Path(output_file).parent.mkdir(parents=True, exist_ok=True)
         bind_path, mapped_out_file = prepare_volume(output_file, work_dir)
+        volumes.append(bind_path)
 
         command = ['python',
                    '/AllPairs/all-pairs-shortest-paths.py',
