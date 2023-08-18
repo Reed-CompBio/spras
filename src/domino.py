@@ -106,13 +106,13 @@ class DOMINO(PRM):
 
         # Make the Python command to run within the container
         domino_command = ['domino',
-                   '--active_genes_files', node_file,
-                   '--network_file', network_file,
-                   '--slices_file', mapped_slices_file,
-                   '--output_folder', mapped_out_dir,
-                   '--use_cache', 'false',
-                   '--parallelization', '1',
-                   '--visualization', 'true']
+                          '--active_genes_files', node_file,
+                          '--network_file', network_file,
+                          '--slices_file', mapped_slices_file,
+                          '--output_folder', mapped_out_dir,
+                          '--use_cache', 'false',
+                          '--parallelization', '1',
+                          '--visualization', 'true']
 
         # Add optional arguments
         if slice_threshold is not None:
