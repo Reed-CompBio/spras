@@ -171,6 +171,10 @@ snakemake --cores 1 --configfile config/config.yaml
 ```
 Make sure to run the command inside the `spras` conda environment.
 
+As a workflow manager, Snakemake will consider the work described in the configuration file to be completed once the necessary output files have been written to the relevant output directory (`output` in the `config/config.yaml` configuration).
+That means that if you change your code and rerun the Snakemake command above, nothing may happen if the output files already exist.
+To iteratively update code and test the workflow, you typically have to remove the output directory or all of its contents before rerunning the Snakemake command.
+
 ### Step 5: Add Local Neighborhood to the tests
 Add test functions to the test file `test/test_ln.py`.
 This file already has existing tests to test the correctness of the Local Neighborhood implementation that was added to the Docker image.
