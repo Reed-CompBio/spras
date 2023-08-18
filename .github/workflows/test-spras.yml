@@ -81,6 +81,7 @@ jobs:
         docker pull reedcompbio/pathlinker:latest
         docker pull reedcompbio/meo:latest
         docker pull reedcompbio/mincostflow:latest
+        docker pull reedcompbio/domino:latest
     - name: Build Omics Integrator 1 Docker image
       uses: docker/build-push-action@v1
       with:
@@ -126,7 +127,7 @@ jobs:
         tags: latest
         cache_froms: reedcompbio/mincostflow:latest
         push: false
-    - name: Build AllPairs Docker image
+    - name: Build All Pairs Shortest Paths Docker image
       uses: docker/build-push-action@v1
       with:
         path: docker-wrappers/AllPairs/.
@@ -134,6 +135,15 @@ jobs:
         repository: annaritz/allpairs
         tags: latest
         cache_froms: annaritz/allpairs:latest
+        push: false
+    - name: Build DOMINO Docker image
+      uses: docker/build-push-action@v1
+      with:
+        path: docker-wrappers/DOMINO/.
+        dockerfile: docker-wrappers/DOMINO/Dockerfile
+        repository: reedcompbio/domino
+        tags: latest
+        cache_froms: reedcompbio/domino:latest
         push: false
 
   # Run pre-commit checks on source files
