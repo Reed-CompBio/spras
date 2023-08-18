@@ -118,10 +118,10 @@ In an interactive Python session, run the following commands to load the `data0`
 > dataset_dict = {'label': 'data0', 'node_files': ['node-prizes.txt', 'sources.txt', 'targets.txt'], 'edge_files': ['network.txt'], 'other_files': [], 'data_dir': 'input'}
 > data = Dataset(dataset_dict)
 > data.node_table.head()
-  NODEID  prize sources targets
-0      A    2.0    True     NaN
-1      B    NaN     NaN     NaN
-2      C    5.7     NaN    True
+  NODEID  prize active sources targets
+0      C    5.7   True     NaN    True
+1      A    2.0   True    True     NaN
+2      B    NaN    NaN     NaN     NaN
 > data.interactome.head()
   Interactor1 Interactor2  Weight
 0           A           B    0.98
@@ -137,15 +137,16 @@ Note the behaviors of the `request_node_columns` function when there are missing
 `request_node_columns` always returns the `NODEID` column in addition to the requested columns.
 
 Now implement the `generate_inputs` function, following the `omicsintegrator1.py` example.
-The nodes should be any node in the dataset that has a prize set, any node that is a source, or any node that is a target.
-A "prize" is a term for a score on a node in a network, so nodes that have non-empty prizes are considered relevant nodes for the Local Neighborhood algorithm along with sources and targets.
+The selected nodes should be any node in the dataset that has a prize set, any node that is active, any node that is a source, or any node that is a target.
+As shown in the example dataset above, "active", "sources", and "targets" are Boolean attributes.
+A "prize" is a term for a numeric score on a node in a network, so nodes that have non-empty prizes are considered relevant nodes for the Local Neighborhood algorithm along with active nodes, sources, and targets.
 The network should be all of the edges written in the format `<vertex1>|<vertex2>`.
 `src/dataset.py` provides functions that provide access to node information and the interactome (edge list).
 
-Implement the `run` function, following the Path Linker example.
+Implement the `run` function, following the PathLinker example.
 The `prepare_volume` utility function is needed to prepare the network and nodes input files to be mounted and used inside the container.
-It is also needed to prepare the path for the output file.
-This is similar to how you had to manually specify paths relative to the container's file system when you interactive tested the container in Step 2.
+It is also used to prepare the path for the output file, which is different from how the output is prepared in the PathLinker example.
+The functionality of `prepare_volume` is similar to how you had to manually specify paths relative to the container's file system when you interactive tested the container in Step 2.
 It is not necessary to create the output directory in advance because the Local Neighborhood algorithm will create it if it does not exist.
 
 Prepare the command to run inside the container, which will resemble the command used when running Local Neighborhood in Step 1.
