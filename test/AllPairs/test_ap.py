@@ -8,8 +8,7 @@ from src.allpairs import AllPairs
 
 TEST_DIR = 'test/AllPairs/'
 OUT_DIR = TEST_DIR+'output/'
-
-EXPECTED_DIR = TEST_DIR+'expected/'  # TODO not currently checked.
+EXPECTED_DIR = TEST_DIR+'expected/'
 
 
 class TestAllPairs:
@@ -23,7 +22,7 @@ class TestAllPairs:
         AllPairs.run(
             nodetypes=TEST_DIR+'input/sample-in-nodetypes.txt',
             network=TEST_DIR+'input/sample-in-net.txt',
-            output_file=OUT_DIR+'sample-out.txt'
+            output_file=str(out_path)
         )
         assert out_path.exists()
 
@@ -35,7 +34,6 @@ class TestAllPairs:
                 network=TEST_DIR + 'input/sample-in-net.txt',
                 output_file=OUT_DIR+'sample-out.txt')
 
-
     # Only run Singularity test if the binary is available on the system
     # spython is only available on Unix, but do not explicitly skip non-Unix platforms
     @pytest.mark.skipif(not shutil.which('singularity'), reason='Singularity not found on system')
@@ -46,7 +44,7 @@ class TestAllPairs:
         AllPairs.run(
             nodetypes=TEST_DIR+'input/sample-in-nodetypes.txt',
             network=TEST_DIR+'input/sample-in-net.txt',
-            output_file=OUT_DIR+'sample-out.txt',
+            output_file=str(out_path),
             singularity=True
         )
         assert out_path.exists()

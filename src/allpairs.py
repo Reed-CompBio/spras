@@ -81,7 +81,7 @@ class AllPairs(PRM):
                    '--nodes', node_file,
                    '--output', mapped_out_file]
 
-        print('Running AllPairs with arguments: {}'.format(' '.join(command)), flush=True)
+        print('Running All Pairs Shortest Paths with arguments: {}'.format(' '.join(command)), flush=True)
 
         container_framework = 'singularity' if singularity else 'docker'
         out = run_container(container_framework,

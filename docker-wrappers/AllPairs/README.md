@@ -13,7 +13,6 @@ To inspect the installed Python packages:
 ```
 docker run reedcompbio/allpairs pip list
 ```
-Windows users may need to add the prefix `winpty` prefix before these commands.
 
 
 ## Testing
