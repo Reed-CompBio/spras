@@ -53,6 +53,12 @@ class TestAllPairs:
     def test_allpairs_correctness(self):
         """
         Tests algorithm correctness of all_pairs_shortest_path.py by using AllPairs.run
+        The shortest paths are:
+        A-B-C
+        A-E
+        B-C
+        B-A-E
+        so the union of the unique edges in these paths will be returned as the pathway.
         """
         out_path = Path(OUT_DIR+'correctness-out.txt')
         out_path.unlink(missing_ok=True)
