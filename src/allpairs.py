@@ -1,5 +1,4 @@
 import warnings
-from pathlib import Path
 
 import pandas as pd
 
@@ -27,6 +26,7 @@ class AllPairs(PRM):
         sources_targets = data.request_node_columns(["sources", "targets"])
         if sources_targets is None:
             return False
+        # TODO may allow this but needs testing
         both_series = sources_targets.sources & sources_targets.targets
         for _index,row in sources_targets[both_series].iterrows():
             warn_msg = row.NODEID+" has been labeled as both a source and a target."
@@ -47,15 +47,16 @@ class AllPairs(PRM):
     @staticmethod
     def run(nodetypes=None, network=None, output_file=None, singularity=False):
         """
-        Run AllPairs with Docker
+        Run All Pairs Shortest Paths with Docker
         @param nodetypes:  input node types with sources and targets (required)
         @param network:  input network file (required)
+        @param singularity: if True, run using the Singularity container instead of the Docker container
         @param output_file: path to the output pathway file (required)
         """
         if not nodetypes or not network or not output_file:
-            raise ValueError('Required AllPairs arguments are missing')
+            raise ValueError('Required All Pairs Shortest Paths arguments are missing')
 
-        work_dir = '/allpairs'
+        work_dir = '/apsp'
 
         # Each volume is a tuple (src, dest)
         volumes = list()
@@ -66,14 +67,7 @@ class AllPairs(PRM):
         bind_path, network_file = prepare_volume(network, work_dir)
         volumes.append(bind_path)
 
-        # AllPairs does not provide an argument to set the output directory
-        # Use its --output argument to set the output file to specify an absolute path and filename
-        out_dir = Path(output_file).parent
-        # AllPairs requires that the output directory exist
-        out_dir.mkdir(parents=True, exist_ok=True)
-        bind_path, mapped_out_dir = prepare_volume(str(out_dir), work_dir)
-        volumes.append(bind_path)
-        mapped_out_file = mapped_out_dir + '/out.txt'  # Use posix path inside the container
+        bind_path, mapped_out_file = prepare_volume(output_file, work_dir)
 
         command = ['python',
                    '/AllPairs/all-pairs-shortest-paths.py',
@@ -83,7 +77,6 @@ class AllPairs(PRM):
 
         print('Running AllPairs with arguments: {}'.format(' '.join(command)), flush=True)
 
-        #TODO: chang the docker image once pushed to readcompbio
         container_framework = 'singularity' if singularity else 'docker'
         out = run_container(container_framework,
                             'reedcompbio/allpairs',
@@ -92,9 +85,6 @@ class AllPairs(PRM):
                             work_dir)
         print(out)
 
-        # Rename the primary output file to match the desired output filename
-        output_edges = Path(next(out_dir.glob('out.txt')))
-        output_edges.rename(output_file)
 
     @staticmethod
     def parse_output(raw_pathway_file, standardized_pathway_file):
