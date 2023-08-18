@@ -1,3 +1,4 @@
+import filecmp
 import shutil
 from pathlib import Path
 
@@ -87,3 +88,21 @@ class TestAllPairs:
             correct_edges.append((node1, node2))
 
         assert output_edges == correct_edges
+
+    def test_allpairs_zero_length(self):
+        """
+        Tests algorithm correctness of all_pairs_shortest_path.py by using AllPairs.run
+        The test case has a single soucre and target that is the same node, so the only path has
+        zero length.
+        Therefore, the output pathway has no edges.
+        """
+        out_path = Path(OUT_DIR+'zero-length-out.txt')
+        out_path.unlink(missing_ok=True)
+
+        AllPairs.run(
+            nodetypes=TEST_DIR+'input/zero-length-nodetypes.txt',
+            network=TEST_DIR+'input/zero-length-network.txt',
+            output_file=OUT_DIR+'zero-length-out.txt'
+        )
+
+        assert filecmp.cmp(OUT_DIR+'zero-length-out.txt', EXPECTED_DIR+'zero-length-expected.txt', shallow=False)
