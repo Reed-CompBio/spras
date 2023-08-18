@@ -62,6 +62,16 @@ algorithms:
           - 3
         rand_restarts:
           - 10
+  -
+    name: domino
+    params:
+      directed: false
+      include: true
+      run1:
+        slice_threshold:
+          - 0.3
+        module_threshold:
+          - 0.05
 datasets:
   -
     data_dir: input
