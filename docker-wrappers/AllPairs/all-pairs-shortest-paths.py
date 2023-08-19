@@ -42,7 +42,6 @@ def allpairs(network_file: Path, nodes_file: Path, output_file: Path):
     with nodes_file.open() as nodes_f:
         for line in nodes_f:
             row = line.strip().split()
-            # Assumes the file is formatted properly with two whitespace-delimited columns
             if row[1] == 'source':
                 sources.add(row[0])
             elif row[1] == 'target':
@@ -53,7 +52,7 @@ def allpairs(network_file: Path, nodes_file: Path, output_file: Path):
     assert len(targets) > 0, 'There are no targets.'
 
     # Read graph & assert all the sources/targets are in network
-    graph = nx.read_weighted_edgelist(network_file)
+    graph = nx.read_weighted_edgelist(network_file, delimiter='\t')
     assert len(sources.intersection(graph.nodes())) == len(sources), 'At least one source is not in the interactome.'
     assert len(targets.intersection(graph.nodes())) == len(targets), 'At least one target is not in the interactome.'
 
@@ -65,7 +64,7 @@ def allpairs(network_file: Path, nodes_file: Path, output_file: Path):
             nx.add_path(output, p)
 
     # Write the subgraph as a list of edges.
-    nx.write_edgelist(output, output_file, data=False)
+    nx.write_edgelist(output, output_file, data=False, delimiter='\t')
     print(f"Wrote output file to {str(output_file)}")
 
 
