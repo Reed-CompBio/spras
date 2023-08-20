@@ -18,8 +18,10 @@ def parse_arguments():
     parser = argparse.ArgumentParser(
         description="All Pairs Shortest Paths pathway reconstruction"
     )
-    parser.add_argument("--network", type=Path, required=True, help="Network file of the form <node1> <node2> <weight>")
-    parser.add_argument("--nodes", type=Path, required=True, help="Nodes file of the form <node> <source-or-target>.")
+    parser.add_argument("--network", type=Path, required=True, help="Network file of the form <node1> <node2> <weight>."
+                                                                    " Tab-delimited.")
+    parser.add_argument("--nodes", type=Path, required=True, help="Nodes file of the form <node> <source-or-target>. "
+                                                                  "Tab-delimited.")
     parser.add_argument("--output", type=Path, required=True, help="Output file")
 
     return parser.parse_args()
@@ -41,7 +43,7 @@ def allpairs(network_file: Path, nodes_file: Path, output_file: Path):
     targets = set()
     with nodes_file.open() as nodes_f:
         for line in nodes_f:
-            row = line.strip().split()
+            row = line.strip().split(sep='\t')
             if row[1] == 'source':
                 sources.add(row[0])
             elif row[1] == 'target':
