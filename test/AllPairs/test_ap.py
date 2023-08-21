@@ -67,7 +67,6 @@ class TestAllPairs:
             network=TEST_DIR+'input/correctness-network.txt',
             output_file=OUT_DIR+'correctness-out.txt'
         )
-
         assert out_path.exists()
 
         with open(out_path, 'r') as f:
