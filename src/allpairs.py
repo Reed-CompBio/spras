@@ -99,5 +99,5 @@ class AllPairs(PRM):
         @param standardized_pathway_file: the same pathway written in the universal format
         """
         df = pd.read_csv(raw_pathway_file, sep='\t', header=None)
-        df.insert(1, 'Rank', 1)  # add a rank column of 1s since the edges are not ranked.
+        df['Rank'] = 1  # add a rank column of 1s since the edges are not ranked.
         df.to_csv(standardized_pathway_file, header=False, index=False, sep='\t')
