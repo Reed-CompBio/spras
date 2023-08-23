@@ -72,6 +72,11 @@
                     flow: [1] # The flow must be an int
                     capacity: [1]
 
+        - name: "allpairs"
+          params:
+                include: true
+                directed: false
+
         - name: "domino"
           params:
                 include: true
@@ -79,6 +84,7 @@
                 run1:
                     slice_threshold: [0.3]
                     module_threshold: [0.05]
+
 
  # Here we specify which pathways to run and other file location information.
  # DataLoader.py can currently only load a single dataset

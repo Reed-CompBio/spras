@@ -29,7 +29,7 @@ def local_neighborhood(network_file: Path, nodes_file: Path, output_file: Path):
     if not nodes_file.exists():
         raise OSError(f"Nodes file {str(nodes_file)} does not exist")
     if output_file.exists():
-        print(f"Output files {str(output_file)} will be overwritten")
+        print(f"Output file {str(output_file)} will be overwritten")
 
     # Create the parent directories for the output file if needed
     output_file.parent.mkdir(parents=True, exist_ok=True)

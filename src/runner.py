@@ -1,6 +1,6 @@
-from src.dataset import Dataset
-
 # supported algorithm imports
+from src.allpairs import AllPairs as allpairs
+from src.dataset import Dataset
 from src.domino import DOMINO as domino
 from src.meo import MEO as meo
 from src.mincostflow import MinCostFlow as mincostflow
