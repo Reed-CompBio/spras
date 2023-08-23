@@ -8,6 +8,15 @@ from src.util import prepare_volume, run_container
 
 __all__ = ['PathLinker']
 
+"""
+Pathlinker will construct a fully directed graph from the provided input file
+- an edge is represented with a head and tail node, which represents the direction of the interation between two nodes
+
+Expected raw input format: 
+Interactor1   Interactor2   Weight
+- the expected raw input file should have node pairs in the 1st and 2nd columns, with a weight in the 3rd column
+- it can include repeated and bidirectional edges
+"""
 class PathLinker(PRM):
     required_inputs = ['nodetypes', 'network']
 

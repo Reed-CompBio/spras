@@ -11,7 +11,15 @@ __all__ = ['DOMINO', 'pre_domino_id_transform', 'post_domino_id_transform']
 ID_PREFIX = 'ENSG0'
 ID_PREFIX_LEN = len(ID_PREFIX)
 
+"""
+Domino will construct a fully undirected graph from the provided input file
+- in the algorithm, it uses nx.Graph()
 
+Expected raw input format: 
+Interactor1     ppi     Interactor2
+- the expected raw input file should have node pairs in the 1st and 3rd columns, with a 'ppi' in the 2nd column
+- it can include repeated and bidirectional edges
+"""
 class DOMINO(PRM):
     required_inputs = ['network', 'active_genes']
 

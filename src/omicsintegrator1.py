@@ -35,7 +35,17 @@ def write_conf(filename=Path('config.txt'), w=None, b=None, d=None, mu=None, noi
         f.write('processes = 1\n')
         f.write('threads = 1\n')
 
+"""
+Omics Integrator 1 will construct works with partially directed graphs
+- it takes in the universal input directly 
 
+Expected raw input format: 
+Interactor1    Interactor2   Weight    Direction
+- the expected raw input file should have node pairs in the 1st and 2nd columns, with a weight in the 3rd column and directionality in the 4th column
+- it can include repeated and bidirectional edges
+- it uses 'U' for undirected edges and 'D' for directed edges
+
+"""
 class OmicsIntegrator1(PRM):
     required_inputs = ['prizes', 'edges']
 

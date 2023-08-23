@@ -46,6 +46,16 @@ def write_properties(filename=Path('properties.txt'), edges=None, sources=None, 
         # Do not need csp.phase, csp.gen.file, or csp.sol.file because MAXCSP is not supported
 
 
+"""
+MEO can support partially directed graphs
+
+Expected raw input format: 
+Interactor1   pp/pd   Interactor2   Weight
+- the expected raw input file should have node pairs in the 1st and 3rd columns, with a directionality in the 2nd column and the weight in the 4th column
+- it use pp for undirected edges and pd for directed edges
+- it cannot include repeated and bidirectional edges
+- there is a chance MRO assumes that it should just be an undirected edge instead
+"""
 class MEO(PRM):
     required_inputs = ['sources', 'targets', 'edges']
 

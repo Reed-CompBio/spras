@@ -9,7 +9,16 @@ from src.util import prepare_path_docker
 
 __all__ = ['OmicsIntegrator2']
 
+"""
+Omics Integrator 2 will construct a fully undirected graph from the provided input file
+- in the algorithm, it uses nx.Graph() objects, which are undirected
+- uses a pcst_fast solver which supports undirected graphs
 
+Expected raw input format: 
+Interactor1   Interactor2   Weight
+- the expected raw input file should have node pairs in the 1st and 2nd columns, with a weight in the 3rd column
+- it can include repeated and bidirectional edges
+"""
 class OmicsIntegrator2(PRM):
     required_inputs = ['prizes', 'edges']
 
