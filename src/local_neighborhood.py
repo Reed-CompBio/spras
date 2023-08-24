@@ -9,7 +9,7 @@ from src.util import prepare_volume, run_container
 __all__ = ['LocalNeighborhood']
 
 class LocalNeighborhood(PRM):
-    required_inputs = ['nodes', 'network']
+    required_inputs = ['network', 'nodes']
 
     @staticmethod
     def generate_inputs(data, filename_map):
@@ -29,8 +29,6 @@ class LocalNeighborhood(PRM):
         elif data.contains_node_columns(['sources','targets']):
             #If there aren't prizes but are sources and targets, make prizes based on them
             node_df = data.request_node_columns(['sources','targets'])
-            node_df.loc[node_df['sources']==True, 'prize'] = 1.0
-            node_df.loc[node_df['targets']==True, 'prize'] = 1.0
         else:
             raise ValueError("Local Neighborhood requires node prizes or sources and targets")
 
@@ -98,11 +96,13 @@ class LocalNeighborhood(PRM):
 
         # TODO consider making this a string in the config file instead of a Boolean
         container_framework = 'singularity' if singularity else 'docker'
-        out = run_container(container_framework,
+        out = run_container(
+                            container_framework,
                             'oliverfanderson/local-neighborhood',
                             command,
                             volumes,
-                            work_dir)
+                            work_dir
+                            )
         print(out)
 
         # Rename the primary output file to match the desired output filename
@@ -121,4 +121,4 @@ class LocalNeighborhood(PRM):
         # What about multiple raw_pathway_files
         df = pd.read_csv(raw_pathway_file, sep='|')
         df.insert(2, 'rank', 1)
-        df.to_csv(standardized_pathway_file, header=False, index=False, sep='\t')
+        df.to_csv(standardized_pathway_file, sep='\t', header=False, index=False)
