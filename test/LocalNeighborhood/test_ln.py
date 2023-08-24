@@ -9,6 +9,7 @@ import pytest
 SPRAS_ROOT = Path(__file__).parent.parent.parent.absolute()
 sys.path.append(str(Path(SPRAS_ROOT, 'docker-wrappers', 'LocalNeighborhood')))
 from local_neighborhood import local_neighborhood
+from src.local_neighborhood import LocalNeighborhood
 
 TEST_DIR = Path('test', 'LocalNeighborhood/')
 OUT_FILE = Path(TEST_DIR, 'output', 'ln-output.txt')
@@ -46,3 +47,33 @@ class TestLocalNeighborhood:
                                output_file=OUT_FILE)
 
     # Write tests for the Local Neighborhood run function here
+    def test_ln_required(self):
+        out_path = Path(OUT_FILE)
+        out_path.unlink(missing_ok=True)
+        # Only include required arguments
+        LocalNeighborhood.run(
+            nodes=Path(TEST_DIR, 'input', 'ln-nodes.txt'),
+            network=Path(TEST_DIR, 'input', 'ln-network.txt'),
+            output_file=OUT_FILE
+        )
+        assert out_path.exists()
+
+    def test_ln_optional(self):
+        out_path = Path(OUT_FILE)
+        out_path.unlink(missing_ok=True)
+        # Include optional argument
+        LocalNeighborhood.run(
+            nodes=Path(TEST_DIR, 'input', 'ln-nodes.txt'),
+            network=Path(TEST_DIR, 'input', 'ln-network.txt'),
+            output_file=OUT_FILE
+        )
+        assert out_path.exists()
+
+    def test_ln_missing(self):
+        # Test the expected error is raised when required arguments are missing
+        with pytest.raises(ValueError):
+            # No nodetypes
+            LocalNeighborhood.run(
+                network=Path(TEST_DIR, 'input', 'ln-network.txt'),
+                output_file=OUT_FILE
+        )
