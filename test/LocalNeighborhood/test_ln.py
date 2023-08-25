@@ -59,13 +59,12 @@ class TestLocalNeighborhood:
     # spython is only available on Unix, but do not explicitly skip non-Unix platforms
     @pytest.mark.skipif(not shutil.which('singularity'), reason='Singularity not found on system')
     def test_ln_singularity(self):
-        out_path = OUT_FILE
+        out_path = Path(OUT_FILE)
         out_path.unlink(missing_ok=True)
         # Only include required arguments and run with Singularity
         LocalNeighborhood.run(
             nodes=TEST_DIR+'input/ln-nodes.txt',
             network=TEST_DIR+'input/ln-network.txt',
-            output_file=OUT_FILE,
-            singularity=True
+            output_file=OUT_FILE
         )
         assert out_path.exists()
