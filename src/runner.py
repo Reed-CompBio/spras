@@ -2,12 +2,12 @@
 from src.allpairs import AllPairs as allpairs
 from src.dataset import Dataset
 from src.domino import DOMINO as domino
+from src.local_neighborhood import LocalNeighborhood as localneighborhood
 from src.meo import MEO as meo
 from src.mincostflow import MinCostFlow as mincostflow
 from src.omicsintegrator1 import OmicsIntegrator1 as omicsintegrator1
 from src.omicsintegrator2 import OmicsIntegrator2 as omicsintegrator2
 from src.pathlinker import PathLinker as pathlinker
-from src.local_neighborhood import LocalNeighborhood as localneighborhood
 
 
 def run(algorithm, params):

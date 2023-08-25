@@ -9,6 +9,7 @@ import pytest
 SPRAS_ROOT = Path(__file__).parent.parent.parent.absolute()
 sys.path.append(str(Path(SPRAS_ROOT, 'docker-wrappers', 'LocalNeighborhood')))
 from local_neighborhood import local_neighborhood
+
 from src.local_neighborhood import LocalNeighborhood
 
 TEST_DIR = Path('test', 'LocalNeighborhood/')
