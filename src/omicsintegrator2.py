@@ -1,11 +1,10 @@
 import os
 from pathlib import Path
 
-import docker
 import pandas as pd
 
 from src.prm import PRM
-from src.util import prepare_path_docker
+from src.util import prepare_path_docker, prepare_volume, run_container
 
 __all__ = ['OmicsIntegrator2']
 
@@ -15,7 +14,8 @@ class OmicsIntegrator2(PRM):
 
     def generate_inputs(data, filename_map):
         """
-        Access fields from the dataset and write the required input files
+        Access fields from the dataset and write the required input files.
+        Automatically converts edge weights to edge costs.
         @param data: dataset
         @param filename_map: a dict mapping file types in the required_inputs to the filename for that type
         @return:
@@ -25,26 +25,26 @@ class OmicsIntegrator2(PRM):
                 raise ValueError(f"{input_type} filename is missing")
 
         if data.contains_node_columns('prize'):
-            #NODEID is always included in the node table
+            # NODEID is always included in the node table
             node_df = data.request_node_columns(['prize'])
-        elif data.contains_node_columns(['sources','targets']):
-            #If there aren't prizes but are sources and targets, make prizes based on them
-            node_df = data.request_node_columns(['sources','targets'])
+        elif data.contains_node_columns(['sources', 'targets']):
+            # If there aren't prizes but are sources and targets, make prizes based on them
+            node_df = data.request_node_columns(['sources', 'targets'])
             node_df.loc[node_df['sources']==True, 'prize'] = 1.0
             node_df.loc[node_df['targets']==True, 'prize'] = 1.0
         else:
             raise ValueError("Omics Integrator 2 requires node prizes or sources and targets")
 
-        #Omics Integrator already gives warnings for strange prize values, so we won't here
-        node_df.to_csv(filename_map['prizes'],sep='\t',index=False,columns=['NODEID','prize'],header=['name','prize'])
+        # Omics Integrator already gives warnings for strange prize values, so we won't here
+        node_df.to_csv(filename_map['prizes'], sep='\t', index=False, columns=['NODEID', 'prize'], header=['name', 'prize'])
         edges_df = data.get_interactome()
 
-        #We'll have to update this when we make iteractomes more proper, but for now
+        # We'll have to update this when we make iteractomes more proper, but for now
         # assume we always get a weight and turn it into a cost.
-        # use the same approach as omicsintegrator2 by adding half the max cost as the base cost.
+        # use the same approach as OmicsIntegrator2 by adding half the max cost as the base cost.
         # if everything is less than 1 assume that these are confidences and set the max to 1
-        edges_df['cost'] = (max(edges_df['Weight'].max(),1.0)*1.5) - edges_df['Weight']
-        edges_df.to_csv(filename_map['edges'],sep='\t',index=False,columns=['Interactor1','Interactor2','cost'],header=['protein1','protein2','cost'])
+        edges_df['cost'] = (max(edges_df['Weight'].max(), 1.0)*1.5) - edges_df['Weight']
+        edges_df.to_csv(filename_map['edges'], sep='\t', index=False, columns=['Interactor1', 'Interactor2', 'cost'], header=['protein1', 'protein2', 'cost'])
 
 
 
@@ -63,22 +63,25 @@ class OmicsIntegrator2(PRM):
         if edges is None or prizes is None or output_file is None:
             raise ValueError('Required Omics Integrator 2 arguments are missing')
 
-        if singularity:
-            raise NotImplementedError('Omics Integrator 2 does not yet support Singularity')
+        work_dir = '/spras'
 
-        # Initialize a Docker client using environment variables
-        client = docker.from_env()
-        work_dir = Path(__file__).parent.parent.absolute()
+        # Each volume is a tuple (src, dest)
+        volumes = list()
 
-        edge_file = Path(edges)
-        prize_file = Path(prizes)
+        bind_path, edge_file = prepare_volume(edges, work_dir)
+        volumes.append(bind_path)
+
+        bind_path, prize_file = prepare_volume(prizes, work_dir)
+        volumes.append(bind_path)
 
         out_dir = Path(output_file).parent
         # Omics Integrator 2 requires that the output directory exist
-        Path(work_dir, out_dir).mkdir(parents=True, exist_ok=True)
+        out_dir.mkdir(parents=True, exist_ok=True)
+        bind_path, mapped_out_dir = prepare_volume(out_dir, work_dir)
+        volumes.append(bind_path)
 
-        command = ['OmicsIntegrator', '-e', edge_file.as_posix(), '-p', prize_file.as_posix(),
-                   '-o', out_dir.as_posix(), '--filename', 'oi2']
+        command = ['OmicsIntegrator', '-e', edge_file, '-p', prize_file,
+                   '-o', mapped_out_dir, '--filename', 'oi2']
 
         # Add optional arguments
         if w is not None:
@@ -101,34 +104,13 @@ class OmicsIntegrator2(PRM):
 
         print('Running Omics Integrator 2 with arguments: {}'.format(' '.join(command)), flush=True)
 
-        #Don't perform this step on systems where permissions aren't an issue like windows
-        need_chown = True
-        try:
-            uid = os.getuid()
-        except AttributeError:
-            need_chown = False
-
-        try:
-            out = client.containers.run('reedcompbio/omics-integrator-2',
-                                        command,
-                                        stderr=True,
-                                        volumes={
-                                            prepare_path_docker(work_dir): {'bind': '/OmicsIntegrator2', 'mode': 'rw'}},
-                                        working_dir='/OmicsIntegrator2')
-            if need_chown:
-                #This command changes the ownership of output files so we don't
-                # get a permissions error when snakemake tries to touch the files
-                chown_command = " ".join(["chown",str(uid),out_dir.as_posix()+"/oi2*"])
-                client.containers.run('reedcompbio/omics-integrator-2',
-                                            chown_command,
-                                            stderr=True,
-                                            volumes={prepare_path_docker(work_dir): {'bind': '/OmicsIntegrator2', 'mode': 'rw'}},
-                                            working_dir='/OmicsIntegrator2')
-
-            print(out.decode('utf-8'))
-        finally:
-            # Not sure whether this is needed
-            client.close()
+        container_framework = 'singularity' if singularity else 'docker'
+        out = run_container(container_framework,
+                            'reedcompbio/omics-integrator-2',
+                            command,
+                            volumes,
+                            work_dir)
+        print(out)
 
         # TODO do we want to retain other output files?
         # TODO if deleting other output files, write them all to a tmp directory and copy
