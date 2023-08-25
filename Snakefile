@@ -13,7 +13,7 @@ SEP = '/'
 wildcard_constraints:
     params="params-\w+"
 
-config, datasets, out_dir, algorithm_params, algorithm_directed = process_config(config)
+config, datasets, out_dir, algorithm_params, algorithm_directed, pca_params, hac_params = process_config(config)
 
 # TODO consider the best way to pass global configuration information to the run functions
 SINGULARITY = "singularity" in config and config["singularity"]
@@ -74,10 +74,13 @@ def make_final_input(wildcards):
 
     if config["analysis"]["ml"]["include"]:  
         final_input.extend(expand('{out_dir}{sep}{dataset}-pca.png',out_dir=out_dir,sep=SEP,dataset=dataset_labels,algorithm_params=algorithms_with_params))
-        final_input.extend(expand('{out_dir}{sep}{dataset}-pca-components.txt',out_dir=out_dir,sep=SEP,dataset=dataset_labels,algorithm_params=algorithms_with_params))
-        final_input.extend(expand('{out_dir}{sep}{dataset}-hac.png',out_dir=out_dir,sep=SEP,dataset=dataset_labels,algorithm_params=algorithms_with_params))
-        final_input.extend(expand('{out_dir}{sep}{dataset}-hac-clusters.txt',out_dir=out_dir,sep=SEP,dataset=dataset_labels,algorithm_params=algorithms_with_params))
+        final_input.extend(expand('{out_dir}{sep}{dataset}-pca-variance.txt',out_dir=out_dir,sep=SEP,dataset=dataset_labels,algorithm_params=algorithms_with_params))
+        final_input.extend(expand('{out_dir}{sep}{dataset}-hac-vertical.png',out_dir=out_dir,sep=SEP,dataset=dataset_labels,algorithm_params=algorithms_with_params))
+        final_input.extend(expand('{out_dir}{sep}{dataset}-hac-clusters-vertical.txt',out_dir=out_dir,sep=SEP,dataset=dataset_labels,algorithm_params=algorithms_with_params))
         final_input.extend(expand('{out_dir}{sep}{dataset}-pca-coordinates.txt',out_dir=out_dir,sep=SEP,dataset=dataset_labels,algorithm_params=algorithms_with_params))
+        final_input.extend(expand('{out_dir}{sep}{dataset}-hac-horizontal.png',out_dir=out_dir,sep=SEP,dataset=dataset_labels,algorithm_params=algorithms_with_params))
+        final_input.extend(expand('{out_dir}{sep}{dataset}-hac-clusters-horizontal.txt',out_dir=out_dir,sep=SEP,dataset=dataset_labels,algorithm_params=algorithms_with_params))
+        final_input.extend(expand('{out_dir}{sep}{dataset}-ensemble-pathway.txt',out_dir=out_dir,sep=SEP,dataset=dataset_labels,algorithm_params=algorithms_with_params))
 
     if len(final_input) == 0:
         # No analysis added yet, so add reconstruction output files if they exist.
@@ -263,15 +266,19 @@ rule ml_analysis:
         pathways = expand('{out_dir}{sep}{{dataset}}-{algorithm_params}{sep}pathway.txt', out_dir=out_dir, sep=SEP, algorithm_params=algorithms_with_params)
     output: 
         pca_image = SEP.join([out_dir, '{dataset}-pca.png']),
-        pca_components= SEP.join([out_dir, '{dataset}-pca-components.txt']),
+        pca_variance= SEP.join([out_dir, '{dataset}-pca-variance.txt']),
         pca_coordinates = SEP.join([out_dir, '{dataset}-pca-coordinates.txt']),
-        hac_image = SEP.join([out_dir, '{dataset}-hac.png']),
-        hac_clusters = SEP.join([out_dir, '{dataset}-hac-clusters.txt'])
+        hac_image_vertical = SEP.join([out_dir, '{dataset}-hac-vertical.png']),
+        hac_clusters_vertical = SEP.join([out_dir, '{dataset}-hac-clusters-vertical.txt']),
+        hac_image_horizontal = SEP.join([out_dir, '{dataset}-hac-horizontal.png']),
+        hac_clusters_horizontal = SEP.join([out_dir, '{dataset}-hac-clusters-horizontal.txt']),
+        ensemble_network_file = SEP.join([out_dir,'{dataset}-ensemble-pathway.txt'])
     run: 
         summary_df = ml.summarize_networks(input.pathways)
-        ml.pca(summary_df, output.pca_image, output.pca_components, output.pca_coordinates)
-        ml.hac(summary_df, output.hac_image, output.hac_clusters)
-
+        ml.pca(summary_df, output.pca_image, output.pca_variance, output.pca_coordinates, **pca_params)
+        ml.hac_vertical(summary_df, output.hac_image_vertical, output.hac_clusters_vertical, **hac_params)
+        ml.hac_horizontal(summary_df, output.hac_image_horizontal, output.hac_clusters_horizontal, **hac_params)
+        ml.ensemble_network(summary_df, output.ensemble_network_file)
 
 # Remove the output directory
 rule clean:

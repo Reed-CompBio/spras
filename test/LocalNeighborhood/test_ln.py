@@ -1,9 +1,8 @@
 import sys
+from filecmp import cmp
 from pathlib import Path
 
 import pytest
-
-from src.util import compare_files
 
 # TODO consider refactoring to simplify the import
 # Modify the path because of the - in the directory
@@ -26,7 +25,7 @@ class TestLocalNeighborhood:
                            output_file=OUT_FILE)
         assert OUT_FILE.exists(), 'Output file was not written'
         expected_file = Path(TEST_DIR, 'expected_output', 'ln-output.txt')
-        assert compare_files(OUT_FILE, expected_file), 'Output file does not match expected output file'
+        assert cmp(OUT_FILE, expected_file, shallow=False), 'Output file does not match expected output file'
 
     """
     Run the local neighborhood algorithm with a missing input file
