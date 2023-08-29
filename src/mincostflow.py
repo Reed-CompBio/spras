@@ -2,6 +2,7 @@ from pathlib import Path
 
 import pandas as pd
 
+from src.dataset import convert_undirected_to_directed
 from src.prm import PRM
 from src.util import prepare_volume, run_container
 
@@ -12,7 +13,7 @@ MinCostFlow deals with fully directed graphs
 - OR Tools MCF is designed for directed graphs
 - when an edge (arc), it has a source and target node, so flow it only allowed to moced from source to the target
 
-Expected raw input format: 
+Expected raw input format:
 Interactor1  Interactor2   Weight
 - the expected raw input file should have node pairs in the 1st and 2nd columns, with the weight in the 3rd column
 - it can include repeated and bidirectional edges
@@ -45,6 +46,9 @@ class MinCostFlow (PRM):
 
         # create the network of edges
         edges = data.get_interactome()
+
+        # Format network edges
+        edges = convert_undirected_to_directed(edges)
 
         # creates the edges files that contains the head and tail nodes and the weights after them
         edges.to_csv(filename_map['edges'], sep='\t', index=False, columns=["Interactor1","Interactor2","Weight"], header=False)

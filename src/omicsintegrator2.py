@@ -4,6 +4,7 @@ from pathlib import Path
 import docker
 import pandas as pd
 
+from src.dataset import convert_directed_to_undirected
 from src.prm import PRM
 from src.util import prepare_path_docker
 
@@ -14,7 +15,7 @@ Omics Integrator 2 will construct a fully undirected graph from the provided inp
 - in the algorithm, it uses nx.Graph() objects, which are undirected
 - uses a pcst_fast solver which supports undirected graphs
 
-Expected raw input format: 
+Expected raw input format:
 Interactor1   Interactor2   Weight
 - the expected raw input file should have node pairs in the 1st and 2nd columns, with a weight in the 3rd column
 - it can include repeated and bidirectional edges
@@ -46,7 +47,12 @@ class OmicsIntegrator2(PRM):
 
         #Omics Integrator already gives warnings for strange prize values, so we won't here
         node_df.to_csv(filename_map['prizes'],sep='\t',index=False,columns=['NODEID','prize'],header=['name','prize'])
+
+        # Create network file
         edges_df = data.get_interactome()
+
+        # Format network file
+        edges_df = convert_directed_to_undirected(edges_df)
 
         #We'll have to update this when we make iteractomes more proper, but for now
         # assume we always get a weight and turn it into a cost.

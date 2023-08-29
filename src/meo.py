@@ -2,6 +2,7 @@ from pathlib import Path
 
 import pandas as pd
 
+from src.dataset import add_directionality_seperators
 from src.prm import PRM
 from src.util import prepare_volume, run_container
 
@@ -49,7 +50,7 @@ def write_properties(filename=Path('properties.txt'), edges=None, sources=None, 
 """
 MEO can support partially directed graphs
 
-Expected raw input format: 
+Expected raw input format:
 Interactor1   pp/pd   Interactor2   Weight
 - the expected raw input file should have node pairs in the 1st and 3rd columns, with a directionality in the 2nd column and the weight in the 4th column
 - it use pp for undirected edges and pd for directed edges
@@ -83,11 +84,12 @@ class MEO(PRM):
             nodes = nodes.loc[nodes[node_type]]
             nodes.to_csv(filename_map[node_type], index=False, columns=['NODEID'], header=False)
 
-        # TODO need to support partially directed graphs
-        # Expected columns are Node1 EdgeType Node2 Weight
+        # Create network file
         edges = data.get_interactome()
-        # For now all edges are undirected
-        edges.insert(1, 'EdgeType', '(pp)')
+
+        # Format network file
+        edges = add_directionality_seperators(edges, 1, 'EdgeType', '(pd)', '(pp)')
+
         edges.to_csv(filename_map['edges'], sep='\t', index=False, columns=['Interactor1', 'EdgeType', 'Interactor2', 'Weight'], header=False)
 
 

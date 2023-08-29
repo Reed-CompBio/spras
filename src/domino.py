@@ -3,6 +3,7 @@ from pathlib import Path
 
 import pandas as pd
 
+from src.dataset import add_seperator, convert_directed_to_undirected
 from src.prm import PRM
 from src.util import prepare_volume, run_container
 
@@ -15,7 +16,7 @@ ID_PREFIX_LEN = len(ID_PREFIX)
 Domino will construct a fully undirected graph from the provided input file
 - in the algorithm, it uses nx.Graph()
 
-Expected raw input format: 
+Expected raw input format:
 Interactor1     ppi     Interactor2
 - the expected raw input file should have node pairs in the 1st and 3rd columns, with a 'ppi' in the 2nd column
 - it can include repeated and bidirectional edges
@@ -51,7 +52,10 @@ class DOMINO(PRM):
 
         # Create network file
         edges_df = data.get_interactome()
-        edges_df['ppi'] = 'ppi'
+
+        # Format network file
+        edges_df = convert_directed_to_undirected(edges_df)
+        edges_df = add_seperator(edges_df, 1, 'ppi', 'ppi')
 
         # Transform each node id with a prefix
         edges_df['Interactor1'] = edges_df['Interactor1'].apply(pre_domino_id_transform)
