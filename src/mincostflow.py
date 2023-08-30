@@ -2,7 +2,7 @@ from pathlib import Path
 
 import pandas as pd
 
-from src.dataset import convert_undirected_to_directed
+from src.dataset import convert_undirected_to_directed, readd_direction_col_directed
 from src.prm import PRM
 from src.util import prepare_volume, run_container
 
@@ -140,4 +140,5 @@ class MinCostFlow (PRM):
 
         df = pd.read_csv(raw_pathway_file, sep='\t', header=None)
         df.insert(2, 'Rank', 1)  # adds in a rank column of 1s because the edges are not ranked
+        df = readd_direction_col_directed(df, 3)
         df.to_csv(standardized_pathway_file, header=False, index=False, sep='\t')

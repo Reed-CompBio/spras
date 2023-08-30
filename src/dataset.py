@@ -264,3 +264,55 @@ def add_directionality_seperators(df: pd.DataFrame, col_loc: int, col_name: str,
             )
 
     return df
+
+def readd_direction_col_mixed(df: pd.DataFrame, direction_col_loc: int, existing_direction_column: str, dir_sep: str, undir_sep: str) -> pd.DataFrame:
+    """
+    readds a 'Direction' column that puts a 'U' or 'D' based on the dir/undir seperators in the existing direction column
+
+    *user must keep the existing direction column when using the function
+
+    @param df: input network df that contains directionality
+    @param direction_col_loc: the spot in the dataframe to put back the 'Direction' column
+    @param existing_direction_column: the name of the existing directionality column
+    @param dir_sep: the directed edge sep
+    @param undir_sep: the undirected edge sep
+    @return a df with Direction column added back
+    """
+
+    df.insert(direction_col_loc, "Direction", "D")
+
+    for index, row in df.iterrows():
+        if row[existing_direction_column] == undir_sep:
+            df.at[index, "Direction"] = "U"
+
+        elif row[existing_direction_column] == dir_sep:
+            df.at[index, "Direction"] = "D"
+
+        else:
+            raise ValueError(
+                f'direction must be a \'{dir_sep}\' or \'{undir_sep}\', but found {row[existing_direction_column]}'
+            )
+
+    return df
+
+def readd_direction_col_undirected(df: pd.DataFrame, direction_col_loc: int) -> pd.DataFrame:
+    """
+    readds a 'Direction' column that puts a 'U'
+
+    @param df: input network df that contains directionality
+    @param direction_col_loc: the spot in the dataframe to put back the 'Direction' column
+    @return a df with Direction column added back
+    """
+    df.insert(direction_col_loc, "Direction", "U")
+    return df
+
+def readd_direction_col_directed(df: pd.DataFrame, direction_col_loc: int) -> pd.DataFrame:
+    """
+    readds a 'Direction' column that puts a 'D'
+
+    @param df: input network df that contains directionality
+    @param direction_col_loc: the spot in the dataframe to put back the 'Direction' column
+    @return a df with Direction column added back
+    """
+    df.insert(direction_col_loc, "Direction", "D")
+    return df

@@ -3,6 +3,7 @@ from pathlib import Path
 
 import pandas as pd
 
+from src.dataset import convert_directed_to_undirected, readd_direction_col_undirected
 from src.prm import PRM
 from src.util import prepare_volume, run_container
 
@@ -42,8 +43,12 @@ class AllPairs(PRM):
 
         input_df.to_csv(filename_map["nodetypes"], sep="\t", index=False, columns=["#Node", "Node type"])
 
+        # Create network file
+        edges_df = data.get_interactome()
+        # Format network file
+        edges_df = convert_directed_to_undirected(edges_df)
         # This is pretty memory intensive. We might want to keep the interactome centralized.
-        data.get_interactome().to_csv(filename_map["network"], sep="\t", index=False,
+        edges_df.to_csv(filename_map["network"], sep="\t", index=False,
                                       columns=["Interactor1", "Interactor2", "Weight"],
                                       header=["#Interactor1", "Interactor2", "Weight"])
 
@@ -100,4 +105,5 @@ class AllPairs(PRM):
         """
         df = pd.read_csv(raw_pathway_file, sep='\t', header=None)
         df['Rank'] = 1  # add a rank column of 1s since the edges are not ranked.
+        df = readd_direction_col_undirected(df, 2)
         df.to_csv(standardized_pathway_file, header=False, index=False, sep='\t')

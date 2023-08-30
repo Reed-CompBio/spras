@@ -2,7 +2,7 @@ from pathlib import Path
 
 import pandas as pd
 
-from src.dataset import add_directionality_seperators
+from src.dataset import add_directionality_seperators, readd_direction_col_mixed
 from src.prm import PRM
 from src.util import prepare_volume, run_container
 
@@ -179,4 +179,8 @@ class MEO(PRM):
         # TODO what should be the edge rank?
         # Would need to load the paths output file to rank edges correctly
         df.insert(5, 'Rank', 1)  # Add a constant rank of 1
-        df.to_csv(standardized_pathway_file, columns=['Source', 'Target', 'Rank'], header=False, index=False, sep='\t')
+
+        # TODO: add direction column
+        df = readd_direction_col_mixed(df, 6, "Type", "pd", "pp")
+
+        df.to_csv(standardized_pathway_file, columns=['Source', 'Target', 'Rank', "Direction"], header=False, index=False, sep='\t')

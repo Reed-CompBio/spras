@@ -4,7 +4,7 @@ from pathlib import Path
 import docker
 import pandas as pd
 
-from src.dataset import convert_directed_to_undirected
+from src.dataset import convert_directed_to_undirected, readd_direction_col_undirected
 from src.prm import PRM
 from src.util import prepare_path_docker
 
@@ -173,4 +173,5 @@ class OmicsIntegrator2(PRM):
         df = df[df['in_solution'] == True]  # Check whether this column can be empty before revising this line
         df = df.take([0, 1], axis=1)
         df[3] = [1 for _ in range(len(df.index))]
+        df = readd_direction_col_undirected(df, 3)
         df.to_csv(standardized_pathway_file, header=False, index=False, sep='\t')
