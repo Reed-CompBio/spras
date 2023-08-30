@@ -313,9 +313,6 @@ def process_config(config):
             # Do not parse the rest of the parameters for this algorithm if it is not included
             continue
 
-        if "directed" in cur_params:
-            algorithm_directed[alg["name"]] = cur_params.pop("directed")
-
         # The algorithm has no named arguments so create a default placeholder
         if len(cur_params) == 0:
             cur_params["run1"] = {"spras_placeholder": ["no parameters"]}

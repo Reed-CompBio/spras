@@ -29,14 +29,12 @@
         - name: "pathlinker"
           params:
                 include: true
-                directed: true
                 run1:
                     k: range(100,201,100)
 
         - name: "omicsintegrator1"
           params:
                 include: true
-                directed: false
                 run1:
                     r: [5]
                     b: [5, 6]
@@ -47,7 +45,6 @@
         - name: "omicsintegrator2"
           params:
                 include: true
-                directed: false
                 run1:
                     b: [4]
                     g: [0]
@@ -58,7 +55,6 @@
         - name: "meo"
           params:
                 include: true
-                directed: true
                 run1:
                     max_path_length: [3]
                     local_search: ["Yes"]
@@ -67,7 +63,6 @@
         - name: "mincostflow"
           params:
                 include: true
-                directed: false
                 run1:
                     flow: [1] # The flow must be an int
                     capacity: [1]
@@ -75,12 +70,10 @@
         - name: "allpairs"
           params:
                 include: true
-                directed: false
 
         - name: "domino"
           params:
                 include: true
-                directed: false
                 run1:
                     slice_threshold: [0.3]
                     module_threshold: [0.05]
@@ -125,13 +118,13 @@
  analysis:
         # Create one summary per pathway file and a single summary table for all pathways for each dataset
         summary:
-          include: true
+          include: false
         # Create output files for each pathway that can be visualized with GraphSpace
         graphspace:
-          include: true
+          include: false
         # Machine learning analysis (e.g. clustering) of the pathway output files for each dataset
         ml:
-          include: true
+          include: false
           # specify how many principal components to calculate
           components: 2
           # boolean to show the labels on the pca graph
