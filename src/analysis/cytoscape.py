@@ -10,6 +10,8 @@ def run_cytoscape_container(pathways: List[Union[str, PurePath]], out_dir: str, 
     2. setup wrapper command
     3. link cytoscape src at runtime
     """
+    # To work with Singularity, /spras must be mapped to a writeable location because that directory is fixed as
+    # the home directory inside the container and Cytoscape writes configuration files there
     work_dir = '/spras'
 
     # Each volume is a tuple (src, dest)
