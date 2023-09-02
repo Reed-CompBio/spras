@@ -3,19 +3,19 @@
 # by Kozo Nishida
 FROM python:3.9.13
 
-# VERSIONS
+# Versions
 ENV CYTOSCAPE_VERSION=3.9.1
 ENV PY4CYTOSCAPE_VERSION=1.3.0
 ENV JAVA_HOME="/usr/lib/jvm/java-11-openjdk-amd64"
-# Cytoscape writes some configuration files to the home directory, ignoring -Duser.home in Cytoscape.vmoptions
-ENV HOME="/spras"
+# Workaround for java.util.zip.ZipException: Invalid CEN header https://cytoscape.org/common_issues.html#zipvalidation
+ENV EXTRA_JAVA_OPTS="-Djdk.util.zip.disableZip64ExtraFieldValidation=true"
 
 WORKDIR /py4cytoscape
 
-# INSTALL PY4CYTOSCAPE
+# Install py4cytoscape
 RUN pip install py4cytoscape==${PY4CYTOSCAPE_VERSION}
 
-# INSTALL JAVA AND CYTOSCAPE
+# Install Java and Cytoscape
 RUN apt-get update && apt-get -y install default-jdk xvfb supervisor wget
 RUN wget https://github.com/cytoscape/cytoscape/releases/download/${CYTOSCAPE_VERSION}/cytoscape-unix-${CYTOSCAPE_VERSION}.tar.gz \
     && tar xf cytoscape-unix-${CYTOSCAPE_VERSION}.tar.gz && rm cytoscape-unix-${CYTOSCAPE_VERSION}.tar.gz
