@@ -3,7 +3,7 @@ from pathlib import Path
 
 import pandas as pd
 
-from src.dataset import convert_directed_to_undirected, readd_direction_col_undirected
+from src.interactome import convert_directed_to_undirected, readd_direction_col_undirected
 from src.prm import PRM
 from src.util import prepare_volume, run_container
 
@@ -105,5 +105,5 @@ class AllPairs(PRM):
         """
         df = pd.read_csv(raw_pathway_file, sep='\t', header=None)
         df['Rank'] = 1  # add a rank column of 1s since the edges are not ranked.
-        df = readd_direction_col_undirected(df, 2)
+        df = readd_direction_col_undirected(df)
         df.to_csv(standardized_pathway_file, header=False, index=False, sep='\t')

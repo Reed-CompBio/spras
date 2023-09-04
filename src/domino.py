@@ -3,8 +3,8 @@ from pathlib import Path
 
 import pandas as pd
 
-from src.dataset import (
-    add_seperator,
+from src.interactome import (
+    add_constant,
     convert_directed_to_undirected,
     readd_direction_col_undirected,
 )
@@ -58,8 +58,8 @@ class DOMINO(PRM):
         edges_df = data.get_interactome()
 
         # Format network file
-        edges_df = convert_directed_to_undirected(edges_df)
-        edges_df = add_seperator(edges_df, 1, 'ppi', 'ppi')
+        # edges_df = convert_directed_to_undirected(edges_df)
+        edges_df = add_constant(edges_df, 'ppi', 'ppi')
 
         # Transform each node id with a prefix
         edges_df['Interactor1'] = edges_df['Interactor1'].apply(pre_domino_id_transform)
@@ -203,7 +203,7 @@ class DOMINO(PRM):
             # Remove the prefix
             edges_df['source'] = edges_df['source'].apply(post_domino_id_transform)
             edges_df['target'] = edges_df['target'].apply(post_domino_id_transform)
-            edges_df = readd_direction_col_undirected(edges_df, 3)
+            edges_df = readd_direction_col_undirected(edges_df)
 
         print(edges_df)
         edges_df.to_csv(standardized_pathway_file, sep='\t', header=False, index=False)

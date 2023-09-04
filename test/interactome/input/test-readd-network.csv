@@ -1,0 +1,6 @@
+A	pp	B	0.5
+B	pd	C	0.5
+C	pd	B	0.5
+A	pp	D	0.5
+C	pd	D	0.5
+D	pd	C	0.5

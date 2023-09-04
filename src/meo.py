@@ -2,7 +2,7 @@ from pathlib import Path
 
 import pandas as pd
 
-from src.dataset import add_directionality_seperators, readd_direction_col_mixed
+from src.interactome import add_directionality_constant, readd_direction_col_mixed
 from src.prm import PRM
 from src.util import prepare_volume, run_container
 
@@ -88,7 +88,7 @@ class MEO(PRM):
         edges = data.get_interactome()
 
         # Format network file
-        edges = add_directionality_seperators(edges, 1, 'EdgeType', '(pd)', '(pp)')
+        edges = add_directionality_constant(edges, 'EdgeType', '(pd)', '(pp)')
 
         edges.to_csv(filename_map['edges'], sep='\t', index=False, columns=['Interactor1', 'EdgeType', 'Interactor2', 'Weight'], header=False)
 
@@ -181,6 +181,6 @@ class MEO(PRM):
         df.insert(5, 'Rank', 1)  # Add a constant rank of 1
 
         # TODO: add direction column
-        df = readd_direction_col_mixed(df, 6, "Type", "pd", "pp")
+        df = readd_direction_col_mixed(df, "Type", "pd", "pp")
 
         df.to_csv(standardized_pathway_file, columns=['Source', 'Target', 'Rank', "Direction"], header=False, index=False, sep='\t')
