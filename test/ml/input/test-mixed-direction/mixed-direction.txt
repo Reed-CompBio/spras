@@ -1,0 +1,4 @@
+A	B	1	D
+B	A	1	D
+C	D	1	U
+E	F	1	U
