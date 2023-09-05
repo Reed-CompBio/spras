@@ -7,6 +7,7 @@ Methods for converting/creating the universal input and universal output
 
 import pandas as pd
 
+
 def convert_undirected_to_directed(df: pd.DataFrame) -> pd.DataFrame:
     """
     turns a graph into a fully directed graph
@@ -25,10 +26,10 @@ def convert_undirected_to_directed(df: pd.DataFrame) -> pd.DataFrame:
     new_df['Direction'] = 'D'
     df.loc[mask, 'Direction'] = 'D'
     df = pd.concat([df, new_df], ignore_index=True)
-    
+
     print("convert_undirected_to_directed")
     print(df)
-    
+
     return df
 
 
@@ -41,12 +42,12 @@ def convert_directed_to_undirected(df: pd.DataFrame) -> pd.DateOffset:
     @param df: input network df of edges, weights, and directionality
     @return a dataframe with no directed edges in Direction column
     """
-    
+
     df["Direction"] = "U"
-    
+
     print("convert_directed_to_undirected")
     print(df)
-    
+
     return df
 
 
@@ -61,10 +62,10 @@ def add_constant(df: pd.DataFrame, col_name: str, const: str) -> pd.DataFrame:
     """
 
     df.insert(df.shape[1], col_name, const)
-    
+
     print("add_constant")
     print(df)
-   
+
     return df
 
 
@@ -86,7 +87,7 @@ def add_directionality_constant(df: pd.DataFrame,  col_name: str, dir_const: str
 
     print("add_directionality_constant")
     print(df)
-    
+
     return df
 
 def readd_direction_col_mixed(df: pd.DataFrame, existing_direction_column: str, dir_const: str, undir_const: str) -> pd.DataFrame:
@@ -110,10 +111,10 @@ def readd_direction_col_mixed(df: pd.DataFrame, existing_direction_column: str, 
 
     mask_dir = df[existing_direction_column] == dir_const
     df.loc[mask_dir, "Direction"] = "D"
-    
+
     print("readd_direction_col_mixed")
     print(df)
-    
+
     return df
 
 def readd_direction_col_undirected(df: pd.DataFrame) -> pd.DataFrame:
@@ -124,10 +125,10 @@ def readd_direction_col_undirected(df: pd.DataFrame) -> pd.DataFrame:
     @return a df with Direction column added back
     """
     df.insert(df.shape[1], "Direction", "U")
-    
+
     print("readd_direction_col_undirected")
     print(df)
-    
+
     return df
 
 def readd_direction_col_directed(df: pd.DataFrame) -> pd.DataFrame:
@@ -138,8 +139,8 @@ def readd_direction_col_directed(df: pd.DataFrame) -> pd.DataFrame:
     @return a df with Direction column added back
     """
     df.insert(df.shape[1], "Direction", "D")
-    
+
     print("readd_direction_col_directed")
     print(df)
-    
+
     return df

@@ -1,14 +1,15 @@
 from pathlib import Path
+
 import pandas as pd
 
 from src.interactome import (
-    convert_undirected_to_directed,
-    convert_directed_to_undirected,
     add_constant,
     add_directionality_constant,
+    convert_directed_to_undirected,
+    convert_undirected_to_directed,
+    readd_direction_col_directed,
     readd_direction_col_mixed,
     readd_direction_col_undirected,
-    readd_direction_col_directed,
 )
 
 IN_DIR = "test/interactome/input"
@@ -40,7 +41,7 @@ class TestInteractome:
         df = add_constant(df, "const", "-")
         expected_df = pd.read_csv(EXPECTED_DIR+"add_const.csv", sep='\t')
         assert df.equals(expected_df)
-        
+
     def add_directionality_const(self):
         df = pd.read_csv(IN_DIR+ 'test-network.csv', sep='\t')
         df = add_directionality_constant(df, "direct", "pd", "pp")
@@ -48,10 +49,10 @@ class TestInteractome:
         assert df.equals(expected_df)
 
     def readd_col_mixed(self):
-        None
+        assert True
 
     def readd_col_undir(self):
-        None
+        assert True
 
     def readd_col_dir(self):
-        None
+        assert True

@@ -4,7 +4,10 @@ from pathlib import Path
 import docker
 import pandas as pd
 
-from src.interactome import convert_directed_to_undirected, readd_direction_col_undirected
+from src.interactome import (
+    convert_directed_to_undirected,
+    readd_direction_col_undirected,
+)
 from src.prm import PRM
 from src.util import prepare_path_docker
 
