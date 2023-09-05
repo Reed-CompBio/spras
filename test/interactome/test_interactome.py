@@ -27,13 +27,13 @@ class TestInteractome:
     def undirected_to_directed(self):
         df = pd.read_csv(IN_DIR+ 'test-network.csv', sep='\t')
         df = convert_undirected_to_directed(df)
-        expected_df = pd.read_csv(EXPECTED_DIR+ 'u_to_d.csv', sep='\t')
+        expected_df = pd.read_csv(EXPECTED_DIR+ 'convert_u_to_d.csv', sep='\t')
         assert df.equals(expected_df)
 
     def directed_to_undirected(self):
         df = pd.read_csv(IN_DIR+ 'test-network.csv', sep='\t')
         df = convert_directed_to_undirected(df)
-        expected_df = pd.read_csv(EXPECTED_DIR+'d_to_u.csv', sep='\t')
+        expected_df = pd.read_csv(EXPECTED_DIR+'convert_d_to_u.csv', sep='\t')
         assert df.equals(expected_df)
 
     def add_const(self):
@@ -49,10 +49,20 @@ class TestInteractome:
         assert df.equals(expected_df)
 
     def readd_col_mixed(self):
-        assert True
+        df = pd.read_csv(IN_DIR+ "test-readd-network.csv", sep ='\t')
+        df.columns = ["Edge1", "InteractionType", "Edge2", "Weight"]
+        df = readd_direction_col_mixed(df, "InteractionType", "pd", "pp")
+        expected_df = pd.read_csv(EXPECTED_DIR+"readd_mixed.csv", sep = '\t')
+        assert df.equals(expected_df)
 
     def readd_col_undir(self):
-        assert True
+        df = pd.read_csv(IN_DIR+ "test-readd-network.csv", sep ='\t')
+        df = readd_direction_col_undirected(df)
+        expected_df = pd.read_csv(EXPECTED_DIR+"readd_undir.csv", sep = '\t')
+        assert df.equals(expected_df)
 
     def readd_col_dir(self):
-        assert True
+        df = pd.read_csv(IN_DIR+ "test-readd-network.csv", sep ='\t')
+        df = readd_direction_col_directed(df)
+        expected_df = pd.read_csv(EXPECTED_DIR+"readd_dir.csv", sep = '\t')
+        assert df.equals(expected_df)

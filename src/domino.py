@@ -59,6 +59,7 @@ class DOMINO(PRM):
 
         # Format network file
         # edges_df = convert_directed_to_undirected(edges_df)
+        # - technically this can be called but since we don't use the column and based on what the function does, it is not truly needed
         edges_df = add_constant(edges_df, 'ppi', 'ppi')
 
         # Transform each node id with a prefix

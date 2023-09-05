@@ -180,7 +180,6 @@ class MEO(PRM):
         # Would need to load the paths output file to rank edges correctly
         df.insert(5, 'Rank', 1)  # Add a constant rank of 1
 
-        # TODO: add direction column
         df = readd_direction_col_mixed(df, "Type", "pd", "pp")
 
         df.to_csv(standardized_pathway_file, columns=['Source', 'Target', 'Rank', "Direction"], header=False, index=False, sep='\t')

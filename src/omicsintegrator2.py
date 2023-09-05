@@ -56,6 +56,7 @@ class OmicsIntegrator2(PRM):
 
         # Format network file
         # edges_df = convert_directed_to_undirected(edges_df)
+        # - technically this can be called but since we don't use the column and based on what the function does, it is not truly needed
 
         #We'll have to update this when we make iteractomes more proper, but for now
         # assume we always get a weight and turn it into a cost.
@@ -175,6 +176,6 @@ class OmicsIntegrator2(PRM):
         df = pd.read_csv(raw_pathway_file, sep='\t')
         df = df[df['in_solution'] == True]  # Check whether this column can be empty before revising this line
         df = df.take([0, 1], axis=1)
-        df[3] = [1 for _ in range(len(df.index))]
+        df['Rank'] = [1 for _ in range(len(df.index))]
         df = readd_direction_col_undirected(df)
         df.to_csv(standardized_pathway_file, header=False, index=False, sep='\t')

@@ -48,8 +48,11 @@ class AllPairs(PRM):
 
         # Create network file
         edges_df = data.get_interactome()
+
         # Format network file
-        edges_df = convert_directed_to_undirected(edges_df)
+        # edges_df = convert_directed_to_undirected(edges_df)
+        # - technically this can be called but since we don't use the column and based on what the function does, it is not truly needed
+
         # This is pretty memory intensive. We might want to keep the interactome centralized.
         edges_df.to_csv(filename_map["network"], sep="\t", index=False,
                                       columns=["Interactor1", "Interactor2", "Weight"],
