@@ -52,13 +52,13 @@ def summarize_networks(file_paths: Iterable[Union[str, PathLike]]) -> pd.DataFra
                         edges.append(UNDIR_CONST.join([node1, node2]))
                     elif direction == "D":
                         edges.append(DIR_CONST.join([node1, node2]))
-                    else: 
+                    else:
                         ValueError(f"direction is {direction}, rather than U or D")
-            
+
             # getting the algorithm name
             p = PurePath(file)
             edge_tuples.append((p.parts[-2], edges))
-            
+
         except FileNotFoundError:
             print(file, ' not found during ML analysis')  # should not hit this
             continue
