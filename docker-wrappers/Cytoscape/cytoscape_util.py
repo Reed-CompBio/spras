@@ -1,5 +1,4 @@
 import argparse
-import os
 import subprocess
 import time
 from typing import List
@@ -29,19 +28,12 @@ def get_parser() -> argparse.ArgumentParser:
     )
 
     parser.add_argument(
-        "--outdir",
-        dest='outdir',
+        "--output",
+        dest='output',
         type=str,
-        default='output',
-        help='The output directory of the session file. Default: output'
-    )
-
-    parser.add_argument(
-        "--outlabel",
-        dest='outlabel',
-        type=str,
-        default='cytoscape-session',
-        help='The output filename of the session file, which will have the extension .cys. Default: cytoscape-session'
+        default='cytoscape-session.cys',
+        help='The output filename of the Cytoscape session file, which will have the extension .cys added if it is not '
+             'already provided. Default: cytoscape-session.cys'
     )
     return parser
 
@@ -99,7 +91,7 @@ def parse_name(pathway: str) -> (str, str):
         return parts[0], parts[1]
 
 
-def load_pathways(pathways: List[str], out_dir: str, out_label: str) -> None:
+def load_pathways(pathways: List[str], output: str) -> None:
     if len(pathways) == 0:
         raise ValueError('One or more pathway files are required')
 
@@ -113,12 +105,12 @@ def load_pathways(pathways: List[str], out_dir: str, out_label: str) -> None:
         )
         p4c.networks.rename_network(name, network=suid)
 
-    p4c.session.save_session(os.path.join(out_dir, out_label))
+    p4c.session.save_session(output)
 
 
 def main():
     opts = parse_arguments()
-    load_pathways(opts.pathways, opts.outdir, opts.outlabel)
+    load_pathways(opts.pathways, opts.output)
 
 
 if __name__ == '__main__':

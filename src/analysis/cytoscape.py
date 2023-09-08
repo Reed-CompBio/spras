@@ -5,7 +5,7 @@ from typing import List, Union
 from src.util import prepare_volume, run_container
 
 
-def run_cytoscape_container(pathways: List[Union[str, PurePath]], out_dir: str, singularity: bool = False) -> None:
+def run_cytoscape_container(pathways: List[Union[str, PurePath]], output_file: str, singularity: bool = False) -> None:
     """
     1. take pathways and create volume mappings
     2. setup wrapper command
@@ -21,7 +21,8 @@ def run_cytoscape_container(pathways: List[Union[str, PurePath]], out_dir: str, 
     # Each volume is a tuple (src, dest)
     volumes = list()
 
-    cytoscape_output_dir = Path(out_dir, 'cytoscape').absolute()
+    # A temporary directory for Cytoscape output files
+    cytoscape_output_dir = Path(output_file.replace('.cys', '')).absolute()
     cytoscape_output_dir.mkdir(parents=True, exist_ok=True)
 
     # TODO update the latest p4cytoscape and use env variable to control the log directory instead
@@ -30,14 +31,12 @@ def run_cytoscape_container(pathways: List[Union[str, PurePath]], out_dir: str, 
     # Only needed when running in Singularity
     volumes.append((cytoscape_output_dir, PurePath(work_dir, 'CytoscapeConfiguration')))
 
-    # Map the output directory
-    bind_path, mapped_out_dir = prepare_volume(out_dir, work_dir)
+    # Map the output file
+    bind_path, mapped_output = prepare_volume(output_file, work_dir)
     volumes.append(bind_path)
 
-    # Create the Python command to run inside the container
-    command = ['python', '/py4cytoscape/cytoscape_util.py',
-               '--outdir', mapped_out_dir,
-               '--outlabel', 'cytoscape-session']
+    # Create the initial Python command to run inside the container
+    command = ['python', '/py4cytoscape/cytoscape_util.py', '--output', mapped_output]
 
     # Map the pathway filenames and add them to the Python command
     for pathway in pathways:
