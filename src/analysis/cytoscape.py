@@ -1,4 +1,5 @@
-from pathlib import PurePath
+from pathlib import Path, PurePath
+from shutil import rmtree
 from typing import List, Union
 
 from src.util import prepare_volume, run_container
@@ -14,22 +15,28 @@ def run_cytoscape_container(pathways: List[Union[str, PurePath]], out_dir: str, 
 
     # To work with Singularity, /spras must be mapped to a writeable location because that directory is fixed as
     # the home directory inside the container and Cytoscape writes configuration files there
-    # $HOME cannot be set in the Dockerfile because Singularity overwrites home at launch by default
+    # $HOME cannot be set in the Dockerfile because Singularity overwrites home at launch
     env = f'HOME={work_dir}'
 
     # Each volume is a tuple (src, dest)
     volumes = list()
 
+    cytoscape_output_dir = Path(out_dir, 'cytoscape').absolute()
+    cytoscape_output_dir.mkdir(parents=True, exist_ok=True)
+
     # TODO update the latest p4cytoscape and use env variable to control the log directory instead
-    volumes.append((PurePath(out_dir), PurePath('/spras/logs')))
+    # Requires generalizing the run_container function to support multiple environment variables
+    volumes.append((cytoscape_output_dir, PurePath(work_dir, 'logs')))
+    # Only needed when running in Singularity
+    volumes.append((cytoscape_output_dir, PurePath(work_dir, 'CytoscapeConfiguration')))
 
     # Map the output directory
-    bind_path, out_dir = prepare_volume(out_dir, work_dir)
+    bind_path, mapped_out_dir = prepare_volume(out_dir, work_dir)
     volumes.append(bind_path)
 
-    # Create the initial part of the Python command to run inside the container
+    # Create the Python command to run inside the container
     command = ['python', '/py4cytoscape/cytoscape_util.py',
-               '--outdir', out_dir,
+               '--outdir', mapped_out_dir,
                '--outlabel', 'cytoscape-session']
 
     # Map the pathway filenames and add them to the Python command
@@ -50,3 +57,4 @@ def run_cytoscape_container(pathways: List[Union[str, PurePath]], out_dir: str, 
                         work_dir,
                         env)
     print(out)
+    rmtree(cytoscape_output_dir)
