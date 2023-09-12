@@ -2,7 +2,7 @@
 Author: Neha Talluri
 07/19/23
 
-Methods for converting/creating the universal input and universal output
+Methods for converting from the universal input and recreating the universal output
 """
 
 import pandas as pd
@@ -26,10 +26,6 @@ def convert_undirected_to_directed(df: pd.DataFrame) -> pd.DataFrame:
     new_df['Direction'] = 'D'
     df.loc[mask, 'Direction'] = 'D'
     df = pd.concat([df, new_df], ignore_index=True)
-
-    print("convert_undirected_to_directed")
-    print(df)
-
     return df
 
 
@@ -47,9 +43,6 @@ def convert_directed_to_undirected(df: pd.DataFrame) -> pd.DateOffset:
 
     df["Direction"] = "U"
 
-    print("convert_directed_to_undirected")
-    print(df)
-
     return df
 
 
@@ -64,9 +57,6 @@ def add_constant(df: pd.DataFrame, new_col_name: str, const: str) -> pd.DataFram
     """
 
     df.insert(df.shape[1], new_col_name, const)
-
-    print("add_constant")
-    print(df)
 
     return df
 
@@ -86,9 +76,6 @@ def add_directionality_constant(df: pd.DataFrame,  col_name: str, dir_const: str
     df.insert(df.shape[1], col_name, dir_const)
     mask = df['Direction'] == 'U'
     df.loc[mask, col_name] = undir_const
-
-    print("add_directionality_constant")
-    print(df)
 
     return df
 
@@ -114,9 +101,6 @@ def readd_direction_col_mixed(df: pd.DataFrame, existing_direction_column: str, 
     # mask_dir = df[existing_direction_column] == dir_const
     # df.loc[mask_dir, "Direction"] = "D"
 
-    print("readd_direction_col_mixed")
-    print(df)
-
     return df
 
 def readd_direction_col_undirected(df: pd.DataFrame) -> pd.DataFrame:
@@ -128,9 +112,6 @@ def readd_direction_col_undirected(df: pd.DataFrame) -> pd.DataFrame:
     """
     df.insert(df.shape[1], "Direction", "U")
 
-    print("readd_direction_col_undirected")
-    print(df)
-
     return df
 
 def readd_direction_col_directed(df: pd.DataFrame) -> pd.DataFrame:
@@ -141,8 +122,5 @@ def readd_direction_col_directed(df: pd.DataFrame) -> pd.DataFrame:
     @return a df with Direction column of 'D's added back
     """
     df.insert(df.shape[1], "Direction", "D")
-
-    print("readd_direction_col_directed")
-    print(df)
 
     return df
