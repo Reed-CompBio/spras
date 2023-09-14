@@ -4,6 +4,8 @@ A Docker image for [Cytoscape](https://cytoscape.org/) that is available on [Doc
 It was originally derived from the [`docker-cytoscape-desktop/py4cytoscape
 `](https://github.com/cytoscape/docker-cytoscape-desktop/blob/173ab46b4b5e5c148113ad0c9960a6af3fc50432/py4cytoscape/Dockerfile) image.
 
+Thank you to Scooter Morris for help debugging problems running Cytoscape in Singularity.
+
 ## Building the Docker image
 
 To create the Docker image run:
@@ -11,8 +13,6 @@ To create the Docker image run:
 docker build -t reedcompbio/py4cytoscape -f Dockerfile .
 ```
 from this directory.
-
-This Docker image is compatible with Docker but not yet Singularity.
 
 ## TODO
 - Finish this readme
