@@ -244,7 +244,7 @@ rule viz_cytoscape:
     output: 
         session = SEP.join([out_dir, '{dataset}-cytoscape.cys'])
     run:
-        cytoscape.run_cytoscape_container(input.pathways, output.session, SINGULARITY)
+        cytoscape.run_cytoscape(input.pathways, output.session, SINGULARITY)
 
 
 # Write a single summary table for all pathways for each dataset

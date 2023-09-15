@@ -5,11 +5,12 @@ from typing import List, Union
 from src.util import prepare_volume, run_container
 
 
-def run_cytoscape_container(pathways: List[Union[str, PurePath]], output_file: str, singularity: bool = False) -> None:
+def run_cytoscape(pathways: List[Union[str, PurePath]], output_file: str, singularity: bool = False) -> None:
     """
-    1. take pathways and create volume mappings
-    2. setup wrapper command
-    3. link cytoscape src at runtime
+    Create a Cytoscape session file with visualizations of each of the provided pathways
+    @param pathways: a list of pathways to visualize
+    @param output_file: the output Cytoscape session file
+    @param singularity: whether to run in a Singularity container
     """
     work_dir = '/spras'
 
