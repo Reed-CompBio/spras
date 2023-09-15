@@ -26,7 +26,7 @@ def run_cytoscape(pathways: List[Union[str, PurePath]], output_file: str, singul
     cytoscape_output_dir = Path(output_file.replace('.cys', '')).absolute()
     cytoscape_output_dir.mkdir(parents=True, exist_ok=True)
 
-    # TODO update the latest p4cytoscape and use env variable to control the log directory instead
+    # TODO update to the latest p4cytoscape and use env variable to control the log directory instead
     # Requires generalizing the run_container function to support multiple environment variables
     volumes.append((cytoscape_output_dir, PurePath(work_dir, 'logs')))
     # Only needed when running in Singularity

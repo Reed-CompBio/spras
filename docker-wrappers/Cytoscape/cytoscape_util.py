@@ -50,6 +50,10 @@ def parse_arguments() -> argparse.Namespace:
 
 
 def start_remote_cytoscape() -> None:
+    """
+    Use supervisord to start the Cytoscape process. Ping Cytoscape until a connection is established and sleep in
+    between pings. Hangs indefinitely if Cytoscape does not start up correctly and cannot be reached.
+    """
     try:
         subprocess.run([
             "/usr/bin/supervisord", "-c", "/etc/supervisor/conf.d/supervisord.conf"
@@ -92,6 +96,11 @@ def parse_name(pathway: str) -> (str, str):
 
 
 def load_pathways(pathways: List[str], output: str) -> None:
+    """
+    Launch and connect to Cytoscape, import all pathways, and save a session file
+    @param pathways: the list of pathways to import
+    @param output: the name of the Cytoscape session file to save
+    """
     if len(pathways) == 0:
         raise ValueError('One or more pathway files are required')
 
@@ -109,6 +118,9 @@ def load_pathways(pathways: List[str], output: str) -> None:
 
 
 def main():
+    """
+    Main function
+    """
     opts = parse_arguments()
     load_pathways(opts.pathways, opts.output)
 
