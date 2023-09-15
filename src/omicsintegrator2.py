@@ -106,7 +106,7 @@ class OmicsIntegrator2(PRM):
 
         container_framework = 'singularity' if singularity else 'docker'
         out = run_container(container_framework,
-                            'reedcompbio/omics-integrator-2',
+                            'reedcompbio/omics-integrator-2:v2',
                             command,
                             volumes,
                             work_dir)
