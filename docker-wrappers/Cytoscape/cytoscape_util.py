@@ -7,6 +7,7 @@ import py4cytoscape as p4c
 from requests.exceptions import RequestException
 
 SLEEP_INTERVAL = 10
+MAX_CONNECTION_ATTEMPTS = 20
 
 
 def get_parser() -> argparse.ArgumentParser:
@@ -52,32 +53,37 @@ def parse_arguments() -> argparse.Namespace:
 def start_remote_cytoscape() -> None:
     """
     Use supervisord to start the Cytoscape process. Ping Cytoscape until a connection is established and sleep in
-    between pings. Hangs indefinitely if Cytoscape does not start up correctly and cannot be reached.
+    between pings. Raises an error if Cytoscape cannot be reached within the maximum number of attempts.
     """
     try:
         subprocess.run([
-            "/usr/bin/supervisord", "-c", "/etc/supervisor/conf.d/supervisord.conf"
+            '/usr/bin/supervisord', '-c', '/etc/supervisor/conf.d/supervisord.conf'
         ],
             check=True)
     except subprocess.CalledProcessError as e:
-        print('An error has occurred while trying to run Cytoscape\n' + str(e), flush=True)
+        raise RuntimeError('An error has occurred while trying to run Cytoscape') from e
 
     connected = False
+    attempts = 0
     # Allow initial time to start up before trying to connect
     time.sleep(SLEEP_INTERVAL)
-    while not connected:
+    while not connected and attempts < MAX_CONNECTION_ATTEMPTS:
+        attempts += 1
         try:
             p4c.cytoscape_ping()
-            print("Connected to Cytoscape", flush=True)
+            print('Connected to Cytoscape', flush=True)
             connected = True
         except (RequestException, p4c.exceptions.CyError):
-            print("Pinging Cytoscape, waiting for connection... ", flush=True)
+            print('Pinging Cytoscape, waiting for connection... ', flush=True)
             time.sleep(SLEEP_INTERVAL)
             pass
         except Exception as e:
             print(e)
-            print("Pinging Cytoscape, waiting for connection... ", flush=True)
+            print('Pinging Cytoscape, waiting for connection... ', flush=True)
             time.sleep(SLEEP_INTERVAL)
+
+    if not connected:
+        raise ConnectionError('Could not connect to Cytoscape')
 
 
 def parse_name(pathway: str) -> (str, str):
@@ -109,8 +115,8 @@ def load_pathways(pathways: List[str], output: str) -> None:
         path, name = parse_name(pathway)
         suid = p4c.networks.import_network_from_tabular_file(
             file=path,
-            column_type_list="s,t,x",
-            delimiters="\t"
+            column_type_list='s,t,x',
+            delimiters='\t'
         )
         p4c.networks.rename_network(name, network=suid)
 
