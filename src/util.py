@@ -230,7 +230,7 @@ def hash_filename(filename: str, length: Optional[int] = None) -> str:
 
 
 # Because this is called independently for each file, the same local path can be mounted to multiple volumes
-def prepare_volume(filename: str, volume_base: str) -> Tuple[Tuple[PurePath, PurePath], str]:
+def prepare_volume(filename: Union[str, PurePath], volume_base: Union[str, PurePath]) -> Tuple[Tuple[PurePath, PurePath], str]:
     """
     Makes a file on the local file system accessible within a container by mapping the local (source) path to a new
     container (destination) path and renaming the file to be relative to the destination path.
@@ -246,6 +246,8 @@ def prepare_volume(filename: str, volume_base: str) -> Tuple[Tuple[PurePath, Pur
     if not base_path.is_absolute():
         raise ValueError(f'Volume base must be an absolute path: {volume_base}')
 
+    if isinstance(filename, PurePath):
+        filename = str(filename)
     filename_hash = hash_filename(filename, DEFAULT_HASH_LENGTH)
     dest = PurePosixPath(base_path, filename_hash)
 
