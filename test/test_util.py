@@ -39,6 +39,8 @@ class TestUtil:
                              [('oi1-edges.txt', '/spras', '/spras/MG4YPNK/oi1-edges.txt'),
                               ('test/OmicsIntegrator1/input/oi1-edges.txt', '/spras', '/spras/ZNNT3GR/oi1-edges.txt'),
                               ('test/OmicsIntegrator1/output/', '/spras', '/spras/DPCSFJV/output'),
+                              (PurePosixPath('test/OmicsIntegrator1/output/'), '/spras', '/spras/TNDO5TR/output'),
+                              ('test/OmicsIntegrator1/output', PurePosixPath('/spras'), '/spras/TNDO5TR/output'),
                               ('../src', '/spras', '/spras/NNBVZ6X/src')])
     def test_prepare_volume(self, filename, volume_base, expected_filename):
         _, container_filename = prepare_volume(filename, volume_base)
