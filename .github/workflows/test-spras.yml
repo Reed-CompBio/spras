@@ -77,7 +77,7 @@ jobs:
     - name: Pull Docker images
       run: |
         docker pull reedcompbio/omics-integrator-1:latest
-        docker pull reedcompbio/omics-integrator-2:latest
+        docker pull reedcompbio/omics-integrator-2:v2
         docker pull reedcompbio/pathlinker:latest
         docker pull reedcompbio/meo:latest
         docker pull reedcompbio/mincostflow:latest
@@ -98,8 +98,8 @@ jobs:
         path: docker-wrappers/OmicsIntegrator2/.
         dockerfile: docker-wrappers/OmicsIntegrator2/Dockerfile
         repository: reedcompbio/omics-integrator-2
-        tags: latest
-        cache_froms: reedcompbio/omics-integrator-2:latest
+        tags: v2
+        cache_froms: reedcompbio/omics-integrator-2:v2
         push: false
     - name: Build PathLinker Docker image
       uses: docker/build-push-action@v1
