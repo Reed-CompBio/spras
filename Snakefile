@@ -60,7 +60,8 @@ def make_final_input(wildcards):
     #TODO analysis could be parsed in the parse_config() function.
     if config["analysis"]["summary"]["include"]:
         # add summary output file for each pathway
-        final_input.extend(expand('{out_dir}{sep}{dataset}-{algorithm_params}{sep}summary.txt',out_dir=out_dir,sep=SEP,dataset=dataset_labels,algorithm_params=algorithms_with_params))
+        #TODO: reuse in the future once we make summary work for mixed graphs
+        # final_input.extend(expand('{out_dir}{sep}{dataset}-{algorithm_params}{sep}summary.txt',out_dir=out_dir,sep=SEP,dataset=dataset_labels,algorithm_params=algorithms_with_params))
         # add table summarizing all pathways for each dataset
         final_input.extend(expand('{out_dir}{sep}{dataset}-pathway-summary.txt',out_dir=out_dir,sep=SEP,dataset=dataset_labels))
 
@@ -216,14 +217,15 @@ rule parse_output:
     run:
         runner.parse_output(wildcards.algorithm, input.raw_file, output.standardized_file)
 
+#TODO: reuse in the future once we make summary work for mixed graphs
 # Collect summary statistics for a single pathway
-rule summarize_pathway:
-    input:
-        standardized_file = SEP.join([out_dir, '{dataset}-{algorithm}-{params}', 'pathway.txt'])
-    output:
-        summary_file = SEP.join([out_dir, '{dataset}-{algorithm}-{params}', 'summary.txt'])
-    run:
-        summary.run(input.standardized_file,output.summary_file,directed=algorithm_directed[wildcards.algorithm])
+# rule summarize_pathway:
+#     input:
+#         standardized_file = SEP.join([out_dir, '{dataset}-{algorithm}-{params}', 'pathway.txt'])
+#     output:
+#         summary_file = SEP.join([out_dir, '{dataset}-{algorithm}-{params}', 'summary.txt'])
+#     run:
+#         summary.run(input.standardized_file,output.summary_file)
 
 # Write GraphSpace JSON Graphs
 rule viz_graphspace:

@@ -1,4 +1,4 @@
-A B 1
-B C 1
-A D 1
-C D 1
+A B 1 U
+B C 1 U
+A D 1 U
+C D 1 U

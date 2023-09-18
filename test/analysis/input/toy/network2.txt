@@ -1,15 +1,15 @@
-A B 1
-B C 1
-C D 1
-D E 1
-E F 1
-A C 1
-A D 1
-A E 1
-A F 1
-B D 1
-B E 1
-B F 1
-C E 1
-C F 1
-D F 1
+A B 1 U
+B C 1 U
+C D 1 U
+D E 1 U
+E F 1 U
+A C 1 U
+A D 1 U
+A E 1 U
+A F 1 U
+B D 1 U
+B E 1 U
+B F 1 U
+C E 1 U
+C F 1 U
+D F 1 U

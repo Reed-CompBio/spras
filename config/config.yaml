@@ -118,7 +118,7 @@
  analysis:
         # Create one summary per pathway file and a single summary table for all pathways for each dataset
         summary:
-          include: false
+          include: true
         # Create output files for each pathway that can be visualized with GraphSpace
         graphspace:
           include: false

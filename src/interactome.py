@@ -98,9 +98,6 @@ def readd_direction_col_mixed(df: pd.DataFrame, existing_direction_column: str, 
     mask_undir = df[existing_direction_column] == undir_const
     df.loc[mask_undir, "Direction"] = "U"
 
-    # mask_dir = df[existing_direction_column] == dir_const
-    # df.loc[mask_dir, "Direction"] = "D"
-
     return df
 
 def readd_direction_col_undirected(df: pd.DataFrame) -> pd.DataFrame:

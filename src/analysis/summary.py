@@ -34,7 +34,7 @@ def summarize_networks(file_paths: Iterable[Path], node_table: pd.DataFrame) -> 
     # Iterate through each network file path
     for file_path in sorted(file_paths):
         # Load in the network
-        nw = nx.read_weighted_edgelist(file_path)
+        nw = nx.read_edgelist(file_path, data=(('weight', float), ('Direction',str)))
         # Save the network name, number of nodes, number edges, and number of connected components
         nw_name = str(file_path)
         number_nodes = nw.number_of_nodes()
@@ -71,63 +71,59 @@ def degree(g):
 
 # stats is just a list of functions to apply to the graph.
 # They should take as input a networkx graph or digraph but may have any output.
-stats = [degree, nx.clustering, nx.betweenness_centrality]
+# stats = [degree, nx.clustering, nx.betweenness_centrality]
 
 
-def produce_statistics(g: nx.Graph, s=None) -> dict:
-    global stats
-    if s is not None:
-        stats = s
-    d = dict()
-    for s in stats:
-        sname = s.__name__
-        d[sname] = s(g)
-    return d
+# def produce_statistics(g: nx.Graph, s=None) -> dict:
+#     global stats
+#     if s is not None:
+#         stats = s
+#     d = dict()
+#     for s in stats:
+#         sname = s.__name__
+#         d[sname] = s(g)
+#     return d
 
 
-def load_graph(path: str, directed=False) -> nx.Graph:
-    if not directed:
-        g = nx.read_edgelist(path, data=(('rank', float),))
-    else:
-        # self-edges are not allowed in DiGraphs.
-        g = nx.read_edgelist(path, data=(('rank', float),), create_using=nx.DiGraph)
-    return g
+# def load_graph(path: str) -> nx.Graph:
+#     g = nx.read_edgelist(path, data=(('weight', float), ('Direction',str)))
+#     return g
 
 
-def save(data, pth):
-    fout = open(pth, 'w')
-    fout.write('#node\t%s\n' % '\t'.join([s.__name__ for s in stats]))
-    for node in data[stats[0].__name__]:
-        row = [data[s.__name__][node] for s in stats]
-        fout.write('%s\t%s\n' % (node, '\t'.join([str(d) for d in row])))
-    fout.close()
+# def save(data, pth):
+#     fout = open(pth, 'w')
+#     fout.write('#node\t%s\n' % '\t'.join([s.__name__ for s in stats]))
+#     for node in data[stats[0].__name__]:
+#         row = [data[s.__name__][node] for s in stats]
+#         fout.write('%s\t%s\n' % (node, '\t'.join([str(d) for d in row])))
+#     fout.close()
 
 
-def run(infile: str, outfile: str, directed=False) -> None:
-    """
-    run function that wraps above functions.
-    """
-    # if output directory doesn't exist, make it.
-    outdir = os.path.dirname(outfile)
-    if not os.path.exists(outdir):
-        os.makedirs(outdir)
+# def run(infile: str, outfile: str) -> None:
+#     """
+#     run function that wraps above functions.
+#     """
+#     # if output directory doesn't exist, make it.
+#     outdir = os.path.dirname(outfile)
+#     if not os.path.exists(outdir):
+#         os.makedirs(outdir)
 
-    # load graph, produce stats, and write to human-readable file.
-    g = load_graph(infile, directed=directed)
-    dat = produce_statistics(g)
-    save(dat, outfile)
-
-
-def main(argv):
-    """
-    for testing
-    """
-    g = load_graph(argv[1])
-    print(g.nodes)
-    dat = produce_statistics(g)
-    print(dat)
-    save(dat, argv[2])
+#     # load graph, produce stats, and write to human-readable file.
+#     g = load_graph(infile)
+#     dat = produce_statistics(g)
+#     save(dat, outfile)
 
 
-if __name__ == "__main__":
-    main(sys.argv)
+# def main(argv):
+#     """
+#     for testing
+#     """
+#     g = load_graph(argv[1])
+#     print(g.nodes)
+#     dat = produce_statistics(g)
+#     print(dat)
+#     save(dat, argv[2])
+
+
+# if __name__ == "__main__":
+#     main(sys.argv)

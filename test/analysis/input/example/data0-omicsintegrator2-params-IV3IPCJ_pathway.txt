@@ -1,2 +1,2 @@
-B A 1
-B C 1
+B A 1 U
+B C 1 U
