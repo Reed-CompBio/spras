@@ -68,7 +68,7 @@ def summarize_networks(file_paths: Iterable[Path], node_table: pd.DataFrame) -> 
 def degree(g):
     return dict(g.degree)
 
-
+# TODO: redo .run code to work on mixed graphs
 # stats is just a list of functions to apply to the graph.
 # They should take as input a networkx graph or digraph but may have any output.
 # stats = [degree, nx.clustering, nx.betweenness_centrality]

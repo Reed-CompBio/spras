@@ -206,7 +206,6 @@ class DOMINO(PRM):
             edges_df['target'] = edges_df['target'].apply(post_domino_id_transform)
             edges_df = readd_direction_col_undirected(edges_df)
 
-        print(edges_df)
         edges_df.to_csv(standardized_pathway_file, sep='\t', header=False, index=False)
 
 

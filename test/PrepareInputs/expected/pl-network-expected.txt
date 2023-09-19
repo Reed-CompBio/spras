@@ -1,0 +1,5 @@
+#Interactor1	Interactor2	Weight
+A	B	0.98
+B	C	0.77
+B	A	0.98
+C	B	0.77

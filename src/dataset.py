@@ -71,20 +71,10 @@ class Dataset:
         data_loc = dataset_dict["data_dir"]
 
         # Load everything as pandas tables
-        print("about to create self.interactome")
-        print(data_loc)
-        print(interactome_loc)
-
-        with open(os.path.join(data_loc, interactome_loc), "r") as f:
-            for _i in range(9):  # first 5 lines
-                print(f.readline())
-
         self.interactome = pd.read_table(
             os.path.join(data_loc, interactome_loc), sep="\t", header=None
         )
-        print(self.interactome)
         num_cols = self.interactome.shape[1]
-        print(num_cols)
         if num_cols == 3:
 
             self.interactome.columns = ["Interactor1", "Interactor2", "Weight"]
