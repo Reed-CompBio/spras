@@ -83,6 +83,7 @@ jobs:
         docker pull reedcompbio/mincostflow:latest
         docker pull reedcompbio/allpairs:latest
         docker pull reedcompbio/domino:latest
+        docker pull oliverfanderson/local-neighborhood
     - name: Build Omics Integrator 1 Docker image
       uses: docker/build-push-action@v1
       with:
@@ -145,6 +146,15 @@ jobs:
         repository: reedcompbio/domino
         tags: latest
         cache_froms: reedcompbio/domino:latest
+        push: false
+    - name: Build LocalNeighborhood Docker image
+      uses: docker/build-push-action@v1
+      with:
+        path: docker-wrappers/LocalNeighborhood/.
+        dockerfile: docker-wrappers/LocalNeighborhood/Dockerfile
+        repository: oliverfanderson/local-neighborhood
+        tags: latest
+        cache_froms: oliverfanderson/local-neighborhood:latest
         push: false
 
   # Run pre-commit checks on source files
