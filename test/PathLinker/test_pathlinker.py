@@ -4,6 +4,9 @@ from pathlib import Path
 import pytest
 
 from spras.pathlinker import PathLinker
+import spras.config as config
+
+config.init_from_file("config/config.yaml")
 
 TEST_DIR = 'test/PathLinker/'
 OUT_FILE_DEFAULT = TEST_DIR+'output/pathlinker-ranked-edges.txt'
@@ -53,10 +56,11 @@ class TestPathLinker:
         out_path = Path(OUT_FILE_DEFAULT)
         out_path.unlink(missing_ok=True)
         # Only include required arguments and run with Singularity
+        config.config.framework = "singularity"
         PathLinker.run(
             nodetypes=TEST_DIR+'input/sample-in-nodetypes.txt',
             network=TEST_DIR+'input/sample-in-net.txt',
             output_file=OUT_FILE_DEFAULT,
-            singularity=True
         )
+        config.config.framework = "docker"
         assert out_path.exists()

@@ -7,7 +7,9 @@ from spras.interactome import (
     reinsert_direction_col_undirected,
 )
 from spras.prm import PRM
-from spras.util import add_rank_column, prepare_volume, run_container
+from spras.util import add_rank_column, prepare_volume
+from spras.containers import run_container
+import spras.config as config
 
 __all__ = ['MinCostFlow']
 
@@ -113,11 +115,12 @@ class MinCostFlow (PRM):
             command.extend(['--capacity', str(capacity)])
 
         # choosing to run in docker or singularity container
-        container_framework = 'singularity' if singularity else 'docker'
+        container_framework = config.config.framework
+        container_suffix = "mincostflow"
 
         # constructs a docker run call
         out = run_container(container_framework,
-                            'reedcompbio/mincostflow',
+                            container_suffix,
                             command,
                             volumes,
                             work_dir)

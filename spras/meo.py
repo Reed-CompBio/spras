@@ -7,7 +7,9 @@ from spras.interactome import (
     reinsert_direction_col_directed,
 )
 from spras.prm import PRM
-from spras.util import add_rank_column, prepare_volume, run_container
+from spras.util import add_rank_column, prepare_volume
+from spras.containers import run_container
+import spras.config as config
 
 __all__ = ['MEO', 'write_properties']
 
@@ -105,7 +107,7 @@ class MEO(PRM):
     # TODO document required arguments
     @staticmethod
     def run(edges=None, sources=None, targets=None, output_file=None, max_path_length=None, local_search=None,
-            rand_restarts=None, singularity=False):
+            rand_restarts=None):
         """
         Run Maximum Edge Orientation in the Docker image with the provided parameters.
         The properties file is generated from the provided arguments.
@@ -158,9 +160,10 @@ class MEO(PRM):
         print('Running Maximum Edge Orientation with arguments: {}'.format(' '.join(command)), flush=True)
 
         # TODO consider making this a string in the config file instead of a Boolean
-        container_framework = 'singularity' if singularity else 'docker'
+        container_framework = config.config.framework
+        container_suffix = "meo"
         out = run_container(container_framework,
-                            'reedcompbio/meo',
+                            container_suffix,
                             command,
                             volumes,
                             work_dir)

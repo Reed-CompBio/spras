@@ -8,7 +8,9 @@ from spras.interactome import (
     reinsert_direction_col_undirected,
 )
 from spras.prm import PRM
-from spras.util import prepare_volume, run_container
+from spras.util import prepare_volume
+from spras.containers import run_container
+import spras.config as config
 
 __all__ = ['DOMINO', 'pre_domino_id_transform', 'post_domino_id_transform']
 
@@ -70,7 +72,7 @@ class DOMINO(PRM):
                         header=['ID_interactor_A', 'ppi', 'ID_interactor_B'])
 
     @staticmethod
-    def run(network=None, active_genes=None, output_file=None, slice_threshold=None, module_threshold=None, singularity=False):
+    def run(network=None, active_genes=None, output_file=None, slice_threshold=None, module_threshold=None):
         """
         Run DOMINO with Docker.
         Let visualization be always true, parallelization be always 1 thread, and use_cache be always false.
@@ -113,9 +115,10 @@ class DOMINO(PRM):
 
         print('Running slicer with arguments: {}'.format(' '.join(slicer_command)), flush=True)
 
-        container_framework = 'singularity' if singularity else 'docker'
+        container_framework = config.config.framework
+        container_suffix = "domino"
         slicer_out = run_container(container_framework,
-                                   'reedcompbio/domino',
+                                   container_suffix,
                                    slicer_command,
                                    volumes,
                                    work_dir)

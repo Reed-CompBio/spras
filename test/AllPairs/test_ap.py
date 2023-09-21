@@ -5,6 +5,9 @@ from pathlib import Path
 import pytest
 
 from spras.allpairs import AllPairs
+import spras.config as config
+
+config.init_from_file("config/config.yaml")
 
 TEST_DIR = 'test/AllPairs/'
 OUT_DIR = TEST_DIR+'output/'
@@ -41,12 +44,13 @@ class TestAllPairs:
         out_path = Path(OUT_DIR+'sample-out.txt')
         out_path.unlink(missing_ok=True)
         # Only include required arguments and run with Singularity
+        config.config.framework = "singularity"
         AllPairs.run(
             nodetypes=TEST_DIR+'input/sample-in-nodetypes.txt',
             network=TEST_DIR+'input/sample-in-net.txt',
-            output_file=str(out_path),
-            singularity=True
+            output_file=str(out_path)
         )
+        config.config.framework = "docker"
         assert out_path.exists()
 
     def test_allpairs_correctness(self):

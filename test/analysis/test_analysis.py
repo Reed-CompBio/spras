@@ -1,5 +1,8 @@
 import spras.analysis.graphspace as graphspace
 import spras.analysis.summary as summary
+import spras.config as config
+
+config.init_from_file("config/config.yaml")
 
 TEST_DIR = 'test/analysis/'
 

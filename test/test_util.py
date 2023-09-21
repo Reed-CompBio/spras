@@ -2,11 +2,15 @@ from pathlib import PurePosixPath, PureWindowsPath
 
 import pytest
 
+
 from spras.util import (
-    convert_docker_path,
     hash_params_sha1_base32,
-    prepare_path_docker,
     prepare_volume,
+)
+
+from spras.containers import (
+    convert_docker_path,
+    prepare_path_docker,
 )
 
 

@@ -4,6 +4,9 @@ from pathlib import Path
 import pytest
 
 from spras.omicsintegrator1 import OmicsIntegrator1, write_conf
+import spras.config as config
+
+config.init_from_file("config/config.yaml")
 
 TEST_DIR = 'test/OmicsIntegrator1/'
 OUT_FILE = TEST_DIR+'output/test_optimalForest.sif'
@@ -85,11 +88,12 @@ class TestOmicsIntegrator1:
         out_path = Path(OUT_FILE)
         out_path.unlink(missing_ok=True)
         # Only include required arguments and run with Singularity
+        config.config.framework = "singularity"
         OmicsIntegrator1.run(edges=TEST_DIR + 'input/oi1-edges.txt',
                              prizes=TEST_DIR + 'input/oi1-prizes.txt',
                              output_file=OUT_FILE,
                              w=5,
                              b=1,
-                             d=10,
-                             singularity=True)
+                             d=10)
+        config.config.framework = "docker"
         assert out_path.exists()

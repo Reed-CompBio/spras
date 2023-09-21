@@ -4,6 +4,9 @@ from pathlib import Path
 import pytest
 
 from spras.omicsintegrator2 import OmicsIntegrator2
+import spras.config as config
+
+config.init_from_file("config/config.yaml")
 
 TEST_DIR = 'test/OmicsIntegrator2/'
 EDGE_FILE = TEST_DIR+'input/oi2-edges.txt'
@@ -45,8 +48,7 @@ class TestOmicsIntegrator2:
                              noisy_edges=0,
                              random_terminals=0,
                              dummy_mode='terminals',
-                             seed=2,
-                             singularity=False)
+                             seed=2)
         assert OUT_FILE.exists()
 
     def test_oi2_missing(self):
@@ -62,8 +64,9 @@ class TestOmicsIntegrator2:
     def test_oi2_singularity(self):
         # Only include required arguments
         OUT_FILE.unlink(missing_ok=True)
+        config.config.framework = "singularity"
         OmicsIntegrator2.run(edges=EDGE_FILE,
                              prizes=PRIZE_FILE,
-                             output_file=OUT_FILE,
-                             singularity=True)
+                             output_file=OUT_FILE)
+        config.config.framework = "docker"
         assert OUT_FILE.exists()

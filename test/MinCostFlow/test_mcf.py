@@ -4,6 +4,9 @@ from pathlib import Path
 import pytest
 
 from spras.mincostflow import MinCostFlow
+import spras.config as config
+
+config.init_from_file("config/config.yaml")
 
 TEST_DIR = 'test/MinCostFlow/'
 OUT_FILE = TEST_DIR + 'output/mincostflow-output.txt'
@@ -86,8 +89,7 @@ class TestMinCostFlow:
                         edges=TEST_DIR + 'input/' + graph + '/edges.txt',
                         output_file=OUT_FILE,
                         flow=1,
-                        capacity=1,
-                        singularity=False)
+                        capacity=1)
         assert out_path.exists()
 
     @pytest.mark.parametrize('graph', ['graph1'])
@@ -104,11 +106,13 @@ class TestMinCostFlow:
         out_path = Path(OUT_FILE)
         out_path.unlink(missing_ok=True)
         # Include all optional arguments
+        config.config.framework = "singularity"
         MinCostFlow.run(sources=TEST_DIR + 'input/' + graph + '/sources.txt',
                         targets=TEST_DIR + 'input/' + graph + '/targets.txt',
                         edges=TEST_DIR + 'input/' + graph + '/edges.txt',
                         output_file=OUT_FILE,
                         flow=1,
-                        capacity=1,
-                        singularity=True)
+                        capacity=1)
+        config.config.framework = "docker"
         assert out_path.exists()
+        

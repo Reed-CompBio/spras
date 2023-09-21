@@ -8,7 +8,9 @@ from spras.interactome import (
     reinsert_direction_col_undirected,
 )
 from spras.prm import PRM
-from spras.util import prepare_volume, run_container
+from spras.util import prepare_volume
+from spras.containers import run_container
+import spras.config as config
 
 __all__ = ['AllPairs']
 
@@ -59,7 +61,7 @@ class AllPairs(PRM):
                                       header=["#Interactor1", "Interactor2", "Weight"])
 
     @staticmethod
-    def run(nodetypes=None, network=None, output_file=None, singularity=False):
+    def run(nodetypes=None, network=None, output_file=None):
         """
         Run All Pairs Shortest Paths with Docker
         @param nodetypes: input node types with sources and targets (required)
@@ -94,9 +96,12 @@ class AllPairs(PRM):
 
         print('Running All Pairs Shortest Paths with arguments: {}'.format(' '.join(command)), flush=True)
 
-        container_framework = 'singularity' if singularity else 'docker'
-        out = run_container(container_framework,
-                            'reedcompbio/allpairs',
+        container_framework = config.config.framework
+        container_suffix = "allpairs"
+
+        out = run_container(
+                            container_framework,
+                            container_suffix,
                             command,
                             volumes,
                             work_dir)

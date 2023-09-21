@@ -4,6 +4,9 @@ from pathlib import Path
 import pytest
 
 from spras.meo import MEO, write_properties
+import spras.config as config
+
+config.init_from_file("config/config.yaml")
 
 TEST_DIR = 'test/MEO/'
 OUT_FILE = TEST_DIR + 'output/edges.txt'
@@ -59,9 +62,10 @@ class TestMaximumEdgeOrientation:
         out_path = Path(OUT_FILE)
         out_path.unlink(missing_ok=True)
         # Only include required arguments and run with Singularity
+        config.config.framework = "singularity"
         MEO.run(edges=TEST_DIR + 'input/meo-edges.txt',
                 sources=TEST_DIR + 'input/meo-sources.txt',
                 targets=TEST_DIR + 'input/meo-targets.txt',
-                output_file=OUT_FILE,
-                singularity=True)
+                output_file=OUT_FILE)
+        config.config.framework = "docker"
         assert out_path.exists()

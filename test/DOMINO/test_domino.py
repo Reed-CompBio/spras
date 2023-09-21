@@ -5,6 +5,9 @@ from pathlib import Path
 import pytest
 
 from spras.domino import DOMINO, post_domino_id_transform, pre_domino_id_transform
+import spras.config as config
+
+config.init_from_file("config/config.yaml")
 
 TEST_DIR = 'test/DOMINO/'
 OUT_FILE_DEFAULT = TEST_DIR+'output/domino-output.txt'
@@ -68,13 +71,14 @@ class TestDOMINO:
         out_path = Path(OUT_FILE_DEFAULT)
         out_path.unlink(missing_ok=True)
         # Only include required arguments and run with Singularity
+        config.config.framework = "singularity"
         DOMINO.run(
             network=TEST_DIR+'input/domino-network.txt',
             active_genes=TEST_DIR+'input/domino-active-genes.txt',
             output_file=OUT_FILE_DEFAULT,
             singularity=True)
         assert out_path.exists()
-
+    config.config.framework = "docker"
     def test_pre_id_transform(self):
         """
         Test the node ID transformation run before DOMINO executes

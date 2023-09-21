@@ -5,7 +5,9 @@ import pandas as pd
 from spras.dataset import Dataset
 from spras.interactome import reinsert_direction_col_undirected
 from spras.prm import PRM
-from spras.util import add_rank_column, prepare_volume, run_container
+from spras.util import add_rank_column, prepare_volume
+from spras.containers import run_container
+import spras.config as config
 
 __all__ = ['OmicsIntegrator2']
 
@@ -67,7 +69,7 @@ class OmicsIntegrator2(PRM):
     # TODO document required arguments
     @staticmethod
     def run(edges=None, prizes=None, output_file=None, w=None, b=None, g=None, noise=None, noisy_edges=None,
-            random_terminals=None, dummy_mode=None, seed=None, singularity=False):
+            random_terminals=None, dummy_mode=None, seed=None):
         """
         Run Omics Integrator 2 in the Docker image with the provided parameters.
         Only the .tsv output file is retained and then renamed.
@@ -118,9 +120,10 @@ class OmicsIntegrator2(PRM):
 
         print('Running Omics Integrator 2 with arguments: {}'.format(' '.join(command)), flush=True)
 
-        container_framework = 'singularity' if singularity else 'docker'
+        container_framework = config.config.framework
+        container_suffix = "omics-integrator-2:v2"
         out = run_container(container_framework,
-                            'reedcompbio/omics-integrator-2:v2',
+                            container_suffix,
                             command,
                             volumes,
                             work_dir)

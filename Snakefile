@@ -5,6 +5,9 @@ import yaml
 from spras.dataset import Dataset
 from spras.util import process_config
 from spras.analysis import ml, summary, graphspace, cytoscape
+from spras.dataset import Dataset
+from spras.analysis import ml, summary, graphspace, cytoscape
+import spras.config as _config
 
 # Snakemake updated the behavior in the 6.5.0 release https://github.com/snakemake/snakemake/pull/1037
 # and using the wrong separator prevents Snakemake from matching filenames to the rules that can produce them
@@ -13,23 +16,27 @@ SEP = '/'
 wildcard_constraints:
     params="params-\w+"
 
-config, datasets, out_dir, algorithm_params, algorithm_directed, pca_params, hac_params = process_config(config)
+# Elsewhere we import this as config, but in the Snakefile, the variable config is already populated
+# with the parsed config.yaml. This is done by Snakemake, which magically pipes config into this file
+# without declaration!
+_config.init_global(config)
 
-# TODO consider the best way to pass global configuration information to the run functions
-SINGULARITY = "singularity" in config and config["singularity"]
-if SINGULARITY:
-    print('Running Singularity containers')
-else:
-    print('Running Docker containers')
+out_dir = _config.config.out_dir
+algorithm_params = _config.config.algorithm_params
+algorithm_directed = _config.config.algorithm_directed
+pca_params = _config.config.pca_params
+hac_params = _config.config.hac_params
+
+FRAMEWORK = _config.config.framework
+print(f"Running {FRAMEWORK} containers")
 
 # Return the dataset dictionary from the config file given the label
-def get_dataset(datasets, label):
-    return datasets[label]
+def get_dataset(_datasets, label):
+    return _datasets[label]
 
 algorithms = list(algorithm_params)
 algorithms_with_params = [f'{algorithm}-params-{params_hash}' for algorithm, param_combos in algorithm_params.items() for params_hash in param_combos.keys()]
-
-dataset_labels = list(datasets.keys())
+dataset_labels = list(_config.config.datasets.keys())
 
 # Get the parameter dictionary for the specified
 # algorithm and parameter combination hash
@@ -46,7 +53,7 @@ def write_parameter_log(algorithm, param_label, logfile):
 
 # Log the dataset contents specified in the config file in a yaml file
 def write_dataset_log(dataset, logfile):
-    dataset_contents = get_dataset(datasets,dataset)
+    dataset_contents = get_dataset(_config.config.datasets,dataset)
 
     # safe_dump gives RepresenterError for an OrderedDict
     # config file has to convert the dataset from OrderedDict to dict to avoid this
@@ -57,23 +64,22 @@ def write_dataset_log(dataset, logfile):
 def make_final_input(wildcards):
     final_input = []
 
-    # TODO analysis could be parsed in the parse_config() function.
-    if config["analysis"]["summary"]["include"]:
+    if _config.config.analysis_include_summary:
         # add summary output file for each pathway
         # TODO: reuse in the future once we make summary work for mixed graphs. See https://github.com/Reed-CompBio/spras/issues/128
         # final_input.extend(expand('{out_dir}{sep}{dataset}-{algorithm_params}{sep}summary.txt',out_dir=out_dir,sep=SEP,dataset=dataset_labels,algorithm_params=algorithms_with_params))
         # add table summarizing all pathways for each dataset
         final_input.extend(expand('{out_dir}{sep}{dataset}-pathway-summary.txt',out_dir=out_dir,sep=SEP,dataset=dataset_labels))
 
-    if config["analysis"]["graphspace"]["include"]:
+    if _config.config.analysis_include_graphspace:
         # add graph and style JSON files.
         final_input.extend(expand('{out_dir}{sep}{dataset}-{algorithm_params}{sep}gs.json',out_dir=out_dir,sep=SEP,dataset=dataset_labels,algorithm_params=algorithms_with_params))
         final_input.extend(expand('{out_dir}{sep}{dataset}-{algorithm_params}{sep}gsstyle.json',out_dir=out_dir,sep=SEP,dataset=dataset_labels,algorithm_params=algorithms_with_params))
-
-    if config["analysis"]["cytoscape"]["include"]:
+    
+    if _config.config.analysis_include_cytoscape:
         final_input.extend(expand('{out_dir}{sep}{dataset}-cytoscape.cys',out_dir=out_dir,sep=SEP,dataset=dataset_labels))
 
-    if config["analysis"]["ml"]["include"]:  
+    if _config.config.analysis_include_ml:
         final_input.extend(expand('{out_dir}{sep}{dataset}-pca.png',out_dir=out_dir,sep=SEP,dataset=dataset_labels,algorithm_params=algorithms_with_params))
         final_input.extend(expand('{out_dir}{sep}{dataset}-pca-variance.txt',out_dir=out_dir,sep=SEP,dataset=dataset_labels,algorithm_params=algorithms_with_params))
         final_input.extend(expand('{out_dir}{sep}{dataset}-hac-vertical.png',out_dir=out_dir,sep=SEP,dataset=dataset_labels,algorithm_params=algorithms_with_params))
@@ -117,7 +123,7 @@ rule log_datasets:
 # Return all files used in the dataset
 # Input preparation needs to be rerun if these files are modified
 def get_dataset_dependencies(wildcards):
-    dataset = datasets[wildcards.dataset]
+    dataset = _config.config.datasets[wildcards.dataset]
     all_files = dataset["node_files"] + dataset["edge_files"] + dataset["other_files"]
     # Add the relative file path
     all_files = [dataset["data_dir"] + SEP + data_file for data_file in all_files]
@@ -131,7 +137,7 @@ rule merge_input:
     output: dataset_file = SEP.join([out_dir, '{dataset}-merged.pickle'])
     run:
         # Pass the dataset to PRRunner where the files will be merged and written to disk (i.e. pickled)
-        dataset_dict = get_dataset(datasets, wildcards.dataset)
+        dataset_dict = get_dataset(_config.config.datasets, wildcards.dataset)
         runner.merge_input(dataset_dict, output.dataset_file)
 
 # The checkpoint is like a rule but can be used in dynamic workflows
@@ -209,7 +215,6 @@ rule reconstruct:
             params.pop('spras_placeholder')
         # TODO consider the best way to pass global configuration information to the run functions
         # This approach requires that all run functions support a singularity option
-        params['singularity'] = SINGULARITY
         runner.run(wildcards.algorithm, params)
 
 # Original pathway reconstruction output to universal output

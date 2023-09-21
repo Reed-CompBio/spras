@@ -4,7 +4,9 @@ import pandas as pd
 
 from spras.interactome import reinsert_direction_col_mixed
 from spras.prm import PRM
-from spras.util import add_rank_column, prepare_volume, run_container
+from spras.util import add_rank_column, prepare_volume
+from spras.containers import run_container
+import spras.config as config
 
 __all__ = ['OmicsIntegrator1', 'write_conf']
 
@@ -92,7 +94,7 @@ class OmicsIntegrator1(PRM):
     @staticmethod
     def run(edges=None, prizes=None, dummy_mode=None, mu_squared=None, exclude_terms=None,
             output_file=None, noisy_edges=None, shuffled_prizes=None, random_terminals=None,
-            seed=None, w=None, b=None, d=None, mu=None, noise=None, g=None, r=None, singularity=False):
+            seed=None, w=None, b=None, d=None, mu=None, noise=None, g=None, r=None):
         """
         Run Omics Integrator 1 in the Docker image with the provided parameters.
         Does not support the garnet, cyto30, knockout, cv, or cv-reps arguments.
@@ -159,9 +161,11 @@ class OmicsIntegrator1(PRM):
         print('Running Omics Integrator 1 with arguments: {}'.format(' '.join(command)), flush=True)
 
         # TODO consider making this a string in the config file instead of a Boolean
-        container_framework = 'singularity' if singularity else 'docker'
+        container_framework = config.config.framework
+        container_suffix = "omics-integrator-1:no-conda" # no-conda version is the default
+
         out = run_container(container_framework,
-                            'reedcompbio/omics-integrator-1:no-conda',  # no-conda version is the default
+                            container_suffix,  # no-conda version is the default
                             command,
                             volumes,
                             work_dir,
