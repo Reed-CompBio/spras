@@ -27,7 +27,11 @@ class TestCytoscape:
 
     # Only run Singularity test if the binary is available on the system
     # spython is only available on Unix, but do not explicitly skip non-Unix platforms
-    @pytest.mark.skipif(not shutil.which('singularity'), reason='Singularity not found on system')
+    # @pytest.mark.skipif(not shutil.which('singularity'), reason='Singularity not found on system')
+    # See https://github.com/Reed-CompBio/spras/pull/66#issuecomment-1730079719 for discussion of the test
+    # environment where this test passes. It fails in GitHub Actions.
+    # Open a GitHub issue if Cytoscape does not work on Singularity as expected for assistance debugging
+    @pytest.mark.xfail(reason='Requires Singularity and only works for certain Singularity configurations')
     def test_cytoscape_singularity(self):
         out_path = Path(OUT_FILE)
         out_path.unlink(missing_ok=True)
