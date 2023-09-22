@@ -75,8 +75,7 @@ class TestDOMINO:
         DOMINO.run(
             network=TEST_DIR+'input/domino-network.txt',
             active_genes=TEST_DIR+'input/domino-active-genes.txt',
-            output_file=OUT_FILE_DEFAULT,
-            singularity=True)
+            output_file=OUT_FILE_DEFAULT)
         assert out_path.exists()
     config.config.framework = "docker"
     def test_pre_id_transform(self):

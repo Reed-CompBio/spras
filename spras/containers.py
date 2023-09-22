@@ -3,9 +3,11 @@ import platform
 import re
 from pathlib import Path, PurePath, PurePosixPath
 from typing import Any, Dict, List, Optional, Tuple, Union
+
 import docker
 
 import spras.config as config
+
 
 def prepare_path_docker(orig_path: PurePath) -> str:
     """

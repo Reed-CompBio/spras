@@ -115,4 +115,4 @@ class TestMinCostFlow:
                         capacity=1)
         config.config.framework = "docker"
         assert out_path.exists()
-        
+

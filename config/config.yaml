@@ -7,7 +7,7 @@ hash_length: 7
 singularity: false
 
 # Allow the user to configure which container registry containers should be pulled from
-# Note that this assumes container names are consistent across registries, and that the 
+# Note that this assumes container names are consistent across registries, and that the
 # registry being passed doesn't require authentication for pull actions
 registry:
    base_url: docker.io

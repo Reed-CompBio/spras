@@ -1,17 +1,18 @@
-'''
-This config file is being used as a singleton. Because python creates a single instance
-of modules when they're imported, we rely on the Snakefile instantiating the module.
-In particular, when the Snakefile calls init_config, it will reassign config
-to take the value of the actual config provided by Snakemake. After that point, any
-module that imports this module can access a config option by checking the object's
-value. For example
+# This config file is being used as a singleton. Because python creates a single instance
+# of modules when they're imported, we rely on the Snakefile instantiating the module.
+# In particular, when the Snakefile calls init_config, it will reassign config
+# to take the value of the actual config provided by Snakemake. After that point, any
+# module that imports this module can access a config option by checking the object's
+# value. For example
+#
+# import spras.config as config
+# container_framework = config.config.framework
+#
+# will grab the top level registry configuration option as it appears in the config file
 
-import spras.config as config
-container_framework = config.config.framework
-
-will grab the top level registry configuration option as it appears in the config file
-'''
+import copy as copy
 import itertools as it
+import os
 import numpy as np
 import yaml
 import copy as copy
@@ -44,7 +45,7 @@ def init_from_file(filepath):
     except yaml.YAMLError as e:
         print(f"Error: Failed to parse config '{filepath}': {e}")
         return False
-    
+
     # And finally, initialize
     config = Config(config_dict)
 
@@ -52,7 +53,7 @@ def init_from_file(filepath):
 class Config:
     def __init__(self, raw_config):
         # Since process_config winds up modifying the raw_config passed to it as a side effect,
-        # we'll make a deep copy here to guarantee we don't break anything. This preserves the 
+        # we'll make a deep copy here to guarantee we don't break anything. This preserves the
         # config as it's given to the Snakefile by Snakemake
         _raw_config = copy.deepcopy(raw_config)
         self.process_config(_raw_config)
@@ -60,10 +61,10 @@ class Config:
     def process_config(self, raw_config):
         if raw_config == {}:
             raise ValueError("Config file cannot be empty. Use --configfile <filename> to set a config file.")
-        
+
         # Set up a few top-level config variables
         self.out_dir = raw_config["reconstruction_settings"]["locations"]["reconstruction_dir"]
-        
+
         if "singularity" in raw_config and raw_config["singularity"]:
             self.framework = "singularity"
         else:
@@ -74,7 +75,7 @@ class Config:
             self.container_prefix = raw_config["registry"]["base_url"] + "/" + raw_config["registry"]["owner"]
         else:
             self.container_prefix = DEFAULT_CONTAINER_PREFIX
-        
+
         # Parse dataset information
         # Datasets is initially a list, where each list entry has a dataset label and lists of input files
         # Convert the dataset list into a dict where the label is the key and update the config data structure
@@ -98,7 +99,7 @@ class Config:
             self.hash_length = int(raw_config["hash_length"])
         else:
             self.hash_length = DEFAULT_HASH_LENGTH
-        
+
         prior_params_hashes = set()
 
         # Parse algorithm information
