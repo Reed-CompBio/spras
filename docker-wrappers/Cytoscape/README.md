@@ -17,6 +17,9 @@ from this directory.
 Test code is located in `test/analysis/test_cytoscape.py`.
 The Docker wrapper can be tested with `pytest`.
 
+## Versions:
+- v1: Use supervisord to launch Cytoscape from a Python subprocess, then connect to Cytoscape with py4cytoscape. Only loads undirected pathways. Compatible with Singularity in local testing (Apptainer version 1.2.2-1.el7) but fails in GitHub Actions.
+
 ## TODO
 - Add an auth file for `xvfb-run`
 - Java initial heap size, maximum Java heap size, and thread stack size are hard-coded in `Cytoscape.vmoptions` file
