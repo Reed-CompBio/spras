@@ -88,6 +88,8 @@ reconstruction_settings:
 analysis:
   graphspace:
     include: false
+  cytoscape:
+    include: true
   summary:
     include: true
   ml:

@@ -122,6 +122,9 @@
         # Create output files for each pathway that can be visualized with GraphSpace
         graphspace:
           include: false
+        # Create Cytoscape session file with all pathway graphs for each dataset
+        cytoscape:
+          include: true
         # Machine learning analysis (e.g. clustering) of the pathway output files for each dataset
         ml:
           include: true

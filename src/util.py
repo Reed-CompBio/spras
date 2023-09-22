@@ -53,6 +53,8 @@ def convert_docker_path(src_path: PurePath, dest_path: PurePath, file_path: Unio
 
 
 # TODO consider a better default environment variable
+# TODO environment currently a single string (e.g. 'TMPDIR=/OmicsIntegrator1'), should it be a list?
+# run_container_singularity assumes a single string
 # Follow docker-py's naming conventions (https://docker-py.readthedocs.io/en/stable/containers.html)
 # Technically the argument is an image, not a container, but we use container here.
 def run_container(framework: str, container: str, command: List[str], volumes: List[Tuple[PurePath, PurePath]], working_dir: str, environment: str = 'SPRAS=True'):
@@ -63,7 +65,7 @@ def run_container(framework: str, container: str, command: List[str], volumes: L
     @param command: command to run in the container
     @param volumes: a list of volumes to mount where each item is a (source, destination) tuple
     @param working_dir: the working directory in the container
-    @param environment: environment variables to set in the container
+    @param environment: environment variable to set in the container
     @return: output from Singularity execute or Docker run
     """
     normalized_framework = framework.casefold()
@@ -76,7 +78,6 @@ def run_container(framework: str, container: str, command: List[str], volumes: L
 
 
 # TODO any issue with creating a new client each time inside this function?
-# TODO environment currently a single string (e.g. 'TMPDIR=/OmicsIntegrator1'), should it be a list?
 def run_container_docker(container: str, command: List[str], volumes: List[Tuple[PurePath, PurePath]], working_dir: str, environment: str = 'SPRAS=True'):
     """
     Runs a command in the container using Docker.
@@ -87,7 +88,7 @@ def run_container_docker(container: str, command: List[str], volumes: List[Tuple
     @param command: command to run in the container
     @param volumes: a list of volumes to mount where each item is a (source, destination) tuple
     @param working_dir: the working directory in the container
-    @param environment: environment variables to set in the container
+    @param environment: environment variable to set in the container
     @return: output from Docker run
     """
     out = None
@@ -175,7 +176,7 @@ def run_container_singularity(container: str, command: List[str], volumes: List[
     @param command: command to run in the container
     @param volumes: a list of volumes to mount where each item is a (source, destination) tuple
     @param working_dir: the working directory in the container
-    @param environment: environment variables to set in the container
+    @param environment: environment variable to set in the container
     @return: output from Singularity execute
     """
     # spython is not compatible with Windows
@@ -188,7 +189,15 @@ def run_container_singularity(container: str, command: List[str], volumes: List[
     bind_paths = [f'{prepare_path_docker(src)}:{dest}' for src, dest in volumes]
 
     # TODO is try/finally needed for Singularity?
-    singularity_options = ['--cleanenv', '--containall', '--pwd', working_dir, '--env', environment]
+    singularity_options = ['--cleanenv', '--containall', '--pwd', working_dir]
+    # Singularity does not allow $HOME to be set as a regular environment variable
+    # Capture it and use the special argument instead
+    if environment.startswith('HOME='):
+        home_dir = environment[5:]
+        singularity_options.extend(['--home', home_dir])
+    else:
+        singularity_options.extend(['--env', environment])
+
     # To debug a container add the execute arguments: singularity_options=['--debug'], quiet=False
     # Adding 'docker://' to the container indicates this is a Docker image Singularity must convert
     return Client.execute('docker://' + container,

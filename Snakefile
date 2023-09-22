@@ -4,7 +4,7 @@ import shutil
 import yaml
 from src.dataset import Dataset
 from src.util import process_config
-from src.analysis import ml, summary, graphspace
+from src.analysis import ml, summary, graphspace, cytoscape
 
 # Snakemake updated the behavior in the 6.5.0 release https://github.com/snakemake/snakemake/pull/1037
 # and using the wrong separator prevents Snakemake from matching filenames to the rules that can produce them
@@ -69,7 +69,10 @@ def make_final_input(wildcards):
         # add graph and style JSON files.
         final_input.extend(expand('{out_dir}{sep}{dataset}-{algorithm_params}{sep}gs.json',out_dir=out_dir,sep=SEP,dataset=dataset_labels,algorithm_params=algorithms_with_params))
         final_input.extend(expand('{out_dir}{sep}{dataset}-{algorithm_params}{sep}gsstyle.json',out_dir=out_dir,sep=SEP,dataset=dataset_labels,algorithm_params=algorithms_with_params))
-    
+
+    if config["analysis"]["cytoscape"]["include"]:
+        final_input.extend(expand('{out_dir}{sep}{dataset}-cytoscape.cys',out_dir=out_dir,sep=SEP,dataset=dataset_labels))
+
     if config["analysis"]["ml"]["include"]:  
         final_input.extend(expand('{out_dir}{sep}{dataset}-pca.png',out_dir=out_dir,sep=SEP,dataset=dataset_labels,algorithm_params=algorithms_with_params))
         final_input.extend(expand('{out_dir}{sep}{dataset}-pca-variance.txt',out_dir=out_dir,sep=SEP,dataset=dataset_labels,algorithm_params=algorithms_with_params))
@@ -227,7 +230,7 @@ rule parse_output:
 #     run:
 #         summary.run(input.standardized_file,output.summary_file)
 
-# Write GraphSpace JSON Graphs
+# Write GraphSpace JSON graphs
 rule viz_graphspace:
     input: standardized_file = SEP.join([out_dir, '{dataset}-{algorithm}-{params}', 'pathway.txt'])
     output:
@@ -235,6 +238,16 @@ rule viz_graphspace:
         style_json = SEP.join([out_dir, '{dataset}-{algorithm}-{params}', 'gsstyle.json'])
     run:
         graphspace.write_json(input.standardized_file,output.graph_json,output.style_json,directed=algorithm_directed[wildcards.algorithm])
+
+
+# Write a Cytoscape session file with all pathways for each dataset
+rule viz_cytoscape:
+    input: pathways = expand('{out_dir}{sep}{{dataset}}-{algorithm_params}{sep}pathway.txt', out_dir=out_dir, sep=SEP, algorithm_params=algorithms_with_params)
+    output: 
+        session = SEP.join([out_dir, '{dataset}-cytoscape.cys'])
+    run:
+        cytoscape.run_cytoscape(input.pathways, output.session, SINGULARITY)
+
 
 # Write a single summary table for all pathways for each dataset
 rule summary_table:
