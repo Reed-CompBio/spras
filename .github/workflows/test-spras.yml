@@ -52,7 +52,7 @@ jobs:
       uses: eWaterCycle/setup-apptainer@v2
       with:
         # Choose version from https://github.com/apptainer/apptainer/releases
-        apptainer-version: 1.1.3
+        apptainer-version: 1.2.2
     - name: Run tests
       shell: bash --login {0}
       # Verbose output and disable stdout and stderr capturing
@@ -145,6 +145,15 @@ jobs:
         repository: reedcompbio/domino
         tags: latest
         cache_froms: reedcompbio/domino:latest
+        push: false
+    - name: Build Cytoscape Docker image
+      uses: docker/build-push-action@v1
+      with:
+        path: docker-wrappers/Cytoscape/.
+        dockerfile: docker-wrappers/Cytoscape/Dockerfile
+        repository: reedcompbio/py4cytoscape
+        tags: v1
+        cache_froms: reedcompbio/py4cytoscape:v1
         push: false
 
   # Run pre-commit checks on source files

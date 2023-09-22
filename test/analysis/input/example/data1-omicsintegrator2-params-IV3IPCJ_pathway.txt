@@ -1,6 +1,6 @@
-C D 1
-C F 1
-A D 1
-I G 1
-H G 1
-G F 1
+C	D	1
+C	F	1
+A	D	1
+I	G	1
+H	G	1
+G	F	1
