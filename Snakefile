@@ -237,7 +237,7 @@ rule viz_graphspace:
         graph_json = SEP.join([out_dir, '{dataset}-{algorithm}-{params}', 'gs.json']),
         style_json = SEP.join([out_dir, '{dataset}-{algorithm}-{params}', 'gsstyle.json'])
     run:
-        graphspace.write_json(input.standardized_file,output.graph_json,output.style_json,directed=algorithm_directed[wildcards.algorithm])
+        graphspace.write_json(input.standardized_file,output.graph_json,output.style_json)
 
 
 # Write a Cytoscape session file with all pathways for each dataset

@@ -16,7 +16,7 @@ class TestPrepareInputs:
         """
         Path(OUTDIR).mkdir(parents=True, exist_ok=True)
 
-    def test_prepare_inputs(self):
+    def test_prepare_inputs_networks(self):
         config_loc = os.path.join("config", "config.yaml")
 
         with open(config_loc) as config_file:

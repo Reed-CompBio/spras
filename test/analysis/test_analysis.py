@@ -7,6 +7,7 @@ class TestAnalysis:
     """
     Test the summary statistics
     """
+    # TODO: put back tests once summary.run is put back with mixed graphs
     # # test a ranked file of ints (1 - 10)
     # def test_summary_ranked_ints(self):
     #     summary.run(TEST_DIR + 'input/standardized-ranked.txt', TEST_DIR + 'output/standardized-ranked-out.txt')

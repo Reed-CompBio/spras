@@ -1,17 +1,18 @@
 import json
 import os
 import sys
-
+import pandas as pd
 import networkx as nx
 from graphspace_python.api.client import GraphSpace
 from graphspace_python.graphs.classes.gsgraph import GSGraph
 
+# remove all the the directed = bool in the function names
+def write_json(graph_file,out_graph,out_style) -> None:
 
-def write_json(graph_file,out_graph,out_style,directed=False) -> None:
-
+	print("graph file", graph_file)
 	# get GS Graph
 	graph_name = os.path.basename(out_graph) # name is the prefix specified.
-	G = get_gs_graph(graph_file,graph_name,directed=directed)
+	G = get_gs_graph(graph_file, graph_name)
 
 	# write graph JSON
 	with open(out_graph,'w') as f:
@@ -27,7 +28,7 @@ Post a graph to GraphSpace.
 We need to resolve the issue with username/password in config
 files before we post to GraphSpace.
 '''
-def post_graph(G:GSGraph,username:str,password:str,directed=False) -> None:
+def post_graph(G:GSGraph,username:str,password:str) -> None:
 	gs = GraphSpace(username,password)
 	try:
 		gs.update_graph(G)
@@ -36,9 +37,10 @@ def post_graph(G:GSGraph,username:str,password:str,directed=False) -> None:
 	print('posted graph')
 	return
 
-def get_gs_graph(graph_file:str,graph_name:str,directed=False) -> GSGraph:
+def get_gs_graph(graph_file:str,graph_name:str) -> GSGraph:
 	# read file as networkx graph
-	nxG = load_graph(graph_file,directed=directed)
+	# returns a tuple, the graph and directionality
+	nxG, directed = load_graph(graph_file)
 
 	# convert networkx graph to GraphSpace object
 	G = GSGraph()
@@ -55,12 +57,27 @@ def get_gs_graph(graph_file:str,graph_name:str,directed=False) -> GSGraph:
 			G.add_edge_style(u,v,width=2,color='#281D6A')
 	return G
 
-## TODO this is a duplicated function in summary.py.
-## Pull this and others into a utils.py function.
-def load_graph(path: str,directed=False) -> nx.Graph:
-	if not directed:
-		G = nx.read_edgelist(path,data=(('rank',float),))
-	else:
-		# note - self-edges are not allowed in DiGraphs.
-		G = nx.read_edgelist(path,data=(('rank',float),),create_using=nx.DiGraph)
-	return G
+
+def load_graph(path: str) -> nx.Graph:
+	G = nx.Graph()
+	directed = False
+	
+	try:
+		pathways = pd.read_csv(path, sep="\t", header=None)
+	except pd.errors.EmptyDataError:
+		print(f"The file {path} is empty.")
+		return G, directed
+	pathways.columns = ["Interactor1", "Interactor2", "Rank", "Direction"]
+	mask_u = pathways['Direction'] == 'U'
+	mask_d = pathways['Direction'] == 'D'
+
+	if mask_u.all():
+		G = nx.read_edgelist(path,data=(('rank',float), ('Direction',str)))
+		directed = False
+	elif mask_d.all():
+		G = nx.read_edgelist(path,data=(('rank',float),('Direction',str)), create_using=nx.DiGraph)
+		directed = True
+	else: 
+		print("graphspace does not deal with mixed direction type graphs currently")
+
+	return G, directed 
