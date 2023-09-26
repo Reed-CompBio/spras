@@ -1,10 +1,12 @@
 import json
 import os
 import sys
-import pandas as pd
+
 import networkx as nx
+import pandas as pd
 from graphspace_python.api.client import GraphSpace
 from graphspace_python.graphs.classes.gsgraph import GSGraph
+
 
 # remove all the the directed = bool in the function names
 def write_json(graph_file,out_graph,out_style) -> None:
@@ -61,7 +63,7 @@ def get_gs_graph(graph_file:str,graph_name:str) -> GSGraph:
 def load_graph(path: str) -> nx.Graph:
 	G = nx.Graph()
 	directed = False
-	
+
 	try:
 		pathways = pd.read_csv(path, sep="\t", header=None)
 	except pd.errors.EmptyDataError:
@@ -77,7 +79,7 @@ def load_graph(path: str) -> nx.Graph:
 	elif mask_d.all():
 		G = nx.read_edgelist(path,data=(('rank',float),('Direction',str)), create_using=nx.DiGraph)
 		directed = True
-	else: 
+	else:
 		print("graphspace does not deal with mixed direction type graphs currently")
 
-	return G, directed 
+	return G, directed
