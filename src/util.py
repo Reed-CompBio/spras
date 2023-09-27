@@ -278,7 +278,7 @@ def run_container_dsub(container: str, command: List[str], volumes: List[Tuple[P
     flags['env'] = environment
     flags['input-recursive'] = [vol[3]+'='+vol[2] for vol in dsub_volumes]
     flags['output-recursive'] = "OUTPUT=" + workspace_bucket +  working_dir
-    flags['logging'] = workspace_bucket + '/dsub/'+ datetime.now().isoformat().replace('.', '-').replace(':', '-')
+    flags['logging'] = workspace_bucket + '/dsub/'
     
     # Create dsub command 
     dsub_command = prepare_dsub_cmd(flags)
