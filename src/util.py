@@ -54,7 +54,7 @@ def convert_docker_path(src_path: PurePath, dest_path: PurePath, file_path: Unio
     rel_path = file_path.relative_to(src_path)
     return PurePosixPath(dest_path, rel_path)
 
-def download_gcs(gcs_path, local_path, is_dir, multithread):
+def download_gcs(gcs_path: str, local_path: str, is_dir: bool, multithread: bool):
     # check that output path exists
     if not os.path.exists(Path(local_path).parent):
         os.makedirs(Path(local_path).parent)
@@ -66,11 +66,13 @@ def download_gcs(gcs_path, local_path, is_dir, multithread):
     cmd = cmd + ' cp'
     if is_dir:
         cmd = cmd + ' -r'
-    cmd = cmd + ' ' + gcs_path + '/ ' + str(Path(local_path).parent)
+    cmd = cmd + ' ' + gcs_path + '/* ' + local_path
 
     print(cmd)
+    # run command 
     subprocess.run(cmd, shell=True)
-def upload_gcs(local_path, gcs_path, is_dir, multithread):
+
+def upload_gcs(local_path: str, gcs_path: str, is_dir: bool, multithread: bool):
     # build command
     cmd = 'gsutil'
     if multithread:
@@ -81,9 +83,10 @@ def upload_gcs(local_path, gcs_path, is_dir, multithread):
     cmd = cmd + ' ' + str(Path(local_path).resolve()) + ' ' + gcs_path
 
     print(cmd)
+    # run command
     subprocess.run(cmd, shell=True)
     
-def prepare_dsub_cmd(flags):
+def prepare_dsub_cmd(flags: dict):
     # set constant flags
     dsub_command = 'dsub'
     flags['provider'] = 'google-cls-v2'
@@ -98,7 +101,7 @@ def prepare_dsub_cmd(flags):
     flag_list = ["provider", "regions", "zones", "location", "user-project", "project", "network", "subnetwork", "service-account", "image", "env", "logging", "input", "input-recursive", "mount", "output", "output-recursive", "command", "script"]
     ordered_flags = {f:flags[f] for f in flag_list if f in flags.keys()}
 
-    # parse through keyword arguments
+    # iteratively add flags to the command 
     for flag in ordered_flags.keys():
         if isinstance(ordered_flags.get(flag), list):
             for f in ordered_flags.get(flag):
@@ -106,6 +109,7 @@ def prepare_dsub_cmd(flags):
         else:
             dsub_command = dsub_command + " --" + flag + " " + ordered_flags.get(flag)
 
+    # Wait for dsub job to complegte
     dsub_command = dsub_command + " --wait"
     print(f"Command: {dsub_command}")
     return dsub_command
@@ -259,11 +263,7 @@ def run_container_dsub(container: str, command: List[str], volumes: List[Tuple[P
         else:
             container_command.append(item)
     # Add a command to copy the volumes to the workspace buckets
-    #container_command.extend([';', 'cp', '-r'])
-    #container_command.extend(['${'+volume[3]+'}' for volume in dsub_volumes])
-    #container_command.append('${OUTPUT}')
-#    container_command.extend([('; cp -r ' + f'/mnt/data/input/gs/{workspace_bucket}' +str(volume[1]) + ' $OUTPUT').replace('gs://', '') for volume in dsub_volumes])
-    container_command.append(('; cp -rf ' + f'/mnt/data/input/gs/{workspace_bucket}{working_dir}' + ' $OUTPUT').replace('gs://', ''))
+    container_command.append(('; cp -rf ' + f'/mnt/data/input/gs/{workspace_bucket}{working_dir}/*' + ' $OUTPUT').replace('gs://', ''))
 
     # Make the command into a string
     flags['command'] = ' '.join(container_command)
@@ -288,9 +288,6 @@ def run_container_dsub(container: str, command: List[str], volumes: List[Tuple[P
     
     # Pull output volumes from WORKSPACE_BUCKET
     for src, dst, gcs_path, env in dsub_volumes:
-        gcs_path = gcs_path.split('/')
-        gcs_path.insert(gcs_path.index('spras')+1, 'spras')
-        gcs_path = '/'.join(gcs_path)
         download_gcs(local_path=str(src), gcs_path=gcs_path, is_dir=True, multithread=True)  
     
     # return location of dsub logs in WORKSPACE_BUCKET
