@@ -15,6 +15,8 @@ from typing import Any, Dict, List, Optional, Tuple, Union
 import docker
 import numpy as np  # Required to eval some forms of parameter ranges
 import pandas as pd
+import subprocess
+from datetime import datetime 
 
 # The default length of the truncated hash used to identify parameter combinations
 DEFAULT_HASH_LENGTH = 7
@@ -64,10 +66,10 @@ def download_gcs(gcs_path, local_path, is_dir, multithread):
     cmd = cmd + ' cp'
     if is_dir:
         cmd = cmd + ' -r'
-    cmd = cmd + ' ' + gcs_path + ' ' + local_path
+    cmd = cmd + ' ' + gcs_path + '/ ' + str(Path(local_path).parent)
 
     print(cmd)
-    subprocess.run(cmd, shell=True
+    subprocess.run(cmd, shell=True)
 def upload_gcs(local_path, gcs_path, is_dir, multithread):
     # build command
     cmd = 'gsutil'
@@ -86,8 +88,8 @@ def prepare_dsub_cmd(flags):
     dsub_command = 'dsub'
     flags['provider'] = 'google-cls-v2'
     flags['regions'] = 'us-central1'
-    #flags['user-project'] = os.getenv('GOOGLE_PROJECT')
-    #flags['project'] = os.getenv('GOOGLE_PROJECT')
+    flags['user-project'] = os.getenv('GOOGLE_PROJECT')
+    flags['project'] = os.getenv('GOOGLE_PROJECT')
     flags['network'] = 'network'
     flags['subnetwork'] = 'subnetwork'
     flags['service-account'] = subprocess.run(['gcloud', 'config' ,'get-value' ,'account'], capture_output=True, text=True).stdout.replace('\n', '')
@@ -240,23 +242,32 @@ def run_container_dsub(container: str, command: List[str], volumes: List[Tuple[P
     """
     # Dictionary of flags for dsub command
     flags = dict()
-    # Add path in the workspace bucket and label for dsub command for each volume
-    dsub_volumes = [(src, dst, "${WORKSPACE}"+str(dst), "INPUT_" + str(i),) for i, (src, dst) in enumerate(volumes)]
-    
+
     workspace_bucket = os.getenv('WORKSPACE_BUCKET')
+    # Add path in the workspace bucket and label for dsub command for each volume
+    dsub_volumes = [(src, dst, workspace_bucket +  str(dst), "INPUT_" + str(i),) for i, (src, dst) in enumerate(volumes)]
+    
     # Prepare command that will be run inside the container for dsub 
     container_command = list()
     for item in command:
         # Replace each volume with path in workspace 
         to_replace = ["${"+path[3]+'}' for path in dsub_volumes if str(path[1]) in item]
-        container_command.append(to_replace[0] if len(to_replace) == 1 else item)
+        if len(to_replace) == 1 and len(PurePath(item).suffix) > 0:
+            container_command.append(to_replace[0]+'/'+item.split('/')[-1])
+        elif len(to_replace) == 1 and len(PurePath(item).suffix) == 0:
+            container_command.append(to_replace[0]+'/')
+        else:
+            container_command.append(item)
     # Add a command to copy the volumes to the workspace buckets
-    container_command.extend([';', 'cp', '-r'])
-    container_command.extend(['${'+volume[3]+'}' for volume in dsub_volumes])
-    container_command.append('${OUTPUT}')
+    #container_command.extend([';', 'cp', '-r'])
+    #container_command.extend(['${'+volume[3]+'}' for volume in dsub_volumes])
+    #container_command.append('${OUTPUT}')
+#    container_command.extend([('; cp -r ' + f'/mnt/data/input/gs/{workspace_bucket}' +str(volume[1]) + ' $OUTPUT').replace('gs://', '') for volume in dsub_volumes])
+    container_command.append(('; cp -rf ' + f'/mnt/data/input/gs/{workspace_bucket}{working_dir}' + ' $OUTPUT').replace('gs://', ''))
+
     # Make the command into a string
     flags['command'] = ' '.join(container_command)
-    flags['command'] = '"' + flags['command'] + '"'
+    flags['command'] = "'" + flags['command'] + "'"
     
     ## Push volumes to WORKSPACE_BUCKET
     for src, dst, gcs_path, env in dsub_volumes:
@@ -266,8 +277,8 @@ def run_container_dsub(container: str, command: List[str], volumes: List[Tuple[P
     flags['image'] = container
     flags['env'] = environment
     flags['input-recursive'] = [vol[3]+'='+vol[2] for vol in dsub_volumes]
-    flags['output-recursive'] = '${WORKSPACE}'+work_dir
-    flags['logging'] = '${WORKSPACE}/dsub/'+ datetime.now().isoformat().replace('.', '-').replace(':', '-')
+    flags['output-recursive'] = "OUTPUT=" + workspace_bucket +  working_dir
+    flags['logging'] = workspace_bucket + '/dsub/'+ datetime.now().isoformat().replace('.', '-').replace(':', '-')
     
     # Create dsub command 
     dsub_command = prepare_dsub_cmd(flags)
@@ -277,10 +288,13 @@ def run_container_dsub(container: str, command: List[str], volumes: List[Tuple[P
     
     # Pull output volumes from WORKSPACE_BUCKET
     for src, dst, gcs_path, env in dsub_volumes:
+        gcs_path = gcs_path.split('/')
+        gcs_path.insert(gcs_path.index('spras')+1, 'spras')
+        gcs_path = '/'.join(gcs_path)
         download_gcs(local_path=str(src), gcs_path=gcs_path, is_dir=True, multithread=True)  
     
     # return location of dsub logs in WORKSPACE_BUCKET
-    return  'dsub logs: {logs}'.format(logs = flags['logging']).replace('${WORKSPACE}', str(workspace_bucket))
+    return  'dsub logs: {logs}'.format(logs = flags['logging'])
 
 def run_container_singularity(container: str, command: List[str], volumes: List[Tuple[PurePath, PurePath]], working_dir: str, environment: str = 'SPRAS=True'):
     """
