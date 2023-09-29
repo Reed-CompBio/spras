@@ -2,10 +2,12 @@ from pathlib import Path, PurePath
 from shutil import rmtree
 from typing import List, Union
 
-from spras.util import prepare_volume, run_container
+import spras.config as config
+from spras.containers import run_container
+from spras.util import prepare_volume
 
 
-def run_cytoscape(pathways: List[Union[str, PurePath]], output_file: str, singularity: bool = False) -> None:
+def run_cytoscape(pathways: List[Union[str, PurePath]], output_file: str) -> None:
     """
     Create a Cytoscape session file with visualizations of each of the provided pathways
     @param pathways: a list of pathways to visualize
@@ -49,9 +51,10 @@ def run_cytoscape(pathways: List[Union[str, PurePath]], output_file: str, singul
     print('Running Cytoscape with arguments: {}'.format(' '.join(command)), flush=True)
 
     # TODO consider making this a string in the config file instead of a Boolean
-    container_framework = 'singularity' if singularity else 'docker'
+    container_framework = config.config.container_framework
+    container_prefix = "py4cytoscape:v2"
     out = run_container(container_framework,
-                        'reedcompbio/py4cytoscape:v2',
+                        container_prefix,
                         command,
                         volumes,
                         work_dir,

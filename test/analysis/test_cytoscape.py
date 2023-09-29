@@ -3,6 +3,7 @@ from pathlib import Path
 
 import pytest
 
+import spras.config as config
 from spras.analysis.cytoscape import run_cytoscape
 
 INPUT_DIR = 'test/analysis/input/example/'
@@ -33,7 +34,9 @@ class TestCytoscape:
     # Open a GitHub issue if Cytoscape does not work on Singularity as expected for assistance debugging
     @pytest.mark.xfail(reason='Requires Singularity and only works for certain Singularity configurations')
     def test_cytoscape_singularity(self):
+        config.config.container_framework = "singularity"
         out_path = Path(OUT_FILE)
         out_path.unlink(missing_ok=True)
-        run_cytoscape(INPUT_PATHWAYS, OUT_FILE, True)
+        run_cytoscape(INPUT_PATHWAYS, OUT_FILE)
+        config.config.container_framework = "docker"
         assert out_path.exists()
