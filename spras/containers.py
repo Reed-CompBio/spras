@@ -63,7 +63,7 @@ def run_container(framework: str, container_suffix: str, command: List[str], vol
     elif normalized_framework == 'singularity':
         return run_container_singularity(container, command, volumes, working_dir, environment)
     else:
-        raise ValueError(f'{config.config.framework} is not a recognized container framework. Choose "docker" or "singularity".')
+        raise ValueError(f'{config.config.container_framework} is not a recognized container framework. Choose "docker" or "singularity".')
 
 
 # TODO any issue with creating a new client each time inside this function?

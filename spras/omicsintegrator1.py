@@ -161,7 +161,7 @@ class OmicsIntegrator1(PRM):
         print('Running Omics Integrator 1 with arguments: {}'.format(' '.join(command)), flush=True)
 
         # TODO consider making this a string in the config file instead of a Boolean
-        container_framework = config.config.framework
+        container_framework = config.config.container_framework
         container_suffix = "omics-integrator-1:no-conda" # no-conda version is the default
 
         out = run_container(container_framework,

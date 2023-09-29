@@ -64,9 +64,9 @@ class TestOmicsIntegrator2:
     def test_oi2_singularity(self):
         # Only include required arguments
         OUT_FILE.unlink(missing_ok=True)
-        config.config.framework = "singularity"
+        config.config.container_framework = "singularity"
         OmicsIntegrator2.run(edges=EDGE_FILE,
                              prizes=PRIZE_FILE,
                              output_file=OUT_FILE)
-        config.config.framework = "docker"
+        config.config.container_framework = "docker"
         assert OUT_FILE.exists()

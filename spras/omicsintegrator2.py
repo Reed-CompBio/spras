@@ -120,7 +120,7 @@ class OmicsIntegrator2(PRM):
 
         print('Running Omics Integrator 2 with arguments: {}'.format(' '.join(command)), flush=True)
 
-        container_framework = config.config.framework
+        container_framework = config.config.container_framework
         container_suffix = "omics-integrator-2:v2"
         out = run_container(container_framework,
                             container_suffix,

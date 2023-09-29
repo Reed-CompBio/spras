@@ -115,7 +115,7 @@ class DOMINO(PRM):
 
         print('Running slicer with arguments: {}'.format(' '.join(slicer_command)), flush=True)
 
-        container_framework = config.config.framework
+        container_framework = config.config.container_framework
         container_suffix = "domino"
         slicer_out = run_container(container_framework,
                                    container_suffix,

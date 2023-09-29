@@ -117,7 +117,7 @@ class PathLinker(PRM):
 
         print('Running PathLinker with arguments: {}'.format(' '.join(command)), flush=True)
 
-        container_framework = config.config.framework
+        container_framework = config.config.container_framework
         container_suffix = "pathlinker"
         out = run_container(container_framework,
                             container_suffix,

@@ -160,7 +160,7 @@ class MEO(PRM):
         print('Running Maximum Edge Orientation with arguments: {}'.format(' '.join(command)), flush=True)
 
         # TODO consider making this a string in the config file instead of a Boolean
-        container_framework = config.config.framework
+        container_framework = config.config.container_framework
         container_suffix = "meo"
         out = run_container(container_framework,
                             container_suffix,

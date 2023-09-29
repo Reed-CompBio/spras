@@ -62,10 +62,10 @@ class TestMaximumEdgeOrientation:
         out_path = Path(OUT_FILE)
         out_path.unlink(missing_ok=True)
         # Only include required arguments and run with Singularity
-        config.config.framework = "singularity"
+        config.config.container_framework = "singularity"
         MEO.run(edges=TEST_DIR + 'input/meo-edges.txt',
                 sources=TEST_DIR + 'input/meo-sources.txt',
                 targets=TEST_DIR + 'input/meo-targets.txt',
                 output_file=OUT_FILE)
-        config.config.framework = "docker"
+        config.config.container_framework = "docker"
         assert out_path.exists()

@@ -88,12 +88,12 @@ class TestOmicsIntegrator1:
         out_path = Path(OUT_FILE)
         out_path.unlink(missing_ok=True)
         # Only include required arguments and run with Singularity
-        config.config.framework = "singularity"
+        config.config.container_framework = "singularity"
         OmicsIntegrator1.run(edges=TEST_DIR + 'input/oi1-edges.txt',
                              prizes=TEST_DIR + 'input/oi1-prizes.txt',
                              output_file=OUT_FILE,
                              w=5,
                              b=1,
                              d=10)
-        config.config.framework = "docker"
+        config.config.container_framework = "docker"
         assert out_path.exists()

@@ -6,7 +6,7 @@
 # value. For example
 #
 # import spras.config as config
-# container_framework = config.config.framework
+# container_framework = config.config.container_framework
 #
 # will grab the top level registry configuration option as it appears in the config file
 
@@ -67,13 +67,13 @@ class Config:
         self.out_dir = raw_config["reconstruction_settings"]["locations"]["reconstruction_dir"]
 
         if "singularity" in raw_config and raw_config["singularity"]:
-            self.framework = "singularity"
+            self.container_framework = "singularity"
         else:
-            self.framework = "docker"
+            self.container_framework = "docker"
 
         # Grab registry from the config, and if none is provided default to docker
-        if "registry" in raw_config and raw_config["registry"]["base_url"] != "" and raw_config["registry"]["owner"] != "":
-            self.container_prefix = raw_config["registry"]["base_url"] + "/" + raw_config["registry"]["owner"]
+        if "container_registry" in raw_config and raw_config["container_registry"]["base_url"] != "" and raw_config["container_registry"]["owner"] != "":
+            self.container_prefix = raw_config["container_registry"]["base_url"] + "/" + raw_config["container_registry"]["owner"]
         else:
             self.container_prefix = DEFAULT_CONTAINER_PREFIX
 
