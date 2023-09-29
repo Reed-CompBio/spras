@@ -2,7 +2,7 @@ from pathlib import PurePosixPath, PureWindowsPath
 
 import pytest
 
-from src.util import (
+from spras.util import (
     convert_docker_path,
     hash_params_sha1_base32,
     prepare_path_docker,

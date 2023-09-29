@@ -3,7 +3,7 @@ from pathlib import Path
 
 import pandas as pd
 
-import src.analysis.ml as ml
+import spras.analysis.ml as ml
 
 INPUT_DIR = 'test/ml/input/'
 OUT_DIR = 'test/ml/output/'
