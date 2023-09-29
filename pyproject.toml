@@ -1,16 +1,20 @@
 [project]
-name = "SPRAS"
-version = "v0.0.1"
-description = "Signaling Pathway Reconstruction Analysis Streamliner (SPRAS)"
+name = "spras"
+version = "0.0.1"
+description = "Signaling Pathway Reconstruction Analysis Streamliner"
 authors = [
-  { name = "Anthony Gitter", email = "agitter@morgridge.org" },
+  { name = "Anthony Gitter", email = "gitter@biostat.wisc.edu" },
+  { name = "Anna Ritz", email = "aritz@reed.edu"},
 ]
 license = { file = "LICENSE" }
 readme = "README.md"
 classifiers = [
-    "Programming Language :: Python :: 3",
+    "Development Status :: 3 - Alpha",
+    "Intended Audience :: Science/Research",
     "License :: OSI Approved :: MIT License",
     "Operating System :: OS Independent",
+    "Programming Language :: Python :: 3",
+    "Topic :: Scientific/Engineering :: Bio-Informatics",
 ]
 requires-python = ">=3.8"
 dependencies = [
@@ -22,18 +26,18 @@ dependencies = [
     "pandas==1.4",
     "pip==22.1",
     "requests==2.28",
-    "scikit-learn==1.2", #Version bumped from 1.1-->1.2 to get past compilation errors. No other errors encountered
+    "scikit-learn==1.2",
     "seaborn==0.12",
     "spython==0.2",
     # Only required for GraphSpace
     "commonmark==0.9",
-    "docutils", #==0.18
+    "docutils==0.18",
     "jinja2==3.1",
     "mock==4.0",
     "recommonmark==0.7",
     "sphinx==5.0",
     "graphspace_python==1.3.1",
-    "sphinx-rtd-theme==1.0.0",
+    "sphinx-rtd-theme==1.2.0",
 ]
 
 [project.optional-dependencies]
@@ -45,7 +49,7 @@ dev = [
 
 [project.urls]
 "Homepage" = "https://github.com/Reed-CompBio/spras"
-"Bug Tracker" = "https://github.com/Reed-CompBio/spras/issues"
+"Issues" = "https://github.com/Reed-CompBio/spras/issues"
 
 [build-system]
 requires = ["setuptools>=64.0"]
