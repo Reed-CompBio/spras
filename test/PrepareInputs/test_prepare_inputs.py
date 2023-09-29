@@ -9,6 +9,9 @@ from src import runner
 
 OUTDIR = "test/PrepareInputs/output/"
 EXPDIR = "test/PrepareInputs/expected/"
+algorithms = ['mincostflow', 'meo', 'omicsintegrator1', "omicsintegrator2", "domino", "pathlinker", "allpairs"]
+algo_exp_file = {'mincostflow': 'edges', 'meo': 'edges', 'omicsintegrator1': 'edges', 'omicsintegrator2': 'edges', 'domino': 'network', 'pathlinker': 'network', "allpairs": 'network'}
+
 class TestPrepareInputs:
     def setup_class(cls):
         """
@@ -23,51 +26,12 @@ class TestPrepareInputs:
             config = yaml.load(config_file, Loader=yaml.FullLoader)
         test_file = "test/PrepareInputs/output/test_pickled_dataset.pkl"
 
-        for dataset in config["datasets"]:
-            runner.merge_input(dataset, test_file)
+        data0_dataset = next((ds for ds in config["datasets"] if ds["label"] == "data0"), None)
 
-            # Test PathLinker
-            filename_map = {"nodetypes": os.path.join("test","PrepareInputs", "output", "pl-nodetypes.txt"),
-                            "network": os.path.join("test","PrepareInputs", "output", "pl-network.txt")}
-            runner.prepare_inputs("pathlinker", test_file, filename_map)
-            assert filecmp.cmp(OUTDIR +'pl-network.txt', EXPDIR + 'pl-network-expected.txt')
-
-            # Test OmicsIntegrator1
-            filename_map = {"prizes": os.path.join("test","PrepareInputs", "output", "oi1-prizes.txt"),
-                            "edges": os.path.join("test","PrepareInputs", "output", "oi1-network.txt")}
-            runner.prepare_inputs("omicsintegrator1", test_file, filename_map)
-            assert filecmp.cmp(OUTDIR +'oi1-network.txt', EXPDIR + 'oi1-network-expected.txt')
-
-            # Test OmicsIntegrator2
-            filename_map = {"prizes": os.path.join("test","PrepareInputs", "output", "oi2-prizes.txt"),
-                            "edges": os.path.join("test","PrepareInputs", "output", "oi2-network.txt")}
-            runner.prepare_inputs("omicsintegrator2", test_file, filename_map)
-            assert filecmp.cmp(OUTDIR +'oi2-network.txt', EXPDIR + 'oi2-network-expected.txt')
-
-            # Test MEO
-            filename_map = {"sources": os.path.join("test","PrepareInputs", "output", "meo-sources.txt"),
-                            "targets": os.path.join("test","PrepareInputs", "output", "meo-targets.txt"),
-                            "edges": os.path.join("test","PrepareInputs", "output", "meo-edges.txt")}
-            runner.prepare_inputs("meo", test_file, filename_map)
-            assert filecmp.cmp(OUTDIR +'meo-edges.txt', EXPDIR + 'meo-edges-expected.txt')
-
-            # Test MCF
-            filename_map = {"sources": os.path.join("test","PrepareInputs", "output", "mcf-sources.txt"),
-                            "targets": os.path.join("test","PrepareInputs", "output", "mcf-targets.txt"),
-                            "edges": os.path.join("test","PrepareInputs", "output", "mcf-edges.txt")}
-            runner.prepare_inputs("mincostflow", test_file, filename_map)
-            assert filecmp.cmp(OUTDIR +'mcf-edges.txt', EXPDIR + 'mcf-edges-expected.txt')
-
-            # Test AllPairs
-            filename_map = {"nodetypes": os.path.join("test","PrepareInputs", "output", "ap-nodetypes.txt"),
-                            "network": os.path.join("test","PrepareInputs", "output", "ap-network.txt")}
-            runner.prepare_inputs("allpairs", test_file, filename_map)
-            assert filecmp.cmp(OUTDIR +'ap-network.txt', EXPDIR + 'ap-network-expected.txt')
-
-            # Test Domino
-            filename_map = {"network": os.path.join("test","PrepareInputs", "output", "d-network.txt"),
-                            "active_genes": os.path.join("test","PrepareInputs", "output", "d-active_genes.txt")}
-            runner.prepare_inputs("domino", test_file, filename_map)
-            assert filecmp.cmp(OUTDIR +'d-network.txt', EXPDIR + 'd-network-expected.txt')
-
-            break # only run dataset 0
+        for algo in algorithms:
+            inputs = runner.get_required_inputs(algo)
+            runner.merge_input(data0_dataset, test_file)
+            filename_map = {input_str: os.path.join("test", "PrepareInputs", "output", f"{algo}-{input_str}.txt") for input_str in inputs}
+            runner.prepare_inputs(algo, test_file, filename_map)
+            exp_file_name = algo_exp_file[algo]
+            assert filecmp.cmp(OUTDIR +f"{algo}-{exp_file_name}.txt", EXPDIR + f"{algo}-{exp_file_name}-expected.txt")
