@@ -166,7 +166,7 @@ def run_container_singularity(container: str, command: List[str], volumes: List[
     @param command: command to run in the container
     @param volumes: a list of volumes to mount where each item is a (source, destination) tuple
     @param working_dir: the working directory in the container
-    @param environment: environment variables to set in the container
+    @param environment: environment variable to set in the container
     @return: output from Singularity execute
     """
     # spython is not compatible with Windows
@@ -179,7 +179,15 @@ def run_container_singularity(container: str, command: List[str], volumes: List[
     bind_paths = [f'{prepare_path_docker(src)}:{dest}' for src, dest in volumes]
 
     # TODO is try/finally needed for Singularity?
-    singularity_options = ['--cleanenv', '--containall', '--pwd', working_dir, '--env', environment]
+    singularity_options = ['--cleanenv', '--containall', '--pwd', working_dir]
+    # Singularity does not allow $HOME to be set as a regular environment variable
+    # Capture it and use the special argument instead
+    if environment.startswith('HOME='):
+        home_dir = environment[5:]
+        singularity_options.extend(['--home', home_dir])
+    else:
+        singularity_options.extend(['--env', environment])
+
     # To debug a container add the execute arguments: singularity_options=['--debug'], quiet=False
     # Adding 'docker://' to the container indicates this is a Docker image Singularity must convert
     return Client.execute('docker://' + container,
