@@ -10,6 +10,7 @@ from typing import Any, Dict, List, Optional, Tuple, Union
 
 import pandas as pd
 
+
 def hash_params_sha1_base32(params_dict: Dict[str, Any], length: Optional[int] = None) -> str:
     """
     Hash of a dictionary.
@@ -65,7 +66,8 @@ def prepare_volume(filename: Union[str, PurePath], volume_base: Union[str, PureP
     # There's no clear way to get DEFAULT_HASH_LENGTH from config without a circular import...
     # For now, hardcoding the value to 7, since it appeared the value wasn't updated by
     # config.yaml before anyway.
-    filename_hash = hash_filename(filename, 7)
+    from src.config import DEFAULT_HASH_LENGTH
+    filename_hash = hash_filename(filename, DEFAULT_HASH_LENGTH)
     dest = PurePosixPath(base_path, filename_hash)
 
     abs_filename = Path(filename).resolve()
