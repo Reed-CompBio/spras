@@ -7,6 +7,7 @@ import yaml
 
 from src import runner
 from src.domino import DOMINO, post_domino_id_transform, pre_domino_id_transform
+
 INDIR = "test/ParseOutputs/input/"
 OUTDIR = "test/ParseOutputs/output/"
 EXPDIR = "test/ParseOutputs/expected/"
@@ -24,7 +25,7 @@ class TestParseOutputs:
         Path(OUTDIR).mkdir(parents=True, exist_ok=True)
 
     def test_parse_outputs(self):
-        
+
         # skip domino
         for algo in algorithms:
             # inputs = runner.get_required_inputs(algo)
