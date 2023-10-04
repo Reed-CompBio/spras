@@ -188,6 +188,24 @@ Follow the example for any of the other pathway reconstruction algorithm.
 First pull the image `<username>/local-neighborhood` from Docker Hub.
 Then build the Docker image using the `Dockerfile` that was completed in Step 2.
 
+Modify Generate Inputs:
+
+Purpose: Update the references and expected files for the new algorithm.
+
+Instructions:
+1. Append the algorithm name to the existing algorithms list.
+2. Include a key-value pair in the algo_exp_file dictionary that links the specific algorithm to its expected network file.
+3. Store the expected network file at /test/GenerateInputs/expected using the naming convention: {algorithm name}-{network file name}-expected.txt.
+
+Modify Parse Outputs:
+
+Purpose: Handle and verify the outputs of the new algorithm.
+
+Instructions:
+1. Save the raw-pathway output (from the run function in your wrapper) to /test/ParseOutputs/input. Name it as  {algorithm name}-raw-pathway.txt.
+2. Place the expected parsed output in the test/ParseOutputs/expected directory, following the naming pattern: {algorithm name}-pathway-expected.txt.
+3. Add the new algorithm's name to the algorithms list.
+
 ### Step 6: Work with SPRAS maintainers to revise the pull request
 Step 0 previously described how to create a `local-neighborhood` branch and create a pull request.
 Make sure to commit all of the new and modified files and push them to the `local-neighborhood` branch on your fork.
