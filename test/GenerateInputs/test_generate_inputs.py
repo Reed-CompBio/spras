@@ -7,12 +7,12 @@ import yaml
 
 from src import runner
 
-OUTDIR = "test/PrepareInputs/output/"
-EXPDIR = "test/PrepareInputs/expected/"
+OUTDIR = "test/GenerateInputs/output/"
+EXPDIR = "test/GenerateInputs/expected/"
 algorithms = ['mincostflow', 'meo', 'omicsintegrator1', "omicsintegrator2", "domino", "pathlinker", "allpairs"]
 algo_exp_file = {'mincostflow': 'edges', 'meo': 'edges', 'omicsintegrator1': 'edges', 'omicsintegrator2': 'edges', 'domino': 'network', 'pathlinker': 'network', "allpairs": 'network'}
 
-class TestPrepareInputs:
+class TestGenerateInputs:
     def setup_class(cls):
         """
         Create the expected output directory
