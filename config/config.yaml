@@ -124,7 +124,7 @@
           include: true
         # Create Cytoscape session file with all pathway graphs for each dataset
         cytoscape:
-          include: false
+          include: true
         # Machine learning analysis (e.g. clustering) of the pathway output files for each dataset
         ml:
           include: true
