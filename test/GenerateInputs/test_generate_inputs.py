@@ -31,7 +31,7 @@ class TestGenerateInputs:
         for algo in algorithms:
             inputs = runner.get_required_inputs(algo)
             runner.merge_input(data0_dataset, test_file)
-            filename_map = {input_str: os.path.join("test", "PrepareInputs", "output", f"{algo}-{input_str}.txt") for input_str in inputs}
+            filename_map = {input_str: os.path.join("test", "GenerateInputs", "output", f"{algo}-{input_str}.txt") for input_str in inputs}
             runner.prepare_inputs(algo, test_file, filename_map)
             exp_file_name = algo_exp_file[algo]
             assert filecmp.cmp(OUTDIR +f"{algo}-{exp_file_name}.txt", EXPDIR + f"{algo}-{exp_file_name}-expected.txt")
