@@ -24,7 +24,7 @@ class TestGenerateInputs:
 
         with open(config_loc) as config_file:
             config = yaml.load(config_file, Loader=yaml.FullLoader)
-        test_file = "test/PrepareInputs/output/test_pickled_dataset.pkl"
+        test_file = "test/GenerateInputs/output/test_pickled_dataset.pkl"
 
         data0_dataset = next((ds for ds in config["datasets"] if ds["label"] == "data0"), None)
 
