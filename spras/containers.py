@@ -194,3 +194,42 @@ def run_container_singularity(container: str, command: List[str], volumes: List[
                           command,
                           options=singularity_options,
                           bind=bind_paths)
+
+# Because this is called independently for each file, the same local path can be mounted to multiple volumes
+def prepare_volume(filename: Union[str, PurePath], volume_base: Union[str, PurePath]) -> Tuple[Tuple[PurePath, PurePath], str]:
+    """
+    Makes a file on the local file system accessible within a container by mapping the local (source) path to a new
+    container (destination) path and renaming the file to be relative to the destination path.
+    The destination path will be a new path relative to the volume_base that includes a hash identifier derived from the
+    original filename.
+    An example mapped filename looks like '/spras/MG4YPNK/oi1-edges.txt'.
+    @param filename: The file on the local file system to map
+    @param volume_base: The base directory in the container, which must be an absolute directory
+    @return: first returned object is a tuple (source path, destination path) and the second returned object is the
+    updated filename relative to the destination path
+    """
+    base_path = PurePosixPath(volume_base)
+    if not base_path.is_absolute():
+        raise ValueError(f'Volume base must be an absolute path: {volume_base}')
+
+    if isinstance(filename, PurePath):
+        filename = str(filename)
+
+    # There's no clear way to get DEFAULT_HASH_LENGTH from config without a circular import...
+    # For now, hardcoding the value to 7, since it appeared the value wasn't updated by
+    # config.yaml before anyway.
+    filename_hash = hash_filename(filename, config.config.hash_length)
+    dest = PurePosixPath(base_path, filename_hash)
+
+    abs_filename = Path(filename).resolve()
+    container_filename = str(PurePosixPath(dest, abs_filename.name))
+    if abs_filename.is_dir():
+        dest = PurePosixPath(dest, abs_filename.name)
+        src = abs_filename
+    else:
+        parent = abs_filename.parent
+        if parent.as_posix() == '.':
+            parent = Path.cwd()
+        src = parent
+
+    return (src, dest), container_filename

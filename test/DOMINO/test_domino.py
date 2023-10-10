@@ -71,13 +71,13 @@ class TestDOMINO:
         out_path = Path(OUT_FILE_DEFAULT)
         out_path.unlink(missing_ok=True)
         # Only include required arguments and run with Singularity
-        config.config.container_framework = "singularity"
         DOMINO.run(
             network=TEST_DIR+'input/domino-network.txt',
             active_genes=TEST_DIR+'input/domino-active-genes.txt',
-            output_file=OUT_FILE_DEFAULT)
+            output_file=OUT_FILE_DEFAULT,
+            container_framework="singularity")
         assert out_path.exists()
-    config.config.container_framework = "docker"
+
     def test_pre_id_transform(self):
         """
         Test the node ID transformation run before DOMINO executes

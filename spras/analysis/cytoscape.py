@@ -2,9 +2,14 @@ from pathlib import Path, PurePath
 from shutil import rmtree
 from typing import List, Union
 
+<<<<<<< HEAD:spras/analysis/cytoscape.py
 import spras.config as config
 from spras.containers import run_container
 from spras.util import prepare_volume
+=======
+import src.config as config
+from src.containers import prepare_volume, run_container
+>>>>>>> 75b746c (Move container framework to algorith run call and fix hash lengths):src/analysis/cytoscape.py
 
 
 def run_cytoscape(pathways: List[Union[str, PurePath]], output_file: str) -> None:

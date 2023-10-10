@@ -2,9 +2,10 @@
 
 # The length of the hash used to identify a parameter combination
 hash_length: 7
-# If true, use Singularity instead of Docker
-# Singularity support is only available on Unix
-singularity: false
+
+# Specify the container framework. Current supported versions include 'docker' and
+# 'singularity'. If container_framework is not specified, SPRAS will default to docker.
+container_framework: docker
 
 # Allow the user to configure which container registry containers should be pulled from
 # Note that this assumes container names are consistent across registries, and that the

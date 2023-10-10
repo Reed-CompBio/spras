@@ -66,8 +66,14 @@ class Config:
         # Set up a few top-level config variables
         self.out_dir = raw_config["reconstruction_settings"]["locations"]["reconstruction_dir"]
 
-        if "singularity" in raw_config and raw_config["singularity"]:
-            self.container_framework = "singularity"
+        # We allow the container framework not to be defined in the config. In the case it isn't, default to docker.
+        # However, if we get a bad value, we raise an exception.
+        if "container_framework" in raw_config:
+            container_framework = raw_config["container_framework"].lower()
+            if container_framework not in ("docker", "singularity"):
+                msg = "SPRAS was configured to run with an unknown container framework: '" + raw_config["container_framework"] + "'. Accepted values are 'docker' or 'singularity"
+                raise ValueError(msg)
+            self.container_framework = container_framework
         else:
             self.container_framework = "docker"
 

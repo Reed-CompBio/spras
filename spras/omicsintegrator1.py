@@ -94,7 +94,7 @@ class OmicsIntegrator1(PRM):
     @staticmethod
     def run(edges=None, prizes=None, dummy_mode=None, mu_squared=None, exclude_terms=None,
             output_file=None, noisy_edges=None, shuffled_prizes=None, random_terminals=None,
-            seed=None, w=None, b=None, d=None, mu=None, noise=None, g=None, r=None):
+            seed=None, w=None, b=None, d=None, mu=None, noise=None, g=None, r=None, container_framework="docker"):
         """
         Run Omics Integrator 1 in the Docker image with the provided parameters.
         Does not support the garnet, cyto30, knockout, cv, or cv-reps arguments.
@@ -160,10 +160,7 @@ class OmicsIntegrator1(PRM):
 
         print('Running Omics Integrator 1 with arguments: {}'.format(' '.join(command)), flush=True)
 
-        # TODO consider making this a string in the config file instead of a Boolean
-        container_framework = config.config.container_framework
         container_suffix = "omics-integrator-1:no-conda" # no-conda version is the default
-
         out = run_container(container_framework,
                             container_suffix,  # no-conda version is the default
                             command,

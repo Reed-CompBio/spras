@@ -69,7 +69,7 @@ class PathLinker(PRM):
 
     # Skips parameter validation step
     @staticmethod
-    def run(nodetypes=None, network=None, output_file=None, k=None):
+    def run(nodetypes=None, network=None, output_file=None, k=None, container_framework="docker"):
         """
         Run PathLinker with Docker
         @param nodetypes:  input node types with sources and targets (required)
@@ -117,7 +117,6 @@ class PathLinker(PRM):
 
         print('Running PathLinker with arguments: {}'.format(' '.join(command)), flush=True)
 
-        container_framework = config.config.container_framework
         container_suffix = "pathlinker"
         out = run_container(container_framework,
                             container_suffix,

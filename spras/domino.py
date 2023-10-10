@@ -72,7 +72,7 @@ class DOMINO(PRM):
                         header=['ID_interactor_A', 'ppi', 'ID_interactor_B'])
 
     @staticmethod
-    def run(network=None, active_genes=None, output_file=None, slice_threshold=None, module_threshold=None):
+    def run(network=None, active_genes=None, output_file=None, slice_threshold=None, module_threshold=None, container_framework="docker"):
         """
         Run DOMINO with Docker.
         Let visualization be always true, parallelization be always 1 thread, and use_cache be always false.
@@ -115,7 +115,6 @@ class DOMINO(PRM):
 
         print('Running slicer with arguments: {}'.format(' '.join(slicer_command)), flush=True)
 
-        container_framework = config.config.container_framework
         container_suffix = "domino"
         slicer_out = run_container(container_framework,
                                    container_suffix,
@@ -144,7 +143,7 @@ class DOMINO(PRM):
         print('Running DOMINO with arguments: {}'.format(' '.join(domino_command)), flush=True)
 
         domino_out = run_container(container_framework,
-                                   'reedcompbio/domino',
+                                   container_suffix,
                                    domino_command,
                                    volumes,
                                    work_dir)

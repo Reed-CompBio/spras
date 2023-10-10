@@ -107,7 +107,7 @@ class MEO(PRM):
     # TODO document required arguments
     @staticmethod
     def run(edges=None, sources=None, targets=None, output_file=None, max_path_length=None, local_search=None,
-            rand_restarts=None):
+            rand_restarts=None, container_framework="docker"):
         """
         Run Maximum Edge Orientation in the Docker image with the provided parameters.
         The properties file is generated from the provided arguments.
@@ -159,8 +159,6 @@ class MEO(PRM):
 
         print('Running Maximum Edge Orientation with arguments: {}'.format(' '.join(command)), flush=True)
 
-        # TODO consider making this a string in the config file instead of a Boolean
-        container_framework = config.config.container_framework
         container_suffix = "meo"
         out = run_container(container_framework,
                             container_suffix,

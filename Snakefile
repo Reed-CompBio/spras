@@ -215,6 +215,7 @@ rule reconstruct:
             params.pop('spras_placeholder')
         # TODO consider the best way to pass global configuration information to the run functions
         # This approach requires that all run functions support a singularity option
+        params['container_framework'] = FRAMEWORK
         runner.run(wildcards.algorithm, params)
 
 # Original pathway reconstruction output to universal output

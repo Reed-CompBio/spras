@@ -56,11 +56,9 @@ class TestPathLinker:
         out_path = Path(OUT_FILE_DEFAULT)
         out_path.unlink(missing_ok=True)
         # Only include required arguments and run with Singularity
-        config.config.container_framework = "singularity"
         PathLinker.run(
             nodetypes=TEST_DIR+'input/sample-in-nodetypes.txt',
             network=TEST_DIR+'input/sample-in-net.txt',
             output_file=OUT_FILE_DEFAULT,
-        )
-        config.config.container_framework = "docker"
+            container_framework="singularity")
         assert out_path.exists()

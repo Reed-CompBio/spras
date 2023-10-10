@@ -44,13 +44,11 @@ class TestAllPairs:
         out_path = Path(OUT_DIR+'sample-out.txt')
         out_path.unlink(missing_ok=True)
         # Only include required arguments and run with Singularity
-        config.config.container_framework = "singularity"
         AllPairs.run(
             nodetypes=TEST_DIR+'input/sample-in-nodetypes.txt',
             network=TEST_DIR+'input/sample-in-net.txt',
-            output_file=str(out_path)
-        )
-        config.config.container_framework = "docker"
+            output_file=str(out_path),
+            container_framework="singularity")
         assert out_path.exists()
 
     def test_allpairs_correctness(self):

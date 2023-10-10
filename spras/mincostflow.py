@@ -62,7 +62,7 @@ class MinCostFlow (PRM):
                      header=False)
 
     @staticmethod
-    def run(sources=None, targets=None, edges=None, output_file=None, flow=None, capacity=None, singularity=False):
+    def run(sources=None, targets=None, edges=None, output_file=None, flow=None, capacity=None, container_framework="docker"):
         """
         Run min cost flow with Docker (or singularity)
         @param sources: input sources (required)
@@ -115,7 +115,6 @@ class MinCostFlow (PRM):
             command.extend(['--capacity', str(capacity)])
 
         # choosing to run in docker or singularity container
-        container_framework = config.config.container_framework
         container_suffix = "mincostflow"
 
         # constructs a docker run call

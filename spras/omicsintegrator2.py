@@ -69,7 +69,7 @@ class OmicsIntegrator2(PRM):
     # TODO document required arguments
     @staticmethod
     def run(edges=None, prizes=None, output_file=None, w=None, b=None, g=None, noise=None, noisy_edges=None,
-            random_terminals=None, dummy_mode=None, seed=None):
+            random_terminals=None, dummy_mode=None, seed=None, container_framework="docker"):
         """
         Run Omics Integrator 2 in the Docker image with the provided parameters.
         Only the .tsv output file is retained and then renamed.
@@ -120,7 +120,6 @@ class OmicsIntegrator2(PRM):
 
         print('Running Omics Integrator 2 with arguments: {}'.format(' '.join(command)), flush=True)
 
-        container_framework = config.config.container_framework
         container_suffix = "omics-integrator-2:v2"
         out = run_container(container_framework,
                             container_suffix,
