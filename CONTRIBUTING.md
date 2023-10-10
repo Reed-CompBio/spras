@@ -169,7 +169,8 @@ After completing this step, try running the Local Neighborhood algorithm through
 ```bash
 snakemake --cores 1 --configfile config/config.yaml
 ```
-Make sure to run the command inside the `spras` conda environment.
+Make sure to run the command inside the `spras` conda environment. If installing via `pip` instead of using conda, install with the `-e` flag (the full command to run from the repo root is
+`python -m pip install -e .`) so that Python picks up any changes you make. Omitting the `-e` flag will prevent your changes from being reflected unless you force re-install.
 
 As a workflow manager, Snakemake will consider the work described in the configuration file to be completed once the necessary output files have been written to the relevant output directory (`output` in the `config/config.yaml` configuration).
 That means that if you change your code and rerun the Snakemake command above, nothing may happen if the output files already exist.
