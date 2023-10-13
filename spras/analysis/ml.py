@@ -12,7 +12,7 @@ from sklearn.cluster import AgglomerativeClustering
 from sklearn.decomposition import PCA
 from sklearn.preprocessing import StandardScaler
 
-from src.util import make_required_dirs
+from spras.util import make_required_dirs
 
 plt.switch_backend('Agg')
 

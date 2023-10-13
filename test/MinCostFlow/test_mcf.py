@@ -3,7 +3,7 @@ from pathlib import Path
 
 import pytest
 
-from src.mincostflow import MinCostFlow
+from spras.mincostflow import MinCostFlow
 
 TEST_DIR = 'test/MinCostFlow/'
 OUT_FILE = TEST_DIR + 'output/mincostflow-output.txt'
