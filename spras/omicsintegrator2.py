@@ -38,10 +38,11 @@ class OmicsIntegrator2(PRM):
         node_df.to_csv(filename_map['prizes'], sep='\t', index=False, columns=['NODEID', 'prize'], header=['name', 'prize'])
         edges_df = data.get_interactome()
 
-        # We'll have to update this when we make iteractomes more proper, but for now
-        # assume we always get a weight and turn it into a cost.
-        # use the same approach as OmicsIntegrator2 by adding half the max cost as the base cost.
-        # if everything is less than 1 assume that these are confidences and set the max to 1
+        # For now assume we always get a weight and turn it into a cost.
+        # Use the same approach as the OmicsIntegrator2 data preparation notebooks (e.g.
+        # https://github.com/fraenkel-lab/OmicsIntegrator2/blob/master/interactomes/PreProcess_STRING_For_OmicsIntegrator.ipynb)
+        # by adding half the max cost as the base cost.
+        # If all weights are less than 1, assume that these are probability-like weights and set the max to 1.
         edges_df['cost'] = (max(edges_df['Weight'].max(), 1.0)*1.5) - edges_df['Weight']
         edges_df.to_csv(filename_map['edges'], sep='\t', index=False, columns=['Interactor1', 'Interactor2', 'cost'], header=['protein1', 'protein2', 'cost'])
 
