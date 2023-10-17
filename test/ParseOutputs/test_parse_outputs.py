@@ -16,7 +16,7 @@ EXPDIR = "test/ParseOutputs/expected/"
 OUT_FILE_PARSE = OUTDIR+'/domino-parse-output.txt'
 OUT_FILE_PARSE_EXP = EXPDIR + '/domino-parse-output.txt'
 
-# domino is seperate function 
+# domino is seperate function
 algorithms = ['mincostflow', 'meo', 'omicsintegrator1', "omicsintegrator2", "pathlinker", "allpairs"]
 class TestParseOutputs:
     def setup_class(cls):

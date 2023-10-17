@@ -26,7 +26,7 @@ class TestGenerateInputs:
         test_file = "test/GenerateInputs/output/test_pickled_dataset.pkl"
 
         data0_dataset = next((ds for ds in config["datasets"] if ds["label"] == "data0"), None)
-        
+
         for algo in algo_exp_file.keys():
             inputs = runner.get_required_inputs(algo)
             runner.merge_input(data0_dataset, test_file)
