@@ -16,6 +16,7 @@ EXPDIR = "test/ParseOutputs/expected/"
 OUT_FILE_PARSE = OUTDIR+'/domino-parse-output.txt'
 OUT_FILE_PARSE_EXP = EXPDIR + '/domino-parse-output.txt'
 
+# domino is seperate function 
 algorithms = ['mincostflow', 'meo', 'omicsintegrator1', "omicsintegrator2", "pathlinker", "allpairs"]
 class TestParseOutputs:
     def setup_class(cls):
@@ -25,10 +26,7 @@ class TestParseOutputs:
         Path(OUTDIR).mkdir(parents=True, exist_ok=True)
 
     def test_parse_outputs(self):
-
-        # skip domino
         for algo in algorithms:
-            # inputs = runner.get_required_inputs(algo)
             test_file = INDIR + f"{algo}-raw-pathway.txt"
             out_file = OUTDIR + f"{algo}-pathway.txt"
             print(out_file)

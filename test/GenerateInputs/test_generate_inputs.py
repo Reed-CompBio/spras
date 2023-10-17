@@ -9,7 +9,6 @@ from src import runner
 
 OUTDIR = "test/GenerateInputs/output/"
 EXPDIR = "test/GenerateInputs/expected/"
-algorithms = ['mincostflow', 'meo', 'omicsintegrator1', "omicsintegrator2", "domino", "pathlinker", "allpairs"]
 algo_exp_file = {'mincostflow': 'edges', 'meo': 'edges', 'omicsintegrator1': 'edges', 'omicsintegrator2': 'edges', 'domino': 'network', 'pathlinker': 'network', "allpairs": 'network'}
 
 class TestGenerateInputs:
@@ -27,8 +26,8 @@ class TestGenerateInputs:
         test_file = "test/GenerateInputs/output/test_pickled_dataset.pkl"
 
         data0_dataset = next((ds for ds in config["datasets"] if ds["label"] == "data0"), None)
-
-        for algo in algorithms:
+        
+        for algo in algo_exp_file.keys():
             inputs = runner.get_required_inputs(algo)
             runner.merge_input(data0_dataset, test_file)
             filename_map = {input_str: os.path.join("test", "GenerateInputs", "output", f"{algo}-{input_str}.txt") for input_str in inputs}
