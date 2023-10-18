@@ -20,7 +20,9 @@ class TestOmicsIntegrator2:
         OUT_FILE.unlink(missing_ok=True)
         OmicsIntegrator2.run(edges=EDGE_FILE,
                              prizes=PRIZE_FILE,
-                             output_file=OUT_FILE)
+                             output_file=OUT_FILE,
+                             b=2,
+                             g=0)
         assert OUT_FILE.exists()
 
     def test_oi2_some_optional(self):

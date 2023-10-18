@@ -1,3 +1,3 @@
-name	 prize
-A	10.0
-D	10.0
+name	prize
+C	5.7
+A	2.0

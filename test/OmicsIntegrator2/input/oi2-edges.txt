@@ -1,6 +1,10 @@
 protein1	protein2	cost
-A	B	0.9
-A	C	0.1
-B	D	0.9
-C	D	0.1
-A	D	10
+A	B	0.52
+B	C	0.73
+A	D	1.38
+C	D	0.61
+C	E	0.91
+C	F	1.0
+F	G	0.74
+G	H	0.58
+G	I	0.84
