@@ -5,8 +5,8 @@ from pathlib import Path
 
 import yaml
 
-from src import runner
-from src.domino import DOMINO, post_domino_id_transform, pre_domino_id_transform
+from spras import runner
+from spras.domino import DOMINO, post_domino_id_transform, pre_domino_id_transform
 
 INDIR = "test/ParseOutputs/input/"
 OUTDIR = "test/ParseOutputs/output/"

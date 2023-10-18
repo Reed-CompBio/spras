@@ -2,7 +2,7 @@ from pathlib import Path
 
 import pandas as pd
 
-from src.interactome import (
+from spras.interactome import (
     add_constant,
     add_directionality_constant,
     convert_directed_to_undirected,

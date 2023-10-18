@@ -5,7 +5,7 @@ from pathlib import Path
 
 import yaml
 
-from src import runner
+from spras import runner
 
 OUTDIR = "test/GenerateInputs/output/"
 EXPDIR = "test/GenerateInputs/expected/"
