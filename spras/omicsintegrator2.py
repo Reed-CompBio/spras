@@ -2,13 +2,13 @@ from pathlib import Path
 
 import pandas as pd
 
-from src.dataset import Dataset
-from src.interactome import (
+from spras.dataset import Dataset
+from spras.interactome import (
     convert_directed_to_undirected,
     readd_direction_col_undirected,
 )
-from src.prm import PRM
-from src.util import add_rank_column, prepare_volume, run_container
+from spras.prm import PRM
+from spras.util import add_rank_column, prepare_volume, run_container
 
 __all__ = ['OmicsIntegrator2']
 

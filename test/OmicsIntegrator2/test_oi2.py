@@ -3,7 +3,7 @@ from pathlib import Path
 
 import pytest
 
-from src.omicsintegrator2 import OmicsIntegrator2
+from spras.omicsintegrator2 import OmicsIntegrator2
 
 TEST_DIR = 'test/OmicsIntegrator2/'
 EDGE_FILE = TEST_DIR+'input/oi2-edges.txt'

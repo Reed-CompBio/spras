@@ -4,7 +4,7 @@ from pathlib import Path
 
 import pytest
 
-from src.domino import DOMINO, post_domino_id_transform, pre_domino_id_transform
+from spras.domino import DOMINO, post_domino_id_transform, pre_domino_id_transform
 
 TEST_DIR = 'test/DOMINO/'
 OUT_FILE_DEFAULT = TEST_DIR+'output/domino-output.txt'

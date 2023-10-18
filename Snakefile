@@ -1,10 +1,10 @@
 import os
-from src import runner
+from spras import runner
 import shutil
 import yaml
-from src.dataset import Dataset
-from src.util import process_config
-from src.analysis import ml, summary, graphspace, cytoscape
+from spras.dataset import Dataset
+from spras.util import process_config
+from spras.analysis import ml, summary, graphspace, cytoscape
 
 # Snakemake updated the behavior in the 6.5.0 release https://github.com/snakemake/snakemake/pull/1037
 # and using the wrong separator prevents Snakemake from matching filenames to the rules that can produce them

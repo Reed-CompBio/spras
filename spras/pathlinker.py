@@ -3,9 +3,12 @@ from pathlib import Path
 
 import pandas as pd
 
-from src.interactome import convert_undirected_to_directed, readd_direction_col_directed
-from src.prm import PRM
-from src.util import prepare_volume, run_container
+from spras.interactome import (
+    convert_undirected_to_directed,
+    readd_direction_col_directed,
+)
+from spras.prm import PRM
+from spras.util import prepare_volume, run_container
 
 __all__ = ['PathLinker']
 

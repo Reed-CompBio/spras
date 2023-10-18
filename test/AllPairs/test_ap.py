@@ -4,7 +4,7 @@ from pathlib import Path
 
 import pytest
 
-from src.allpairs import AllPairs
+from spras.allpairs import AllPairs
 
 TEST_DIR = 'test/AllPairs/'
 OUT_DIR = TEST_DIR+'output/'

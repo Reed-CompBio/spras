@@ -3,7 +3,7 @@ from pathlib import Path
 
 import pytest
 
-from src.omicsintegrator1 import OmicsIntegrator1, write_conf
+from spras.omicsintegrator1 import OmicsIntegrator1, write_conf
 
 TEST_DIR = 'test/OmicsIntegrator1/'
 OUT_FILE = TEST_DIR+'output/test_optimalForest.sif'

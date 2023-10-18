@@ -2,9 +2,9 @@ from pathlib import Path
 
 import pandas as pd
 
-from src.interactome import add_directionality_constant, readd_direction_col_mixed
-from src.prm import PRM
-from src.util import prepare_volume, run_container
+from spras.interactome import add_directionality_constant, readd_direction_col_mixed
+from spras.prm import PRM
+from spras.util import prepare_volume, run_container
 
 __all__ = ['MEO', 'write_properties']
 

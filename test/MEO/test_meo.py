@@ -3,7 +3,7 @@ from pathlib import Path
 
 import pytest
 
-from src.meo import MEO, write_properties
+from spras.meo import MEO, write_properties
 
 TEST_DIR = 'test/MEO/'
 OUT_FILE = TEST_DIR + 'output/edges.txt'
