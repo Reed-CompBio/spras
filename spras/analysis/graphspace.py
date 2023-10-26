@@ -8,10 +8,8 @@ from graphspace_python.api.client import GraphSpace
 from graphspace_python.graphs.classes.gsgraph import GSGraph
 
 
-# remove all the the directed = bool in the function names
 def write_json(graph_file,out_graph,out_style) -> None:
 
-	print("graph file", graph_file)
 	# get GS Graph
 	graph_name = os.path.basename(out_graph) # name is the prefix specified.
 	G = get_gs_graph(graph_file, graph_name)
@@ -40,8 +38,14 @@ def post_graph(G:GSGraph,username:str,password:str) -> None:
 	return
 
 def get_gs_graph(graph_file:str,graph_name:str) -> GSGraph:
+	"""
+	Creates a GraphSpace graph using the networkx graph or digraph and directionality returned from load_graph
+
+	If the graph is empty, that likely means the graph was mized in directionality
+	- this will return an emty GraphSpace graph
+	"""
 	# read file as networkx graph
-	# returns a tuple, the graph and directionality
+	# returns a tuple, (the graph, directionality)
 	nxG, directed = load_graph(graph_file)
 
 	# convert networkx graph to GraphSpace object
@@ -52,15 +56,21 @@ def get_gs_graph(graph_file:str,graph_name:str) -> GSGraph:
 		G.add_node_style(n,color='#ACCE9A',shape='rectangle',width=30,height=30)
 	for u,v in nxG.edges():
 		if directed:
-			G.add_edge(u,v,directed=True,popup='Directed Edge %s-%s<br>Rank %d' % (u,v,nxG[u][v]['rank']))
+			G.add_edge(u,v,directed=True,popup='Directed Edge %s-%s<br>Rank %d' % (u,v,nxG[u][v]['Rank']))
 			G.add_edge_style(u,v,directed=True,width=2,color='#281D6A')
 		else:
-			G.add_edge(u,v,popup='Undirected Edge %s-%s<br>Rank %d' % (u,v,nxG[u][v]['rank']))
+			G.add_edge(u,v,popup='Undirected Edge %s-%s<br>Rank %d' % (u,v,nxG[u][v]['Rank']))
 			G.add_edge_style(u,v,width=2,color='#281D6A')
 	return G
 
 
 def load_graph(path: str) -> nx.Graph:
+	"""
+    Returns a Graph or Digraph, accompanied by a boolean indicating if it's directed.
+
+    This code is compatible only with fully directed or undirected graphs.
+    If neither, an empty Graph will be returned
+    """
 	G = nx.Graph()
 	directed = False
 
@@ -72,14 +82,17 @@ def load_graph(path: str) -> nx.Graph:
 	pathways.columns = ["Interactor1", "Interactor2", "Rank", "Direction"]
 	mask_u = pathways['Direction'] == 'U'
 	mask_d = pathways['Direction'] == 'D'
+	pathways.drop(columns=["Direction"])
 
 	if mask_u.all():
-		G = nx.read_edgelist(path,data=(('rank',float), ('Direction',str)))
+		G = nx.from_pandas_edgelist(pathways, "Interactor1", "Interactor2", ["Rank"])
 		directed = False
+
 	elif mask_d.all():
-		G = nx.read_edgelist(path,data=(('rank',float),('Direction',str)), create_using=nx.DiGraph)
+		G = nx.from_pandas_edgelist(pathways, "Interactor1", "Interactor2", ["rank"], create_using=nx.DiGraph())
 		directed = True
 	else:
-		print("graphspace does not deal with mixed direction type graphs currently")
+		print(f"{path} could not be visualized. GraphSpace does not deal with mixed direction type graphs currently")
+
 
 	return G, directed
