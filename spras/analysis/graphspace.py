@@ -89,7 +89,7 @@ def load_graph(path: str) -> nx.Graph:
 		directed = False
 
 	elif mask_d.all():
-		G = nx.from_pandas_edgelist(pathways, "Interactor1", "Interactor2", ["rank"], create_using=nx.DiGraph())
+		G = nx.from_pandas_edgelist(pathways, "Interactor1", "Interactor2", ["Rank"], create_using=nx.DiGraph())
 		directed = True
 	else:
 		print(f"{path} could not be visualized. GraphSpace does not deal with mixed direction type graphs currently")
