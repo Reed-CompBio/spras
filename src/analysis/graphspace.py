@@ -27,7 +27,7 @@ Post a graph to GraphSpace.
 We need to resolve the issue with username/password in config
 files before we post to GraphSpace.
 '''
-def post_graph(G:GSGraph,username:str,password:str,directed=False) -> None:
+def post_graph(G:GSGraph,username:str,password:str) -> None:
 	gs = GraphSpace(username,password)
 	try:
 		gs.update_graph(G)
@@ -64,3 +64,42 @@ def load_graph(path: str,directed=False) -> nx.Graph:
 		# note - self-edges are not allowed in DiGraphs.
 		G = nx.read_edgelist(path,data=(('rank',float),),create_using=nx.DiGraph)
 	return G
+
+## Testing function
+def test_gs_edges() -> None:
+	username = input('Username:')
+	password = input('Password:')
+
+	G = GSGraph()
+	G.set_name('mixed graph testing')
+
+	G.add_node('dirA',label='dirA')
+	G.add_node_style('dirA',color='#ACCE9A',shape='rectangle',width=50,height=30)
+	G.add_node('dirB',label='dirB')
+	G.add_node_style('dirB',color='#ACCE9A',shape='rectangle',width=50,height=30)
+	G.add_edge('dirA','dirB',directed=True)
+	G.add_edge_style('dirA','dirB',directed=True,width=3)
+	G.add_edge('dirB','dirA',directed=True)
+	G.add_edge_style('dirB','dirA',directed=True,width=3)
+
+	G.add_node('undirA',label='undirA')
+	G.add_node_style('undirA',color='#AC12CA',shape='rectangle',width=50,height=30)
+	G.add_node('undirB',label='undirB')
+	G.add_node_style('undirB',color='#AC12CA',shape='rectangle',width=50,height=30)
+	G.add_edge('undirA','undirB',directed=False)
+	G.add_edge_style('undirA','undirB',directed=False,width=2)
+
+	G.add_node('mixedA',label='mixedA')
+	G.add_node_style('mixedA',color='#F1CE9A',shape='rectangle',width=50,height=30)
+	G.add_node('mixedB',label='mixedB')
+	G.add_node_style('mixedB',color='#F1CE9A',shape='rectangle',width=50,height=30)
+	G.add_edge('mixedA','mixedB',directed=True)
+	G.add_edge_style('mixedA','mixedB',directed=True,width=3)
+	G.add_edge('mixedA','mixedB',directed=False)
+	G.add_edge_style('mixedA','mixedB',directed=False,width=2)
+
+	post_graph(G,username,password)
+	return
+
+if __name__ == '__main__':
+	test_gs_edges()
