@@ -1,24 +1,25 @@
-# This config file is being used as a singleton. Because python creates a single instance
-# of modules when they're imported, we rely on the Snakefile instantiating the module.
-# In particular, when the Snakefile calls init_config, it will reassign config
-# to take the value of the actual config provided by Snakemake. After that point, any
-# module that imports this module can access a config option by checking the object's
-# value. For example
-#
-# import spras.config as config
-# container_framework = config.config.container_framework
-#
-# will grab the top level registry configuration option as it appears in the config file
+"""
+This config file is being used as a singleton. Because python creates a single instance
+of modules when they're imported, we rely on the Snakefile instantiating the module.
+In particular, when the Snakefile calls init_config, it will reassign config
+to take the value of the actual config provided by Snakemake. After that point, any
+module that imports this module can access a config option by checking the object's
+value. For example
+
+import spras.config as config
+container_framework = config.config.container_framework
+
+will grab the top level registry configuration option as it appears in the config file
+"""
 
 import copy as copy
 import itertools as it
 import os
+from urllib.parse import urljoin
 
 import numpy as np
 import yaml
-import copy as copy
-import os
-from urllib.parse import urljoin
+
 from spras.util import hash_params_sha1_base32
 
 # The default length of the truncated hash used to identify parameter combinations
