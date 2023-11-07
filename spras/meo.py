@@ -6,10 +6,10 @@ from spras.interactome import (
     add_directionality_constant,
     reinsert_direction_col_directed,
 )
-from spras.prm import PRM
-from spras.util import add_rank_column, prepare_volume
-from spras.containers import run_container
 import spras.config as config
+from spras.util import add_rank_column
+from spras.containers import prepare_volume, run_container
+from spras.prm import PRM
 
 __all__ = ['MEO', 'write_properties']
 

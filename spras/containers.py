@@ -7,6 +7,7 @@ from typing import Any, Dict, List, Optional, Tuple, Union
 import docker
 
 import spras.config as config
+from spras.util import hash_filename
 
 
 def prepare_path_docker(orig_path: PurePath) -> str:

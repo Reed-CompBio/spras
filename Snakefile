@@ -3,7 +3,6 @@ from spras import runner
 import shutil
 import yaml
 from spras.dataset import Dataset
-from spras.util import process_config
 from spras.analysis import ml, summary, graphspace, cytoscape
 from spras.dataset import Dataset
 from spras.analysis import ml, summary, graphspace, cytoscape

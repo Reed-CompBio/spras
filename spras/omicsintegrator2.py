@@ -2,12 +2,12 @@ from pathlib import Path
 
 import pandas as pd
 
+import spras.config as config
+from spras.containers import prepare_volume, run_container
 from spras.dataset import Dataset
 from spras.interactome import reinsert_direction_col_undirected
 from spras.prm import PRM
-from spras.util import add_rank_column, prepare_volume
-from spras.containers import run_container
-import spras.config as config
+from spras.util import add_rank_column
 
 __all__ = ['OmicsIntegrator2']
 

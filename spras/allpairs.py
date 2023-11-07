@@ -7,10 +7,9 @@ from spras.interactome import (
     convert_directed_to_undirected,
     reinsert_direction_col_undirected,
 )
-from spras.prm import PRM
-from spras.util import prepare_volume
-from spras.containers import run_container
 import spras.config as config
+from spras.containers import prepare_volume, run_container
+from spras.prm import PRM
 
 __all__ = ['AllPairs']
 
