@@ -71,7 +71,7 @@ class MinCostFlow (PRM):
         @param output_file: output file name (required)
         @param flow: amount of flow going through the graph (optional)
         @param capacity: amount of capacity allowed on each edge (optional)
-        @param singularity: if True, run using the Singularity container instead of the Docker container (optional)
+        @param container_framework: choose the container runtime framework, currently supports "docker" or "singularity" (required)
         """
 
         # ensures that these parameters are required

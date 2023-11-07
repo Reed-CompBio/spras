@@ -116,7 +116,7 @@ class MEO(PRM):
         Only the edge output file is retained.
         All other output files are deleted.
         @param output_file: the name of the output edge file, which will overwrite any existing file with this name
-        @param singularity: if True, run using the Singularity container instead of the Docker container
+        @param container_framework: choose the container runtime framework, currently supports "docker" or "singularity" (required)
         """
         if edges is None or sources is None or targets is None or output_file is None:
             raise ValueError('Required Maximum Edge Orientation arguments are missing')

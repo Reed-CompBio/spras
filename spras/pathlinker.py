@@ -76,7 +76,7 @@ class PathLinker(PRM):
         @param network:  input network file (required)
         @param output_file: path to the output pathway file (required)
         @param k: path length (optional)
-        @param singularity: if True, run using the Singularity container instead of the Docker container
+        @param container_framework: choose the container runtime framework, currently supports "docker" or "singularity" (required)
         """
         # Add additional parameter validation
         # Do not require k

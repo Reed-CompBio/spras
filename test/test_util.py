@@ -17,6 +17,7 @@ from src.util import (
     prepare_volume,
 )
 
+config.init_from_file("config/config.yaml")
 
 class TestUtil:
     def test_prepare_path_docker(self):

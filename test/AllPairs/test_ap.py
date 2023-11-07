@@ -7,6 +7,9 @@ import pytest
 from spras.allpairs import AllPairs
 import spras.config as config
 
+# Note that we don't directly use the config in the test, but we need the config
+# to be initialized under the hood nonetheless. Initializing the config has implications
+# like setting hash length behaviors, container registries, etc.
 config.init_from_file("config/config.yaml")
 
 TEST_DIR = 'test/AllPairs/'

@@ -66,7 +66,7 @@ class AllPairs(PRM):
         Run All Pairs Shortest Paths with Docker
         @param nodetypes: input node types with sources and targets (required)
         @param network: input network file (required)
-        @param singularity: if True, run using the Singularity container instead of the Docker container
+        @param container_framework: choose the container runtime framework, currently supports "docker" or "singularity" (required)
         @param output_file: path to the output pathway file (required)
         """
         if not nodetypes or not network or not output_file:

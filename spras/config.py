@@ -71,7 +71,7 @@ class Config:
         if "container_framework" in raw_config:
             container_framework = raw_config["container_framework"].lower()
             if container_framework not in ("docker", "singularity"):
-                msg = "SPRAS was configured to run with an unknown container framework: '" + raw_config["container_framework"] + "'. Accepted values are 'docker' or 'singularity"
+                msg = "SPRAS was configured to run with an unknown container framework: '" + raw_config["container_framework"] + "'. Accepted values are 'docker' or 'singularity'."
                 raise ValueError(msg)
             self.container_framework = container_framework
         else:

@@ -215,9 +215,6 @@ def prepare_volume(filename: Union[str, PurePath], volume_base: Union[str, PureP
     if isinstance(filename, PurePath):
         filename = str(filename)
 
-    # There's no clear way to get DEFAULT_HASH_LENGTH from config without a circular import...
-    # For now, hardcoding the value to 7, since it appeared the value wasn't updated by
-    # config.yaml before anyway.
     filename_hash = hash_filename(filename, config.config.hash_length)
     dest = PurePosixPath(base_path, filename_hash)
 

@@ -82,7 +82,7 @@ class DOMINO(PRM):
         @param output_file: path to the output pathway file (required)
         @param slice_threshold: the p-value threshold for considering a slice as relevant (optional)
         @param module_threshold: the p-value threshold for considering a putative module as final module (optional)
-        @param singularity: if True, run using the Singularity container instead of the Docker container (optional)
+        @param container_framework: choose the container runtime framework, currently supports "docker" or "singularity" (required)
         """
 
         if not network or not active_genes or not output_file:

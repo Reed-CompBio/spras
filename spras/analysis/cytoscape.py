@@ -12,12 +12,12 @@ from src.containers import prepare_volume, run_container
 >>>>>>> 75b746c (Move container framework to algorith run call and fix hash lengths):src/analysis/cytoscape.py
 
 
-def run_cytoscape(pathways: List[Union[str, PurePath]], output_file: str) -> None:
+def run_cytoscape(pathways: List[Union[str, PurePath]], output_file: str, container_framework="docker") -> None:
     """
     Create a Cytoscape session file with visualizations of each of the provided pathways
     @param pathways: a list of pathways to visualize
     @param output_file: the output Cytoscape session file
-    @param singularity: whether to run in a Singularity container
+    @param container_framework: choose the container runtime framework, currently supports "docker" or "singularity"
     """
     work_dir = '/spras'
 
@@ -56,10 +56,9 @@ def run_cytoscape(pathways: List[Union[str, PurePath]], output_file: str) -> Non
     print('Running Cytoscape with arguments: {}'.format(' '.join(command)), flush=True)
 
     # TODO consider making this a string in the config file instead of a Boolean
-    container_framework = config.config.container_framework
-    container_prefix = "py4cytoscape:v2"
+    container_suffix = "py4cytoscape:v2"
     out = run_container(container_framework,
-                        container_prefix,
+                        container_suffix,
                         command,
                         volumes,
                         work_dir,

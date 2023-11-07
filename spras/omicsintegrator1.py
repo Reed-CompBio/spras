@@ -105,7 +105,7 @@ class OmicsIntegrator1(PRM):
         All other output files are deleted.
         @param output_file: the name of the output sif file for the optimal forest, which will overwrite any
         existing file with this name
-        @param singularity: if True, run using the Singularity container instead of the Docker container
+        @param container_framework: choose the container runtime framework, currently supports "docker" or "singularity" (required)
         """
         if edges is None or prizes is None or output_file is None or w is None or b is None or d is None:
             raise ValueError('Required Omics Integrator 1 arguments are missing')
