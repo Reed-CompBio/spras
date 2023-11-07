@@ -3,8 +3,8 @@ from pathlib import Path
 
 import pytest
 
-from spras.mincostflow import MinCostFlow
 import spras.config as config
+from spras.mincostflow import MinCostFlow
 
 config.init_from_file("config/config.yaml")
 

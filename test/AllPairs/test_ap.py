@@ -4,8 +4,8 @@ from pathlib import Path
 
 import pytest
 
-from spras.allpairs import AllPairs
 import spras.config as config
+from spras.allpairs import AllPairs
 
 # Note that we don't directly use the config in the test, but we need the config
 # to be initialized under the hood nonetheless. Initializing the config has implications

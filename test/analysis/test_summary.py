@@ -2,8 +2,8 @@ from pathlib import Path
 
 import pandas as pd
 
-from spras.analysis.summary import summarize_networks
 import spras.config as config
+from spras.analysis.summary import summarize_networks
 
 config.init_from_file("config/config.yaml")
 

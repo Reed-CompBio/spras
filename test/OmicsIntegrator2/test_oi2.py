@@ -3,8 +3,8 @@ from pathlib import Path
 
 import pytest
 
-from spras.omicsintegrator2 import OmicsIntegrator2
 import spras.config as config
+from spras.omicsintegrator2 import OmicsIntegrator2
 
 config.init_from_file("config/config.yaml")
 

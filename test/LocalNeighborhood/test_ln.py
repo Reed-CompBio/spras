@@ -3,6 +3,7 @@ from filecmp import cmp
 from pathlib import Path
 
 import pytest
+
 import spras.config as config
 
 config.init_from_file("config/config.yaml")
