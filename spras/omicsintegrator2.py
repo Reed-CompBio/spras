@@ -2,9 +2,9 @@ from pathlib import Path
 
 import pandas as pd
 
-from src.dataset import Dataset
-from src.prm import PRM
-from src.util import add_rank_column, prepare_volume, run_container
+from spras.dataset import Dataset
+from spras.prm import PRM
+from spras.util import add_rank_column, prepare_volume, run_container
 
 __all__ = ['OmicsIntegrator2']
 

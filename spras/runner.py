@@ -1,12 +1,12 @@
 # supported algorithm imports
-from src.allpairs import AllPairs as allpairs
-from src.dataset import Dataset
-from src.domino import DOMINO as domino
-from src.meo import MEO as meo
-from src.mincostflow import MinCostFlow as mincostflow
-from src.omicsintegrator1 import OmicsIntegrator1 as omicsintegrator1
-from src.omicsintegrator2 import OmicsIntegrator2 as omicsintegrator2
-from src.pathlinker import PathLinker as pathlinker
+from spras.allpairs import AllPairs as allpairs
+from spras.dataset import Dataset
+from spras.domino import DOMINO as domino
+from spras.meo import MEO as meo
+from spras.mincostflow import MinCostFlow as mincostflow
+from spras.omicsintegrator1 import OmicsIntegrator1 as omicsintegrator1
+from spras.omicsintegrator2 import OmicsIntegrator2 as omicsintegrator2
+from spras.pathlinker import PathLinker as pathlinker
 
 
 def run(algorithm, params):

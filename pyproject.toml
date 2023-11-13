@@ -1,3 +1,60 @@
+[project]
+name = "spras"
+version = "0.0.1"
+description = "Signaling Pathway Reconstruction Analysis Streamliner"
+authors = [
+  { name = "Anthony Gitter", email = "gitter@biostat.wisc.edu" },
+  { name = "Anna Ritz", email = "aritz@reed.edu"},
+]
+license = { file = "LICENSE" }
+readme = "README.md"
+classifiers = [
+    "Development Status :: 3 - Alpha",
+    "Intended Audience :: Science/Research",
+    "License :: OSI Approved :: MIT License",
+    "Operating System :: OS Independent",
+    "Programming Language :: Python :: 3",
+    "Topic :: Scientific/Engineering :: Bio-Informatics",
+]
+requires-python = ">=3.8"
+dependencies = [
+    "adjusttext==0.7.3",
+    "snakemake==7.19.1",
+    "docker==5.0.3", # Switched from docker-py to docker because docker-py is not maintained in pypi. This appears to have no effect
+    "matplotlib==3.5",
+    "networkx==2.8",
+    "pandas==1.4",
+    "pip==22.1",
+    "requests==2.28",
+    "scikit-learn==1.2",
+    "seaborn==0.12",
+    "spython==0.2",
+    # Only required for GraphSpace
+    "commonmark==0.9",
+    "docutils==0.18",
+    "jinja2==3.1",
+    "mock==4.0",
+    "recommonmark==0.7",
+    "sphinx==5.0",
+    "graphspace_python==1.3.1",
+    "sphinx-rtd-theme==1.2.0",
+]
+
+[project.optional-dependencies]
+dev = [
+   # Only required for development
+    "pre-commit==2.20",
+    "pytest==7.1",
+]
+
+[project.urls]
+"Homepage" = "https://github.com/Reed-CompBio/spras"
+"Issues" = "https://github.com/Reed-CompBio/spras/issues"
+
+[build-system]
+requires = ["setuptools>=64.0"]
+build-backend = "setuptools.build_meta"
+
 [tool.ruff]
 target-version = "py38"
 # Autofix errors when possible
@@ -16,3 +73,9 @@ select = [
     "I", # isort
     "W292", # missing-newline-at-end-of-file
 ]
+
+[tool.setuptools]
+# py-modules tells setuptools which directory is our actual module
+py-modules = ["spras"]
+# packages tells setuptools what the exported package is called (ie allows import spras)
+packages = ["spras", "spras.analysis"]

@@ -1,5 +1,5 @@
-import src.analysis.graphspace as graphspace
-import src.analysis.summary as summary
+import spras.analysis.graphspace as graphspace
+import spras.analysis.summary as summary
 
 TEST_DIR = 'test/analysis/'
 

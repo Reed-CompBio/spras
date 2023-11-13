@@ -3,7 +3,7 @@ from pathlib import Path
 
 import pytest
 
-from src.pathlinker import PathLinker
+from spras.pathlinker import PathLinker
 
 TEST_DIR = 'test/PathLinker/'
 OUT_FILE_DEFAULT = TEST_DIR+'output/pathlinker-ranked-edges.txt'

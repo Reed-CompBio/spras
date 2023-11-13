@@ -2,7 +2,7 @@ from pathlib import Path, PurePath
 from shutil import rmtree
 from typing import List, Union
 
-from src.util import prepare_volume, run_container
+from spras.util import prepare_volume, run_container
 
 
 def run_cytoscape(pathways: List[Union[str, PurePath]], output_file: str, singularity: bool = False) -> None:

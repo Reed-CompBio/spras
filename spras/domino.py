@@ -3,8 +3,8 @@ from pathlib import Path
 
 import pandas as pd
 
-from src.prm import PRM
-from src.util import prepare_volume, run_container
+from spras.prm import PRM
+from spras.util import prepare_volume, run_container
 
 __all__ = ['DOMINO', 'pre_domino_id_transform', 'post_domino_id_transform']
 

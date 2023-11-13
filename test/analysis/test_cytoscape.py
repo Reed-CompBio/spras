@@ -3,7 +3,7 @@ from pathlib import Path
 
 import pytest
 
-from src.analysis.cytoscape import run_cytoscape
+from spras.analysis.cytoscape import run_cytoscape
 
 INPUT_DIR = 'test/analysis/input/example/'
 INPUT_PATHWAYS = [INPUT_DIR + 'data0-meo-params-GKEDDFZ_pathway.txt',
