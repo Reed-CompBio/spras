@@ -9,8 +9,6 @@ from spras.domino import DOMINO, post_domino_id_transform, pre_domino_id_transfo
 TEST_DIR = 'test/DOMINO/'
 OUT_FILE_DEFAULT = TEST_DIR+'output/domino-output.txt'
 OUT_FILE_OPTIONAL = TEST_DIR+'output/domino-output-thresholds.txt'
-OUT_FILE_PARSE = TEST_DIR+'output/domino-parse-output.txt'
-OUT_FILE_PARSE_EXP = TEST_DIR+'expected_output/domino-parse-output.txt'
 
 
 class TestDOMINO:
@@ -62,18 +60,6 @@ class TestDOMINO:
             DOMINO.run(
                 active_genes=TEST_DIR+'input/domino-active-genes.txt',
                 output_file=OUT_FILE_DEFAULT)
-
-    def test_domino_parse_output(self):
-        # Input is the concatenated module_0.html and module_1.html file from
-        # the DOMINO output of the network dip.sif and the nodes tnfa_active_genes_file.txt
-        # from https://github.com/Shamir-Lab/DOMINO/tree/master/examples
-        # Confirms the generated output matches the expected output
-        out_path = Path(OUT_FILE_PARSE)
-        out_path.unlink(missing_ok=True)
-        DOMINO.parse_output(
-            TEST_DIR+'input/domino-concat-modules.txt',
-            OUT_FILE_PARSE)
-        assert filecmp.cmp(OUT_FILE_PARSE, OUT_FILE_PARSE_EXP, shallow=False)
 
     # Only run Singularity test if the binary is available on the system
     # spython is only available on Unix, but do not explicitly skip non-Unix platforms

@@ -188,6 +188,15 @@ Follow the example for any of the other pathway reconstruction algorithm.
 First pull the image `<username>/local-neighborhood` from Docker Hub.
 Then build the Docker image using the `Dockerfile` that was completed in Step 2.
 
+Modify Generate Inputs:
+1. Include a key-value pair in the algo_exp_file dictionary that links the specific algorithm to its expected network file.
+2. Create or obtain the expected network file and save it to `/test/GenerateInputs/expected`. Name it as: `{algorithm name}-{network file name}-expected.txt`.
+
+Modify Parse Outputs:
+1. Obtain the raw-pathway output (ex. from the run function in your wrapper by running the Snakemake workflow) and save it to `/test/ParseOutputs/input`. Name it as  `{algorithm name}-raw-pathway.txt`.
+2. Create or obtain the expected universal output and save it to `test/ParseOutputs/expected` directory. Name it as: `{algorithm name}-pathway-expected.txt`.
+3. Add the new algorithm's name to the algorithms list in `test/ParseOutputs/test_parse_outputs.py`.
+
 ### Step 6: Work with SPRAS maintainers to revise the pull request
 Step 0 previously described how to create a `local-neighborhood` branch and create a pull request.
 Make sure to commit all of the new and modified files and push them to the `local-neighborhood` branch on your fork.
@@ -205,7 +214,7 @@ The pull request will be closed so that the `master` branch of the fork stays sy
 1. Import the new class in `src/runner.py` so the wrapper functions can be accessed
 1. Document the usage of the Docker wrapper and the assumptions made when implementing the wrapper
 1. Add example usage for the new algorithm and its parameters to the template config file
-1. Write test functions and provide example input data in a new test subdirectory `test/<algorithm>`
+1. Write test functions and provide example input data in a new test subdirectory `test/<algorithm>`. Provide example data and algorithm/expected files names to lists or dicts in `test/GenerateInputs` and `test/ParseOutputs`.
 1. Extend `.github/workflows/test-spras.yml` to pull and build the new Docker image
 
 When adding new algorithms, there are many other considerations that are not relevant with the simple Local Neighborhood example.

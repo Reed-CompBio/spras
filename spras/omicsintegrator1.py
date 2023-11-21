@@ -2,6 +2,7 @@ from pathlib import Path
 
 import pandas as pd
 
+from spras.interactome import readd_direction_col_mixed
 from spras.prm import PRM
 from spras.util import prepare_volume, run_container
 
@@ -35,7 +36,17 @@ def write_conf(filename=Path('config.txt'), w=None, b=None, d=None, mu=None, noi
         f.write('processes = 1\n')
         f.write('threads = 1\n')
 
+"""
+Omics Integrator 1 will construct works with partially directed graphs
+- it takes in the universal input directly
 
+Expected raw input format:
+Interactor1    Interactor2   Weight    Direction
+- the expected raw input file should have node pairs in the 1st and 2nd columns, with a weight in the 3rd column and directionality in the 4th column
+- it can include repeated and bidirectional edges
+- it uses 'U' for undirected edges and 'D' for directed edges
+
+"""
 class OmicsIntegrator1(PRM):
     required_inputs = ['prizes', 'edges']
 
@@ -64,10 +75,11 @@ class OmicsIntegrator1(PRM):
         #Omics Integrator already gives warnings for strange prize values, so we won't here
         node_df.to_csv(filename_map['prizes'],sep='\t',index=False,columns=['NODEID','prize'],header=['name','prize'])
 
-        #For now we assume all input networks are undirected until we expand how edge tables work
+        # Get network file
         edges_df = data.get_interactome()
-        edges_df['directionality'] = 'U'
-        edges_df.to_csv(filename_map['edges'],sep='\t',index=False,columns=['Interactor1','Interactor2','Weight','directionality'],header=['protein1','protein2','weight','directionality'])
+
+        # Rename Direction column
+        edges_df.to_csv(filename_map['edges'],sep='\t',index=False,columns=['Interactor1','Interactor2','Weight','Direction'],header=['protein1','protein2','weight','directionality'])
 
 
     # TODO add parameter validation
@@ -182,6 +194,9 @@ class OmicsIntegrator1(PRM):
             with open(standardized_pathway_file, 'w'):
                 pass
             return
-        df = df.take([0, 2], axis=1)
-        df[3] = [1 for _ in range(len(df.index))]
-        df.to_csv(standardized_pathway_file, header=False, index=False, sep='\t')
+
+        df.columns = ["Edge1", "InteractionType", "Edge2"]
+        df.insert (3, "Rank", 1)
+        df = readd_direction_col_mixed(df, "InteractionType", "pd", "pp")
+
+        df.to_csv(standardized_pathway_file,columns=['Edge1', 'Edge2', 'Rank', "Direction"], header=False, index=False, sep='\t')

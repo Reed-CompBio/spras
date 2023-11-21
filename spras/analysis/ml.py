@@ -18,7 +18,9 @@ plt.switch_backend('Agg')
 
 linkage_methods = ["ward", "complete", "average", "single"]
 distance_metrics = ["euclidean", "manhattan", "cosine"]
-NODE_SEP = '|||'  # separator between nodes when forming edges in the dataframe
+
+UNDIR_CONST = '---'
+DIR_CONST = '-->'
 DPI = 300
 
 
@@ -45,7 +47,13 @@ def summarize_networks(file_paths: Iterable[Union[str, PathLike]]) -> pd.DataFra
                 if len(parts) > 0:  # in case of empty line in file
                     node1 = parts[0]
                     node2 = parts[1]
-                    edges.append(NODE_SEP.join(sorted([node1, node2])))  # assumes edges are undirected
+                    direction = str(parts[3]).strip()
+                    if direction == "U":
+                        edges.append(UNDIR_CONST.join(sorted([node1, node2])))
+                    elif direction == "D":
+                        edges.append(DIR_CONST.join([node1, node2]))
+                    else:
+                        ValueError(f"direction is {direction}, rather than U or D")
 
             # getting the algorithm name
             p = PurePath(file)
@@ -300,8 +308,10 @@ def ensemble_network(dataframe: pd.DataFrame, output_file: str):
     """
     row_means = dataframe.mean(axis=1, numeric_only=True).reset_index()
     row_means.columns = ['Edges', 'Frequency']
-    row_means[['Node1', 'Node2']] = row_means['Edges'].str.split(NODE_SEP, expand=True, regex=False)
-    row_means = row_means.drop('Edges', axis=1)
-    row_means = row_means[['Node1', 'Node2', 'Frequency']]
+
+    row_means['Direction'] = row_means['Edges'].apply(lambda edge: 'D' if '-->' in edge else 'U')
+    row_means['Node1'] = row_means['Edges'].apply(lambda edge: edge.split('-->')[0] if '-->' in edge else edge.split('---')[0])
+    row_means['Node2'] = row_means['Edges'].apply(lambda edge: edge.split('-->')[1] if '-->' in edge else edge.split('---')[1])
+
     make_required_dirs(output_file)
-    row_means.to_csv(output_file, sep='\t', index=False, header=False)
+    row_means[['Node1', 'Node2', 'Frequency', "Direction"]].to_csv(output_file, sep='\t', index=False, header=True)

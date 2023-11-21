@@ -1,0 +1,3 @@
+protein1	protein2	cost	in_solution
+B	A	0.52	True
+B	C	0.73	True

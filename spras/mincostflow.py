@@ -2,12 +2,25 @@ from pathlib import Path
 
 import pandas as pd
 
+from spras.interactome import (
+    convert_undirected_to_directed,
+    readd_direction_col_directed,
+)
 from spras.prm import PRM
 from spras.util import prepare_volume, run_container
 
 __all__ = ['MinCostFlow']
 
+"""
+MinCostFlow deals with fully directed graphs
+- OR Tools MCF is designed for directed graphs
+- when an edge (arc), it has a source and target node, so flow it only allowed to moced from source to the target
 
+Expected raw input format:
+Interactor1  Interactor2   Weight
+- the expected raw input file should have node pairs in the 1st and 2nd columns, with the weight in the 3rd column
+- it can include repeated and bidirectional edges
+"""
 class MinCostFlow (PRM):
     required_inputs = ['sources', 'targets', 'edges']
 
@@ -36,6 +49,9 @@ class MinCostFlow (PRM):
 
         # create the network of edges
         edges = data.get_interactome()
+
+        # Format network edges
+        edges = convert_undirected_to_directed(edges)
 
         # creates the edges files that contains the head and tail nodes and the weights after them
         edges.to_csv(filename_map['edges'], sep='\t', index=False, columns=["Interactor1","Interactor2","Weight"], header=False)
@@ -127,4 +143,5 @@ class MinCostFlow (PRM):
 
         df = pd.read_csv(raw_pathway_file, sep='\t', header=None)
         df.insert(2, 'Rank', 1)  # adds in a rank column of 1s because the edges are not ranked
+        df = readd_direction_col_directed(df)
         df.to_csv(standardized_pathway_file, header=False, index=False, sep='\t')

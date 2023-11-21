@@ -3,11 +3,25 @@ from pathlib import Path
 
 import pandas as pd
 
+from spras.interactome import (
+    convert_undirected_to_directed,
+    readd_direction_col_directed,
+)
 from spras.prm import PRM
 from spras.util import prepare_volume, run_container
 
 __all__ = ['PathLinker']
 
+"""
+Pathlinker will construct a fully directed graph from the provided input file
+- an edge is represented with a head and tail node, which represents the direction of the interation between two nodes
+- uses networkx Digraph() object
+
+Expected raw input format:
+Interactor1   Interactor2   Weight
+- the expected raw input file should have node pairs in the 1st and 2nd columns, with a weight in the 3rd column
+- it can include repeated and bidirectional edges
+"""
 class PathLinker(PRM):
     required_inputs = ['nodetypes', 'network']
 
@@ -41,8 +55,14 @@ class PathLinker(PRM):
 
         input_df.to_csv(filename_map["nodetypes"],sep="\t",index=False,columns=["#Node","Node type"])
 
+        # Create network file
+        edges = data.get_interactome()
+
+        # Format network file
+        edges = convert_undirected_to_directed(edges)
+
         #This is pretty memory intensive. We might want to keep the interactome centralized.
-        data.get_interactome().to_csv(filename_map["network"],sep="\t",index=False,columns=["Interactor1","Interactor2","Weight"],header=["#Interactor1","Interactor2","Weight"])
+        edges.to_csv(filename_map["network"],sep="\t",index=False,columns=["Interactor1","Interactor2","Weight"],header=["#Interactor1","Interactor2","Weight"])
 
 
     # Skips parameter validation step
@@ -120,4 +140,5 @@ class PathLinker(PRM):
         # Questions: should there be a header/optional columns?
         # What about multiple raw_pathway_files
         df = pd.read_csv(raw_pathway_file, sep='\t').take([0, 1, 2], axis=1)
+        df = readd_direction_col_directed(df)
         df.to_csv(standardized_pathway_file, header=False, index=False, sep='\t')

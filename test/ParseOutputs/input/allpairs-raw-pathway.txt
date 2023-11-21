@@ -1,0 +1,10 @@
+S1	A
+S1	B
+A	E
+A	F
+E	T1
+T1	F
+F	T2
+F	B
+B	S2
+S2	T3
