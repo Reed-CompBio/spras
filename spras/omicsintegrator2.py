@@ -47,7 +47,7 @@ class OmicsIntegrator2(PRM):
         else:
             raise ValueError("Omics Integrator 2 requires node prizes or sources and targets")
 
-        #Omics Integrator already gives warnings for strange prize values, so we won't here
+        # Omics Integrator already gives warnings for strange prize values, so we won't here
         node_df.to_csv(filename_map['prizes'],sep='\t',index=False,columns=['NODEID','prize'],header=['name','prize'])
 
         # Create network file
@@ -57,7 +57,7 @@ class OmicsIntegrator2(PRM):
         # edges_df = convert_directed_to_undirected(edges_df)
         # - technically this can be called but since we don't use the column and based on what the function does, it is not truly needed
 
-        #We'll have to update this when we make iteractomes more proper, but for now
+        # We'll have to update this when we make iteractomes more proper, but for now
         # assume we always get a weight and turn it into a cost.
         # use the same approach as OmicsIntegrator2 by adding half the max cost as the base cost.
         # if everything is less than 1 assume that these are confidences and set the max to 1

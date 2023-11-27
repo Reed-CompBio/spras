@@ -8,16 +8,16 @@ import yaml
 from spras import runner
 from spras.domino import DOMINO, post_domino_id_transform, pre_domino_id_transform
 
-INDIR = "test/ParseOutputs/input/"
-OUTDIR = "test/ParseOutputs/output/"
-EXPDIR = "test/ParseOutputs/expected/"
+INDIR = "test/parse-outputs/input/"
+OUTDIR = "test/parse-outputs/output/"
+EXPDIR = "test/parse-outputs/expected/"
 
 # for domino
 OUT_FILE_PARSE = OUTDIR+'/domino-parse-output.txt'
 OUT_FILE_PARSE_EXP = EXPDIR + '/domino-parse-output.txt'
 
 # domino is seperate function
-algorithms = ['mincostflow', 'meo', 'omicsintegrator1', "omicsintegrator2", "pathlinker", "allpairs"]
+algorithms = ['mincostflow', 'meo', 'omicsintegrator1', 'omicsintegrator2', 'pathlinker', 'allpairs']
 class TestParseOutputs:
     def setup_class(cls):
         """

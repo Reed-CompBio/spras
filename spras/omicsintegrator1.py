@@ -37,7 +37,7 @@ def write_conf(filename=Path('config.txt'), w=None, b=None, d=None, mu=None, noi
         f.write('threads = 1\n')
 
 """
-Omics Integrator 1 will construct works with partially directed graphs
+Omics Integrator 1 works with partially directed graphs
 - it takes in the universal input directly
 
 Expected raw input format:
@@ -72,7 +72,7 @@ class OmicsIntegrator1(PRM):
         else:
             raise ValueError("Omics Integrator 1 requires node prizes or sources and targets")
 
-        #Omics Integrator already gives warnings for strange prize values, so we won't here
+        # Omics Integrator already gives warnings for strange prize values, so we won't here
         node_df.to_csv(filename_map['prizes'],sep='\t',index=False,columns=['NODEID','prize'],header=['name','prize'])
 
         # Get network file

@@ -4,7 +4,7 @@ import pandas as pd
 
 from spras.interactome import (
     convert_undirected_to_directed,
-    readd_direction_col_directed,
+    readd_direction_col_undirected,
 )
 from spras.prm import PRM
 from spras.util import prepare_volume, run_container
@@ -14,7 +14,7 @@ __all__ = ['MinCostFlow']
 """
 MinCostFlow deals with fully directed graphs
 - OR Tools MCF is designed for directed graphs
-- when an edge (arc), it has a source and target node, so flow it only allowed to moced from source to the target
+- when an edge (arc) is added, it has a source and target node, so flow is only allowed to move from source to the target
 
 Expected raw input format:
 Interactor1  Interactor2   Weight
@@ -137,11 +137,17 @@ class MinCostFlow (PRM):
     def parse_output(raw_pathway_file, standardized_pathway_file):
         """
         Convert a predicted pathway into the universal format
+
+        Although the algorithm constructs a directed network, the resulting network is treated as undirected. 
+        This is because the flow within the network doesn't imply causal relationships between nodes. 
+        The primary goal of the algorithm is node identification, not the identification of directional edges.
+
         @param raw_pathway_file: pathway file produced by an algorithm's run function
         @param standardized_pathway_file: the same pathway written in the universal format
         """
 
         df = pd.read_csv(raw_pathway_file, sep='\t', header=None)
         df.insert(2, 'Rank', 1)  # adds in a rank column of 1s because the edges are not ranked
-        df = readd_direction_col_directed(df)
+        df = readd_direction_col_undirected(df)
         df.to_csv(standardized_pathway_file, header=False, index=False, sep='\t')
+
