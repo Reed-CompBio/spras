@@ -10,12 +10,12 @@ from spras import runner
 OUTDIR = "test/generate-inputs/output/"
 EXPDIR = "test/generate-inputs/expected/"
 algo_exp_file = {
-    'mincostflow': 'edges', 
-    'meo': 'edges', 
-    'omicsintegrator1': 'edges', 
-    'omicsintegrator2': 'edges', 
-    'domino': 'network', 
-    'pathlinker': 'network', 
+    'mincostflow': 'edges',
+    'meo': 'edges',
+    'omicsintegrator1': 'edges',
+    'omicsintegrator2': 'edges',
+    'domino': 'network',
+    'pathlinker': 'network',
     'allpairs': 'network'
     }
 
