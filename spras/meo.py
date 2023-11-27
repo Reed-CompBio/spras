@@ -2,7 +2,7 @@ from pathlib import Path
 
 import pandas as pd
 
-from spras.interactome import add_directionality_constant, readd_direction_col_mixed
+from spras.interactome import add_directionality_constant, readd_direction_col_directed
 from spras.prm import PRM
 from spras.util import prepare_volume, run_container
 
@@ -54,8 +54,11 @@ Expected raw input format:
 Interactor1   pp/pd   Interactor2   Weight
 - the expected raw input file should have node pairs in the 1st and 3rd columns, with a directionality in the 2nd column and the weight in the 4th column
 - it use pp for undirected edges and pd for directed edges
-- it cannot include repeated and bidirectional edges
-- there is a chance MRO assumes that it should just be an undirected edge instead
+- it cannot include repeated and directed edges in opposite directions(A->B and B->A in the input)
+- MEO assumes that it should be an undirected edge instead
+
+- MEO tracks the directionality of the original edges, but all of its output edges are directed.
+- To remain accurate to MEO's design we will also treat the output graph's as directed
 """
 class MEO(PRM):
     required_inputs = ['sources', 'targets', 'edges']
@@ -180,6 +183,6 @@ class MEO(PRM):
         # Would need to load the paths output file to rank edges correctly
         df.insert(5, 'Rank', 1)  # Add a constant rank of 1
 
-        df = readd_direction_col_mixed(df, "Type", "pd", "pp")
+        df = readd_direction_col_directed(df)
 
         df.to_csv(standardized_pathway_file, columns=['Source', 'Target', 'Rank', "Direction"], header=False, index=False, sep='\t')

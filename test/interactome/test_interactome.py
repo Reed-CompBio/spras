@@ -63,7 +63,7 @@ class TestInteractome:
         expected_columns = ['Interactor1','Direct_Const','Interactor2','Weight', 'Direction']
         df = pd.read_csv(IN_DIR+ '/test-readd-network.csv', sep='\t', header=None, names=columns)
         df = readd_direction_col_mixed(df, "Direct_Const", "pd", "pp")
-        df.to_csv(OUT_DIR+"/output_readd_directiona_col_mixed.csv", sep='\t', index=False, header=False)
+        df.to_csv(OUT_DIR+"/output_readd_direction_col_mixed.csv", sep='\t', index=False, header=False)
         expected_df = pd.read_csv(EXPECTED_DIR+"/readd_mixed.csv", sep = '\t',header=None, names=expected_columns )
         assert df.equals(expected_df)
 
@@ -72,7 +72,7 @@ class TestInteractome:
         expected_columns = ['Interactor1','Direct_Const','Interactor2','Weight', 'Direction']
         df = pd.read_csv(IN_DIR+ '/test-readd-network.csv', sep='\t', header=None, names=columns)
         df = readd_direction_col_undirected(df)
-        df.to_csv(OUT_DIR+"/output_readd_directiona_col_undir.csv", sep='\t', index=False, header=False)
+        df.to_csv(OUT_DIR+"/output_readd_direction_col_undir.csv", sep='\t', index=False, header=False)
         expected_df = pd.read_csv(EXPECTED_DIR+"/readd_undir.csv", sep = '\t', header=None, names=expected_columns)
         assert df.equals(expected_df)
 
@@ -81,6 +81,6 @@ class TestInteractome:
         expected_columns = ['Interactor1','Direct_Const','Interactor2','Weight', 'Direction']
         df = pd.read_csv(IN_DIR+ '/test-readd-network.csv', sep='\t', header=None, names=columns)
         df = readd_direction_col_directed(df)
-        df.to_csv(OUT_DIR+"/output_readd_directiona_col_dir.csv", sep='\t', index=False, header=False)
+        df.to_csv(OUT_DIR+"/output_readd_direction_col_dir.csv", sep='\t', index=False, header=False)
         expected_df = pd.read_csv(EXPECTED_DIR+"/readd_dir.csv", sep = '\t', header=None, names=expected_columns)
         assert df.equals(expected_df)

@@ -309,8 +309,13 @@ def ensemble_network(dataframe: pd.DataFrame, output_file: str):
     row_means = dataframe.mean(axis=1, numeric_only=True).reset_index()
     row_means.columns = ['Edges', 'Frequency']
 
+    # Add a 'Direction' column, set to 'D' if edge is directed ('-->'), else 'U'
     row_means['Direction'] = row_means['Edges'].apply(lambda edge: 'D' if '-->' in edge else 'U')
+
+    # Extracts the start node connected from "---" or "-->" from column Edges and adds the start node to column Node2
     row_means['Node1'] = row_means['Edges'].apply(lambda edge: edge.split('-->')[0] if '-->' in edge else edge.split('---')[0])
+
+    #Extracts the end node connected from "---" or "-->" from column Edges and adds the end node to column Node2
     row_means['Node2'] = row_means['Edges'].apply(lambda edge: edge.split('-->')[1] if '-->' in edge else edge.split('---')[1])
 
     make_required_dirs(output_file)

@@ -2,7 +2,7 @@
 Author: Neha Talluri
 07/19/23
 
-Methods for converting from the universal input and recreating the universal output
+Methods for converting from the universal network input format and to the universal network output format
 """
 
 import pandas as pd
@@ -11,10 +11,8 @@ import pandas as pd
 def convert_undirected_to_directed(df: pd.DataFrame) -> pd.DataFrame:
     """
     turns a graph into a fully directed graph
-    - turns every unidirected edges into a bi-directed edge
-    - with bi-directed edges, we are not loosing too much information because the relationship of the undirected egde is still preserved
-
-   * A user must keep the Direction column when using this function
+    - turns every undirected edge into a pair of directed edges
+    - with the pair of directed edges edges, we are not loosing too much information because the relationship of the undirected edge is still preserved
 
     @param df: input network df of edges, weights, and directionality
     @return a dataframe with no undirected edges in Direction column
@@ -33,9 +31,7 @@ def convert_directed_to_undirected(df: pd.DataFrame) -> pd.DateOffset:
     """
     turns a graph into a fully undirected graph
     - turns all the directed edges directly into undirected edges
-    - we will loose any sense of directionality and the graph won't be inherently accurate, but the basic relationship between the two connected nodes will still remain intact.
-
-    * A user must keep the Direction column when using this function
+    - we will lose any sense of directionality and the graph won't be inherently accurate, but the basic relationship between the two connected nodes will still remain intact.
 
     @param df: input network df of edges, weights, and directionality
     @return a dataframe with no directed edges in Direction column
@@ -46,9 +42,9 @@ def convert_directed_to_undirected(df: pd.DataFrame) -> pd.DateOffset:
     return df
 
 
-def add_constant(df: pd.DataFrame, new_col_name: str, const: str) -> pd.DataFrame:
+def add_constant(df: pd.DataFrame, new_col_name: str, const) -> pd.DataFrame:
     """
-    adds a constant at the end of the input dataframe that is needed inbetween columns for a specifc algorithm
+    adds a new column at the end of the input dataframe with a constant value in all rows
 
     @param df: input network df of edges, weights, and directionality
     @param new_col_name: the name of the new column
@@ -61,11 +57,9 @@ def add_constant(df: pd.DataFrame, new_col_name: str, const: str) -> pd.DataFram
     return df
 
 
-def add_directionality_constant(df: pd.DataFrame,  col_name: str, dir_const: str, undir_const: str) -> pd.DataFrame:
+def add_directionality_constant(df: pd.DataFrame,  col_name: str, dir_const, undir_const) -> pd.DataFrame:
     """
     deals with adding in directionality constants for mixed graphs that aren't using the universal input directly
-
-    * user must keep the Direction column when using the function
 
     @param df: input network df of edges, weights, and directionality
     @param col_name: the name of the new column
@@ -84,19 +78,23 @@ def readd_direction_col_mixed(df: pd.DataFrame, existing_direction_column: str, 
     readds a 'Direction' column that puts a 'U' or 'D' at the end of provided dataframe
     based on the dir/undir constants in the existing direction column
 
-    *user must keep the existing direction column when using the function
-
-    @param df: input network df that contains directionality
+    @param df: input network df that contains a directionality column
     @param existing_direction_column: the name of the existing directionality column
     @param dir_const: the directed edge sep
     @param undir_const: the undirected edge sep
     @return a df with universal Direction column added back
     """
 
-    df.insert(df.shape[1], "Direction", "D")
+    df.insert(df.shape[1], "Direction", "NA")
+
+    mask_dir = df[existing_direction_column] == dir_const
+    df.loc[mask_dir, "Direction"] = "D"
 
     mask_undir = df[existing_direction_column] == undir_const
     df.loc[mask_undir, "Direction"] = "U"
+
+    if not df[existing_direction_column].isin([dir_const, undir_const]).all():
+        raise ValueError(f"The column '{existing_direction_column}' contains values other than '{dir_const}' and '{undir_const}'")
 
     return df
 
@@ -104,7 +102,7 @@ def readd_direction_col_undirected(df: pd.DataFrame) -> pd.DataFrame:
     """
     readds a 'Direction' column that puts a columns of 'U's at the end of the provided dataframe
 
-    @param df: input network df that contains directionality
+    @param df: input network df that contains a directionality column
     @return a df with Direction column of 'U's added back
     """
     df.insert(df.shape[1], "Direction", "U")
@@ -115,7 +113,7 @@ def readd_direction_col_directed(df: pd.DataFrame) -> pd.DataFrame:
     """
     readds a 'Direction' column that puts a column of 'D's at the end of the provided dataframe
 
-    @param df: input network df that contains directionality
+    @param df: input network df that contains directionality column
     @return a df with Direction column of 'D's added back
     """
     df.insert(df.shape[1], "Direction", "D")

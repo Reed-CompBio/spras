@@ -1,6 +1,7 @@
 import json
 import os
 import sys
+from typing import Union
 
 import networkx as nx
 import pandas as pd
@@ -41,8 +42,8 @@ def get_gs_graph(graph_file:str,graph_name:str) -> GSGraph:
 	"""
 	Creates a GraphSpace graph using the networkx graph or digraph and directionality returned from load_graph
 
-	If the graph is empty, that likely means the graph was mized in directionality
-	- this will return an emty GraphSpace graph
+	If the graph is empty, that likely means the graph was mixed in directionality
+	- this will return an empty GraphSpace graph
 	"""
 	# read file as networkx graph
 	# returns a tuple, (the graph, directionality)
@@ -64,7 +65,7 @@ def get_gs_graph(graph_file:str,graph_name:str) -> GSGraph:
 	return G
 
 
-def load_graph(path: str) -> nx.Graph:
+def load_graph(path: str) -> Union[nx.Graph, nx.DiGraph]:
 	"""
     Returns a Graph or Digraph, accompanied by a boolean indicating if it's directed.
 
