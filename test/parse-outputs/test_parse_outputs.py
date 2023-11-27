@@ -31,7 +31,7 @@ class TestParseOutputs:
             out_file = OUTDIR + f"{algo}-pathway.txt"
             print(out_file)
             runner.parse_output(algo, test_file, out_file)
-            assert filecmp.cmp(OUTDIR +f"{algo}-pathway.txt", EXPDIR + f"{algo}-pathway-expected.txt")
+            assert filecmp.cmp(OUTDIR +f"{algo}-pathway.txt", EXPDIR + f"{algo}-pathway-expected.txt", shallow=False)
 
     def test_domino_parse_output(self):
         # Input is the concatenated module_0.html and module_1.html file from

@@ -76,8 +76,8 @@ class Dataset:
         )
         num_cols = self.interactome.shape[1]
         if num_cols == 3:
-
             self.interactome.columns = ["Interactor1", "Interactor2", "Weight"]
+            # When no direction is specified, default to undirected edges
             self.interactome["Direction"] = "U"
 
         elif num_cols == 4:
@@ -89,7 +89,7 @@ class Dataset:
             ]
         else:
             raise ValueError(
-                f"edge_files must have three or four columns but found {num_cols}"
+                f"Edge file {interactome_loc} must have three or four columns but found {num_cols}"
             )
 
         node_set = set(self.interactome.Interactor1.unique())
