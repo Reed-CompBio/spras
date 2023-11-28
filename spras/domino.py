@@ -6,7 +6,7 @@ import pandas as pd
 from spras.interactome import (
     add_constant,
     convert_directed_to_undirected,
-    readd_direction_col_undirected,
+    reinsert_direction_col_undirected,
 )
 from spras.prm import PRM
 from spras.util import prepare_volume, run_container
@@ -204,7 +204,7 @@ class DOMINO(PRM):
             # Remove the prefix
             edges_df['source'] = edges_df['source'].apply(post_domino_id_transform)
             edges_df['target'] = edges_df['target'].apply(post_domino_id_transform)
-            edges_df = readd_direction_col_undirected(edges_df)
+            edges_df = reinsert_direction_col_undirected(edges_df)
 
         edges_df.to_csv(standardized_pathway_file, sep='\t', header=False, index=False)
 

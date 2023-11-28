@@ -2,7 +2,10 @@ from pathlib import Path
 
 import pandas as pd
 
-from spras.interactome import add_directionality_constant, readd_direction_col_directed
+from spras.interactome import (
+    add_directionality_constant,
+    reinsert_direction_col_directed,
+)
 from spras.prm import PRM
 from spras.util import prepare_volume, run_container
 
@@ -183,6 +186,6 @@ class MEO(PRM):
         # Would need to load the paths output file to rank edges correctly
         df.insert(5, 'Rank', 1)  # Add a constant rank of 1
 
-        df = readd_direction_col_directed(df)
+        df = reinsert_direction_col_directed(df)
 
         df.to_csv(standardized_pathway_file, columns=['Source', 'Target', 'Rank', "Direction"], header=False, index=False, sep='\t')

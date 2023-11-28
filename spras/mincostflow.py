@@ -4,7 +4,7 @@ import pandas as pd
 
 from spras.interactome import (
     convert_undirected_to_directed,
-    readd_direction_col_undirected,
+    reinsert_direction_col_undirected,
 )
 from spras.prm import PRM
 from spras.util import prepare_volume, run_container
@@ -148,6 +148,6 @@ class MinCostFlow (PRM):
 
         df = pd.read_csv(raw_pathway_file, sep='\t', header=None)
         df.insert(2, 'Rank', 1)  # adds in a rank column of 1s because the edges are not ranked
-        df = readd_direction_col_undirected(df)
+        df = reinsert_direction_col_undirected(df)
         df.to_csv(standardized_pathway_file, header=False, index=False, sep='\t')
 

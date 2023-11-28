@@ -2,7 +2,7 @@ from pathlib import Path
 
 import pandas as pd
 
-from spras.interactome import readd_direction_col_mixed
+from spras.interactome import reinsert_direction_col_mixed
 from spras.prm import PRM
 from spras.util import prepare_volume, run_container
 
@@ -197,6 +197,6 @@ class OmicsIntegrator1(PRM):
 
         df.columns = ["Edge1", "InteractionType", "Edge2"]
         df.insert (3, "Rank", 1)
-        df = readd_direction_col_mixed(df, "InteractionType", "pd", "pp")
+        df = reinsert_direction_col_mixed(df, "InteractionType", "pd", "pp")
 
         df.to_csv(standardized_pathway_file,columns=['Edge1', 'Edge2', 'Rank', "Direction"], header=False, index=False, sep='\t')

@@ -63,25 +63,33 @@ def add_directionality_constant(df: pd.DataFrame,  col_name: str, dir_const, und
 
     @param df: input network df of edges, weights, and directionality
     @param col_name: the name of the new column
-    @param dir_const: the directed edge sep
-    @param undir_const: the undirected edge sep
+    @param dir_const: the directed edge const
+    @param undir_const: the undirected edge const
     @return a df converted to show directionality differently
     """
-    df.insert(df.shape[1], col_name, dir_const)
+
+    df.insert(df.shape[1], col_name, "NA")
+
     mask = df['Direction'] == 'U'
     df.loc[mask, col_name] = undir_const
 
+    mask = df['Direction'] == 'D'
+    df.loc[mask, col_name] = dir_const
+
+    if not df[col_name].isin([dir_const, undir_const]).all():
+        raise ValueError(f"The column '{col_name}' contains values other than '{dir_const}' and '{undir_const}'")
+
     return df
 
-def readd_direction_col_mixed(df: pd.DataFrame, existing_direction_column: str, dir_const: str, undir_const: str) -> pd.DataFrame:
+def reinsert_direction_col_mixed(df: pd.DataFrame, existing_direction_column: str, dir_const: str, undir_const: str) -> pd.DataFrame:
     """
-    readds a 'Direction' column that puts a 'U' or 'D' at the end of provided dataframe
+    adds back a 'Direction' column that puts a 'U' or 'D' at the end of provided dataframe
     based on the dir/undir constants in the existing direction column
 
     @param df: input network df that contains a directionality column
     @param existing_direction_column: the name of the existing directionality column
-    @param dir_const: the directed edge sep
-    @param undir_const: the undirected edge sep
+    @param dir_const: the directed edge const
+    @param undir_const: the undirected edge const
     @return a df with universal Direction column added back
     """
 
@@ -98,9 +106,9 @@ def readd_direction_col_mixed(df: pd.DataFrame, existing_direction_column: str, 
 
     return df
 
-def readd_direction_col_undirected(df: pd.DataFrame) -> pd.DataFrame:
+def reinsert_direction_col_undirected(df: pd.DataFrame) -> pd.DataFrame:
     """
-    readds a 'Direction' column that puts a columns of 'U's at the end of the provided dataframe
+    adds back a 'Direction' column that puts a columns of 'U's at the end of the provided dataframe
 
     @param df: input network df that contains a directionality column
     @return a df with Direction column of 'U's added back
@@ -109,9 +117,9 @@ def readd_direction_col_undirected(df: pd.DataFrame) -> pd.DataFrame:
 
     return df
 
-def readd_direction_col_directed(df: pd.DataFrame) -> pd.DataFrame:
+def reinsert_direction_col_directed(df: pd.DataFrame) -> pd.DataFrame:
     """
-    readds a 'Direction' column that puts a column of 'D's at the end of the provided dataframe
+    adds back a 'Direction' column that puts a column of 'D's at the end of the provided dataframe
 
     @param df: input network df that contains directionality column
     @return a df with Direction column of 'D's added back

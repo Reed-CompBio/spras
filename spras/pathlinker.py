@@ -5,7 +5,7 @@ import pandas as pd
 
 from spras.interactome import (
     convert_undirected_to_directed,
-    readd_direction_col_directed,
+    reinsert_direction_col_directed,
 )
 from spras.prm import PRM
 from spras.util import prepare_volume, run_container
@@ -140,5 +140,5 @@ class PathLinker(PRM):
         # Questions: should there be a header/optional columns?
         # What about multiple raw_pathway_files
         df = pd.read_csv(raw_pathway_file, sep='\t').take([0, 1, 2], axis=1)
-        df = readd_direction_col_directed(df)
+        df = reinsert_direction_col_directed(df)
         df.to_csv(standardized_pathway_file, header=False, index=False, sep='\t')

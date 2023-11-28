@@ -7,9 +7,9 @@ from spras.interactome import (
     add_directionality_constant,
     convert_directed_to_undirected,
     convert_undirected_to_directed,
-    readd_direction_col_directed,
-    readd_direction_col_mixed,
-    readd_direction_col_undirected,
+    reinsert_direction_col_directed,
+    reinsert_direction_col_mixed,
+    reinsert_direction_col_undirected,
 )
 
 IN_DIR = "test/interactome/input"
@@ -58,29 +58,29 @@ class TestInteractome:
         expected_df = pd.read_csv(EXPECTED_DIR+"/add_directionality_const.csv", sep='\t',  header=None, names=expected_columns)
         assert df.equals(expected_df)
 
-    def test_readd_col_mixed(self):
+    def test_reinsert_col_mixed(self):
         columns = ['Interactor1','Direct_Const','Interactor2','Weight']
         expected_columns = ['Interactor1','Direct_Const','Interactor2','Weight', 'Direction']
-        df = pd.read_csv(IN_DIR+ '/test-readd-network.csv', sep='\t', header=None, names=columns)
-        df = readd_direction_col_mixed(df, "Direct_Const", "pd", "pp")
-        df.to_csv(OUT_DIR+"/output_readd_direction_col_mixed.csv", sep='\t', index=False, header=False)
-        expected_df = pd.read_csv(EXPECTED_DIR+"/readd_mixed.csv", sep = '\t',header=None, names=expected_columns )
+        df = pd.read_csv(IN_DIR+ '/test-reinsert-network.csv', sep='\t', header=None, names=columns)
+        df = reinsert_direction_col_mixed(df, "Direct_Const", "pd", "pp")
+        df.to_csv(OUT_DIR+"/output_reinsert_direction_col_mixed.csv", sep='\t', index=False, header=False)
+        expected_df = pd.read_csv(EXPECTED_DIR+"/reinsert_mixed.csv", sep = '\t',header=None, names=expected_columns )
         assert df.equals(expected_df)
 
-    def test_readd_col_undir(self):
+    def test_reinsert_col_undir(self):
         columns = ['Interactor1','Direct_Const','Interactor2','Weight']
         expected_columns = ['Interactor1','Direct_Const','Interactor2','Weight', 'Direction']
-        df = pd.read_csv(IN_DIR+ '/test-readd-network.csv', sep='\t', header=None, names=columns)
-        df = readd_direction_col_undirected(df)
-        df.to_csv(OUT_DIR+"/output_readd_direction_col_undir.csv", sep='\t', index=False, header=False)
-        expected_df = pd.read_csv(EXPECTED_DIR+"/readd_undir.csv", sep = '\t', header=None, names=expected_columns)
+        df = pd.read_csv(IN_DIR+ '/test-reinsert-network.csv', sep='\t', header=None, names=columns)
+        df = reinsert_direction_col_undirected(df)
+        df.to_csv(OUT_DIR+"/output_reinsert_direction_col_undir.csv", sep='\t', index=False, header=False)
+        expected_df = pd.read_csv(EXPECTED_DIR+"/reinsert_undir.csv", sep = '\t', header=None, names=expected_columns)
         assert df.equals(expected_df)
 
-    def test_readd_col_dir(self):
+    def test_reinsert_col_dir(self):
         columns = ['Interactor1','Direct_Const','Interactor2','Weight']
         expected_columns = ['Interactor1','Direct_Const','Interactor2','Weight', 'Direction']
-        df = pd.read_csv(IN_DIR+ '/test-readd-network.csv', sep='\t', header=None, names=columns)
-        df = readd_direction_col_directed(df)
-        df.to_csv(OUT_DIR+"/output_readd_direction_col_dir.csv", sep='\t', index=False, header=False)
-        expected_df = pd.read_csv(EXPECTED_DIR+"/readd_dir.csv", sep = '\t', header=None, names=expected_columns)
+        df = pd.read_csv(IN_DIR+ '/test-reinsert-network.csv', sep='\t', header=None, names=columns)
+        df = reinsert_direction_col_directed(df)
+        df.to_csv(OUT_DIR+"/output_reinsert_direction_col_dir.csv", sep='\t', index=False, header=False)
+        expected_df = pd.read_csv(EXPECTED_DIR+"/reinsert_dir.csv", sep = '\t', header=None, names=expected_columns)
         assert df.equals(expected_df)

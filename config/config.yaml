@@ -28,13 +28,13 @@
  algorithms:
         - name: "pathlinker"
           params:
-                include: false
+                include: true
                 run1:
                     k: range(100,201,100)
 
         - name: "omicsintegrator1"
           params:
-                include: false
+                include: true
                 run1:
                     r: [5]
                     b: [5, 6]
@@ -44,7 +44,7 @@
 
         - name: "omicsintegrator2"
           params:
-                include: false
+                include: true
                 run1:
                     b: [4]
                     g: [0]
@@ -62,18 +62,18 @@
 
         - name: "mincostflow"
           params:
-                include: false
+                include: true
                 run1:
                     flow: [1] # The flow must be an int
                     capacity: [1]
 
         - name: "allpairs"
           params:
-                include: false
+                include: true
 
         - name: "domino"
           params:
-                include: false
+                include: true
                 run1:
                     slice_threshold: [0.3]
                     module_threshold: [0.05]
@@ -118,16 +118,16 @@
  analysis:
         # Create one summary per pathway file and a single summary table for all pathways for each dataset
         summary:
-          include: false
+          include: true
         # Create output files for each pathway that can be visualized with GraphSpace
         graphspace:
-          include: false
+          include: true
         # Create Cytoscape session file with all pathway graphs for each dataset
         cytoscape:
-          include: false
+          include: true
         # Machine learning analysis (e.g. clustering) of the pathway output files for each dataset
         ml:
-          include: false
+          include: true
           # specify how many principal components to calculate
           components: 2
           # boolean to show the labels on the pca graph

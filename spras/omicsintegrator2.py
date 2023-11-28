@@ -5,7 +5,7 @@ import pandas as pd
 from spras.dataset import Dataset
 from spras.interactome import (
     convert_directed_to_undirected,
-    readd_direction_col_undirected,
+    reinsert_direction_col_undirected,
 )
 from spras.prm import PRM
 from spras.util import add_rank_column, prepare_volume, run_container
@@ -156,5 +156,5 @@ class OmicsIntegrator2(PRM):
         df = df[df['in_solution'] == True]  # Check whether this column can be empty before revising this line
         df = df.take([0, 1], axis=1)
         df = add_rank_column(df)
-        df = readd_direction_col_undirected(df)
+        df = reinsert_direction_col_undirected(df)
         df.to_csv(standardized_pathway_file, header=False, index=False, sep='\t')
