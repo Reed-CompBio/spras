@@ -1,2 +1,2 @@
-A	pp	C
+A	pd	C
 C	pp	D
