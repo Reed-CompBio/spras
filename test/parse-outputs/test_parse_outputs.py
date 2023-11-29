@@ -24,6 +24,6 @@ class TestParseOutputs:
         for algo in algorithms:
             test_file = INDIR + f"{algo}-raw-pathway.txt"
             out_file = OUTDIR + f"{algo}-pathway.txt"
-            
+
             runner.parse_output(algo, test_file, out_file)
             assert filecmp.cmp(OUTDIR +f"{algo}-pathway.txt", EXPDIR + f"{algo}-pathway-expected.txt", shallow=False)
