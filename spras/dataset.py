@@ -87,6 +87,10 @@ class Dataset:
                 "Weight",
                 "Direction",
             ]
+
+            if not self.interactome["Direction"].isin(["U", "D"]).all():
+                raise ValueError(f"The Direction column for {self.label} contains values other than U and D")
+
         else:
             raise ValueError(
                 f"Edge file {interactome_loc} must have three or four columns but found {num_cols}"
