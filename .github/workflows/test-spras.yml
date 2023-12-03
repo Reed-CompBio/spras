@@ -152,8 +152,8 @@ jobs:
         path: docker-wrappers/Cytoscape/.
         dockerfile: docker-wrappers/Cytoscape/Dockerfile
         repository: reedcompbio/py4cytoscape
-        tags: v1
-        cache_froms: reedcompbio/py4cytoscape:v1
+        tags: v2
+        cache_froms: reedcompbio/py4cytoscape:v2
         push: false
 
   # Run pre-commit checks on source files
