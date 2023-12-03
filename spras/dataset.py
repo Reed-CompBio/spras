@@ -11,6 +11,7 @@ Author: Chris Magnano
 Methods and intermediate state for loading data and putting it into pandas tables for use by pathway reconstruction algorithms.
 """
 
+
 class Dataset:
 
     NODE_ID = "NODEID"
@@ -88,8 +89,11 @@ class Dataset:
                 "Direction",
             ]
 
+            # Make directionality column case insensitive
+            self.interactome["Direction"] = self.interactome["Direction"].str.upper()
             if not self.interactome["Direction"].isin(["U", "D"]).all():
-                raise ValueError(f"The Direction column for {self.label} contains values other than U and D")
+                raise ValueError(f"The Direction column for {self.label} edge file {interactome_loc} contains values "
+                                 f"other than U and D")
 
         else:
             raise ValueError(

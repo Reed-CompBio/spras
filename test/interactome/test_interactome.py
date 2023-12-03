@@ -1,7 +1,9 @@
 from pathlib import Path
 
 import pandas as pd
+import pytest
 
+from spras.dataset import Dataset
 from spras.interactome import (
     add_constant,
     add_directionality_constant,
@@ -86,3 +88,27 @@ class TestInteractome:
         df.to_csv(OUT_DIR + "/output_reinsert_direction_col_dir.txt", sep='\t', index=False, header=False)
         expected_df = pd.read_csv(EXPECTED_DIR + "/reinsert_dir.txt", sep='\t', header=None, names=expected_columns)
         assert df.equals(expected_df)
+
+    def test_invalid_value(self):
+        """
+        Test error is thrown when fourth column of edge file has an invalid value (not D or U)
+        """
+        with pytest.raises(ValueError):
+            dataset_info = {'label': 'test',
+                            'edge_files': ['test-network-invalid-value.txt'],
+                            'node_files': None,  # Will raise error before loading node table
+                            'data_dir': IN_DIR
+                            }
+            Dataset(dataset_info)
+
+    def test_missing_value(self):
+        """
+        Test error is thrown when fourth column of edge file is missing
+        """
+        with pytest.raises(ValueError):
+            dataset_info = {'label': 'test',
+                            'edge_files': ['test-network-missing-value.txt'],
+                            'node_files': None,  # Will raise error before loading node table
+                            'data_dir': IN_DIR
+                            }
+            Dataset(dataset_info)

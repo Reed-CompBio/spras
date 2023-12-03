@@ -1,0 +1,6 @@
+A	B	0.5	U
+B	C	0.5	D
+C	B	0.5
+A	D	0.5	U
+C	D	0.5	D
+D	C	0.5	D
