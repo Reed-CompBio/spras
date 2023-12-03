@@ -2,12 +2,27 @@ from pathlib import Path
 
 import pandas as pd
 
+from spras.interactome import (
+    convert_undirected_to_directed,
+    reinsert_direction_col_undirected,
+)
 from spras.prm import PRM
-from spras.util import prepare_volume, run_container
+from spras.util import add_rank_column, prepare_volume, run_container
 
 __all__ = ['MinCostFlow']
 
+"""
+MinCostFlow deals with fully directed graphs
+- OR Tools MCF is designed for directed graphs
+- when an edge (arc) is added, it has a source and target node, so flow is only allowed to move from source to the target
+However, its the directionality it assigns to undirected edges via the flow assignments is not meaningful, so all
+edges are currently undirected.
 
+Expected raw input format:
+Interactor1  Interactor2   Weight
+- the expected raw input file should have node pairs in the 1st and 2nd columns, with the weight in the 3rd column
+- it can include repeated and bidirectional edges
+"""
 class MinCostFlow (PRM):
     required_inputs = ['sources', 'targets', 'edges']
 
@@ -37,8 +52,12 @@ class MinCostFlow (PRM):
         # create the network of edges
         edges = data.get_interactome()
 
+        # Format network edges
+        edges = convert_undirected_to_directed(edges)
+
         # creates the edges files that contains the head and tail nodes and the weights after them
-        edges.to_csv(filename_map['edges'], sep='\t', index=False, columns=["Interactor1","Interactor2","Weight"], header=False)
+        edges.to_csv(filename_map['edges'], sep='\t', index=False, columns=["Interactor1", "Interactor2", "Weight"],
+                     header=False)
 
     @staticmethod
     def run(sources=None, targets=None, edges=None, output_file=None, flow=None, capacity=None, singularity=False):
@@ -121,10 +140,19 @@ class MinCostFlow (PRM):
     def parse_output(raw_pathway_file, standardized_pathway_file):
         """
         Convert a predicted pathway into the universal format
+
+        Although the algorithm constructs a directed network, the resulting network is treated as undirected.
+        This is because the flow within the network doesn't imply causal relationships between nodes.
+        The primary goal of the algorithm is node identification, not the identification of directional edges.
+
         @param raw_pathway_file: pathway file produced by an algorithm's run function
         @param standardized_pathway_file: the same pathway written in the universal format
         """
 
         df = pd.read_csv(raw_pathway_file, sep='\t', header=None)
-        df.insert(2, 'Rank', 1)  # adds in a rank column of 1s because the edges are not ranked
+        df = add_rank_column(df)
+        # TODO update MinCostFlow version to support mixed graphs
+        # Currently directed edges in the input will be converted to undirected edges in the output
+        df = reinsert_direction_col_undirected(df)
         df.to_csv(standardized_pathway_file, header=False, index=False, sep='\t')
+

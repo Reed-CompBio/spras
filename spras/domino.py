@@ -3,6 +3,10 @@ from pathlib import Path
 
 import pandas as pd
 
+from spras.interactome import (
+    add_constant,
+    reinsert_direction_col_undirected,
+)
 from spras.prm import PRM
 from spras.util import prepare_volume, run_container
 
@@ -12,6 +16,15 @@ ID_PREFIX = 'ENSG0'
 ID_PREFIX_LEN = len(ID_PREFIX)
 
 
+"""
+DOMINO will construct a fully undirected graph from the provided input file
+- in the algorithm, it uses nx.Graph()
+
+Expected raw input format:
+Interactor1     ppi     Interactor2
+- the expected raw input file should have node pairs in the 1st and 3rd columns, with a 'ppi' in the 2nd column
+- it can include repeated and bidirectional edges
+"""
 class DOMINO(PRM):
     required_inputs = ['network', 'active_genes']
 
@@ -43,7 +56,11 @@ class DOMINO(PRM):
 
         # Create network file
         edges_df = data.get_interactome()
-        edges_df['ppi'] = 'ppi'
+
+        # Format network file
+        # edges_df = convert_directed_to_undirected(edges_df)
+        # - technically this can be called but since we don't use the column and based on what the function does, it is not truly needed
+        edges_df = add_constant(edges_df, 'ppi', 'ppi')
 
         # Transform each node id with a prefix
         edges_df['Interactor1'] = edges_df['Interactor1'].apply(pre_domino_id_transform)
@@ -187,6 +204,7 @@ class DOMINO(PRM):
             # Remove the prefix
             edges_df['source'] = edges_df['source'].apply(post_domino_id_transform)
             edges_df['target'] = edges_df['target'].apply(post_domino_id_transform)
+            edges_df = reinsert_direction_col_undirected(edges_df)
 
         edges_df.to_csv(standardized_pathway_file, sep='\t', header=False, index=False)
 

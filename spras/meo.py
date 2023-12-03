@@ -2,8 +2,12 @@ from pathlib import Path
 
 import pandas as pd
 
+from spras.interactome import (
+    add_directionality_constant,
+    reinsert_direction_col_directed,
+)
 from spras.prm import PRM
-from spras.util import prepare_volume, run_container
+from spras.util import add_rank_column, prepare_volume, run_container
 
 __all__ = ['MEO', 'write_properties']
 
@@ -46,6 +50,20 @@ def write_properties(filename=Path('properties.txt'), edges=None, sources=None, 
         # Do not need csp.phase, csp.gen.file, or csp.sol.file because MAXCSP is not supported
 
 
+"""
+MEO can support partially directed graphs
+
+Expected raw input format:
+Interactor1   pp/pd   Interactor2   Weight
+- the expected raw input file should have node pairs in the 1st and 3rd columns, with a directionality in the 2nd column and the weight in the 4th column
+- it use pp for undirected edges and pd for directed edges
+- it cannot include repeated and directed edges in opposite directions (A->B and B->A in the input)
+- MEO assumes that it should be an undirected edge instead
+- it cannot support undirected self edges (A-A)
+
+- MEO tracks the directionality of the original edges, but all of its output edges are directed.
+- To remain accurate to MEO's design we will also treat the output graph's as directed
+"""
 class MEO(PRM):
     required_inputs = ['sources', 'targets', 'edges']
 
@@ -73,12 +91,14 @@ class MEO(PRM):
             nodes = nodes.loc[nodes[node_type]]
             nodes.to_csv(filename_map[node_type], index=False, columns=['NODEID'], header=False)
 
-        # TODO need to support partially directed graphs
-        # Expected columns are Node1 EdgeType Node2 Weight
+        # Create network file
         edges = data.get_interactome()
-        # For now all edges are undirected
-        edges.insert(1, 'EdgeType', '(pp)')
-        edges.to_csv(filename_map['edges'], sep='\t', index=False, columns=['Interactor1', 'EdgeType', 'Interactor2', 'Weight'], header=False)
+
+        # Format network file
+        edges = add_directionality_constant(edges, 'EdgeType', '(pd)', '(pp)')
+
+        edges.to_csv(filename_map['edges'], sep='\t', index=False,
+                     columns=['Interactor1', 'EdgeType', 'Interactor2', 'Weight'], header=False)
 
 
     # TODO add parameter validation
@@ -166,5 +186,8 @@ class MEO(PRM):
         df = df.loc[df['Oriented']]
         # TODO what should be the edge rank?
         # Would need to load the paths output file to rank edges correctly
-        df.insert(5, 'Rank', 1)  # Add a constant rank of 1
-        df.to_csv(standardized_pathway_file, columns=['Source', 'Target', 'Rank'], header=False, index=False, sep='\t')
+        df = add_rank_column(df)
+        df = reinsert_direction_col_directed(df)
+
+        df.to_csv(standardized_pathway_file, columns=['Source', 'Target', 'Rank', "Direction"], header=False,
+                  index=False, sep='\t')

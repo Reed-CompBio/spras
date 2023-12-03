@@ -1,0 +1,3 @@
+Source	Type	Target	Oriented	Weight
+GENEA	pp	GENEC	true	0.5
+GENEC	pd	GENEB	true	0.5

@@ -3,11 +3,25 @@ from pathlib import Path
 
 import pandas as pd
 
+from spras.interactome import (
+    convert_undirected_to_directed,
+    reinsert_direction_col_directed,
+)
 from spras.prm import PRM
 from spras.util import prepare_volume, run_container
 
 __all__ = ['PathLinker']
 
+"""
+Pathlinker will construct a fully directed graph from the provided input file
+- an edge is represented with a head and tail node, which represents the direction of the interation between two nodes
+- uses networkx Digraph() object
+
+Expected raw input format:
+Interactor1   Interactor2   Weight
+- the expected raw input file should have node pairs in the 1st and 2nd columns, with a weight in the 3rd column
+- it can include repeated and bidirectional edges
+"""
 class PathLinker(PRM):
     required_inputs = ['nodetypes', 'network']
 
@@ -23,17 +37,17 @@ class PathLinker(PRM):
             if input_type not in filename_map:
                 raise ValueError(f"{input_type} filename is missing")
 
-        #Get sources and targets for node input file
+        # Get sources and targets for node input file
         sources_targets = data.request_node_columns(["sources", "targets"])
         if sources_targets is None:
             return False
         both_series = sources_targets.sources & sources_targets.targets
-        for _index,row in sources_targets[both_series].iterrows():
-            warn_msg = row.NODEID+" has been labeled as both a source and a target."
+        for _index, row in sources_targets[both_series].iterrows():
+            warn_msg = row.NODEID + " has been labeled as both a source and a target."
             # Only use stacklevel 1 because this is due to the data not the code context
             warnings.warn(warn_msg, stacklevel=1)
 
-        #Create nodetype file
+        # Create nodetype file
         input_df = sources_targets[["NODEID"]].copy()
         input_df.columns = ["#Node"]
         input_df.loc[sources_targets["sources"] == True,"Node type"]="source"
@@ -41,9 +55,15 @@ class PathLinker(PRM):
 
         input_df.to_csv(filename_map["nodetypes"],sep="\t",index=False,columns=["#Node","Node type"])
 
-        #This is pretty memory intensive. We might want to keep the interactome centralized.
-        data.get_interactome().to_csv(filename_map["network"],sep="\t",index=False,columns=["Interactor1","Interactor2","Weight"],header=["#Interactor1","Interactor2","Weight"])
+        # Create network file
+        edges = data.get_interactome()
 
+        # Format network file
+        edges = convert_undirected_to_directed(edges)
+
+        # This is pretty memory intensive. We might want to keep the interactome centralized.
+        edges.to_csv(filename_map["network"],sep="\t",index=False,columns=["Interactor1","Interactor2","Weight"],
+                     header=["#Interactor1","Interactor2","Weight"])
 
     # Skips parameter validation step
     @staticmethod
@@ -117,7 +137,7 @@ class PathLinker(PRM):
         @param raw_pathway_file: pathway file produced by an algorithm's run function
         @param standardized_pathway_file: the same pathway written in the universal format
         """
-        # Questions: should there be a header/optional columns?
         # What about multiple raw_pathway_files
         df = pd.read_csv(raw_pathway_file, sep='\t').take([0, 1, 2], axis=1)
+        df = reinsert_direction_col_directed(df)
         df.to_csv(standardized_pathway_file, header=False, index=False, sep='\t')

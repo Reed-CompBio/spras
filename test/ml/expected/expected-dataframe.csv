@@ -1,14 +1,16 @@
-,test-data-s1,test-data-s2,test-data-s3,test-data-longName,test-data-longName2,test-data-empty,test-data-spaces
-A|||B,1,1,0,0,0,0,0
-C|||D,1,1,0,0,0,0,0
-E|||F,1,1,0,0,0,0,0
-L|||M,0,1,1,0,0,0,1
-M|||N,0,0,1,0,0,0,0
-O|||P,0,0,1,0,0,0,1
-P|||Q,0,0,1,0,0,0,0
-node1|||node2,0,0,0,1,0,0,0
-node1|||node3,0,0,0,1,1,0,0
-node4|||node5,0,0,0,1,1,0,0
-LONGERNAMES|||TEST,0,0,0,1,1,0,0
-node2|||node3,0,0,0,0,1,0,0
-nodes with|||spaces in name,0,0,0,0,0,0,1
+,test-data-s1,test-data-s2,test-data-s3,test-data-longName,test-data-longName2,test-data-empty,test-data-spaces,test-mixed-direction
+A---B,1,1,0,0,0,0,0,0
+C---D,1,1,0,0,0,0,0,1
+E---F,1,1,0,0,0,0,0,1
+L---M,0,1,1,0,0,0,1,0
+M---N,0,0,1,0,0,0,0,0
+O---P,0,0,1,0,0,0,1,0
+P---Q,0,0,1,0,0,0,0,0
+node1---node2,0,0,0,1,0,0,0,0
+node1---node3,0,0,0,1,1,0,0,0
+node4---node5,0,0,0,1,1,0,0,0
+LONGERNAMES---TEST,0,0,0,1,1,0,0,0
+node2---node3,0,0,0,0,1,0,0,0
+nodes with---spaces in name,0,0,0,0,0,0,1,0
+A-->B,0,0,0,0,0,0,0,1
+B-->A,0,0,0,0,0,0,0,1

@@ -1,10 +1,10 @@
-A B 1
-A C 3
-C D 5
-E F 2
-F D 4
-G D 9
-G A 8
-G H 6
-B E 7
-B C 10
+A	B	1	U
+A	C  	3  	U
+C	D 	5	U
+E	F	2	U
+F	D	4	U
+G	D	9	U
+G	A	8	U
+G	H	6	U
+B	E	7	U
+B	C	10	U

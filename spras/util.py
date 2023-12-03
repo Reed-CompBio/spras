@@ -326,7 +326,8 @@ def process_config(config):
             continue
 
         if "directed" in cur_params:
-            algorithm_directed[alg["name"]] = cur_params.pop("directed")
+            print("UPDATE: we no longer use the directed key in the config file")
+            cur_params.pop("directed")
 
         # The algorithm has no named arguments so create a default placeholder
         if len(cur_params) == 0:
@@ -389,5 +390,5 @@ def add_rank_column(df: pd.DataFrame) -> pd.DataFrame:
     Add a column of 1s to the dataframe
     @param df: the dataframe to add the rank column of 1s to
     """
-    df['rank'] = 1
+    df['Rank'] = 1
     return df

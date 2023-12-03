@@ -1,3 +1,3 @@
-A	B	1
-C	D	1
-E	F	1
+A	B	1	U
+C	D	1	U
+E	F	1	U

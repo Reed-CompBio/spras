@@ -1,0 +1,3 @@
+protein1	protein2	weight	directionality
+A	B	0.98	U
+B	C	0.77	U
