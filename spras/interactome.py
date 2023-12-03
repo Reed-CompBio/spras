@@ -12,7 +12,8 @@ def convert_undirected_to_directed(df: pd.DataFrame) -> pd.DataFrame:
     """
     turns a graph into a fully directed graph
     - turns every undirected edge into a pair of directed edges
-    - with the pair of directed edges edges, we are not loosing too much information because the relationship of the undirected edge is still preserved
+    - with the pair of directed edges, we are not losing too much information because the relationship of the undirected
+      edge is still preserved
 
     @param df: input network df of edges, weights, and directionality
     @return a dataframe with no undirected edges in Direction column
@@ -27,11 +28,12 @@ def convert_undirected_to_directed(df: pd.DataFrame) -> pd.DataFrame:
     return df
 
 
-def convert_directed_to_undirected(df: pd.DataFrame) -> pd.DateOffset:
+def convert_directed_to_undirected(df: pd.DataFrame) -> pd.DataFrame:
     """
     turns a graph into a fully undirected graph
     - turns all the directed edges directly into undirected edges
-    - we will lose any sense of directionality and the graph won't be inherently accurate, but the basic relationship between the two connected nodes will still remain intact.
+    - we will lose any sense of directionality and the graph won't be inherently accurate, but the basic relationship
+      between the two connected nodes will still remain intact.
 
     @param df: input network df of edges, weights, and directionality
     @return a dataframe with no directed edges in Direction column
@@ -81,6 +83,7 @@ def add_directionality_constant(df: pd.DataFrame,  col_name: str, dir_const, und
 
     return df
 
+
 def reinsert_direction_col_mixed(df: pd.DataFrame, existing_direction_column: str, dir_const: str, undir_const: str) -> pd.DataFrame:
     """
     adds back a 'Direction' column that puts a 'U' or 'D' at the end of provided dataframe
@@ -106,6 +109,7 @@ def reinsert_direction_col_mixed(df: pd.DataFrame, existing_direction_column: st
 
     return df
 
+
 def reinsert_direction_col_undirected(df: pd.DataFrame) -> pd.DataFrame:
     """
     adds back a 'Direction' column that puts a columns of 'U's at the end of the provided dataframe
@@ -116,6 +120,7 @@ def reinsert_direction_col_undirected(df: pd.DataFrame) -> pd.DataFrame:
     df.insert(df.shape[1], "Direction", "U")
 
     return df
+
 
 def reinsert_direction_col_directed(df: pd.DataFrame) -> pd.DataFrame:
     """

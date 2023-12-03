@@ -89,7 +89,7 @@ class Dataset:
                 "Direction",
             ]
 
-            # Make directionality column case insensitive
+            # Make directionality column case-insensitive
             self.interactome["Direction"] = self.interactome["Direction"].str.upper()
             if not self.interactome["Direction"].isin(["U", "D"]).all():
                 raise ValueError(f"The Direction column for {self.label} edge file {interactome_loc} contains values "

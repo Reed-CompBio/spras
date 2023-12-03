@@ -21,8 +21,6 @@ D	1.9	True	True	True
 A secondary format provides only a list of node identifiers and uses the filename as the node attribute, as in the example `sources.txt`.
 This format may be deprecated.
 
-
-
 ### Edge file
 Edge files do not include a header row.
 Each row lists the two nodes that are connected with an edge, the weight for that edge, and, optionally, a directionality column to indicate whether the edge is directed or undirected.

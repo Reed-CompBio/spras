@@ -4,7 +4,7 @@ import pandas as pd
 
 from spras.interactome import reinsert_direction_col_mixed
 from spras.prm import PRM
-from spras.util import prepare_volume, run_container
+from spras.util import add_rank_column, prepare_volume, run_container
 
 __all__ = ['OmicsIntegrator1', 'write_conf']
 
@@ -50,6 +50,7 @@ Interactor1    Interactor2   Weight    Direction
 class OmicsIntegrator1(PRM):
     required_inputs = ['prizes', 'edges']
 
+    @staticmethod
     def generate_inputs(data, filename_map):
         """
         Access fields from the dataset and write the required input files
@@ -62,10 +63,10 @@ class OmicsIntegrator1(PRM):
                 raise ValueError(f"{input_type} filename is missing")
 
         if data.contains_node_columns('prize'):
-            #NODEID is always included in the node table
+            # NODEID is always included in the node table
             node_df = data.request_node_columns(['prize'])
-        elif data.contains_node_columns(['sources','targets']):
-            #If there aren't prizes but are sources and targets, make prizes based on them
+        elif data.contains_node_columns(['sources', 'targets']):
+            # If there aren't prizes but are sources and targets, make prizes based on them
             node_df = data.request_node_columns(['sources','targets'])
             node_df.loc[node_df['sources']==True, 'prize'] = 1.0
             node_df.loc[node_df['targets']==True, 'prize'] = 1.0
@@ -79,7 +80,9 @@ class OmicsIntegrator1(PRM):
         edges_df = data.get_interactome()
 
         # Rename Direction column
-        edges_df.to_csv(filename_map['edges'],sep='\t',index=False,columns=['Interactor1','Interactor2','Weight','Direction'],header=['protein1','protein2','weight','directionality'])
+        edges_df.to_csv(filename_map['edges'],sep='\t',index=False,
+                        columns=['Interactor1','Interactor2','Weight','Direction'],
+                        header=['protein1','protein2','weight','directionality'])
 
 
     # TODO add parameter validation
@@ -196,7 +199,8 @@ class OmicsIntegrator1(PRM):
             return
 
         df.columns = ["Edge1", "InteractionType", "Edge2"]
-        df.insert (3, "Rank", 1)
+        df = add_rank_column(df)
         df = reinsert_direction_col_mixed(df, "InteractionType", "pd", "pp")
 
-        df.to_csv(standardized_pathway_file,columns=['Edge1', 'Edge2', 'Rank', "Direction"], header=False, index=False, sep='\t')
+        df.to_csv(standardized_pathway_file, columns=['Edge1', 'Edge2', 'Rank', "Direction"], header=False, index=False,
+                  sep='\t')

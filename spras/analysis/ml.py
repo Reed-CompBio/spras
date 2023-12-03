@@ -19,8 +19,8 @@ plt.switch_backend('Agg')
 linkage_methods = ["ward", "complete", "average", "single"]
 distance_metrics = ["euclidean", "manhattan", "cosine"]
 
-UNDIR_CONST = '---'
-DIR_CONST = '-->'
+UNDIR_CONST = '---'  # separator between nodes when forming undirected edges
+DIR_CONST = '-->'  # separator between nodes when forming directed edges
 DPI = 300
 
 
@@ -49,8 +49,10 @@ def summarize_networks(file_paths: Iterable[Union[str, PathLike]]) -> pd.DataFra
                     node2 = parts[1]
                     direction = str(parts[3]).strip()
                     if direction == "U":
+                        # node order does not matter, sort nodes so they can be matched across pathways
                         edges.append(UNDIR_CONST.join(sorted([node1, node2])))
                     elif direction == "D":
+                        # node order does matter for directed edges
                         edges.append(DIR_CONST.join([node1, node2]))
                     else:
                         ValueError(f"direction is {direction}, rather than U or D")
@@ -310,13 +312,15 @@ def ensemble_network(dataframe: pd.DataFrame, output_file: str):
     row_means.columns = ['Edges', 'Frequency']
 
     # Add a 'Direction' column, set to 'D' if edge is directed ('-->'), else 'U'
-    row_means['Direction'] = row_means['Edges'].apply(lambda edge: 'D' if '-->' in edge else 'U')
+    row_means['Direction'] = row_means['Edges'].apply(lambda edge: 'D' if DIR_CONST in edge else 'U')
 
     # Extracts the start node connected from "---" or "-->" from column Edges and adds the start node to column Node2
-    row_means['Node1'] = row_means['Edges'].apply(lambda edge: edge.split('-->')[0] if '-->' in edge else edge.split('---')[0])
+    row_means['Node1'] = row_means['Edges'].apply(
+        lambda edge: edge.split(DIR_CONST)[0] if DIR_CONST in edge else edge.split(UNDIR_CONST)[0])
 
-    #Extracts the end node connected from "---" or "-->" from column Edges and adds the end node to column Node2
-    row_means['Node2'] = row_means['Edges'].apply(lambda edge: edge.split('-->')[1] if '-->' in edge else edge.split('---')[1])
+    # Extracts the end node connected from "---" or "-->" from column Edges and adds the end node to column Node2
+    row_means['Node2'] = row_means['Edges'].apply(
+        lambda edge: edge.split(DIR_CONST)[1] if DIR_CONST in edge else edge.split(UNDIR_CONST)[1])
 
     make_required_dirs(output_file)
     row_means[['Node1', 'Node2', 'Frequency', "Direction"]].to_csv(output_file, sep='\t', index=False, header=True)

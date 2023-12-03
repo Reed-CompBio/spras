@@ -1,2 +1,2 @@
-A	B	1	U
-B	C	1	U
+A	B	1	D
+B	C	1	D

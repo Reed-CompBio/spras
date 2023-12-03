@@ -3,10 +3,7 @@ from pathlib import Path
 import pandas as pd
 
 from spras.dataset import Dataset
-from spras.interactome import (
-    convert_directed_to_undirected,
-    reinsert_direction_col_undirected,
-)
+from spras.interactome import reinsert_direction_col_undirected
 from spras.prm import PRM
 from spras.util import add_rank_column, prepare_volume, run_container
 
@@ -15,7 +12,7 @@ __all__ = ['OmicsIntegrator2']
 """
 Omics Integrator 2 will construct a fully undirected graph from the provided input file
 - in the algorithm, it uses nx.Graph() objects, which are undirected
-- uses a pcst_fast solver which supports undirected graphs
+- uses the pcst_fast solver which supports undirected graphs
 
 Expected raw input format:
 Interactor1   Interactor2   Weight
@@ -48,7 +45,7 @@ class OmicsIntegrator2(PRM):
             raise ValueError("Omics Integrator 2 requires node prizes or sources and targets")
 
         # Omics Integrator already gives warnings for strange prize values, so we won't here
-        node_df.to_csv(filename_map['prizes'],sep='\t',index=False,columns=['NODEID','prize'],header=['name','prize'])
+        node_df.to_csv(filename_map['prizes'], sep='\t', index=False, columns=['NODEID', 'prize'], header=['name','prize'])
 
         # Create network file
         edges_df = data.get_interactome()
@@ -62,7 +59,8 @@ class OmicsIntegrator2(PRM):
         # use the same approach as OmicsIntegrator2 by adding half the max cost as the base cost.
         # if everything is less than 1 assume that these are confidences and set the max to 1
         edges_df['cost'] = (max(edges_df['Weight'].max(), 1.0)*1.5) - edges_df['Weight']
-        edges_df.to_csv(filename_map['edges'], sep='\t', index=False, columns=['Interactor1', 'Interactor2', 'cost'], header=['protein1', 'protein2', 'cost'])
+        edges_df.to_csv(filename_map['edges'], sep='\t', index=False, columns=['Interactor1', 'Interactor2', 'cost'],
+                        header=['protein1', 'protein2', 'cost'])
 
     # TODO add parameter validation
     # TODO add reasonable default values

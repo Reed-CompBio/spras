@@ -1,19 +1,21 @@
 import filecmp
-import os
-import shutil
 from pathlib import Path
 
-import yaml
-
 from spras import runner
-from spras.domino import DOMINO, post_domino_id_transform, pre_domino_id_transform
 
 INDIR = "test/parse-outputs/input/"
 OUTDIR = "test/parse-outputs/output/"
 EXPDIR = "test/parse-outputs/expected/"
 
+# DOMINO input is the concatenated module_0.html and module_1.html file from
+# the DOMINO output of the network dip.sif and the nodes tnfa_active_genes_file.txt
+# from https://github.com/Shamir-Lab/DOMINO/tree/master/examples
+
 algorithms = ['mincostflow', 'meo', 'omicsintegrator1', 'omicsintegrator2', 'pathlinker', 'allpairs', 'domino']
+
+
 class TestParseOutputs:
+    @classmethod
     def setup_class(cls):
         """
         Create the expected output directory
@@ -26,4 +28,4 @@ class TestParseOutputs:
             out_file = OUTDIR + f"{algo}-pathway.txt"
 
             runner.parse_output(algo, test_file, out_file)
-            assert filecmp.cmp(OUTDIR +f"{algo}-pathway.txt", EXPDIR + f"{algo}-pathway-expected.txt", shallow=False)
+            assert filecmp.cmp(OUTDIR + f"{algo}-pathway.txt", EXPDIR + f"{algo}-pathway-expected.txt", shallow=False)

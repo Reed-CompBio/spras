@@ -390,5 +390,5 @@ def add_rank_column(df: pd.DataFrame) -> pd.DataFrame:
     Add a column of 1s to the dataframe
     @param df: the dataframe to add the rank column of 1s to
     """
-    df['rank'] = 1
+    df['Rank'] = 1
     return df

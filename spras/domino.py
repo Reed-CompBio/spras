@@ -5,7 +5,6 @@ import pandas as pd
 
 from spras.interactome import (
     add_constant,
-    convert_directed_to_undirected,
     reinsert_direction_col_undirected,
 )
 from spras.prm import PRM
@@ -16,8 +15,9 @@ __all__ = ['DOMINO', 'pre_domino_id_transform', 'post_domino_id_transform']
 ID_PREFIX = 'ENSG0'
 ID_PREFIX_LEN = len(ID_PREFIX)
 
+
 """
-Domino will construct a fully undirected graph from the provided input file
+DOMINO will construct a fully undirected graph from the provided input file
 - in the algorithm, it uses nx.Graph()
 
 Expected raw input format:

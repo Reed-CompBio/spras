@@ -57,10 +57,10 @@ def write_dataset_log(dataset, logfile):
 def make_final_input(wildcards):
     final_input = []
 
-    #TODO analysis could be parsed in the parse_config() function.
+    # TODO analysis could be parsed in the parse_config() function.
     if config["analysis"]["summary"]["include"]:
         # add summary output file for each pathway
-        #TODO: reuse in the future once we make summary work for mixed graphs. See https://github.com/Reed-CompBio/spras/issues/128
+        # TODO: reuse in the future once we make summary work for mixed graphs. See https://github.com/Reed-CompBio/spras/issues/128
         # final_input.extend(expand('{out_dir}{sep}{dataset}-{algorithm_params}{sep}summary.txt',out_dir=out_dir,sep=SEP,dataset=dataset_labels,algorithm_params=algorithms_with_params))
         # add table summarizing all pathways for each dataset
         final_input.extend(expand('{out_dir}{sep}{dataset}-pathway-summary.txt',out_dir=out_dir,sep=SEP,dataset=dataset_labels))
@@ -220,7 +220,7 @@ rule parse_output:
     run:
         runner.parse_output(wildcards.algorithm, input.raw_file, output.standardized_file)
 
-#TODO: reuse in the future once we make summary work for mixed graphs. See https://github.com/Reed-CompBio/spras/issues/128
+# TODO: reuse in the future once we make summary work for mixed graphs. See https://github.com/Reed-CompBio/spras/issues/128
 # Collect summary statistics for a single pathway
 # rule summarize_pathway:
 #     input:
