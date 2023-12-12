@@ -3,12 +3,12 @@ from pathlib import Path
 
 import pandas as pd
 
+import spras.config as config
+from spras.containers import prepare_volume, run_container
 from spras.interactome import (
     add_constant,
     reinsert_direction_col_undirected,
 )
-import spras.config as config
-from spras.containers import prepare_volume, run_container
 from spras.prm import PRM
 
 __all__ = ['DOMINO', 'pre_domino_id_transform', 'post_domino_id_transform']

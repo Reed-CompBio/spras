@@ -3,10 +3,10 @@ from pathlib import Path
 import pandas as pd
 
 import spras.config as config
-from spras.interactome import reinsert_direction_col_mixed
-from spras.util import add_rank_column
 from spras.containers import prepare_volume, run_container
+from spras.interactome import reinsert_direction_col_mixed
 from spras.prm import PRM
+from spras.util import add_rank_column
 
 __all__ = ['OmicsIntegrator1', 'write_conf']
 
