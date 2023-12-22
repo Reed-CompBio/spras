@@ -110,6 +110,8 @@ class AllPairs(PRM):
         @param standardized_pathway_file: the same pathway written in the universal format
         """
         df = pd.read_csv(raw_pathway_file, sep='\t', header=None)
+        
         df['Rank'] = 1  # add a rank column of 1s since the edges are not ranked.
         df = reinsert_direction_col_undirected(df)
-        df.to_csv(standardized_pathway_file, header=False, index=False, sep='\t')
+        df.columns = ['Node1', 'Node2', 'Rank', 'Direction']
+        df.to_csv(standardized_pathway_file, header=True, index=False, sep='\t')

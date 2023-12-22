@@ -44,7 +44,7 @@ def summarize_networks(file_paths: Iterable[Union[str, PathLike]]) -> pd.DataFra
             edges = []
             for line in lines:
                 parts = line.split('\t')
-                if len(parts) > 0:  # in case of empty line in file
+                if len(parts) >= 4:  # in case of empty line in file or line doesn't include all values
                     node1 = parts[0]
                     node2 = parts[1]
                     direction = str(parts[3]).strip()
@@ -55,7 +55,10 @@ def summarize_networks(file_paths: Iterable[Union[str, PathLike]]) -> pd.DataFra
                         # node order does matter for directed edges
                         edges.append(DIR_CONST.join([node1, node2]))
                     else:
-                        ValueError(f"direction is {direction}, rather than U or D")
+                        if direction == 'Direction': # if reading the header
+                            continue
+                        else: 
+                            raise ValueError(f"direction is {direction}, rather than U or D")
 
             # getting the algorithm name
             p = PurePath(file)

@@ -1,3 +1,4 @@
+Node1	Node2	Rank	Direction
 node1	node2	1	U
 node1	node3	1	U
 node4	node5	1	U

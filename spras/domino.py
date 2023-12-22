@@ -205,8 +205,10 @@ class DOMINO(PRM):
             edges_df['source'] = edges_df['source'].apply(post_domino_id_transform)
             edges_df['target'] = edges_df['target'].apply(post_domino_id_transform)
             edges_df = reinsert_direction_col_undirected(edges_df)
-
-        edges_df.to_csv(standardized_pathway_file, sep='\t', header=False, index=False)
+            edges_df.columns = ['Node1', 'Node2', 'Rank', 'Direction']
+            edges_df.to_csv(standardized_pathway_file, sep='\t', header=True, index=False)
+        else: 
+            edges_df.to_csv(standardized_pathway_file, sep='\t', header=None, index=False)
 
 
 def pre_domino_id_transform(node_id):

@@ -33,8 +33,17 @@ def summarize_networks(file_paths: Iterable[Path], node_table: pd.DataFrame) -> 
 
     # Iterate through each network file path
     for file_path in sorted(file_paths):
-        # Load in the network
-        nw = nx.read_edgelist(file_path, data=(('weight', float), ('Direction',str)))
+        nw = None
+        # nw = nx.read_edgelist(file_path, data=(('weight', float), ('Direction',str)))
+        if os.path.getsize(file_path) == 0:
+            continue
+        else: 
+            with open(file_path, 'r') as f:
+                # skip the header line
+                next(f)
+                # Load in the network
+                nw = nx.read_edgelist(f, data=(('weight', float), ('Direction', str)))
+
         # Save the network name, number of nodes, number edges, and number of connected components
         nw_name = str(file_path)
         number_nodes = nw.number_of_nodes()

@@ -188,6 +188,6 @@ class MEO(PRM):
         # Would need to load the paths output file to rank edges correctly
         df = add_rank_column(df)
         df = reinsert_direction_col_directed(df)
-
-        df.to_csv(standardized_pathway_file, columns=['Source', 'Target', 'Rank', "Direction"], header=False,
-                  index=False, sep='\t')
+        df.drop(columns=['Type', 'Oriented', 'Weight'], inplace = True)
+        df.columns = ['Node1', 'Node2', 'Rank', "Direction"]
+        df.to_csv(standardized_pathway_file, header=True, index=False, sep='\t')

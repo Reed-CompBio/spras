@@ -201,6 +201,6 @@ class OmicsIntegrator1(PRM):
         df.columns = ["Edge1", "InteractionType", "Edge2"]
         df = add_rank_column(df)
         df = reinsert_direction_col_mixed(df, "InteractionType", "pd", "pp")
-
-        df.to_csv(standardized_pathway_file, columns=['Edge1', 'Edge2', 'Rank', "Direction"], header=False, index=False,
-                  sep='\t')
+        df.drop(columns=['InteractionType'], inplace = True)
+        df.columns = ['Node1', 'Node2', 'Rank', "Direction"]
+        df.to_csv(standardized_pathway_file, header=True, index=False, sep='\t')

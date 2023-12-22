@@ -155,4 +155,5 @@ class OmicsIntegrator2(PRM):
         df = df.take([0, 1], axis=1)
         df = add_rank_column(df)
         df = reinsert_direction_col_undirected(df)
-        df.to_csv(standardized_pathway_file, header=False, index=False, sep='\t')
+        df.columns = ['Node1', 'Node2', 'Rank', "Direction"]
+        df.to_csv(standardized_pathway_file, header=True, index=False, sep='\t')

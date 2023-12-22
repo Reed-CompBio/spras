@@ -154,5 +154,6 @@ class MinCostFlow (PRM):
         # TODO update MinCostFlow version to support mixed graphs
         # Currently directed edges in the input will be converted to undirected edges in the output
         df = reinsert_direction_col_undirected(df)
-        df.to_csv(standardized_pathway_file, header=False, index=False, sep='\t')
+        df.columns = ['Node1', 'Node2', 'Rank', "Direction"]
+        df.to_csv(standardized_pathway_file, header=True, index=False, sep='\t')
 

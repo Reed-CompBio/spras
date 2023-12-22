@@ -140,4 +140,5 @@ class PathLinker(PRM):
         # What about multiple raw_pathway_files
         df = pd.read_csv(raw_pathway_file, sep='\t').take([0, 1, 2], axis=1)
         df = reinsert_direction_col_directed(df)
-        df.to_csv(standardized_pathway_file, header=False, index=False, sep='\t')
+        df.columns = ['Node1', 'Node2', 'Rank', "Direction"]
+        df.to_csv(standardized_pathway_file, header=True, index=False, sep='\t')
