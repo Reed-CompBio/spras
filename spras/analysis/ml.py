@@ -112,6 +112,7 @@ def pca(dataframe: pd.DataFrame, output_png: str, output_var: str, output_coord:
     df = df.transpose()  # based on the algorithms rather than the edges
     X = df.values
 
+    
     min_shape = min(df.shape)
     if components < 2:
         raise ValueError(f"components={components} must be greater than or equal to 2 in the config file.")
@@ -120,6 +121,10 @@ def pca(dataframe: pd.DataFrame, output_png: str, output_var: str, output_coord:
         components = min_shape
     if not isinstance(labels, bool):
         raise ValueError(f"labels={labels} must be True or False")
+
+    if df.empty:
+        raise ValueError("The summarize network dataFrame is empty.\nEnsure that the output files and configuration parameters are correct and non-empty to produce a non-empty dataframe for PCA.")
+
 
     scaler = StandardScaler()
     scaler.fit(X)  # calc mean and standard deviation
