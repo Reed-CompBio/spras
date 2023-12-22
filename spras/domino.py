@@ -207,7 +207,7 @@ class DOMINO(PRM):
             edges_df = reinsert_direction_col_undirected(edges_df)
             edges_df.columns = ['Node1', 'Node2', 'Rank', 'Direction']
             edges_df.to_csv(standardized_pathway_file, sep='\t', header=True, index=False)
-        else: 
+        else:
             edges_df.to_csv(standardized_pathway_file, sep='\t', header=None, index=False)
 
 

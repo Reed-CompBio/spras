@@ -57,7 +57,7 @@ def summarize_networks(file_paths: Iterable[Union[str, PathLike]]) -> pd.DataFra
                     else:
                         if direction == 'Direction': # if reading the header
                             continue
-                        else: 
+                        else:
                             raise ValueError(f"direction is {direction}, rather than U or D")
 
             # getting the algorithm name

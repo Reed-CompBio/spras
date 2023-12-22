@@ -37,7 +37,7 @@ def summarize_networks(file_paths: Iterable[Path], node_table: pd.DataFrame) -> 
         # nw = nx.read_edgelist(file_path, data=(('weight', float), ('Direction',str)))
         if os.path.getsize(file_path) == 0:
             continue
-        else: 
+        else:
             with open(file_path, 'r') as f:
                 # skip the header line
                 next(f)
