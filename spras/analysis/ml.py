@@ -81,6 +81,11 @@ def summarize_networks(file_paths: Iterable[Union[str, PathLike]]) -> pd.DataFra
     concated_df = pd.concat(edge_dataframes, axis=1, join='outer')
     concated_df = concated_df.fillna(0)
     concated_df = concated_df.astype('int64')
+    
+    # don't do ml post processing if there is an empty dataframe
+    if concated_df.empty:
+        raise ValueError("The summarize network dataFrame is empty.\nEnsure that the output files and configuration parameters are correct and non-empty to produce a non-empty dataframe for ml post processing.")
+
     return concated_df
 
 def create_palette(column_names):
@@ -112,7 +117,6 @@ def pca(dataframe: pd.DataFrame, output_png: str, output_var: str, output_coord:
     df = df.transpose()  # based on the algorithms rather than the edges
     X = df.values
 
-    
     min_shape = min(df.shape)
     if components < 2:
         raise ValueError(f"components={components} must be greater than or equal to 2 in the config file.")
@@ -121,10 +125,6 @@ def pca(dataframe: pd.DataFrame, output_png: str, output_var: str, output_coord:
         components = min_shape
     if not isinstance(labels, bool):
         raise ValueError(f"labels={labels} must be True or False")
-
-    if df.empty:
-        raise ValueError("The summarize network dataFrame is empty.\nEnsure that the output files and configuration parameters are correct and non-empty to produce a non-empty dataframe for PCA.")
-
 
     scaler = StandardScaler()
     scaler.fit(X)  # calc mean and standard deviation
