@@ -82,9 +82,11 @@ def summarize_networks(file_paths: Iterable[Union[str, PathLike]]) -> pd.DataFra
     concated_df = concated_df.fillna(0)
     concated_df = concated_df.astype('int64')
 
-    # don't do ml post processing if there is an empty dataframe
+    # don't do ml post processing if there is an empty dataframe or the number of samples is <= 1
     if concated_df.empty:
-        raise ValueError("The summarize network dataFrame is empty.\nEnsure that the output files and configuration parameters are correct and non-empty to produce a non-empty dataframe for ml post processing.")
+        raise ValueError("ML post-processing cannot proceed because the summarize network dataFrame is empty.\nCheck that the output files and configuration parameters are correct and non-empty to produce a non-empty dataframe for ml post processing.")
+    if min(concated_df.shape) <= 1:
+        raise ValueError (f"ML post-processing cannot proceed as the available number of samples is insufficient. The process requires more than one sample, but currently, there are only {min(concated_df.shape)} samples.")
 
     return concated_df
 

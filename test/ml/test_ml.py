@@ -30,6 +30,10 @@ class TestML:
         with pytest.raises(ValueError): #raises error if empty dataframe is used for post processing
             ml.summarize_networks([INPUT_DIR + 'test-data-empty/empty.txt'])
 
+    def test_summarize_networks_empty(self):
+        with pytest.raises(ValueError): #raises error if empty dataframe is used for post processing
+            ml.summarize_networks([INPUT_DIR + 'test-data-single/single.txt'])
+
     def test_pca(self):
         dataframe = ml.summarize_networks([INPUT_DIR + 'test-data-s1/s1.txt', INPUT_DIR + 'test-data-s2/s2.txt', INPUT_DIR + 'test-data-s3/s3.txt'])
         ml.pca(dataframe, OUT_DIR + 'pca.png', OUT_DIR + 'pca-variance.txt',
