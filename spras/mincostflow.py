@@ -2,7 +2,6 @@ from pathlib import Path
 
 import pandas as pd
 
-import spras.config as config
 from spras.containers import prepare_volume, run_container
 from spras.interactome import (
     convert_undirected_to_directed,
@@ -71,7 +70,7 @@ class MinCostFlow (PRM):
         @param output_file: output file name (required)
         @param flow: amount of flow going through the graph (optional)
         @param capacity: amount of capacity allowed on each edge (optional)
-        @param container_framework: choose the container runtime framework, currently supports "docker" or "singularity" (required)
+        @param container_framework: choose the container runtime framework, currently supports "docker" or "singularity" (optional)
         """
 
         # ensures that these parameters are required

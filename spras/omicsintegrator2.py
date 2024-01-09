@@ -2,7 +2,6 @@ from pathlib import Path
 
 import pandas as pd
 
-import spras.config as config
 from spras.containers import prepare_volume, run_container
 from spras.dataset import Dataset
 from spras.interactome import reinsert_direction_col_undirected
@@ -75,6 +74,7 @@ class OmicsIntegrator2(PRM):
         Only the .tsv output file is retained and then renamed.
         All other output files are deleted.
         @param output_file: the name of the output file, which will overwrite any existing file with this name
+        @param container_framework: choose the container runtime framework, currently supports "docker" or "singularity" (optional)
         """
         if edges is None or prizes is None or output_file is None:
             raise ValueError('Required Omics Integrator 2 arguments are missing')

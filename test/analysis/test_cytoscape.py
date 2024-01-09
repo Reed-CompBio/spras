@@ -36,9 +36,7 @@ class TestCytoscape:
     # Open a GitHub issue if Cytoscape does not work on Singularity as expected for assistance debugging
     @pytest.mark.xfail(reason='Requires Singularity and only works for certain Singularity configurations')
     def test_cytoscape_singularity(self):
-        config.config.container_framework = "singularity"
         out_path = Path(OUT_FILE)
         out_path.unlink(missing_ok=True)
-        run_cytoscape(INPUT_PATHWAYS, OUT_FILE)
-        config.config.container_framework = "docker"
+        run_cytoscape(INPUT_PATHWAYS, OUT_FILE, "singularity")
         assert out_path.exists()

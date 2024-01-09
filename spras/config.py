@@ -15,7 +15,6 @@ will grab the top level registry configuration option as it appears in the confi
 import copy as copy
 import itertools as it
 import os
-from urllib.parse import urljoin
 
 import numpy as np
 import yaml
@@ -57,6 +56,33 @@ class Config:
         # Since process_config winds up modifying the raw_config passed to it as a side effect,
         # we'll make a deep copy here to guarantee we don't break anything. This preserves the
         # config as it's given to the Snakefile by Snakemake
+
+        # Member vars populated by process_config. Set to None before they are populated so that our
+        # __init__ makes clear exactly what is being configured.
+        # Directory used for storing output
+        self.out_dir = None
+        # Container framework used by PRMs. Valid options are "docker" and "singularity"
+        self.container_framework = None
+        # The container prefix (host and organization) to use for images. Default is "docker.io/reedcompbio"
+        self.container_prefix = DEFAULT_CONTAINER_PREFIX
+        # A dictionary to store configured datasets against which SPRAS will be run
+        self.datasets = None
+        # The hash length SPRAS will use to identify parameter combinations. Default is 7
+        self.hash_length = DEFAULT_HASH_LENGTH
+
+        # TODO: Update each of these with a note about what they are and what they're for.
+        self.algorithms = None
+        self.algorithm_params = None
+        self.algorithm_directed  = None
+        self.analysis_params = None
+        self.ml_params = None
+        self.pca_params = None
+        self.hac_params = None
+        self.analysis_include_summary = None
+        self.analysis_include_graphspace  = None
+        self.analysis_include_cytoscape  = None
+        self.analysis_include_ml = None
+
         _raw_config = copy.deepcopy(raw_config)
         self.process_config(_raw_config)
 
@@ -81,8 +107,6 @@ class Config:
         # Grab registry from the config, and if none is provided default to docker
         if "container_registry" in raw_config and raw_config["container_registry"]["base_url"] != "" and raw_config["container_registry"]["owner"] != "":
             self.container_prefix = raw_config["container_registry"]["base_url"] + "/" + raw_config["container_registry"]["owner"]
-        else:
-            self.container_prefix = DEFAULT_CONTAINER_PREFIX
 
         # Parse dataset information
         # Datasets is initially a list, where each list entry has a dataset label and lists of input files
@@ -94,7 +118,6 @@ class Config:
         # Currently assumes all datasets have a label and the labels are unique
         # When Snakemake parses the config file it loads the datasets as OrderedDicts not dicts
         # Convert to dicts to simplify the yaml logging
-        self.datasets = {}
         self.datasets = {dataset["label"]: dict(dataset) for dataset in raw_config["datasets"]}
 
         # Code snipped from Snakefile that may be useful for assigning default labels
@@ -105,8 +128,6 @@ class Config:
         # Override the default parameter hash length if specified in the config file
         if "hash_length" in raw_config and raw_config["hash_length"] != "":
             self.hash_length = int(raw_config["hash_length"])
-        else:
-            self.hash_length = DEFAULT_HASH_LENGTH
 
         prior_params_hashes = set()
 

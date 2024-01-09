@@ -3,7 +3,6 @@ from pathlib import Path
 
 import pandas as pd
 
-import spras.config as config
 from spras.containers import prepare_volume, run_container
 from spras.interactome import (
     convert_directed_to_undirected,
@@ -65,7 +64,7 @@ class AllPairs(PRM):
         Run All Pairs Shortest Paths with Docker
         @param nodetypes: input node types with sources and targets (required)
         @param network: input network file (required)
-        @param container_framework: choose the container runtime framework, currently supports "docker" or "singularity" (required)
+        @param container_framework: choose the container runtime framework, currently supports "docker" or "singularity" (optional)
         @param output_file: path to the output pathway file (required)
         """
         if not nodetypes or not network or not output_file:

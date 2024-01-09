@@ -2,7 +2,6 @@ from pathlib import Path
 
 import pandas as pd
 
-import spras.config as config
 from spras.containers import prepare_volume, run_container
 from spras.interactome import (
     add_directionality_constant,
@@ -116,7 +115,7 @@ class MEO(PRM):
         Only the edge output file is retained.
         All other output files are deleted.
         @param output_file: the name of the output edge file, which will overwrite any existing file with this name
-        @param container_framework: choose the container runtime framework, currently supports "docker" or "singularity" (required)
+        @param container_framework: choose the container runtime framework, currently supports "docker" or "singularity" (optional)
         """
         if edges is None or sources is None or targets is None or output_file is None:
             raise ValueError('Required Maximum Edge Orientation arguments are missing')

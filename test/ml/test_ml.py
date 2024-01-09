@@ -4,9 +4,6 @@ from pathlib import Path
 import pandas as pd
 
 import spras.analysis.ml as ml
-import spras.config as config
-
-config.init_from_file("config/config.yaml")
 
 INPUT_DIR = 'test/ml/input/'
 OUT_DIR = 'test/ml/output/'

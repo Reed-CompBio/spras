@@ -3,7 +3,6 @@ from pathlib import Path
 
 import pandas as pd
 
-import spras.config as config
 from spras.containers import prepare_volume, run_container
 from spras.interactome import (
     add_constant,
@@ -81,7 +80,7 @@ class DOMINO(PRM):
         @param output_file: path to the output pathway file (required)
         @param slice_threshold: the p-value threshold for considering a slice as relevant (optional)
         @param module_threshold: the p-value threshold for considering a putative module as final module (optional)
-        @param container_framework: choose the container runtime framework, currently supports "docker" or "singularity" (required)
+        @param container_framework: choose the container runtime framework, currently supports "docker" or "singularity" (optional)
         """
 
         if not network or not active_genes or not output_file:

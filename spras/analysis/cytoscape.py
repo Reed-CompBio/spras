@@ -2,7 +2,6 @@ from pathlib import Path, PurePath
 from shutil import rmtree
 from typing import List, Union
 
-import spras.config as config
 from spras.containers import prepare_volume, run_container
 
 
@@ -11,7 +10,7 @@ def run_cytoscape(pathways: List[Union[str, PurePath]], output_file: str, contai
     Create a Cytoscape session file with visualizations of each of the provided pathways
     @param pathways: a list of pathways to visualize
     @param output_file: the output Cytoscape session file
-    @param container_framework: choose the container runtime framework, currently supports "docker" or "singularity"
+    @param container_framework: choose the container runtime framework, currently supports "docker" or "singularity" (optional)
     """
     work_dir = '/spras'
 
@@ -49,7 +48,6 @@ def run_cytoscape(pathways: List[Union[str, PurePath]], output_file: str, contai
 
     print('Running Cytoscape with arguments: {}'.format(' '.join(command)), flush=True)
 
-    # TODO consider making this a string in the config file instead of a Boolean
     container_suffix = "py4cytoscape:v2"
     out = run_container(container_framework,
                         container_suffix,

@@ -2,10 +2,7 @@ from pathlib import Path
 
 import pandas as pd
 
-import spras.config as config
 from spras.analysis.summary import summarize_networks
-
-config.init_from_file("config/config.yaml")
 
 # Notes:
 # - Column labels are required in the node table

@@ -2,7 +2,6 @@ from pathlib import Path
 
 import pandas as pd
 
-import spras.config as config
 from spras.containers import prepare_volume, run_container
 from spras.interactome import reinsert_direction_col_mixed
 from spras.prm import PRM
@@ -105,7 +104,7 @@ class OmicsIntegrator1(PRM):
         All other output files are deleted.
         @param output_file: the name of the output sif file for the optimal forest, which will overwrite any
         existing file with this name
-        @param container_framework: choose the container runtime framework, currently supports "docker" or "singularity" (required)
+        @param container_framework: choose the container runtime framework, currently supports "docker" or "singularity" (optional)
         """
         if edges is None or prizes is None or output_file is None or w is None or b is None or d is None:
             raise ValueError('Required Omics Integrator 1 arguments are missing')

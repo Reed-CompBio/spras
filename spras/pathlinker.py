@@ -3,7 +3,6 @@ from pathlib import Path
 
 import pandas as pd
 
-import spras.config as config
 from spras.containers import prepare_volume, run_container
 from spras.interactome import (
     convert_undirected_to_directed,
@@ -75,7 +74,7 @@ class PathLinker(PRM):
         @param network:  input network file (required)
         @param output_file: path to the output pathway file (required)
         @param k: path length (optional)
-        @param container_framework: choose the container runtime framework, currently supports "docker" or "singularity" (required)
+        @param container_framework: choose the container runtime framework, currently supports "docker" or "singularity" (optional)
         """
         # Add additional parameter validation
         # Do not require k

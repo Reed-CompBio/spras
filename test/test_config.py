@@ -86,8 +86,6 @@ class TestConfig:
         with pytest.raises(ValueError):
             config.init_global(test_config)
 
-        test_config["container_framework"] = "badFramework"
-
     def test_config_container_registry(self):
         test_config = get_test_config()
         test_config["container_registry"]["base_url"] = "docker.io"

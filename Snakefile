@@ -4,8 +4,6 @@ import shutil
 import yaml
 from spras.dataset import Dataset
 from spras.analysis import ml, summary, graphspace, cytoscape
-from spras.dataset import Dataset
-from spras.analysis import ml, summary, graphspace, cytoscape
 import spras.config as _config
 
 # Snakemake updated the behavior in the 6.5.0 release https://github.com/snakemake/snakemake/pull/1037
@@ -249,7 +247,7 @@ rule viz_cytoscape:
     output: 
         session = SEP.join([out_dir, '{dataset}-cytoscape.cys'])
     run:
-        cytoscape.run_cytoscape(input.pathways, output.session)
+        cytoscape.run_cytoscape(input.pathways, output.session, FRAMEWORK)
 
 
 # Write a single summary table for all pathways for each dataset
