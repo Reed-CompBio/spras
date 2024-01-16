@@ -69,18 +69,28 @@ class Config:
         self.datasets = None
         # The hash length SPRAS will use to identify parameter combinations. Default is 7
         self.hash_length = DEFAULT_HASH_LENGTH
-
-        # TODO: Update each of these with a note about what they are and what they're for.
+        # The list of algorithms to run in the workflow. Each is a dict with 'name' as an expected key.
         self.algorithms = None
+        # A nested dict mapping algorithm names to dicts that map parameter hashes to parameter combinations.
+        # Only includes algorithms that are set to be run with 'include: true'.
         self.algorithm_params = None
+        # Deprecated. Previously a dict mapping algorithm names to a Boolean tracking whether they used directed graphs.
         self.algorithm_directed  = None
+        # A dict with the analysis settings
         self.analysis_params = None
+        # A dict with the ML settings
         self.ml_params = None
+        # A dict with the PCA settings
         self.pca_params = None
+        # A dict with the hierarchical clustering settings
         self.hac_params = None
+        # A Boolean specifying whether to run the summary analysis
         self.analysis_include_summary = None
+        # A Boolean specifying whether to run the GraphSpace analysis
         self.analysis_include_graphspace  = None
+        # A Boolean specifying whether to run the Cytoscape analysis
         self.analysis_include_cytoscape  = None
+        # A Boolean specifying whether to run the ML analysis
         self.analysis_include_ml = None
 
         _raw_config = copy.deepcopy(raw_config)
