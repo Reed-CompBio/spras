@@ -2,13 +2,11 @@ from pathlib import PurePosixPath, PureWindowsPath
 
 import pytest
 
-from spras.util import (
-    convert_docker_path,
-    hash_params_sha1_base32,
-    prepare_path_docker,
-    prepare_volume,
-)
+import spras.config as config
+from spras.containers import convert_docker_path, prepare_path_docker, prepare_volume
+from spras.util import hash_params_sha1_base32
 
+config.init_from_file("config/config.yaml")
 
 class TestUtil:
     def test_prepare_path_docker(self):

@@ -2,12 +2,13 @@ from pathlib import Path
 
 import pandas as pd
 
+from spras.containers import prepare_volume, run_container
 from spras.interactome import (
     convert_undirected_to_directed,
     reinsert_direction_col_undirected,
 )
 from spras.prm import PRM
-from spras.util import add_rank_column, prepare_volume, run_container
+from spras.util import add_rank_column
 
 __all__ = ['MinCostFlow']
 
@@ -60,7 +61,7 @@ class MinCostFlow (PRM):
                      header=False)
 
     @staticmethod
-    def run(sources=None, targets=None, edges=None, output_file=None, flow=None, capacity=None, singularity=False):
+    def run(sources=None, targets=None, edges=None, output_file=None, flow=None, capacity=None, container_framework="docker"):
         """
         Run min cost flow with Docker (or singularity)
         @param sources: input sources (required)
@@ -69,7 +70,7 @@ class MinCostFlow (PRM):
         @param output_file: output file name (required)
         @param flow: amount of flow going through the graph (optional)
         @param capacity: amount of capacity allowed on each edge (optional)
-        @param singularity: if True, run using the Singularity container instead of the Docker container (optional)
+        @param container_framework: choose the container runtime framework, currently supports "docker" or "singularity" (optional)
         """
 
         # ensures that these parameters are required
@@ -113,11 +114,11 @@ class MinCostFlow (PRM):
             command.extend(['--capacity', str(capacity)])
 
         # choosing to run in docker or singularity container
-        container_framework = 'singularity' if singularity else 'docker'
+        container_suffix = "mincostflow"
 
         # constructs a docker run call
         out = run_container(container_framework,
-                            'reedcompbio/mincostflow',
+                            container_suffix,
                             command,
                             volumes,
                             work_dir)

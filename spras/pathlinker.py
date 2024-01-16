@@ -3,12 +3,12 @@ from pathlib import Path
 
 import pandas as pd
 
+from spras.containers import prepare_volume, run_container
 from spras.interactome import (
     convert_undirected_to_directed,
     reinsert_direction_col_directed,
 )
 from spras.prm import PRM
-from spras.util import prepare_volume, run_container
 
 __all__ = ['PathLinker']
 
@@ -67,14 +67,14 @@ class PathLinker(PRM):
 
     # Skips parameter validation step
     @staticmethod
-    def run(nodetypes=None, network=None, output_file=None, k=None, singularity=False):
+    def run(nodetypes=None, network=None, output_file=None, k=None, container_framework="docker"):
         """
         Run PathLinker with Docker
         @param nodetypes:  input node types with sources and targets (required)
         @param network:  input network file (required)
         @param output_file: path to the output pathway file (required)
         @param k: path length (optional)
-        @param singularity: if True, run using the Singularity container instead of the Docker container
+        @param container_framework: choose the container runtime framework, currently supports "docker" or "singularity" (optional)
         """
         # Add additional parameter validation
         # Do not require k
@@ -115,10 +115,9 @@ class PathLinker(PRM):
 
         print('Running PathLinker with arguments: {}'.format(' '.join(command)), flush=True)
 
-        # TODO consider making this a string in the config file instead of a Boolean
-        container_framework = 'singularity' if singularity else 'docker'
+        container_suffix = "pathlinker"
         out = run_container(container_framework,
-                            'reedcompbio/pathlinker',
+                            container_suffix,
                             command,
                             volumes,
                             work_dir)
