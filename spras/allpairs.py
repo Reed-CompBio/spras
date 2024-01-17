@@ -3,12 +3,12 @@ from pathlib import Path
 
 import pandas as pd
 
+from spras.containers import prepare_volume, run_container
 from spras.interactome import (
     convert_directed_to_undirected,
-    readd_direction_col_undirected,
+    reinsert_direction_col_undirected,
 )
 from spras.prm import PRM
-from spras.util import prepare_volume, run_container
 
 __all__ = ['AllPairs']
 
@@ -59,12 +59,12 @@ class AllPairs(PRM):
                                       header=["#Interactor1", "Interactor2", "Weight"])
 
     @staticmethod
-    def run(nodetypes=None, network=None, output_file=None, singularity=False):
+    def run(nodetypes=None, network=None, output_file=None, container_framework="docker"):
         """
         Run All Pairs Shortest Paths with Docker
         @param nodetypes: input node types with sources and targets (required)
         @param network: input network file (required)
-        @param singularity: if True, run using the Singularity container instead of the Docker container
+        @param container_framework: choose the container runtime framework, currently supports "docker" or "singularity" (optional)
         @param output_file: path to the output pathway file (required)
         """
         if not nodetypes or not network or not output_file:
@@ -94,9 +94,11 @@ class AllPairs(PRM):
 
         print('Running All Pairs Shortest Paths with arguments: {}'.format(' '.join(command)), flush=True)
 
-        container_framework = 'singularity' if singularity else 'docker'
-        out = run_container(container_framework,
-                            'reedcompbio/allpairs',
+        container_suffix = "allpairs"
+
+        out = run_container(
+                            container_framework,
+                            container_suffix,
                             command,
                             volumes,
                             work_dir)
@@ -111,5 +113,5 @@ class AllPairs(PRM):
         """
         df = pd.read_csv(raw_pathway_file, sep='\t', header=None)
         df['Rank'] = 1  # add a rank column of 1s since the edges are not ranked.
-        df = readd_direction_col_undirected(df)
+        df = reinsert_direction_col_undirected(df)
         df.to_csv(standardized_pathway_file, header=False, index=False, sep='\t')

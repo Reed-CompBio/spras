@@ -3,12 +3,12 @@ from pathlib import Path
 
 import pandas as pd
 
+from spras.containers import prepare_volume, run_container
 from spras.interactome import (
     convert_undirected_to_directed,
-    readd_direction_col_directed,
+    reinsert_direction_col_directed,
 )
 from spras.prm import PRM
-from spras.util import prepare_volume, run_container
 
 __all__ = ['PathLinker']
 
@@ -37,17 +37,17 @@ class PathLinker(PRM):
             if input_type not in filename_map:
                 raise ValueError(f"{input_type} filename is missing")
 
-        #Get sources and targets for node input file
+        # Get sources and targets for node input file
         sources_targets = data.request_node_columns(["sources", "targets"])
         if sources_targets is None:
             return False
         both_series = sources_targets.sources & sources_targets.targets
-        for _index,row in sources_targets[both_series].iterrows():
-            warn_msg = row.NODEID+" has been labeled as both a source and a target."
+        for _index, row in sources_targets[both_series].iterrows():
+            warn_msg = row.NODEID + " has been labeled as both a source and a target."
             # Only use stacklevel 1 because this is due to the data not the code context
             warnings.warn(warn_msg, stacklevel=1)
 
-        #Create nodetype file
+        # Create nodetype file
         input_df = sources_targets[["NODEID"]].copy()
         input_df.columns = ["#Node"]
         input_df.loc[sources_targets["sources"] == True,"Node type"]="source"
@@ -61,20 +61,20 @@ class PathLinker(PRM):
         # Format network file
         edges = convert_undirected_to_directed(edges)
 
-        #This is pretty memory intensive. We might want to keep the interactome centralized.
-        edges.to_csv(filename_map["network"],sep="\t",index=False,columns=["Interactor1","Interactor2","Weight"],header=["#Interactor1","Interactor2","Weight"])
-
+        # This is pretty memory intensive. We might want to keep the interactome centralized.
+        edges.to_csv(filename_map["network"],sep="\t",index=False,columns=["Interactor1","Interactor2","Weight"],
+                     header=["#Interactor1","Interactor2","Weight"])
 
     # Skips parameter validation step
     @staticmethod
-    def run(nodetypes=None, network=None, output_file=None, k=None, singularity=False):
+    def run(nodetypes=None, network=None, output_file=None, k=None, container_framework="docker"):
         """
         Run PathLinker with Docker
         @param nodetypes:  input node types with sources and targets (required)
         @param network:  input network file (required)
         @param output_file: path to the output pathway file (required)
         @param k: path length (optional)
-        @param singularity: if True, run using the Singularity container instead of the Docker container
+        @param container_framework: choose the container runtime framework, currently supports "docker" or "singularity" (optional)
         """
         # Add additional parameter validation
         # Do not require k
@@ -115,10 +115,9 @@ class PathLinker(PRM):
 
         print('Running PathLinker with arguments: {}'.format(' '.join(command)), flush=True)
 
-        # TODO consider making this a string in the config file instead of a Boolean
-        container_framework = 'singularity' if singularity else 'docker'
+        container_suffix = "pathlinker"
         out = run_container(container_framework,
-                            'reedcompbio/pathlinker',
+                            container_suffix,
                             command,
                             volumes,
                             work_dir)
@@ -137,8 +136,7 @@ class PathLinker(PRM):
         @param raw_pathway_file: pathway file produced by an algorithm's run function
         @param standardized_pathway_file: the same pathway written in the universal format
         """
-        # Questions: should there be a header/optional columns?
         # What about multiple raw_pathway_files
         df = pd.read_csv(raw_pathway_file, sep='\t').take([0, 1, 2], axis=1)
-        df = readd_direction_col_directed(df)
+        df = reinsert_direction_col_directed(df)
         df.to_csv(standardized_pathway_file, header=False, index=False, sep='\t')

@@ -3,7 +3,10 @@ from pathlib import Path
 
 import pytest
 
+import spras.config as config
 from spras.meo import MEO, write_properties
+
+config.init_from_file("config/config.yaml")
 
 TEST_DIR = 'test/MEO/'
 OUT_FILE = TEST_DIR + 'output/edges.txt'
@@ -63,5 +66,5 @@ class TestMaximumEdgeOrientation:
                 sources=TEST_DIR + 'input/meo-sources.txt',
                 targets=TEST_DIR + 'input/meo-targets.txt',
                 output_file=OUT_FILE,
-                singularity=True)
+                container_framework="singularity")
         assert out_path.exists()

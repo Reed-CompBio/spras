@@ -2,9 +2,10 @@ from pathlib import Path
 
 import pandas as pd
 
-from spras.interactome import readd_direction_col_mixed
+from spras.containers import prepare_volume, run_container
+from spras.interactome import reinsert_direction_col_mixed
 from spras.prm import PRM
-from spras.util import prepare_volume, run_container
+from spras.util import add_rank_column
 
 __all__ = ['OmicsIntegrator1', 'write_conf']
 
@@ -37,7 +38,7 @@ def write_conf(filename=Path('config.txt'), w=None, b=None, d=None, mu=None, noi
         f.write('threads = 1\n')
 
 """
-Omics Integrator 1 will construct works with partially directed graphs
+Omics Integrator 1 works with partially directed graphs
 - it takes in the universal input directly
 
 Expected raw input format:
@@ -50,6 +51,7 @@ Interactor1    Interactor2   Weight    Direction
 class OmicsIntegrator1(PRM):
     required_inputs = ['prizes', 'edges']
 
+    @staticmethod
     def generate_inputs(data, filename_map):
         """
         Access fields from the dataset and write the required input files
@@ -62,24 +64,26 @@ class OmicsIntegrator1(PRM):
                 raise ValueError(f"{input_type} filename is missing")
 
         if data.contains_node_columns('prize'):
-            #NODEID is always included in the node table
+            # NODEID is always included in the node table
             node_df = data.request_node_columns(['prize'])
-        elif data.contains_node_columns(['sources','targets']):
-            #If there aren't prizes but are sources and targets, make prizes based on them
+        elif data.contains_node_columns(['sources', 'targets']):
+            # If there aren't prizes but are sources and targets, make prizes based on them
             node_df = data.request_node_columns(['sources','targets'])
             node_df.loc[node_df['sources']==True, 'prize'] = 1.0
             node_df.loc[node_df['targets']==True, 'prize'] = 1.0
         else:
             raise ValueError("Omics Integrator 1 requires node prizes or sources and targets")
 
-        #Omics Integrator already gives warnings for strange prize values, so we won't here
+        # Omics Integrator already gives warnings for strange prize values, so we won't here
         node_df.to_csv(filename_map['prizes'],sep='\t',index=False,columns=['NODEID','prize'],header=['name','prize'])
 
         # Get network file
         edges_df = data.get_interactome()
 
         # Rename Direction column
-        edges_df.to_csv(filename_map['edges'],sep='\t',index=False,columns=['Interactor1','Interactor2','Weight','Direction'],header=['protein1','protein2','weight','directionality'])
+        edges_df.to_csv(filename_map['edges'],sep='\t',index=False,
+                        columns=['Interactor1','Interactor2','Weight','Direction'],
+                        header=['protein1','protein2','weight','directionality'])
 
 
     # TODO add parameter validation
@@ -89,7 +93,7 @@ class OmicsIntegrator1(PRM):
     @staticmethod
     def run(edges=None, prizes=None, dummy_mode=None, mu_squared=None, exclude_terms=None,
             output_file=None, noisy_edges=None, shuffled_prizes=None, random_terminals=None,
-            seed=None, w=None, b=None, d=None, mu=None, noise=None, g=None, r=None, singularity=False):
+            seed=None, w=None, b=None, d=None, mu=None, noise=None, g=None, r=None, container_framework="docker"):
         """
         Run Omics Integrator 1 in the Docker image with the provided parameters.
         Does not support the garnet, cyto30, knockout, cv, or cv-reps arguments.
@@ -100,7 +104,7 @@ class OmicsIntegrator1(PRM):
         All other output files are deleted.
         @param output_file: the name of the output sif file for the optimal forest, which will overwrite any
         existing file with this name
-        @param singularity: if True, run using the Singularity container instead of the Docker container
+        @param container_framework: choose the container runtime framework, currently supports "docker" or "singularity" (optional)
         """
         if edges is None or prizes is None or output_file is None or w is None or b is None or d is None:
             raise ValueError('Required Omics Integrator 1 arguments are missing')
@@ -155,10 +159,9 @@ class OmicsIntegrator1(PRM):
 
         print('Running Omics Integrator 1 with arguments: {}'.format(' '.join(command)), flush=True)
 
-        # TODO consider making this a string in the config file instead of a Boolean
-        container_framework = 'singularity' if singularity else 'docker'
+        container_suffix = "omics-integrator-1:no-conda" # no-conda version is the default
         out = run_container(container_framework,
-                            'reedcompbio/omics-integrator-1:no-conda',  # no-conda version is the default
+                            container_suffix,  # no-conda version is the default
                             command,
                             volumes,
                             work_dir,
@@ -196,7 +199,8 @@ class OmicsIntegrator1(PRM):
             return
 
         df.columns = ["Edge1", "InteractionType", "Edge2"]
-        df.insert (3, "Rank", 1)
-        df = readd_direction_col_mixed(df, "InteractionType", "pd", "pp")
+        df = add_rank_column(df)
+        df = reinsert_direction_col_mixed(df, "InteractionType", "pd", "pp")
 
-        df.to_csv(standardized_pathway_file,columns=['Edge1', 'Edge2', 'Rank', "Direction"], header=False, index=False, sep='\t')
+        df.to_csv(standardized_pathway_file, columns=['Edge1', 'Edge2', 'Rank', "Direction"], header=False, index=False,
+                  sep='\t')

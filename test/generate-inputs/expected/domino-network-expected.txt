@@ -1,0 +1,3 @@
+ID_interactor_A	ppi	ID_interactor_B
+ENSG0A	ppi	ENSG0B
+ENSG0B	ppi	ENSG0C

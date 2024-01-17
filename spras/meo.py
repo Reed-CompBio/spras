@@ -2,9 +2,13 @@ from pathlib import Path
 
 import pandas as pd
 
-from spras.interactome import add_directionality_constant, readd_direction_col_mixed
+from spras.containers import prepare_volume, run_container
+from spras.interactome import (
+    add_directionality_constant,
+    reinsert_direction_col_directed,
+)
 from spras.prm import PRM
-from spras.util import prepare_volume, run_container
+from spras.util import add_rank_column
 
 __all__ = ['MEO', 'write_properties']
 
@@ -54,8 +58,12 @@ Expected raw input format:
 Interactor1   pp/pd   Interactor2   Weight
 - the expected raw input file should have node pairs in the 1st and 3rd columns, with a directionality in the 2nd column and the weight in the 4th column
 - it use pp for undirected edges and pd for directed edges
-- it cannot include repeated and bidirectional edges
-- there is a chance MRO assumes that it should just be an undirected edge instead
+- it cannot include repeated and directed edges in opposite directions (A->B and B->A in the input)
+- MEO assumes that it should be an undirected edge instead
+- it cannot support undirected self edges (A-A)
+
+- MEO tracks the directionality of the original edges, but all of its output edges are directed.
+- To remain accurate to MEO's design we will also treat the output graph's as directed
 """
 class MEO(PRM):
     required_inputs = ['sources', 'targets', 'edges']
@@ -90,14 +98,15 @@ class MEO(PRM):
         # Format network file
         edges = add_directionality_constant(edges, 'EdgeType', '(pd)', '(pp)')
 
-        edges.to_csv(filename_map['edges'], sep='\t', index=False, columns=['Interactor1', 'EdgeType', 'Interactor2', 'Weight'], header=False)
+        edges.to_csv(filename_map['edges'], sep='\t', index=False,
+                     columns=['Interactor1', 'EdgeType', 'Interactor2', 'Weight'], header=False)
 
 
     # TODO add parameter validation
     # TODO document required arguments
     @staticmethod
     def run(edges=None, sources=None, targets=None, output_file=None, max_path_length=None, local_search=None,
-            rand_restarts=None, singularity=False):
+            rand_restarts=None, container_framework="docker"):
         """
         Run Maximum Edge Orientation in the Docker image with the provided parameters.
         The properties file is generated from the provided arguments.
@@ -106,7 +115,7 @@ class MEO(PRM):
         Only the edge output file is retained.
         All other output files are deleted.
         @param output_file: the name of the output edge file, which will overwrite any existing file with this name
-        @param singularity: if True, run using the Singularity container instead of the Docker container
+        @param container_framework: choose the container runtime framework, currently supports "docker" or "singularity" (optional)
         """
         if edges is None or sources is None or targets is None or output_file is None:
             raise ValueError('Required Maximum Edge Orientation arguments are missing')
@@ -149,10 +158,9 @@ class MEO(PRM):
 
         print('Running Maximum Edge Orientation with arguments: {}'.format(' '.join(command)), flush=True)
 
-        # TODO consider making this a string in the config file instead of a Boolean
-        container_framework = 'singularity' if singularity else 'docker'
+        container_suffix = "meo"
         out = run_container(container_framework,
-                            'reedcompbio/meo',
+                            container_suffix,
                             command,
                             volumes,
                             work_dir)
@@ -178,8 +186,8 @@ class MEO(PRM):
         df = df.loc[df['Oriented']]
         # TODO what should be the edge rank?
         # Would need to load the paths output file to rank edges correctly
-        df.insert(5, 'Rank', 1)  # Add a constant rank of 1
+        df = add_rank_column(df)
+        df = reinsert_direction_col_directed(df)
 
-        df = readd_direction_col_mixed(df, "Type", "pd", "pp")
-
-        df.to_csv(standardized_pathway_file, columns=['Source', 'Target', 'Rank', "Direction"], header=False, index=False, sep='\t')
+        df.to_csv(standardized_pathway_file, columns=['Source', 'Target', 'Rank', "Direction"], header=False,
+                  index=False, sep='\t')

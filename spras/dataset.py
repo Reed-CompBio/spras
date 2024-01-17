@@ -11,6 +11,7 @@ Author: Chris Magnano
 Methods and intermediate state for loading data and putting it into pandas tables for use by pathway reconstruction algorithms.
 """
 
+
 class Dataset:
 
     NODE_ID = "NODEID"
@@ -76,8 +77,8 @@ class Dataset:
         )
         num_cols = self.interactome.shape[1]
         if num_cols == 3:
-
             self.interactome.columns = ["Interactor1", "Interactor2", "Weight"]
+            # When no direction is specified, default to undirected edges
             self.interactome["Direction"] = "U"
 
         elif num_cols == 4:
@@ -87,9 +88,16 @@ class Dataset:
                 "Weight",
                 "Direction",
             ]
+
+            # Make directionality column case-insensitive
+            self.interactome["Direction"] = self.interactome["Direction"].str.upper()
+            if not self.interactome["Direction"].isin(["U", "D"]).all():
+                raise ValueError(f"The Direction column for {self.label} edge file {interactome_loc} contains values "
+                                 f"other than U and D")
+
         else:
             raise ValueError(
-                f"edge_files must have three or four columns but found {num_cols}"
+                f"Edge file {interactome_loc} must have three or four columns but found {num_cols}"
             )
 
         node_set = set(self.interactome.Interactor1.unique())

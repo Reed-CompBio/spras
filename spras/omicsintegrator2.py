@@ -2,20 +2,18 @@ from pathlib import Path
 
 import pandas as pd
 
+from spras.containers import prepare_volume, run_container
 from spras.dataset import Dataset
-from spras.interactome import (
-    convert_directed_to_undirected,
-    readd_direction_col_undirected,
-)
+from spras.interactome import reinsert_direction_col_undirected
 from spras.prm import PRM
-from spras.util import add_rank_column, prepare_volume, run_container
+from spras.util import add_rank_column
 
 __all__ = ['OmicsIntegrator2']
 
 """
 Omics Integrator 2 will construct a fully undirected graph from the provided input file
 - in the algorithm, it uses nx.Graph() objects, which are undirected
-- uses a pcst_fast solver which supports undirected graphs
+- uses the pcst_fast solver which supports undirected graphs
 
 Expected raw input format:
 Interactor1   Interactor2   Weight
@@ -47,8 +45,8 @@ class OmicsIntegrator2(PRM):
         else:
             raise ValueError("Omics Integrator 2 requires node prizes or sources and targets")
 
-        #Omics Integrator already gives warnings for strange prize values, so we won't here
-        node_df.to_csv(filename_map['prizes'],sep='\t',index=False,columns=['NODEID','prize'],header=['name','prize'])
+        # Omics Integrator already gives warnings for strange prize values, so we won't here
+        node_df.to_csv(filename_map['prizes'], sep='\t', index=False, columns=['NODEID', 'prize'], header=['name','prize'])
 
         # Create network file
         edges_df = data.get_interactome()
@@ -57,24 +55,26 @@ class OmicsIntegrator2(PRM):
         # edges_df = convert_directed_to_undirected(edges_df)
         # - technically this can be called but since we don't use the column and based on what the function does, it is not truly needed
 
-        #We'll have to update this when we make iteractomes more proper, but for now
+        # We'll have to update this when we make iteractomes more proper, but for now
         # assume we always get a weight and turn it into a cost.
         # use the same approach as OmicsIntegrator2 by adding half the max cost as the base cost.
         # if everything is less than 1 assume that these are confidences and set the max to 1
         edges_df['cost'] = (max(edges_df['Weight'].max(), 1.0)*1.5) - edges_df['Weight']
-        edges_df.to_csv(filename_map['edges'], sep='\t', index=False, columns=['Interactor1', 'Interactor2', 'cost'], header=['protein1', 'protein2', 'cost'])
+        edges_df.to_csv(filename_map['edges'], sep='\t', index=False, columns=['Interactor1', 'Interactor2', 'cost'],
+                        header=['protein1', 'protein2', 'cost'])
 
     # TODO add parameter validation
     # TODO add reasonable default values
     # TODO document required arguments
     @staticmethod
     def run(edges=None, prizes=None, output_file=None, w=None, b=None, g=None, noise=None, noisy_edges=None,
-            random_terminals=None, dummy_mode=None, seed=None, singularity=False):
+            random_terminals=None, dummy_mode=None, seed=None, container_framework="docker"):
         """
         Run Omics Integrator 2 in the Docker image with the provided parameters.
         Only the .tsv output file is retained and then renamed.
         All other output files are deleted.
         @param output_file: the name of the output file, which will overwrite any existing file with this name
+        @param container_framework: choose the container runtime framework, currently supports "docker" or "singularity" (optional)
         """
         if edges is None or prizes is None or output_file is None:
             raise ValueError('Required Omics Integrator 2 arguments are missing')
@@ -120,9 +120,9 @@ class OmicsIntegrator2(PRM):
 
         print('Running Omics Integrator 2 with arguments: {}'.format(' '.join(command)), flush=True)
 
-        container_framework = 'singularity' if singularity else 'docker'
+        container_suffix = "omics-integrator-2:v2"
         out = run_container(container_framework,
-                            'reedcompbio/omics-integrator-2:v2',
+                            container_suffix,
                             command,
                             volumes,
                             work_dir)
@@ -156,5 +156,5 @@ class OmicsIntegrator2(PRM):
         df = df[df['in_solution'] == True]  # Check whether this column can be empty before revising this line
         df = df.take([0, 1], axis=1)
         df = add_rank_column(df)
-        df = readd_direction_col_undirected(df)
+        df = reinsert_direction_col_undirected(df)
         df.to_csv(standardized_pathway_file, header=False, index=False, sep='\t')

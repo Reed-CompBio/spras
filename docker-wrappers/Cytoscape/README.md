@@ -19,7 +19,9 @@ The Docker wrapper can be tested with `pytest`.
 
 ## Versions:
 - v1: Use supervisord to launch Cytoscape from a Python subprocess, then connect to Cytoscape with py4cytoscape. Only loads undirected pathways. Compatible with Singularity in local testing (Apptainer version 1.2.2-1.el7) but fails in GitHub Actions.
+- v2: Add support for edge direction column.
 
 ## TODO
 - Add an auth file for `xvfb-run`
 - Java initial heap size, maximum Java heap size, and thread stack size are hard-coded in `Cytoscape.vmoptions` file
+- Resolve issues with `Cytoscape.vmoptions` line endings being reset to Windows-style. They must be reset periodically, and the image will fail if they are not Unix-style.

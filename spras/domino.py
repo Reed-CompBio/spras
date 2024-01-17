@@ -3,21 +3,21 @@ from pathlib import Path
 
 import pandas as pd
 
+from spras.containers import prepare_volume, run_container
 from spras.interactome import (
     add_constant,
-    convert_directed_to_undirected,
-    readd_direction_col_undirected,
+    reinsert_direction_col_undirected,
 )
 from spras.prm import PRM
-from spras.util import prepare_volume, run_container
 
 __all__ = ['DOMINO', 'pre_domino_id_transform', 'post_domino_id_transform']
 
 ID_PREFIX = 'ENSG0'
 ID_PREFIX_LEN = len(ID_PREFIX)
 
+
 """
-Domino will construct a fully undirected graph from the provided input file
+DOMINO will construct a fully undirected graph from the provided input file
 - in the algorithm, it uses nx.Graph()
 
 Expected raw input format:
@@ -70,7 +70,7 @@ class DOMINO(PRM):
                         header=['ID_interactor_A', 'ppi', 'ID_interactor_B'])
 
     @staticmethod
-    def run(network=None, active_genes=None, output_file=None, slice_threshold=None, module_threshold=None, singularity=False):
+    def run(network=None, active_genes=None, output_file=None, slice_threshold=None, module_threshold=None, container_framework="docker"):
         """
         Run DOMINO with Docker.
         Let visualization be always true, parallelization be always 1 thread, and use_cache be always false.
@@ -80,7 +80,7 @@ class DOMINO(PRM):
         @param output_file: path to the output pathway file (required)
         @param slice_threshold: the p-value threshold for considering a slice as relevant (optional)
         @param module_threshold: the p-value threshold for considering a putative module as final module (optional)
-        @param singularity: if True, run using the Singularity container instead of the Docker container (optional)
+        @param container_framework: choose the container runtime framework, currently supports "docker" or "singularity" (optional)
         """
 
         if not network or not active_genes or not output_file:
@@ -113,9 +113,9 @@ class DOMINO(PRM):
 
         print('Running slicer with arguments: {}'.format(' '.join(slicer_command)), flush=True)
 
-        container_framework = 'singularity' if singularity else 'docker'
+        container_suffix = "domino"
         slicer_out = run_container(container_framework,
-                                   'reedcompbio/domino',
+                                   container_suffix,
                                    slicer_command,
                                    volumes,
                                    work_dir)
@@ -141,7 +141,7 @@ class DOMINO(PRM):
         print('Running DOMINO with arguments: {}'.format(' '.join(domino_command)), flush=True)
 
         domino_out = run_container(container_framework,
-                                   'reedcompbio/domino',
+                                   container_suffix,
                                    domino_command,
                                    volumes,
                                    work_dir)
@@ -204,7 +204,7 @@ class DOMINO(PRM):
             # Remove the prefix
             edges_df['source'] = edges_df['source'].apply(post_domino_id_transform)
             edges_df['target'] = edges_df['target'].apply(post_domino_id_transform)
-            edges_df = readd_direction_col_undirected(edges_df)
+            edges_df = reinsert_direction_col_undirected(edges_df)
 
         edges_df.to_csv(standardized_pathway_file, sep='\t', header=False, index=False)
 

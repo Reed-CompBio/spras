@@ -2,19 +2,22 @@ from pathlib import Path
 
 import pandas as pd
 
+from spras.containers import prepare_volume, run_container
 from spras.interactome import (
     convert_undirected_to_directed,
-    readd_direction_col_directed,
+    reinsert_direction_col_undirected,
 )
 from spras.prm import PRM
-from spras.util import prepare_volume, run_container
+from spras.util import add_rank_column
 
 __all__ = ['MinCostFlow']
 
 """
 MinCostFlow deals with fully directed graphs
 - OR Tools MCF is designed for directed graphs
-- when an edge (arc), it has a source and target node, so flow it only allowed to moced from source to the target
+- when an edge (arc) is added, it has a source and target node, so flow is only allowed to move from source to the target
+However, its the directionality it assigns to undirected edges via the flow assignments is not meaningful, so all
+edges are currently undirected.
 
 Expected raw input format:
 Interactor1  Interactor2   Weight
@@ -54,10 +57,11 @@ class MinCostFlow (PRM):
         edges = convert_undirected_to_directed(edges)
 
         # creates the edges files that contains the head and tail nodes and the weights after them
-        edges.to_csv(filename_map['edges'], sep='\t', index=False, columns=["Interactor1","Interactor2","Weight"], header=False)
+        edges.to_csv(filename_map['edges'], sep='\t', index=False, columns=["Interactor1", "Interactor2", "Weight"],
+                     header=False)
 
     @staticmethod
-    def run(sources=None, targets=None, edges=None, output_file=None, flow=None, capacity=None, singularity=False):
+    def run(sources=None, targets=None, edges=None, output_file=None, flow=None, capacity=None, container_framework="docker"):
         """
         Run min cost flow with Docker (or singularity)
         @param sources: input sources (required)
@@ -66,7 +70,7 @@ class MinCostFlow (PRM):
         @param output_file: output file name (required)
         @param flow: amount of flow going through the graph (optional)
         @param capacity: amount of capacity allowed on each edge (optional)
-        @param singularity: if True, run using the Singularity container instead of the Docker container (optional)
+        @param container_framework: choose the container runtime framework, currently supports "docker" or "singularity" (optional)
         """
 
         # ensures that these parameters are required
@@ -110,11 +114,11 @@ class MinCostFlow (PRM):
             command.extend(['--capacity', str(capacity)])
 
         # choosing to run in docker or singularity container
-        container_framework = 'singularity' if singularity else 'docker'
+        container_suffix = "mincostflow"
 
         # constructs a docker run call
         out = run_container(container_framework,
-                            'reedcompbio/mincostflow',
+                            container_suffix,
                             command,
                             volumes,
                             work_dir)
@@ -137,11 +141,19 @@ class MinCostFlow (PRM):
     def parse_output(raw_pathway_file, standardized_pathway_file):
         """
         Convert a predicted pathway into the universal format
+
+        Although the algorithm constructs a directed network, the resulting network is treated as undirected.
+        This is because the flow within the network doesn't imply causal relationships between nodes.
+        The primary goal of the algorithm is node identification, not the identification of directional edges.
+
         @param raw_pathway_file: pathway file produced by an algorithm's run function
         @param standardized_pathway_file: the same pathway written in the universal format
         """
 
         df = pd.read_csv(raw_pathway_file, sep='\t', header=None)
-        df.insert(2, 'Rank', 1)  # adds in a rank column of 1s because the edges are not ranked
-        df = readd_direction_col_directed(df)
+        df = add_rank_column(df)
+        # TODO update MinCostFlow version to support mixed graphs
+        # Currently directed edges in the input will be converted to undirected edges in the output
+        df = reinsert_direction_col_undirected(df)
         df.to_csv(standardized_pathway_file, header=False, index=False, sep='\t')
+
