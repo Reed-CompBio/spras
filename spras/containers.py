@@ -41,6 +41,62 @@ def convert_docker_path(src_path: PurePath, dest_path: PurePath, file_path: Unio
     rel_path = file_path.relative_to(src_path)
     return PurePosixPath(dest_path, rel_path)
 
+def download_gcs(gcs_path: str, local_path: str, is_dir: bool):
+    # check that output path exists
+    if not os.path.exists(Path(local_path).parent):
+        os.makedirs(Path(local_path).parent)
+
+    # build command
+    cmd = 'gcloud storage'
+    cmd = cmd + ' cp'
+    if is_dir:
+        cmd = cmd + ' -r'
+    cmd = cmd + ' ' + gcs_path + '/* ' + local_path
+
+    print(cmd)
+    # run command 
+    subprocess.run(cmd, shell=True)
+
+def upload_gcs(local_path: str, gcs_path: str, is_dir: bool):
+    # build command
+    cmd = 'gcloud storage'
+    cmd = cmd + ' cp'
+    if is_dir:
+        cmd = cmd + ' -r'
+    cmd = cmd + ' ' + str(Path(local_path).resolve()) + ' ' + gcs_path
+
+    print(cmd)
+    # run command
+    subprocess.run(cmd, shell=True)
+    
+def prepare_dsub_cmd(flags: dict):
+    # set constant flags
+    dsub_command = 'dsub'
+    flags['provider'] = 'google-cls-v2'
+    flags['regions'] = 'us-central1'
+    flags['user-project'] = os.getenv('GOOGLE_PROJECT')
+    flags['project'] = os.getenv('GOOGLE_PROJECT')
+    flags['network'] = 'network'
+    flags['subnetwork'] = 'subnetwork'
+    flags['service-account'] = subprocess.run(['gcloud', 'config' ,'get-value' ,'account'], capture_output=True, text=True).stdout.replace('\n', '')
+
+    # order flags according to flag_list
+    flag_list = ["provider", "regions", "zones", "location", "user-project", "project", "network", "subnetwork", "service-account", "image", "env", "logging", "input", "input-recursive", "mount", "output", "output-recursive", "command", "script"]
+    ordered_flags = {f:flags[f] for f in flag_list if f in flags.keys()}
+
+    # iteratively add flags to the command 
+    for flag in ordered_flags.keys():
+        if isinstance(ordered_flags.get(flag), list):
+            for f in ordered_flags.get(flag):
+                dsub_command = dsub_command + " --" + flag + " " + f
+        else:
+            dsub_command = dsub_command + " --" + flag + " " + ordered_flags.get(flag)
+
+    # Wait for dsub job to complegte
+    dsub_command = dsub_command + " --wait"
+    print(f"Command: {dsub_command}")
+    return dsub_command
+
 
 # TODO consider a better default environment variable
 # TODO environment currently a single string (e.g. 'TMPDIR=/OmicsIntegrator1'), should it be a list?
@@ -65,6 +121,8 @@ def run_container(framework: str, container_suffix: str, command: List[str], vol
         return run_container_docker(container, command, volumes, working_dir, environment)
     elif normalized_framework == 'singularity':
         return run_container_singularity(container, command, volumes, working_dir, environment)
+    elif normalized_framework == 'dsub':
+        return run_container_dsub(container, command, volumes, working_dir, environment)
     else:
         raise ValueError(f'{framework} is not a recognized container framework. Choose "docker" or "singularity".')
 
@@ -232,3 +290,65 @@ def prepare_volume(filename: Union[str, PurePath], volume_base: Union[str, PureP
         src = parent
 
     return (src, dest), container_filename
+
+def run_container_dsub(container: str, command: List[str], volumes: List[Tuple[PurePath, PurePath]], working_dir: str, environment: str = 'SPRAS=True'):
+    """
+    Runs a command in the container using Docker.
+    Attempts to automatically correct file owner and group for new files created by the container, setting them to the
+    current owner and group IDs.
+    Does not modify the owner or group for existing files modified by the container.
+    @param container: name of the container in the Google Cloud Container Registry 
+    @param command: command to run in the container
+    @param volumes: a list of volumes to mount where each item is a (source, destination) tuple
+    @param working_dir: the working directory in the container
+    @param environment: environment variables to set in the container
+    @return: path of output from dsub 
+    """
+    # Dictionary of flags for dsub command
+    flags = dict()
+
+    workspace_bucket = os.getenv('WORKSPACE_BUCKET')
+    # Add path in the workspace bucket and label for dsub command for each volume
+    dsub_volumes = [(src, dst, workspace_bucket +  str(dst), "INPUT_" + str(i),) for i, (src, dst) in enumerate(volumes)]
+    
+    # Prepare command that will be run inside the container for dsub 
+    container_command = list()
+    for item in command:
+        # Replace each volume with path in workspace 
+        to_replace = ["${"+path[3]+'}' for path in dsub_volumes if str(path[1]) in item]
+        if len(to_replace) == 1 and len(PurePath(item).suffix) > 0:
+            container_command.append(to_replace[0]+'/'+item.split('/')[-1])
+        elif len(to_replace) == 1 and len(PurePath(item).suffix) == 0:
+            container_command.append(to_replace[0]+'/')
+        else:
+            container_command.append(item)
+    # Add a command to copy the volumes to the workspace buckets
+    container_command.append(('; cp -rf ' + f'/mnt/data/input/gs/{workspace_bucket}{working_dir}/*' + ' $OUTPUT').replace('gs://', ''))
+
+    # Make the command into a string
+    flags['command'] = ' '.join(container_command)
+    flags['command'] = "'" + flags['command'] + "'"
+    
+    ## Push volumes to WORKSPACE_BUCKET
+    for src, dst, gcs_path, env in dsub_volumes:
+        upload_gcs(local_path=str(src), gcs_path=gcs_path, is_dir=True)
+    
+    ## Prepare flags for dsub command
+    flags['image'] = container
+    flags['env'] = environment
+    flags['input-recursive'] = [vol[3]+'='+vol[2] for vol in dsub_volumes]
+    flags['output-recursive'] = "OUTPUT=" + workspace_bucket +  working_dir
+    flags['logging'] = workspace_bucket + '/dsub/'
+    
+    # Create dsub command 
+    dsub_command = prepare_dsub_cmd(flags)
+    
+    # Run dsub as subprocess
+    subprocess.run(dsub_command, shell=True)
+    
+    # Pull output volumes from WORKSPACE_BUCKET
+    for src, dst, gcs_path, env in dsub_volumes:
+        download_gcs(local_path=str(src), gcs_path=gcs_path, is_dir=True)  
+    
+    # return location of dsub logs in WORKSPACE_BUCKET
+    return  'dsub logs: {logs}'.format(logs = flags['logging'])
