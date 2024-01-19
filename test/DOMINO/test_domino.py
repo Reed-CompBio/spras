@@ -4,7 +4,10 @@ from pathlib import Path
 
 import pytest
 
+import spras.config as config
 from spras.domino import DOMINO, post_domino_id_transform, pre_domino_id_transform
+
+config.init_from_file("config/config.yaml")
 
 TEST_DIR = 'test/DOMINO/'
 OUT_FILE_DEFAULT = TEST_DIR+'output/domino-output.txt'
@@ -72,7 +75,7 @@ class TestDOMINO:
             network=TEST_DIR+'input/domino-network.txt',
             active_genes=TEST_DIR+'input/domino-active-genes.txt',
             output_file=OUT_FILE_DEFAULT,
-            singularity=True)
+            container_framework="singularity")
         assert out_path.exists()
 
     def test_pre_id_transform(self):

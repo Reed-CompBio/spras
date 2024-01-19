@@ -3,7 +3,10 @@ from pathlib import Path
 
 import pytest
 
+import spras.config as config
 from spras.omicsintegrator1 import OmicsIntegrator1, write_conf
+
+config.init_from_file("config/config.yaml")
 
 TEST_DIR = 'test/OmicsIntegrator1/'
 OUT_FILE = TEST_DIR+'output/test_optimalForest.sif'
@@ -91,5 +94,5 @@ class TestOmicsIntegrator1:
                              w=5,
                              b=1,
                              d=10,
-                             singularity=True)
+                             container_framework="singularity")
         assert out_path.exists()

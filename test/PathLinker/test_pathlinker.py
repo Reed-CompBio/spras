@@ -3,7 +3,10 @@ from pathlib import Path
 
 import pytest
 
+import spras.config as config
 from spras.pathlinker import PathLinker
+
+config.init_from_file("config/config.yaml")
 
 TEST_DIR = 'test/PathLinker/'
 OUT_FILE_DEFAULT = TEST_DIR+'output/pathlinker-ranked-edges.txt'
@@ -57,6 +60,5 @@ class TestPathLinker:
             nodetypes=TEST_DIR+'input/sample-in-nodetypes.txt',
             network=TEST_DIR+'input/sample-in-net.txt',
             output_file=OUT_FILE_DEFAULT,
-            singularity=True
-        )
+            container_framework="singularity")
         assert out_path.exists()

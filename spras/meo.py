@@ -2,12 +2,13 @@ from pathlib import Path
 
 import pandas as pd
 
+from spras.containers import prepare_volume, run_container
 from spras.interactome import (
     add_directionality_constant,
     reinsert_direction_col_directed,
 )
 from spras.prm import PRM
-from spras.util import add_rank_column, prepare_volume, run_container
+from spras.util import add_rank_column
 
 __all__ = ['MEO', 'write_properties']
 
@@ -105,7 +106,7 @@ class MEO(PRM):
     # TODO document required arguments
     @staticmethod
     def run(edges=None, sources=None, targets=None, output_file=None, max_path_length=None, local_search=None,
-            rand_restarts=None, singularity=False):
+            rand_restarts=None, container_framework="docker"):
         """
         Run Maximum Edge Orientation in the Docker image with the provided parameters.
         The properties file is generated from the provided arguments.
@@ -114,7 +115,7 @@ class MEO(PRM):
         Only the edge output file is retained.
         All other output files are deleted.
         @param output_file: the name of the output edge file, which will overwrite any existing file with this name
-        @param singularity: if True, run using the Singularity container instead of the Docker container
+        @param container_framework: choose the container runtime framework, currently supports "docker" or "singularity" (optional)
         """
         if edges is None or sources is None or targets is None or output_file is None:
             raise ValueError('Required Maximum Edge Orientation arguments are missing')
@@ -157,10 +158,9 @@ class MEO(PRM):
 
         print('Running Maximum Edge Orientation with arguments: {}'.format(' '.join(command)), flush=True)
 
-        # TODO consider making this a string in the config file instead of a Boolean
-        container_framework = 'singularity' if singularity else 'docker'
+        container_suffix = "meo"
         out = run_container(container_framework,
-                            'reedcompbio/meo',
+                            container_suffix,
                             command,
                             volumes,
                             work_dir)

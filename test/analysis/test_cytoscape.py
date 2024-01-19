@@ -3,7 +3,10 @@ from pathlib import Path
 
 import pytest
 
+import spras.config as config
 from spras.analysis.cytoscape import run_cytoscape
+
+config.init_from_file("config/config.yaml")
 
 INPUT_DIR = 'test/analysis/input/example/'
 INPUT_PATHWAYS = [INPUT_DIR + 'data0-meo-params-GKEDDFZ_pathway.txt',
@@ -35,5 +38,5 @@ class TestCytoscape:
     def test_cytoscape_singularity(self):
         out_path = Path(OUT_FILE)
         out_path.unlink(missing_ok=True)
-        run_cytoscape(INPUT_PATHWAYS, OUT_FILE, True)
+        run_cytoscape(INPUT_PATHWAYS, OUT_FILE, "singularity")
         assert out_path.exists()
