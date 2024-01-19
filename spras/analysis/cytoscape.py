@@ -51,7 +51,7 @@ def run_cytoscape(pathways: List[Union[str, PurePath]], output_file: str, singul
     # TODO consider making this a string in the config file instead of a Boolean
     container_framework = 'singularity' if singularity else 'docker'
     out = run_container(container_framework,
-                        'reedcompbio/py4cytoscape:v2',
+                        'reedcompbio/py4cytoscape:v3',
                         command,
                         volumes,
                         work_dir,
