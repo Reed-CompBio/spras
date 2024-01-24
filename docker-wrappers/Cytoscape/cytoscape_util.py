@@ -118,7 +118,7 @@ def load_pathways(pathways: List[str], output: str) -> None:
             column_type_list='s,t,x,ea',
             delimiters='\t',
             first_row_as_column_names=True,
-            
+
         )
         p4c.networks.rename_network(name, network=suid)
 
