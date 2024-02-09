@@ -67,3 +67,7 @@ class TestML:
         expected = expected.round(5)
 
         assert en.equals(expected)
+
+    def test_summarize_networks_empty(self):
+        with pytest.raises(ValueError):
+            ml.summarize_networks([INPUT_DIR + 'test-data-empty/empty.txt'])
