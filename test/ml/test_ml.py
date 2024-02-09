@@ -71,3 +71,7 @@ class TestML:
     def test_summarize_networks_empty(self):
         with pytest.raises(ValueError):
             ml.summarize_networks([INPUT_DIR + 'test-data-empty/empty.txt'])
+
+    def test_summarize_networks_single_pathway(self):
+        with pytest.raises(ValueError):
+            ml.summarize_networks([INPUT_DIR + 'test-data-s4/s4.txt'])
