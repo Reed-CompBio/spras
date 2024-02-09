@@ -37,7 +37,7 @@ container_registry:
 algorithms:
       - name: "pathlinker"
         params:
-              include: false
+              include: true
               run1:
                   k: range(100,201,100)
 
