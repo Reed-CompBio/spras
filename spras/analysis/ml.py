@@ -59,7 +59,7 @@ def summarize_networks(file_paths: Iterable[Union[str, PathLike]]) -> pd.DataFra
                             continue
                         else:
                             raise ValueError(f"direction is {direction}, rather than U or D")
-                elif len(parts) > 4 and len(parts) > 0: # empty line in file is okay
+                elif len(parts) > 4 or (len(parts) < 4 and len(parts) > 0): # empty line in file is okay
                     raise ValueError(f"A line in pathway file {file} contains {len(parts)} values. There should be 4 values per line")
             # getting the algorithm name
             p = PurePath(file)

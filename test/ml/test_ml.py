@@ -1,6 +1,6 @@
 import filecmp
 from pathlib import Path
-
+import pytest
 import pandas as pd
 
 import spras.analysis.ml as ml
@@ -24,6 +24,19 @@ class TestML:
                                            INPUT_DIR + 'test-data-empty/empty.txt', INPUT_DIR + 'test-data-spaces/spaces.txt', INPUT_DIR + 'test-mixed-direction/mixed-direction.txt'])
         dataframe.to_csv(OUT_DIR + 'dataframe.csv')
         assert filecmp.cmp(OUT_DIR + 'dataframe.csv', EXPECT_DIR + 'expected-dataframe.csv', shallow=False)
+
+        
+    def test_summarize_networks_less_values(self):
+        with pytest.raises(ValueError):
+            dataframe = ml.summarize_networks([INPUT_DIR + 'test-data-unexpected-amount-of-values/less.txt'])
+    
+    def test_summarize_networks_more_values(self):
+        with pytest.raises(ValueError):
+            dataframe = ml.summarize_networks([INPUT_DIR + 'test-data-unexpected-amount-of-values/more.txt'])
+    
+    def test_summarize_networks_empty_line(self):
+        with pytest.raises(ValueError):
+            dataframe = ml.summarize_networks([INPUT_DIR + 'test-data-empty-line/emptyLine.txt'])
 
     def test_pca(self):
         dataframe = ml.summarize_networks([INPUT_DIR + 'test-data-s1/s1.txt', INPUT_DIR + 'test-data-s2/s2.txt', INPUT_DIR + 'test-data-s3/s3.txt'])
