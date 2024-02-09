@@ -54,11 +54,8 @@ def summarize_networks(file_paths: Iterable[Union[str, PathLike]]) -> pd.DataFra
                     elif direction == "D":
                         # node order does matter for directed edges
                         edges.append(DIR_CONST.join([node1, node2]))
-                    else:
-                        if direction == 'Direction': # if reading the header
-                            continue
-                        else:
-                            raise ValueError(f"direction is {direction}, rather than U or D")
+                    elif direction != 'Direction' and direction != 'U' and direction != 'D':
+                        raise ValueError(f"direction is {direction}, rather than U or D")
                 elif len(parts) > 4 or (len(parts) < 4 and len(parts) > 0): # empty line in file is okay
                     raise ValueError(f"A line in pathway file {file} contains {len(parts)} values. There should be 4 values per line")
             # getting the algorithm name
