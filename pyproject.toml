@@ -16,7 +16,7 @@ classifiers = [
     "Programming Language :: Python :: 3",
     "Topic :: Scientific/Engineering :: Bio-Informatics",
 ]
-requires-python = ">=3.8"
+requires-python = ">=3.11"
 dependencies = [
     "adjusttext==0.7.3",
     # A bug was introduced in older versions of snakemake that prevent it from running. Update to fix
