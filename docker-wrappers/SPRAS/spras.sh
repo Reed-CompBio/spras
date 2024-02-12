@@ -1,2 +1,2 @@
 #!/bin/bash
-snakemake --cores 4 --configfile example_config.yaml
+snakemake --cores `nproc` --configfile example_config.yaml
