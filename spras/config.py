@@ -119,7 +119,7 @@ class Config:
         # Unpack settings for running in singularity mode. Needed when running PRM containers if already in a container.
         if "unpack_singularity" in raw_config:
             # The value in the config is a string, and we need to convert it to a bool.
-            unpack_singularity = raw_config["unpack_singularity"].lower() in ("true", "yes", "t", "1")
+            unpack_singularity = raw_config["unpack_singularity"]
             if unpack_singularity and self.container_framework != "singularity":
                 print("Warning: unpack_singularity is set to True, but the container framework is not singularity. This setting will have no effect.")
             self.unpack_singularity = unpack_singularity
@@ -189,7 +189,7 @@ class Config:
                 run_list_tuples = list(it.product(*all_runs))
                 param_name_tuple = tuple(param_name_list)
                 for r in run_list_tuples:
-                    run_dict = dict(zip(param_name_tuple, r))
+                    run_dict = dict(zip(param_name_tuple, r, strict=False))
                     # TODO temporary workaround for yaml.safe_dump in Snakefile write_parameter_log
                     for param, value in run_dict.copy().items():
                         if isinstance(value, np.float64):
