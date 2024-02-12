@@ -10,7 +10,7 @@ dependencies:
   - pandas=1.4
   - pre-commit=2.20 # Only required for development
   - pytest=7.1 # Only required for development
-  - python=3.8
+  - python=3.11
   - pip=22.1
   - requests=2.28
   - scikit-learn=1.2
