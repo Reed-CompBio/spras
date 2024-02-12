@@ -65,6 +65,8 @@ class Config:
         self.container_framework = None
         # The container prefix (host and organization) to use for images. Default is "docker.io/reedcompbio"
         self.container_prefix = DEFAULT_CONTAINER_PREFIX
+        # A Boolean specifying whether to unpack singularity containers. Default is False
+        self.unpack_singularity = False
         # A dictionary to store configured datasets against which SPRAS will be run
         self.datasets = None
         # The hash length SPRAS will use to identify parameter combinations. Default is 7
@@ -113,6 +115,14 @@ class Config:
             self.container_framework = container_framework
         else:
             self.container_framework = "docker"
+
+        # Unpack settings for running in singularity mode. Needed when running PRM containers if already in a container.
+        if "unpack_singularity" in raw_config:
+            # The value in the config is a string, and we need to convert it to a bool.
+            unpack_singularity = raw_config["unpack_singularity"].lower() in ("true", "yes", "t", "1")
+            if unpack_singularity and self.container_framework != "singularity":
+                print("Warning: unpack_singularity is set to True, but the container framework is not singularity. This setting will have no effect.")
+            self.unpack_singularity = unpack_singularity
 
         # Grab registry from the config, and if none is provided default to docker
         if "container_registry" in raw_config and raw_config["container_registry"]["base_url"] != "" and raw_config["container_registry"]["owner"] != "":
