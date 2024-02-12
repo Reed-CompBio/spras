@@ -57,7 +57,7 @@ requires = ["setuptools>=64.0"]
 build-backend = "setuptools.build_meta"
 
 [tool.ruff]
-target-version = "py38"
+target-version = "py311"
 # Autofix errors when possible
 fix = true
 # Select categories or specific rules from https://beta.ruff.rs/docs/rules/
