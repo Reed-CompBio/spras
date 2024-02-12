@@ -18,7 +18,7 @@ transfer_output_files = output
 
 # System specifications.
 request_cpus = 4
-request_memory = 8GB
+request_memory = 4GB
 request_disk = 16GB
 
 # Only run on nodes with Singularity installed
