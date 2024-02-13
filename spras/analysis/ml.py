@@ -100,7 +100,7 @@ def create_palette(column_names):
     """
     # TODO: could add a way for the user to customize the color palette?
     custom_palette = sns.color_palette("husl", len(column_names))
-    label_color_map = {label: color for label, color in zip(column_names, custom_palette)}
+    label_color_map = {label: color for label, color in zip(column_names, custom_palette, strict=False)}
     return label_color_map
 
 
