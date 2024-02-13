@@ -32,4 +32,23 @@ export DOCKER_DEFAULT_PLATFORM=linux/amd64
 
 ## Testing
 
-The folder `docker-wrappers/SPRAS` also contains several files that can be used to test this container on HTCondor.
+The folder `docker-wrappers/SPRAS` also contains several files that can be used to test this container on HTCondor. To test the `spras` container
+in this environment, first login to an HTCondor Access Point (AP). Then, from the AP clone this repo:
+```
+git clone git@github.com:Reed-CompBio/spras.git
+```
+
+When you're ready to run SPRAS as an HTCondor workflow, navigate to the `spras/docker-wrappers/SPRAS` directory and run `condor_submit spras.sub`. This will
+submit SPRAS to HTCondor as a single job with as many cores as indicated by the `request_cpus` line in `spras.sub`, using `example_config.yaml` as the
+SPRAS configuration file. Note that you can alter the configuration file to test various workflows, but you should leave `unpack_singularity = true`,
+or it is likely the job will be unsuccessful. By default, the `example_config.yaml` runs everything except for `cytoscape`, which appears to fail periodically
+in HTCondor.
+
+To monitor the state of the job, you can run `condor_q` for a snapshot of how the job is doing, or you can run `condor_watch_q` if you want realtime updates (you
+should never run something like `watch condor_q`, because this places extraneous strain on the AP). Upon completion, the `output` directory from the workflow
+should be returned as `spras/docker-wrappers/SPRAS/output`, along with several files containing the workflows logging information (anything that matches `spras_*`
+and ending in `.out`, `.err`, or `.log`). If the job was unsuccessful, these files should contain useful debugging clues about what may have gone wrong.
+
+**Note**: If you want to run the workflow with a different version of SPRAS, or one that contains development updates you've made, rebuild this image against
+the version of SPRAS you want to test, and push the image to your image repository. To use that container in the workflow, change the `container_image` line of
+`spras.sub` to point to the new image.
