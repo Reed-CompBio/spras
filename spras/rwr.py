@@ -9,6 +9,7 @@ from spras.interactome import (
     reinsert_direction_col_directed,
 )
 from spras.prm import PRM
+from spras.util import add_rank_column
 
 __all__ = ['RWR']
 
@@ -18,8 +19,9 @@ RWR will construct a directed graph from the provided input file
 - uses networkx Digraph() object
 
 Expected raw input format:
-Node1   Node2   Weight
-- the expected raw input file should have node pairs in the 1st and 2nd columns, with a weight in the 3rd column
+Node1	Node2	Edge Flux	Weight	InNetwork	Type
+- the expected raw input file should have node pairs in the 1st and 2nd columns, with a edge flux in the 3rd column, a weight in the 4th column, and a boolean in the 5th column to indicate if the edge/node is in the network
+- the 'type' column should be 1 for edges, 2 for nodes, and 3 for pathways as we want to keep information about nodes, edges, and pathways.
 - it can include repeated and bidirectional edges
 
 Expected raw input format for prizes:
@@ -39,10 +41,8 @@ class RWR(PRM):
         Access fields from the dataset and write the required input files
         @param data: dataset
         @param filename_map: a dict mapping file types in the required_inputs to the filename for that type
-        @return:
         """
 
-        print("Generating inputs for RWR")
         # ensures the required input are within the filename_map
         for input_type in RWR.required_inputs:
             if input_type not in filename_map:
@@ -145,7 +145,7 @@ class RWR(PRM):
 
         print('Running RWR with arguments: {}'.format(' '.join(command)), flush=True)
 
-        container_suffix = "random-walk-with-restart-test"
+        container_suffix = "random-walk-with-restart"
         out = run_container(container_framework,
                             container_suffix,
                             command,
@@ -167,6 +167,9 @@ class RWR(PRM):
 
         df = pd.read_csv(raw_pathway_file, sep="\t")
 
+        # add a rank column to the dataframe
+        df = add_rank_column(df)
+
         pathway_output_file = standardized_pathway_file
         edge_output_file = standardized_pathway_file.replace('.txt', '') + '_edges.txt'
         node_output_file = standardized_pathway_file.replace('.txt', '') + '_nodes.txt'
@@ -176,12 +179,14 @@ class RWR(PRM):
 
         # get rid of the placeholder column and output it to a file
         df_edge = df_edge.drop(columns=['Type'])
+        df_edge = df_edge.drop(columns=['Rank'])
         df_edge.to_csv(edge_output_file, sep="\t", index=False, header=True)
 
         # locate the first place where placeholder is not Nan
         df_node = df.loc[df['Type'] == 2]
         # rename the header to Node, Pr, R_Pr, Final_Pr
         df_node = df_node.drop(columns=['Type'])
+        df_node = df_node.drop(columns=['Rank'])
         df_node = df_node.rename(columns={'Node1': 'Node', 'Node2': 'Pr', 'Edge Flux': 'R_Pr', 'Weight': 'Final_Pr', 'InNetwork' : 'InNetwork'})
         df_node.to_csv(node_output_file, sep="\t", index=False, header=True)
 
@@ -190,5 +195,6 @@ class RWR(PRM):
         df_pathway = df_pathway.drop(columns=['Type'])
         df_pathway = df_pathway.drop(columns=['Weight'])
         df_pathway = df_pathway.drop(columns=['Edge Flux'])
+
         df_pathway = reinsert_direction_col_directed(df_pathway)
         df_pathway.to_csv(pathway_output_file, sep="\t", index=False, header=False)
