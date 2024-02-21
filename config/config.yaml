@@ -48,6 +48,7 @@ algorithms:
                   r: [5]
                   b: [5, 6]
                   w: np.linspace(0,5,2)
+                  mu: [0.1,0.5]
                   g: [3]
                   d: [10]
 
