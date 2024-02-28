@@ -56,7 +56,7 @@ class TestAllPairs:
 
     @pytest.mark.skipif(not shutil.which('singularity'), reason='Singularity not found on system')
     def test_allpairs_singularity_unpacked(self):
-        out_path = Path(OUT_DIR+'sample-out.txt')
+        out_path = Path(OUT_DIR+'sample-out-unpack.txt')
         out_path.unlink(missing_ok=True)
         # Indicate via config mechanism that we want to unpack the Singularity container
         config.config.unpack_singularity = True
