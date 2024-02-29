@@ -1,3 +1,5 @@
-#btb uses 1 file, btb.py, which contains the algorithm needed to run bowtiebuilder
+FROM python:3.8-bullseye
 
-FROM python:3.10.7
+WORKDIR /btb
+RUN wget https://raw.githubusercontent.com/ellango2612/BowTieBuilder-Algorithm/main/btb.py
+RUN pip install networkx==2.8
