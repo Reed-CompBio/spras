@@ -45,16 +45,15 @@ algorithms:
         params:
               include: true
               run1:
-                  r: [5]
                   b: [5, 6]
-                  w: np.linspace(0,5,2)
-                  mu: [0.1,0.5]
-                  g: [3]
+                  w: np.linspace(1,5,2)
+                  mu: np.linspace(.5,6,.5)
                   d: [10]
+              
 
       - name: "omicsintegrator2"
         params:
-              include: true
+              include: false
               run1:
                   b: [4]
                   g: [0]
@@ -64,7 +63,7 @@ algorithms:
 
       - name: "meo"
         params:
-              include: true
+              include: false
               run1:
                   max_path_length: [3]
                   local_search: ["Yes"]
@@ -72,18 +71,18 @@ algorithms:
 
       - name: "mincostflow"
         params:
-              include: true
+              include: false
               run1:
                   flow: [1] # The flow must be an int
                   capacity: [1]
 
       - name: "allpairs"
         params:
-              include: true
+              include: false
 
       - name: "domino"
         params:
-              include: true
+              include: false
               run1:
                   slice_threshold: [0.3]
                   module_threshold: [0.05]
@@ -94,19 +93,35 @@ algorithms:
 # Assume that if a dataset label does not change, the lists of associated input files do not change
 datasets:
     -
-      label: data0
-      node_files: ["node-prizes.txt", "sources.txt", "targets.txt"]
+      label: HSD-div-ND
+      node_files: ["flies/HSD-div-ND-node-prizes.txt", "sources.txt", "targets.txt"]
       # DataLoader.py can currently only load a single edge file, which is the primary network
-      edge_files: ["network.txt"]
+      edge_files: ["flies/fly-uniprot-network.txt"]
       # Placeholder
       other_files: []
       # Relative path from the spras directory
       data_dir: "input"
     -
-      label: data1
+      label: HSD-H2O-div-ND-H2O
       # Reuse some of the same sources file as 'data0' but different network and targets
-      node_files: ["node-prizes.txt", "sources.txt", "alternative-targets.txt"]
-      edge_files: ["alternative-network.txt"]
+      node_files: ["flies/HSD-H2O-div-ND-H2O-node-prizes.txt", "sources.txt", "targets.txt"]
+      edge_files: ["flies/fly-uniprot-network.txt"]
+      other_files: []
+      # Relative path from the spras directory
+      data_dir: "input"
+    -
+      label: HSD-H2O-div-ND
+      # Reuse some of the same sources file as 'data0' but different network and targets
+      node_files: ["flies/HSD-H2O-div-ND-node-prizes.txt", "sources.txt", "targets.txt"]
+      edge_files: ["flies/fly-uniprot-network.txt"]
+      other_files: []
+      # Relative path from the spras directory
+      data_dir: "input"
+    -
+      label: ND-H2O-div-ND
+      # Reuse some of the same sources file as 'data0' but different network and targets
+      node_files: ["flies/ND-H2O-div-ND-node-prizes.txt", "sources.txt", "targets.txt"]
+      edge_files: ["flies/fly-uniprot-network.txt"]
       other_files: []
       # Relative path from the spras directory
       data_dir: "input"
@@ -131,13 +146,13 @@ analysis:
         include: true
       # Create output files for each pathway that can be visualized with GraphSpace
       graphspace:
-        include: true
+        include: false
       # Create Cytoscape session file with all pathway graphs for each dataset
       cytoscape:
-        include: true
+        include: false
       # Machine learning analysis (e.g. clustering) of the pathway output files for each dataset
       ml:
-        include: true
+        include: false
         # specify how many principal components to calculate
         components: 2
         # boolean to show the labels on the pca graph
