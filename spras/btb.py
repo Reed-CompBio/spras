@@ -9,10 +9,10 @@ from pathlib import Path
 import pandas as pd
 
 from spras.containers import prepare_volume, run_container
-from spras.interactome import (
-    convert_undirected_to_directed,
-    reinsert_direction_col_directed,
-)
+# from spras.interactome import (
+#     convert_undirected_to_directed,
+#     reinsert_direction_col_directed,
+# )
 # what type of directionality does btb support?
 
 from spras.prm import PRM
@@ -34,6 +34,11 @@ class BowtieBuilder(PRM):
         for input_type in BowtieBuilder.required_inputs:
             if input_type not in filename_map:
                 raise ValueError(f"{input_type} filename is missing")
+        print("FILEMAP NAME: ", filename_map)
+        print("DATA HEAD: ")
+        print( data.node_table.head())
+        print("DATA INTERACTOME: ")
+        print(data.interactome.head())
 
         # Get sources and write to file, repeat for targets
         # Does not check whether a node is a source and a target
@@ -45,7 +50,15 @@ class BowtieBuilder(PRM):
             # TODO test whether this selection is needed, what values could the column contain that we would want to
             # include or exclude?
             nodes = nodes.loc[nodes[node_type]]
-            nodes.to_csv(filename_map[node_type], index=False, columns=['NODEID'], header=False)
+            if(node_type == "sources"):
+                nodes.to_csv(filename_map["source"], sep= '\t', index=False, columns=['NODEID'], header=False)
+                print("NODES: ")
+                print(nodes)
+            elif(node_type == "targets"):
+                nodes.to_csv(filename_map["target"], sep= '\t', index=False, columns=['NODEID'], header=False)
+                print("NODES: ")
+                print(nodes)
+
 
         # Create network file
         edges = data.get_interactome()
@@ -54,14 +67,13 @@ class BowtieBuilder(PRM):
         #unsure if formating network file is needed
         # edges = add_directionality_constant(edges, 'EdgeType', '(pd)', '(pp)')
 
-        edges.to_csv(filename_map['edges'], sep='\t', index=False,
-                     columns=['Interactor1', 'EdgeType', 'Interactor2', 'Weight'], header=False)
+        edges.to_csv(filename_map['edges'], sep='\t', index=False, header=False)
 
 
 
         # Skips parameter validation step
     @staticmethod
-    def run(source=None, target=None, edges=None, output_file=None, k=None, container_framework="docker"):
+    def run(source=None, target=None, edges=None, output_file=None, container_framework="docker"):
         """
         Run PathLinker with Docker
         @param nodetypes:  input node types with sources and targets (required)
@@ -77,7 +89,7 @@ class BowtieBuilder(PRM):
         if not source or not target or not edges or not output_file:
             raise ValueError('Required BowtieBuilder arguments are missing')
 
-        work_dir = '/spras'
+        work_dir = '/btb'
 
         # Each volume is a tuple (src, dest)
         volumes = list()
@@ -98,7 +110,7 @@ class BowtieBuilder(PRM):
         out_dir.mkdir(parents=True, exist_ok=True)
         bind_path, mapped_out_dir = prepare_volume(str(out_dir), work_dir)
         volumes.append(bind_path)
-        mapped_out_prefix = mapped_out_dir + '/out'  # Use posix path inside the container
+        mapped_out_prefix = mapped_out_dir + '/raw-pathway.txt'  # Use posix path inside the container
 
         command = ['python',
                    'btb.py',
@@ -110,6 +122,7 @@ class BowtieBuilder(PRM):
                    target_file,
                    '--output',
                    mapped_out_prefix]
+        # command = ['ls', '-R']
 
 
         print('Running BowtieBuilder with arguments: {}'.format(' '.join(command)), flush=True)
@@ -121,12 +134,21 @@ class BowtieBuilder(PRM):
                             volumes,
                             work_dir)
         print(out)
+        print("Source file: ", source_file)
+        print("target file: ", target_file)
+        print("edges file: ", edges_file)
+        print("mapped out dir: ", mapped_out_dir)
+        print("mapped out prefix: ", mapped_out_prefix)
+
+
+
+
 
         # Rename the primary output file to match the desired output filename
         # Currently PathLinker only writes one output file so we do not need to delete others
         # We may not know the value of k that was used
-        output_edges = Path(next(out_dir.glob('out*-ranked-edges.txt')))
-        output_edges.rename(output_file)
+        # output_edges = Path(next(out_dir.glob('out*-ranked-edges.txt')))
+        # output_edges.rename(output_file)
 
 
     @staticmethod
@@ -137,6 +159,7 @@ class BowtieBuilder(PRM):
         @param standardized_pathway_file: the same pathway written in the universal format
         """
         # What about multiple raw_pathway_files
-        df = pd.read_csv(raw_pathway_file, sep='\t').take([0, 1, 2], axis=1)
-        df = reinsert_direction_col_directed(df)
+        print("PARSING OUTPUT BTB")
+        df = pd.read_csv(raw_pathway_file, sep='\t').take([0, 1], axis=0)
+        # df = reinsert_direction_col_directed(df)
         df.to_csv(standardized_pathway_file, header=False, index=False, sep='\t')
