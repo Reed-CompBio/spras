@@ -45,10 +45,8 @@ algorithms:
         params:
               include: true
               run1:
-                  r: [5]
                   b: [5, 6]
                   w: np.linspace(0,5,2)
-                  g: [3]
                   d: [10]
 
       - name: "omicsintegrator2"
