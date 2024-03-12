@@ -42,8 +42,8 @@ def summarize_networks(file_paths: Iterable[Union[str, PathLike]]) -> pd.DataFra
                 lines = f.readlines()
 
             if len(lines) > 0:
-                lines.pop(0) # process header line 
-            
+                lines.pop(0) # process header line
+
             edges = []
             for line in lines:
                 parts = line.split('\t')
@@ -61,7 +61,7 @@ def summarize_networks(file_paths: Iterable[Union[str, PathLike]]) -> pd.DataFra
                         raise ValueError(f"direction is {direction}, rather than U or D")
                 elif len(parts) != 0:
                     raise ValueError(f"In file {file}, expected line {line} to have 4 values, but found {len(parts)} values.")
-                
+
             # getting the algorithm name
             p = PurePath(file)
             edge_tuples.append((p.parts[-2], edges))
