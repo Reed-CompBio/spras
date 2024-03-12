@@ -9,6 +9,7 @@ from spras.interactome import (
     reinsert_direction_col_directed,
 )
 from spras.prm import PRM
+from spras.util import raw_pathway_df
 
 __all__ = ['PathLinker']
 
@@ -137,7 +138,14 @@ class PathLinker(PRM):
         @param standardized_pathway_file: the same pathway written in the universal format
         """
         # What about multiple raw_pathway_files
-        df = pd.read_csv(raw_pathway_file, sep='\t').take([0, 1, 2], axis=1)
-        df = reinsert_direction_col_directed(df)
-        df.columns = ['Node1', 'Node2', 'Rank', "Direction"]
+        # try:
+        #     df = pd.read_csv(raw_pathway_file, sep='\t')
+
+        # except pd.errors.EmptyDataError:
+        #     print("we hit empty thingy")
+        df = raw_pathway_df(raw_pathway_file, header = 0)
+        if not df.empty:
+            df = df.take([0, 1, 2], axis=1)
+            df = reinsert_direction_col_directed(df)
+            df.columns = ['Node1', 'Node2', 'Rank', "Direction"]
         df.to_csv(standardized_pathway_file, header=True, index=False, sep='\t')

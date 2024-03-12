@@ -1,3 +1,4 @@
+import os
 from pathlib import Path
 
 import pandas as pd
@@ -5,7 +6,7 @@ import pandas as pd
 from spras.containers import prepare_volume, run_container
 from spras.interactome import reinsert_direction_col_mixed
 from spras.prm import PRM
-from spras.util import add_rank_column
+from spras.util import add_rank_column, raw_pathway_df
 
 __all__ = ['OmicsIntegrator1', 'write_conf']
 
@@ -191,16 +192,49 @@ class OmicsIntegrator1(PRM):
         # I'm assuming from having read the documentation that we will be passing in optimalForest.sif
         # as raw_pathway_file, in which case the format should be edge1 interactiontype edge2.
         # if that assumption is wrong we will need to tweak things
-        try:
-            df = pd.read_csv(raw_pathway_file, sep='\t', header=None)
-        except pd.errors.EmptyDataError:
-            with open(standardized_pathway_file, 'w'):
-                pass
-            return
+        # try:
+        #     # check_file = os.stat(raw_pathway_file).st_size
 
-        df.columns = ["Edge1", "InteractionType", "Edge2"]
-        df = add_rank_column(df)
-        df = reinsert_direction_col_mixed(df, "InteractionType", "pd", "pp")
-        df.drop(columns=['InteractionType'], inplace = True)
-        df.columns = ['Node1', 'Node2', 'Rank', "Direction"]
+        #     # if(check_file == 0):
+        #     #     print("The file is empty.")
+        #     #     df = pd.DataFrame(columns = ['Edge1', 'Edge2','Rank','Direction'])
+
+        #     # else:
+        #     df = pd.read_csv(raw_pathway_file, sep='\t', header=None)
+        #     df.columns = ["Edge1", "InteractionType", "Edge2"]
+        #     df = add_rank_column(df)
+        #     df = reinsert_direction_col_mixed(df, "InteractionType", "pd", "pp")
+        #     df.drop(columns=['InteractionType'], inplace = True)
+        #     df.columns = ['Node1', 'Node2','Rank','Direction']
+
+        # except pd.errors.EmptyDataError:
+        #     print("we hit empty thingy")
+        #     df = pd.DataFrame(columns = ['Node1', 'Node2','Rank','Direction'])
+        #     # with open(standardized_pathway_file, 'w'):
+        #     #     pass
+        #     # return
+
+        df = raw_pathway_df(raw_pathway_file, header=None)
+        if not df.empty:
+            df.columns = ["Edge1", "InteractionType", "Edge2"]
+            df = add_rank_column(df)
+            df = reinsert_direction_col_mixed(df, "InteractionType", "pd", "pp")
+            df.drop(columns=['InteractionType'], inplace = True)
+            df.columns = ['Node1', 'Node2','Rank','Direction']
+
+        # if df.empty:
+        #     print("THE DATA FRAME IS EMPTY")
+        #     print(df)
+        # else:
+        #     print("THE DF IS NOT EMPTY")
+
+        # df.columns = ["Edge1", "InteractionType", "Edge2"]
+        # df = add_rank_column(df)
+        # df = reinsert_direction_col_mixed(df, "InteractionType", "pd", "pp")
+        # df.drop(columns=['InteractionType'], inplace = True)
+
+
+
+        print(df)
+        print(df.columns)
         df.to_csv(standardized_pathway_file, header=True, index=False, sep='\t')

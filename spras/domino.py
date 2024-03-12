@@ -208,7 +208,8 @@ class DOMINO(PRM):
             edges_df.columns = ['Node1', 'Node2', 'Rank', 'Direction']
             edges_df.to_csv(standardized_pathway_file, sep='\t', header=True, index=False)
         else:
-            edges_df.to_csv(standardized_pathway_file, sep='\t', header=None, index=False)
+            df = pd.DataFrame(columns = ['Node1', 'Node2', 'Rank', 'Direction'])
+            df.to_csv(standardized_pathway_file, sep='\t', header=True, index=False)
 
 
 def pre_domino_id_transform(node_id):
