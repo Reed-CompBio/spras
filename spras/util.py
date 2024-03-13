@@ -63,6 +63,9 @@ def add_rank_column(df: pd.DataFrame) -> pd.DataFrame:
 def raw_pathway_df(raw_pathway_file: str, header:int= None) -> pd.DataFrame:
     """
     creates df from contents in raw pathway file, otherwise returns an empty df
+    @param raw_pathway_file: the specific path to the raw_pathway_file to read from
+    @param header: what row the header is, otherwise None
+
     """
     try:
         df = pd.read_csv(raw_pathway_file, sep='\t', header=header)

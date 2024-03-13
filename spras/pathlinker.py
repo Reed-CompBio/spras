@@ -137,13 +137,7 @@ class PathLinker(PRM):
         @param raw_pathway_file: pathway file produced by an algorithm's run function
         @param standardized_pathway_file: the same pathway written in the universal format
         """
-        # What about multiple raw_pathway_files
-        # try:
-        #     df = pd.read_csv(raw_pathway_file, sep='\t')
-
-        # except pd.errors.EmptyDataError:
-        #     print("we hit empty thingy")
-        df = raw_pathway_df(raw_pathway_file, header = 0)
+        df = raw_pathway_df(raw_pathway_file, header=0)
         if not df.empty:
             df = df.take([0, 1, 2], axis=1)
             df = reinsert_direction_col_directed(df)

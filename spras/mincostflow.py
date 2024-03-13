@@ -150,8 +150,7 @@ class MinCostFlow (PRM):
         @param standardized_pathway_file: the same pathway written in the universal format
         """
 
-        df = raw_pathway_df(raw_pathway_file, header = None)
-        # df = pd.read_csv(raw_pathway_file, sep='\t', header=None)
+        df = raw_pathway_df(raw_pathway_file, header=None)
         if not df.empty:
             df = add_rank_column(df)
             df = reinsert_direction_col_undirected(df)

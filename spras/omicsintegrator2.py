@@ -150,14 +150,13 @@ class OmicsIntegrator2(PRM):
         num_lines = sum(1 for line in open(raw_pathway_file))
         if num_lines < 2:
             df = pd.DataFrame(columns = ['Node1', 'Node2', 'Rank', 'Direction'])
-            df.to_csv(standardized_pathway_file, header=True, index=False, sep='\t')
-            return
-        df = raw_pathway_df(raw_pathway_file, header=0 )
-        # df = pd.read_csv(raw_pathway_file, sep='\t', header = 0)
-        # df = df[df['in_solution'] == True]  # Check whether this column can be empty before revising this line
-        if not df.empty:
-            df = df.take([0, 1], axis=1)
-            df = add_rank_column(df)
+        else: 
+            df = pd.read_csv(raw_pathway_file, sep='\t', header=0)
+            df = df[df['in_solution'] == True] # Check whether this column can be empty before revising this line
+            df = add_rank_column(df) 
             df = reinsert_direction_col_undirected(df)
+            df.drop(columns=['cost', 'in_solution'], inplace = True)
             df.columns = ['Node1', 'Node2', 'Rank', "Direction"]
+        
         df.to_csv(standardized_pathway_file, header=True, index=False, sep='\t')
+        

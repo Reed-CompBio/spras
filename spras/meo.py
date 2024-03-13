@@ -180,8 +180,6 @@ class MEO(PRM):
         @param raw_pathway_file: pathway file produced by an algorithm's run function
         @param standardized_pathway_file: the same pathway written in the universal format
         """
-        # Columns Source Type Target Oriented Weight
-        # df = pd.read_csv(raw_pathway_file, sep='\t', header=0)
         df = raw_pathway_df(raw_pathway_file, header=0)
         if not df.empty:
         # Keep only edges that were assigned an orientation (direction)
