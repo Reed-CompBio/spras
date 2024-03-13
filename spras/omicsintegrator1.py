@@ -192,7 +192,7 @@ class OmicsIntegrator1(PRM):
         # I'm assuming from having read the documentation that we will be passing in optimalForest.sif
         # as raw_pathway_file, in which case the format should be edge1 interactiontype edge2.
         # if that assumption is wrong we will need to tweak things
-        
+
 
         df = raw_pathway_df(raw_pathway_file, header=None)
         if not df.empty:
