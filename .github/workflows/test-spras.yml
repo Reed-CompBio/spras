@@ -146,6 +146,15 @@ jobs:
         tags: latest
         cache_froms: reedcompbio/domino:latest
         push: false
+    - name: Build RWR Docker image
+      uses: docker/build-push-action@v1
+      with:
+        path: docker-wrappers/RWR/.
+        dockerfile: docker-wrappers/RWR/Dockerfile
+        repository: reedcompbio/random-walk-with-restart
+        tags: latest
+        cache_froms: reedcompbio/random-walk-with-restart:latest
+        push: false
     - name: Build Cytoscape Docker image
       uses: docker/build-push-action@v1
       with:

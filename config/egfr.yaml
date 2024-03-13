@@ -67,6 +67,21 @@ algorithms:
           - 0.3
         module_threshold:
           - 0.05
+
+  -
+    name: rwr
+    params:
+      include: true
+      run1:
+        single_source:
+          - 0
+        w:
+          - 0.20
+        df:
+          - 0.85
+        threshold:
+          - 0.0002
+
 datasets:
   -
     data_dir: input
