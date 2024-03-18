@@ -155,8 +155,8 @@ Use the `run_container` utility function to run the command in the container `<u
 Implement the `parse_output` function.
 The edges in the Local Neighborhood output have the same format as the input, `<vertex1>|<vertex2>`.
 Convert these to be tab-separated vertex pairs followed by a tab and a `1` at the end of every line, which indicates all edges have the same rank.
-See the `add_rank_column` function in `src.util.py`.
-Make sure header = True when the file is created.
+See the `add_rank_column` and `raw_pathway_df` function in `src.util.py`.
+Make sure header = True with column names: ['Node1', 'Node2', 'Rank', 'Direction'] when the file is created
 The output should have the format `<vertex1> <vertex2> 1 U`.
 
 ### Step 4: Make the Local Neighborhood wrapper accessible through SPRAS

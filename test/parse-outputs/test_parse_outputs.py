@@ -1,6 +1,9 @@
 import filecmp
 from pathlib import Path
 
+import pandas as pd
+import pytest
+
 from spras import runner
 
 INDIR = "test/parse-outputs/input/"
@@ -29,3 +32,10 @@ class TestParseOutputs:
 
             runner.parse_output(algo, test_file, out_file)
             assert filecmp.cmp(OUTDIR + f"{algo}-pathway.txt", EXPDIR + f"{algo}-pathway-expected.txt", shallow=False)
+
+    def test_empty_file(self):
+        for algo in algorithms:
+            test_file = INDIR + f"empty-raw-pathway.txt"
+            out_file = OUTDIR + f"{algo}-empty-pathway.txt"
+            runner.parse_output(algo, test_file, out_file)
+            assert filecmp.cmp(OUTDIR + f"{algo}-empty-pathway.txt", EXPDIR + f"empty-pathway-expected.txt", shallow=False)

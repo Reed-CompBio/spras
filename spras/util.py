@@ -62,9 +62,10 @@ def add_rank_column(df: pd.DataFrame) -> pd.DataFrame:
 
 def raw_pathway_df(raw_pathway_file: str, header:int= None) -> pd.DataFrame:
     """
-    creates df from contents in raw pathway file, otherwise returns an empty df
-    @param raw_pathway_file: the specific path to the raw_pathway_file to read from
-    @param header: what row the header is, otherwise None
+    Creates DF from contents in raw pathway file,
+    otherwise returns an empty DF with standard output column names
+    @param raw_pathway_file: path to raw_pathway_file
+    @param header: what row the header is in raw_pathway_file, otherwise None
 
     """
     try:
