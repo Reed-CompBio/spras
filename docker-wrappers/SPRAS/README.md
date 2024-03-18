@@ -1,7 +1,7 @@
 # SPRAS Docker image
 
 ## Building
-A Docker image for SPRAS that is available on [Dockerhub]()
+A Docker image for SPRAS that is available on [DockerHub](https://hub.docker.com/repository/docker/reedcompbio/spras)
 This image comes bundled with all of the necessary software packages to run SPRAS, and can be used for execution in distributed environments (like HTCondor).
 
 To create the Docker image, make sure you are in this repository's root directory, and from your terminal run:
@@ -35,7 +35,7 @@ export DOCKER_DEFAULT_PLATFORM=linux/amd64
 The folder `docker-wrappers/SPRAS` also contains several files that can be used to test this container on HTCondor. To test the `spras` container
 in this environment, first login to an HTCondor Access Point (AP). Then, from the AP clone this repo:
 ```
-git clone git@github.com:Reed-CompBio/spras.git
+git clone https://github.com/Reed-CompBio/spras.git
 ```
 
 When you're ready to run SPRAS as an HTCondor workflow, navigate to the `spras/docker-wrappers/SPRAS` directory and run `condor_submit spras.sub`. This will
@@ -44,11 +44,15 @@ SPRAS configuration file. Note that you can alter the configuration file to test
 or it is likely the job will be unsuccessful. By default, the `example_config.yaml` runs everything except for `cytoscape`, which appears to fail periodically
 in HTCondor.
 
-To monitor the state of the job, you can run `condor_q` for a snapshot of how the job is doing, or you can run `condor_watch_q` if you want realtime updates (you
-should never run something like `watch condor_q`, because this places extraneous strain on the AP). Upon completion, the `output` directory from the workflow
-should be returned as `spras/docker-wrappers/SPRAS/output`, along with several files containing the workflows logging information (anything that matches `spras_*`
-and ending in `.out`, `.err`, or `.log`). If the job was unsuccessful, these files should contain useful debugging clues about what may have gone wrong.
+To monitor the state of the job, you can run `condor_q` for a snapshot of how the job is doing, or you can run `condor_watch_q` if you want realtime updates.
+Upon completion, the `output` directory from the workflow should be returned as `spras/docker-wrappers/SPRAS/output`, along with several files containing the
+workflow's logging information (anything that matches `spras_*` and ending in `.out`, `.err`, or `.log`). If the job was unsuccessful, these files should contain
+useful debugging clues about what may have gone wrong.
 
 **Note**: If you want to run the workflow with a different version of SPRAS, or one that contains development updates you've made, rebuild this image against
 the version of SPRAS you want to test, and push the image to your image repository. To use that container in the workflow, change the `container_image` line of
 `spras.sub` to point to the new image.
+
+## Versions:
+- v0.0.1: Created an image with SPRAS as an installed python module. This makes SPRAS runnable anywhere with Docker/Singularity. Note that the Snakefile should be
+          runnable from any directory within the container.
