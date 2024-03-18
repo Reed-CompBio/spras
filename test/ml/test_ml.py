@@ -27,11 +27,11 @@ class TestML:
         assert filecmp.cmp(OUT_DIR + 'dataframe.csv', EXPECT_DIR + 'expected-dataframe.csv', shallow=False)
 
     def test_summarize_networks_empty(self):
-        with pytest.raises(ValueError): #raises error if empty dataframe is used for post processing
+        with pytest.raises(OSError): #raises error if empty dataframe is used for post processing
             ml.summarize_networks([INPUT_DIR + 'test-data-empty/empty.txt'])
 
-    def test_summarize_networks_empty(self):
-        with pytest.raises(ValueError): #raises error if empty dataframe is used for post processing
+    def test_single_line(self):
+        with pytest.raises(OSError): #raises error if single line in file
             ml.summarize_networks([INPUT_DIR + 'test-data-single/single.txt'])
 
     def test_pca(self):
@@ -68,10 +68,3 @@ class TestML:
 
         assert en.equals(expected)
 
-    def test_summarize_networks_empty(self):
-        with pytest.raises(ValueError):
-            ml.summarize_networks([INPUT_DIR + 'test-data-empty/empty.txt'])
-
-    def test_summarize_networks_single_pathway(self):
-        with pytest.raises(ValueError):
-            ml.summarize_networks([INPUT_DIR + 'test-data-s4/s4.txt'])

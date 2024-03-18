@@ -84,9 +84,9 @@ def summarize_networks(file_paths: Iterable[Union[str, PathLike]]) -> pd.DataFra
 
     # don't do ml post processing if there is an empty dataframe or the number of samples is <= 1
     if concated_df.empty:
-        raise ValueError("ML post-processing cannot proceed because the summarize network dataFrame is empty.\nWe suggest setting ml's include: true in the configuration file to false to avoid this error.")
+        raise OSError("ML post-processing cannot proceed because the summarize network dataFrame is empty.\nWe suggest setting ml's include: true in the configuration file to false to avoid this error.")
     if min(concated_df.shape) <= 1:
-        raise ValueError (f"ML post-processing cannot proceed because the available number of pathways is insufficient. The ml post processing requires more than one pathway, but currently, there are only {min(concated_df.shape)} pathways.")
+        raise OSError (f"ML post-processing cannot proceed because the available number of pathways is insufficient. The ml post processing requires more than one pathway, but currently, there are only {min(concated_df.shape)} pathways.")
 
     return concated_df
 
