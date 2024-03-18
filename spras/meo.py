@@ -190,4 +190,4 @@ class MEO(PRM):
             df = reinsert_direction_col_directed(df)
             df.drop(columns=['Type', 'Oriented', 'Weight'], inplace = True)
             df.columns = ['Node1', 'Node2', 'Rank', "Direction"]
-        df.to_csv(standardized_pathway_file, header=True, index=False, sep='\t')
+        df.to_csv(standardized_pathway_file, index=False, sep='\t', header=True)
