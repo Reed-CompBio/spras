@@ -81,6 +81,13 @@ def summarize_networks(file_paths: Iterable[Union[str, PathLike]]) -> pd.DataFra
     concated_df = pd.concat(edge_dataframes, axis=1, join='outer')
     concated_df = concated_df.fillna(0)
     concated_df = concated_df.astype('int64')
+
+    # don't do ml post processing if there is an empty dataframe or the number of samples is <= 1
+    if concated_df.empty:
+        raise OSError("ML post-processing cannot proceed because the summarize network dataFrame is empty.\nWe suggest setting ml's include: true in the configuration file to false to avoid this error.")
+    if min(concated_df.shape) <= 1:
+        raise OSError (f"ML post-processing cannot proceed because the available number of pathways is insufficient. The ml post processing requires more than one pathway, but currently, there are only {min(concated_df.shape)} pathways.")
+
     return concated_df
 
 def create_palette(column_names):
