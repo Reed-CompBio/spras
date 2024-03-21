@@ -54,6 +54,20 @@ class TestAllPairs:
             container_framework="singularity")
         assert out_path.exists()
 
+    @pytest.mark.skipif(not shutil.which('singularity'), reason='Singularity not found on system')
+    def test_allpairs_singularity_unpacked(self):
+        out_path = Path(OUT_DIR+'sample-out-unpack.txt')
+        out_path.unlink(missing_ok=True)
+        # Indicate via config mechanism that we want to unpack the Singularity container
+        config.config.unpack_singularity = True
+        AllPairs.run(
+            nodetypes=TEST_DIR+'input/sample-in-nodetypes.txt',
+            network=TEST_DIR+'input/sample-in-net.txt',
+            output_file=str(out_path),
+            container_framework="singularity")
+        config.config.unpack_singularity = False
+        assert out_path.exists()
+
     def test_allpairs_correctness(self):
         """
         Tests algorithm correctness of all_pairs_shortest_path.py by using AllPairs.run
