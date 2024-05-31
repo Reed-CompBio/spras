@@ -21,12 +21,12 @@ Unzip them on your local file system into a directory you’ll use for this projec
 ## Step 3: Install Anaconda (optional)
 
 If you do not already have Anaconda on your computer, install Anaconda so you can manage conda environments.
-If you haven’t used conda before for Python, this blog post gives an overview of conda and why it is useful <https://astrobiomike.github.io/unix/conda-intro>.
+If you haven’t used conda before for Python, this [blog post](https://astrobiomike.github.io/unix/conda-intro) gives an overview of conda and why it is useful.
 You don’t need most of the commands in it, but it can be a reference.
 You can download Anaconda from <https://www.anaconda.com/download> and follow the installation instructions.
 If you have the option to add Anaconda to your system `PATH` when installing it, which will make it your default version of Python, we recommend that.
 Anaconda will give you an initial default conda environment and some useful packages.
-A conda environment is an isolated collection of Python packages that enables you to have multiple versions of Python and packages installed in parallel for different project, which often require different versions of their dependencies.
+A conda environment is an isolated collection of Python packages that enables you to have multiple versions of Python and packages installed in parallel for different projects, which often require different versions of their dependencies.
 
 ## Step 4: Create a conda environment for PathLinker
 
@@ -51,7 +51,7 @@ Change (`cd`) into the example directory and try running the example command
 python ../run.py sample-in-net.txt sample-in-nodetypes.txt
 ```
 If it works, open the two input files and the output file(s).
-See if it makes sense what PathLinker has done.
+See if what PathLinker has done makes sense.
 The input network file lists one edge in the graph per line.
 The node types file tells you which nodes are the special sources and targets.
 
