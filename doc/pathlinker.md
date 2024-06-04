@@ -16,13 +16,13 @@ Start by reading this manuscript to gain a high-level understanding of its algor
 ## Step 2: Get the PathLinker files
 
 From the PathLinker GitHub repository <https://github.com/Murali-group/PathLinker>, click Code and Download ZIP to download all the source and data files.
-Unzip them on your local file system into a directory you’ll use for this project.
+Unzip them on your local file system into a directory youâ€™ll use for this project.
 
 ## Step 3: Install Anaconda (optional)
 
 If you do not already have Anaconda on your computer, install Anaconda so you can manage conda environments.
-If you haven’t used conda before for Python, this [blog post](https://astrobiomike.github.io/unix/conda-intro) gives an overview of conda and why it is useful.
-You don’t need most of the commands in it, but it can be a reference.
+If you havenâ€™t used conda before for Python, this [blog post](https://astrobiomike.github.io/unix/conda-intro) gives an overview of conda and why it is useful.
+You donâ€™t need most of the commands in it, but it can be a reference.
 You can download Anaconda from <https://www.anaconda.com/download> and follow the installation instructions.
 If you have the option to add Anaconda to your system `PATH` when installing it, which will make it your default version of Python, we recommend that.
 Anaconda will give you an initial default conda environment and some useful packages.
@@ -32,7 +32,12 @@ A conda environment is an isolated collection of Python packages that enables yo
 
 Create a new conda environment for PathLinker called "pathlinker" with Python 3.5 and install the dependencies from a requirements file into that environment.
 PathLinker uses old versions of Python and dependencies like networkx, a package for working with graphs in Python.
-From the project directory you created that contains the `requirements.txt` file from the PathLinker repository run:
+The `requirements.txt` file contains an uninstallable package, so open it in a text editor and delete the line
+```
+pkg-resources==0.0.0
+```
+
+Then, from the project directory you created that contains the `requirements.txt` file from the PathLinker repository run:
 ```
 conda create -n pathlinker python=3.5
 conda activate pathlinker
