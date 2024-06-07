@@ -83,6 +83,16 @@ jobs:
         docker pull reedcompbio/mincostflow:latest
         docker pull reedcompbio/allpairs:latest
         docker pull reedcompbio/domino:latest
+        docker pull gabeah/local-neighborhood:latest
+    - name: Build Local Neighborhood Docker Image
+      uses: docker/build-push-action@v1
+      with:
+        path: docker-wrappers/LocalNeighborhood
+        dockerfile: docker-wrappers/LocalNeighborhood/Dockerfile
+        repository: gabeah/local-neighborhood
+        tags: latest
+        cache_from: gabeah/local-neighborhood:latest
+        push: false
     - name: Build Omics Integrator 1 Docker image
       uses: docker/build-push-action@v1
       with:
