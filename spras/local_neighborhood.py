@@ -6,7 +6,7 @@ import pandas as pd
 from spras.containers import prepare_volume, run_container
 from spras.interactome import (
     convert_undirected_to_directed,
-    reinsert_direction_col_directed,
+    reinsert_direction_col_undirected,
 )
 from spras.util import add_rank_column
 from spras.prm import PRM
@@ -118,10 +118,11 @@ class LocalNeighborhood:
             sep='|',
             header=None
             )
-        print(df)
+
+        # Add extra data to not annoy the SNAKEFILE
         df = add_rank_column(df)
-        print(df)
-        print(df.to_csv(header=False,index=False,sep='\t'))
+        df = reinsert_direction_col_undirected(df)
+
         df.to_csv(standardized_pathway_file, 
                     header=None, 
                     index=False, 
