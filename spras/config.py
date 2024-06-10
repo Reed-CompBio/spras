@@ -204,8 +204,8 @@ class Config:
             self.hac_params["linkage"] = self.ml_params["linkage"]
         if "metric" in self.ml_params:
             self.hac_params["metric"] = self.ml_params ["metric"]
-
         self.analysis_include_summary = raw_config["analysis"]["summary"]["include"]
         self.analysis_include_graphspace = raw_config["analysis"]["graphspace"]["include"]
         self.analysis_include_cytoscape = raw_config["analysis"]["cytoscape"]["include"]
         self.analysis_include_ml = raw_config["analysis"]["ml"]["include"]
+        self.analysis_include_ml_aggregate_algo = raw_config["analysis"]["ml"]["aggregate_per_algorithm"]
