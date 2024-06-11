@@ -26,8 +26,8 @@ def get_test_config():
                 "include": False
             },
             "ml": {
-                "include": False,
-                "aggregate_per_algorithm": False
+                "include": False
+                # "aggregate_per_algorithm": False
             },
             "graphspace": {
                 "include": False
