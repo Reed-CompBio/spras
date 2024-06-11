@@ -13,7 +13,7 @@ from spras.prm import PRM
 
 __all__ = ['LocalNeighborhood']
 
-class LocalNeighborhood:
+class LocalNeighborhood(PRM):
     required_inputs = ["network", "nodes"]
 
     @staticmethod
@@ -21,7 +21,7 @@ class LocalNeighborhood:
         """
         Access fields from the dataset and write the required input files
         @param data: dataset
-        @param filename_map:
+        @param filename_map: dictionary where key is input type, and value is a path to a file
         @return:
         """
         print('generating inputs!!')
@@ -53,7 +53,8 @@ class LocalNeighborhood:
                         index=False,
                         columns=['Interactor1','Interactor2'],
                         header=False)
-        
+        return None
+
     @staticmethod
     def run(nodes=None, network=None, output_file=None, container_framework="docker"):
         '''
@@ -105,6 +106,7 @@ class LocalNeighborhood:
         # Currently LocalNeighborhood only writes one output file so we do not need to delete others
         output_edges = Path(out_dir, 'out')
         output_edges.rename(output_file)
+        return None
 
     @staticmethod
     def parse_output(raw_pathway_file, standardized_pathway_file):
@@ -127,3 +129,4 @@ class LocalNeighborhood:
                     header=None, 
                     index=False, 
                     sep='\t')
+        return None
