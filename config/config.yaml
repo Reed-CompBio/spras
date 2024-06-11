@@ -61,7 +61,7 @@ algorithms:
 
       - name: "meo"
         params:
-              include: true
+              include: false
               run1:
                   max_path_length: [3]
                   local_search: ["Yes"]
@@ -69,18 +69,18 @@ algorithms:
 
       - name: "mincostflow"
         params:
-              include: true
+              include: false
               run1:
                   flow: [1] # The flow must be an int
                   capacity: [1]
 
       - name: "allpairs"
         params:
-              include: true
+              include: false
 
       - name: "domino"
         params:
-              include: true
+              include: false
               run1:
                   slice_threshold: [0.3]
                   module_threshold: [0.05]
@@ -138,7 +138,7 @@ analysis:
         include: true
         # required: true or false
         # adds ml analysis per algorithm output
-        aggregate_per_algorithm: true
+        # aggregate_per_algorithm: true
         # specify how many principal components to calculate
         components: 2
         # boolean to show the labels on the pca graph
