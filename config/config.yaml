@@ -136,9 +136,8 @@ analysis:
       ml:
         # ml analysis per dataset
         include: true
-        # required: true or false
-        # adds ml analysis per algorithm output
-        # aggregate_per_algorithm: true
+        # required; adds ml analysis per algorithm output
+        aggregate_per_algorithm: true
         # specify how many principal components to calculate
         components: 2
         # boolean to show the labels on the pca graph
