@@ -61,7 +61,7 @@ algorithms:
 
       - name: "meo"
         params:
-              include: false
+              include: true
               run1:
                   max_path_length: [3]
                   local_search: ["Yes"]
@@ -69,18 +69,18 @@ algorithms:
 
       - name: "mincostflow"
         params:
-              include: false
+              include: true
               run1:
                   flow: [1] # The flow must be an int
                   capacity: [1]
 
       - name: "allpairs"
         params:
-              include: false
+              include: true
 
       - name: "domino"
         params:
-              include: false
+              include: true
               run1:
                   slice_threshold: [0.3]
                   module_threshold: [0.05]
