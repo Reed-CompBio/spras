@@ -50,19 +50,28 @@ def download_gcs(gcs_path: str, local_path: str, is_dir: bool):
 
     # build command
     cmd = 'gcloud storage'
-    cmd = cmd + ' cp'
+    # rsync with checksums to make file transfer faster for larger files
+    cmd = cmd + ' rsync --checksums-only'
+    # check if directory
     if is_dir:
         cmd = cmd + ' -r'
-    cmd = cmd + ' ' + gcs_path + '/* ' + local_path
+    cmd = cmd + ' ' + gcs_path + ' ' + local_path
 
     print(cmd)
     # run command 
     subprocess.run(cmd, shell=True)
 
 def upload_gcs(local_path: str, gcs_path: str, is_dir: bool):
-    # build command
-    cmd = 'gcloud storage'
-    cmd = cmd + ' cp'
+    # check if path exists in cloud storage
+    exists = len(subprocess.run(f'gcloud storage ls {gcs_path}', shell=True, capture_output=True, text=True).stdout)
+    # if path exists rsyc
+    if exists > 0:
+        cmd = 'gcloud storage rsync --checksums-only'
+    # else copy path to cloud storage
+    else:
+        cmd = 'gcloud storage cp -c'
+    
+    # check if directory 
     if is_dir:
         cmd = cmd + ' -r'
     cmd = cmd + ' ' + str(Path(local_path).resolve()) + ' ' + gcs_path
