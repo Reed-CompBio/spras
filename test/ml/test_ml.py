@@ -2,6 +2,7 @@ import filecmp
 from pathlib import Path
 
 import pandas as pd
+import pytest
 
 import spras.analysis.ml as ml
 
@@ -24,6 +25,14 @@ class TestML:
                                            INPUT_DIR + 'test-data-empty/empty.txt', INPUT_DIR + 'test-data-spaces/spaces.txt', INPUT_DIR + 'test-mixed-direction/mixed-direction.txt'])
         dataframe.to_csv(OUT_DIR + 'dataframe.csv')
         assert filecmp.cmp(OUT_DIR + 'dataframe.csv', EXPECT_DIR + 'expected-dataframe.csv', shallow=False)
+
+    def test_summarize_networks_empty(self):
+        with pytest.raises(ValueError): #raises error if empty dataframe is used for post processing
+            ml.summarize_networks([INPUT_DIR + 'test-data-empty/empty.txt'])
+
+    def test_single_line(self):
+        with pytest.raises(ValueError): #raises error if single line in file s.t. single row in dataframe is used for post processing
+            ml.summarize_networks([INPUT_DIR + 'test-data-single/single.txt'])
 
     def test_pca(self):
         dataframe = ml.summarize_networks([INPUT_DIR + 'test-data-s1/s1.txt', INPUT_DIR + 'test-data-s2/s2.txt', INPUT_DIR + 'test-data-s3/s3.txt'])
