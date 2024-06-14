@@ -83,6 +83,7 @@ jobs:
         docker pull reedcompbio/mincostflow:latest
         docker pull reedcompbio/allpairs:latest
         docker pull reedcompbio/domino:latest
+        docker pull sumedhars/local-neighborhood:latest
     - name: Build Omics Integrator 1 Docker image
       uses: docker/build-push-action@v1
       with:
@@ -154,6 +155,15 @@ jobs:
         repository: reedcompbio/py4cytoscape
         tags: v2
         cache_froms: reedcompbio/py4cytoscape:v2
+        push: false
+    - name: Build Local Neighborhood Docker image
+      uses: docker/build-push-action@v1
+      with:
+        path: docker-wrappers/LocalNeighborhood/.
+        dockerfile: docker-wrappers/LocalNeighborhood/Dockerfile
+        repository: sumedhars/local-neighborhood
+        tags: v2
+        cache_froms: sumedhars/local-neighborhood:latest
         push: false
 
   # Run pre-commit checks on source files
