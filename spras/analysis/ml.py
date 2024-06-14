@@ -37,7 +37,7 @@ def summarize_networks(file_paths: Iterable[Union[str, PathLike]]) -> pd.DataFra
     edge_tuples = []
     for file in file_paths:
         try:
-            # collecting and sorting the edge pairs per algortihm
+            # collecting and sorting the edge pairs per algorithm
             with open(file, 'r') as f:
                 lines = f.readlines()
 
@@ -82,13 +82,17 @@ def summarize_networks(file_paths: Iterable[Union[str, PathLike]]) -> pd.DataFra
     concated_df = concated_df.fillna(0)
     concated_df = concated_df.astype('int64')
 
-    # don't do ml post processing if there is an empty dataframe or the number of samples is <= 1
+    # don't do ml post-processing if there is an empty dataframe or the number of samples is <= 1
     if concated_df.empty:
-        raise OSError("ML post-processing cannot proceed because the summarize network dataFrame is empty.\nWe suggest setting ml's include: true in the configuration file to false to avoid this error.")
+        raise OSError("ML post-processing cannot proceed because the summarize network dataframe is empty.\nWe "
+                      "suggest setting ml include: false in the configuration file to avoid this error.")
     if min(concated_df.shape) <= 1:
-        raise OSError (f"ML post-processing cannot proceed because the available number of pathways is insufficient. The ml post processing requires more than one pathway, but currently, there are only {min(concated_df.shape)} pathways.")
+        raise OSError(f"ML post-processing cannot proceed because the available number of pathways is insufficient. "
+                      f"The ml post-processing requires more than one pathway, but currently "
+                      f"there are only {min(concated_df.shape)} pathways.")
 
     return concated_df
+
 
 def create_palette(column_names):
     """
@@ -148,7 +152,7 @@ def pca(dataframe: pd.DataFrame, output_png: str, output_var: str, output_coord:
 
     # saving the coordinates of each algorithm
     make_required_dirs(output_coord)
-    coordinates_df = pd.DataFrame(X_pca, columns = ['PC' + str(i) for i in range(1, components+1)])
+    coordinates_df = pd.DataFrame(X_pca, columns=['PC' + str(i) for i in range(1, components+1)])
     coordinates_df.insert(0, 'algorithm', columns.tolist())
     coordinates_df.to_csv(output_coord, sep='\t', index=False)
 
