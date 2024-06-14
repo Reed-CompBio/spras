@@ -26,7 +26,7 @@ def get_test_config():
                 "include": False
             },
             "ml": {
-                "include": False,
+                "include": False
             },
             "graphspace": {
                 "include": False
