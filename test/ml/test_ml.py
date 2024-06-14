@@ -28,7 +28,7 @@ class TestML:
 
     def test_summarize_networks_empty(self):
         with pytest.raises(ValueError): #raises error if empty dataframe is used for post processing
-            ml.summarize_networks([INPUT_DIR + 'test-data-empty/emptya.txt'])
+            ml.summarize_networks([INPUT_DIR + 'test-data-empty/empty.txt'])
 
     def test_single_line(self):
         with pytest.raises(ValueError): #raises error if single line in file s.t. single row in dataframe is used for post processing
@@ -67,4 +67,3 @@ class TestML:
         expected = expected.round(5)
 
         assert en.equals(expected)
-
