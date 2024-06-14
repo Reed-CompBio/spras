@@ -27,7 +27,6 @@ def get_test_config():
             },
             "ml": {
                 "include": False,
-                "aggregate_per_algorithm": False
             },
             "graphspace": {
                 "include": False
@@ -103,18 +102,3 @@ class TestConfig:
         test_config["container_registry"]["owner"] = ""
         config.init_global(test_config)
         assert (config.config.container_prefix == config.DEFAULT_CONTAINER_PREFIX)
-
-
-    def test_ml(self):
-        # test ml_aggregate
-        test_config = get_test_config()
-        config.init_global(test_config)
-        assert (config.config.analysis_include_ml_aggregate_algo == False)
-
-        test_config["analysis"]["ml"]["aggregate_per_algorithm"] = True
-        config.init_global(test_config)
-        assert (config.config.analysis_include_ml_aggregate_algo == True)
-
-        with pytest.raises(ValueError): #raises error if empty dataframe is used for post processing
-            del test_config["analysis"]["ml"]["aggregate_per_algorithm"]
-            config.init_global(test_config)

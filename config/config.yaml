@@ -63,16 +63,16 @@ algorithms:
         params:
               include: true
               run1:
-                  max_path_length: [3]
+                  max_path_length: [3, 4, 5]
                   local_search: ["Yes"]
-                  rand_restarts: [10]
+                  rand_restarts: [10, 11]
 
       - name: "mincostflow"
         params:
               include: true
               run1:
                   flow: [1] # The flow must be an int
-                  capacity: [1]
+                  capacity: [1, 2, 3]
 
       - name: "allpairs"
         params:
@@ -136,7 +136,7 @@ analysis:
       ml:
         # ml analysis per dataset
         include: true
-        # required; adds ml analysis per algorithm output
+        # adds ml analysis per algorithm output
         aggregate_per_algorithm: true
         # specify how many principal components to calculate
         components: 2
