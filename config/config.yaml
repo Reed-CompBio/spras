@@ -137,6 +137,7 @@ analysis:
         # ml analysis per dataset
         include: true
         # adds ml analysis per algorithm output
+        # works only on algorithms with multiple parameter combinations chosen
         aggregate_per_algorithm: true
         # specify how many principal components to calculate
         components: 2
