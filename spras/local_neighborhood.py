@@ -2,6 +2,8 @@ from spras.prm import PRM
 from pathlib import Path
 from spras.containers import prepare_volume, run_container
 import pandas as pd
+from spras.interactome import(reinsert_direction_col_directed)
+from spras.util import(add_rank_column)
 
 class LocalNeighborhood(PRM):
     required_inputs = ['network','nodes']
@@ -27,9 +29,8 @@ class LocalNeighborhood(PRM):
 
         edges_df = data.get_interactome()
         
-        edges_df.to_csv(filename_map['edges'],sep='\t',index=False,
-                        columns=['Interactor1','Interactor2','Weight','Direction']
-                        header=['protein1','protein2','weight','directionality'])
+        edges_df.to_csv(filename_map['edges'],sep='\t',index=False, columns=['Interactor1','Interactor2','Weight','Direction'], header=['protein1','protein2','weight','directionality'])
+        
     def run(nodetypes=None, network=None, output_file=None, k=None, container_framework='docker'):
         if not nodetypes or not network or not output_file:
             raise ValueError('Required Pathlinker arguments are missing')
@@ -50,6 +51,7 @@ class LocalNeighborhood(PRM):
         container_suffix = 'local-neighborhood'
         out = run_container(container_framework, container_suffix, command, volumes, work_dir)
     def parse_output(raw_pathway_file, standardized_pathway_file):
-        df = pd.read_csv(raw_pathway_file, sep='\t').take([0, 1, 2], axis=1)
+        df = pd.read_csv(raw_pathway_file, sep='|', header=None)
+        df = add_rank_column(df)
         df = reinsert_direction_col_directed(df)
         df.to_csv(standardized_pathway_file, header=False, index=False, sep='\t')
