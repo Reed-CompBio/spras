@@ -77,21 +77,21 @@ def load_graph(path: str) -> Tuple[Union[nx.Graph, nx.DiGraph], bool]:
     directed = False
 
     try:
-        pathways = pd.read_csv(path, sep="\t", header=None)
+        pathways = pd.read_csv(path, sep="\t", header=0)
     except pd.errors.EmptyDataError:
         print(f"The file {path} is empty.")
         return G, directed
-    pathways.columns = ["Interactor1", "Interactor2", "Rank", "Direction"]
+
     mask_u = pathways['Direction'] == 'U'
     mask_d = pathways['Direction'] == 'D'
     pathways.drop(columns=["Direction"])
 
     if mask_u.all():
-        G = nx.from_pandas_edgelist(pathways, "Interactor1", "Interactor2", ["Rank"])
+        G = nx.from_pandas_edgelist(pathways, "Node1", "Node2", ["Rank"])
         directed = False
 
     elif mask_d.all():
-        G = nx.from_pandas_edgelist(pathways, "Interactor1", "Interactor2", ["Rank"], create_using=nx.DiGraph())
+        G = nx.from_pandas_edgelist(pathways, "Node1", "Node2", ["Rank"], create_using=nx.DiGraph())
         directed = True
     else:
         print(f"{path} could not be visualized. GraphSpace does not support mixed direction type graphs currently")

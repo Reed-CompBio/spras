@@ -48,7 +48,7 @@ def run_cytoscape(pathways: List[Union[str, PurePath]], output_file: str, contai
 
     print('Running Cytoscape with arguments: {}'.format(' '.join(command)), flush=True)
 
-    container_suffix = "py4cytoscape:v2"
+    container_suffix = "py4cytoscape:v3"
     out = run_container(container_framework,
                         container_suffix,
                         command,

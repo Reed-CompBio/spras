@@ -59,3 +59,18 @@ def add_rank_column(df: pd.DataFrame) -> pd.DataFrame:
     """
     df['Rank'] = 1
     return df
+
+def raw_pathway_df(raw_pathway_file: str, header:int= None) -> pd.DataFrame:
+    """
+    Creates DF from contents in raw pathway file,
+    otherwise returns an empty DF with standard output column names
+    @param raw_pathway_file: path to raw_pathway_file
+    @param header: what row the header is in raw_pathway_file, otherwise None
+
+    """
+    try:
+        df = pd.read_csv(raw_pathway_file, sep='\t', header=header)
+    except pd.errors.EmptyDataError: # read an empty file
+        df = pd.DataFrame(columns = ['Node1', 'Node2','Rank','Direction'])
+
+    return df
