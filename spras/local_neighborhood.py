@@ -5,6 +5,8 @@ import pandas as pd
 from spras.interactome import(reinsert_direction_col_directed)
 from spras.util import(add_rank_column)
 
+__all__ = ["LocalNeighborhood"]
+
 class LocalNeighborhood(PRM):
     required_inputs = ['network','nodes']
 
@@ -25,11 +27,11 @@ class LocalNeighborhood(PRM):
             # raises error if there are no prizes, sources, or targets
             raise ValueError("Local Neighborhood requires node prizes or sources and targets")
 
-        node_df.to_csv(filename_map['prizes'],sep='\t',indez=False,columns=['NODEID','prize'],header=['name','prize'])
+        node_df.to_csv(filename_map['nodes'],index=False,columns=['NODEID'],header=False)
 
         edges_df = data.get_interactome()
         
-        edges_df.to_csv(filename_map['edges'],sep='\t',index=False, columns=['Interactor1','Interactor2','Weight','Direction'], header=['protein1','protein2','weight','directionality'])
+        edges_df.to_csv(filename_map['network'],index=False,sep = "|",columns=['Interactor1','Interactor2'], header=False)
         
     def run(nodetypes=None, network=None, output_file=None, k=None, container_framework='docker'):
         if not nodetypes or not network or not output_file:
