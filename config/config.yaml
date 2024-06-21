@@ -35,9 +35,14 @@ container_registry:
 # careful: too many parameters might make your runs take a long time.
 
 algorithms:
+      - name: "btb"
+        params:
+          include: true
+
       - name: "local_neighborhood"
         params:
-              include: true
+              include: false
+
       - name: "pathlinker"
         params:
               include: false
