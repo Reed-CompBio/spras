@@ -1,0 +1,7 @@
+Node1	Node2
+A	D
+B	D
+C	D
+D	F
+D	G
+D	E
