@@ -29,6 +29,7 @@ Windows users may need to escape the absolute paths so that `/data` becomes `//d
 
 ## Versions:
 - v1: Initial version. Copies PathLinker source files from GitHub and pip installs packages from requirements file.
+- v2: Add bash, which is not available in Alpine Linux.
 
 ## TODO
 - Attribute https://github.com/Murali-group/PathLinker

@@ -78,11 +78,12 @@ jobs:
       run: |
         docker pull reedcompbio/omics-integrator-1:latest
         docker pull reedcompbio/omics-integrator-2:v2
-        docker pull reedcompbio/pathlinker:latest
+        docker pull reedcompbio/pathlinker:v2
         docker pull reedcompbio/meo:latest
         docker pull reedcompbio/mincostflow:latest
         docker pull reedcompbio/allpairs:latest
         docker pull reedcompbio/domino:latest
+        docker pull reedcompbio/py4cytoscape:v2
     - name: Build Omics Integrator 1 Docker image
       uses: docker/build-push-action@v1
       with:
@@ -108,7 +109,7 @@ jobs:
         dockerfile: docker-wrappers/PathLinker/Dockerfile
         repository: reedcompbio/pathlinker
         tags: latest
-        cache_froms: reedcompbio/pathlinker:latest
+        cache_froms: reedcompbio/pathlinker:v2
         push: false
     - name: Build Maximum Edge Orientation Docker image
       uses: docker/build-push-action@v1
