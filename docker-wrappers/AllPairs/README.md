@@ -29,3 +29,4 @@ The Docker wrapper can be tested with `pytest -k test_ap.py` from the root of th
 
 ## Versions:
 - v1: Initial version. Copies source file from SPRAS repository.
+- v2: Add bash, which is not available in Alpine Linux.

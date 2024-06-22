@@ -81,7 +81,7 @@ jobs:
         docker pull reedcompbio/pathlinker:v2
         docker pull reedcompbio/meo:latest
         docker pull reedcompbio/mincostflow:latest
-        docker pull reedcompbio/allpairs:latest
+        docker pull reedcompbio/allpairs:v2
         docker pull reedcompbio/domino:latest
         docker pull reedcompbio/py4cytoscape:v2
     - name: Build Omics Integrator 1 Docker image
@@ -135,7 +135,7 @@ jobs:
         path: docker-wrappers/AllPairs/.
         dockerfile: docker-wrappers/AllPairs/Dockerfile
         repository: reedcompbio/allpairs
-        tags: latest
+        tags: v2
         cache_froms: reedcompbio/allpairs:latest
         push: false
     - name: Build DOMINO Docker image
