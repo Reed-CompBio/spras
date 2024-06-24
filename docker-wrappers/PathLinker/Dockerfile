@@ -4,7 +4,8 @@ FROM python:3.5.10-alpine
 
 # gettext is required for the envsubst command
 # See https://github.com/haskell/cabal/issues/6126 regarding wget
-RUN apk add --no-cache ca-certificates gettext wget
+# bash is required for dsub in the All of Us cloud environment
+RUN apk add --no-cache ca-certificates gettext wget bash
 
 WORKDIR /PathLinker
 COPY pathlinker-files.txt .
