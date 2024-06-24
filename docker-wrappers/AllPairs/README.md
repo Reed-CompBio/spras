@@ -26,3 +26,7 @@ The Docker wrapper can be tested with `pytest -k test_ap.py` from the root of th
 ## Notes
 - The `all-pairs-shortest-paths.py` code is located locally in SPRAS (since the code is short). It is under `docker-wrappers/AllPairs`.
 - Samples of an input network and source/target file are located under test/AllPairs/input.
+
+## Versions:
+- v1: Initial version. Copies source file from SPRAS repository.
+- v2: Add bash, which is not available in Alpine Linux.
