@@ -14,7 +14,7 @@ SPRAS_ROOT = Path(__file__).parent.parent.parent.absolute()
 sys.path.append(str(Path(SPRAS_ROOT, 'docker-wrappers', 'BowtieBuilder')))
 from spras.btb import BowtieBuilder
 
-TEST_DIR = Path('test', 'bowtiebuilder/')
+TEST_DIR = Path('test', 'BTB/')
 OUT_FILE = Path(TEST_DIR, 'output', 'output1.txt')
 
 
