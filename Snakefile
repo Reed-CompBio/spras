@@ -36,10 +36,10 @@ algorithms_with_params = [f'{algorithm}-params-{params_hash}' for algorithm, par
 dataset_labels = list(_config.config.datasets.keys())
 
 # Get algorithms that are running multiple parameter combinations
-def include_algorithm (algo):
+def algo_has_mult_param_combos(algo):
     return len(algorithm_params.get(algo, {})) > 1
 
-algorithms_mult_param_combos = [algo for algo in algorithms if include_algorithm(algo)]
+algorithms_mult_param_combos = [algo for algo in algorithms if algo_has_mult_param_combos(algo)]
 
 # Get the parameter dictionary for the specified
 # algorithm and parameter combination hash
@@ -299,13 +299,13 @@ rule ml_analysis:
         ml.hac_horizontal(summary_df, output.hac_image_horizontal, output.hac_clusters_horizontal, **hac_params)
         ml.ensemble_network(summary_df, output.ensemble_network_file)
 
-def collect_files_per_algo (wildcards):
-    filtered_params = [algo_param for algo_param in algorithms_with_params if wildcards.algorithm in algo_param]
-    return expand('{out_dir}{sep}{{dataset}}-{algorithm_params}{sep}pathway.txt', out_dir=out_dir, sep=SEP, algorithm_params=filtered_params)
+def collect_pathways_per_algo(wildcards):
+    filtered_algo_params = [algo_param for algo_param in algorithms_with_params if wildcards.algorithm in algo_param]
+    return expand('{out_dir}{sep}{{dataset}}-{algorithm_params}{sep}pathway.txt', out_dir=out_dir, sep=SEP, algorithm_params=filtered_algo_params)
 
 rule ml_analysis_aggregate_algo:
     input:
-        pathways = collect_files_per_algo
+        pathways = collect_pathways_per_algo
     output:
         pca_image = SEP.join([out_dir, '{dataset}-ml', '{algorithm}-pca.png']),
         pca_variance= SEP.join([out_dir, '{dataset}-ml', '{algorithm}-pca-variance.txt']),
