@@ -25,30 +25,32 @@ class TestBowtieBuilder:
     def test_ln(self):
         print("RUNNING TEST_LN FOR BOWTIEBUILDER")
         OUT_FILE.unlink(missing_ok=True)
-        BowtieBuilder(source_file=Path(TEST_DIR, 'input', 'source.txt'),
-                           target_file=Path(TEST_DIR, 'input', 'target.txt'),
-                           edges_file=Path(TEST_DIR, 'input', 'edges.txt'),
+        BowtieBuilder(sources=Path(TEST_DIR, 'input', 'source.txt'),
+                           targets=Path(TEST_DIR, 'input', 'target.txt'),
+                           edges=Path(TEST_DIR, 'input', 'edges.txt'),
                            output_file=OUT_FILE)
         assert OUT_FILE.exists(), 'Output file was not written'
         expected_file = Path(TEST_DIR, 'expected', 'output1.txt')
         assert cmp(OUT_FILE, expected_file, shallow=False), 'Output file does not match expected output file'
 
-    # """
-    # Run the bowtiebuilder algorithm with a missing input file
-    # """
-    # def test_missing_file(self):
-    #     with pytest.raises(OSError):
-    #         BowtieBuilder(source_file=Path(TEST_DIR, 'input', 'missing.txt'),
-    #                        target_file=Path(TEST_DIR, 'input', 'target.txt'),
-    #                        edges_file=Path(TEST_DIR, 'input', 'edges.txt'),
-    #                        output_file=OUT_FILE)
+    """
+    Run the bowtiebuilder algorithm with a missing input file
+    """
+    def test_missing_file(self):
+        print("RUNNING TEST_MISSING_FILE FOR BOWTIEBUILDER")
+        with pytest.raises(OSError):
+            BowtieBuilder(sources=Path(TEST_DIR, 'input', 'missing.txt'),
+                           targets=Path(TEST_DIR, 'input', 'target.txt'),
+                           edges=Path(TEST_DIR, 'input', 'edges.txt'),
+                           output_file=OUT_FILE)
 
-    # """
-    # Run the local neighborhood algorithm with an improperly formatted network file
-    # """
-    # def test_format_error(self):
-    #     with pytest.raises(ValueError):
-    #         BowtieBuilder(source_file=Path(TEST_DIR, 'input', 'source.txt'),
-    #                        target_file=Path(TEST_DIR, 'input', 'target.txt'),
-    #                        edges_file=Path(TEST_DIR, 'input', 'edges_bad.txt'),
-    #                        output_file=OUT_FILE)
+    """
+    Run the local neighborhood algorithm with an improperly formatted network file
+    """
+    def test_format_error(self):
+        print("RUNNING TEST_FORMAT_ERROR FOR BOWTIEBUILDER")
+        with pytest.raises(ValueError):
+            BowtieBuilder( sources=Path(TEST_DIR, 'input', 'source.txt'),
+                           targets=Path(TEST_DIR, 'input', 'target.txt'),
+                           edges=Path(TEST_DIR, 'input', 'edges_bad.txt'),
+                           output_file=OUT_FILE )

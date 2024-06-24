@@ -56,8 +56,8 @@ class TestLocalNeighborhood:
         out_path.unlink(missing_ok=True)
         # Only include required arguments
         LocalNeighborhood.run(
-            nodes=Path(TEST_DIR,'input','ln-nodes.txt')
-            network=Path(TEST_DIR, 'input', 'ln-network.txt')
+            nodes = Path(TEST_DIR,'input','ln-nodes.txt'),
+            network = Path(TEST_DIR, 'input', 'ln-network.txt'),
             output_file=OUT_FILE
         )
         assert out_path.exists()
