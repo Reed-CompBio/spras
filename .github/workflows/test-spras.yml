@@ -80,7 +80,7 @@ jobs:
         docker pull reedcompbio/omics-integrator-2:v2
         docker pull reedcompbio/pathlinker:latest
         docker pull reedcompbio/meo:latest
-        docker pull reedcompbio/mincostflow:latest
+        docker pull reedcompbio/mincostflow:v2
         docker pull reedcompbio/allpairs:latest
         docker pull reedcompbio/domino:latest
     - name: Build Omics Integrator 1 Docker image
@@ -125,7 +125,7 @@ jobs:
         path: docker-wrappers/MinCostFlow/.
         dockerfile: docker-wrappers/MinCostFlow/Dockerfile
         repository: reedcompbio/mincostflow
-        tags: latest
+        tags: v2
         cache_froms: reedcompbio/mincostflow:latest
         push: false
     - name: Build All Pairs Shortest Paths Docker image
