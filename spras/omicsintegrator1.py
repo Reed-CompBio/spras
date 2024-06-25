@@ -11,7 +11,7 @@ __all__ = ['OmicsIntegrator1', 'write_conf']
 
 
 # TODO decide on default number of processes and threads
-def write_conf(filename=Path('config.txt'), wne, b=None, d=None, mu=None, noise=None, g=None, r=None):
+def write_conf(filename=Path('config.txt'), w=None, b=None, d=None, mu=None, noise=None, g=None, r=None):
     """
     Write the configuration file for Omics Integrator 1
     See https://github.com/fraenkel-lab/OmicsIntegrator#required-inputs
@@ -159,10 +159,7 @@ class OmicsIntegrator1(PRM):
 
         print('Running Omics Integrator 1 with arguments: {}'.format(' '.join(command)), flush=True)
 
-        container_suffix = "omics-integrator-1:no_conda" # no-conda version is the default
-        
-        # temporary solution for dsub backend
-        container_framework = 'dsub'
+        container_suffix = "omics-integrator-1:no-conda" # no-conda version is the default
         
         out = run_container(container_framework,
                             container_suffix,  # no-conda version is the default
