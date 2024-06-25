@@ -94,8 +94,7 @@ class AllPairs(PRM):
 
         print('Running All Pairs Shortest Paths with arguments: {}'.format(' '.join(command)), flush=True)
 
-        container_suffix = "allpairs"
-
+        container_suffix = "allpairs:v2"
         out = run_container(
                             container_framework,
                             container_suffix,
