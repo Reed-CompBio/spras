@@ -22,16 +22,16 @@ class TestBowtieBuilder:
     """
     Run the bowtiebuilder algorithm on the example input files and check the output matches the expected output
     """
-    # def test_ln(self):
-    #     print("RUNNING TEST_LN FOR BOWTIEBUILDER")
-    #     OUT_FILE.unlink(missing_ok=True)
-    #     bowtiebuilder.run(source=Path(TEST_DIR, 'input', 'source.txt'),
-    #                        target=Path(TEST_DIR, 'input', 'target.txt'),
-    #                        edges=Path(TEST_DIR, 'input', 'edges.txt'),
-    #                        output_file=OUT_FILE)
-    #     assert OUT_FILE.exists(), 'Output file was not written'
-    #     expected_file = Path(TEST_DIR, 'expected', 'output1.txt')
-    #     assert cmp(OUT_FILE, expected_file, shallow=False), 'Output file does not match expected output file'
+    def test_ln(self):
+        print("RUNNING TEST_LN FOR BOWTIEBUILDER")
+        OUT_FILE.unlink(missing_ok=True)
+        bowtiebuilder.run(source=Path(TEST_DIR, 'input', 'source.txt'),
+                           target=Path(TEST_DIR, 'input', 'target.txt'),
+                           edges=Path(TEST_DIR, 'input', 'edges.txt'),
+                           output_file=OUT_FILE)
+        assert OUT_FILE.exists(), 'Output file was not written'
+        expected_file = Path(TEST_DIR, 'expected', 'output1.txt')
+        assert cmp(OUT_FILE, expected_file, shallow=False), 'Output file does not match expected output file'
 
     """
     Run the bowtiebuilder algorithm with a missing input file
@@ -44,12 +44,13 @@ class TestBowtieBuilder:
                            output_file=OUT_FILE)
 
 
-    # def test_missing_file(self):
-    #     with pytest.raises(FileNotFoundError):
-    #         bowtiebuilder.run(source=Path(TEST_DIR, 'input', 'unknown.txt'),
-    #                        target=Path(TEST_DIR, 'input', 'target.txt'),
-    #                        edges=Path(TEST_DIR, 'input', 'edges.txt'),
-    #                        output_file=OUT_FILE)
+    def test_missing_file(self):
+        with pytest.raises(OSError):
+            bowtiebuilder.run(source=Path(TEST_DIR, 'input', 'unknown.txt'),
+                           target=Path(TEST_DIR, 'input', 'target.txt'),
+                           edges=Path(TEST_DIR, 'input', 'edges.txt'),
+                           output_file=OUT_FILE)
+
 
     # """
     # """
