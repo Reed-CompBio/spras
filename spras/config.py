@@ -61,7 +61,7 @@ class Config:
         # __init__ makes clear exactly what is being configured.
         # Directory used for storing output
         self.out_dir = None
-        # Container framework used by PRMs. Valid options are "docker" and "singularity"
+        # Container framework used by PRMs. Valid options are "docker", "dsub", and "singularity"
         self.container_framework = None
         # The container prefix (host and organization) to use for images. Default is "docker.io/reedcompbio"
         self.container_prefix = DEFAULT_CONTAINER_PREFIX
@@ -107,7 +107,7 @@ class Config:
         # However, if we get a bad value, we raise an exception.
         if "container_framework" in raw_config:
             container_framework = raw_config["container_framework"].lower()
-            if container_framework not in ("docker", "singularity"):
+            if container_framework not in ("docker", "singularity", "dsub"):
                 msg = "SPRAS was configured to run with an unknown container framework: '" + raw_config["container_framework"] + "'. Accepted values are 'docker' or 'singularity'."
                 raise ValueError(msg)
             self.container_framework = container_framework
