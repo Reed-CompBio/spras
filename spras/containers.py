@@ -10,7 +10,6 @@ import spras.config as config
 from spras.util import hash_filename
 
 import subprocess
-from datetime import datetime 
 
 def prepare_path_docker(orig_path: PurePath) -> str:
     """

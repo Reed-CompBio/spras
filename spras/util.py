@@ -10,6 +10,7 @@ from typing import Any, Dict, List, Optional, Tuple, Union
 
 import pandas as pd
 
+
 def hash_params_sha1_base32(params_dict: Dict[str, Any], length: Optional[int] = None) -> str:
     """
     Hash of a dictionary.
