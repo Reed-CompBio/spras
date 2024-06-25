@@ -61,16 +61,24 @@ def download_gcs(gcs_path: str, local_path: str, is_dir: bool):
     # run command 
     subprocess.run(cmd, shell=True)
 
+    if is_dir and Path(Path(local_path)/'gcs_temp.txt').exists():
+        os.remove(Path(Path(local_path)/'gcs_temp.txt')) 
+
 def upload_gcs(local_path: str, gcs_path: str, is_dir: bool):
     # check if path exists in cloud storage
     exists = len(subprocess.run(f'gcloud storage ls {gcs_path}', shell=True, capture_output=True, text=True).stdout)
     # if path exists rsyc
     if exists > 0:
         cmd = 'gcloud storage rsync --checksums-only'
+    # if directory is empty
+    elif exists == 0 and len(os.listdir(local_path)) == 0:
+        # create a temporary file because GCS will not recognize empty directories
+        Path(Path(local_path)/'gcs_temp.txt').touch()
+        # copy path to cloud storage
+        cmd = 'gcloud storage cp -c'
     # else copy path to cloud storage
     else:
         cmd = 'gcloud storage cp -c'
-    
     # check if directory 
     if is_dir:
         cmd = cmd + ' -r'
@@ -321,18 +329,27 @@ def run_container_dsub(container: str, command: List[str], volumes: List[Tuple[P
     workspace_bucket = os.getenv('WORKSPACE_BUCKET')
     # Add path in the workspace bucket and label for dsub command for each volume
     dsub_volumes = [(src, dst, workspace_bucket +  str(dst), "INPUT_" + str(i),) for i, (src, dst) in enumerate(volumes)]
-    
+
     # Prepare command that will be run inside the container for dsub 
     container_command = list()
     for item in command:
-        # Replace each volume with path in workspace 
-        to_replace = ["${"+path[3]+'}' for path in dsub_volumes if str(path[1]) in item]
-        if len(to_replace) == 1 and len(PurePath(item).suffix) > 0:
-            container_command.append(to_replace[0]+'/'+item.split('/')[-1])
-        elif len(to_replace) == 1 and len(PurePath(item).suffix) == 0:
-            container_command.append(to_replace[0]+'/')
+        # Find if item is volume 
+        to_replace = [(str(path[1]), "${"+path[3]+'}') for path in dsub_volumes if str(path[1]) in item]
+        # Replace volume path with dsub volume path
+        if len(to_replace) == 1:
+            # Get path that will be replaced
+            path = to_replace[0][0]
+            # Get dsub input variable that will replace path 
+            env_variable = to_replace[0][1]
+            # Replace path with env_variable 
+            container_path = item.replace(path, env_variable)
+            # Add / if there is no suffix
+            if container_path == env_variable:
+                container_path = container_path + '/'
+            container_command.append(container_path)
         else:
             container_command.append(item)
+
     # Add a command to copy the volumes to the workspace buckets
     container_command.append(('; cp -rf ' + f'/mnt/data/input/gs/{workspace_bucket}{working_dir}/*' + ' $OUTPUT').replace('gs://', ''))
 
