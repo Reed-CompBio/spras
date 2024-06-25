@@ -1,6 +1,7 @@
 import os
 import platform
 import re
+import subprocess
 from pathlib import Path, PurePath, PurePosixPath
 from typing import Any, Dict, List, Optional, Tuple, Union
 
@@ -9,7 +10,6 @@ import docker
 import spras.config as config
 from spras.util import hash_filename
 
-import subprocess
 
 def prepare_path_docker(orig_path: PurePath) -> str:
     """
@@ -57,11 +57,11 @@ def download_gcs(gcs_path: str, local_path: str, is_dir: bool):
     cmd = cmd + ' ' + gcs_path + ' ' + local_path
 
     print(cmd)
-    # run command 
+    # run command
     subprocess.run(cmd, shell=True)
 
     if is_dir and Path(Path(local_path)/'gcs_temp.txt').exists():
-        os.remove(Path(Path(local_path)/'gcs_temp.txt')) 
+        os.remove(Path(Path(local_path)/'gcs_temp.txt'))
 
 def upload_gcs(local_path: str, gcs_path: str, is_dir: bool):
     # check if path exists in cloud storage
@@ -78,7 +78,7 @@ def upload_gcs(local_path: str, gcs_path: str, is_dir: bool):
     # else copy path to cloud storage
     else:
         cmd = 'gcloud storage cp -c'
-    # check if directory 
+    # check if directory
     if is_dir:
         cmd = cmd + ' -r'
     cmd = cmd + ' ' + str(Path(local_path).resolve()) + ' ' + gcs_path
@@ -86,7 +86,7 @@ def upload_gcs(local_path: str, gcs_path: str, is_dir: bool):
     print(cmd)
     # run command
     subprocess.run(cmd, shell=True)
-    
+
 def prepare_dsub_cmd(flags: dict):
     # set constant flags
     dsub_command = 'dsub'
@@ -102,7 +102,7 @@ def prepare_dsub_cmd(flags: dict):
     flag_list = ["provider", "regions", "zones", "location", "user-project", "project", "network", "subnetwork", "service-account", "image", "env", "logging", "input", "input-recursive", "mount", "output", "output-recursive", "command", "script"]
     ordered_flags = {f:flags[f] for f in flag_list if f in flags.keys()}
 
-    # iteratively add flags to the command 
+    # iteratively add flags to the command
     for flag in ordered_flags.keys():
         if isinstance(ordered_flags.get(flag), list):
             for f in ordered_flags.get(flag):
@@ -315,7 +315,7 @@ def run_container_dsub(container: str, command: List[str], volumes: List[Tuple[P
     Attempts to automatically correct file owner and group for new files created by the container, setting them to the
     current owner and group IDs.
     Does not modify the owner or group for existing files modified by the container.
-    @param container: name of the container in the Google Cloud Container Registry 
+    @param container: name of the container in the Google Cloud Container Registry
     @param command: command to run in the container
     @param volumes: a list of volumes to mount where each item is a (source, destination) tuple
     @param working_dir: the working directory in the container
@@ -329,18 +329,18 @@ def run_container_dsub(container: str, command: List[str], volumes: List[Tuple[P
     # Add path in the workspace bucket and label for dsub command for each volume
     dsub_volumes = [(src, dst, workspace_bucket +  str(dst), "INPUT_" + str(i),) for i, (src, dst) in enumerate(volumes)]
 
-    # Prepare command that will be run inside the container for dsub 
+    # Prepare command that will be run inside the container for dsub
     container_command = list()
     for item in command:
-        # Find if item is volume 
+        # Find if item is volume
         to_replace = [(str(path[1]), "${"+path[3]+'}') for path in dsub_volumes if str(path[1]) in item]
         # Replace volume path with dsub volume path
         if len(to_replace) == 1:
             # Get path that will be replaced
             path = to_replace[0][0]
-            # Get dsub input variable that will replace path 
+            # Get dsub input variable that will replace path
             env_variable = to_replace[0][1]
-            # Replace path with env_variable 
+            # Replace path with env_variable
             container_path = item.replace(path, env_variable)
             # Add / if there is no suffix
             if container_path == env_variable:
@@ -355,27 +355,27 @@ def run_container_dsub(container: str, command: List[str], volumes: List[Tuple[P
     # Make the command into a string
     flags['command'] = ' '.join(container_command)
     flags['command'] = "'" + flags['command'] + "'"
-    
+
     ## Push volumes to WORKSPACE_BUCKET
     for src, dst, gcs_path, env in dsub_volumes:
         upload_gcs(local_path=str(src), gcs_path=gcs_path, is_dir=True)
-    
+
     ## Prepare flags for dsub command
     flags['image'] = container
     flags['env'] = environment
     flags['input-recursive'] = [vol[3]+'='+vol[2] for vol in dsub_volumes]
     flags['output-recursive'] = "OUTPUT=" + workspace_bucket +  working_dir
     flags['logging'] = workspace_bucket + '/dsub/'
-    
-    # Create dsub command 
+
+    # Create dsub command
     dsub_command = prepare_dsub_cmd(flags)
-    
+
     # Run dsub as subprocess
     subprocess.run(dsub_command, shell=True)
-    
+
     # Pull output volumes from WORKSPACE_BUCKET
     for src, dst, gcs_path, env in dsub_volumes:
-        download_gcs(local_path=str(src), gcs_path=gcs_path, is_dir=True)  
-    
+        download_gcs(local_path=str(src), gcs_path=gcs_path, is_dir=True)
+
     # return location of dsub logs in WORKSPACE_BUCKET
     return  'dsub logs: {logs}'.format(logs = flags['logging'])

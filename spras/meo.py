@@ -1,7 +1,7 @@
+import os
 from pathlib import Path
 
 import pandas as pd
-import os
 
 from spras.containers import prepare_volume, run_container
 from spras.interactome import (
@@ -39,10 +39,9 @@ def write_properties(filename=Path('properties.txt'), edges=None, sources=None, 
         sources = input_prefix + sources
         targets = input_prefix + targets
         edge_output = input_prefix + edge_output
-        path_output = input_prefix + path_output 
+        path_output = input_prefix + path_output
 
     with open(filename, 'w') as f:
-        print(Path(edges).as_posix(), Path(sources).as_posix(), Path(targets).as_posix(), Path(edge_output).as_posix(), Path(path_output).as_posix())
         # Write the required properties
         f.write(f'edges.file = {Path(edges).as_posix()}\n')
         f.write(f'sources.file = {Path(sources).as_posix()}\n')
