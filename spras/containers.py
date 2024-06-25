@@ -320,7 +320,7 @@ def run_container_dsub(container: str, command: List[str], volumes: List[Tuple[P
     @param volumes: a list of volumes to mount where each item is a (source, destination) tuple
     @param working_dir: the working directory in the container
     @param environment: environment variables to set in the container
-    @return: path of output from dsub 
+    @return: path of output from dsub
     """
     # Dictionary of flags for dsub command
     flags = dict()
@@ -357,7 +357,7 @@ def run_container_dsub(container: str, command: List[str], volumes: List[Tuple[P
     flags['command'] = "'" + flags['command'] + "'"
 
     ## Push volumes to WORKSPACE_BUCKET
-    for src, dst, gcs_path, env in dsub_volumes:
+    for src, _dst, gcs_path, _env in dsub_volumes:
         upload_gcs(local_path=str(src), gcs_path=gcs_path, is_dir=True)
 
     ## Prepare flags for dsub command
@@ -374,7 +374,7 @@ def run_container_dsub(container: str, command: List[str], volumes: List[Tuple[P
     subprocess.run(dsub_command, shell=True)
 
     # Pull output volumes from WORKSPACE_BUCKET
-    for src, dst, gcs_path, env in dsub_volumes:
+    for src, _dst, gcs_path, _env in dsub_volumes:
         download_gcs(local_path=str(src), gcs_path=gcs_path, is_dir=True)
 
     # return location of dsub logs in WORKSPACE_BUCKET
