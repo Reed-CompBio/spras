@@ -64,7 +64,7 @@ class PathLinker(PRM):
         # This is pretty memory intensive. We might want to keep the interactome centralized.
         edges.to_csv(filename_map["network"],sep="\t",index=False,columns=["Interactor1","Interactor2","Weight"],
                      header=["#Interactor1","Interactor2","Weight"])
-
+    #modify above to meet new file format req
     # Skips parameter validation step
     @staticmethod
     def run(nodetypes=None, network=None, output_file=None, k=None, container_framework="docker"):
@@ -118,7 +118,7 @@ class PathLinker(PRM):
         container_suffix = "pathlinker"
         out = run_container(container_framework,
                             container_suffix,
-                            command,
+                            command,    
                             volumes,
                             work_dir)
         print(out)

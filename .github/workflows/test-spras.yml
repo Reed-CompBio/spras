@@ -75,6 +75,7 @@ jobs:
       # https://medium.com/mobileforgood/coding-tips-patterns-for-continuous-integration-with-docker-on-travis-ci-9cedb8348a62
       # https://github.com/docker/build-push-action/issues/7
     - name: Pull Docker images
+    #Added LN image pull
       run: |
         docker pull reedcompbio/omics-integrator-1:latest
         docker pull reedcompbio/omics-integrator-2:v2
@@ -83,6 +84,8 @@ jobs:
         docker pull reedcompbio/mincostflow:latest
         docker pull reedcompbio/allpairs:latest
         docker pull reedcompbio/domino:latest
+        docker pull dwnachre/local-neighborhood
+        
     - name: Build Omics Integrator 1 Docker image
       uses: docker/build-push-action@v1
       with:
@@ -154,6 +157,18 @@ jobs:
         repository: reedcompbio/py4cytoscape
         tags: v2
         cache_froms: reedcompbio/py4cytoscape:v2
+        push: false
+  #Adding LN Here
+    - name: Build LocalNeighborhood Docker image
+      uses: docker/build-push-action@v1
+      with:
+        path: docker-wrappers/LocalNeighborhood/.
+        dockerfile: docker-wrappers/LocalNeighborhood/Dockerfile
+        #Ask about the following line
+        repository: reedcompbio/localneighborhood
+        tags: v2
+        #Ask about the following line
+        cache_froms: reedcompbio/localneighborhood:latest
         push: false
 
   # Run pre-commit checks on source files
