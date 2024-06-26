@@ -33,23 +33,23 @@ class LocalNeighborhood(PRM):
         
         edges_df.to_csv(filename_map['network'],index=False,sep = "|",columns=['Interactor1','Interactor2'], header=False)
         
-    def run(nodetypes=None, network=None, output_file=None, k=None, container_framework='docker'):
-        if not nodetypes or not network or not output_file:
-            raise ValueError('Required Pathlinker arguments are missing')
+    def run(nodes=None, network=None, output_file=None, container_framework='docker'):
+        if not nodes or not network or not output_file:
+            raise ValueError('Required arguments are missing')
         work_dir = '/spras'
 
         volumes = list()
 
-        bind_path, node_file = prepare_volume(nodetypes,work_dir)
+        bind_path, node_file = prepare_volume(nodes,work_dir)
         volumes.append(bind_path)
 
         bind_path, network_file = prepare_volume(network, work_dir)
         volumes.append(bind_path)
 
         out_dir = Path(output_file).parent
-        mapped_out_dir = prepare_volume(str(out_dir),work_dir)
+        bind_path, mapped_out_dir = prepare_volume(str(out_dir),work_dir)
         mapped_out_prefix = mapped_out_dir + '/out'
-        command = ['python','/LocalNeighborhood/run.py',network_file,node_file,'--output', mapped_out_prefix]
+        command = ['python','/LocalNeighborhood/local_neighborhood.py','--network',network_file,'--nodes',node_file,'--output', mapped_out_prefix]
         container_suffix = 'local-neighborhood'
         out = run_container(container_framework, container_suffix, command, volumes, work_dir)
     def parse_output(raw_pathway_file, standardized_pathway_file):

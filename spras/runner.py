@@ -8,7 +8,7 @@ from spras.omicsintegrator1 import OmicsIntegrator1 as omicsintegrator1
 from spras.omicsintegrator2 import OmicsIntegrator2 as omicsintegrator2
 from spras.pathlinker import PathLinker as pathlinker
 from spras.local_neighborhood import LocalNeighborhood as local_neighborhood
-
+    
 def run(algorithm, params):
     """
     A generic interface to the algorithm-specific run functions
