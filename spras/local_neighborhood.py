@@ -47,11 +47,19 @@ class LocalNeighborhood(PRM):
         volumes.append(bind_path)
 
         out_dir = Path(output_file).parent
+
+        out_dir.mkdir(parents=True, exist_ok=True)
         bind_path, mapped_out_dir = prepare_volume(str(out_dir),work_dir)
+        volumes.append(bind_path)
         mapped_out_prefix = mapped_out_dir + '/out'
+        
         command = ['python','/LocalNeighborhood/local_neighborhood.py','--network',network_file,'--nodes',node_file,'--output', mapped_out_prefix]
+        
         container_suffix = 'local-neighborhood'
         out = run_container(container_framework, container_suffix, command, volumes, work_dir)
+
+        output_edges = Path(out_dir,'out')
+        output_edges.rename(output_file)
     def parse_output(raw_pathway_file, standardized_pathway_file):
         df = pd.read_csv(raw_pathway_file, sep='|', header=None)
         df = add_rank_column(df)
