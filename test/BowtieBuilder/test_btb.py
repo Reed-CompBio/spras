@@ -37,25 +37,29 @@ class TestBowtieBuilder:
     Run the bowtiebuilder algorithm with a missing input file
     """
     def test_missing_arguments(self):
-        with pytest.raises(ValueError):
+        with pytest.raises(ValueError) as exec_info:
             bowtiebuilder.run(
                            target=Path(TEST_DIR, 'input', 'target.txt'),
                            edges=Path(TEST_DIR, 'input', 'edges.txt'),
                            output_file=OUT_FILE)
+        assert exec_info.type is ValueError            
 
 
     def test_missing_file(self):
         with pytest.raises(OSError):
-            bowtiebuilder.run(source=Path(TEST_DIR, 'input', 'unknown.txt'),
+            try: 
+                bowtiebuilder.run(source=Path(TEST_DIR, 'input', 'unknown.txt'),
                            target=Path(TEST_DIR, 'input', 'target.txt'),
                            edges=Path(TEST_DIR, 'input', 'edges.txt'),
                            output_file=OUT_FILE)
+            except OSError:
+                raise OSError
 
 
     # """
     # """
     def test_format_error(self):
-        with pytest.raises(IndexError):
+        with pytest.raises(IndexError) as exec_info:
             bowtiebuilder.run(source=Path(TEST_DIR, 'input', 'source.txt'),
                            target=Path(TEST_DIR, 'input', 'target.txt'),
                            edges=Path(TEST_DIR, 'input', 'edges_bad.txt'),
