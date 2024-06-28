@@ -5,6 +5,7 @@ from pathlib import Path
 import pytest
 
 import spras.config as config
+from spras.local_neighborhood import LocalNeighborhood
 
 config.init_from_file("config/config.yaml")
 
@@ -50,3 +51,12 @@ class TestLocalNeighborhood:
                                output_file=OUT_FILE)
 
     # Write tests for the Local Neighborhood run function here
+    def test_localneighborhood(self):
+        out_path = Path(OUT_FILE)
+        out_path.unlink(missing_ok=True)
+        # Include required arguments (nodes, network, output file)
+        LocalNeighborhood.run(nodes=Path(TEST_DIR,input,'ln-nodes.txt'),
+                              network=Path(TEST_DIR,input,'ln-network.txt')
+                              output_file=OUT_FILE
+                              )
+        assert out_path.exists()

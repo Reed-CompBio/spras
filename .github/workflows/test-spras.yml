@@ -155,6 +155,15 @@ jobs:
         tags: v2
         cache_froms: reedcompbio/py4cytoscape:v2
         push: false
+    - name: Build local-neighborhood Docker image
+      uses: docker/build-push-action@v1
+      with:
+        path: docker-wrappers/LocalNeighborhood
+        dockerfile: docker-wrappers/LocalNeighborhood/Dockerfile
+        repository: syeleti
+        tags: latest
+        cache_froms: syeleti/local-neighborhood
+        push: true
 
   # Run pre-commit checks on source files
   pre-commit:
