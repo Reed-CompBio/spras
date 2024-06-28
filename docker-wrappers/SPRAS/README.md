@@ -67,7 +67,8 @@ contain useful debugging clues about what may have gone wrong.
 the version of SPRAS you want to test, and push the image to your image repository. To use that container in the workflow, change the `container_image` line of
 `spras.sub` to point to the new image.
 
-**Note**: In some cases, it may be necessary to convert the SPRAS image to a `.sif` container image before running someplace like the OSPool. To do this, run
+**Note**: In some cases, especially if you're encountering an error like `/srv//spras.sh: line 10: snakemake: command not found`, it may be necessary to convert
+the SPRAS image to a `.sif` container image before running someplace like the OSPool. To do this, run:
 ```
 apptainer build spras.sif docker://reedcompbio/spras:v0.1.0
 ```
