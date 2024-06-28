@@ -34,7 +34,7 @@ class TestBowtieBuilder:
         assert cmp(OUT_FILE, expected_file, shallow=False), 'Output file does not match expected output file'
 
     """
-    Run the bowtiebuilder algorithm with a missing input file
+    Run the bowtiebuilder algorithm with missing arguments
     """
     def test_missing_arguments(self):
         with pytest.raises(ValueError) as exec_info:
@@ -42,24 +42,27 @@ class TestBowtieBuilder:
                            target=Path(TEST_DIR, 'input', 'target.txt'),
                            edges=Path(TEST_DIR, 'input', 'edges.txt'),
                            output_file=OUT_FILE)
-        assert exec_info.type is ValueError            
+        print(exec_info)            
 
 
+    """
+    Run the bowtiebuilder algorithm with missing files
+    """
     def test_missing_file(self):
-        with pytest.raises(OSError):
-            try: 
-                bowtiebuilder.run(source=Path(TEST_DIR, 'input', 'unknown.txt'),
+        with pytest.raises(ValueError):
+            print("beginning test")
+            bowtiebuilder.run(source=Path(TEST_DIR, 'input', 'unknown.txt'),
                            target=Path(TEST_DIR, 'input', 'target.txt'),
                            edges=Path(TEST_DIR, 'input', 'edges.txt'),
                            output_file=OUT_FILE)
-            except OSError:
-                raise OSError
 
 
-    # """
-    # """
+    """
+    Run the bowtiebuilder algorithm with bad input data
+    """
     def test_format_error(self):
-        with pytest.raises(IndexError) as exec_info:
+        with pytest.raises(IndexError):
+            print("beginning test")
             bowtiebuilder.run(source=Path(TEST_DIR, 'input', 'source.txt'),
                            target=Path(TEST_DIR, 'input', 'target.txt'),
                            edges=Path(TEST_DIR, 'input', 'edges_bad.txt'),

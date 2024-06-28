@@ -89,6 +89,9 @@ class BowtieBuilder(PRM):
         if not source or not target or not edges or not output_file:
             raise ValueError('Required BowtieBuilder arguments are missing')
 
+        if not source.exists() or not target.exists() or not edges.exists():
+            raise ValueError('Missing input file')
+
         work_dir = '/btb'
 
         # Each volume is a tuple (src, dest)
@@ -127,7 +130,7 @@ class BowtieBuilder(PRM):
 
         print('Running BowtieBuilder with arguments: {}'.format(' '.join(command)), flush=True)
 
-        container_suffix = "btb"
+        container_suffix = "bowtiebuilder"
         out = run_container(container_framework,
                             container_suffix,
                             command,
