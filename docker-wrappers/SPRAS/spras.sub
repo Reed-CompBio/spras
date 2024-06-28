@@ -35,7 +35,7 @@ error = logs/spras_$(Cluster)_$(Process).err
 # simply a wrapper on the Snakefile.                       #
 ############################################################
 executable = spras.sh
-arguments = "--cores $(NUM_PROCS) --configfile $(CONFIG_FILE)"
+arguments = "--cores $(NUM_PROCS) --configfile $(CONFIG_FILE) --retries 3"
 
 ############################################################
 #        Handle transferring required inputs/outputs       #
