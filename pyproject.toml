@@ -20,11 +20,12 @@ requires-python = ">=3.11"
 dependencies = [
     "adjusttext==0.7.3",
     # A bug was introduced in older versions of snakemake that prevent it from running. Update to fix
-    "snakemake==8.5.3",
+    "snakemake==8.11.6",
     "docker==5.0.3", # Switched from docker-py to docker because docker-py is not maintained in pypi. This appears to have no effect
     "matplotlib==3.6",
     "networkx==2.8",
-    "pandas==1.5",
+    "pandas==2.0",
+    "numpy==1.26.4",
     "pip==22.1",
     "requests==2.28",
     "scikit-learn==1.2",

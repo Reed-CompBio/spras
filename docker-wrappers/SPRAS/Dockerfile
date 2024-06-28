@@ -9,7 +9,7 @@ RUN dnf update -y && \
     docker apptainer
 
 COPY / /spras/
-
+RUN chmod -R 777 /spras
 WORKDIR /spras
 
 # Install spras into the container
