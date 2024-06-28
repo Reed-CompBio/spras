@@ -67,6 +67,12 @@ contain useful debugging clues about what may have gone wrong.
 the version of SPRAS you want to test, and push the image to your image repository. To use that container in the workflow, change the `container_image` line of
 `spras.sub` to point to the new image.
 
+**Note**: In some cases, it may be necessary to convert the SPRAS image to a `.sif` container image before running someplace like the OSPool. To do this, run
+```
+apptainer build spras.sif docker://reedcompbio/spras:v0.1.0
+```
+to produce the file `spras.sif`. Then, substitute this value as the `container_image` in the submit file.
+
 ## Versions:
 
 - v0.1.0: Created an image with SPRAS as an installed python module. This makes SPRAS runnable anywhere with Docker/Singularity. Note that the Snakefile should be
