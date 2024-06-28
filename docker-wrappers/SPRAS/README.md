@@ -8,7 +8,12 @@ This image comes bundled with all of the necessary software packages to run SPRA
 To create the Docker image, make sure you are in this repository's root directory, and from your terminal run:
 
 ```
-docker build -t reedcompbio/spras -f docker-wrappers/SPRAS/Dockerfile .
+docker build -t <project name>/<image name>:<tag name> -f docker-wrappers/SPRAS/Dockerfile .
+```
+
+For example, to build this image with the intent of pushing it to DockerHub as reedcompbio/spras:v0.1.0, you'd run:
+```
+docker build -t reedcompbio/spras:v0.1.0 -f docker-wrappers/SPRAS/Dockerfile .
 ```
 
 This will copy the entire SPRAS repository into the container and install SPRAS with `pip`. As such, any changes you've made to the current SPRAS repository will be reflected in version of SPRAS installed in the container. Since SPRAS
@@ -28,13 +33,15 @@ This will cause changes to spras source code to update the intsalled package.
 FROM --platform=linux/amd64 almalinux:9
 ```
 
-Or to temporarily override your system's default by exporting the environment variable:
-
+Or to temporarily override your system's default during the build, prepend your build command with:
 ```
-export DOCKER_DEFAULT_PLATFORM=linux/amd64
+DOCKER_DEFAULT_PLATFORM=linux/amd64
 ```
 
-(This environment variable can then be cleared by running `unset DOCKER_DEFAULT_PLATFORM` to return your system to its default)
+For example, to build reedcompbio/spras:v0.1.0 on Apple Silicon as a linux/amd64 container, you'd run:
+```
+DOCKER_DEFAULT_PLATFORM=linux/amd64 docker build -t reedcompbio/spras:v0.1.0 -f docker-wrappers/SPRAS/Dockerfile .
+```
 
 ## Testing
 
@@ -45,16 +52,16 @@ in this environment, first login to an HTCondor Access Point (AP). Then, from th
 git clone https://github.com/Reed-CompBio/spras.git
 ```
 
-When you're ready to run SPRAS as an HTCondor workflow, navigate to the `spras/docker-wrappers/SPRAS` directory and run `condor_submit spras.sub`. This will
-submit SPRAS to HTCondor as a single job with as many cores as indicated by the `request_cpus` line in `spras.sub`, using `example_config.yaml` as the
-SPRAS configuration file. Note that you can alter the configuration file to test various workflows, but you should leave `unpack_singularity = true`,
-or it is likely the job will be unsuccessful. By default, the `example_config.yaml` runs everything except for `cytoscape`, which appears to fail periodically
-in HTCondor.
+When you're ready to run SPRAS as an HTCondor workflow, navigate to the `spras/docker-wrappers/SPRAS` directory and create the `logs/` directory. Then run
+`condor_submit spras.sub`, which will submit SPRAS to HTCondor as a single job with as many cores as indicated by the `NUM_PROCS` line in `spras.sub`, using
+the value of `EXAMPLE_CONFIG` as the SPRAS configuration file. Note that you can alter the configuration file to test various workflows, but you should leave
+`unpack_singularity = true`, or it is likely the job will be unsuccessful. By default, the `example_config.yaml` runs everything except for `cytoscape`, which
+appears to fail periodically in HTCondor.
 
 To monitor the state of the job, you can run `condor_q` for a snapshot of how the job is doing, or you can run `condor_watch_q` if you want realtime updates.
 Upon completion, the `output` directory from the workflow should be returned as `spras/docker-wrappers/SPRAS/output`, along with several files containing the
-workflow's logging information (anything that matches `spras_*` and ending in `.out`, `.err`, or `.log`). If the job was unsuccessful, these files should contain
-useful debugging clues about what may have gone wrong.
+workflow's logging information (anything that matches `logs/spras_*` and ending in `.out`, `.err`, or `.log`). If the job was unsuccessful, these files should
+contain useful debugging clues about what may have gone wrong.
 
 **Note**: If you want to run the workflow with a different version of SPRAS, or one that contains development updates you've made, rebuild this image against
 the version of SPRAS you want to test, and push the image to your image repository. To use that container in the workflow, change the `container_image` line of
