@@ -1,2 +1,3 @@
 #!/bin/bash
-snakemake --cores `nproc` --configfile example_config.yaml
+
+PATH=/usr/local/sbin:/usr/local/bin:/usr/sbin:/usr/bin:/sbin:/bin snakemake "$@"
