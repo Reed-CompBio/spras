@@ -37,7 +37,7 @@ container_registry:
 algorithms:
       - name: "pathlinker"
         params:
-              include: false
+              include: true
               run1:
                   k: range(100,201,100)
 
@@ -134,7 +134,11 @@ analysis:
         include: true
       # Machine learning analysis (e.g. clustering) of the pathway output files for each dataset
       ml:
+        # ml analysis per dataset
         include: true
+        # adds ml analysis per algorithm output
+        # only runs for algorithms with multiple parameter combinations chosen
+        aggregate_per_algorithm: true
         # specify how many principal components to calculate
         components: 2
         # boolean to show the labels on the pca graph
