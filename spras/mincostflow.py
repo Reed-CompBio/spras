@@ -53,11 +53,8 @@ class MinCostFlow (PRM):
         # create the network of edges
         edges = data.get_interactome()
 
-        # Format network edges
-        edges = convert_undirected_to_directed(edges)
-
         # creates the edges files that contains the head and tail nodes and the weights after them
-        edges.to_csv(filename_map['edges'], sep='\t', index=False, columns=["Interactor1", "Interactor2", "Weight"],
+        edges.to_csv(filename_map['edges'], sep='\t', index=False, columns=["Interactor1", "Interactor2", "Weight", "Direction"],
                      header=False)
 
     @staticmethod
@@ -114,7 +111,7 @@ class MinCostFlow (PRM):
             command.extend(['--capacity', str(capacity)])
 
         # choosing to run in docker or singularity container
-        container_suffix = "mincostflow"
+        container_suffix = "mincostflow:v2"
 
         # constructs a docker run call
         out = run_container(container_framework,
@@ -152,8 +149,5 @@ class MinCostFlow (PRM):
 
         df = pd.read_csv(raw_pathway_file, sep='\t', header=None)
         df = add_rank_column(df)
-        # TODO update MinCostFlow version to support mixed graphs
-        # Currently directed edges in the input will be converted to undirected edges in the output
-        df = reinsert_direction_col_undirected(df)
-        df.to_csv(standardized_pathway_file, header=False, index=False, sep='\t')
+        df.to_csv(standardized_pathway_file, header=True, index=False, sep='\t')
 
