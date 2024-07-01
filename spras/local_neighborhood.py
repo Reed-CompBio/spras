@@ -64,7 +64,7 @@ class LocalNeighborhood(PRM):
         """
         # Add additional parameter validation
         # Could consider setting the default here instead
-        if not nodetypes or not network or not output_file:
+        if not nodeinputs or not network or not output_file:
             raise ValueError('Required Local Neighborhood arguments are missing')
 
         work_dir = '/spras'
@@ -72,7 +72,7 @@ class LocalNeighborhood(PRM):
         # Each volume is a tuple (src, dest)
         volumes = list()
 
-        bind_path, node_file = prepare_volume(nodetypes, work_dir)
+        bind_path, node_file = prepare_volume(nodeinputs, work_dir)
         volumes.append(bind_path)
 
         bind_path, network_file = prepare_volume(network, work_dir)
