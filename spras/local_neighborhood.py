@@ -42,7 +42,7 @@ class LocalNeighborhood(PRM):
 
         print(node_df) 
         
-        node_df.to_csv(filename_map['nodetypes'],sep='\t',index=False,columns=['NODEID'],header=False)
+        node_df.to_csv(filename_map['nodeinputs'],sep='\t',index=False,columns=['NODEID'],header=False)
 
         edges_df = data.get_interactome()
 
