@@ -24,7 +24,7 @@ dependencies = [
     "docker==5.0.3", # Switched from docker-py to docker because docker-py is not maintained in pypi. This appears to have no effect
     "matplotlib==3.6",
     "networkx==2.8",
-    "pandas==2.0",
+    "pandas==1.5",
     "numpy==1.26.4",
     "pip==22.1",
     "requests==2.28",
