@@ -5,15 +5,10 @@ hash_length: 7
 
 # Specify the container framework. Current supported versions include 'docker' and
 # 'singularity'. If container_framework is not specified, SPRAS will default to docker.
-container_framework: docker
+container_framework: singularity
 
-# Only used if container_framework is set to singularity, this will unpack the singularity containers
-# to the local filesystem. This is useful when PRM containers need to run inside another container,
-# such as would be the case in an HTCondor/OSPool environment.
-# NOTE: This unpacks singularity containers to the local filesystem, which will take up space in a way
-# that persists after the workflow is complete. To clean up the unpacked containers, the user must
-# manually delete them.
-unpack_singularity: false
+# Unpack singularity. See config/config.yaml for details.
+unpack_singularity: true
 
 # Allow the user to configure which container registry containers should be pulled from
 # Note that this assumes container names are consistent across registries, and that the
@@ -45,7 +40,7 @@ container_registry:
 algorithms:
       - name: "pathlinker"
         params:
-              include: true
+              include: false
               run1:
                   k: range(100,201,100)
 
@@ -53,8 +48,10 @@ algorithms:
         params:
               include: true
               run1:
+                  r: [5]
                   b: [5, 6]
                   w: np.linspace(0,5,2)
+                  g: [3]
                   d: [10]
 
       - name: "omicsintegrator2"
@@ -107,14 +104,14 @@ datasets:
       other_files: []
       # Relative path from the spras directory
       data_dir: "input"
-    -
-      label: data1
-      # Reuse some of the same sources file as 'data0' but different network and targets
-      node_files: ["node-prizes.txt", "sources.txt", "alternative-targets.txt"]
-      edge_files: ["alternative-network.txt"]
-      other_files: []
-      # Relative path from the spras directory
-      data_dir: "input"
+    # -
+    #   label: data1
+    #   # Reuse some of the same sources file as 'data0' but different network and targets
+    #   node_files: ["node-prizes.txt", "sources.txt", "alternative-targets.txt"]
+    #   edge_files: ["alternative-network.txt"]
+    #   other_files: []
+    #   # Relative path from the spras directory
+    #   data_dir: "input"
 
 # If we want to reconstruct then we should set run to true.
 # TODO: if include is true above but run is false here, algs are not run.
@@ -139,14 +136,10 @@ analysis:
         include: true
       # Create Cytoscape session file with all pathway graphs for each dataset
       cytoscape:
-        include: true
+        include: false
       # Machine learning analysis (e.g. clustering) of the pathway output files for each dataset
       ml:
-        # ml analysis per dataset
         include: true
-        # adds ml analysis per algorithm output
-        # only runs for algorithms with multiple parameter combinations chosen
-        aggregate_per_algorithm: true
         # specify how many principal components to calculate
         components: 2
         # boolean to show the labels on the pca graph

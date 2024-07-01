@@ -219,7 +219,7 @@ rule reconstruct:
         # Create a copy so that the updates are not written to the parameters logfile
         params = reconstruction_params(wildcards.algorithm, wildcards.params).copy()
         # Add the input files
-        params.update(dict(zip(runner.get_required_inputs(wildcards.algorithm), *{input})))
+        params.update(dict(zip(runner.get_required_inputs(wildcards.algorithm), *{input}, strict=True)))
         # Add the output file
         # All run functions can accept a relative path to the output file that should be written that is called 'output_file'
         params['output_file'] = output.pathway_file
