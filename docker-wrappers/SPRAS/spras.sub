@@ -7,6 +7,9 @@
 ############################################################
 CONFIG_FILE = example_config.yaml
 NUM_PROCS = 4
+# Paths to input data and Snakefile.
+INPUT_DIR = ../../input
+SNAKEFILE = ../../Snakefile
 
 ############################################################
 # Specify that the workflow should run in the SPRAS        #
@@ -26,7 +29,7 @@ container_image = docker://reedcompbio/spras:v0.1.0
 # NOTE: You should `mkdir logs/` before running, or the    #
 # spras_$(Cluster).log file won't be available.            #
 ############################################################
-log = logs/spras_$(Cluster).log
+log = logs/spras_$(Cluster)_$(Process).log
 output = logs/spras_$(Cluster)_$(Process).out
 error = logs/spras_$(Cluster)_$(Process).err
 
@@ -42,7 +45,7 @@ arguments = "--cores $(NUM_PROCS) --configfile $(CONFIG_FILE) --retries 3"
 ############################################################
 should_transfer_files = YES
 when_to_transfer_output = ON_EXIT
-transfer_input_files = $(CONFIG_FILE), ../../input, ../../Snakefile
+transfer_input_files = $(CONFIG_FILE), $(INPUT_DIR), $(SNAKEFILE)
 # The output directory should match whatever you configure in your configfile.
 transfer_output_files = output
 
