@@ -84,6 +84,16 @@ jobs:
         docker pull reedcompbio/allpairs:latest
         docker pull reedcompbio/domino:latest
         docker pull gabeah/local-neighborhood:latest
+        docker pull gabeah/bowtiebuilder:latest
+    - name: Build BowtieBuilder Docker Image
+      uses: docker/build-push-action@v1
+      with:
+        path: docker-wrappers/BowTieBuilder
+        dockerfile: docker-wrappers/BowTieBuilder/Dockerfile
+        respository: gabeah/bowtiebuilder
+        tags: latest
+        cache_from: gabeah/bowtiebuilder:latest
+        push: false
     - name: Build Local Neighborhood Docker Image
       uses: docker/build-push-action@v1
       with:

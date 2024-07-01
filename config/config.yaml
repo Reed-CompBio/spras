@@ -35,10 +35,6 @@ container_registry:
 # careful: too many parameters might make your runs take a long time.
 
 algorithms:
-      - name: "btb"
-        params:
-          include: true
-
       - name: "local_neighborhood"
         params:
               include: false
@@ -118,6 +114,12 @@ datasets:
       other_files: []
       # Relative path from the spras directory
       data_dir: "input"
+
+      # label: data2
+      # node_files: ["tps-egfr-prizes.txt"]
+      # edge_files: ["phosphosite-irefindex13.0-uniprot.txt"]
+      # other_files: []
+      # data_dir: "input"
 
 # If we want to reconstruct then we should set run to true.
 # TODO: if include is true above but run is false here, algs are not run.
