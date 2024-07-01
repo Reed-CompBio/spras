@@ -189,7 +189,7 @@ class Config:
                 run_list_tuples = list(it.product(*all_runs))
                 param_name_tuple = tuple(param_name_list)
                 for r in run_list_tuples:
-                    run_dict = dict(zip(param_name_tuple, r, strict=False))
+                    run_dict = dict(zip(param_name_tuple, r, strict=True))
                     # TODO temporary workaround for yaml.safe_dump in Snakefile write_parameter_log
                     for param, value in run_dict.copy().items():
                         if isinstance(value, np.float64):
