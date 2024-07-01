@@ -209,3 +209,8 @@ class Config:
         self.analysis_include_graphspace = raw_config["analysis"]["graphspace"]["include"]
         self.analysis_include_cytoscape = raw_config["analysis"]["cytoscape"]["include"]
         self.analysis_include_ml = raw_config["analysis"]["ml"]["include"]
+
+        if 'aggregate_per_algorithm' not in self.ml_params:
+            self.analysis_include_ml_aggregate_algo = False
+        else:
+            self.analysis_include_ml_aggregate_algo = raw_config["analysis"]["ml"]["aggregate_per_algorithm"]
