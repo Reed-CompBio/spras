@@ -89,8 +89,26 @@ class BowtieBuilder(PRM):
         if not source or not target or not edges or not output_file:
             raise ValueError('Required BowtieBuilder arguments are missing')
 
+        # Test for pytest (docker container also runs this)
         if not source.exists() or not target.exists() or not edges.exists():
             raise ValueError('Missing input file')
+
+        print("testing line by line")
+
+
+        # Testing for btb index
+        # It's a bit messy, but it works
+        with open(edges, 'r') as edge_file:
+            try:
+                for line in edge_file:
+                    line = line.strip()
+                    line = line.split('\t')
+                    line = line[2]
+                    
+            except Exception as err:
+                print("error!!")
+                print(err)
+                raise(err)
 
         work_dir = '/btb'
 

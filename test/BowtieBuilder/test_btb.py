@@ -37,12 +37,11 @@ class TestBowtieBuilder:
     Run the bowtiebuilder algorithm with missing arguments
     """
     def test_missing_arguments(self):
-        with pytest.raises(ValueError) as exec_info:
+        with pytest.raises(ValueError):
             bowtiebuilder.run(
                            target=Path(TEST_DIR, 'input', 'target.txt'),
                            edges=Path(TEST_DIR, 'input', 'edges.txt'),
-                           output_file=OUT_FILE)
-        print(exec_info)            
+                           output_file=OUT_FILE)            
 
 
     """
@@ -50,7 +49,6 @@ class TestBowtieBuilder:
     """
     def test_missing_file(self):
         with pytest.raises(ValueError):
-            print("beginning test")
             bowtiebuilder.run(source=Path(TEST_DIR, 'input', 'unknown.txt'),
                            target=Path(TEST_DIR, 'input', 'target.txt'),
                            edges=Path(TEST_DIR, 'input', 'edges.txt'),
