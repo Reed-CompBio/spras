@@ -25,9 +25,9 @@ spras package that receives changes without re-installation, change the
 pip install -e .[dev]
 ```
 
-This will cause changes to spras source code to update the intsalled package.
+This will cause changes to spras source code to update the installed package.
 
-**Note:** This image will build for the same platform that is native to your system (ie amd64 or arm64). If you need to run this in a remote environment like HTCondor that is almost certainly `amd64` but you're building from Apple Silicon, it is recommended to either modify the Dockerfile to pin the platform:
+**Note:** This image will build for the same platform that is native to your system (i.e. amd64 or arm64). If you need to run this in a remote environment like HTCondor that is almost certainly `amd64` but you're building from Apple Silicon, it is recommended to either modify the Dockerfile to pin the platform:
 
 ```
 FROM --platform=linux/amd64 almalinux:9
@@ -76,5 +76,6 @@ to produce the file `spras.sif`. Then, substitute this value as the `container_i
 
 ## Versions:
 
+The versions of this image match the version of the spras package within it.
 - v0.1.0: Created an image with SPRAS as an installed python module. This makes SPRAS runnable anywhere with Docker/Singularity. Note that the Snakefile should be
   runnable from any directory within the container.

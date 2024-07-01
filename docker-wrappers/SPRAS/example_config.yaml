@@ -7,7 +7,7 @@ hash_length: 7
 # 'singularity'. If container_framework is not specified, SPRAS will default to docker.
 container_framework: singularity
 
-# Unpack singularity
+# Unpack singularity. See config/config.yaml for details.
 unpack_singularity: true
 
 # Allow the user to configure which container registry containers should be pulled from

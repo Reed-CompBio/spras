@@ -191,7 +191,7 @@ def run_container_singularity(container: str, command: List[str], volumes: List[
     else:
         singularity_options.extend(['--env', environment])
 
-    # Handle unpacking singularity image if needed. Potentially needed for running nested unprivileged containeres
+    # Handle unpacking singularity image if needed. Potentially needed for running nested unprivileged containers
     if config.config.unpack_singularity:
         # Split the string by "/"
         path_elements = container.split("/")
