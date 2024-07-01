@@ -162,7 +162,7 @@ jobs:
         path: docker-wrappers/LocalNeighborhood/.
         dockerfile: docker-wrappers/LocalNeighborhood/Dockerfile
         repository: sumedhars/local-neighborhood
-        tags: v2
+        tags: latest
         cache_froms: sumedhars/local-neighborhood:latest
         push: false
 

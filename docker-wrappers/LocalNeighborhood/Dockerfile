@@ -9,6 +9,3 @@ WORKDIR /LocalNeighborhood
 # Copy the py file to the working directory
 COPY local_neighborhood.py .
 
-# Copy the data subfolder to the working directory
-COPY ln-network.txt .
-COPY ln-nodes.txt .

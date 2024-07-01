@@ -9,7 +9,7 @@ __all__ = ['LocalNeighborhood']
 
 
 class LocalNeighborhood(PRM):
-    required_inputs = ['network', 'nodetypes']
+    required_inputs = ['network', 'nodeinputs']
 
     @staticmethod
     def generate_inputs(data, filename_map):
@@ -53,20 +53,16 @@ class LocalNeighborhood(PRM):
                         header=False)
 
 
-    #TODO: ?????
     @staticmethod
-    def run(nodetypes=None, network=None, output_file=None, container_framework="docker"):
+    def run(nodeinputs=None, network=None, output_file=None, container_framework="docker"):
         """
         Run PathLinker with Docker
-        @param nodetypes:  input node types with sources and targets (required)
+        @param nodeinputs:  input node types with sources and targets (required)
         @param network:  input network file (required)
         @param output_file: path to the output pathway file (required)
-        @param k: path length (optional)
         @param container_framework: choose the container runtime framework, currently supports "docker" or "singularity" (optional)
         """
         # Add additional parameter validation
-        # Do not require k
-        # Use the PathLinker default
         # Could consider setting the default here instead
         if not nodetypes or not network or not output_file:
             raise ValueError('Required Local Neighborhood arguments are missing')
@@ -82,17 +78,11 @@ class LocalNeighborhood(PRM):
         bind_path, network_file = prepare_volume(network, work_dir)
         volumes.append(bind_path)
 
-        # PathLinker does not provide an argument to set the output directory
-        # Use its --output argument to set the output file prefix to specify an absolute path and prefix
-        # out_dir = Path(output_file).parent
-        # PathLinker requires that the output directory exist
-        # out_dir.mkdir(parents=True, exist_ok=True)
         bind_path, mapped_out_file = prepare_volume(output_file, work_dir)
         volumes.append(bind_path)
         # mapped_out_prefix = mapped_out_dir + '/out'  # Use posix path inside the container
 
         # print(mapped_out_prefix)
-        #TODO: change for local neighborhood
         command = ['python',
                    '/LocalNeighborhood/local_neighborhood.py',
                    '--network', network_file,
@@ -101,7 +91,7 @@ class LocalNeighborhood(PRM):
 
         print('Running Local Neighborhood with arguments: {}'.format(' '.join(command)), flush=True)
 
-        container_suffix = "local-neighborhood" #TODO change
+        container_suffix = "local-neighborhood" 
         out = run_container(container_framework,
                             container_suffix,
                             command,
