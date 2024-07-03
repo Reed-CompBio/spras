@@ -20,7 +20,7 @@ from spras.prm import PRM
 __all__ = ['BowtieBuilder']
 
 class BowtieBuilder(PRM):
-    required_inputs = ['source', 'target', 'edges']
+    required_inputs = ['sources', 'targets', 'edges']
 
     #generate input taken from meo.py beacuse they have same input requirements
     @staticmethod
@@ -51,11 +51,11 @@ class BowtieBuilder(PRM):
             # include or exclude?
             nodes = nodes.loc[nodes[node_type]]
             if(node_type == "sources"):
-                nodes.to_csv(filename_map["source"], sep= '\t', index=False, columns=['NODEID'], header=False)
+                nodes.to_csv(filename_map["sources"], sep= '\t', index=False, columns=['NODEID'], header=False)
                 print("NODES: ")
                 print(nodes)
             elif(node_type == "targets"):
-                nodes.to_csv(filename_map["target"], sep= '\t', index=False, columns=['NODEID'], header=False)
+                nodes.to_csv(filename_map["targets"], sep= '\t', index=False, columns=['NODEID'], header=False)
                 print("NODES: ")
                 print(nodes)
 
@@ -73,7 +73,7 @@ class BowtieBuilder(PRM):
 
         # Skips parameter validation step
     @staticmethod
-    def run(source=None, target=None, edges=None, output_file=None, container_framework="docker"):
+    def run(sources=None, targets=None, edges=None, output_file=None, container_framework="docker"):
         """
         Run PathLinker with Docker
         @param nodetypes:  input node types with sources and targets (required)
@@ -82,16 +82,19 @@ class BowtieBuilder(PRM):
         @param k: path length (optional)
         @param container_framework: choose the container runtime framework, currently supports "docker" or "singularity" (optional)
         """
+
+        print("running algorithm")
+
         # Add additional parameter validation
         # Do not require k
         # Use the PathLinker default
         # Could consider setting the default here instead
-        if not source or not target or not edges or not output_file:
+        if not sources or not targets or not edges or not output_file:
             raise ValueError('Required BowtieBuilder arguments are missing')
 
         # Test for pytest (docker container also runs this)
         # Testing out here avoids the trouble that container errors provide
-        if not Path(source).exists() or not Path(target).exists() or not Path(edges).exists():
+        if not Path(sources).exists() or not Path(targets).exists() or not Path(edges).exists():
             raise ValueError('Missing input file')
 
         # Testing for btb index
@@ -113,10 +116,10 @@ class BowtieBuilder(PRM):
         # Each volume is a tuple (src, dest)
         volumes = list()
 
-        bind_path, source_file = prepare_volume(source, work_dir)
+        bind_path, source_file = prepare_volume(sources, work_dir)
         volumes.append(bind_path)
 
-        bind_path, target_file = prepare_volume(target, work_dir)
+        bind_path, target_file = prepare_volume(targets, work_dir)
         volumes.append(bind_path)
 
         bind_path, edges_file = prepare_volume(edges, work_dir)
@@ -179,6 +182,7 @@ class BowtieBuilder(PRM):
         """
         # What about multiple raw_pathway_files
         print("PARSING OUTPUT BTB")
-        df = pd.read_csv(raw_pathway_file, sep='\t').take([0, 1], axis=0)
+        df = pd.read_csv(raw_pathway_file, sep='\t')
         # df = reinsert_direction_col_directed(df)
+        print(df)
         df.to_csv(standardized_pathway_file, header=False, index=False, sep='\t')
