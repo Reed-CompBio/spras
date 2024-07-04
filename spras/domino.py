@@ -228,4 +228,4 @@ def post_domino_id_transform(node_id):
     @param node_id: the node id to transform
     @return the node id without the prefix, if it was present, otherwise the original node id
     """
-    node_id.removeprefix(ID_PREFIX)
+    return node_id.removeprefix(ID_PREFIX)
