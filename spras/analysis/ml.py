@@ -42,12 +42,12 @@ def summarize_networks(file_paths: Iterable[Union[str, PathLike]]) -> pd.DataFra
                 lines = f.readlines()
 
             if len(lines) > 0:
-                lines.pop(0) # process header line
+                lines.pop(0)  # skip header line
 
             edges = []
             for line in lines:
                 parts = line.split('\t')
-                if len(parts) == 4: # empty lines not allowed but empty files are allowed
+                if len(parts) == 4:  # empty lines not allowed but empty files are allowed
                     node1 = parts[0]
                     node2 = parts[1]
                     direction = str(parts[3]).strip()
@@ -57,7 +57,7 @@ def summarize_networks(file_paths: Iterable[Union[str, PathLike]]) -> pd.DataFra
                     elif direction == "D":
                         # node order does matter for directed edges
                         edges.append(DIR_CONST.join([node1, node2]))
-                    elif direction != 'Direction' and direction != 'U' and direction != 'D':
+                    elif direction != 'Direction':
                         raise ValueError(f"direction is {direction}, rather than U or D")
                 elif len(parts) != 0:
                     raise ValueError(f"In file {file}, expected line {line} to have 4 values, but found {len(parts)} values.")

@@ -83,6 +83,7 @@ jobs:
         docker pull reedcompbio/mincostflow:latest
         docker pull reedcompbio/allpairs:latest
         docker pull reedcompbio/domino:latest
+        docker pull reedcompbio/py4cytoscape:v3
     - name: Build Omics Integrator 1 Docker image
       uses: docker/build-push-action@v1
       with:

@@ -43,11 +43,11 @@ class TestML:
             ml.summarize_networks([INPUT_DIR + 'test-data-wrong-direction/wrong-direction.txt'])
 
     def test_summarize_networks_empty(self):
-        with pytest.raises(ValueError): #raises error if empty dataframe is used for post processing
+        with pytest.raises(ValueError):  # raises error if empty dataframe is used for post processing
             ml.summarize_networks([INPUT_DIR + 'test-data-empty/empty.txt'])
 
     def test_single_line(self):
-        with pytest.raises(ValueError): #raises error if single line in file s.t. single row in dataframe is used for post processing
+        with pytest.raises(ValueError):  # raises error if single line in file s.t. single row in dataframe is used for post processing
             ml.summarize_networks([INPUT_DIR + 'test-data-single/single.txt'])
 
     def test_pca(self):

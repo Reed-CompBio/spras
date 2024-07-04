@@ -1,7 +1,4 @@
-import os
 from pathlib import Path
-
-import pandas as pd
 
 from spras.containers import prepare_volume, run_container
 from spras.interactome import reinsert_direction_col_mixed
@@ -192,14 +189,12 @@ class OmicsIntegrator1(PRM):
         # I'm assuming from having read the documentation that we will be passing in optimalForest.sif
         # as raw_pathway_file, in which case the format should be edge1 interactiontype edge2.
         # if that assumption is wrong we will need to tweak things
-
-
-        df = raw_pathway_df(raw_pathway_file, header=None)
+        df = raw_pathway_df(raw_pathway_file, sep='\t', header=None)
         if not df.empty:
             df.columns = ["Edge1", "InteractionType", "Edge2"]
             df = add_rank_column(df)
             df = reinsert_direction_col_mixed(df, "InteractionType", "pd", "pp")
-            df.drop(columns=['InteractionType'], inplace = True)
-            df.columns = ['Node1', 'Node2','Rank','Direction']
+            df.drop(columns=['InteractionType'], inplace=True)
+            df.columns = ['Node1', 'Node2', 'Rank', 'Direction']
 
         df.to_csv(standardized_pathway_file, header=True, index=False, sep='\t')
