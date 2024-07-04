@@ -114,7 +114,7 @@ class PathLinker(PRM):
 
         print('Running PathLinker with arguments: {}'.format(' '.join(command)), flush=True)
 
-        container_suffix = "pathlinker"
+        container_suffix = "pathlinker:v2"
         out = run_container(container_framework,
                             container_suffix,
                             command,
