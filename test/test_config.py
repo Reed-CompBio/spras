@@ -102,3 +102,6 @@ class TestConfig:
         test_config["container_registry"]["owner"] = ""
         config.init_global(test_config)
         assert (config.config.container_prefix == config.DEFAULT_CONTAINER_PREFIX)
+
+    def test_dataset_label(self):
+        # TODO: test differnt invalid labels and combinationst that aren't allowed
