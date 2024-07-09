@@ -83,25 +83,15 @@ jobs:
         docker pull reedcompbio/mincostflow:latest
         docker pull reedcompbio/allpairs:latest
         docker pull reedcompbio/domino:latest
-        docker pull gabeah/local-neighborhood:latest
-        docker pull gabeah/bowtiebuilder:latest
+        docker pull reedcompbio/bowtiebuilder:v1
     - name: Build BowtieBuilder Docker Image
       uses: docker/build-push-action@v1
       with:
         path: docker-wrappers/BowTieBuilder
         dockerfile: docker-wrappers/BowTieBuilder/Dockerfile
-        respository: gabeah/bowtiebuilder
+        respository: reedcompbio/bowtiebuilder
         tags: latest
-        cache_from: gabeah/bowtiebuilder:latest
-        push: false
-    - name: Build Local Neighborhood Docker Image
-      uses: docker/build-push-action@v1
-      with:
-        path: docker-wrappers/LocalNeighborhood
-        dockerfile: docker-wrappers/LocalNeighborhood/Dockerfile
-        repository: gabeah/local-neighborhood
-        tags: latest
-        cache_from: gabeah/local-neighborhood:latest
+        cache_from: reedcompbio/bowtiebuilder:v1
         push: false
     - name: Build Omics Integrator 1 Docker image
       uses: docker/build-push-action@v1

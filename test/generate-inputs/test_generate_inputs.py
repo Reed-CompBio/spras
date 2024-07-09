@@ -17,7 +17,7 @@ algo_exp_file = {
     'domino': 'network',
     'pathlinker': 'network',
     'allpairs': 'network',
-    'local_neighborhood': 'network'
+    'bowtiebuilder': 'edges'
     }
 
 

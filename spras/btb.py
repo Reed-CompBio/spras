@@ -149,7 +149,7 @@ class BowtieBuilder(PRM):
 
         print('Running BowtieBuilder with arguments: {}'.format(' '.join(command)), flush=True)
 
-        container_suffix = "bowtiebuilder"
+        container_suffix = "bowtiebuilder:v1"
         out = run_container(container_framework,
                             container_suffix,
                             command,
