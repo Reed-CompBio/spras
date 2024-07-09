@@ -115,6 +115,13 @@ datasets:
       other_files: []
       # Relative path from the spras directory
       data_dir: "input"
+    
+gold_standard:
+    -
+      label: gs
+      node_files: ["gs_nodes.txt"]
+      # edge_files: [] TODO: later iteration
+      data_dir: "input"
 
 # If we want to reconstruct then we should set run to true.
 # TODO: if include is true above but run is false here, algs are not run.
@@ -156,3 +163,5 @@ analysis:
         linkage: 'ward'
         # 'euclidean', 'manhattan', 'cosine'
         metric: 'euclidean'
+      evaluation:
+        include: true
