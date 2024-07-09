@@ -9,11 +9,10 @@ from pathlib import Path
 import pandas as pd
 
 from spras.containers import prepare_volume, run_container
-# from spras.interactome import (
-#     convert_undirected_to_directed,
-#     reinsert_direction_col_directed,
-# )
-# what type of directionality does btb support?
+from spras.interactome import (
+    convert_undirected_to_directed,
+    reinsert_direction_col_directed,
+)
 
 from spras.prm import PRM
 
@@ -63,41 +62,35 @@ class BowtieBuilder(PRM):
         # Create network file
         edges = data.get_interactome()
 
-        # Format network file
-        #unsure if formating network file is needed
-        # edges = add_directionality_constant(edges, 'EdgeType', '(pd)', '(pp)')
+        # Format into directed graph
+        edges.convert_undirected_to_directed()
 
         edges.to_csv(filename_map['edges'], sep='\t', index=False, header=False)
 
 
 
-        # Skips parameter validation step
+    # Skips parameter validation step
     @staticmethod
     def run(sources=None, targets=None, edges=None, output_file=None, container_framework="docker"):
         """
         Run PathLinker with Docker
-        @param nodetypes:  input node types with sources and targets (required)
-        @param network:  input network file (required)
+        @param sources:  input source file (required)
+        @param targets:  input target file (required)
+        @param edges:    input edge file (required)
         @param output_file: path to the output pathway file (required)
-        @param k: path length (optional)
         @param container_framework: choose the container runtime framework, currently supports "docker" or "singularity" (optional)
         """
 
-        print("running algorithm")
-
-        # Add additional parameter validation
-        # Do not require k
-        # Use the PathLinker default
-        # Could consider setting the default here instead
+        # Tests for pytest (docker container also runs this) 
+        # Testing out here avoids the trouble that container errors provide
+        
         if not sources or not targets or not edges or not output_file:
             raise ValueError('Required BowtieBuilder arguments are missing')
 
-        # Test for pytest (docker container also runs this)
-        # Testing out here avoids the trouble that container errors provide
         if not Path(sources).exists() or not Path(targets).exists() or not Path(edges).exists():
             raise ValueError('Missing input file')
 
-        # Testing for btb index
+        # Testing for btb index errors
         # It's a bit messy, but it works \_('_')_/
         with open(edges, 'r') as edge_file:
             try:
@@ -107,8 +100,7 @@ class BowtieBuilder(PRM):
                     line = line[2]
                     
             except Exception as err:
-                print("error!!")
-                print(err)
+        
                 raise(err)
 
         work_dir = '/btb'
@@ -163,12 +155,7 @@ class BowtieBuilder(PRM):
         print("mapped out prefix: ", mapped_out_prefix)
 
 
-
-
-
-        # Rename the primary output file to match the desired output filename
-        # Currently PathLinker only writes one output file so we do not need to delete others
-        # We may not know the value of k that was used
+        # Output is already written to raw-pathway.txt file
         # output_edges = Path(next(out_dir.glob('out*-ranked-edges.txt')))
         # output_edges.rename(output_file)
 
@@ -183,6 +170,6 @@ class BowtieBuilder(PRM):
         # What about multiple raw_pathway_files
         print("PARSING OUTPUT BTB")
         df = pd.read_csv(raw_pathway_file, sep='\t')
-        # df = reinsert_direction_col_directed(df)
+        df = reinsert_direction_col_directed(df)
         print(df)
         df.to_csv(standardized_pathway_file, header=False, index=False, sep='\t')

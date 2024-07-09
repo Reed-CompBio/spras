@@ -60,7 +60,6 @@ class TestBowtieBuilder:
     """
     def test_format_error(self):
         with pytest.raises(IndexError):
-            print("beginning test")
             bowtiebuilder.run(source=Path(TEST_DIR, 'input', 'source.txt'),
                            target=Path(TEST_DIR, 'input', 'target.txt'),
                            edges=Path(TEST_DIR, 'input', 'edges_bad.txt'),
