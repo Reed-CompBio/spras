@@ -63,7 +63,7 @@ class BowtieBuilder(PRM):
         edges = data.get_interactome()
 
         # Format into directed graph
-        edges.convert_undirected_to_directed()
+        edges = convert_undirected_to_directed(edges)
 
         edges.to_csv(filename_map['edges'], sep='\t', index=False, header=False)
 
@@ -100,7 +100,6 @@ class BowtieBuilder(PRM):
                     line = line[2]
                     
             except Exception as err:
-        
                 raise(err)
 
         work_dir = '/btb'
