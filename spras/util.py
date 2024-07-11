@@ -42,6 +42,7 @@ def hash_filename(filename: str, length: Optional[int] = None) -> str:
     """
     return hash_params_sha1_base32({'filename': filename}, length)
 
+
 def make_required_dirs(path: str):
     """
     Create the directory and parent directories required before an output file can be written to the specified path.
@@ -58,4 +59,20 @@ def add_rank_column(df: pd.DataFrame) -> pd.DataFrame:
     @param df: the dataframe to add the rank column of 1s to
     """
     df['Rank'] = 1
+    return df
+
+
+def raw_pathway_df(raw_pathway_file: str, sep: str = '\t', header: int = None) -> pd.DataFrame:
+    """
+    Creates dataframe from contents in raw pathway file,
+    otherwise returns an empty dataframe with standard output column names
+    @param raw_pathway_file: path to raw_pathway_file
+    @param sep: separator used when loading the dataframe, default tab character
+    @param header: what row the header is in raw_pathway_file, default None
+    """
+    try:
+        df = pd.read_csv(raw_pathway_file, sep=sep, header=header)
+    except pd.errors.EmptyDataError:  # read an empty file
+        df = pd.DataFrame(columns=['Node1', 'Node2', 'Rank', 'Direction'])
+
     return df

@@ -1,14 +1,13 @@
 import warnings
 from pathlib import Path
 
-import pandas as pd
-
 from spras.containers import prepare_volume, run_container
 from spras.interactome import (
     convert_directed_to_undirected,
     reinsert_direction_col_undirected,
 )
 from spras.prm import PRM
+from spras.util import add_rank_column, raw_pathway_df
 
 __all__ = ['AllPairs']
 
@@ -94,8 +93,7 @@ class AllPairs(PRM):
 
         print('Running All Pairs Shortest Paths with arguments: {}'.format(' '.join(command)), flush=True)
 
-        container_suffix = "allpairs"
-
+        container_suffix = "allpairs:v2"
         out = run_container(
                             container_framework,
                             container_suffix,
@@ -111,7 +109,9 @@ class AllPairs(PRM):
         @param raw_pathway_file: pathway file produced by an algorithm's run function
         @param standardized_pathway_file: the same pathway written in the universal format
         """
-        df = pd.read_csv(raw_pathway_file, sep='\t', header=None)
-        df['Rank'] = 1  # add a rank column of 1s since the edges are not ranked.
-        df = reinsert_direction_col_undirected(df)
-        df.to_csv(standardized_pathway_file, header=False, index=False, sep='\t')
+        df = raw_pathway_df(raw_pathway_file, sep='\t', header=None)
+        if not df.empty:
+            df = add_rank_column(df)
+            df = reinsert_direction_col_undirected(df)
+            df.columns = ['Node1', 'Node2', 'Rank', 'Direction']
+        df.to_csv(standardized_pathway_file, header=True, index=False, sep='\t')

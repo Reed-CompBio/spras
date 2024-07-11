@@ -102,6 +102,3 @@ class TestConfig:
         test_config["container_registry"]["owner"] = ""
         config.init_global(test_config)
         assert (config.config.container_prefix == config.DEFAULT_CONTAINER_PREFIX)
-
-
-
