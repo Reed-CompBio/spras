@@ -34,6 +34,8 @@ def get_dataset(_datasets, label):
 algorithms = list(algorithm_params)
 algorithms_with_params = [f'{algorithm}-params-{params_hash}' for algorithm, param_combos in algorithm_params.items() for params_hash in param_combos.keys()]
 dataset_labels = list(_config.config.datasets.keys())
+gold_standard_labels = list(_config.config.gold_standard.keys())
+print("gold standard labels", gold_standard_labels) #TODO delete
 
 # Get algorithms that are running multiple parameter combinations
 def algo_has_mult_param_combos(algo):
@@ -102,8 +104,9 @@ def make_final_input(wildcards):
         final_input.extend(expand('{out_dir}{sep}{dataset}-ml{sep}{algorithm}-hac-clusters-horizontal.txt',out_dir=out_dir,sep=SEP,dataset=dataset_labels,algorithm=algorithms_mult_param_combos,algorithm_params=algorithms_with_params))
         final_input.extend(expand('{out_dir}{sep}{dataset}-ml{sep}{algorithm}-ensemble-pathway.txt',out_dir=out_dir,sep=SEP,dataset=dataset_labels,algorithm=algorithms_mult_param_combos,algorithm_params=algorithms_with_params))
 
-    # if _config.config.evaluation_include:
-    #     final_input.extend(expand('{out_dir}{sep}{dataset}-{goldstandard}.txt',out_dir=out_dir,sep=SEP,dataset=dataset_labels,algorithm=algorithms_mult_param_combos,algorithm_params=algorithms_with_params))
+    if _config.config.evaluation_include:
+        # final_input.extend(expand('{out_dir}{sep}{dataset}-{goldstandard}.txt',out_dir=out_dir,sep=SEP,dataset=dataset_labels,algorithm=algorithms_mult_param_combos,algorithm_params=algorithms_with_params))
+        final_input.extend(expand('{out_dir}{sep}{dataset}-{gold_standard}-evaluation.txt',out_dir=out_dir, sep=SEP,dataset=dataset_labels,gold_standard=gold_standard_labels, algorithm_params=algorithms_with_params))
     
     if len(final_input) == 0:
         # No analysis added yet, so add reconstruction output files if they exist.
@@ -328,6 +331,12 @@ rule ml_analysis_aggregate_algo:
         ml.hac_vertical(summary_df, output.hac_image_vertical, output.hac_clusters_vertical, **hac_params)
         ml.hac_horizontal(summary_df, output.hac_image_horizontal, output.hac_clusters_horizontal, **hac_params)
         ml.ensemble_network(summary_df, output.ensemble_network_file)
+
+rule evaluation:
+    input: dataset_file = SEP.join([out_dir,'{dataset}-merged.pickle'])
+    output: eval_file = SEP.join([out_dir, "{dataset}-{gold_standard}-evaluation.txt"])
+    run:
+        "touch $(eval_file)"
 
 # Remove the output directory
 rule clean:

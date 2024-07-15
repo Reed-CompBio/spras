@@ -142,9 +142,7 @@ class Config:
         # When Snakemake parses the config file it loads the datasets as OrderedDicts not dicts
         # Convert to dicts to simplify the yaml logging
         self.datasets = {dataset["label"]: dict(dataset) for dataset in raw_config["datasets"]}
-        print(self.datasets)
         self.gold_standard = {goldstandard["label"]: dict(goldstandard) for goldstandard in raw_config["gold_standard"]}
-        print(self.gold_standard)
         # Code snipped from Snakefile that may be useful for assigning default labels
         # dataset_labels = [dataset.get('label', f'dataset{index}') for index, dataset in enumerate(datasets)]
         # Maps from the dataset label to the dataset list index
@@ -229,3 +227,5 @@ class Config:
             self.analysis_include_ml_aggregate_algo = False
         else:
             self.analysis_include_ml_aggregate_algo = raw_config["analysis"]["ml"]["aggregate_per_algorithm"]
+
+        
