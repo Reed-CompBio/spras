@@ -15,6 +15,7 @@ will grab the top level registry configuration option as it appears in the confi
 import copy as copy
 import itertools as it
 import os
+import re
 
 import numpy as np
 import yaml
@@ -142,7 +143,13 @@ class Config:
         # When Snakemake parses the config file it loads the datasets as OrderedDicts not dicts
         # Convert to dicts to simplify the yaml logging
         self.datasets = {dataset["label"]: dict(dataset) for dataset in raw_config["datasets"]}
+
         self.gold_standard = {goldstandard["label"]: dict(goldstandard) for goldstandard in raw_config["gold_standard"]}
+        for key in self.gold_standard:
+            pattern = r'^\w+$'
+            if not bool(re.match(pattern, key)):
+                raise ValueError(f"Gold Standard label \'{key}\' contains invalid values. Gold Standard labels can only contain letters, numbers, or underscores.")
+
         # Code snipped from Snakefile that may be useful for assigning default labels
         # dataset_labels = [dataset.get('label', f'dataset{index}') for index, dataset in enumerate(datasets)]
         # Maps from the dataset label to the dataset list index
@@ -222,10 +229,9 @@ class Config:
         self.analysis_include_graphspace = raw_config["analysis"]["graphspace"]["include"]
         self.analysis_include_cytoscape = raw_config["analysis"]["cytoscape"]["include"]
         self.analysis_include_ml = raw_config["analysis"]["ml"]["include"]
+        self.analysis_include_evalution = raw_config["analysis"]["evaluation"]["include"]
 
         if 'aggregate_per_algorithm' not in self.ml_params:
             self.analysis_include_ml_aggregate_algo = False
         else:
             self.analysis_include_ml_aggregate_algo = raw_config["analysis"]["ml"]["aggregate_per_algorithm"]
-
-        

@@ -20,6 +20,7 @@ def get_test_config():
             }
         },
         "datasets": [{"label":"alg1"}, {"label":"alg2"}],
+        "gold_standard": [{"label":"gs1"}],
         "algorithms": [{"params": ["param2", "param2"]}],
         "analysis": {
             "summary": {
@@ -32,6 +33,9 @@ def get_test_config():
                 "include": False
             },
             "cytoscape": {
+                "include": False
+            },
+            "evaluation": {
                 "include": False
             },
         },

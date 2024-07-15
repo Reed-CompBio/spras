@@ -2,6 +2,7 @@
 from spras.allpairs import AllPairs as allpairs
 from spras.dataset import Dataset
 from spras.domino import DOMINO as domino
+from spras.evaluation import Evaluation
 from spras.meo import MEO as meo
 from spras.mincostflow import MinCostFlow as mincostflow
 from spras.omicsintegrator1 import OmicsIntegrator1 as omicsintegrator1
@@ -41,6 +42,15 @@ def merge_input(dataset_dict, dataset_file):
     """
     dataset = Dataset(dataset_dict)
     dataset.to_file(dataset_file)
+
+def merge_gold_standard_input(gs_dict, gs_file):
+    """
+    Merge files listed for this gold standard dataset and write the dataset to disk
+    @param gs_dict: gold standard dataset to process
+    @param gs_file: output filename
+    """
+    gs_dataset = Evaluation(gs_dict)
+    gs_dataset.to_file(gs_file)
 
 
 def prepare_inputs(algorithm, data_file, filename_map):

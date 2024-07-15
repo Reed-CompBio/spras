@@ -3,6 +3,7 @@ from spras import runner
 import shutil
 import yaml
 from spras.dataset import Dataset
+from spras.evaluation import Evaluation
 from spras.analysis import ml, summary, graphspace, cytoscape
 import spras.config as _config
 
@@ -35,7 +36,6 @@ algorithms = list(algorithm_params)
 algorithms_with_params = [f'{algorithm}-params-{params_hash}' for algorithm, param_combos in algorithm_params.items() for params_hash in param_combos.keys()]
 dataset_labels = list(_config.config.datasets.keys())
 gold_standard_labels = list(_config.config.gold_standard.keys())
-print("gold standard labels", gold_standard_labels) #TODO delete
 
 # Get algorithms that are running multiple parameter combinations
 def algo_has_mult_param_combos(algo):
@@ -104,8 +104,7 @@ def make_final_input(wildcards):
         final_input.extend(expand('{out_dir}{sep}{dataset}-ml{sep}{algorithm}-hac-clusters-horizontal.txt',out_dir=out_dir,sep=SEP,dataset=dataset_labels,algorithm=algorithms_mult_param_combos,algorithm_params=algorithms_with_params))
         final_input.extend(expand('{out_dir}{sep}{dataset}-ml{sep}{algorithm}-ensemble-pathway.txt',out_dir=out_dir,sep=SEP,dataset=dataset_labels,algorithm=algorithms_mult_param_combos,algorithm_params=algorithms_with_params))
 
-    if _config.config.evaluation_include:
-        # final_input.extend(expand('{out_dir}{sep}{dataset}-{goldstandard}.txt',out_dir=out_dir,sep=SEP,dataset=dataset_labels,algorithm=algorithms_mult_param_combos,algorithm_params=algorithms_with_params))
+    if _config.config.analysis_include_evalution:
         final_input.extend(expand('{out_dir}{sep}{dataset}-{gold_standard}-evaluation.txt',out_dir=out_dir, sep=SEP,dataset=dataset_labels,gold_standard=gold_standard_labels, algorithm_params=algorithms_with_params))
     
     if len(final_input) == 0:
@@ -159,9 +158,18 @@ rule merge_input:
         dataset_dict = get_dataset(_config.config.datasets, wildcards.dataset)
         runner.merge_input(dataset_dict, output.dataset_file)
 
-# TODO: add a merge input for gold standard data?
-# may need to update runner.py to add a merge_gs_input function
+def get_gs_dependencies(wildcards):
+    gs = _config.config.gold_standard[wildcards.gold_standard]
+    all_files = gs["node_files"]
+    all_files = [gs["data_dir"] + SEP + data_file for data_file in all_files]
+    return all_files
 
+rule merge_gs_input:
+    input: get_gs_dependencies
+    output: gs_file = SEP.join([out_dir, '{gold_standard}-merged.pickle'])
+    run:
+        gs_dict = get_dataset(_config.config.gold_standard, wildcards.gold_standard)
+        runner.merge_gold_standard_input(gs_dict, output.gs_file)
 
 # The checkpoint is like a rule but can be used in dynamic workflows
 # The workflow directed acyclic graph is re-evaluated after the checkpoint job runs
@@ -333,10 +341,13 @@ rule ml_analysis_aggregate_algo:
         ml.ensemble_network(summary_df, output.ensemble_network_file)
 
 rule evaluation:
-    input: dataset_file = SEP.join([out_dir,'{dataset}-merged.pickle'])
+    input: 
+        gs_file = SEP.join([out_dir,'{gold_standard}-merged.pickle']),
+        pathways = expand('{out_dir}{sep}{{dataset}}-{algorithm_params}{sep}pathway.txt', out_dir=out_dir, sep=SEP, algorithm_params=algorithms_with_params)
     output: eval_file = SEP.join([out_dir, "{dataset}-{gold_standard}-evaluation.txt"])
     run:
-        "touch $(eval_file)"
+        node_table = Evaluation.from_file(input.gs_file).node_table
+        Evaluation.precision(input.pathways, node_table, output.eval_file)
 
 # Remove the output directory
 rule clean:
