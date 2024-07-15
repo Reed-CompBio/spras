@@ -83,7 +83,7 @@ jobs:
         docker pull reedcompbio/mincostflow:latest
         docker pull reedcompbio/allpairs:v2
         docker pull reedcompbio/domino:latest
-        docker pull reedcompbio/py4cytoscape:v2
+        docker pull reedcompbio/py4cytoscape:v3
         docker pull reedcompbio/spras:v0.1.0
     - name: Build Omics Integrator 1 Docker image
       uses: docker/build-push-action@v1
@@ -154,8 +154,8 @@ jobs:
         path: docker-wrappers/Cytoscape/.
         dockerfile: docker-wrappers/Cytoscape/Dockerfile
         repository: reedcompbio/py4cytoscape
-        tags: v2
-        cache_froms: reedcompbio/py4cytoscape:latest
+        tags: v3
+        cache_froms: reedcompbio/py4cytoscape:v3
         push: false
     - name: Build SPRAS Docker image
       uses: docker/build-push-action@v1

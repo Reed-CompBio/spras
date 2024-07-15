@@ -149,12 +149,13 @@ class OmicsIntegrator2(PRM):
         # Omicsintegrator2 returns a single line file if no network is found
         num_lines = sum(1 for line in open(raw_pathway_file))
         if num_lines < 2:
-            with open(standardized_pathway_file, 'w'):
-                pass
-            return
-        df = pd.read_csv(raw_pathway_file, sep='\t')
-        df = df[df['in_solution'] == True]  # Check whether this column can be empty before revising this line
-        df = df.take([0, 1], axis=1)
-        df = add_rank_column(df)
-        df = reinsert_direction_col_undirected(df)
-        df.to_csv(standardized_pathway_file, header=False, index=False, sep='\t')
+            df = pd.DataFrame(columns=['Node1', 'Node2', 'Rank', 'Direction'])
+        else:
+            df = pd.read_csv(raw_pathway_file, sep='\t', header=0)
+            df = df[df['in_solution'] == True]  # Check whether this column can be empty before revising this line
+            df = df.take([0, 1], axis=1)
+            df = add_rank_column(df)
+            df = reinsert_direction_col_undirected(df)
+            df.columns = ['Node1', 'Node2', 'Rank', "Direction"]
+
+        df.to_csv(standardized_pathway_file, header=True, index=False, sep='\t')
