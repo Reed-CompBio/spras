@@ -69,6 +69,8 @@ class Config:
         self.unpack_singularity = False
         # A dictionary to store configured datasets against which SPRAS will be run
         self.datasets = None
+        # a dictionary to store configured gold standard data against ouptut of SPRAS runs
+        self.gold_standard = None
         # The hash length SPRAS will use to identify parameter combinations. Default is 7
         self.hash_length = DEFAULT_HASH_LENGTH
         # The list of algorithms to run in the workflow. Each is a dict with 'name' as an expected key.
@@ -94,6 +96,7 @@ class Config:
         self.analysis_include_cytoscape  = None
         # A Boolean specifying whether to run the ML analysis
         self.analysis_include_ml = None
+
 
         _raw_config = copy.deepcopy(raw_config)
         self.process_config(_raw_config)
@@ -139,7 +142,9 @@ class Config:
         # When Snakemake parses the config file it loads the datasets as OrderedDicts not dicts
         # Convert to dicts to simplify the yaml logging
         self.datasets = {dataset["label"]: dict(dataset) for dataset in raw_config["datasets"]}
-
+        print(self.datasets)
+        self.gold_standard = {goldstandard["label"]: dict(goldstandard) for goldstandard in raw_config["gold_standard"]}
+        print(self.gold_standard)
         # Code snipped from Snakefile that may be useful for assigning default labels
         # dataset_labels = [dataset.get('label', f'dataset{index}') for index, dataset in enumerate(datasets)]
         # Maps from the dataset label to the dataset list index

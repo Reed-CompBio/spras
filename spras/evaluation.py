@@ -38,9 +38,9 @@ class Evaluation:
         single_node_table = pd.read_table(os.path.join(data_loc, node_file))
         self.node_table = single_node_table
 
-        # self.node_table = pd.DataFrame(node_set, columns=[self.NODE_ID])
-        # for loop? and read in node dataset into a pandas df
 
 def percision_recall():
     None
     # https://scikit-learn.org/stable/modules/generated/sklearn.metrics.average_precision_score.html
+
+def 
