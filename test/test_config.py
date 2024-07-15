@@ -104,4 +104,12 @@ class TestConfig:
         assert (config.config.container_prefix == config.DEFAULT_CONTAINER_PREFIX)
 
     def test_dataset_label(self):
-        # TODO: test differnt invalid labels and combinationst that aren't allowed
+        test_config = get_test_config()
+
+        error_test_dicts = [{"label":"test$"}, {"label":"@test'"}, {"label":"[test]"}, {"label":"test-test"}, {"label":"✉"}, {"label":"test/test-2____te+st&te'st*868_"}]
+
+        for test_dict in error_test_dicts:
+            test_config["datasets"]= [test_dict]
+            with pytest.raises(ValueError): #raises error if any chars other than letters, numbers, or underscores are in dataset label
+                config.init_global(test_config)
+
