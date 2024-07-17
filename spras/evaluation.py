@@ -16,6 +16,7 @@ class Evaluation:
         self.node_table = None
         # self.edge_table = None TODO: later iteration
         self.load_files_from_dict(gold_standard_dict)
+        # TODO add a self.dataset_somthing = None
         return
 
     def to_file(self, file_name):
@@ -37,6 +38,8 @@ class Evaluation:
     def load_files_from_dict(self, gold_standard_dict):
 
         self.label = gold_standard_dict["label"]
+        # TODO: set self.datasets
+        
         node_data_files = gold_standard_dict["node_files"][0] # TODO: single file for now
         data_loc = gold_standard_dict["data_dir"]
 

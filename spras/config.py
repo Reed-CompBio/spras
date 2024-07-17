@@ -97,6 +97,8 @@ class Config:
         self.analysis_include_cytoscape  = None
         # A Boolean specifying whether to run the ML analysis
         self.analysis_include_ml = None
+        # A Boolean specifying whether to run the Evaluation analysis
+        self.analysis_include_evalution = None
 
 
         _raw_config = copy.deepcopy(raw_config)

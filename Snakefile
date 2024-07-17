@@ -37,6 +37,8 @@ algorithms_with_params = [f'{algorithm}-params-{params_hash}' for algorithm, par
 dataset_labels = list(_config.config.datasets.keys())
 gold_standard_labels = list(_config.config.gold_standard.keys())
 
+# TODO: create something that will be gs to dataset pairing
+
 # Get algorithms that are running multiple parameter combinations
 def algo_has_mult_param_combos(algo):
     return len(algorithm_params.get(algo, {})) > 1
@@ -105,6 +107,7 @@ def make_final_input(wildcards):
         final_input.extend(expand('{out_dir}{sep}{dataset}-ml{sep}{algorithm}-ensemble-pathway.txt',out_dir=out_dir,sep=SEP,dataset=dataset_labels,algorithm=algorithms_mult_param_combos,algorithm_params=algorithms_with_params))
 
     if _config.config.analysis_include_evalution:
+        # TODO: update to using gs to specific dataset pairing
         final_input.extend(expand('{out_dir}{sep}{dataset}-{gold_standard}-evaluation.txt',out_dir=out_dir, sep=SEP,dataset=dataset_labels,gold_standard=gold_standard_labels, algorithm_params=algorithms_with_params))
     
     if len(final_input) == 0:
@@ -340,6 +343,7 @@ rule ml_analysis_aggregate_algo:
         ml.hac_horizontal(summary_df, output.hac_image_horizontal, output.hac_clusters_horizontal, **hac_params)
         ml.ensemble_network(summary_df, output.ensemble_network_file)
 
+# update to use specific gs to dataset pairing
 rule evaluation:
     input: 
         gs_file = SEP.join([out_dir,'{gold_standard}-merged.pickle']),

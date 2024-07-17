@@ -122,6 +122,7 @@ gold_standard:
       node_files: ["gs_nodes.txt"]
       # edge_files: [] TODO: later iteration
       data_dir: "input"
+      # TODO: dataset: []
 
 # If we want to reconstruct then we should set run to true.
 # TODO: if include is true above but run is false here, algs are not run.
