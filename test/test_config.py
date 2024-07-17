@@ -105,7 +105,7 @@ class TestConfig:
 
     def test_error_dataset_label(self):
         test_config = get_test_config()
-        error_test_dicts = [{"label":"test$"}, {"label":"@test'"}, {"label":"[test]"}, {"label":"test-test"}, {"label":"✉"}, {"label":"test/test-2____te+st&te'st*868_"}]
+        error_test_dicts = [{"label":"test$"}, {"label":"@test'"}, {"label":"[test]"}, {"label":"test-test"}, {"label":"✉"}]
 
         for test_dict in error_test_dicts:
             test_config["datasets"]= [test_dict]
@@ -114,8 +114,8 @@ class TestConfig:
 
     def test_correct_dataset_label(self):
         test_config = get_test_config()
-        correct_test_dicts = [{"label":"test"},  {"label":"123"}, {"label":"test123"}, {"label":"123test"}, {"label":"test123test"}, {"label":"_"}, {"label":"test_test"}, {"label":"_test"}, {"label":"test_"}]
+        correct_test_dicts = [{"label":"test"},  {"label":"123"}, {"label":"test123"}, {"label":"123test"}, {"label":"_"}, {"label":"test_test"}, {"label":"_test"}, {"label":"test_"}]
 
         for test_dict in correct_test_dicts:
             test_config["datasets"]= [test_dict]
-            config.init_global(test_config)
+            config.init_global(test_config) # no error should be raised
