@@ -37,7 +37,10 @@ algorithms_with_params = [f'{algorithm}-params-{params_hash}' for algorithm, par
 dataset_labels = list(_config.config.datasets.keys())
 gold_standard_labels = list(_config.config.gold_standard.keys())
 
-# TODO: create something that will be gs to dataset pairing
+dataset_gs_pairs_tuples = [(gs_values['label'], dataset) for gs_values in _config.config.gold_standard.values() for dataset in gs_values['datasets']]
+# am I able to send tuples around?
+dataset_gs_pairs_formatted = [f"{dataset}-{gs_values['label']}" for gs_values in _config.config.gold_standard.values() for dataset in gs_values['datasets']]
+# prefomatting makes it easier to send around but requires more functions to use
 
 # Get algorithms that are running multiple parameter combinations
 def algo_has_mult_param_combos(algo):
@@ -107,8 +110,7 @@ def make_final_input(wildcards):
         final_input.extend(expand('{out_dir}{sep}{dataset}-ml{sep}{algorithm}-ensemble-pathway.txt',out_dir=out_dir,sep=SEP,dataset=dataset_labels,algorithm=algorithms_mult_param_combos,algorithm_params=algorithms_with_params))
 
     if _config.config.analysis_include_evalution:
-        # TODO: update to using gs to specific dataset pairing
-        final_input.extend(expand('{out_dir}{sep}{dataset}-{gold_standard}-evaluation.txt',out_dir=out_dir, sep=SEP,dataset=dataset_labels,gold_standard=gold_standard_labels, algorithm_params=algorithms_with_params))
+        final_input.extend(expand('{out_dir}{sep}{dataset_gold_standard_pair}-evaluation.txt',out_dir=out_dir,sep=SEP,dataset_gold_standard_pair=dataset_gs_pairs_formatted,algorithm_params=algorithms_with_params))
     
     if len(final_input) == 0:
         # No analysis added yet, so add reconstruction output files if they exist.
@@ -343,12 +345,21 @@ rule ml_analysis_aggregate_algo:
         ml.hac_horizontal(summary_df, output.hac_image_horizontal, output.hac_clusters_horizontal, **hac_params)
         ml.ensemble_network(summary_df, output.ensemble_network_file)
 
-# update to use specific gs to dataset pairing
+def get_gs_pickle_file(wildcards):
+    parts = wildcards.dataset_gs_pairs_formatted.split('-')
+    gs = parts[1]
+    return SEP.join([out_dir, f'{gs}-merged.pickle'])
+    
+def get_dataset_label(wildcards):
+    parts = wildcards.dataset_gs_pairs_formatted.split('-')
+    dataset = parts[0]
+    return dataset
+
 rule evaluation:
     input: 
-        gs_file = SEP.join([out_dir,'{gold_standard}-merged.pickle']),
-        pathways = expand('{out_dir}{sep}{{dataset}}-{algorithm_params}{sep}pathway.txt', out_dir=out_dir, sep=SEP, algorithm_params=algorithms_with_params)
-    output: eval_file = SEP.join([out_dir, "{dataset}-{gold_standard}-evaluation.txt"])
+        gs_file = get_gs_pickle_file,
+        pathways = expand('{out_dir}{sep}{dataset_label}-{algorithm_params}{sep}pathway.txt', out_dir=out_dir, sep=SEP, algorithm_params=algorithms_with_params, dataset_label=get_dataset_label),
+    output: eval_file = SEP.join([out_dir, "{dataset_gs_pairs_formatted}-evaluation.txt"])
     run:
         node_table = Evaluation.from_file(input.gs_file).node_table
         Evaluation.precision(input.pathways, node_table, output.eval_file)

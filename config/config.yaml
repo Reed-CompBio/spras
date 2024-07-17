@@ -118,11 +118,16 @@ datasets:
 
 gold_standard:
     -
-      label: gs1
-      node_files: ["gs_nodes.txt"]
+      label: gs0
+      node_files: ["gs_nodes0.txt"]
       # edge_files: [] TODO: later iteration
       data_dir: "input"
-      # TODO: dataset: []
+      datasets: ["data0"]
+    -
+      label: gs1
+      node_files: ["gs_nodes1.txt"]
+      data_dir: "input"
+      datasets: ["data1", "data0"]
 
 # If we want to reconstruct then we should set run to true.
 # TODO: if include is true above but run is false here, algs are not run.
