@@ -59,7 +59,7 @@ is to use the the snakemake HTCondor executor to parallelize the workflow by sub
 
 Navigate to the `spras/docker-wrappers/SPRAS` directory and create the `logs/` directory. Then run `condor_submit spras.sub`, which will submit SPRAS
 to HTCondor as a single job with as many cores as indicated by the `NUM_PROCS` line in `spras.sub`, using the value of `EXAMPLE_CONFIG` as the SPRAS
-configuration file. Note that you can alter the configuration file to test various workflows, but you should leave `unpack_singularity = true`, or it 
+configuration file. Note that you can alter the configuration file to test various workflows, but you should leave `unpack_singularity = true`, or it
 is likely the job will be unsuccessful. By default, the `example_config.yaml` runs everything except for `cytoscape`, which appears to fail periodically
 in HTCondor.
 
