@@ -146,7 +146,7 @@ class Config:
         # Convert to dicts to simplify the yaml logging
         self.datasets = {dataset["label"]: dict(dataset) for dataset in raw_config["datasets"]}
 
-        # TODO: turn into try except 
+        # TODO: turn into try except
         self.gold_standard = {goldstandard["label"]: dict(goldstandard) for goldstandard in raw_config["gold_standard"]}
         for key in self.gold_standard:
             pattern = r'^\w+$'
