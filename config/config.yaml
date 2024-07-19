@@ -122,6 +122,7 @@ gold_standard:
       node_files: ["gs_nodes0.txt"]
       # edge_files: [] TODO: later iteration
       data_dir: "input"
+      # Set of datasets to compare with the specific gold standard dataset
       datasets: ["data0"]
     -
       label: gs1

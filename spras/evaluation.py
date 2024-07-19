@@ -21,7 +21,7 @@ class Evaluation:
 
     def to_file(self, file_name):
         """
-        Saves dataset object to pickle file
+        Saves gold standard object to pickle file
         """
         with open(file_name, "wb") as f:
             pkl.dump(self, f)
@@ -29,14 +29,22 @@ class Evaluation:
     @classmethod
     def from_file(cls, file_name):
         """
-        Loads dataset object from a pickle file.
-        Usage: dataset = Dataset.from_file(pickle_file)
+        Loads gold standard object from a pickle file.
+        Usage: gold_standard = Evaluation.from_file(pickle_file)
         """
         with open(file_name, "rb") as f:
             return pkl.load(f)
 
     def load_files_from_dict(self, gold_standard_dict):
+        """
+        Loads gold standard files from gold_standard_dict, which is one gold standard dataset
+        dictionary from the list in the config file with the fields in the config file.
+        Populates node_table.
 
+        node_table is a single column of nodes pandas table.
+
+        returns: none
+        """
         self.label = gold_standard_dict["label"]
         self.datasets = gold_standard_dict["datasets"]
 
@@ -53,7 +61,14 @@ class Evaluation:
         # TODO: later iteration - chose between node and edge file, or allow both
 
     def precision(file_paths: Iterable[Path], node_table: pd.DataFrame, output_file: str):
-
+        """
+        Takes in file paths for a specific dataset and an associated gold standard node table.
+        Calculates precision for each pathway file
+        Returns output back to output_file
+        @param file_paths: file paths of pathway reconstruction algorithm outputs
+        @param node_table: the gold standard nodes
+        @param output_file: the filename to save the precision of each pathway
+        """
         y_true = node_table['NODEID'].tolist()
         results = []
 

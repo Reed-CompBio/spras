@@ -70,7 +70,7 @@ class Config:
         self.unpack_singularity = False
         # A dictionary to store configured datasets against which SPRAS will be run
         self.datasets = None
-        # a dictionary to store configured gold standard data against ouptut of SPRAS runs
+        # A dictionary to store configured gold standard data against ouptut of SPRAS runs
         self.gold_standard = None
         # The hash length SPRAS will use to identify parameter combinations. Default is 7
         self.hash_length = DEFAULT_HASH_LENGTH
@@ -146,6 +146,7 @@ class Config:
         # Convert to dicts to simplify the yaml logging
         self.datasets = {dataset["label"]: dict(dataset) for dataset in raw_config["datasets"]}
 
+        # TODO: turn into try except 
         self.gold_standard = {goldstandard["label"]: dict(goldstandard) for goldstandard in raw_config["gold_standard"]}
         for key in self.gold_standard:
             pattern = r'^\w+$'
