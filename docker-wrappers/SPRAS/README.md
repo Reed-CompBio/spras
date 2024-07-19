@@ -89,13 +89,20 @@ cp -r ../../input .
 It's also necessary for this workflow to create an Apptainer image from the published Docker image. See [Creating an Apptainer image for SPRAS](#creating-an-apptainer-image-for-spras)
 for instructions.
 
-To start the workflow with HTCondor, run:
+To start the workflow with HTCondor in the CHTC pool, run:
 ```bash
 snakemake --profile spras_profile
 ```
 
 Resource requirements can be adjusted as needed in `spras_profile/config.yaml`, and HTCondor logs for this workflow can be found in `.snakemake/htcondor`.
 You can set a different log directory by adding `htcondor-jobdir: /path/to/dir` to the profile's configuration.
+
+To run this same workflow in the OSPool, add the following to the profile's default-resources block:
+```
+  classad_WantGlideIn: true
+  requirements: |
+    '(HAS_SINGULARITY == True) && (Poolname =!= "CHTC")'
+```
 
 **Note**: This workflow requires that the terminal session responsible for running snakemake stays active. Closing the terminal will suspend jobs,
 but the workflow can use Snakemakes checkpointing to pick up any jobs where they left off.
