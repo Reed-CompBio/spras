@@ -1,0 +1,11 @@
+jobs: 30
+executor: htcondor
+configfile: example_config.yaml
+shared-fs-usage: none
+default-resources:
+  job_wrapper: "spras.sh"
+  # If running in CHTC, this only works with apptainer images
+  container_image: "spras.sif"
+  universe: "container"
+  request_disk: "16GB"
+  request_memory: "8GB"
