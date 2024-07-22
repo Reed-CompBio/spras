@@ -28,15 +28,14 @@ hac_params = _config.config.hac_params
 FRAMEWORK = _config.config.container_framework
 print(f"Running {FRAMEWORK} containers")
 
-# Return the dataset or goldstandard dictionary from the config file given the label
-def get_dict(_datasets, label):
-    print(_datasets, label)
+# Return the dataset or gold_standard dictionary from the config file given the label
+def get_dataset(_datasets, label):
     return _datasets[label]
 
 algorithms = list(algorithm_params)
 algorithms_with_params = [f'{algorithm}-params-{params_hash}' for algorithm, param_combos in algorithm_params.items() for params_hash in param_combos.keys()]
 dataset_labels = list(_config.config.datasets.keys())
-dataset_goldstandard_pairs = [f"{dataset}-{gs_values['label']}" for gs_values in _config.config.gold_standard.values() for dataset in gs_values['datasets']]
+dataset_gold_standard_pairs = [f"{dataset}-{gs_values['label']}" for gs_values in _config.config.gold_standards.values() for dataset in gs_values['datasets']]
 
 # Get algorithms that are running multiple parameter combinations
 def algo_has_mult_param_combos(algo):
@@ -59,7 +58,7 @@ def write_parameter_log(algorithm, param_label, logfile):
 
 # Log the dataset contents specified in the config file in a yaml file
 def write_dataset_log(dataset, logfile):
-    dataset_contents = get_dict(_config.config.datasets,dataset)
+    dataset_contents = get_dataset(_config.config.datasets,dataset)
 
     # safe_dump gives RepresenterError for an OrderedDict
     # config file has to convert the dataset from OrderedDict to dict to avoid this
@@ -106,7 +105,7 @@ def make_final_input(wildcards):
         final_input.extend(expand('{out_dir}{sep}{dataset}-ml{sep}{algorithm}-ensemble-pathway.txt',out_dir=out_dir,sep=SEP,dataset=dataset_labels,algorithm=algorithms_mult_param_combos,algorithm_params=algorithms_with_params))
 
     if _config.config.analysis_include_evalution:
-        final_input.extend(expand('{out_dir}{sep}{dataset_gold_standard_pair}-evaluation.txt',out_dir=out_dir,sep=SEP,dataset_gold_standard_pair=dataset_goldstandard_pairs,algorithm_params=algorithms_with_params))
+        final_input.extend(expand('{out_dir}{sep}{dataset_gold_standard_pair}-evaluation.txt',out_dir=out_dir,sep=SEP,dataset_gold_standard_pair=dataset_gold_standard_pairs,algorithm_params=algorithms_with_params))
     
     if len(final_input) == 0:
         # No analysis added yet, so add reconstruction output files if they exist.
@@ -156,23 +155,23 @@ rule merge_input:
     output: dataset_file = SEP.join([out_dir, '{dataset}-merged.pickle'])
     run:
         # Pass the dataset to PRRunner where the files will be merged and written to disk (i.e. pickled)
-        dataset_dict = get_dict(_config.config.datasets, wildcards.dataset)
+        dataset_dict = get_dataset(_config.config.datasets, wildcards.dataset)
         runner.merge_input(dataset_dict, output.dataset_file)
 
 # Return all files used in the gold standard
-def get_goldstandard_dependencies(wildcards):
-    gs = _config.config.gold_standard[wildcards.gold_standard]
+def get_gold_standard_dependencies(wildcards):
+    gs = _config.config.gold_standards[wildcards.gold_standard]
     all_files = gs["node_files"]
     all_files = [gs["data_dir"] + SEP + data_file for data_file in all_files]
     return all_files
 
-# Merge all node files for a goldstandard into a single node table
+# Merge all node files for a gold_standard into a single node table
 rule merge_gs_input:
-    input: get_goldstandard_dependencies
-    output: goldstandard_file = SEP.join([out_dir, '{gold_standard}-merged.pickle'])
+    input: get_gold_standard_dependencies
+    output: gold_standard_file = SEP.join([out_dir, '{gold_standard}-merged.pickle'])
     run:
-        goldstandard_dict = get_dict(_config.config.gold_standard, wildcards.gold_standard)
-        runner.merge_gold_standard_input(goldstandard_dict, output.goldstandard_file)
+        gold_standard_dict = get_dataset(_config.config.gold_standards, wildcards.gold_standard)
+        Evaluation.merge_gold_standard_input(gold_standard_dict, output.gold_standard_file)
 
 # The checkpoint is like a rule but can be used in dynamic workflows
 # The workflow directed acyclic graph is re-evaluated after the checkpoint job runs
@@ -345,25 +344,25 @@ rule ml_analysis_aggregate_algo:
         ml.ensemble_network(summary_df, output.ensemble_network_file)
 
 # Return the gold standard pickle file for a specific gold standard
-def get_goldstandard_pickle_file(wildcards):
-    parts = wildcards.dataset_goldstandard_pairs.split('-')
+def get_gold_standard_pickle_file(wildcards):
+    parts = wildcards.dataset_gold_standard_pairs.split('-')
     gs = parts[1]
     return SEP.join([out_dir, f'{gs}-merged.pickle'])
     
 # Returns the dataset corresponding to the gold standard pair
 def get_dataset_label(wildcards):
-    parts = wildcards.dataset_goldstandard_pairs.split('-')
+    parts = wildcards.dataset_gold_standard_pairs.split('-')
     dataset = parts[0]
     return dataset
 
 # Run evaluation code for a specific dataset's pathway outputs against its paired gold standard
 rule evaluation:
     input: 
-        goldstandard_file = get_goldstandard_pickle_file,
+        gold_standard_file = get_gold_standard_pickle_file,
         pathways = expand('{out_dir}{sep}{dataset_label}-{algorithm_params}{sep}pathway.txt', out_dir=out_dir, sep=SEP, algorithm_params=algorithms_with_params, dataset_label=get_dataset_label),
-    output: eval_file = SEP.join([out_dir, "{dataset_goldstandard_pairs}-evaluation.txt"])
+    output: eval_file = SEP.join([out_dir, "{dataset_gold_standard_pairs}-evaluation.txt"])
     run:
-        node_table = Evaluation.from_file(input.goldstandard_file).node_table
+        node_table = Evaluation.from_file(input.gold_standard_file).node_table
         Evaluation.precision(input.pathways, node_table, output.eval_file)
 
 # Remove the output directory

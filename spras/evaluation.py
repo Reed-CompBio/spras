@@ -19,6 +19,15 @@ class Evaluation:
         self.datasets = None
         return
 
+    def merge_gold_standard_input(gs_dict, gs_file):
+        """
+        Merge files listed for this gold standard dataset and write the dataset to disk
+        @param gs_dict: gold standard dataset to process
+        @param gs_file: output filename
+        """
+        gs_dataset = Evaluation(gs_dict)
+        gs_dataset.to_file(gs_file)
+
     def to_file(self, file_name):
         """
         Saves gold standard object to pickle file
@@ -60,6 +69,7 @@ class Evaluation:
 
         # TODO: later iteration - chose between node and edge file, or allow both
 
+    # TODO: move outside of Evaluation class?
     def precision(file_paths: Iterable[Path], node_table: pd.DataFrame, output_file: str):
         """
         Takes in file paths for a specific dataset and an associated gold standard node table.

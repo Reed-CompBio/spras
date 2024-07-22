@@ -71,7 +71,7 @@ class Config:
         # A dictionary to store configured datasets against which SPRAS will be run
         self.datasets = None
         # A dictionary to store configured gold standard data against ouptut of SPRAS runs
-        self.gold_standard = None
+        self.gold_standards = None
         # The hash length SPRAS will use to identify parameter combinations. Default is 7
         self.hash_length = DEFAULT_HASH_LENGTH
         # The list of algorithms to run in the workflow. Each is a dict with 'name' as an expected key.
@@ -147,11 +147,15 @@ class Config:
         self.datasets = {dataset["label"]: dict(dataset) for dataset in raw_config["datasets"]}
 
         # TODO: turn into try except
-        self.gold_standard = {goldstandard["label"]: dict(goldstandard) for goldstandard in raw_config["gold_standard"]}
-        for key in self.gold_standard:
+        try:
+            self.gold_standards = {gold_standard["label"]: dict(gold_standard) for gold_standard in raw_config["gold_standard"]}
+        except:
+            self.gold_standards = {}
+
+        for key in self.gold_standards:
             pattern = r'^\w+$'
             if not bool(re.match(pattern, key)):
-                raise ValueError(f"Gold Standard label \'{key}\' contains invalid values. Gold Standard labels can only contain letters, numbers, or underscores.")
+                raise ValueError(f"Gold standard label \'{key}\' contains invalid values. Gold standard labels can only contain letters, numbers, or underscores.")
 
         # Code snipped from Snakefile that may be useful for assigning default labels
         # dataset_labels = [dataset.get('label', f'dataset{index}') for index, dataset in enumerate(datasets)]
@@ -233,6 +237,12 @@ class Config:
         self.analysis_include_cytoscape = raw_config["analysis"]["cytoscape"]["include"]
         self.analysis_include_ml = raw_config["analysis"]["ml"]["include"]
         self.analysis_include_evalution = raw_config["analysis"]["evaluation"]["include"]
+
+        # the code will run correctly without this section below
+        # TODO: decide if this part is needed
+        if self.gold_standards == {} and self.analysis_include_evalution == True:
+            print("Gold standard data not provided. Evaluation analysis cannot run.")
+            self.analysis_include_evalution = False
 
         if 'aggregate_per_algorithm' not in self.ml_params:
             self.analysis_include_ml_aggregate_algo = False
