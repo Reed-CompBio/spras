@@ -99,6 +99,7 @@ algorithms:
 # Assume that if a dataset label does not change, the lists of associated input files do not change
 datasets:
     -
+      # Labels can only contain letters, numbers, or underscores
       label: data0
       node_files: ["node-prizes.txt", "sources.txt", "targets.txt"]
       # DataLoader.py can currently only load a single edge file, which is the primary network
