@@ -146,7 +146,6 @@ class Config:
         # Convert to dicts to simplify the yaml logging
         self.datasets = {dataset["label"]: dict(dataset) for dataset in raw_config["datasets"]}
 
-        # TODO: turn into try except
         try:
             self.gold_standards = {gold_standard["label"]: dict(gold_standard) for gold_standard in raw_config["gold_standard"]}
         except:
@@ -238,7 +237,7 @@ class Config:
         self.analysis_include_ml = raw_config["analysis"]["ml"]["include"]
         self.analysis_include_evalution = raw_config["analysis"]["evaluation"]["include"]
 
-        # the code will run correctly without this section below
+        # COMMENT: the code will run correctly without this section below due to empty dict in try except above 
         # TODO: decide if this part is needed
         if self.gold_standards == {} and self.analysis_include_evalution == True:
             print("Gold standard data not provided. Evaluation analysis cannot run.")

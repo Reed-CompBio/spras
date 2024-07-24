@@ -13,10 +13,10 @@ class Evaluation:
 
     def __init__(self, gold_standard_dict):
         self.label = None
+        self.datasets = None
         self.node_table = None
         # self.edge_table = None TODO: later iteration
         self.load_files_from_dict(gold_standard_dict)
-        self.datasets = None
         return
 
     def merge_gold_standard_input(gs_dict, gs_file):
@@ -54,10 +54,16 @@ class Evaluation:
 
         returns: none
         """
-        self.label = gold_standard_dict["label"]
-        self.datasets = gold_standard_dict["datasets"]
+        self.label = gold_standard_dict["label"] # COMMENT: cannot be empty, will break with a NoneType exception 
+        self.datasets = gold_standard_dict["datasets"] # COMMENT: can be empty, snakemake will not run evaluation due to dataset_gold_standard_pairs in snakemake file
 
-        node_data_files = gold_standard_dict["node_files"][0] # TODO: single file for now
+        try: 
+            # COMMENT: cannot be empty, snakemake will run evaluation even if empty
+            node_data_files = gold_standard_dict["node_files"][0] # TODO: single file for now 
+        except:
+            if not gold_standard_dict["node_files"]:
+                raise ValueError (f"Node_files for {self.label} is an empty list, cannot run evalution")
+
         data_loc = gold_standard_dict["data_dir"]
 
         single_node_table = pd.read_table(os.path.join(data_loc, node_data_files), header=None)
