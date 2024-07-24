@@ -15,6 +15,7 @@ will grab the top level registry configuration option as it appears in the confi
 import copy as copy
 import itertools as it
 import os
+import re
 
 import numpy as np
 import yaml
@@ -69,6 +70,8 @@ class Config:
         self.unpack_singularity = False
         # A dictionary to store configured datasets against which SPRAS will be run
         self.datasets = None
+        # A dictionary to store configured gold standard data against ouptut of SPRAS runs
+        self.gold_standards = None
         # The hash length SPRAS will use to identify parameter combinations. Default is 7
         self.hash_length = DEFAULT_HASH_LENGTH
         # The list of algorithms to run in the workflow. Each is a dict with 'name' as an expected key.
@@ -94,6 +97,9 @@ class Config:
         self.analysis_include_cytoscape  = None
         # A Boolean specifying whether to run the ML analysis
         self.analysis_include_ml = None
+        # A Boolean specifying whether to run the Evaluation analysis
+        self.analysis_include_evalution = None
+
 
         _raw_config = copy.deepcopy(raw_config)
         self.process_config(_raw_config)
@@ -139,6 +145,16 @@ class Config:
         # When Snakemake parses the config file it loads the datasets as OrderedDicts not dicts
         # Convert to dicts to simplify the yaml logging
         self.datasets = {dataset["label"]: dict(dataset) for dataset in raw_config["datasets"]}
+
+        try:
+            self.gold_standards = {gold_standard["label"]: dict(gold_standard) for gold_standard in raw_config["gold_standard"]}
+        except:
+            self.gold_standards = {}
+
+        for key in self.gold_standards:
+            pattern = r'^\w+$'
+            if not bool(re.match(pattern, key)):
+                raise ValueError(f"Gold standard label \'{key}\' contains invalid values. Gold standard labels can only contain letters, numbers, or underscores.")
 
         # Code snipped from Snakefile that may be useful for assigning default labels
         # dataset_labels = [dataset.get('label', f'dataset{index}') for index, dataset in enumerate(datasets)]
@@ -219,6 +235,13 @@ class Config:
         self.analysis_include_graphspace = raw_config["analysis"]["graphspace"]["include"]
         self.analysis_include_cytoscape = raw_config["analysis"]["cytoscape"]["include"]
         self.analysis_include_ml = raw_config["analysis"]["ml"]["include"]
+        self.analysis_include_evalution = raw_config["analysis"]["evaluation"]["include"]
+
+        # COMMENT: the code will run correctly without this section below due to empty dict in try except above
+        # TODO: decide if this part is needed
+        if self.gold_standards == {} and self.analysis_include_evalution == True:
+            print("Gold standard data not provided. Evaluation analysis cannot run.")
+            self.analysis_include_evalution = False
 
         if 'aggregate_per_algorithm' not in self.ml_params:
             self.analysis_include_ml_aggregate_algo = False
