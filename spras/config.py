@@ -237,7 +237,7 @@ class Config:
         self.analysis_include_ml = raw_config["analysis"]["ml"]["include"]
         self.analysis_include_evalution = raw_config["analysis"]["evaluation"]["include"]
 
-        # COMMENT: the code will run correctly without this section below due to empty dict in try except above 
+        # COMMENT: the code will run correctly without this section below due to empty dict in try except above
         # TODO: decide if this part is needed
         if self.gold_standards == {} and self.analysis_include_evalution == True:
             print("Gold standard data not provided. Evaluation analysis cannot run.")

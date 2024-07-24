@@ -54,15 +54,11 @@ class Evaluation:
 
         returns: none
         """
-        self.label = gold_standard_dict["label"] # COMMENT: cannot be empty, will break with a NoneType exception 
+        self.label = gold_standard_dict["label"] # COMMENT: cannot be empty, will break with a NoneType exception
         self.datasets = gold_standard_dict["datasets"] # COMMENT: can be empty, snakemake will not run evaluation due to dataset_gold_standard_pairs in snakemake file
 
-        try: 
-            # COMMENT: cannot be empty, snakemake will run evaluation even if empty
-            node_data_files = gold_standard_dict["node_files"][0] # TODO: single file for now 
-        except:
-            if not gold_standard_dict["node_files"]:
-                raise ValueError (f"Node_files for {self.label} is an empty list, cannot run evalution")
+        # COMMENT: cannot be empty, snakemake will run evaluation even if empty
+        node_data_files = gold_standard_dict["node_files"][0] # TODO: single file for now
 
         data_loc = gold_standard_dict["data_dir"]
 
@@ -75,7 +71,6 @@ class Evaluation:
 
         # TODO: later iteration - chose between node and edge file, or allow both
 
-    # TODO: move outside of Evaluation class?
     def precision(file_paths: Iterable[Path], node_table: pd.DataFrame, output_file: str):
         """
         Takes in file paths for a specific dataset and an associated gold standard node table.
