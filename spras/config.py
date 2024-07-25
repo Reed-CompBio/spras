@@ -15,6 +15,7 @@ will grab the top level registry configuration option as it appears in the confi
 import copy as copy
 import itertools as it
 import os
+import re
 
 import numpy as np
 import yaml
@@ -139,6 +140,11 @@ class Config:
         # When Snakemake parses the config file it loads the datasets as OrderedDicts not dicts
         # Convert to dicts to simplify the yaml logging
         self.datasets = {dataset["label"]: dict(dataset) for dataset in raw_config["datasets"]}
+
+        for key in self.datasets:
+            pattern = r'^\w+$'
+            if not bool(re.match(pattern, key)):
+                raise ValueError(f"Dataset label \'{key}\' contains invalid values. Dataset labels can only contain letters, numbers, or underscores.")
 
         # Code snipped from Snakefile that may be useful for assigning default labels
         # dataset_labels = [dataset.get('label', f'dataset{index}') for index, dataset in enumerate(datasets)]
