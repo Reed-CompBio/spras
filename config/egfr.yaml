@@ -72,7 +72,7 @@ datasets:
     data_dir: input
     edge_files:
       - phosphosite-irefindex13.0-uniprot.txt
-    label: tpsegfr
+    label: tps_egfr
     node_files:
       - tps-egfr-prizes.txt
     other_files: []
