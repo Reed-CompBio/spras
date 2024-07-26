@@ -22,8 +22,8 @@ Interactor1   Interactor2   Weight
 - the expected raw input file should have node pairs in the 1st and 2nd columns, with a weight in the 3rd column
 - it can include repeated and bidirectional edges
 """
-class ResponseNet(PRM):
-    required_inputs = ['nodetypes', 'network']
+class ResponseNet (PRM):
+    required_inputs = ['sources', 'targets', 'edges']
 
     @staticmethod
     def generate_inputs(data, filename_map):
@@ -31,91 +31,83 @@ class ResponseNet(PRM):
         Access fields from the dataset and write the required input files
         @param data: dataset
         @param filename_map: a dict mapping file types in the required_inputs to the filename for that type
-        @return:
         """
-        for input_type in PathLinker.required_inputs:
+
+        # ensures the required input are within the filename_map
+        for input_type in MinCostFlow.required_inputs:
             if input_type not in filename_map:
                 raise ValueError(f"{input_type} filename is missing")
 
-        # Get sources and targets for node input file
-        sources_targets = data.request_node_columns(["sources", "targets"])
-        if sources_targets is None:
-            return False
-        both_series = sources_targets.sources & sources_targets.targets
-        for _index, row in sources_targets[both_series].iterrows():
-            warn_msg = row.NODEID + " has been labeled as both a source and a target."
-            # Only use stacklevel 1 because this is due to the data not the code context
-            warnings.warn(warn_msg, stacklevel=1)
+        # will take the sources and write them to files, and repeats with targets
+        for node_type in ['sources', 'targets']:
+            nodes = data.request_node_columns([node_type])
+            if nodes is None:
+                raise ValueError(f'No {node_type} found in the node files')
+            # take nodes one column data frame, call sources/ target series
+            nodes = nodes.loc[nodes[node_type]]
+            # creates with the node type without headers
+            nodes.to_csv(filename_map[node_type], index=False, columns=['NODEID'], header=False)
 
-        # Create nodetype file
-        input_df = sources_targets[["NODEID"]].copy()
-        input_df.columns = ["#Node"]
-        input_df.loc[sources_targets["sources"] == True,"Node type"]="source"
-        input_df.loc[sources_targets["targets"] == True,"Node type"]="target"
-
-        input_df.to_csv(filename_map["nodetypes"],sep="\t",index=False,columns=["#Node","Node type"])
-
-        # Create network file
+        # create the network of edges
+        # responsenet should be recieving a directed graph
         edges = data.get_interactome()
+        edges = edges.convert_undirected_to_directed()
 
-        # Format network file
-        edges = convert_undirected_to_directed(edges)
+        # creates the edges files that contains the head and tail nodes and the weights after them
+        edges.to_csv(filename_map['edges'], sep='\t', index=False, columns=["Interactor1", "Interactor2", "Weight"],
+                     header=False)
 
-        # This is pretty memory intensive. We might want to keep the interactome centralized.
-        edges.to_csv(filename_map["network"],sep="\t",index=False,columns=["Interactor1","Interactor2","Weight"],
-                     header=["#Interactor1","Interactor2","Weight"])
-
-    # Skips parameter validation step
     @staticmethod
-    def run(nodetypes=None, network=None, output_file=None, gamma=10, container_framework="docker"):
+    def run(sources=None, targets=None, edges=None, output_file=None, gamma=10, container_framework="docker"):
         """
-        Run ResponseNet with Docker
-        @param nodetypes:  input node types with sources and targets (required)
-        @param network:  input network file (required)
-        @param output_file: path to the output pathway file (required)
-        @param k: path length (optional)
+        Run min cost flow with Docker (or singularity)
+        @param sources: input sources (required)
+        @param targets: input targets (required)
+        @param edges: input network file (required)
+        @param output_file: output file name (required)
+        @param gamma: integer representing gamma (optional, default is 10)
         @param container_framework: choose the container runtime framework, currently supports "docker" or "singularity" (optional)
         """
-        # Add additional parameter validation
-        # Do not require k
-        # Use the PathLinker default
-        # Could consider setting the default here instead
-        if not nodetypes or not network or not output_file:
-            raise ValueError('Required ResponseNet arguments are missing')
 
-        work_dir = '/spras'
+        # ensures that these parameters are required
+        if not sources or not targets or not edges or not output_file:
+            raise ValueError('Required MinCostFlow arguments are missing')
 
-        # Each volume is a tuple (src, dest)
+        # the data files will be mapped within this directory within the container
+        work_dir = '/responsenet'
+
+        # the tuple is for mapping the sources, targets, edges, and output
         volumes = list()
 
-        bind_path, node_file = prepare_volume(nodetypes, work_dir)
+        bind_path, sources_file = prepare_volume(sources, work_dir)
         volumes.append(bind_path)
 
-        bind_path, network_file = prepare_volume(network, work_dir)
+        bind_path, targets_file = prepare_volume(targets, work_dir)
         volumes.append(bind_path)
 
-        # ResponseNet does not provide an argument to set the output directory
-        # Use its --output argument to set the output file prefix to specify an absolute path and prefix
+        bind_path, edges_file = prepare_volume(edges, work_dir)
+        volumes.append(bind_path)
+
+        # Create a prefix for the output filename and ensure the directory exists
         out_dir = Path(output_file).parent
-        # PathLinker requires that the output directory exist
         out_dir.mkdir(parents=True, exist_ok=True)
         bind_path, mapped_out_dir = prepare_volume(str(out_dir), work_dir)
         volumes.append(bind_path)
-        mapped_out_prefix = mapped_out_dir + '/out'  # Use posix path inside the container
+        mapped_out_prefix = mapped_out_dir + '/out'
 
+        # Makes the Python command to run within in the container
         command = ['python',
-                   '/ResponseNet/run.py',
-                   network_file,
-                   node_file,
-                   '--output', mapped_out_prefix]
+                    '/responsenet/responsenet.py',
+                    '--edges_file', edges_file,
+                    '--sources_file', sources_file,
+                    '--targets_file', targets_file,
+                    '--output', mapped_out_prefix,
+                    '--gamma', gamma]
 
-        # Add optional argument
-        if k is not None:
-            command.extend(['-k', str(k)])
+        # choosing to run in docker or singularity container
+        container_suffix = "responsenet"
 
-        print('Running PathLinker with arguments: {}'.format(' '.join(command)), flush=True)
-
-        container_suffix = "pathlinker"
+        # constructs a docker run call
         out = run_container(container_framework,
                             container_suffix,
                             command,
@@ -123,20 +115,26 @@ class ResponseNet(PRM):
                             work_dir)
         print(out)
 
-        # Rename the primary output file to match the desired output filename
-        # Currently PathLinker only writes one output file so we do not need to delete others
-        # We may not know the value of k that was used
-        output_edges = Path(next(out_dir.glob('out*-ranked-edges.txt')))
-        output_edges.rename(output_file)
+    # TODO: Make sure we get an output file and a log file for user inspection, see DOMINO
+
 
     @staticmethod
     def parse_output(raw_pathway_file, standardized_pathway_file):
         """
         Convert a predicted pathway into the universal format
+
+        Although the algorithm constructs a directed network, the resulting network is treated as undirected.
+        This is because the flow within the network doesn't imply causal relationships between nodes.
+        The primary goal of the algorithm is node identification, not the identification of directional edges.
+
         @param raw_pathway_file: pathway file produced by an algorithm's run function
         @param standardized_pathway_file: the same pathway written in the universal format
         """
-        # What about multiple raw_pathway_files
-        df = pd.read_csv(raw_pathway_file, sep='\t').take([0, 1, 2], axis=1)
+
+        df = pd.read_csv(raw_pathway_file, sep='\t', header=None)
+        df = add_rank_column(df)
+        # TODO update MinCostFlow version to support mixed graphs
+        # Currently directed edges in the input will be converted to undirected edges in the output
         df = reinsert_direction_col_directed(df)
         df.to_csv(standardized_pathway_file, header=False, index=False, sep='\t')
+
