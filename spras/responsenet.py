@@ -20,7 +20,7 @@ ResponseNet will construct a fully directed graph from the provided input file
 Expected raw input format:
 Interactor1   Interactor2   Weight
 - the expected raw input file should have node pairs in the 1st and 2nd columns, with a weight in the 3rd column
-- it can include repeated and bidirectional edges
+- it can include bidirectional edges, but will only keep one copy of repeated edges
 """
 class ResponseNet (PRM):
     required_inputs = ['sources', 'targets', 'edges']
@@ -51,7 +51,7 @@ class ResponseNet (PRM):
         # create the network of edges
         # responsenet should be recieving a directed graph
         edges = data.get_interactome()
-        edges = edges.convert_undirected_to_directed()
+        edges = convert_undirected_to_directed(edges)
 
         # creates the edges files that contains the head and tail nodes and the weights after them
         edges.to_csv(filename_map['edges'], sep='\t', index=False, columns=["Interactor1", "Interactor2", "Weight"],
@@ -113,7 +113,7 @@ class ResponseNet (PRM):
             command.append('-o')
 
         # choosing to run in docker or singularity container
-        container_suffix = "responsenet"
+        container_suffix = "responsenet:v1.0"
 
         # constructs a docker run call
         out = run_container(container_framework,
