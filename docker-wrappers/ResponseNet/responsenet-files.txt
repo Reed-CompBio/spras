@@ -1,2 +1,0 @@
-https://raw.githubusercontent.com/Reed-CompBio/ResponseNet/$RESPONSENET_COMMIT_SHA/requirements.txt
-https://raw.githubusercontent.com/Reed-CompBio/ResponseNet/$RESPONSENET_COMMIT_SHA/responsenet.py

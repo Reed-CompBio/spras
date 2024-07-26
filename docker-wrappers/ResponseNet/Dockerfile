@@ -1,17 +1,9 @@
 #uses ubuntu as the base
-FROM python:3.10.7-alpine
-
-# gettext is required for the envsubst command
-# See https://github.com/haskell/cabal/issues/6126 regarding wget
-RUN apk add --no-cache ca-certificates gettext wget
+FROM python:3.10.7
 
 WORKDIR /ResponseNet
 
-COPY responsenet-files.txt .
+RUN pip install ortools && pip install networkx
 
-RUN export RESPONSENET_COMMIT_SHA=fd1e2b1cff6fd5c4bf84ac40800dc4feba487b8a
-RUN envsubst '${RESPONSENET_COMMIT_SHA}' < responsenet-files.txt > responsenet-files-versioned.txt
-RUN rm responsenet-files.txt
-RUN wget --input-file responsenet-files-versioned.txt
-RUN sed -i '/pkg-resources/d' requirements.txt && \
-    pip install -r requirements.txt
+RUN wget https://raw.githubusercontent.com/Reed-CompBio/ResponseNet/7f1af8d0e88c49d3334b18c7afd0a0f890fd9fba/responsenet.py
+

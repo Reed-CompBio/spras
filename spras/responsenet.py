@@ -34,7 +34,7 @@ class ResponseNet (PRM):
         """
 
         # ensures the required input are within the filename_map
-        for input_type in MinCostFlow.required_inputs:
+        for input_type in ResponseNet.required_inputs:
             if input_type not in filename_map:
                 raise ValueError(f"{input_type} filename is missing")
 
