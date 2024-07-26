@@ -5,5 +5,6 @@ WORKDIR /ResponseNet
 
 RUN pip install ortools && pip install networkx
 
-RUN wget https://raw.githubusercontent.com/Reed-CompBio/ResponseNet/7f1af8d0e88c49d3334b18c7afd0a0f890fd9fba/responsenet.py
+# Last built 7/26/24 @ 2:45 PM PST
+RUN wget https://raw.githubusercontent.com/Reed-CompBio/ResponseNet/40f3ff9b0db1391b0709c49cc7140dced0ed9102/responsenet.py
 
