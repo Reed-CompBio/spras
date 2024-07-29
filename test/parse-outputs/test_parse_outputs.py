@@ -11,7 +11,7 @@ EXPDIR = "test/parse-outputs/expected/"
 # the DOMINO output of the network dip.sif and the nodes tnfa_active_genes_file.txt
 # from https://github.com/Shamir-Lab/DOMINO/tree/master/examples
 
-algorithms = ['mincostflow', 'meo', 'omicsintegrator1', 'omicsintegrator2', 'pathlinker', 'allpairs', 'domino']
+algorithms = ['mincostflow', 'meo', 'omicsintegrator1', 'omicsintegrator2', 'pathlinker', 'allpairs', 'domino', 'bowtiebuilder']
 
 
 class TestParseOutputs:

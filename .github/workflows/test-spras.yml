@@ -85,6 +85,16 @@ jobs:
         docker pull reedcompbio/domino:latest
         docker pull reedcompbio/py4cytoscape:v3
         docker pull reedcompbio/spras:v0.1.0
+        docker pull reedcompbio/bowtiebuilder:v1
+    - name: Build BowtieBuilder Docker Image
+      uses: docker/build-push-action@v1
+      with:
+        path: docker-wrappers/BowTieBuilder
+        dockerfile: docker-wrappers/BowTieBuilder/Dockerfile
+        respository: reedcompbio/bowtiebuilder
+        tags: latest
+        cache_from: reedcompbio/bowtiebuilder:v1
+        push: false    
     - name: Build Omics Integrator 1 Docker image
       uses: docker/build-push-action@v1
       with:

@@ -1,0 +1,8 @@
+Node1	Node2
+A	D
+A	B
+C	F
+B	C
+F	G
+G	I
+G	H
