@@ -86,17 +86,16 @@ def summarize_networks(file_paths: Iterable[Union[str, PathLike]]) -> pd.DataFra
     concated_df = concated_df.fillna(0)
     concated_df = concated_df.astype('int64')
 
-    # don't do ml post-processing if there is an empty dataframe or the number of samples is <= 1
-    if concated_df.empty:
+    return concated_df
+
+def df_error(dataframe: pd.DataFrame):
+    if dataframe.empty:
         raise ValueError("ML post-processing cannot proceed because the summarize network dataframe is empty.\nWe "
                       "suggest setting ml include: false in the configuration file to avoid this error.")
-    if min(concated_df.shape) <= 1:
+    if min(dataframe.shape) <= 1:
         raise ValueError(f"ML post-processing cannot proceed because the available number of pathways is insufficient. "
                       f"The ml post-processing requires more than one pathway, but currently "
                       f"there are only {min(concated_df.shape)} pathways.")
-
-    return concated_df
-
 
 def create_palette(column_names):
     """
@@ -121,6 +120,7 @@ def pca(dataframe: pd.DataFrame, output_png: str, output_var: str, output_coord:
     @param components: the number of principal components to calculate (Default is 2)
     @param labels: determines if labels will be included in the scatterplot (Default is True)
     """
+    df_error(dataframe)
     df = dataframe.reset_index(drop=True)
     columns = dataframe.columns
     column_names = [element.split('-')[-3] for element in columns]  # assume algorithm names do not contain '-'
@@ -222,6 +222,7 @@ def hac_vertical(dataframe: pd.DataFrame, output_png: str, output_file: str, lin
     @param linkage: methods for calculating the distance between clusters
     @param metric: used for distance computation between instances of clusters
     """
+    df_error(dataframe)
     if linkage not in linkage_methods:
         raise ValueError(f"linkage={linkage} must be one of {linkage_methods}")
     if metric not in distance_metrics:
@@ -280,6 +281,7 @@ def hac_horizontal(dataframe: pd.DataFrame, output_png: str, output_file: str, l
     @param linkage: methods for calculating the distance between clusters
     @param metric: used for distance computation between instances of clusters
     """
+    df_error(dataframe)
     if linkage not in linkage_methods:
         raise ValueError(f"linkage={linkage} must be one of {linkage_methods}")
     if linkage == "ward":
