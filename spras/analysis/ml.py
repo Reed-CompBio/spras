@@ -95,7 +95,7 @@ def df_error(dataframe: pd.DataFrame):
     if min(dataframe.shape) <= 1:
         raise ValueError(f"ML post-processing cannot proceed because the available number of pathways is insufficient. "
                       f"The ml post-processing requires more than one pathway, but currently "
-                      f"there are only {min(concated_df.shape)} pathways.")
+                      f"there are only {min(dataframe.shape)} pathways.")
 
 def create_palette(column_names):
     """

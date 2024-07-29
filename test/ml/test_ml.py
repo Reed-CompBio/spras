@@ -42,38 +42,24 @@ class TestML:
         with pytest.raises(ValueError):
             ml.summarize_networks([INPUT_DIR + 'test-data-wrong-direction/wrong-direction.txt'])
 
-    # TODO: Can I move everything into one test?
-    def test_empty_pca(self):
+    def test_empty(self):
+        dataframe = ml.summarize_networks([INPUT_DIR + 'test-data-empty/empty.txt'])
         with pytest.raises(ValueError):  # raises error if empty dataframe is used for post processing
-            dataframe = ml.summarize_networks([INPUT_DIR + 'test-data-empty/empty.txt'])
             ml.pca(dataframe, OUT_DIR + 'pca-empty.png', OUT_DIR + 'pca-empty-variance.txt',
                OUT_DIR + 'pca-empty-coordinates.tsv')
-
-    def test_empty_hac_horizontal(self):
-        with pytest.raises(ValueError):  # raises error if empty dataframe is used for post processing
-            dataframe = ml.summarize_networks([INPUT_DIR + 'test-data-empty/empty.txt'])
+        with pytest.raises(ValueError):
             ml.hac_horizontal(dataframe, OUT_DIR + 'hac-empty-horizontal.png', OUT_DIR + 'hac-empty-clusters-horizontal.txt')
-
-    def test_empty_hac_vertical(self):
-        with pytest.raises(ValueError):  # raises error if empty dataframe is used for post processing
-            dataframe = ml.summarize_networks([INPUT_DIR + 'test-data-empty/empty.txt'])
+        with pytest.raises(ValueError):
             ml.hac_vertical(dataframe, OUT_DIR + 'hac-empty-vertical.png', OUT_DIR + 'hac-empty-clusters-vertical.txt')
 
-     # TODO: Can I move everything into one test?
-    def test_single_line_pca(self):
+    def test_single_line(self):
+        dataframe = ml.summarize_networks([INPUT_DIR + 'test-data-empty/empty.txt'])
         with pytest.raises(ValueError):  # raises error if single line in file s.t. single row in dataframe is used for post processing
-            dataframe = ml.summarize_networks([INPUT_DIR + 'test-data-empty/empty.txt'])
             ml.pca(dataframe, OUT_DIR + 'pca-single-line.png', OUT_DIR + 'pca-single-line-variance.txt',
                OUT_DIR + 'pca-single-line-coordinates.tsv')
-    
-    def test_single_line_hac_horizontal(self):
-        with pytest.raises(ValueError):  # raises error if single line in file s.t. single row in dataframe is used for post processing
-            dataframe = ml.summarize_networks([INPUT_DIR + 'test-data-empty/empty.txt'])
+        with pytest.raises(ValueError):
             ml.hac_horizontal(dataframe, OUT_DIR + 'hac-single-line-horizontal.png', OUT_DIR + 'hac-single-line-clusters-horizontal.txt')
-
-    def test_single_line_hac_vertical(self):
-        with pytest.raises(ValueError):  # raises error if single line in file s.t. single row in dataframe is used for post processing
-            dataframe = ml.summarize_networks([INPUT_DIR + 'test-data-empty/empty.txt'])
+        with pytest.raises(ValueError):
             ml.hac_vertical(dataframe, OUT_DIR + 'hac-single-line-vertical.png', OUT_DIR + 'hac-single-line-clusters-vertical.txt')
 
     def test_pca(self):
