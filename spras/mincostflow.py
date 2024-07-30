@@ -1,14 +1,12 @@
 from pathlib import Path
 
-import pandas as pd
-
 from spras.containers import prepare_volume, run_container
 from spras.interactome import (
     convert_undirected_to_directed,
     reinsert_direction_col_undirected,
 )
 from spras.prm import PRM
-from spras.util import add_rank_column
+from spras.util import add_rank_column, raw_pathway_df
 
 __all__ = ['MinCostFlow']
 
@@ -150,10 +148,11 @@ class MinCostFlow (PRM):
         @param standardized_pathway_file: the same pathway written in the universal format
         """
 
-        df = pd.read_csv(raw_pathway_file, sep='\t', header=None)
-        df = add_rank_column(df)
-        # TODO update MinCostFlow version to support mixed graphs
-        # Currently directed edges in the input will be converted to undirected edges in the output
-        df = reinsert_direction_col_undirected(df)
-        df.to_csv(standardized_pathway_file, header=False, index=False, sep='\t')
-
+        df = raw_pathway_df(raw_pathway_file, sep='\t', header=None)
+        if not df.empty:
+            df = add_rank_column(df)
+            # TODO update MinCostFlow version to support mixed graphs
+            # Currently directed edges in the input will be converted to undirected edges in the output
+            df = reinsert_direction_col_undirected(df)
+            df.columns = ['Node1', 'Node2', 'Rank', "Direction"]
+        df.to_csv(standardized_pathway_file, header=True, index=False, sep='\t')
