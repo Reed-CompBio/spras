@@ -93,14 +93,14 @@ def make_final_input(wildcards):
         final_input.extend(expand('{out_dir}{sep}{dataset}-ml{sep}ensemble-pathway.txt',out_dir=out_dir,sep=SEP,dataset=dataset_labels,algorithm_params=algorithms_with_params))
     
     if _config.config.analysis_include_ml_aggregate_algo:
-        final_input.extend(expand('{out_dir}{sep}{dataset}-ml{sep}{algorithm}-pca.png',out_dir=out_dir,sep=SEP,dataset=dataset_labels,algorithm=algorithms_mult_param_combos,algorithm_params=algorithms_with_params))
-        final_input.extend(expand('{out_dir}{sep}{dataset}-ml{sep}{algorithm}-pca-variance.txt',out_dir=out_dir,sep=SEP,dataset=dataset_labels,algorithm=algorithms_mult_param_combos,algorithm_params=algorithms_with_params))
-        final_input.extend(expand('{out_dir}{sep}{dataset}-ml{sep}{algorithm}-pca-coordinates.txt',out_dir=out_dir,sep=SEP,dataset=dataset_labels,algorithm=algorithms_mult_param_combos,algorithm_params=algorithms_with_params))
-        final_input.extend(expand('{out_dir}{sep}{dataset}-ml{sep}{algorithm}-hac-vertical.png',out_dir=out_dir,sep=SEP,dataset=dataset_labels,algorithm=algorithms_mult_param_combos,algorithm_params=algorithms_with_params))
-        final_input.extend(expand('{out_dir}{sep}{dataset}-ml{sep}{algorithm}-hac-clusters-vertical.txt',out_dir=out_dir,sep=SEP,dataset=dataset_labels,algorithm=algorithms_mult_param_combos,algorithm_params=algorithms_with_params))
-        final_input.extend(expand('{out_dir}{sep}{dataset}-ml{sep}{algorithm}-hac-horizontal.png',out_dir=out_dir,sep=SEP,dataset=dataset_labels,algorithm=algorithms_mult_param_combos,algorithm_params=algorithms_with_params))
-        final_input.extend(expand('{out_dir}{sep}{dataset}-ml{sep}{algorithm}-hac-clusters-horizontal.txt',out_dir=out_dir,sep=SEP,dataset=dataset_labels,algorithm=algorithms_mult_param_combos,algorithm_params=algorithms_with_params))
-        final_input.extend(expand('{out_dir}{sep}{dataset}-ml{sep}{algorithm}-ensemble-pathway.txt',out_dir=out_dir,sep=SEP,dataset=dataset_labels,algorithm=algorithms,algorithm_params=algorithms_with_params))
+        final_input.extend(expand('{out_dir}{sep}{dataset}-ml{sep}{algorithm}-pca.png',out_dir=out_dir,sep=SEP,dataset=dataset_labels,algorithm=algorithms_mult_param_combos))
+        final_input.extend(expand('{out_dir}{sep}{dataset}-ml{sep}{algorithm}-pca-variance.txt',out_dir=out_dir,sep=SEP,dataset=dataset_labels,algorithm=algorithms_mult_param_combos))
+        final_input.extend(expand('{out_dir}{sep}{dataset}-ml{sep}{algorithm}-pca-coordinates.txt',out_dir=out_dir,sep=SEP,dataset=dataset_labels,algorithm=algorithms_mult_param_combos))
+        final_input.extend(expand('{out_dir}{sep}{dataset}-ml{sep}{algorithm}-hac-vertical.png',out_dir=out_dir,sep=SEP,dataset=dataset_labels,algorithm=algorithms_mult_param_combos))
+        final_input.extend(expand('{out_dir}{sep}{dataset}-ml{sep}{algorithm}-hac-clusters-vertical.txt',out_dir=out_dir,sep=SEP,dataset=dataset_labels,algorithm=algorithms_mult_param_combos))
+        final_input.extend(expand('{out_dir}{sep}{dataset}-ml{sep}{algorithm}-hac-horizontal.png',out_dir=out_dir,sep=SEP,dataset=dataset_labels,algorithm=algorithms_mult_param_combos))
+        final_input.extend(expand('{out_dir}{sep}{dataset}-ml{sep}{algorithm}-hac-clusters-horizontal.txt',out_dir=out_dir,sep=SEP,dataset=dataset_labels,algorithm=algorithms_mult_param_combos))
+        final_input.extend(expand('{out_dir}{sep}{dataset}-ml{sep}{algorithm}-ensemble-pathway.txt',out_dir=out_dir,sep=SEP,dataset=dataset_labels,algorithm=algorithms))
 
     if len(final_input) == 0:
         # No analysis added yet, so add reconstruction output files if they exist.
@@ -297,10 +297,22 @@ rule ml_analysis:
         ml.hac_vertical(summary_df, output.hac_image_vertical, output.hac_clusters_vertical, **hac_params)
         ml.hac_horizontal(summary_df, output.hac_image_horizontal, output.hac_clusters_horizontal, **hac_params)
 
+# Ensemble the output pathways for each dataset
+rule ensemble: 
+    input:
+        pathways = expand('{out_dir}{sep}{{dataset}}-{algorithm_params}{sep}pathway.txt', out_dir=out_dir, sep=SEP, algorithm_params=algorithms_with_params)
+    output:
+        ensemble_network_file = SEP.join([out_dir,'{dataset}-ml', 'ensemble-pathway.txt'])
+    run:
+        summary_df = ml.summarize_networks(input.pathways)
+        ml.ensemble_network(summary_df, output.ensemble_network_file)
+
+# Returns all pathways for a specific algorithm
 def collect_pathways_per_algo(wildcards):
     filtered_algo_params = [algo_param for algo_param in algorithms_with_params if wildcards.algorithm in algo_param]
     return expand('{out_dir}{sep}{{dataset}}-{algorithm_params}{sep}pathway.txt', out_dir=out_dir, sep=SEP, algorithm_params=filtered_algo_params)
 
+# Cluster the output pathways for each dataset per algorithm
 rule ml_analysis_aggregate_algo:
     input:
         pathways = collect_pathways_per_algo
@@ -318,15 +330,7 @@ rule ml_analysis_aggregate_algo:
         ml.hac_vertical(summary_df, output.hac_image_vertical, output.hac_clusters_vertical, **hac_params)
         ml.hac_horizontal(summary_df, output.hac_image_horizontal, output.hac_clusters_horizontal, **hac_params)
 
-rule ensemble: 
-    input:
-        pathways = expand('{out_dir}{sep}{{dataset}}-{algorithm_params}{sep}pathway.txt', out_dir=out_dir, sep=SEP, algorithm_params=algorithms_with_params)
-    output:
-        ensemble_network_file = SEP.join([out_dir,'{dataset}-ml', 'ensemble-pathway.txt'])
-    run:
-        summary_df = ml.summarize_networks(input.pathways)
-        ml.ensemble_network(summary_df, output.ensemble_network_file)
-
+# Ensemble the output pathways for each dataset per algorithm
 rule ensemble_per_algo:
     input:
         pathways = collect_pathways_per_algo
