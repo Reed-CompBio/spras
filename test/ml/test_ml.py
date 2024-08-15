@@ -95,3 +95,25 @@ class TestML:
         expected = expected.round(5)
 
         assert en.equals(expected)
+
+    def test_ensemble_network_single_line(self):
+        dataframe = ml.summarize_networks([INPUT_DIR + 'test-data-single/single.txt'])
+        ml.ensemble_network(dataframe, OUT_DIR + 'ensemble-network-single.tsv')
+
+        en = pd.read_table(OUT_DIR + 'ensemble-network-single.tsv')
+        en = en.round(5)
+        expected = pd.read_table(EXPECT_DIR + 'expected-ensemble-network-single.tsv')
+        expected = expected.round(5)
+
+        assert en.equals(expected)
+
+    def test_ensemble_network_empty(self):
+        dataframe = ml.summarize_networks([INPUT_DIR + 'test-data-empty/empty.txt'])
+        ml.ensemble_network(dataframe, OUT_DIR + 'ensemble-network-empty.tsv')
+
+        en = pd.read_table(OUT_DIR + 'ensemble-network-empty.tsv')
+        en = en.round(5)
+        expected = pd.read_table(EXPECT_DIR + 'expected-ensemble-network-empty.tsv')
+        expected = expected.round(5)
+
+        assert en.equals(expected)
