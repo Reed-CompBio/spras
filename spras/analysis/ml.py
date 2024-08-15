@@ -89,6 +89,9 @@ def summarize_networks(file_paths: Iterable[Union[str, PathLike]]) -> pd.DataFra
     return concated_df
 
 def df_error(dataframe: pd.DataFrame):
+    """
+    Raises an error if the dataframe is empty or contains one pathway (one row)
+    """
     if dataframe.empty:
         raise ValueError("ML post-processing cannot proceed because the summarize network dataframe is empty.\nWe "
                       "suggest setting ml include: false in the configuration file to avoid this error.")
