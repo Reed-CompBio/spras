@@ -145,7 +145,7 @@ class Config:
         # When Snakemake parses the config file it loads the datasets as OrderedDicts not dicts
         # Convert to dicts to simplify the yaml logging
         self.datasets = {dataset["label"]: dict(dataset) for dataset in raw_config["datasets"]}
-        
+
         for key in self.datasets:
             pattern = r'^\w+$'
             if not bool(re.match(pattern, key)):
