@@ -205,8 +205,11 @@ class DOMINO(PRM):
             edges_df['source'] = edges_df['source'].apply(post_domino_id_transform)
             edges_df['target'] = edges_df['target'].apply(post_domino_id_transform)
             edges_df = reinsert_direction_col_undirected(edges_df)
+            edges_df.columns = ['Node1', 'Node2', 'Rank', 'Direction']
+        else:
+            edges_df = pd.DataFrame(columns=['Node1', 'Node2', 'Rank', 'Direction'])
 
-        edges_df.to_csv(standardized_pathway_file, sep='\t', header=False, index=False)
+        edges_df.to_csv(standardized_pathway_file, sep='\t', header=True, index=False)
 
 
 def pre_domino_id_transform(node_id):
@@ -225,9 +228,4 @@ def post_domino_id_transform(node_id):
     @param node_id: the node id to transform
     @return the node id without the prefix, if it was present, otherwise the original node id
     """
-    # Use removeprefix if SPRAS ever requires Python >= 3.9
-    # https://docs.python.org/3/library/stdtypes.html#str.removeprefix
-    if node_id.startswith(ID_PREFIX):
-        return node_id[ID_PREFIX_LEN:]
-    else:
-        return node_id
+    return node_id.removeprefix(ID_PREFIX)

@@ -83,7 +83,8 @@ jobs:
         docker pull reedcompbio/mincostflow:latest
         docker pull reedcompbio/allpairs:v2
         docker pull reedcompbio/domino:latest
-        docker pull reedcompbio/py4cytoscape:v2
+        docker pull reedcompbio/py4cytoscape:v3
+        docker pull reedcompbio/spras:v0.1.0
     - name: Build Omics Integrator 1 Docker image
       uses: docker/build-push-action@v1
       with:
@@ -153,8 +154,17 @@ jobs:
         path: docker-wrappers/Cytoscape/.
         dockerfile: docker-wrappers/Cytoscape/Dockerfile
         repository: reedcompbio/py4cytoscape
-        tags: v2
-        cache_froms: reedcompbio/py4cytoscape:latest
+        tags: v3
+        cache_froms: reedcompbio/py4cytoscape:v3
+        push: false
+    - name: Build SPRAS Docker image
+      uses: docker/build-push-action@v1
+      with:
+        path: .
+        dockerfile: docker-wrappers/SPRAS/Dockerfile
+        repository: reedcompbio/spras
+        tags: v0.1.0
+        cache_froms: reedcompbio/spras:v0.1.0
         push: false
 
   # Run pre-commit checks on source files
@@ -167,6 +177,6 @@ jobs:
     - name: Setup Python
       uses: actions/setup-python@v4
       with:
-        python-version: '3.8' # Match this to the version specified in environment.yml
+        python-version: '3.11' # Match this to the version specified in environment.yml
     - name: Run pre-commit checks
       uses: pre-commit/action@v3.0.0

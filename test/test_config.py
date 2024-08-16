@@ -102,3 +102,20 @@ class TestConfig:
         test_config["container_registry"]["owner"] = ""
         config.init_global(test_config)
         assert (config.config.container_prefix == config.DEFAULT_CONTAINER_PREFIX)
+
+    def test_error_dataset_label(self):
+        test_config = get_test_config()
+        error_test_dicts = [{"label":"test$"}, {"label":"@test'"}, {"label":"[test]"}, {"label":"test-test"}, {"label":"✉"}]
+
+        for test_dict in error_test_dicts:
+            test_config["datasets"]= [test_dict]
+            with pytest.raises(ValueError): #raises error if any chars other than letters, numbers, or underscores are in dataset label
+                config.init_global(test_config)
+
+    def test_correct_dataset_label(self):
+        test_config = get_test_config()
+        correct_test_dicts = [{"label":"test"},  {"label":"123"}, {"label":"test123"}, {"label":"123test"}, {"label":"_"}, {"label":"test_test"}, {"label":"_test"}, {"label":"test_"}]
+
+        for test_dict in correct_test_dicts:
+            test_config["datasets"]= [test_dict]
+            config.init_global(test_config) # no error should be raised

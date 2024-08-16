@@ -7,6 +7,14 @@ hash_length: 7
 # 'singularity'. If container_framework is not specified, SPRAS will default to docker.
 container_framework: docker
 
+# Only used if container_framework is set to singularity, this will unpack the singularity containers
+# to the local filesystem. This is useful when PRM containers need to run inside another container,
+# such as would be the case in an HTCondor/OSPool environment.
+# NOTE: This unpacks singularity containers to the local filesystem, which will take up space in a way
+# that persists after the workflow is complete. To clean up the unpacked containers, the user must
+# manually delete them.
+unpack_singularity: false
+
 # Allow the user to configure which container registry containers should be pulled from
 # Note that this assumes container names are consistent across registries, and that the
 # registry being passed doesn't require authentication for pull actions
@@ -91,6 +99,7 @@ algorithms:
 # Assume that if a dataset label does not change, the lists of associated input files do not change
 datasets:
     -
+      # Labels can only contain letters, numbers, or underscores
       label: data0
       node_files: ["node-prizes.txt", "sources.txt", "targets.txt"]
       # DataLoader.py can currently only load a single edge file, which is the primary network
