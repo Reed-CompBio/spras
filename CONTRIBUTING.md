@@ -136,11 +136,12 @@ Also test the functions available in the `Dataset` class.
 Note the behaviors of the `request_node_columns` function when there are missing values in that column of the node table and when multiple columns are requested.
 `request_node_columns` always returns the `NODEID` column in addition to the requested columns.
 
-Now implement the `generate_inputs` function, following the `omicsintegrator1.py` example.
+Now implement the `generate_inputs` function.
+Start by inspecting the `omicsintegrator1.py` example, but note the differences in the expected file formats generated for the two algorithms with respect to the header rows and node prize column.
 The selected nodes should be any node in the dataset that has a prize set, any node that is active, any node that is a source, or any node that is a target.
 As shown in the example dataset above, "active", "sources", and "targets" are Boolean attributes.
 A "prize" is a term for a numeric score on a node in a network, so nodes that have non-empty prizes are considered relevant nodes for the Local Neighborhood algorithm along with active nodes, sources, and targets.
-The network should be all of the edges written in the format `<vertex1>|<vertex2>`.
+The network should be all of the edges written in the format `<vertex1>|<vertex2>`, which also differs from the `omicsintegrator1.py` example.
 `spras/dataset.py` provides functions that provide access to node information and the interactome (edge list).
 
 Implement the `run` function, following the PathLinker example.
@@ -166,11 +167,18 @@ As a convention, algorithm names are written in all lowercase without special ch
 Local Neighborhood has no other parameters.
 Optionally set `include: false` for the other pathway reconstruction algorithms to make testing faster.
 
+The config file has an option `owner` under the `container_registry` settings that controls which Docker Hub account will be used when pulling Docker images.
+The same Docker Hub account will be used for all images and cannot currently be set different for each algorithm.
+Set the `owner` to match your Docker Hub username from Step 2.
+
 After completing this step, try running the Local Neighborhood algorithm through SPRAS with
 ```bash
 snakemake --cores 1 --configfile config/config.yaml
 ```
-Make sure to run the command inside the `spras` conda environment. If installing via `pip` instead of using conda, install with the `-e .[dev]` options (the full command to run from the repo root is `python -m pip install -e .[dev]`) so that Python picks up any changes you make and installs all optional development packages. Omitting the `-e` flag will prevent your changes from being reflected unless you force re-install, and omitting `.[dev]` will prevent pip from installing `pre-commit` and `pytest`.
+Make sure to run the command inside the `spras` conda environment.
+
+If installing via `pip` instead of using conda, install with the `-e .[dev]` options (the full command to run from the repo root is `python -m pip install -e .[dev]`) so that Python picks up any changes you make and installs all optional development packages.
+Omitting the `-e` flag will prevent your changes from being reflected unless you force re-install, and omitting `.[dev]` will prevent pip from installing `pre-commit` and `pytest`.
 
 As a workflow manager, Snakemake will consider the work described in the configuration file to be completed once the necessary output files have been written to the relevant output directory (`output` in the `config/config.yaml` configuration).
 That means that if you change your code and rerun the Snakemake command above, nothing may happen if the output files already exist.
