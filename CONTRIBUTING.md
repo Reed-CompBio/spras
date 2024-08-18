@@ -104,7 +104,7 @@ docker push <username>/local-neighborhood
 Pushing an image requires being logged in, so run `docker login` first if needed using your Docker Hub username and password.
 
 ### Step 3: Write the Local Neighborhood wrapper functions
-Add a new Python file `src/local_neighborhood.py` to implement the wrapper functions for the Local Neighborhood algorithm.
+Add a new Python file `spras/local_neighborhood.py` to implement the wrapper functions for the Local Neighborhood algorithm.
 Use `pathlinker.py` as an example.
 
 Call the new class within `local_neighborhood.py` `LocalNeighborhood` and set `__all__` so the class can be [imported](https://docs.python.org/3/tutorial/modules.html#importing-from-a-package).
@@ -114,7 +114,7 @@ These entries are used to tell Snakemake what input files should be present befo
 Before implementing the `generate_inputs` function, explore the structure of the `Dataset` class interactively.
 In an interactive Python session, run the following commands to load the `data0` dataset and explore the nodes and interactome.
 ```python
-> from src.dataset import Dataset
+> from spras.dataset import Dataset
 > dataset_dict = {'label': 'data0', 'node_files': ['node-prizes.txt', 'sources.txt', 'targets.txt'], 'edge_files': ['network.txt'], 'other_files': [], 'data_dir': 'input'}
 > data = Dataset(dataset_dict)
 > data.node_table.head()
@@ -141,7 +141,7 @@ The selected nodes should be any node in the dataset that has a prize set, any n
 As shown in the example dataset above, "active", "sources", and "targets" are Boolean attributes.
 A "prize" is a term for a numeric score on a node in a network, so nodes that have non-empty prizes are considered relevant nodes for the Local Neighborhood algorithm along with active nodes, sources, and targets.
 The network should be all of the edges written in the format `<vertex1>|<vertex2>`.
-`src/dataset.py` provides functions that provide access to node information and the interactome (edge list).
+`spras/dataset.py` provides functions that provide access to node information and the interactome (edge list).
 
 Implement the `run` function, following the PathLinker example.
 The `prepare_volume` utility function is needed to prepare the network and nodes input files to be mounted and used inside the container.
@@ -155,12 +155,12 @@ Use the `run_container` utility function to run the command in the container `<u
 Implement the `parse_output` function.
 The edges in the Local Neighborhood output have the same format as the input, `<vertex1>|<vertex2>`.
 Convert these to be tab-separated vertex pairs followed by a tab `1` and tab `U` at the end of every line, which indicates all edges have the same rank and are undirected.
-See the `add_rank_column` and `raw_pathway_df` function in `src.util.py` and `reinsert_direction_col_undirected` function in `src.interactome.py`.
+See the `add_rank_column` and `raw_pathway_df` function in `spras.util.py` and `reinsert_direction_col_undirected` function in `spras.interactome.py`.
 Make sure header = True with column names: ['Node1', 'Node2', 'Rank', 'Direction'] when the file is created.
 The output should have the format `<vertex1> <vertex2> 1 U`.
 
 ### Step 4: Make the Local Neighborhood wrapper accessible through SPRAS
-Import the new class `LocalNeighborhood` in `src/runner.py` so the wrapper functions can be accessed.
+Import the new class `LocalNeighborhood` in `spras/runner.py` so the wrapper functions can be accessed.
 Add an entry for Local Neighborhood to the configuration file `config/config.yaml` and set `include: true`.
 As a convention, algorithm names are written in all lowercase without special characters.
 Local Neighborhood has no other parameters.
@@ -211,8 +211,8 @@ The pull request will be closed so that the `master` branch of the fork stays sy
 1. Open a [GitHub issue](https://github.com/Reed-CompBio/spras/issues/new/choose) to propose adding a new algorithm and discuss it with the SPRAS maintainers
 1. Add a new subdirectory to `docker-wrappers` with the name `<algorithm>`, write a `Dockerfile` to build an image for `<algorithm>`, and include any other files required to build that image in the subdirectory
 1. Build and push the Docker image to the [reedcompbio](https://hub.docker.com/orgs/reedcompbio) Docker organization (SPRAS maintainer required)
-1. Add a new Python file `src/<algorithm>.py` to implement the wrapper functions for `<algorithm>`: specify the list of `required_input` files and the `generate_inputs`, `run`, and `parse_output` functions
-1. Import the new class in `src/runner.py` so the wrapper functions can be accessed
+1. Add a new Python file `spras/<algorithm>.py` to implement the wrapper functions for `<algorithm>`: specify the list of `required_input` files and the `generate_inputs`, `run`, and `parse_output` functions
+1. Import the new class in `spras/runner.py` so the wrapper functions can be accessed
 1. Document the usage of the Docker wrapper and the assumptions made when implementing the wrapper
 1. Add example usage for the new algorithm and its parameters to the template config file
 1. Write test functions and provide example input data in a new test subdirectory `test/<algorithm>`. Provide example data and algorithm/expected files names to lists or dicts in `test/generate-inputs` and `test/parse-outputs`. Use the full path with the names of the test files.
