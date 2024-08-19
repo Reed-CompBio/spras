@@ -53,7 +53,7 @@ git clone https://github.com/Reed-CompBio/spras.git
 ```
 
 There are currently two options for running SPRAS with HTCondor. The first is to submit all SPRAS jobs to a single remote Execution Point (EP). The second
-is to use the the snakemake HTCondor executor to parallelize the workflow by submitting each job to its own EP.
+is to use the Snakemake HTCondor executor to parallelize the workflow by submitting each job to its own EP.
 
 ### Submitting All Jobs to a Single EP
 
@@ -68,10 +68,13 @@ CHTC pool, omit the `+WantGlideIn` and `requirements` lines
 
 ### Submitting Parallel Jobs
 
-Parallelizing SPRAS workflows with HTCondor currently requires an experimental executor for HTCondor that has been forked from the upstream [HTCondor Snakemake executor](https://github.com/jhiemstrawisc/snakemake-executor-plugin-htcondor/tree/spras-feature-dev).
-To get this executor, clone the forked repository using the following:
+Parallelizing SPRAS workflows with HTCondor requires two additional pieces of setup. First, it requires an activated SPRAS conda environment with a `pip install`-ed version of the SPRAS module (see the main `README.md` for detailed instructions on pip installation of SPRAS).
+
+Second, it requires an experimental executor for HTCondor that has been forked from the upstream [HTCondor Snakemake executor](https://github.com/htcondor/snakemake-executor-plugin-htcondor).
+
+To get install this executor in the spras conda environment, clone the forked repository using the following:
 ```bash
-git clone -b spras-feature-dev https://github.com/jhiemstrawisc/snakemake-executor-plugin-htcondor.git
+git clone https://github.com/htcondor/snakemake-executor-plugin-htcondor.git
 ```
 
 Then, from your activated `spras` conda environment (important), run:
@@ -105,10 +108,13 @@ To run this same workflow in the OSPool, add the following to the profile's defa
 ```
 
 **Note**: This workflow requires that the terminal session responsible for running snakemake stays active. Closing the terminal will suspend jobs,
-but the workflow can use Snakemakes checkpointing to pick up any jobs where they left off.
+but the workflow can use Snakemake's checkpointing to pick up any jobs where they left off.
+
+**Note**: If you encounter an error that says `No module named 'spras'`, make sure you've `pip install`-ed the SPRAS module into your conda environment.
 
 ### Job Monitoring
-To monitor the state of the job, you can run `condor_q` for a snapshot of how the job is doing, or you can run `condor_watch_q` if you want realtime updates.
+To monitor the state of the job, you can use a second terminal to run `condor_q` for a snapshot of how the workflow is doing, or you can run `condor_watch_q` for realtime updates.
+
 Upon completion, the `output` directory from the workflow should be returned as `spras/docker-wrappers/SPRAS/output`, along with several files containing the
 workflow's logging information (anything that matches `logs/spras_*` and ending in `.out`, `.err`, or `.log`). If the job was unsuccessful, these files should
 contain useful debugging clues about what may have gone wrong.
