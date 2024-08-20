@@ -120,12 +120,11 @@ datasets:
 gold_standard:
     -
       # Labels can only contain letters, numbers, or underscores
-      label: data0
       label: gs0
       node_files: ["gs_nodes0.txt"]
       # edge_files: [] TODO: later iteration
       data_dir: "input"
-      # Set of datasets (dataset labels) to compare with the specific gold standard dataset
+      # List of dataset labels to compare with the specific gold standard dataset
       dataset_labels: ["data0"]
     -
       label: gs1
