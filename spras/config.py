@@ -151,15 +151,24 @@ class Config:
             if not bool(re.match(pattern, key)):
                 raise ValueError(f"Dataset label \'{key}\' contains invalid values. Dataset labels can only contain letters, numbers, or underscores.")
 
+        # parse gold standard information
         try:
             self.gold_standards = {gold_standard["label"]: dict(gold_standard) for gold_standard in raw_config["gold_standard"]}
         except:
             self.gold_standards = {}
 
+        # check that gold_standard labels are formatted correctly
         for key in self.gold_standards:
             pattern = r'^\w+$'
             if not bool(re.match(pattern, key)):
                 raise ValueError(f"Gold standard label \'{key}\' contains invalid values. Gold standard labels can only contain letters, numbers, or underscores.")
+
+        # check that all the dataset labels in the gold standards are existing datasets labels
+        dataset_labels = set(self.datasets.keys())
+        gold_standard_dataset_labels = {dataset_label for value in self.gold_standards.values() for dataset_label in value['dataset_labels']}
+        for label in gold_standard_dataset_labels:
+            if label not in dataset_labels:
+                raise ValueError(f"Dataset label '{label}' provided in gold standards does not exist in the existing dataset labels.")
 
         # Code snipped from Snakefile that may be useful for assigning default labels
         # dataset_labels = [dataset.get('label', f'dataset{index}') for index, dataset in enumerate(datasets)]
@@ -242,11 +251,8 @@ class Config:
         self.analysis_include_ml = raw_config["analysis"]["ml"]["include"]
         self.analysis_include_evalution = raw_config["analysis"]["evaluation"]["include"]
 
-        # COMMENT: the code will run correctly without this section below due to empty dict in try except above
-        # TODO: decide if this part is needed
         if self.gold_standards == {} and self.analysis_include_evalution == True:
-            print("Gold standard data not provided. Evaluation analysis cannot run.")
-            self.analysis_include_evalution = False
+            raise ValueError("Evaluation analysis cannot run as gold standard data not provided. Please set evaluation include to false or provide gold standard data.")
 
         if 'aggregate_per_algorithm' not in self.ml_params:
             self.analysis_include_ml_aggregate_algo = False

@@ -119,17 +119,19 @@ datasets:
 
 gold_standard:
     -
+      # Labels can only contain letters, numbers, or underscores
+      label: data0
       label: gs0
       node_files: ["gs_nodes0.txt"]
       # edge_files: [] TODO: later iteration
       data_dir: "input"
       # Set of datasets (dataset labels) to compare with the specific gold standard dataset
-      datasets: ["data0"]
+      dataset_labels: ["data0"]
     -
       label: gs1
       node_files: ["gs_nodes1.txt"]
       data_dir: "input"
-      datasets: ["data1", "data0"]
+      dataset_labels: ["data1", "data0"]
 
 # If we want to reconstruct then we should set run to true.
 # TODO: if include is true above but run is false here, algs are not run.

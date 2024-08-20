@@ -54,10 +54,10 @@ class Evaluation:
 
         returns: none
         """
-        self.label = gold_standard_dict["label"] # COMMENT: cannot be empty, will break with a NoneType exception
-        self.datasets = gold_standard_dict["datasets"] # COMMENT: can be empty, snakemake will not run evaluation due to dataset_gold_standard_pairs in snakemake file
+        self.label = gold_standard_dict["label"] # cannot be empty, will break with a NoneType exception
+        self.datasets = gold_standard_dict["dataset_labels"] # can be empty, snakemake will not run evaluation due to dataset_gold_standard_pairs in snakemake file
 
-        # COMMENT: cannot be empty, snakemake will run evaluation even if empty
+        # cannot be empty, snakemake will run evaluation even if empty
         node_data_files = gold_standard_dict["node_files"][0] # TODO: single file for now
 
         data_loc = gold_standard_dict["data_dir"]
@@ -80,13 +80,13 @@ class Evaluation:
         @param node_table: the gold standard nodes
         @param output_file: the filename to save the precision of each pathway
         """
-        y_true = node_table['NODEID'].tolist()
+        y_true = set(node_table['NODEID'])
         results = []
 
         for file in file_paths:
             df = pd.read_table(file, sep="\t", header = 0, usecols=["Node1", "Node2"])
-            y_pred = list(set(df['Node1']).union(set(df['Node2'])))
-            all_nodes = set(y_true).union(set(y_pred))
+            y_pred = set(df['Node1']).union(set(df['Node2']))
+            all_nodes = y_true.union(y_pred)
             y_true_binary = [1 if node in y_true else 0 for node in all_nodes]
             y_pred_binary = [1 if node in y_pred else 0 for node in all_nodes]
 
