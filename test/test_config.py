@@ -20,7 +20,7 @@ def get_test_config():
             }
         },
         "datasets": [{"label":"alg1"}, {"label":"alg2"}],
-        "gold_standard": [{"label":"gs1"}],
+        "gold_standard": [{"label":"gs1", "dataset_labels":[]}],
         "algorithms": [{"params": ["param2", "param2"]}],
         "analysis": {
             "summary": {
@@ -118,6 +118,7 @@ class TestConfig:
 
     def test_correct_dataset_label(self):
         test_config = get_test_config()
+        print(test_config)
         correct_test_dicts = [{"label":"test"},  {"label":"123"}, {"label":"test123"}, {"label":"123test"}, {"label":"_"}, {"label":"test_test"}, {"label":"_test"}, {"label":"test_"}]
 
         for test_dict in correct_test_dicts:
