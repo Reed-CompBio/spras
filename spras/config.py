@@ -70,7 +70,7 @@ class Config:
         self.unpack_singularity = False
         # A dictionary to store configured datasets against which SPRAS will be run
         self.datasets = None
-        # A dictionary to store configured gold standard data against ouptut of SPRAS runs
+        # A dictionary to store configured gold standard data against output of SPRAS runs
         self.gold_standards = None
         # The hash length SPRAS will use to identify parameter combinations. Default is 7
         self.hash_length = DEFAULT_HASH_LENGTH
