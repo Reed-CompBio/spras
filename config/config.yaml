@@ -117,7 +117,7 @@ datasets:
       # Relative path from the spras directory
       data_dir: "input"
 
-gold_standard:
+gold_standards:
     -
       # Labels can only contain letters, numbers, or underscores
       label: gs0

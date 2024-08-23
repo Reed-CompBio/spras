@@ -152,7 +152,7 @@ class Config:
 
         # parse gold standard information
         try:
-            self.gold_standards = {gold_standard["label"]: dict(gold_standard) for gold_standard in raw_config["gold_standard"]}
+            self.gold_standards = {gold_standard["label"]: dict(gold_standard) for gold_standard in raw_config["gold_standards"]}
         except:
             self.gold_standards = {}
 

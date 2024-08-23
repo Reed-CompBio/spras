@@ -20,7 +20,7 @@ def get_test_config():
             }
         },
         "datasets": [{"label": "alg1"}, {"label": "alg2"}],
-        "gold_standard": [{"label": "gs1", "dataset_labels": []}],
+        "gold_standards": [{"label": "gs1", "dataset_labels": []}],
         "algorithms": [{"params": ["param2", "param2"]}],
         "analysis": {
             "summary": {
@@ -120,7 +120,6 @@ class TestConfig:
 
     def test_correct_dataset_label(self):
         test_config = get_test_config()
-        print(test_config)
         correct_test_dicts = [{"label": "test"},  {"label": "123"}, {"label": "test123"}, {"label": "123test"}, {"label": "_"},
                               {"label": "test_test"}, {"label": "_test"}, {"label": "test_"}]
 
@@ -133,13 +132,13 @@ class TestConfig:
         error_labels = ["test$", "@test'"]
 
         for test_label in error_labels:
-            test_config["gold_standard"][0]["label"] = test_label
+            test_config["gold_standards"][0]["label"] = test_label
             with pytest.raises(ValueError):  # raises error if any chars other than letters, numbers, or underscores are in gs label
                 config.init_global(test_config)
 
     def test_error_gs_dataset_mismatch(self):
         test_config = get_test_config()
-        test_config["gold_standard"] = [{"label": "gs1", "dataset_labels": ["mismatch"]}]
+        test_config["gold_standards"] = [{"label": "gs1", "dataset_labels": ["mismatch"]}]
 
         with pytest.raises(ValueError):
             config.init_global(test_config)
