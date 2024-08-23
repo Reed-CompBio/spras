@@ -190,11 +190,11 @@ jobs:
         path: .
         dockerfile: docker-wrappers/SPRAS/Dockerfile
         repository: reedcompbio/spras
-        tags: v0.1.0
-        cache_froms: reedcompbio/spras:v0.1.0
+        tags: v0.2.0
+        cache_froms: reedcompbio/spras:v0.2.0
         push: false
     - name: Remove SPRAS Docker image
-      run: docker rmi reedcompbio/spras:v0.1.0 || true
+      run: docker rmi reedcompbio/spras:v0.2.0 || true
 
   # Run pre-commit checks on source files
   pre-commit:

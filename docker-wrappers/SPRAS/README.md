@@ -77,5 +77,6 @@ to produce the file `spras.sif`. Then, substitute this value as the `container_i
 ## Versions:
 
 The versions of this image match the version of the spras package within it.
+- v0.2.0: Add a header row to pathway output file format. Validate dataset label names. Streamline SPRAS image.
 - v0.1.0: Created an image with SPRAS as an installed python module. This makes SPRAS runnable anywhere with Docker/Singularity. Note that the Snakefile should be
   runnable from any directory within the container.

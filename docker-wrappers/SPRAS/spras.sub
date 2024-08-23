@@ -19,7 +19,7 @@ SNAKEFILE = ../../Snakefile
 # `unpack_singularity = true`.                             #
 ############################################################
 universe = container
-container_image = docker://reedcompbio/spras:v0.1.0
+container_image = docker://reedcompbio/spras:v0.2.0
 # container_image = spras.sif
 
 
