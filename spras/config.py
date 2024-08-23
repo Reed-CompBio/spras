@@ -92,14 +92,13 @@ class Config:
         # A Boolean specifying whether to run the summary analysis
         self.analysis_include_summary = None
         # A Boolean specifying whether to run the GraphSpace analysis
-        self.analysis_include_graphspace  = None
+        self.analysis_include_graphspace = None
         # A Boolean specifying whether to run the Cytoscape analysis
-        self.analysis_include_cytoscape  = None
+        self.analysis_include_cytoscape = None
         # A Boolean specifying whether to run the ML analysis
         self.analysis_include_ml = None
         # A Boolean specifying whether to run the Evaluation analysis
-        self.analysis_include_evalution = None
-
+        self.analysis_include_evaluation = None
 
         _raw_config = copy.deepcopy(raw_config)
         self.process_config(_raw_config)
@@ -249,10 +248,11 @@ class Config:
         self.analysis_include_graphspace = raw_config["analysis"]["graphspace"]["include"]
         self.analysis_include_cytoscape = raw_config["analysis"]["cytoscape"]["include"]
         self.analysis_include_ml = raw_config["analysis"]["ml"]["include"]
-        self.analysis_include_evalution = raw_config["analysis"]["evaluation"]["include"]
+        self.analysis_include_evaluation = raw_config["analysis"]["evaluation"]["include"]
 
-        if self.gold_standards == {} and self.analysis_include_evalution == True:
-            raise ValueError("Evaluation analysis cannot run as gold standard data not provided. Please set evaluation include to false or provide gold standard data.")
+        if self.gold_standards == {} and self.analysis_include_evaluation:
+            raise ValueError("Evaluation analysis cannot run as gold standard data not provided. "
+                             "Please set evaluation include to false or provide gold standard data.")
 
         if 'aggregate_per_algorithm' not in self.ml_params:
             self.analysis_include_ml_aggregate_algo = False

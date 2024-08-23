@@ -1,8 +1,7 @@
 import os
 import pickle as pkl
-import warnings
 from pathlib import Path
-from typing import Iterable
+from typing import Dict, Iterable
 
 import pandas as pd
 from sklearn.metrics import precision_score
@@ -11,7 +10,7 @@ from sklearn.metrics import precision_score
 class Evaluation:
     NODE_ID = "NODEID"
 
-    def __init__(self, gold_standard_dict):
+    def __init__(self, gold_standard_dict: Dict):
         self.label = None
         self.datasets = None
         self.node_table = None
@@ -19,6 +18,7 @@ class Evaluation:
         self.load_files_from_dict(gold_standard_dict)
         return
 
+    @staticmethod
     def merge_gold_standard_input(gs_dict, gs_file):
         """
         Merge files listed for this gold standard dataset and write the dataset to disk
@@ -35,8 +35,8 @@ class Evaluation:
         with open(file_name, "wb") as f:
             pkl.dump(self, f)
 
-    @classmethod
-    def from_file(cls, file_name):
+    @staticmethod
+    def from_file(file_name):
         """
         Loads gold standard object from a pickle file.
         Usage: gold_standard = Evaluation.from_file(pickle_file)
@@ -44,7 +44,7 @@ class Evaluation:
         with open(file_name, "rb") as f:
             return pkl.load(f)
 
-    def load_files_from_dict(self, gold_standard_dict):
+    def load_files_from_dict(self, gold_standard_dict: Dict):
         """
         Loads gold standard files from gold_standard_dict, which is one gold standard dataset
         dictionary from the list in the config file with the fields in the config file.
@@ -54,11 +54,11 @@ class Evaluation:
 
         returns: none
         """
-        self.label = gold_standard_dict["label"] # cannot be empty, will break with a NoneType exception
-        self.datasets = gold_standard_dict["dataset_labels"] # can be empty, snakemake will not run evaluation due to dataset_gold_standard_pairs in snakemake file
+        self.label = gold_standard_dict["label"]  # cannot be empty, will break with a NoneType exception
+        self.datasets = gold_standard_dict["dataset_labels"]  # can be empty, snakemake will not run evaluation due to dataset_gold_standard_pairs in snakemake file
 
         # cannot be empty, snakemake will run evaluation even if empty
-        node_data_files = gold_standard_dict["node_files"][0] # TODO: single file for now
+        node_data_files = gold_standard_dict["node_files"][0]  # TODO: single file for now
 
         data_loc = gold_standard_dict["data_dir"]
 
@@ -71,6 +71,7 @@ class Evaluation:
 
         # TODO: later iteration - chose between node and edge file, or allow both
 
+    @staticmethod
     def precision(file_paths: Iterable[Path], node_table: pd.DataFrame, output_file: str):
         """
         Takes in file paths for a specific dataset and an associated gold standard node table.
@@ -84,12 +85,13 @@ class Evaluation:
         results = []
 
         for file in file_paths:
-            df = pd.read_table(file, sep="\t", header = 0, usecols=["Node1", "Node2"])
+            df = pd.read_table(file, sep="\t", header=0, usecols=["Node1", "Node2"])
             y_pred = set(df['Node1']).union(set(df['Node2']))
             all_nodes = y_true.union(y_pred)
             y_true_binary = [1 if node in y_true else 0 for node in all_nodes]
             y_pred_binary = [1 if node in y_pred else 0 for node in all_nodes]
 
+            # default to 0.0 if there is a divide by 0 error
             precision = precision_score(y_true_binary, y_pred_binary, zero_division=0.0)
 
             results.append({"Pathway": file, "Precision": precision})

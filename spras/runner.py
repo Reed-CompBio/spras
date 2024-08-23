@@ -42,6 +42,7 @@ def merge_input(dataset_dict, dataset_file):
     dataset = Dataset(dataset_dict)
     dataset.to_file(dataset_file)
 
+
 def prepare_inputs(algorithm, data_file, filename_map):
     """
     Prepare general dataset files for this algorithm
