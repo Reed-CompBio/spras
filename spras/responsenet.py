@@ -68,13 +68,14 @@ class ResponseNet (PRM):
         @param gamma: integer representing gamma (optional, default is 10)
         @param container_framework: choose the container runtime framework, currently supports "docker" or "singularity" (optional)
         """
+        print("testing 2")
 
         # ensures that these parameters are required
         if not sources or not targets or not edges or not output_file:
-            raise ValueError('Required MinCostFlow arguments are missing')
+            raise ValueError('Required ResponseNet arguments are missing')
 
         # the data files will be mapped within this directory within the container
-        work_dir = '/responsenet'
+        work_dir = '/ResponseNet'
 
         # the tuple is for mapping the sources, targets, edges, and output
         volumes = list()
@@ -97,7 +98,7 @@ class ResponseNet (PRM):
 
         # Makes the Python command to run within in the container
         command = ['python',
-                    '/responsenet/responsenet.py',
+                    'responsenet.py',
                     '--edges_file', edges_file,
                     '--sources_file', sources_file,
                     '--targets_file', targets_file,
@@ -113,7 +114,9 @@ class ResponseNet (PRM):
             command.append('-o')
 
         # choosing to run in docker or singularity container
-        container_suffix = "responsenet:v1.0"
+        container_suffix = "responsenet"
+
+        #print(container_framework, container_suffix, command, volumes, work_dir, sep="\n")
 
         # constructs a docker run call
         out = run_container(container_framework,
@@ -141,7 +144,6 @@ class ResponseNet (PRM):
 
         df = pd.read_csv(raw_pathway_file, sep='\t', header=None)
         df = add_rank_column(df)
-        # TODO update MinCostFlow version to support mixed graphs
         # Currently directed edges in the input will be converted to undirected edges in the output
         df = reinsert_direction_col_directed(df)
         df.to_csv(standardized_pathway_file, header=False, index=False, sep='\t')
