@@ -78,11 +78,13 @@ jobs:
       run: |
         docker pull reedcompbio/omics-integrator-1:latest
         docker pull reedcompbio/omics-integrator-2:v2
-        docker pull reedcompbio/pathlinker:latest
+        docker pull reedcompbio/pathlinker:v2
         docker pull reedcompbio/meo:latest
         docker pull reedcompbio/mincostflow:latest
-        docker pull reedcompbio/allpairs:latest
+        docker pull reedcompbio/allpairs:v2
         docker pull reedcompbio/domino:latest
+        docker pull reedcompbio/py4cytoscape:v3
+        docker pull reedcompbio/spras:v0.1.0
     - name: Build Omics Integrator 1 Docker image
       uses: docker/build-push-action@v1
       with:
@@ -99,7 +101,7 @@ jobs:
         dockerfile: docker-wrappers/OmicsIntegrator2/Dockerfile
         repository: reedcompbio/omics-integrator-2
         tags: v2
-        cache_froms: reedcompbio/omics-integrator-2:v2
+        cache_froms: reedcompbio/omics-integrator-2:latest
         push: false
     - name: Build PathLinker Docker image
       uses: docker/build-push-action@v1
@@ -107,7 +109,7 @@ jobs:
         path: docker-wrappers/PathLinker/.
         dockerfile: docker-wrappers/PathLinker/Dockerfile
         repository: reedcompbio/pathlinker
-        tags: latest
+        tags: v2
         cache_froms: reedcompbio/pathlinker:latest
         push: false
     - name: Build Maximum Edge Orientation Docker image
@@ -134,7 +136,7 @@ jobs:
         path: docker-wrappers/AllPairs/.
         dockerfile: docker-wrappers/AllPairs/Dockerfile
         repository: reedcompbio/allpairs
-        tags: latest
+        tags: v2
         cache_froms: reedcompbio/allpairs:latest
         push: false
     - name: Build DOMINO Docker image
@@ -152,8 +154,17 @@ jobs:
         path: docker-wrappers/Cytoscape/.
         dockerfile: docker-wrappers/Cytoscape/Dockerfile
         repository: reedcompbio/py4cytoscape
-        tags: v2
-        cache_froms: reedcompbio/py4cytoscape:v2
+        tags: v3
+        cache_froms: reedcompbio/py4cytoscape:v3
+        push: false
+    - name: Build SPRAS Docker image
+      uses: docker/build-push-action@v1
+      with:
+        path: .
+        dockerfile: docker-wrappers/SPRAS/Dockerfile
+        repository: reedcompbio/spras
+        tags: v0.1.0
+        cache_froms: reedcompbio/spras:v0.1.0
         push: false
 
   # Run pre-commit checks on source files
@@ -166,6 +177,6 @@ jobs:
     - name: Setup Python
       uses: actions/setup-python@v4
       with:
-        python-version: '3.8' # Match this to the version specified in environment.yml
+        python-version: '3.11' # Match this to the version specified in environment.yml
     - name: Run pre-commit checks
       uses: pre-commit/action@v3.0.0

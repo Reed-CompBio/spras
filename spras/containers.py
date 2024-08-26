@@ -181,6 +181,7 @@ def run_container_singularity(container: str, command: List[str], volumes: List[
     bind_paths = [f'{prepare_path_docker(src)}:{dest}' for src, dest in volumes]
 
     # TODO is try/finally needed for Singularity?
+    # To debug a container add the execute arguments: singularity_options=['--debug'], quiet=False
     singularity_options = ['--cleanenv', '--containall', '--pwd', working_dir]
     # Singularity does not allow $HOME to be set as a regular environment variable
     # Capture it and use the special argument instead
@@ -190,12 +191,37 @@ def run_container_singularity(container: str, command: List[str], volumes: List[
     else:
         singularity_options.extend(['--env', environment])
 
-    # To debug a container add the execute arguments: singularity_options=['--debug'], quiet=False
-    # Adding 'docker://' to the container indicates this is a Docker image Singularity must convert
-    return Client.execute('docker://' + container,
-                          command,
-                          options=singularity_options,
-                          bind=bind_paths)
+    # Handle unpacking singularity image if needed. Potentially needed for running nested unprivileged containers
+    if config.config.unpack_singularity:
+        # Split the string by "/"
+        path_elements = container.split("/")
+
+        # Get the last element, which will indicate the base container name
+        base_cont = path_elements[-1]
+        base_cont = base_cont.replace(":", "_").split(":")[0]
+        sif_file = base_cont + ".sif"
+
+        # Adding 'docker://' to the container indicates this is a Docker image Singularity must convert
+        image_path = Client.pull('docker://' + container, name=sif_file)
+
+        # Check if the directory for base_cont already exists. When running concurrent jobs, it's possible
+        # something else has already pulled/unpacked the container.
+        # Here, we expand the sif image from `image_path` to a directory indicated by `base_cont`
+        if not os.path.exists(base_cont):
+            Client.build(recipe=image_path, image=base_cont, sandbox=True, sudo=False)
+
+        # Execute the locally unpacked container.
+        return Client.execute(base_cont,
+                        command,
+                        options=singularity_options,
+                        bind=bind_paths)
+
+    else:
+        # Adding 'docker://' to the container indicates this is a Docker image Singularity must convert
+        return Client.execute('docker://' + container,
+                              command,
+                              options=singularity_options,
+                              bind=bind_paths)
 
 # Because this is called independently for each file, the same local path can be mounted to multiple volumes
 def prepare_volume(filename: Union[str, PurePath], volume_base: Union[str, PurePath]) -> Tuple[Tuple[PurePath, PurePath], str]:

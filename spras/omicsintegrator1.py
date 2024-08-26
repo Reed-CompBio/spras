@@ -1,11 +1,9 @@
 from pathlib import Path
 
-import pandas as pd
-
 from spras.containers import prepare_volume, run_container
 from spras.interactome import reinsert_direction_col_mixed
 from spras.prm import PRM
-from spras.util import add_rank_column
+from spras.util import add_rank_column, raw_pathway_df
 
 __all__ = ['OmicsIntegrator1', 'write_conf']
 
@@ -191,16 +189,12 @@ class OmicsIntegrator1(PRM):
         # I'm assuming from having read the documentation that we will be passing in optimalForest.sif
         # as raw_pathway_file, in which case the format should be edge1 interactiontype edge2.
         # if that assumption is wrong we will need to tweak things
-        try:
-            df = pd.read_csv(raw_pathway_file, sep='\t', header=None)
-        except pd.errors.EmptyDataError:
-            with open(standardized_pathway_file, 'w'):
-                pass
-            return
+        df = raw_pathway_df(raw_pathway_file, sep='\t', header=None)
+        if not df.empty:
+            df.columns = ["Edge1", "InteractionType", "Edge2"]
+            df = add_rank_column(df)
+            df = reinsert_direction_col_mixed(df, "InteractionType", "pd", "pp")
+            df.drop(columns=['InteractionType'], inplace=True)
+            df.columns = ['Node1', 'Node2', 'Rank', 'Direction']
 
-        df.columns = ["Edge1", "InteractionType", "Edge2"]
-        df = add_rank_column(df)
-        df = reinsert_direction_col_mixed(df, "InteractionType", "pd", "pp")
-
-        df.to_csv(standardized_pathway_file, columns=['Edge1', 'Edge2', 'Rank', "Direction"], header=False, index=False,
-                  sep='\t')
+        df.to_csv(standardized_pathway_file, header=True, index=False, sep='\t')
