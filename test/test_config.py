@@ -19,7 +19,8 @@ def get_test_config():
                 "reconstruction_dir": "my_dir"
             }
         },
-        "datasets": [{"label":"alg1"}, {"label":"alg2"}],
+        "datasets": [{"label": "alg1"}, {"label": "alg2"}],
+        "gold_standards": [{"label": "gs1", "dataset_labels": []}],
         "algorithms": [{"params": ["param2", "param2"]}],
         "analysis": {
             "summary": {
@@ -34,10 +35,14 @@ def get_test_config():
             "cytoscape": {
                 "include": False
             },
+            "evaluation": {
+                "include": False
+            },
         },
     }
 
     return test_raw_config
+
 
 class TestConfig:
     """
@@ -105,17 +110,35 @@ class TestConfig:
 
     def test_error_dataset_label(self):
         test_config = get_test_config()
-        error_test_dicts = [{"label":"test$"}, {"label":"@test'"}, {"label":"[test]"}, {"label":"test-test"}, {"label":"✉"}]
+        error_test_dicts = [{"label": "test$"}, {"label": "@test'"}, {"label": "[test]"}, {"label": "test-test"},
+                            {"label": "✉"}]
 
         for test_dict in error_test_dicts:
-            test_config["datasets"]= [test_dict]
-            with pytest.raises(ValueError): #raises error if any chars other than letters, numbers, or underscores are in dataset label
+            test_config["datasets"] = [test_dict]
+            with pytest.raises(ValueError):  # raises error if any chars other than letters, numbers, or underscores are in dataset label
                 config.init_global(test_config)
 
     def test_correct_dataset_label(self):
         test_config = get_test_config()
-        correct_test_dicts = [{"label":"test"},  {"label":"123"}, {"label":"test123"}, {"label":"123test"}, {"label":"_"}, {"label":"test_test"}, {"label":"_test"}, {"label":"test_"}]
+        correct_test_dicts = [{"label": "test"},  {"label": "123"}, {"label": "test123"}, {"label": "123test"}, {"label": "_"},
+                              {"label": "test_test"}, {"label": "_test"}, {"label": "test_"}]
 
         for test_dict in correct_test_dicts:
-            test_config["datasets"]= [test_dict]
-            config.init_global(test_config) # no error should be raised
+            test_config["datasets"] = [test_dict]
+            config.init_global(test_config)  # no error should be raised
+
+    def test_error_gs_label(self):
+        test_config = get_test_config()
+        error_labels = ["test$", "@test'"]
+
+        for test_label in error_labels:
+            test_config["gold_standards"][0]["label"] = test_label
+            with pytest.raises(ValueError):  # raises error if any chars other than letters, numbers, or underscores are in gs label
+                config.init_global(test_config)
+
+    def test_error_gs_dataset_mismatch(self):
+        test_config = get_test_config()
+        test_config["gold_standards"] = [{"label": "gs1", "dataset_labels": ["mismatch"]}]
+
+        with pytest.raises(ValueError):
+            config.init_global(test_config)
