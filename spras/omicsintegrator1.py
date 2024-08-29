@@ -47,7 +47,7 @@ Interactor1    Interactor2   Weight    Direction
 
 """
 class OmicsIntegrator1(PRM):
-    required_inputs = ['prizes', 'edges']
+    required_inputs = ['prizes', 'edges', 'dummy_nodes']
 
     @staticmethod
     def generate_inputs(data, filename_map):
@@ -75,6 +75,11 @@ class OmicsIntegrator1(PRM):
         # Omics Integrator already gives warnings for strange prize values, so we won't here
         node_df.to_csv(filename_map['prizes'],sep='\t',index=False,columns=['NODEID','prize'],header=['name','prize'])
 
+        print("DATA: NODE TABLE")    
+        print(data.node_table.head())
+        print("NODE DF")
+        print(node_df.head())
+
         # Get network file
         edges_df = data.get_interactome()
 
@@ -82,6 +87,16 @@ class OmicsIntegrator1(PRM):
         edges_df.to_csv(filename_map['edges'],sep='\t',index=False,
                         columns=['Interactor1','Interactor2','Weight','Direction'],
                         header=['protein1','protein2','weight','directionality'])
+        
+        # creates the dummy_nodes file
+        if node_df.contains_node_columns('dummy'):
+            dummy_df = node_df[node_df['dummy'] == True] # revisit this - where is this column being created?
+            # save as list of dummy nodes
+            dummy_df.to_csv(filename_map['dummy_nodes'], sep='\t', index=False, columns=['NODEID'], header=None)
+        else:
+            # create empty dummy file 
+            with open(filename_map['dummy_nodes'], mode='w') as file:
+                pass
 
 
     # TODO add parameter validation
