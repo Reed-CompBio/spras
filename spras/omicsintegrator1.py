@@ -9,7 +9,7 @@ __all__ = ['OmicsIntegrator1', 'write_conf']
 
 
 # TODO decide on default number of processes and threads
-def write_conf(filename=Path('config.txt'), w=None, b=None, d=None, mu=None, noise=None, g=None, r=None, dummy_mode=None):
+def write_conf(filename=Path('config.txt'), w=None, b=None, d=None, mu=None, noise=None, g=None, r=None):
     """
     Write the configuration file for Omics Integrator 1
     See https://github.com/fraenkel-lab/OmicsIntegrator#required-inputs
@@ -32,7 +32,6 @@ def write_conf(filename=Path('config.txt'), w=None, b=None, d=None, mu=None, noi
             f.write(f'g = {g}\n') # not the same as g in Omics Integrator 2
         if r is not None:
             f.write(f'r = {r}\n')
-        #TODO: if dummy_mode is not None:
         f.write('processes = 1\n')
         f.write('threads = 1\n')
 
@@ -168,7 +167,7 @@ class OmicsIntegrator1(PRM):
                    '--outpath', mapped_out_dir,
                    '--outlabel', 'oi1']
         
-         # Add the dummy file argument if dummy_mode is enabled
+        # add the dummy node file argument if dummy_mode is enabled
         if dummy_mode is not None and dummy_mode:
             command.extend(['--dummy', dummy_file])
 
