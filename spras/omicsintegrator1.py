@@ -9,7 +9,7 @@ __all__ = ['OmicsIntegrator1', 'write_conf']
 
 
 # TODO decide on default number of processes and threads
-def write_conf(filename=Path('config.txt'), w=None, b=None, d=None, mu=None, noise=None, g=None, r=None):
+def write_conf(filename=Path('config.txt'), w=None, b=None, d=None, mu=None, noise=None, g=None, r=None, dummy_mode=None):
     """
     Write the configuration file for Omics Integrator 1
     See https://github.com/fraenkel-lab/OmicsIntegrator#required-inputs
@@ -32,6 +32,7 @@ def write_conf(filename=Path('config.txt'), w=None, b=None, d=None, mu=None, noi
             f.write(f'g = {g}\n') # not the same as g in Omics Integrator 2
         if r is not None:
             f.write(f'r = {r}\n')
+        #TODO: if dummy_mode is not None:
         f.write('processes = 1\n')
         f.write('threads = 1\n')
 
@@ -90,7 +91,7 @@ class OmicsIntegrator1(PRM):
         
         # creates the dummy_nodes file
         if node_df.contains_node_columns('dummy'):
-            dummy_df = node_df[node_df['dummy'] == True] # revisit this - where is this column being created?
+            dummy_df = node_df[node_df['dummy'] == True] #TODO: revisit this - where is this column being created?
             # save as list of dummy nodes
             dummy_df.to_csv(filename_map['dummy_nodes'], sep='\t', index=False, columns=['NODEID'], header=None)
         else:
@@ -104,7 +105,7 @@ class OmicsIntegrator1(PRM):
     # TODO add reasonable default values
     # TODO document required arguments
     @staticmethod
-    def run(edges=None, prizes=None, dummy_mode=None, mu_squared=None, exclude_terms=None,
+    def run(edges=None, prizes=None, dummy_nodes=None, dummy_mode=None, mu_squared=None, exclude_terms=None,
             output_file=None, noisy_edges=None, shuffled_prizes=None, random_terminals=None,
             seed=None, w=None, b=None, d=None, mu=None, noise=None, g=None, r=None, container_framework="docker"):
         """
@@ -133,6 +134,19 @@ class OmicsIntegrator1(PRM):
         bind_path, prize_file = prepare_volume(prizes, work_dir)
         volumes.append(bind_path)
 
+        # add dummy node file if dummy_mode is not None
+        if dummy_mode is not None:
+            if dummy_mode == 'file':
+                #TODO: needs to use dummy node file that was put in the dataset
+                # can't handle path to file
+                pass
+            # checks if dummy node file is not given
+            if dummy_nodes is None:
+                raise ValueError('Dummy node file is required if dummy_mode is given')
+            bind_path, dummy_file = prepare_volume(dummy_nodes, work_dir)
+            volumes.append(bind_path)
+                
+
         out_dir = Path(output_file).parent
         # Omics Integrator 1 requires that the output directory exist
         out_dir.mkdir(parents=True, exist_ok=True)
@@ -153,10 +167,12 @@ class OmicsIntegrator1(PRM):
                    '--msgpath', '/OmicsIntegrator/msgsteiner-1.3/msgsteiner',
                    '--outpath', mapped_out_dir,
                    '--outlabel', 'oi1']
+        
+         # Add the dummy file argument if dummy_mode is enabled
+        if dummy_mode is not None and dummy_mode:
+            command.extend(['--dummy', dummy_file])
 
         # Add optional arguments
-        if dummy_mode is not None:
-            command.extend(['--dummyMode', str(dummy_mode)])
         if mu_squared is not None and mu_squared:
             command.extend(['--musquared'])
         if exclude_terms is not None and exclude_terms:
