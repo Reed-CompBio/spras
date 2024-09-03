@@ -158,12 +158,12 @@ class OmicsIntegrator2(PRM):
         else:
             df = pd.read_csv(raw_pathway_file, sep='\t', header=0)
             if (len(df.columns) == len(correct_columns)) and all(df.columns == correct_columns):
-                df = df[df['in_solution'] == True]  # Check whether this column can be empty before revising this line 
+                df = df[df['in_solution'] == True]  # Check whether this column can be empty before revising this line
                 df = df.take([0, 1], axis=1)
                 df = add_rank_column(df)
                 df = reinsert_direction_col_undirected(df)
                 df.columns = ['Node1', 'Node2', 'Rank', "Direction"]
-            else: 
+            else:
                 df = pd.DataFrame(columns=['Node1', 'Node2', 'Rank', 'Direction'])
 
         df.to_csv(standardized_pathway_file, header=True, index=False, sep='\t')
