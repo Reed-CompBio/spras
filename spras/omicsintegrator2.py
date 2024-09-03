@@ -148,9 +148,7 @@ class OmicsIntegrator2(PRM):
         """
         # Omicsintegrator2 returns a single line file if no network is found
         num_lines = sum(1 for line in open(raw_pathway_file))
-        df = pd.read_csv(raw_pathway_file, sep='\t', header=0)
-        print(df)
-        # Omicsintegrator2 has corrupted output, list of correct column names and order
+        # Omicsintegrator2 has corrupted output; list of correct column names and order
         correct_columns = ['protein1', 'protein2', 'cost', 'in_solution']
 
         if num_lines < 2:

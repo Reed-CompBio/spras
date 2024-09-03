@@ -14,6 +14,7 @@ RAW_PATHS_INDIR = 'test/parse-outputs/input/oi2-raw-pathways/'
 
 algorithms = ['mincostflow', 'meo', 'omicsintegrator1', 'omicsintegrator2', 'pathlinker', 'allpairs', 'domino']
 
+
 class TestParseOutputs:
     @classmethod
     def setup_class(cls):
@@ -38,14 +39,14 @@ class TestParseOutputs:
             runner.parse_output(algo, test_file, out_file)
             assert filecmp.cmp(OUTDIR + f"{algo}-empty-pathway.txt", EXPDIR + f"empty-pathway-expected.txt", shallow=False)
 
-    def test_oi2_miss_insolution_parse_output(self):
+    def test_oi2_miss_insolution(self):
         test_file = RAW_PATHS_INDIR + f"oi2-miss-insolution.txt"
         out_file = OUTDIR + f"oi2-miss-insolution-pathway.txt"
 
         runner.parse_output('omicsintegrator2', test_file, out_file)
         assert filecmp.cmp(out_file, EXPDIR + f"empty-pathway-expected.txt", shallow=False)
 
-    def test_oi2_wrong_order_parse_output(self):
+    def test_oi2_wrong_order(self):
         test_file = RAW_PATHS_INDIR + f"oi2-wrong-order.txt"
         out_file = OUTDIR + f"oi2-wrong-order-pathway.txt"
 
