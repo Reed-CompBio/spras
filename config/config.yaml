@@ -162,7 +162,7 @@ analysis:
         include: true
         # adds ml analysis per algorithm output
         # only runs for algorithms with multiple parameter combinations chosen
-        aggregate_per_algorithm: false
+        aggregate_per_algorithm: true
         # specify how many principal components to calculate
         components: 2
         # boolean to show the labels on the pca graph
