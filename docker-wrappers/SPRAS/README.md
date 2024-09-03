@@ -66,7 +66,7 @@ in this environment, first login to an HTCondor Access Point (AP). Then, from th
 git clone https://github.com/Reed-CompBio/spras.git
 ```
 
-**Note:** To work with SPRAS in HTCondor, it is recommended that you build an Apptainer image instead of using Docker. See [Converting Docker Images to Apptainer/Singularity Images](#converting-docker-images-to-apptainersingularity-images) for instructions. Importantly, the Apptainer image must be built for the linux/amd64 architecture. Most HTCondor APs will have `apptainer` installed, but they may not have `docker`. If this is the case, you can build the image with Docker on your local machine, push the image to Docker Hub, and then convert it to Apptainer's `sif` format on the AP. 
+**Note:** To work with SPRAS in HTCondor, it is recommended that you build an Apptainer image instead of using Docker. See [Converting Docker Images to Apptainer/Singularity Images](#converting-docker-images-to-apptainersingularity-images) for instructions. Importantly, the Apptainer image must be built for the linux/amd64 architecture. Most HTCondor APs will have `apptainer` installed, but they may not have `docker`. If this is the case, you can build the image with Docker on your local machine, push the image to Docker Hub, and then convert it to Apptainer's `sif` format on the AP.
 
 There are currently two options for running SPRAS with HTCondor. The first is to submit all SPRAS jobs to a single remote Execution Point (EP). The second
 is to use the Snakemake HTCondor executor to parallelize the workflow by submitting each job to its own EP.
