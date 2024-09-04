@@ -112,7 +112,6 @@ class TestML:
         ml.ensemble_network(dataframe, OUT_DIR + 'ensemble-network-empty.tsv')
 
         en = pd.read_table(OUT_DIR + 'ensemble-network-empty.tsv')
-        en = en.round(5)
         expected = pd.read_table(EXPECT_DIR + 'expected-ensemble-network-empty.tsv')
         expected = expected.round(5)
 

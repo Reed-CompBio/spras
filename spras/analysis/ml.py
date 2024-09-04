@@ -88,7 +88,7 @@ def summarize_networks(file_paths: Iterable[Union[str, PathLike]]) -> pd.DataFra
 
     return concated_df
 
-def df_error(dataframe: pd.DataFrame):
+def validate_df(dataframe: pd.DataFrame):
     """
     Raises an error if the dataframe is empty or contains one pathway (one row)
     """
@@ -123,7 +123,7 @@ def pca(dataframe: pd.DataFrame, output_png: str, output_var: str, output_coord:
     @param components: the number of principal components to calculate (Default is 2)
     @param labels: determines if labels will be included in the scatterplot (Default is True)
     """
-    df_error(dataframe)
+    validate_df(dataframe)
     df = dataframe.reset_index(drop=True)
     columns = dataframe.columns
     column_names = [element.split('-')[-3] for element in columns]  # assume algorithm names do not contain '-'
@@ -225,7 +225,7 @@ def hac_vertical(dataframe: pd.DataFrame, output_png: str, output_file: str, lin
     @param linkage: methods for calculating the distance between clusters
     @param metric: used for distance computation between instances of clusters
     """
-    df_error(dataframe)
+    validate_df(dataframe)
     if linkage not in linkage_methods:
         raise ValueError(f"linkage={linkage} must be one of {linkage_methods}")
     if metric not in distance_metrics:
@@ -284,7 +284,7 @@ def hac_horizontal(dataframe: pd.DataFrame, output_png: str, output_file: str, l
     @param linkage: methods for calculating the distance between clusters
     @param metric: used for distance computation between instances of clusters
     """
-    df_error(dataframe)
+    validate_df(dataframe)
     if linkage not in linkage_methods:
         raise ValueError(f"linkage={linkage} must be one of {linkage_methods}")
     if linkage == "ward":
