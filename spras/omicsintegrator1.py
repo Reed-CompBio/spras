@@ -91,6 +91,9 @@ class OmicsIntegrator1(PRM):
         # creates the dummy_nodes file
         if node_df.contains_node_columns('dummy'):
             dummy_df = node_df[node_df['dummy'] == True] #TODO: revisit this - where is this column being created?
+            # doesn't the oi1 code handle assigning what nodes are dummy nodes (in the forest code?)
+            # how do i get that output(?) to become a column in node_df 
+
             # save as list of dummy nodes
             dummy_df.to_csv(filename_map['dummy_nodes'], sep='\t', index=False, columns=['NODEID'], header=None)
         else:
