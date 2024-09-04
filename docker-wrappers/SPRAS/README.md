@@ -55,7 +55,7 @@ For example, creating an Apptainer image for the `v0.2.0` SPRAS image might look
 apptainer build spras-v0.2.0.sif docker://reedcompbio/spras:v0.2.0
 ```
 
-After running this command, a new file called `spras-v0.2.0` will exist in the directory where the command was run.
+After running this command, a new file called `spras-v0.2.0.sif` will exist in the directory where the command was run.
 
 ## Working with HTCondor
 
