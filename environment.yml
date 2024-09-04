@@ -3,7 +3,7 @@ channels:
   - conda-forge
 dependencies:
   - adjusttext=0.7.3.1
-  - bioconda::snakemake-minimal=8.11.6
+  - bioconda::snakemake-minimal=8.16.0
   - docker-py=5.0
   - matplotlib=3.6
   - networkx=2.8
