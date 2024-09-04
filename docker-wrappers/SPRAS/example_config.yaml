@@ -149,3 +149,5 @@ analysis:
         linkage: 'ward'
         # 'euclidean', 'manhattan', 'cosine'
         metric: 'euclidean'
+      evaluation:
+        include: false
