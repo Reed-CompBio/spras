@@ -49,6 +49,11 @@ Interactor1    Interactor2   Weight    Direction
 class OmicsIntegrator1(PRM):
     required_inputs = ['prizes', 'edges', 'dummy_nodes']
 
+    #TODO: WHERE ARE WE SETTING DUMMY MODE IN CONFIG FILE???
+    # ALGORITHMS OR DATASET (OTHER FILES)?
+    #   if dummy_mode = file then is it going in other_files?
+    #   what about the other three modes?
+
     @staticmethod
     def generate_inputs(data, filename_map):
         """
@@ -90,10 +95,7 @@ class OmicsIntegrator1(PRM):
         
         # creates the dummy_nodes file
         if node_df.contains_node_columns('dummy'):
-            dummy_df = node_df[node_df['dummy'] == True] #TODO: revisit this - where is this column being created?
-            # doesn't the oi1 code handle assigning what nodes are dummy nodes (in the forest code?)
-            # how do i get that output(?) to become a column in node_df 
-
+            dummy_df = node_df[node_df['dummy'] == True] 
             # save as list of dummy nodes
             dummy_df.to_csv(filename_map['dummy_nodes'], sep='\t', index=False, columns=['NODEID'], header=None)
         else:
@@ -136,18 +138,20 @@ class OmicsIntegrator1(PRM):
         bind_path, prize_file = prepare_volume(prizes, work_dir)
         volumes.append(bind_path)
 
+        # 4 dummy mode possibilities:
+        #   1. terminals -> connect the dummy node to all nodes that have been assigned prizes 
+        #   2. all ->  connect the dummy node to all nodes in the interactome i.e. full set of nodes in graph
+        #   3. others -> connect the dummy node to all nodes that are not terminal nodes i.e. nodes w/o prizes
+        #   4. file -> custom nodes - connect the dummy node to a specific list of nodes provided in a file
+
         # add dummy node file if dummy_mode is not None
         if dummy_mode is not None:
             if dummy_mode == 'file':
                 #TODO: needs to use dummy node file that was put in the dataset
-                # can't handle path to file
-                pass
-            # checks if dummy node file is not given
-            if dummy_nodes is None:
-                raise ValueError('Dummy node file is required if dummy_mode is given')
-            bind_path, dummy_file = prepare_volume(dummy_nodes, work_dir)
-            volumes.append(bind_path)
-                
+                bind_path, dummy_file = prepare_volume(dummy_nodes, work_dir)
+                volumes.append(bind_path)
+            #TODO: handle other 3 possibilities here?
+            # or is this handled in actual Oi1 code
 
         out_dir = Path(output_file).parent
         # Omics Integrator 1 requires that the output directory exist
@@ -170,8 +174,9 @@ class OmicsIntegrator1(PRM):
                    '--outpath', mapped_out_dir,
                    '--outlabel', 'oi1']
         
-        # add the dummy node file argument if dummy_mode is enabled
-        if dummy_mode is not None and dummy_mode:
+        # add the dummy node file argument if dummy_mode is file
+        #TODO: anything for the other 3 modes?
+        if dummy_mode is not None and dummy_mode == 'file':
             command.extend(['--dummy', dummy_file])
 
         # Add optional arguments
