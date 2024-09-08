@@ -54,6 +54,8 @@ class OmicsIntegrator1(PRM):
     #   if dummy_mode = file then is it going in other_files?
     #   what about the other three modes?
 
+    #TODO: need to change stuff in dataset.py for handling dummy column addition?
+
     @staticmethod
     def generate_inputs(data, filename_map):
         """
@@ -147,11 +149,12 @@ class OmicsIntegrator1(PRM):
         # add dummy node file if dummy_mode is not None
         if dummy_mode is not None:
             if dummy_mode == 'file':
-                #TODO: needs to use dummy node file that was put in the dataset
+                # needs to use dummy node file that was put in the dataset
                 bind_path, dummy_file = prepare_volume(dummy_nodes, work_dir)
                 volumes.append(bind_path)
             #TODO: handle other 3 possibilities here?
             # or is this handled in actual Oi1 code
+            # other 2/3 modes just use prizes columns (except all which uses all nodes)
 
         out_dir = Path(output_file).parent
         # Omics Integrator 1 requires that the output directory exist
