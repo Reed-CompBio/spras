@@ -1,4 +1,5 @@
 import filecmp
+import random
 from pathlib import Path
 
 import pandas as pd
@@ -60,6 +61,34 @@ class TestML:
         expected = expected.round(5)
 
         assert coord.equals(expected)
+
+    def test_pca_robustness(self):
+        dataframe = ml.summarize_networks([INPUT_DIR + 'test-data-s1/s1.txt', INPUT_DIR + 'test-data-s2/s2.txt', INPUT_DIR + 'test-data-s3/s3.txt'])
+
+        for _i in range(5):
+            dataframe_shuffled = dataframe.sample(frac=1, axis=1)  # permute the columns
+            ml.pca(dataframe_shuffled, OUT_DIR + 'pca-shuffled-columns.png', OUT_DIR + 'pca-shuffled-columns-variance.txt',
+                OUT_DIR + 'pca-shuffled-columns-coordinates.tsv')
+            coord = pd.read_table(OUT_DIR + 'pca-shuffled-columns-coordinates.tsv')
+            coord = coord.round(5)  # round values to 5 digits to account for numeric differences across machines
+            coord.sort_values(by='algorithm', ignore_index=True, inplace=True)
+            expected = pd.read_table(EXPECT_DIR + 'expected-pca-coordinates.tsv')
+            expected = expected.round(5)
+
+            assert coord.equals(expected)
+
+        for _i in range(5):
+            dataframe_shuffled = dataframe.sample(frac=1, axis=0) # permute the rows
+            ml.pca(dataframe_shuffled, OUT_DIR + 'pca-shuffled-rows.png', OUT_DIR + 'pca-shuffled-rows-variance.txt',
+                    OUT_DIR + 'pca-shuffled-rows-coordinates.tsv')
+            coord = pd.read_table(OUT_DIR + 'pca-shuffled-rows-coordinates.tsv')
+            coord = coord.round(5)  # round values to 5 digits to account for numeric differences across machines
+            coord.sort_values(by='algorithm', ignore_index=True, inplace=True)
+            expected = pd.read_table(EXPECT_DIR + 'expected-pca-coordinates.tsv')
+            expected = expected.round(5)
+
+            assert coord.equals(expected)
+
 
     def test_hac_horizontal(self):
         dataframe = ml.summarize_networks([INPUT_DIR + 'test-data-s1/s1.txt', INPUT_DIR + 'test-data-s2/s2.txt', INPUT_DIR + 'test-data-s3/s3.txt'])
