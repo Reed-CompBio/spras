@@ -1,5 +1,4 @@
 import filecmp
-import random
 from pathlib import Path
 
 import pandas as pd
@@ -77,7 +76,7 @@ class TestML:
             assert coord.equals(expected)
 
         for _ in range(5):
-            dataframe_shuffled = dataframe.sample(frac=1, axis=0) # permute the rows
+            dataframe_shuffled = dataframe.sample(frac=1, axis=0)  # permute the rows
             ml.pca(dataframe_shuffled, OUT_DIR + 'pca-shuffled-rows.png', OUT_DIR + 'pca-shuffled-rows-variance.txt',
                     OUT_DIR + 'pca-shuffled-rows-coordinates.tsv')
             coord = pd.read_table(OUT_DIR + 'pca-shuffled-rows-coordinates.tsv')
