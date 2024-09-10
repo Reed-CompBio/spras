@@ -65,7 +65,7 @@ class TestML:
     def test_pca_robustness(self):
         dataframe = ml.summarize_networks([INPUT_DIR + 'test-data-s1/s1.txt', INPUT_DIR + 'test-data-s2/s2.txt', INPUT_DIR + 'test-data-s3/s3.txt'])
 
-        for _i in range(5):
+        for _ in range(5):
             dataframe_shuffled = dataframe.sample(frac=1, axis=1)  # permute the columns
             ml.pca(dataframe_shuffled, OUT_DIR + 'pca-shuffled-columns.png', OUT_DIR + 'pca-shuffled-columns-variance.txt',
                 OUT_DIR + 'pca-shuffled-columns-coordinates.tsv')
@@ -77,7 +77,7 @@ class TestML:
 
             assert coord.equals(expected)
 
-        for _i in range(5):
+        for _ in range(5):
             dataframe_shuffled = dataframe.sample(frac=1, axis=0) # permute the rows
             ml.pca(dataframe_shuffled, OUT_DIR + 'pca-shuffled-rows.png', OUT_DIR + 'pca-shuffled-rows-variance.txt',
                     OUT_DIR + 'pca-shuffled-rows-coordinates.tsv')
