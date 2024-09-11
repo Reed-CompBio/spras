@@ -49,12 +49,7 @@ Interactor1    Interactor2   Weight    Direction
 class OmicsIntegrator1(PRM):
     required_inputs = ['prizes', 'edges', 'dummy_nodes']
 
-    #TODO: WHERE ARE WE SETTING DUMMY MODE IN CONFIG FILE???
-    # ALGORITHMS OR DATASET (OTHER FILES)?
-    #   if dummy_mode = file then is it going in other_files?
-    #   what about the other three modes?
-
-    #TODO: need to change stuff in dataset.py for handling dummy column addition?
+    #TODO: edit generate_inputs to include NODEID (check notes)
 
     @staticmethod
     def generate_inputs(data, filename_map):
@@ -146,15 +141,11 @@ class OmicsIntegrator1(PRM):
         #   3. others -> connect the dummy node to all nodes that are not terminal nodes i.e. nodes w/o prizes
         #   4. file -> custom nodes - connect the dummy node to a specific list of nodes provided in a file
 
-        # add dummy node file if dummy_mode is not None
-        if dummy_mode is not None:
-            if dummy_mode == 'file':
+        # add dummy node file to the volume if dummy_mode is not None and it is 'file'
+        if dummy_mode is not None and dummy_mode == 'file':
                 # needs to use dummy node file that was put in the dataset
                 bind_path, dummy_file = prepare_volume(dummy_nodes, work_dir)
                 volumes.append(bind_path)
-            #TODO: handle other 3 possibilities here?
-            # or is this handled in actual Oi1 code
-            # other 2/3 modes just use prizes columns (except all which uses all nodes)
 
         out_dir = Path(output_file).parent
         # Omics Integrator 1 requires that the output directory exist
@@ -177,10 +168,14 @@ class OmicsIntegrator1(PRM):
                    '--outpath', mapped_out_dir,
                    '--outlabel', 'oi1']
         
-        # add the dummy node file argument if dummy_mode is file
-        #TODO: anything for the other 3 modes?
-        if dummy_mode is not None and dummy_mode == 'file':
-            command.extend(['--dummy', dummy_file])
+        # add the dummy mode argument
+        if dummy_mode is not None and dummy_mode:
+            # for custom dummy modes, add the file
+            if dummy_mode == 'file':
+                command.extend(['--dummy', dummy_file])
+            # else pass in the dummy_mode and let oi1 handle it
+            else:
+                command.extend(['--dummy', dummy_mode])
 
         # Add optional arguments
         if mu_squared is not None and mu_squared:
