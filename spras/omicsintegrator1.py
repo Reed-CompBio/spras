@@ -49,7 +49,7 @@ Interactor1    Interactor2   Weight    Direction
 class OmicsIntegrator1(PRM):
     required_inputs = ['prizes', 'edges', 'dummy_nodes']
 
-    #TODO: edit generate_inputs to include NODEID (check notes)
+    #TODO: TEST !!!!! + test files??
 
     @staticmethod
     def generate_inputs(data, filename_map):
@@ -94,7 +94,7 @@ class OmicsIntegrator1(PRM):
         if node_df.contains_node_columns('dummy'):
             dummy_df = node_df[node_df['dummy'] == True] 
             # save as list of dummy nodes
-            dummy_df.to_csv(filename_map['dummy_nodes'], sep='\t', index=False, columns=['NODEID'], header=None)
+            dummy_df.to_csv(filename_map['dummy_nodes'], sep='\t', index=False, columns=['NODEID', 'dummy'], header=['NODEID', 'dummy'])
         else:
             # create empty dummy file 
             with open(filename_map['dummy_nodes'], mode='w') as file:
