@@ -97,7 +97,6 @@ class TestML:
 
             assert coord.equals(expected)
 
-
     def test_hac_horizontal(self):
         dataframe = ml.summarize_networks([INPUT_DIR + 'test-data-s1/s1.txt', INPUT_DIR + 'test-data-s2/s2.txt', INPUT_DIR + 'test-data-s3/s3.txt'])
         ml.hac_horizontal(dataframe, OUT_DIR + 'hac-horizontal.png', OUT_DIR + 'hac-clusters-horizontal.txt')
@@ -138,6 +137,5 @@ class TestML:
 
         en = pd.read_table(OUT_DIR + 'ensemble-network-empty.tsv')
         expected = pd.read_table(EXPECT_DIR + 'expected-ensemble-network-empty.tsv')
-        expected = expected.round(5)
 
         assert en.equals(expected)

@@ -88,9 +88,11 @@ def summarize_networks(file_paths: Iterable[Union[str, PathLike]]) -> pd.DataFra
 
     return concated_df
 
+
 def validate_df(dataframe: pd.DataFrame):
     """
     Raises an error if the dataframe is empty or contains one pathway (one row)
+    @param dataframe: datafrom of pathways to validate
     """
     if dataframe.empty:
         raise ValueError("ML post-processing cannot proceed because the summarize network dataframe is empty.\nWe "
@@ -99,6 +101,7 @@ def validate_df(dataframe: pd.DataFrame):
         raise ValueError(f"ML post-processing cannot proceed because the available number of pathways is insufficient. "
                       f"The ml post-processing requires more than one pathway, but currently "
                       f"there are only {min(dataframe.shape)} pathways.")
+
 
 def create_palette(column_names):
     """
