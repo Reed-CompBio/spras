@@ -42,6 +42,9 @@ container_registry:
 # then myAlg will be run on (a=1,b=0.5),(a=1,b=0.75),(a=2,b=0.5), and (a=2,b=0,75). Pretty neat, but be
 # careful: too many parameters might make your runs take a long time.
 
+# TODO: where does the dummy node argument go?
+# i.e. where do i set dummy_mode = all, etc.
+
 algorithms:
       - name: "pathlinker"
         params:
@@ -56,6 +59,7 @@ algorithms:
                   b: [5, 6]
                   w: np.linspace(0,5,2)
                   d: [10]
+                  dummy_mode: ["file"] 
 
       - name: "omicsintegrator2"
         params:
@@ -100,24 +104,24 @@ algorithms:
 datasets:
     -
       # Labels can only contain letters, numbers, or underscores
-      label: data0
-      node_files: ["node-prizes.txt", "sources.txt", "targets.txt"]
+      label: hivtest2
+      node_files: ["modified_prize_05.txt", "dummy.txt"]
       # DataLoader.py can currently only load a single edge file, which is the primary network
-      edge_files: ["network.txt"]
+      edge_files: ["phosphosite-irefindex13.0-uniprot.txt"]
       # Placeholder
       other_files: []
       # Relative path from the spras directory
       data_dir: "input"
 
-gold_standards:
-    -
-      # Labels can only contain letters, numbers, or underscores
-      label: gs0
-      node_files: ["gs_nodes0.txt"]
-      # edge_files: [] TODO: later iteration
-      data_dir: "input"
-      # List of dataset labels to compare with the specific gold standard dataset
-      dataset_labels: ["data0"]
+# gold_standards:
+#     -
+#       # Labels can only contain letters, numbers, or underscores
+#       label: gs0
+#       node_files: ["gs_nodes0.txt"]
+#       # edge_files: [] TODO: later iteration
+#       data_dir: "input"
+#       # List of dataset labels to compare with the specific gold standard dataset
+#       dataset_labels: ["data0"]
 
 # If we want to reconstruct then we should set run to true.
 # TODO: if include is true above but run is false here, algs are not run.
@@ -160,4 +164,4 @@ analysis:
         # 'euclidean', 'manhattan', 'cosine'
         metric: 'euclidean'
       evaluation:
-        include: true
+        include: false
