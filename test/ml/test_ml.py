@@ -42,13 +42,25 @@ class TestML:
         with pytest.raises(ValueError):
             ml.summarize_networks([INPUT_DIR + 'test-data-wrong-direction/wrong-direction.txt'])
 
-    def test_summarize_networks_empty(self):
+    def test_empty(self):
+        dataframe = ml.summarize_networks([INPUT_DIR + 'test-data-empty/empty.txt'])
         with pytest.raises(ValueError):  # raises error if empty dataframe is used for post processing
-            ml.summarize_networks([INPUT_DIR + 'test-data-empty/empty.txt'])
+            ml.pca(dataframe, OUT_DIR + 'pca-empty.png', OUT_DIR + 'pca-empty-variance.txt',
+               OUT_DIR + 'pca-empty-coordinates.tsv')
+        with pytest.raises(ValueError):
+            ml.hac_horizontal(dataframe, OUT_DIR + 'hac-empty-horizontal.png', OUT_DIR + 'hac-empty-clusters-horizontal.txt')
+        with pytest.raises(ValueError):
+            ml.hac_vertical(dataframe, OUT_DIR + 'hac-empty-vertical.png', OUT_DIR + 'hac-empty-clusters-vertical.txt')
 
     def test_single_line(self):
+        dataframe = ml.summarize_networks([INPUT_DIR + 'test-data-empty/empty.txt'])
         with pytest.raises(ValueError):  # raises error if single line in file s.t. single row in dataframe is used for post processing
-            ml.summarize_networks([INPUT_DIR + 'test-data-single/single.txt'])
+            ml.pca(dataframe, OUT_DIR + 'pca-single-line.png', OUT_DIR + 'pca-single-line-variance.txt',
+               OUT_DIR + 'pca-single-line-coordinates.tsv')
+        with pytest.raises(ValueError):
+            ml.hac_horizontal(dataframe, OUT_DIR + 'hac-single-line-horizontal.png', OUT_DIR + 'hac-single-line-clusters-horizontal.txt')
+        with pytest.raises(ValueError):
+            ml.hac_vertical(dataframe, OUT_DIR + 'hac-single-line-vertical.png', OUT_DIR + 'hac-single-line-clusters-vertical.txt')
 
     def test_pca(self):
         dataframe = ml.summarize_networks([INPUT_DIR + 'test-data-s1/s1.txt', INPUT_DIR + 'test-data-s2/s2.txt', INPUT_DIR + 'test-data-s3/s3.txt'])
@@ -85,7 +97,6 @@ class TestML:
 
             assert coord.equals(expected)
 
-
     def test_hac_horizontal(self):
         dataframe = ml.summarize_networks([INPUT_DIR + 'test-data-s1/s1.txt', INPUT_DIR + 'test-data-s2/s2.txt', INPUT_DIR + 'test-data-s3/s3.txt'])
         ml.hac_horizontal(dataframe, OUT_DIR + 'hac-horizontal.png', OUT_DIR + 'hac-clusters-horizontal.txt')
@@ -106,5 +117,25 @@ class TestML:
         en = en.round(5)  # round values to 5 digits to account for numeric differences across machines
         expected = pd.read_table(EXPECT_DIR + 'expected-ensemble-network.tsv')
         expected = expected.round(5)
+
+        assert en.equals(expected)
+
+    def test_ensemble_network_single_line(self):
+        dataframe = ml.summarize_networks([INPUT_DIR + 'test-data-single/single.txt'])
+        ml.ensemble_network(dataframe, OUT_DIR + 'ensemble-network-single.tsv')
+
+        en = pd.read_table(OUT_DIR + 'ensemble-network-single.tsv')
+        en = en.round(5)
+        expected = pd.read_table(EXPECT_DIR + 'expected-ensemble-network-single.tsv')
+        expected = expected.round(5)
+
+        assert en.equals(expected)
+
+    def test_ensemble_network_empty(self):
+        dataframe = ml.summarize_networks([INPUT_DIR + 'test-data-empty/empty.txt'])
+        ml.ensemble_network(dataframe, OUT_DIR + 'ensemble-network-empty.tsv')
+
+        en = pd.read_table(OUT_DIR + 'ensemble-network-empty.tsv')
+        expected = pd.read_table(EXPECT_DIR + 'expected-ensemble-network-empty.tsv')
 
         assert en.equals(expected)
