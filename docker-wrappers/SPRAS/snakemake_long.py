@@ -83,14 +83,12 @@ def top_main():
         cwd = os.getcwd()
         args.snakefile = pathlib.Path(cwd) / "Snakefile"
     if not os.path.exists(args.snakefile):
-        print(f"Error: The Snakefile {args.snakefile} does not exist.")
-        return 1
+        raise FileNotFoundError(f"Error: The Snakefile {args.snakefile} does not exist.")
 
     # Make sure the profile directory exists. It's harder to check if it's a valid profile at this level
     # so that will be left to Snakemake.
     if not os.path.exists(args.profile):
-        print(f"Error: The profile directory {args.profile} does not exist.")
-        return 1
+        raise FileNotFoundError(f"Error: The profile directory {args.profile} does not exist.")
 
     # Make sure we have a value for the log directory and that the directory exists.
     if args.htcondor_jobdir is None:
@@ -101,9 +99,11 @@ def top_main():
         if not os.path.exists(args.htcondor_jobdir):
             os.makedirs(args.htcondor_jobdir)
 
-
-    submit_local(args.snakefile, args.profile, args.htcondor_jobdir)
-    return 0
+    try:
+        submit_local(args.snakefile, args.profile, args.htcondor_jobdir)
+    except Exception as e:
+        print(f"Error: Could not submit local universe job. {e}")
+        raise
 
 """
 Command to activate conda environment and run Snakemake. This is run by the local universe job, not the user.
@@ -121,18 +121,29 @@ def long_main():
     snakemake -s {args.snakefile} --profile {args.profile} --htcondor-jobdir {args.htcondor_jobdir}
     """
 
-    # Run the command in a single shell session
-    result = subprocess.run(command, shell=True, executable='/bin/bash')
-
-    # Return 0 for success and 1 for failure
-    return 0 if result.returncode == 0 else 1
+    try:
+        subprocess.run(command, shell=True, executable='/bin/bash', check=True)
+        return 0
+    except subprocess.CalledProcessError as e:
+        print(f"Error: Command '{e.cmd}' returned non-zero exit status {e.returncode}.")
+        raise
+    except Exception as e:
+        print(f"Unexpected error: {e}")
+        raise
 
 def main():
-    if len(sys.argv) > 1:
-        if sys.argv[1] in ["long"]:
+    try:
+        if len(sys.argv) > 1 and sys.argv[1] in ["long"]:
             return long_main()
+        else:
+            top_main()
 
-    return top_main()
+    except subprocess.CalledProcessError as e:
+        print(f"Error: Snakemake failed with return code {e.returncode}.")
+        sys.exit(e.returncode)
+    except Exception as e:
+        print(f"Unexpected error: {e}")
+        sys.exit(1)
 
 if __name__ == '__main__':
-    sys.exit(main())
+    main()
