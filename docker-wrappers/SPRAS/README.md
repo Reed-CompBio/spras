@@ -68,6 +68,8 @@ git clone https://github.com/Reed-CompBio/spras.git
 
 **Note:** To work with SPRAS in HTCondor, it is recommended that you build an Apptainer image instead of using Docker. See [Converting Docker Images to Apptainer/Singularity Images](#converting-docker-images-to-apptainersingularity-images) for instructions. Importantly, the Apptainer image must be built for the linux/amd64 architecture. Most HTCondor APs will have `apptainer` installed, but they may not have `docker`. If this is the case, you can build the image with Docker on your local machine, push the image to Docker Hub, and then convert it to Apptainer's `sif` format on the AP.
 
+**Note:** It is best practice to make sure that the Snakefile you copy for your workflow is the same version as the Snakefile baked into your workflow's container image. When this workflow runs, the Snakefile you just copied will be used during remote execution instead of the Snakefile from the container. As a result, difficult-to-diagnose versioning issues may occur if the version of SPRAS in the remote container doesn't support the Snakefile on your current branch. The safest bet is always to create your own image so you always know what's inside of it.
+
 There are currently two options for running SPRAS with HTCondor. The first is to submit all SPRAS jobs to a single remote Execution Point (EP). The second
 is to use the Snakemake HTCondor executor to parallelize the workflow by submitting each job to its own EP.
 
@@ -104,12 +106,25 @@ cp ../../Snakefile . && \
 cp -r ../../input .
 ```
 
-**Note:** It is best practice to make sure that the Snakefile you copy for your workflow is the same version as the Snakefile baked into your workflow's container image. When this workflow runs, the Snakefile you just copied will be used during remote execution instead of the Snakefile from the container. As a result, difficult-to-diagnose versioning issues may occur if the version of SPRAS in the remote container doesn't support the Snakefile on your current branch. The safest bet is always to create your own image so you always know what's inside of it.
+Instead of editing `spras.sub` to define the workflow, this scenario requires editing the SPRAS profile in `spras_profile/config.yaml`. Make sure you specify the correct container, and change any other config values needed by your workflow (defaults are fine in most cases).
 
-To start the workflow with HTCondor in the CHTC pool, run:
+Then, to start the workflow with HTCondor in the CHTC pool, there are two options:
+
+#### Snakemake From Your Own Terminal
+The first option is to run Snakemake in a way that ties its execution to your terminal. This is good for testing short workflows and running short jobs. The downside is that closing your terminal causes the process to exit, removing any unfinished jobs. To use this option, invoke Snakemake directly by running:
 ```bash
 snakemake --profile spras_profile
 ```
+
+#### Long Running Snakemake Jobs (Managed by HTCondor)
+The second option is to let HTCondor manage the Snakemake process, which allows the jobs to run as long as needed. Instead of seeing Snakemake output directly in your terminal, you'll be able to see it in a specified log file. To use this option, make sure `snakemake_long.py` is executable (you can run `chmod +x snakemake_long.py` from the AP to make sure it is), and then run:
+```
+./snakemake_long.py --profile spras_profile --htcondor-jobdir <path/to/logging/directory>
+```
+
+When run in this mode, all log files for the workflow will be placed into the path you provided for the logging directory. In particular, Snakemake's outputs with job progress can be found split between `<logdir>/snakemake-long.err` and `<logdir>/snakemake-long.out`.
+
+### Adjusting Resources
 
 Resource requirements can be adjusted as needed in `spras_profile/config.yaml`, and HTCondor logs for this workflow can be found in `.snakemake/htcondor`.
 You can set a different log directory by adding `htcondor-jobdir: /path/to/dir` to the profile's configuration.
