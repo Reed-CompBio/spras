@@ -59,7 +59,7 @@ algorithms:
                   b: [5, 6]
                   w: np.linspace(0,5,2)
                   d: [10]
-                  dummy_mode: ["file"] 
+                  dummy_mode: ["terminals"] 
 
       - name: "omicsintegrator2"
         params:
@@ -105,7 +105,7 @@ datasets:
     -
       # Labels can only contain letters, numbers, or underscores
       label: hivtest2
-      node_files: ["modified_prize_05.txt", "dummy.txt"]
+      node_files: ["modified_prize_05.txt"]
       # DataLoader.py can currently only load a single edge file, which is the primary network
       edge_files: ["phosphosite-irefindex13.0-uniprot.txt"]
       # Placeholder

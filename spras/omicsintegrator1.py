@@ -75,14 +75,6 @@ class OmicsIntegrator1(PRM):
         # Omics Integrator already gives warnings for strange prize values, so we won't here
         node_df.to_csv(filename_map['prizes'],sep='\t',index=False,columns=['NODEID','prize'],header=['name','prize'])
 
-        print("DATA: NODE TABLE - true dummy")    
-        print(data.node_table[data.node_table['dummy']==True])
-        print("DATA: NODE TABLE")    
-        print(data.node_table.head())
-        print(len(data.node_table))
-        print("NODE DF")
-        print(node_df.head())
-
         # Get network file
         edges_df = data.get_interactome()
 
