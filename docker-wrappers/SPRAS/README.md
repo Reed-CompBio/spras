@@ -122,7 +122,7 @@ The second option is to let HTCondor manage the Snakemake process, which allows 
 ./snakemake_long.py --profile spras_profile --htcondor-jobdir <path/to/logging/directory>
 ```
 
-When run in this mode, all log files for the workflow will be placed into the path you provided for the logging directory. In particular, Snakemake's outputs with job progress can be found split between `<logdir>/snakemake-long.err` and `<logdir>/snakemake-long.out`.
+When run in this mode, all log files for the workflow will be placed into the path you provided for the logging directory. In particular, Snakemake's outputs with job progress can be found split between `<logdir>/snakemake-long.err` and `<logdir>/snakemake-long.out`. These will also log each rule and what HTCondor job ID was submitted for that rule (see the [troubleshooting section](#troubleshooting) for information on how to use these extra log files).
 
 ### Adjusting Resources
 
@@ -151,6 +151,13 @@ contain useful debugging clues about what may have gone wrong.
 **Note**: If you want to run the workflow with a different version of SPRAS, or one that contains development updates you've made, rebuild this image against
 the version of SPRAS you want to test, and push the image to your image repository. To use that container in the workflow, change the `container_image` line of
 `spras.sub` to point to the new image.
+
+### Troubleshooting
+Some errors Snakemake might encounter while executing rules in the workflow boil down to bad luck in a distributed, heterogeneous computational environment, and it's expected that some errors can be solved simply by rerunning. If you encounter a Snakemake error, try restarting the workflow to see if the same error is generated in the same rule a second time -- repeatable, identical failures are more likely to indicate a more fundamental issue that might require user intervention to fix.
+
+To investigate issues, start by referring to your logging directory. Each Snakemake rule submitted to HTCondor will log a corresponding HTCondor job ID in the Snakemake standard out/error. You can use this job ID to check the standard out, standard error, and HTCondor job log for that specific rule. In some cases the error will indicate a user-solvable issue, e.g. "input file not found" might point to a typo in some part of your workflow. In other cases, errors might be solved by retrying the workflow, which causes Snakemake to pick up where it left off.
+
+If your workflow gets stuck on the same error after multiple consecutive retries and prevents your workflow from completing, this indicates some user/developer intervention is likely required. If you choose to open a github issue, please include a description of the error(s) and what troubleshooting steps you've already taken.
 
 ## Versions:
 
