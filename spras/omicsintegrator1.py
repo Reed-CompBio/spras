@@ -87,7 +87,6 @@ class OmicsIntegrator1(PRM):
         if 'dummy' in data.node_table.columns:
             dummy_df = data.node_table[data.node_table['dummy'] == True] 
             # save as list of dummy nodes
-            # dummy_df.to_csv(filename_map['dummy_nodes'], sep='\t', index=False, columns=['NODEID', 'dummy'], header=['NODEID', 'dummy'])
             dummy_df.to_csv(filename_map['dummy_nodes'], index=False, columns=['NODEID'], header=None)
         else:
             # create empty dummy file 
