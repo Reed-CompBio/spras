@@ -82,15 +82,15 @@ class OmicsIntegrator1(PRM):
         edges_df.to_csv(filename_map['edges'],sep='\t',index=False,
                         columns=['Interactor1','Interactor2','Weight','Direction'],
                         header=['protein1','protein2','weight','directionality'])
-        
+
         # creates the dummy_nodes file
         if 'dummy' in data.node_table.columns:
-            dummy_df = data.node_table[data.node_table['dummy'] == True] 
+            dummy_df = data.node_table[data.node_table['dummy'] == True]
             # save as list of dummy nodes
             dummy_df.to_csv(filename_map['dummy_nodes'], index=False, columns=['NODEID'], header=None)
         else:
-            # create empty dummy file 
-            with open(filename_map['dummy_nodes'], mode='w') as file:
+            # create empty dummy file
+            with open(filename_map['dummy_nodes'], mode='w'):
                 pass
 
 
@@ -129,7 +129,7 @@ class OmicsIntegrator1(PRM):
         volumes.append(bind_path)
 
         # 4 dummy mode possibilities:
-        #   1. terminals -> connect the dummy node to all nodes that have been assigned prizes 
+        #   1. terminals -> connect the dummy node to all nodes that have been assigned prizes
         #   2. all ->  connect the dummy node to all nodes in the interactome i.e. full set of nodes in graph
         #   3. others -> connect the dummy node to all nodes that are not terminal nodes i.e. nodes w/o prizes
         #   4. file -> custom nodes - connect the dummy node to a specific list of nodes provided in a file
@@ -160,7 +160,7 @@ class OmicsIntegrator1(PRM):
                    '--msgpath', '/OmicsIntegrator/msgsteiner-1.3/msgsteiner',
                    '--outpath', mapped_out_dir,
                    '--outlabel', 'oi1']
-        
+
         # add the dummy mode argument
         if dummy_mode is not None and dummy_mode:
             # for custom dummy modes, add the file
