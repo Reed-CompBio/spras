@@ -381,6 +381,20 @@ rule evaluation:
     run:
         node_table = Evaluation.from_file(input.gold_standard_file).node_table
         Evaluation.precision(input.pathways, node_table, output.eval_file)
+        # add recall
+        # Run "PR" curves for output pathays precision and recall 
+        # Run PR curves for ensemble files only 
+        # Run PCA "tuning" idea
+
+# parameter tuning section? 
+# does there need to be a seperate section for parameter tuning if evaluation will deal with it
+# PCA
+# - only one that isn't taken care of by the evaluation code directly, but can be added as something to look at in evaluation
+# no parameter tuning
+# - will use the outputs that can be put into evaluation
+# ensembling 
+# - will use the outputs that can be put into evaluation
+
 
 # Remove the output directory
 rule clean:

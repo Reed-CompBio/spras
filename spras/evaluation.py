@@ -71,7 +71,7 @@ class Evaluation:
 
         # TODO: later iteration - chose between node and edge file, or allow both
 
-    @staticmethod
+    @staticmethod # TODO update to do precision and recall in the same function for the nodes
     def precision(file_paths: Iterable[Path], node_table: pd.DataFrame, output_file: str):
         """
         Takes in file paths for a specific dataset and an associated gold standard node table.
@@ -98,3 +98,9 @@ class Evaluation:
 
         precision_df = pd.DataFrame(results)
         precision_df.to_csv(output_file, sep="\t", index=False)
+
+    # TODO make PR curves for the nodes from ensembled files outputs
+    # TODO make the edge frequency node ensembles 
+
+    # TODO PCA chosen pathway, will need to use precision and recall code for the nodes of the chosen pathway
+    

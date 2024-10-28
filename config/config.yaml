@@ -174,3 +174,8 @@ analysis:
         metric: 'euclidean'
       evaluation:
         include: true
+        # update to decouple the evaluation parts? 
+        # - ensemble vs all pathways vs pca chosen pathway
+        # pr curves from ensemble files 
+        # "pr" curves from all pathways
+        # p and r from pca chosen pathway
