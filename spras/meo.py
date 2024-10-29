@@ -10,6 +10,8 @@ from spras.util import add_rank_column, raw_pathway_df
 
 __all__ = ['MEO', 'write_properties']
 
+# replaces all underscores in the node names with unicode seperator
+underscore_replacement = '꧁SEP꧂'
 
 # Only supports the Random orientation algorithm
 # Does not support MINSAT or MAXCSP
@@ -88,8 +90,8 @@ class MEO(PRM):
             # TODO test whether this selection is needed, what values could the column contain that we would want to
             # include or exclude?
             nodes = nodes.loc[nodes[node_type]]
-            # replace _'s with ꧁SEP꧂
-            nodes['NODEID'] = nodes['NODEID'].str.replace('_', '꧁SEP꧂')
+            # replace _'s with underscore_replacement
+            nodes['NODEID'] = nodes['NODEID'].str.replace('_', underscore_replacement)
             nodes.to_csv(filename_map[node_type], index=False, columns=['NODEID'], header=False)
 
         # Create network file
@@ -98,8 +100,8 @@ class MEO(PRM):
         # Format network file
         edges = add_directionality_constant(edges, 'EdgeType', '(pd)', '(pp)')
         # replace _'s with ꧁SEP꧂
-        edges['Interactor1'] = edges['Interactor1'].str.replace('_', '꧁SEP꧂')
-        edges['Interactor2'] = edges['Interactor2'].str.replace('_', '꧁SEP꧂')
+        edges['Interactor1'] = edges['Interactor1'].str.replace('_', underscore_replacement)
+        edges['Interactor2'] = edges['Interactor2'].str.replace('_', underscore_replacement)
         edges.to_csv(filename_map['edges'], sep='\t', index=False,
                      columns=['Interactor1', 'EdgeType', 'Interactor2', 'Weight'], header=False)
 
@@ -185,9 +187,9 @@ class MEO(PRM):
         # Columns Source Type Target Oriented Weight
         df = raw_pathway_df(raw_pathway_file, sep='\t', header=0)
         if not df.empty:
-            # Replace ꧁SEP꧂ with _
-            df['Source'] = df['Source'].str.replace('꧁SEP꧂', '_')
-            df['Target'] = df['Target'].str.replace('꧁SEP꧂', '_')
+            # Replace underscore_replacement with _
+            df['Source'] = df['Source'].str.replace(underscore_replacement, '_')
+            df['Target'] = df['Target'].str.replace(underscore_replacement, '_')
             # Keep only edges that were assigned an orientation (direction)
             df = df.loc[df['Oriented']]
             # TODO what should be the edge rank?
