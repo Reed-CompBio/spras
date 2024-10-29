@@ -146,7 +146,6 @@ def pca(dataframe: pd.DataFrame, output_png: str, output_var: str, output_coord:
     scaler.fit(X)  # calc mean and standard deviation
     X_scaled = scaler.transform(X)
 
-    # TODO: add in centroid code from other branch
 
     # choosing the PCA
     pca_instance = PCA(n_components=components)
@@ -154,21 +153,34 @@ def pca(dataframe: pd.DataFrame, output_png: str, output_var: str, output_coord:
     X_pca = pca_instance.transform(X_scaled)
     variance = pca_instance.explained_variance_ratio_ * 100
 
+    # TODO: add in centroid code from other branch
+    # calculating the centroid
+    centroid = np.mean(X_pca, axis=0) # mean of each principal component across all samples
+
     # making the plot
     label_color_map = create_palette(column_names)
     plt.figure(figsize=(10, 7))
-    sns.scatterplot(x=X_pca[:, 0], y=X_pca[:, 1], s=70, hue=column_names, legend=True, palette=label_color_map)
+    sns.scatterplot(x=X_pca[:, 0], y=X_pca[:, 1], s=70, hue=column_names, palette=label_color_map)
+    plt.scatter(centroid[0], centroid[1], color='red', marker='X', s=100, label='Centroid')
     plt.title("PCA")
+    plt.legend()
     plt.xlabel(f"PC1 ({variance[0]:.1f}% variance)")
     plt.ylabel(f"PC2 ({variance[1]:.1f}% variance)")
 
     # saving the coordinates of each algorithm
+    # make_required_dirs(output_coord)
+    # coordinates_df = pd.DataFrame(X_pca, columns=['PC' + str(i) for i in range(1, components+1)])
+    # coordinates_df.insert(0, 'algorithm', columns.tolist())
+    # coordinates_df.to_csv(output_coord, sep='\t', index=False)
+
+    # saving the coordinates of each algorithm
     make_required_dirs(output_coord)
     coordinates_df = pd.DataFrame(X_pca, columns=['PC' + str(i) for i in range(1, components+1)])
-    coordinates_df.insert(0, 'algorithm', columns.tolist()) # update the algortihms to somehting else (datapoints labels?)
+    coordinates_df.insert(0, 'datapoint_labels', columns.tolist())
+    centroid_row = ['centroid'] + centroid.tolist() # TODO: do we want a seperate file for the centroid, or add it to the end of the coordinates_df df as a new datapoint
+    coordinates_df.loc[len(coordinates_df)] = centroid_row
     coordinates_df.to_csv(output_coord, sep='\t', index=False)
 
-    # TODO: do we want a seperate file for the centroid, or add it to the end of the coordinates_df df as a new datapoint
 
     # saving the principal components
     make_required_dirs(output_var)

@@ -4,7 +4,7 @@ from pathlib import Path
 from typing import Dict, Iterable
 
 import pandas as pd
-from sklearn.metrics import precision_score
+from sklearn.metrics import precision_score, recall_score
 
 
 class Evaluation:
@@ -71,11 +71,11 @@ class Evaluation:
 
         # TODO: later iteration - chose between node and edge file, or allow both
 
-    @staticmethod # TODO update to do precision and recall in the same function for the nodes
-    def precision(file_paths: Iterable[Path], node_table: pd.DataFrame, output_file: str):
+    @staticmethod
+    def precision_and_recall(file_paths: Iterable[Path], node_table: pd.DataFrame, output_file: str):
         """
         Takes in file paths for a specific dataset and an associated gold standard node table.
-        Calculates precision for each pathway file
+        Calculates precision and recall for each pathway file
         Returns output back to output_file
         @param file_paths: file paths of pathway reconstruction algorithm outputs
         @param node_table: the gold standard nodes
@@ -93,14 +93,25 @@ class Evaluation:
 
             # default to 0.0 if there is a divide by 0 error
             precision = precision_score(y_true_binary, y_pred_binary, zero_division=0.0)
-
-            results.append({"Pathway": file, "Precision": precision})
+            recall = recall_score(y_true_binary, y_pred_binary, zero_division=0.0)
+            results.append({"Pathway": file, "Precision": precision, "Recall": recall})
 
         precision_df = pd.DataFrame(results)
         precision_df.to_csv(output_file, sep="\t", index=False)
 
+        # TODO make "PR" curves from the precision_and_recall file
+
+    def edge_frequency_nodes(ensemble_file: str, node_table:pd.DataFrame, output_file: str, output_png: str):
+        None
+        # create one per ensemble file 
+    
+    def pr_curves ():
+        None
+
     # TODO make PR curves for the nodes from ensembled files outputs
     # TODO make the edge frequency node ensembles 
 
+    def pca_chosen_pathway():
+        None
     # TODO PCA chosen pathway, will need to use precision and recall code for the nodes of the chosen pathway
     

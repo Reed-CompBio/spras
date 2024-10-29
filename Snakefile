@@ -373,18 +373,19 @@ def get_dataset_label(wildcards):
     return dataset
 
 # Run evaluation code for a specific dataset's pathway outputs against its paired gold standard
-rule evaluation:
+rule evaluation: # update to be per algorithm and for all algortihms
     input: 
         gold_standard_file = get_gold_standard_pickle_file,
         pathways = expand('{out_dir}{sep}{dataset_label}-{algorithm_params}{sep}pathway.txt', out_dir=out_dir, sep=SEP, algorithm_params=algorithms_with_params, dataset_label=get_dataset_label),
     output: eval_file = SEP.join([out_dir, "{dataset_gold_standard_pairs}-evaluation.txt"])
     run:
         node_table = Evaluation.from_file(input.gold_standard_file).node_table
-        Evaluation.precision(input.pathways, node_table, output.eval_file)
+        Evaluation.precision_and_recall(input.pathways, node_table, output.eval_file)
         # add recall
         # Run "PR" curves for output pathays precision and recall 
         # Run PR curves for ensemble files only 
         # Run PCA "tuning" idea
+        # - will either need to read file from ml_analysis or rerun pca rule
 
 # parameter tuning section? 
 # does there need to be a seperate section for parameter tuning if evaluation will deal with it
