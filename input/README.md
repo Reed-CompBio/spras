@@ -11,9 +11,9 @@ All other columns specify additional node attributes such as prizes.
 Any nodes that are listed in a node file but are not present in one or more edges in the edge file will be removed.
 For example:
 ```
-NODEID	prize	sources	targets	active
-A	1.0		True	True
-B	3.3	True		True
+NODEID	prize	sources	targets	dummy
+A	1.0		True	True    True
+B	3.3	True	True	
 C	2.5		True	True
 D	1.9	True	True	True
 ```
@@ -25,23 +25,6 @@ There are 4 dummy mode possibilities:
  3. others -> connect the dummy node to all nodes that are not terminal nodes i.e. nodes w/o prizes
  4. file -> custom nodes - connect the dummy node to a specific list of nodes provided in a file
 To support the `file` dummy node logic as part of OmicsIntegrator1, you can either add a seperate `dummy.txt` file (and add this to the `node_files` argument in `config.yaml `) or add a `dummy` column node attribute to a file that contains `NODEID`, `prize`, `source`, etc. 
-
-If adding a seperate `dummy.txt` file:
-Make a file with the name `dummy.txt` and list the dummy nodes, each seperated by a new line. Example:
-```
-A
-B
-C
-```
-
-If adding the `dummy` column node attribute, then add the dummy column and specify boolean values for the `dummy` attribute:
-```
-NODEID	prize	sources	targets	dummy
-A	1.0		True	True    True
-B	3.3	True	True	
-C	2.5		True	True
-D	1.9	True	True	True
-```
 
 A secondary format provides only a list of node identifiers and uses the filename as the node attribute, as in the example `sources.txt`.
 This format may be deprecated.

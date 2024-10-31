@@ -135,10 +135,11 @@ class OmicsIntegrator1(PRM):
         #   4. file -> custom nodes - connect the dummy node to a specific list of nodes provided in a file
 
         # add dummy node file to the volume if dummy_mode is not None and it is 'file'
-        if dummy_mode is not None and dummy_mode == 'file':
-                # needs to use dummy node file that was put in the dataset
-                bind_path, dummy_file = prepare_volume(dummy_nodes, work_dir)
-                volumes.append(bind_path)
+        if dummy_mode == 'file':
+            if dummy_nodes is None:
+                raise ValueError("dummy_nodes file is required when dummy_mode is set to 'file'")
+            bind_path, dummy_file = prepare_volume(dummy_nodes, work_dir)
+            volumes.append(bind_path)
 
         out_dir = Path(output_file).parent
         # Omics Integrator 1 requires that the output directory exist
