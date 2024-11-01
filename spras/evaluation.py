@@ -4,7 +4,9 @@ from pathlib import Path
 from typing import Dict, Iterable
 
 import pandas as pd
-from sklearn.metrics import precision_score, recall_score
+from sklearn.metrics import precision_score, recall_score, precision_recall_curve, average_precision_score
+import matplotlib.pyplot as plt
+import numpy as np
 
 
 class Evaluation:
@@ -72,7 +74,7 @@ class Evaluation:
         # TODO: later iteration - chose between node and edge file, or allow both
 
     @staticmethod
-    def precision_and_recall(file_paths: Iterable[Path], node_table: pd.DataFrame, output_file: str):
+    def precision_and_recall(file_paths: Iterable[Path], node_table: pd.DataFrame, output_file: str, output_png: str ):
         """
         Takes in file paths for a specific dataset and an associated gold standard node table.
         Calculates precision and recall for each pathway file
@@ -96,22 +98,100 @@ class Evaluation:
             recall = recall_score(y_true_binary, y_pred_binary, zero_division=0.0)
             results.append({"Pathway": file, "Precision": precision, "Recall": recall})
 
-        precision_df = pd.DataFrame(results)
-        precision_df.to_csv(output_file, sep="\t", index=False)
+        pr_df = pd.DataFrame(results)
+        pr_df.sort_values(by=["Recall", "Pathway"], axis=0, ascending=True, inplace=True)
+        pr_df.to_csv(output_file, sep="\t", index=False)
 
         # TODO make "PR" curves from the precision_and_recall file
-
-    def edge_frequency_nodes(ensemble_file: str, node_table:pd.DataFrame, output_file: str, output_png: str):
-        None
-        # create one per ensemble file 
-    
-    def pr_curves ():
-        None
+        plt.figure(figsize=(8, 6))
+        plt.plot(pr_df["Recall"], pr_df["Precision"], marker='o', linestyle='-', color='b', label="PR")
+        plt.xlabel("Recall")
+        plt.ylabel("Precision")
+        plt.title(f"Precision and Recall Plot")
+        plt.legend()
+        plt.grid(True)
+        plt.savefig(output_png)
 
     # TODO make PR curves for the nodes from ensembled files outputs
     # TODO make the edge frequency node ensembles 
+    def select_max_freq_and_node(row):
+        max_freq = 0
+        node = ""
+        if pd.isna(row['Node2']) and pd.isna(row['Freq2']):
+            max_freq = row['Freq1']
+            node = row['Node1']
+        elif pd.isna(row['Node1']) and pd.isna(row['Freq1']):
+            max_freq = row['Freq2']
+            node = row['Node2']
+        else:
+            max_freq = max(row['Freq1'], row['Freq2'])
+            node = row['Node1']
+        return node, max_freq
 
-    def pca_chosen_pathway():
-        None
+    def edge_frequency_node_ensemble(ensemble_file: str, node_table:pd.DataFrame):
+        
+        print(node_table)
+        print(type(ensemble_file))
+        ensemble_df = pd.read_table(ensemble_file, sep="\t", header=0)
+        print(ensemble_df)
+        if not ensemble_df.empty:
+            node1_freq = ensemble_df.drop(columns = ['Node2', 'Direction'])
+            node2_freq = ensemble_df.drop(columns = ['Node1', 'Direction'])
+            max_node1_freq = node1_freq.groupby(['Node1']).max().reset_index()
+            max_node1_freq.rename(columns = {'Frequency': 'Freq1'}, inplace = True)
+            max_node2_freq = node2_freq.groupby(['Node2']).max().reset_index()
+            max_node2_freq.rename(columns = {'Frequency': 'Freq2'}, inplace = True)
+            node_df_merged = max_node1_freq.merge(max_node2_freq, left_on='Node1', right_on='Node2', how='outer')
+            node_df_merged[['Node', 'max_freq']] = node_df_merged.apply(Evaluation.select_max_freq_and_node, axis=1, result_type='expand')
+            node_df_merged.drop(columns = ['Node1', 'Node2', 'Freq1', 'Freq2'], inplace = True)
+            node_df_merged.sort_values('max_freq', ascending= False, inplace = True)
+            print(node_df_merged)
+            return node_df_merged
+        else:
+            return pd.DataFrame(columns = ['Node', 'max_freq'])
+        
+
+    def pr_curves_ensemble_nodes(node_ensemble:pd.DataFrame, node_table:pd.DataFrame, output_png: str):
+       
+        gold_standard_nodes = set(node_table['NODEID'])
+
+        if not node_ensemble.empty:
+            y_true = [1 if node in gold_standard_nodes else 0 for node in node_ensemble['Node']]
+            y_scores = node_ensemble['max_freq'].tolist()
+            precision, recall, thresholds = precision_recall_curve(y_true, y_scores)
+            auc_precision_recall = average_precision_score(y_true, y_scores)
+
+            plt.figure()
+            plt.plot(recall, precision, marker='o', label='Precision-Recall curve')
+            plt.axhline(y=auc_precision_recall, color='r', linestyle='--', label=f'Avg Precision: {auc_precision_recall:.4f}')
+            plt.xlabel('Recall')
+            plt.ylabel('Precision')
+            plt.title('Precision-Recall Curve')
+            plt.legend()
+            plt.grid(True)
+            plt.savefig(output_png)
+        else: 
+            plt.figure()
+            plt.savefig(output_png)
+
     # TODO PCA chosen pathway, will need to use precision and recall code for the nodes of the chosen pathway
-    
+    def pca_chosen_pathway(coordinates_file: str, output_dir:str):
+
+        print(output_dir)
+        coord_df = pd.read_csv(coordinates_file, delimiter="\t", header=0)
+
+        centroid_row = coord_df[coord_df['datapoint_labels'] == 'centroid']
+        centroid = centroid_row.iloc[0, 1:].tolist()
+
+        coord_df = coord_df[coord_df['datapoint_labels'] != 'centroid']
+
+        pc_columns = [col for col in coord_df.columns if col.startswith('PC')]
+        coord_df['Distance To Centroid'] = np.sqrt(sum((coord_df[pc] - centroid[i]) ** 2 for i, pc in enumerate(pc_columns)))
+        print(coord_df.sort_values(by='Distance To Centroid'))
+        closest_to_centroid = coord_df.sort_values(by='Distance To Centroid').iloc[0]
+        print(closest_to_centroid)
+        rep_pathway = [os.path.join(output_dir, f"{closest_to_centroid['datapoint_labels']}", "pathway.txt")]
+
+        print(rep_pathway)
+
+        return rep_pathway
