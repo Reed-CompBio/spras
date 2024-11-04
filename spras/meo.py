@@ -11,6 +11,8 @@ from spras.util import add_rank_column, raw_pathway_df
 __all__ = ['MEO', 'write_properties']
 
 # replaces all underscores in the node names with unicode seperator
+# MEO keeps only the substring up to the first underscore when parsing node names
+# https://github.com/agitter/meo/blob/1fe57e8ff3952c494e2b14dfdc563a84596e2fcd/src/alg/Vertex.java#L56-L71
 underscore_replacement = '꧁SEP꧂'
 
 # Only supports the Random orientation algorithm
