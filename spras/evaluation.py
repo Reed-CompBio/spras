@@ -3,10 +3,15 @@ import pickle as pkl
 from pathlib import Path
 from typing import Dict, Iterable
 
-import pandas as pd
-from sklearn.metrics import precision_score, recall_score, precision_recall_curve, average_precision_score
 import matplotlib.pyplot as plt
 import numpy as np
+import pandas as pd
+from sklearn.metrics import (
+    average_precision_score,
+    precision_recall_curve,
+    precision_score,
+    recall_score,
+)
 
 
 class Evaluation:
@@ -81,7 +86,8 @@ class Evaluation:
         Returns output back to output_file
         @param file_paths: file paths of pathway reconstruction algorithm outputs
         @param node_table: the gold standard nodes
-        @param output_file: the filename to save the precision of each pathway
+        @param output_file: the filename to save the precision and recall of each pathway
+        @param output_png: the filename to plot the precision and recall of each pathway (not a PRC)
         """
         y_true = set(node_table['NODEID'])
         results = []
@@ -102,7 +108,6 @@ class Evaluation:
         pr_df.sort_values(by=["Recall", "Pathway"], axis=0, ascending=True, inplace=True)
         pr_df.to_csv(output_file, sep="\t", index=False)
 
-        # TODO make "PR" curves from the precision_and_recall file
         plt.figure(figsize=(8, 6))
         plt.plot(pr_df["Recall"], pr_df["Precision"], marker='o', linestyle='-', color='b', label="PR")
         plt.xlabel("Recall")
@@ -111,10 +116,13 @@ class Evaluation:
         plt.legend()
         plt.grid(True)
         plt.savefig(output_png)
+        # TODO: what to do when this is empty
 
-    # TODO make PR curves for the nodes from ensembled files outputs
-    # TODO make the edge frequency node ensembles 
-    def select_max_freq_and_node(row):
+    def select_max_freq_and_node(row): # TODO: what (:type) would this row be
+        """
+        Selects the node and frequency with the highest frequency value from two potential nodes in a row.
+        Handles cases where one of the nodes or frequencies may be missing and returns the node associated with the maximum frequency.
+        """
         max_freq = 0
         node = ""
         if pd.isna(row['Node2']) and pd.isna(row['Freq2']):
@@ -128,31 +136,42 @@ class Evaluation:
             node = row['Node1']
         return node, max_freq
 
-    def edge_frequency_node_ensemble(ensemble_file: str, node_table:pd.DataFrame):
-        
-        print(node_table)
-        print(type(ensemble_file))
+    def edge_frequency_node_ensemble(ensemble_file: str):
+        """
+        Processes an ensemble of edge frequencies to identify the highest frequency associated with each node
+        Reads ensemble_file, separates frequencies by node, and then calculates the maximum frequency for each node.
+        Returns a DataFrame of nodes with their respective maximum frequencies, or an empty DataFrame if ensemble_file is empty.
+        @param ensemble_file: the pre-computed node_ensemble
+        """
         ensemble_df = pd.read_table(ensemble_file, sep="\t", header=0)
-        print(ensemble_df)
+
         if not ensemble_df.empty:
             node1_freq = ensemble_df.drop(columns = ['Node2', 'Direction'])
             node2_freq = ensemble_df.drop(columns = ['Node1', 'Direction'])
+
             max_node1_freq = node1_freq.groupby(['Node1']).max().reset_index()
             max_node1_freq.rename(columns = {'Frequency': 'Freq1'}, inplace = True)
             max_node2_freq = node2_freq.groupby(['Node2']).max().reset_index()
             max_node2_freq.rename(columns = {'Frequency': 'Freq2'}, inplace = True)
-            node_df_merged = max_node1_freq.merge(max_node2_freq, left_on='Node1', right_on='Node2', how='outer')
-            node_df_merged[['Node', 'max_freq']] = node_df_merged.apply(Evaluation.select_max_freq_and_node, axis=1, result_type='expand')
-            node_df_merged.drop(columns = ['Node1', 'Node2', 'Freq1', 'Freq2'], inplace = True)
-            node_df_merged.sort_values('max_freq', ascending= False, inplace = True)
-            print(node_df_merged)
-            return node_df_merged
-        else:
-            return pd.DataFrame(columns = ['Node', 'max_freq'])
-        
 
-    def pr_curves_ensemble_nodes(node_ensemble:pd.DataFrame, node_table:pd.DataFrame, output_png: str):
-       
+            node_ensemble = max_node1_freq.merge(max_node2_freq, left_on='Node1', right_on='Node2', how='outer')
+            node_ensemble[['Node', 'max_freq']] = node_ensemble.apply(Evaluation.select_max_freq_and_node, axis=1, result_type='expand')
+            node_ensemble.drop(columns = ['Node1', 'Node2', 'Freq1', 'Freq2'], inplace = True)
+            node_ensemble.sort_values('max_freq', ascending= False, inplace = True)
+            return node_ensemble
+        else:
+            # TODO: figure out how to deal with empty ensemble files
+            return pd.DataFrame(columns = ['Node', 'max_freq'])
+
+    def PRC_node_ensemble(node_ensemble:pd.DataFrame, node_table:pd.DataFrame, output_png: str):
+        """
+        Takes in an node ensemble for specific dataset or specific algorithm in a dataset, and an associated gold standard node table.
+        Plots a precision and recall curve for the node ensemble against its associated gold standard node table
+        Returns output back to output_png
+        @param node_ensemble: the pre-computed node_ensemble
+        @param node_table: the gold standard nodes
+        @param output_file: the filename to save the precision and recall curves
+        """
         gold_standard_nodes = set(node_table['NODEID'])
 
         if not node_ensemble.empty:
@@ -170,28 +189,30 @@ class Evaluation:
             plt.legend()
             plt.grid(True)
             plt.savefig(output_png)
-        else: 
+        else:
+            # TODO figure out how to deal with empty ensemble files (still will have the header)
             plt.figure()
+            plt.text(0.5, 0.5, "empty ensemble file", ha='center', va='center', fontsize=12, color='red')
+            plt.axis('off')
             plt.savefig(output_png)
 
-    # TODO PCA chosen pathway, will need to use precision and recall code for the nodes of the chosen pathway
     def pca_chosen_pathway(coordinates_file: str, output_dir:str):
-
-        print(output_dir)
+        """
+        Identifies the pathway closest to a specified centroid based on PCA coordinates
+        Calculates the Euclidean distance from each data point to the centroid, then selects the closest pathway.
+        Returns the file path for the representative pathway associated with the closest data point.
+        @param coordinates_file: the pca coordinates file for a dataset or specific algorithm in a datset
+        @param output_dir: the main reconstruction directory
+        """
         coord_df = pd.read_csv(coordinates_file, delimiter="\t", header=0)
 
         centroid_row = coord_df[coord_df['datapoint_labels'] == 'centroid']
         centroid = centroid_row.iloc[0, 1:].tolist()
-
         coord_df = coord_df[coord_df['datapoint_labels'] != 'centroid']
 
         pc_columns = [col for col in coord_df.columns if col.startswith('PC')]
         coord_df['Distance To Centroid'] = np.sqrt(sum((coord_df[pc] - centroid[i]) ** 2 for i, pc in enumerate(pc_columns)))
-        print(coord_df.sort_values(by='Distance To Centroid'))
         closest_to_centroid = coord_df.sort_values(by='Distance To Centroid').iloc[0]
-        print(closest_to_centroid)
         rep_pathway = [os.path.join(output_dir, f"{closest_to_centroid['datapoint_labels']}", "pathway.txt")]
-
-        print(rep_pathway)
 
         return rep_pathway

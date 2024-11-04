@@ -233,6 +233,7 @@ class Config:
 
         self.analysis_params = raw_config["analysis"] if "analysis" in raw_config else {}
         self.ml_params = self.analysis_params["ml"] if "ml" in self.analysis_params else {}
+        self.evaluation_params = self.analysis_params["evaluation"] if "evaluation" in self.analysis_params else {}
 
         self.pca_params = {}
         if "components" in self.ml_params:
@@ -260,3 +261,8 @@ class Config:
             self.analysis_include_ml_aggregate_algo = raw_config["analysis"]["ml"]["aggregate_per_algorithm"]
         else:
             self.analysis_include_ml_aggregate_algo = False
+
+        if 'aggregate_per_algorithm' in self.evaluation_params and self.analysis_include_evaluation:
+            self.analysis_include_evaluation_aggregate_algo = raw_config["analysis"]["evaluation"]["aggregate_per_algorithm"]
+        else:
+            self.analysis_include_evaluation_aggregate_algo = False

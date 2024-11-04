@@ -173,9 +173,8 @@ analysis:
         # 'euclidean', 'manhattan', 'cosine'
         metric: 'euclidean'
       evaluation:
+        # evaluation per dataset-goldstandard pair
         include: true
-        # update to decouple the evaluation parts? 
-        # - ensemble vs all pathways vs pca chosen pathway
-        # pr curves from ensemble files 
-        # "pr" curves from all pathways
-        # p and r from pca chosen pathway
+        # adds evaluation per algorithm per dataset-goldstandard pair
+        aggregate_per_algorithm: true
+
