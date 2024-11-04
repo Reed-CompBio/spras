@@ -173,4 +173,8 @@ analysis:
         # 'euclidean', 'manhattan', 'cosine'
         metric: 'euclidean'
       evaluation:
+        # evaluation per dataset-goldstandard pair
         include: true
+        # adds evaluation per algorithm per dataset-goldstandard pair
+        aggregate_per_algorithm: true
+
