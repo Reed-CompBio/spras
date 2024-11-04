@@ -396,7 +396,6 @@ rule evaluation:
         pr_file = SEP.join([out_dir, '{dataset_gold_standard_pairs}-eval', "precision-and-recall.txt"]),
         pr_curve_png = SEP.join([out_dir, '{dataset_gold_standard_pairs}-eval', 'pr-curves-ensemble-nodes.png']),
         pr_plot_png = SEP.join([out_dir, '{dataset_gold_standard_pairs}-eval', 'precision-and-recall-plot.png']),
-        # add pca png and file that is needed by Evaluation.precision_and_recall
         pca_chosen_pr_file = SEP.join([out_dir, '{dataset_gold_standard_pairs}-eval', "precision-and-recall-pca-chosen.txt"]),
         pca_chosen_pr_png = SEP.join([out_dir, '{dataset_gold_standard_pairs}-eval', "precision-and-recall-pca-chosen.png"]),
     run:
@@ -430,7 +429,7 @@ rule evaluation_per_algo_pathways:
         gold_standard_file = get_gold_standard_pickle_file,
         pathways =  collect_pathways_per_algo_per_dataset,
     output: 
-        pr_file = SEP.join([out_dir, '{dataset_gold_standard_pairs}-eval', "{algorithm}-precision-and-recall.txt"]), # these all need to be updated to use the algortihm in it
+        pr_file = SEP.join([out_dir, '{dataset_gold_standard_pairs}-eval', "{algorithm}-precision-and-recall.txt"]),
         pr_plot_png = SEP.join([out_dir, '{dataset_gold_standard_pairs}-eval', '{algorithm}-precision-and-recall-plot.png']),
     run:
         node_table = Evaluation.from_file(input.gold_standard_file).node_table
