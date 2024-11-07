@@ -1,0 +1,69 @@
+hash_length: 7
+container_framework: docker
+unpack_singularity: false
+container_registry:
+   base_url: docker.io
+   owner: reedcompbio
+
+algorithms:
+      - name: "pathlinker"
+        params:
+              include: true
+              run1:
+                  k: range(100,201,100)
+
+      - name: "omicsintegrator1"
+        params:
+              include: true
+              run1:
+                  b: [5, 6]
+                  w: np.linspace(0,5,2)
+                  d: [10]
+
+      - name: "omicsintegrator2"
+        params:
+              include: true
+              run1:
+                  b: [4]
+                  g: [0]
+              run2:
+                  b: [2]
+                  g: [3]
+
+      - name: "meo"
+        params:
+              include: true
+              run1:
+                  max_path_length: [3]
+                  local_search: ["Yes"]
+                  rand_restarts: [10]
+
+      - name: "mincostflow"
+        params:
+              include: true
+              run1:
+                  flow: [1] # The flow must be an int
+                  capacity: [1]
+
+      - name: "allpairs"
+        params:
+              include: true
+
+      - name: "domino"
+        params:
+              include: true
+              run1:
+                  slice_threshold: [0.3]
+                  module_threshold: [0.05]
+
+datasets:
+    -
+      # Labels can only contain letters, numbers, or underscores
+      label: test_data
+      node_files: ["node-prizes.txt", "sources.txt", "targets.txt"]
+      # DataLoader.py can currently only load a single edge file, which is the primary network
+      edge_files: ["network.txt"]
+      # Placeholder
+      other_files: []
+      # Relative path from the spras directory
+      data_dir: "test/generate-inputs/inputs"
