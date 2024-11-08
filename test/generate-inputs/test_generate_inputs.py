@@ -17,7 +17,7 @@ algo_exp_file = {
     'domino': 'network',
     'pathlinker': 'network',
     'allpairs': 'network'
-    }
+}
 
 
 class TestGenerateInputs:
@@ -29,7 +29,7 @@ class TestGenerateInputs:
         Path(OUTDIR).mkdir(parents=True, exist_ok=True)
 
     def test_prepare_inputs_networks(self):
-        config_loc = os.path.join("test","generate-inputs", "inputs", "test_config.yaml")
+        config_loc = os.path.join("test", "generate-inputs", "inputs", "test_config.yaml")
 
         with open(config_loc) as config_file:
             config = yaml.load(config_file, Loader=yaml.FullLoader)

@@ -15,6 +15,7 @@ __all__ = ['MEO', 'write_properties']
 # https://github.com/agitter/meo/blob/1fe57e8ff3952c494e2b14dfdc563a84596e2fcd/src/alg/Vertex.java#L56-L71
 underscore_replacement = '꧁SEP꧂'
 
+
 # Only supports the Random orientation algorithm
 # Does not support MINSAT or MAXCSP
 # TODO add parameter validation
@@ -67,6 +68,8 @@ Interactor1   pp/pd   Interactor2   Weight
 - MEO tracks the directionality of the original edges, but all of its output edges are directed.
 - To remain accurate to MEO's design we will also treat the output graph's as directed
 """
+
+
 class MEO(PRM):
     required_inputs = ['sources', 'targets', 'edges']
 
@@ -106,7 +109,6 @@ class MEO(PRM):
         edges['Interactor2'] = edges['Interactor2'].str.replace('_', underscore_replacement)
         edges.to_csv(filename_map['edges'], sep='\t', index=False,
                      columns=['Interactor1', 'EdgeType', 'Interactor2', 'Weight'], header=False)
-
 
     # TODO add parameter validation
     # TODO document required arguments
