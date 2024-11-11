@@ -1,3 +1,4 @@
+import json
 import os
 import sys
 from pathlib import Path
@@ -5,7 +6,7 @@ from typing import Iterable
 
 import networkx as nx
 import pandas as pd
-import json
+
 
 def summarize_networks(file_paths: Iterable[Path], node_table: pd.DataFrame, algo_params) -> pd.DataFrame:
     """
@@ -27,7 +28,7 @@ def summarize_networks(file_paths: Iterable[Path], node_table: pd.DataFrame, alg
         # If the property contains numeric data, save the nodes with property values that are not NA and > 0
         # If the property contains boolean data, save the nodes with property values that are True
         nodes_by_col.append(set(node_table.loc[node_table[col] > 0, "NODEID"]))
-    
+
     print (node_table.columns) #debug statement
 
     # Initialize list to store network summary data
@@ -49,26 +50,26 @@ def summarize_networks(file_paths: Iterable[Path], node_table: pd.DataFrame, alg
 
         # Initialize list to store current network information
         cur_nw_info = [nw_name, number_nodes, number_edges, ncc]
-        
+
         # Iterate through each node property and save the intersection with the current network
         for node_list in nodes_by_col:
             num_nodes = len(set(nw).intersection(node_list))
             cur_nw_info.append(num_nodes)
-        
+
         # String split name to access algorithm and hashcode from filepath
         # Name of filepath follows format "output/data#-algo-params-hashcode/pathway.txt"
         # algorithm parameters have format { algo : { hashcode : { parameter combos } } }
 
         filepath = nw_name.split("/")
         filename = filepath[1].split("-")
-        algo = filename[1] 
+        algo = filename[1]
         hashcode = filename[3]
 
         param_combo = algo_params[algo][hashcode]
         params = json.dumps(param_combo)
         params = params.replace("\"", "") #removes extra double quotes from string
         cur_nw_info.append(params)
-        
+
         # Prepare column names
         col_names = ["Name", "Number of nodes", "Number of undirected edges", "Number of connected components"]
         col_names.extend(nodes_by_col_labs)
