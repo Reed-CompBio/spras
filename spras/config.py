@@ -80,11 +80,13 @@ class Config:
         # Only includes algorithms that are set to be run with 'include: true'.
         self.algorithm_params = None
         # Deprecated. Previously a dict mapping algorithm names to a Boolean tracking whether they used directed graphs.
-        self.algorithm_directed  = None
+        self.algorithm_directed = None
         # A dict with the analysis settings
         self.analysis_params = None
         # A dict with the ML settings
         self.ml_params = None
+        # A Boolean specifying whether to run ML analysis for individual algorithms
+        self.analysis_include_ml_aggregate_algo = None
         # A dict with the PCA settings
         self.pca_params = None
         # A dict with the hierarchical clustering settings
@@ -254,7 +256,7 @@ class Config:
             raise ValueError("Evaluation analysis cannot run as gold standard data not provided. "
                              "Please set evaluation include to false or provide gold standard data.")
 
-        if 'aggregate_per_algorithm' not in self.ml_params:
-            self.analysis_include_ml_aggregate_algo = False
-        else:
+        if 'aggregate_per_algorithm' in self.ml_params and self.analysis_include_ml:
             self.analysis_include_ml_aggregate_algo = raw_config["analysis"]["ml"]["aggregate_per_algorithm"]
+        else:
+            self.analysis_include_ml_aggregate_algo = False
