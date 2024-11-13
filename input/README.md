@@ -18,14 +18,6 @@ C	2.5		True	True
 D	1.9	True	True	True
 ```
 
-##### OmicsIntegrator1: Dummy Nodes
-There are 4 dummy mode possibilities:
- 1. terminals -> connect the dummy node to all nodes that have been assigned prizes 
- 2. all ->  connect the dummy node to all nodes in the interactome i.e. full set of nodes in graph
- 3. others -> connect the dummy node to all nodes that are not terminal nodes i.e. nodes w/o prizes
- 4. file -> custom nodes - connect the dummy node to a specific list of nodes provided in a file
-To support the `file` dummy node logic as part of OmicsIntegrator1, you can either add a seperate `dummy.txt` file (and add this to the `node_files` argument in `config.yaml `) or add a `dummy` column node attribute to a file that contains `NODEID`, `prize`, `source`, etc. 
-
 A secondary format provides only a list of node identifiers and uses the filename as the node attribute, as in the example `sources.txt`.
 This format may be deprecated.
 

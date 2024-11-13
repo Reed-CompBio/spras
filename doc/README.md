@@ -39,6 +39,17 @@ PathLinker takes as input (1) a weighted, directed PPI network, (2) two sets of 
 - Ritz et al. Pathways on demand: automated reconstruction of human signaling networks.  _NPJ Systems Biology and Applications._ 2016. [doi:10.1038/npjsba.2016.2](https://doi.org/10.1038/npjsba.2016.2)
 - Youssef, Law, and Ritz. Integrating protein localization with automated signaling pathway reconstruction. _BMC Bioinformatics._ 2019. [doi:10.1186/s12859-019-3077-x](https://doi.org/10.1186/s12859-019-3077-x)
 
+## OmicsIntegrator1
+
+One of the parameter options for OmicsIntegraor1 is `dummy-mode`. 
+There are 4 dummy mode possibilities:
+ 1. terminals -> connect the dummy node to all nodes that have been assigned prizes 
+ 2. all ->  connect the dummy node to all nodes in the interactome i.e. full set of nodes in graph
+ 3. others -> connect the dummy node to all nodes that are not terminal nodes i.e. nodes w/o prizes
+ 4. file -> custom nodes - connect the dummy node to a specific list of nodes provided in a file
+To support the `file` dummy node logic as part of OmicsIntegrator1, you can either add a seperate `dummy.txt` file (and add this to the `node_files` argument in `config.yaml `) or add a `dummy` column node attribute to a file that contains `NODEID`, `prize`, `source`, etc. 
+
+
 ## Pathway Reconstruction Augmenter (PRAUG)
 
 **References:**
