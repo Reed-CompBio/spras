@@ -101,6 +101,10 @@ class Config:
         self.analysis_include_ml = None
         # A Boolean specifying whether to run the Evaluation analysis
         self.analysis_include_evaluation = None
+        # A Boolean specifying whether to run the ML per algorithm analysis
+        self.analysis_include_ml_aggregate_algo = None
+        # A Boolean specifying whether to run the Evaluation per algorithm aanalysis
+        self.analysis_include_evaluation_aggregate_algo = None
 
         _raw_config = copy.deepcopy(raw_config)
         self.process_config(_raw_config)
@@ -253,16 +257,26 @@ class Config:
         self.analysis_include_ml = raw_config["analysis"]["ml"]["include"]
         self.analysis_include_evaluation = raw_config["analysis"]["evaluation"]["include"]
 
-        if self.gold_standards == {} and self.analysis_include_evaluation:
-            raise ValueError("Evaluation analysis cannot run as gold standard data not provided. "
-                             "Please set evaluation include to false or provide gold standard data.")
-
+        # only run ml aggregate_per_algorithm if analysis_include_ml is set to true
         if 'aggregate_per_algorithm' in self.ml_params and self.analysis_include_ml:
             self.analysis_include_ml_aggregate_algo = raw_config["analysis"]["ml"]["aggregate_per_algorithm"]
         else:
             self.analysis_include_ml_aggregate_algo = False
 
+        if self.gold_standards == {} and self.analysis_include_evaluation:
+            raise ValueError("Evaluation analysis cannot run as gold standard data not provided. "
+                             "Please set evaluation include to false or provide gold standard data.")
+
+         # only run evaluation if ml is set to true
+        if not self.analysis_include_ml and self.analysis_include_evaluation:
+            self.analysis_include_evaluation = False
+
+        # only run evaluation aggregate_per_algorithm if analysis_include_ml is set to true
         if 'aggregate_per_algorithm' in self.evaluation_params and self.analysis_include_evaluation:
             self.analysis_include_evaluation_aggregate_algo = raw_config["analysis"]["evaluation"]["aggregate_per_algorithm"]
         else:
+            self.analysis_include_evaluation_aggregate_algo = False
+
+        # only run evaluation per algo if ml per algo is set to true
+        if not self.analysis_include_ml_aggregate_algo and self.analysis_include_evaluation_aggregate_algo:
             self.analysis_include_evaluation_aggregate_algo = False
