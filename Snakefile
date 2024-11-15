@@ -104,19 +104,17 @@ def make_final_input(wildcards):
         final_input.extend(expand('{out_dir}{sep}{dataset}-ml{sep}{algorithm}-ensemble-pathway.txt',out_dir=out_dir,sep=SEP,dataset=dataset_labels,algorithm=algorithms))
 
     if _config.config.analysis_include_evaluation:
-        final_input.extend(expand('{out_dir}{sep}{dataset_gold_standard_pair}-eval{sep}precision-and-recall.txt',out_dir=out_dir,sep=SEP,dataset_gold_standard_pair=dataset_gold_standard_pairs,algorithm_params=algorithms_with_params))
-        final_input.extend(expand('{out_dir}{sep}{dataset_gold_standard_pair}-eval{sep}pr-curves-ensemble-nodes.png',out_dir=out_dir,sep=SEP,dataset_gold_standard_pair=dataset_gold_standard_pairs,algorithm_params=algorithms_with_params))
-        final_input.extend(expand('{out_dir}{sep}{dataset_gold_standard_pair}-eval{sep}precision-and-recall-plot.png',out_dir=out_dir,sep=SEP,dataset_gold_standard_pair=dataset_gold_standard_pairs)) 
-        final_input.extend(expand('{out_dir}{sep}{dataset_gold_standard_pair}-eval{sep}precision-and-recall-pca-chosen.txt',out_dir=out_dir,sep=SEP,dataset_gold_standard_pair=dataset_gold_standard_pairs))
-        final_input.extend(expand('{out_dir}{sep}{dataset_gold_standard_pair}-eval{sep}precision-and-recall-pca-chosen.png',out_dir=out_dir,sep=SEP,dataset_gold_standard_pair=dataset_gold_standard_pairs))
-        
+        final_input.extend(expand('{out_dir}{sep}{dataset_gold_standard_pair}-eval{sep}precision-recall-per-pathway.txt',out_dir=out_dir,sep=SEP,dataset_gold_standard_pair=dataset_gold_standard_pairs,algorithm_params=algorithms_with_params))
+        final_input.extend(expand('{out_dir}{sep}{dataset_gold_standard_pair}-eval{sep}precision-recall-per-pathway.png',out_dir=out_dir,sep=SEP,dataset_gold_standard_pair=dataset_gold_standard_pairs)) 
+        final_input.extend(expand('{out_dir}{sep}{dataset_gold_standard_pair}-eval{sep}precision-recall-pca-chosen-pathway.txt',out_dir=out_dir,sep=SEP,dataset_gold_standard_pair=dataset_gold_standard_pairs))
+        final_input.extend(expand('{out_dir}{sep}{dataset_gold_standard_pair}-eval{sep}precision-recall-curve-ensemble-nodes.png',out_dir=out_dir,sep=SEP,dataset_gold_standard_pair=dataset_gold_standard_pairs,algorithm_params=algorithms_with_params))
+        # TODO: should we provide the node ensemble frequencies       
     if _config.config.analysis_include_evaluation_aggregate_algo:
-        final_input.extend(expand('{out_dir}{sep}{dataset_gold_standard_pair}-eval{sep}{algorithm}-precision-and-recall.txt',out_dir=out_dir,sep=SEP,dataset_gold_standard_pair=dataset_gold_standard_pairs,algorithm=algorithms))
-        final_input.extend(expand('{out_dir}{sep}{dataset_gold_standard_pair}-eval{sep}{algorithm}-precision-and-recall-plot.png',out_dir=out_dir,sep=SEP,dataset_gold_standard_pair=dataset_gold_standard_pairs,algorithm=algorithms))
-        final_input.extend(expand('{out_dir}{sep}{dataset_gold_standard_pair}-eval{sep}{algorithm}-precision-and-recall-pca-chosen.txt',out_dir=out_dir,sep=SEP,dataset_gold_standard_pair=dataset_gold_standard_pairs,algorithm=algorithms_mult_param_combos))
-        final_input.extend(expand('{out_dir}{sep}{dataset_gold_standard_pair}-eval{sep}{algorithm}-precision-and-recall-pca-chosen.png',out_dir=out_dir,sep=SEP,dataset_gold_standard_pair=dataset_gold_standard_pairs,algorithm=algorithms_mult_param_combos))
-        final_input.extend(expand('{out_dir}{sep}{dataset_gold_standard_pair}-eval{sep}{algorithm}-pr-curves-ensemble-nodes.png',out_dir=out_dir,sep=SEP,dataset_gold_standard_pair=dataset_gold_standard_pairs,algorithm=algorithms))
-
+        final_input.extend(expand('{out_dir}{sep}{dataset_gold_standard_pair}-eval{sep}{algorithm}-precision-recall-per-pathway.txt',out_dir=out_dir,sep=SEP,dataset_gold_standard_pair=dataset_gold_standard_pairs,algorithm=algorithms))
+        final_input.extend(expand('{out_dir}{sep}{dataset_gold_standard_pair}-eval{sep}{algorithm}-precision-recall-per-pathway.png',out_dir=out_dir,sep=SEP,dataset_gold_standard_pair=dataset_gold_standard_pairs,algorithm=algorithms))
+        final_input.extend(expand('{out_dir}{sep}{dataset_gold_standard_pair}-eval{sep}{algorithm}-precision-recall-pca-chosen-pathway.txt',out_dir=out_dir,sep=SEP,dataset_gold_standard_pair=dataset_gold_standard_pairs,algorithm=algorithms_mult_param_combos))
+        final_input.extend(expand('{out_dir}{sep}{dataset_gold_standard_pair}-eval{sep}{algorithm}-precision-recall-curve-ensemble-nodes.png',out_dir=out_dir,sep=SEP,dataset_gold_standard_pair=dataset_gold_standard_pairs,algorithm=algorithms))
+        # TODO: should we provide the node ensemble frequencies per algortihm
     if len(final_input) == 0:
         # No analysis added yet, so add reconstruction output files if they exist.
         # (if analysis is specified, these should be implicitly run).
@@ -384,27 +382,24 @@ def get_dataset_label(wildcards):
 
 
 # Run evaluation for all pathway outputs, ensemble.txt, and pca_coordinates.txt for a dataset against its paired gold standard
-# TODO: figure out why this works when all one rule, but the per algorithm doesn't work like that
 rule evaluation:
     input: 
         gold_standard_file = get_gold_standard_pickle_file,
         pathways = expand('{out_dir}{sep}{dataset_label}-{algorithm_params}{sep}pathway.txt', out_dir=out_dir, sep=SEP, algorithm_params=algorithms_with_params, dataset_label=get_dataset_label),
         ensemble_file=lambda wildcards: f"{out_dir}{SEP}{get_dataset_label(wildcards)}-ml{SEP}ensemble-pathway.txt",
-        # add PCA coordinates file 
         pca_coordinates_file =lambda wildcards: f"{out_dir}{SEP}{get_dataset_label(wildcards)}-ml{SEP}pca-coordinates.txt"
     output: 
-        pr_file = SEP.join([out_dir, '{dataset_gold_standard_pairs}-eval', "precision-and-recall.txt"]),
-        pr_curve_png = SEP.join([out_dir, '{dataset_gold_standard_pairs}-eval', 'pr-curves-ensemble-nodes.png']),
-        pr_plot_png = SEP.join([out_dir, '{dataset_gold_standard_pairs}-eval', 'precision-and-recall-plot.png']),
-        pca_chosen_pr_file = SEP.join([out_dir, '{dataset_gold_standard_pairs}-eval', "precision-and-recall-pca-chosen.txt"]),
-        pca_chosen_pr_png = SEP.join([out_dir, '{dataset_gold_standard_pairs}-eval', "precision-and-recall-pca-chosen.png"]),
+        pr_file = SEP.join([out_dir, '{dataset_gold_standard_pairs}-eval', "precision-recall-per-pathway.txt"]),
+        pr_png = SEP.join([out_dir, '{dataset_gold_standard_pairs}-eval', 'precision-recall-per-pathway.png']),
+        pr_curve_png = SEP.join([out_dir, '{dataset_gold_standard_pairs}-eval', 'precision-recall-curve-ensemble-nodes.png']),
+        pca_chosen_pr_file = SEP.join([out_dir, '{dataset_gold_standard_pairs}-eval', "precision-recall-pca-chosen-pathway.txt"]),
     run:
         node_table = Evaluation.from_file(input.gold_standard_file).node_table
-        Evaluation.precision_and_recall(input.pathways, node_table, output.pr_file, output.pr_plot_png)
+        Evaluation.precision_and_recall(input.pathways, node_table, output.pr_file, output.pr_png)
         node_ensemble = Evaluation.edge_frequency_node_ensemble(input.ensemble_file)
         Evaluation.PRC_node_ensemble(node_ensemble, node_table, output.pr_curve_png)
         pca_chosen_pathway = Evaluation.pca_chosen_pathway(input.pca_coordinates_file, out_dir)
-        Evaluation.precision_and_recall(pca_chosen_pathway, node_table, output.pca_chosen_pr_file, output.pca_chosen_pr_png)
+        Evaluation.precision_and_recall(pca_chosen_pathway, node_table, output.pca_chosen_pr_file)
 
 # Returns all pathways for a specific algorithm and dataset
 def collect_pathways_per_algo_per_dataset(wildcards):
@@ -423,24 +418,23 @@ def collect_pca_coordinates_per_algo_per_dataset(wildcards):
     return f"{out_dir}{SEP}{dataset_label}-ml{SEP}{wildcards.algorithm}-pca-coordinates.txt"
 
 # Run evaluation per algortihm for all associated pathway outputs, ensemble.txt, and pca_coordinates.txt for a dataset against its paired gold standard
-# TODO: only works when these rules are broken up
 rule evaluation_per_algo_pathways:
     input: 
         gold_standard_file = get_gold_standard_pickle_file,
         pathways =  collect_pathways_per_algo_per_dataset,
     output: 
-        pr_file = SEP.join([out_dir, '{dataset_gold_standard_pairs}-eval', "{algorithm}-precision-and-recall.txt"]),
-        pr_plot_png = SEP.join([out_dir, '{dataset_gold_standard_pairs}-eval', '{algorithm}-precision-and-recall-plot.png']),
+        pr_file = SEP.join([out_dir, '{dataset_gold_standard_pairs}-eval', "{algorithm}-precision-recall-per-pathway.txt"]),
+        pr_png = SEP.join([out_dir, '{dataset_gold_standard_pairs}-eval', '{algorithm}-precision-recall-per-pathway.png']),
     run:
         node_table = Evaluation.from_file(input.gold_standard_file).node_table
-        Evaluation.precision_and_recall(input.pathways, node_table, output.pr_file, output.pr_plot_png)
+        Evaluation.precision_and_recall(input.pathways, node_table, output.pr_file, output.pr_png)
 
 rule evaluation_per_algo_ensemble_pr_curve:
     input: 
         gold_standard_file = get_gold_standard_pickle_file,
         ensemble_file = collect_ensemble_per_algo_per_dataset,
     output: 
-        pr_curve_png = SEP.join([out_dir, '{dataset_gold_standard_pairs}-eval', '{algorithm}-pr-curves-ensemble-nodes.png']),
+        pr_curve_png = SEP.join([out_dir, '{dataset_gold_standard_pairs}-eval', '{algorithm}-precision-recall-curve-ensemble-nodes.png']),
     run:
         node_table = Evaluation.from_file(input.gold_standard_file).node_table
         node_ensemble = Evaluation.edge_frequency_node_ensemble(input.ensemble_file)
@@ -451,12 +445,11 @@ rule evaluation_per_algo_pca_chosen:
         gold_standard_file = get_gold_standard_pickle_file,
         pca_coordinates_file = collect_pca_coordinates_per_algo_per_dataset
     output: 
-        pca_chosen_pr_file = SEP.join([out_dir, '{dataset_gold_standard_pairs}-eval', "{algorithm}-precision-and-recall-pca-chosen.txt"]),
-        pca_chosen_pr_png = SEP.join([out_dir, '{dataset_gold_standard_pairs}-eval', "{algorithm}-precision-and-recall-pca-chosen.png"]),
+        pca_chosen_pr_file = SEP.join([out_dir, '{dataset_gold_standard_pairs}-eval', "{algorithm}-precision-recall-pca-chosen-pathway.txt"]),
     run:
         node_table = Evaluation.from_file(input.gold_standard_file).node_table
         pca_chosen_pathway = Evaluation.pca_chosen_pathway(input.pca_coordinates_file, out_dir)
-        Evaluation.precision_and_recall(pca_chosen_pathway, node_table, output.pca_chosen_pr_file, output.pca_chosen_pr_png)
+        Evaluation.precision_and_recall(pca_chosen_pathway, node_table, output.pca_chosen_pr_file)
 
 # Remove the output directory
 rule clean:
