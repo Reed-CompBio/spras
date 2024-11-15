@@ -3439,7 +3439,7 @@ gold_standards:
       - tps_egfr
 reconstruction_settings:
   locations:
-    reconstruction_dir: output
+    reconstruction_dir: output/tps_egfr
   run: true
 analysis:
   summary:
