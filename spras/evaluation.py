@@ -108,7 +108,6 @@ class Evaluation:
         pr_df = pd.DataFrame(results)
         pr_df.sort_values(by=["Recall", "Pathway"], axis=0, ascending=True, inplace=True)
         pr_df.to_csv(output_file, sep="\t", index=False)
-        print(pr_df)
 
         num_of_algorithms_used = 0
         if output_png is not None:
