@@ -395,11 +395,11 @@ rule evaluation:
         pca_chosen_pr_file = SEP.join([out_dir, '{dataset_gold_standard_pairs}-eval', "precision-recall-pca-chosen-pathway.txt"]),
     run:
         node_table = Evaluation.from_file(input.gold_standard_file).node_table
-        Evaluation.precision_and_recall(input.pathways, node_table, output.pr_file, output.pr_png)
+        Evaluation.precision_and_recall(input.pathways, node_table, algorithms, output.pr_file, output.pr_png)
         node_ensemble = Evaluation.edge_frequency_node_ensemble(input.ensemble_file)
-        Evaluation.PRC_node_ensemble(node_ensemble, node_table, output.pr_curve_png)
+        Evaluation.precision_recall_curve_node_ensemble(node_ensemble, node_table, output.pr_curve_png)
         pca_chosen_pathway = Evaluation.pca_chosen_pathway(input.pca_coordinates_file, out_dir)
-        Evaluation.precision_and_recall(pca_chosen_pathway, node_table, output.pca_chosen_pr_file)
+        Evaluation.precision_and_recall(pca_chosen_pathway, node_table, algorithms, output.pca_chosen_pr_file)
 
 # Returns all pathways for a specific algorithm and dataset
 def collect_pathways_per_algo_per_dataset(wildcards):
@@ -427,7 +427,7 @@ rule evaluation_per_algo_pathways:
         pr_png = SEP.join([out_dir, '{dataset_gold_standard_pairs}-eval', '{algorithm}-precision-recall-per-pathway.png']),
     run:
         node_table = Evaluation.from_file(input.gold_standard_file).node_table
-        Evaluation.precision_and_recall(input.pathways, node_table, output.pr_file, output.pr_png)
+        Evaluation.precision_and_recall(input.pathways, node_table, algorithms, output.pr_file, output.pr_png)
 
 rule evaluation_per_algo_ensemble_pr_curve:
     input: 
@@ -438,7 +438,7 @@ rule evaluation_per_algo_ensemble_pr_curve:
     run:
         node_table = Evaluation.from_file(input.gold_standard_file).node_table
         node_ensemble = Evaluation.edge_frequency_node_ensemble(input.ensemble_file)
-        Evaluation.PRC_node_ensemble(node_ensemble, node_table, output.pr_curve_png)
+        Evaluation.precision_recall_curve_node_ensemble(node_ensemble, node_table, output.pr_curve_png)
 
 rule evaluation_per_algo_pca_chosen:
     input: 
@@ -449,7 +449,7 @@ rule evaluation_per_algo_pca_chosen:
     run:
         node_table = Evaluation.from_file(input.gold_standard_file).node_table
         pca_chosen_pathway = Evaluation.pca_chosen_pathway(input.pca_coordinates_file, out_dir)
-        Evaluation.precision_and_recall(pca_chosen_pathway, node_table, output.pca_chosen_pr_file)
+        Evaluation.precision_and_recall(pca_chosen_pathway, node_table, algorithms, output.pca_chosen_pr_file)
 
 # Remove the output directory
 rule clean:
