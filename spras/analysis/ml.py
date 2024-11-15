@@ -10,7 +10,7 @@ from adjustText import adjust_text
 from scipy.cluster.hierarchy import dendrogram, fcluster
 from sklearn.cluster import AgglomerativeClustering
 from sklearn.decomposition import PCA
-from sklearn.preprocessing import StandardScaler
+from sklearn.preprocessing import MinMaxScaler, StandardScaler
 
 from spras.util import make_required_dirs
 
@@ -142,8 +142,14 @@ def pca(dataframe: pd.DataFrame, output_png: str, output_var: str, output_coord:
     if not isinstance(labels, bool):
         raise ValueError(f"labels={labels} must be True or False")
 
-    scaler = StandardScaler()
+    #TODO: MinMaxScaler changes nothing about the data
+    # scaler = MinMaxScaler()
+    # scaler.fit(X)  # calc mean and standard deviation
+    # X_scaled = scaler.transform(X)
+
+    scaler = StandardScaler()  # TODO: StandardScalar doesn't make sense on binary data because the mean and variance lead to values outside the binary range
     scaler.fit(X)  # calc mean and standard deviation
+    scaler.transform(X)
     X_scaled = scaler.transform(X)
 
     # choosing the PCA
