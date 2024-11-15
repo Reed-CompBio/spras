@@ -142,3 +142,5 @@ class TestConfig:
 
         with pytest.raises(ValueError):
             config.init_global(test_config)
+
+    # TODO: should I add a test case on the new config eval / ml couple code
