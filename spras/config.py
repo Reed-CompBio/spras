@@ -257,26 +257,27 @@ class Config:
         self.analysis_include_ml = raw_config["analysis"]["ml"]["include"]
         self.analysis_include_evaluation = raw_config["analysis"]["evaluation"]["include"]
 
-        # only run ml aggregate_per_algorithm if analysis_include_ml is set to true
+        # Only run ML aggregate per algorithm if analysis include ML is set to True
         if 'aggregate_per_algorithm' in self.ml_params and self.analysis_include_ml:
             self.analysis_include_ml_aggregate_algo = raw_config["analysis"]["ml"]["aggregate_per_algorithm"]
         else:
             self.analysis_include_ml_aggregate_algo = False
 
+        # Raises an error if Evaluation is enabled but no gold standard data is provided
         if self.gold_standards == {} and self.analysis_include_evaluation:
             raise ValueError("Evaluation analysis cannot run as gold standard data not provided. "
                              "Please set evaluation include to false or provide gold standard data.")
 
-         # only run evaluation if ml is set to true
+         # Only run Evaluation if ML is set to True
         if not self.analysis_include_ml and self.analysis_include_evaluation:
             self.analysis_include_evaluation = False
 
-        # only run evaluation aggregate_per_algorithm if analysis_include_ml is set to true
+        # Only run Evaluation aggregate per algorithm if analysis include ML is set to True
         if 'aggregate_per_algorithm' in self.evaluation_params and self.analysis_include_evaluation:
             self.analysis_include_evaluation_aggregate_algo = raw_config["analysis"]["evaluation"]["aggregate_per_algorithm"]
         else:
             self.analysis_include_evaluation_aggregate_algo = False
 
-        # only run evaluation per algo if ml per algo is set to true
+        # Only run Evaluation per algorithm if ML per algorithm is set to True
         if not self.analysis_include_ml_aggregate_algo and self.analysis_include_evaluation_aggregate_algo:
             self.analysis_include_evaluation_aggregate_algo = False
