@@ -79,27 +79,28 @@ class Evaluation:
         # TODO: later iteration - chose between node and edge file, or allow both
 
     @staticmethod
-    def precision_and_recall(file_paths: Iterable[Path], node_table: pd.DataFrame, output_file: str, output_png: str ):
+    def precision_and_recall(file_paths: Iterable[Path], node_table: pd.DataFrame, algorithms: list, output_file: str, output_png:str=None):
         """
         Takes in file paths for a specific dataset and an associated gold standard node table.
         Calculates precision and recall for each pathway file
         Returns output back to output_file
         @param file_paths: file paths of pathway reconstruction algorithm outputs
         @param node_table: the gold standard nodes
+        @param algorithms: list of algorithms used in current run of SPRAS
         @param output_file: the filename to save the precision and recall of each pathway
-        @param output_png: the filename to plot the precision and recall of each pathway (not a PRC)
+        @param output_png (optional): the filename to plot the precision and recall of each pathway (not a PRC)
         """
         y_true = set(node_table['NODEID'])
         results = []
-
         for file in file_paths:
             df = pd.read_table(file, sep="\t", header=0, usecols=["Node1", "Node2"])
+            # TODO: do we want to include the pathways that are empty for evaluation / in the pr_df?
             y_pred = set(df['Node1']).union(set(df['Node2']))
             all_nodes = y_true.union(y_pred)
             y_true_binary = [1 if node in y_true else 0 for node in all_nodes]
             y_pred_binary = [1 if node in y_pred else 0 for node in all_nodes]
-
             # default to 0.0 if there is a divide by 0 error
+            # not using precision_recall_curve because thresholds are binary (0 or 1); rather we are directly calculating precision and recall per pathway
             precision = precision_score(y_true_binary, y_pred_binary, zero_division=0.0)
             recall = recall_score(y_true_binary, y_pred_binary, zero_division=0.0)
             results.append({"Pathway": file, "Precision": precision, "Recall": recall})
@@ -107,18 +108,43 @@ class Evaluation:
         pr_df = pd.DataFrame(results)
         pr_df.sort_values(by=["Recall", "Pathway"], axis=0, ascending=True, inplace=True)
         pr_df.to_csv(output_file, sep="\t", index=False)
+        print(pr_df)
 
-        plt.figure(figsize=(8, 6))
-        plt.plot(pr_df["Recall"], pr_df["Precision"], marker='o', linestyle='-', color='b', label="PR")
-        plt.xlabel("Recall")
-        plt.ylabel("Precision")
-        plt.title(f"Precision and Recall Plot")
-        plt.legend()
-        plt.grid(True)
-        plt.savefig(output_png)
-        # TODO: what to do when this is empty
+        num_of_algorithms_used = 0
+        if output_png is not None:
+            if not pr_df.empty:
+                plt.figure(figsize=(8, 6))
+                # plot a line per algorithm
+                for algorithm in algorithms: #TODO I think there is a better way than doing this; using split on the filepaths doesn't work bc it is not adaptable
+                    subset = pr_df[pr_df["Pathway"].str.contains(algorithm)]
+                    if not subset.empty:
+                        plt.plot(
+                            subset["Recall"],
+                            subset["Precision"],
+                            marker='o',
+                            linestyle='-',
+                            label=f"{algorithm}"
+                        )
+                        num_of_algorithms_used += 1
 
-    def select_max_freq_and_node(row): # TODO: what (:type) would this row be
+                # plot overall precision and recall from all the algorithms
+                if num_of_algorithms_used > 1:
+                    plt.plot(pr_df["Recall"], pr_df["Precision"], marker='o', linestyle='-', color='b', label="Overall Precision-Recall")
+
+                plt.xlabel("Recall")
+                plt.ylabel("Precision")
+                plt.title(f"Precision and Recall Plot")
+                plt.legend()
+                plt.grid(True)
+                plt.savefig(output_png)
+            else:
+                plt.figure()
+                plt.plot([], [])
+                plt.title("Empty Pathway Files")
+                plt.savefig(output_png)
+
+
+    def select_max_freq_and_node(row: pd.Series):
         """
         Selects the node and frequency with the highest frequency value from two potential nodes in a row.
         Handles cases where one of the nodes or frequencies may be missing and returns the node associated with the maximum frequency.
@@ -160,10 +186,9 @@ class Evaluation:
             node_ensemble.sort_values('max_freq', ascending= False, inplace = True)
             return node_ensemble
         else:
-            # TODO: figure out how to deal with empty ensemble files
             return pd.DataFrame(columns = ['Node', 'max_freq'])
 
-    def PRC_node_ensemble(node_ensemble:pd.DataFrame, node_table:pd.DataFrame, output_png: str):
+    def precision_recall_curve_node_ensemble(node_ensemble:pd.DataFrame, node_table:pd.DataFrame, output_png: str):
         """
         Takes in an node ensemble for specific dataset or specific algorithm in a dataset, and an associated gold standard node table.
         Plots a precision and recall curve for the node ensemble against its associated gold standard node table
@@ -190,10 +215,9 @@ class Evaluation:
             plt.grid(True)
             plt.savefig(output_png)
         else:
-            # TODO figure out how to deal with empty ensemble files (still will have the header)
             plt.figure()
-            plt.text(0.5, 0.5, "empty ensemble file", ha='center', va='center', fontsize=12, color='red')
-            plt.axis('off')
+            plt.plot([], [])
+            plt.title("Empty Ensemble File")
             plt.savefig(output_png)
 
     def pca_chosen_pathway(coordinates_file: str, output_dir:str):
