@@ -56,6 +56,9 @@ Output files will be written to the `output` directory.
 You do not need to manually download Docker images from DockerHub before running SPRAS.
 The workflow will automatically download any missing images as long as Docker is running.
 
+### Running SPRAS with HTCondor
+Large SPRAS workflows may benefit from execution with HTCondor, a scheduler/manager for distributed high-throughput computing workflows that allows many Snakemake steps to be run in parallel. For instructions on running SPRAS in this setting, see `docker-wrappers/SPRAS/README.md`.
+
 ## Components
 **Configuration file**: Specifies which pathway reconstruction algorithms to run, which hyperparameter combinations to use, and which datasets to run them on.
 

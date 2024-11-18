@@ -1,0 +1,28 @@
+# Default configuration for the SPRAS/HTCondor executor profile. Each of these values
+# can also be passed via command line flags, e.g. `--jobs 30 --executor htcondor`.
+
+# 'jobs' specifies the maximum number of HTCondor jobs that can be in the queue at once.
+jobs: 30
+executor: htcondor
+configfile: example_config.yaml
+# Indicate to the plugin that jobs running on various EPs do not share a filesystem with
+# each other, or with the AP.
+shared-fs-usage: none
+# Distributed, heterogeneous computational environments are a wild place where strange things
+# can happen. If something goes wrong, try again up to 5 times. After that, we assume there's
+# a real error that requires user/admin intervention
+retries: 5
+
+# Default resources will apply to all workflow steps. If a single workflow step fails due
+# to insufficient resources, it can be re-run with modified values. Snakemake will handle
+# picking up where it left off, and won't re-run steps that have already completed.
+default-resources:
+  job_wrapper: "spras.sh"
+  # If running in CHTC, this only works with apptainer images
+  # Note requirement for quotes around the image name
+  container_image: "'spras-v0.2.0.sif'"
+  universe: "container"
+  # The value for request_disk should be large enough to accommodate the runtime container
+  # image, any additional PRM container images, and your input data.
+  request_disk: "16GB"
+  request_memory: "8GB"
