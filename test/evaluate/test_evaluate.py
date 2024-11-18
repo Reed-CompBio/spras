@@ -69,6 +69,5 @@ class TestEvaluate:
         ml.pca(dataframe, OUT_DIR + 'pca.png', OUT_DIR + 'pca-variance.txt', OUT_DIR + 'pca-coordinates.tsv')
 
         pathway = Evaluation.pca_chosen_pathway(OUT_DIR + 'pca-coordinates.tsv', INPUT_DIR)
-        print(pathway)
         Evaluation.precision_and_recall(pathway, NODE_TABLE, algorithms, output_file, output_png)
         assert filecmp.cmp(output_file, EXPECT_DIR + 'expected-precision-recall-per-pathway-pca-chosen.txt', shallow=False)

@@ -27,7 +27,8 @@ def get_test_config():
                 "include": False
             },
             "ml": {
-                "include": False
+                "include": False,
+                "aggregate_per_algorithm": False
             },
             "graphspace": {
                 "include": False
@@ -36,7 +37,8 @@ def get_test_config():
                 "include": False
             },
             "evaluation": {
-                "include": False
+                "include": False,
+                 "aggregate_per_algorithm": False
             },
         },
     }
@@ -143,4 +145,131 @@ class TestConfig:
         with pytest.raises(ValueError):
             config.init_global(test_config)
 
-    # TODO: should I add a test case on the new config eval / ml couple code
+    def test_eval_ml_coupling(self):
+        test_config = get_test_config()
+        include_combos = [(True, True), (True, False), (False, True), (False, False)]
+
+        # ml: True evaluation: True
+        test_config["analysis"]["ml"]["include"] = include_combos[0][0]
+        test_config["analysis"]["evaluation"]["include"] = include_combos[0][1]
+        config.init_global(test_config)
+        assert config.config.analysis_include_ml == True and config.config.analysis_include_evaluation == True
+
+        # ml: True evaluation: False
+        test_config["analysis"]["ml"]["include"] = include_combos[1][0]
+        test_config["analysis"]["evaluation"]["include"] = include_combos[1][1]
+        config.init_global(test_config)
+        assert config.config.analysis_include_ml == True and config.config.analysis_include_evaluation == False
+
+        # ml: False evaluation: True
+        test_config["analysis"]["ml"]["include"] = include_combos[2][0]
+        test_config["analysis"]["evaluation"]["include"] = include_combos[2][1]
+        config.init_global(test_config)
+        assert config.config.analysis_include_ml == False and config.config.analysis_include_evaluation == False
+
+        # ml: False evaluation: False
+        test_config["analysis"]["ml"]["include"] = include_combos[3][0]
+        test_config["analysis"]["evaluation"]["include"] = include_combos[3][1]
+        config.init_global(test_config)
+        assert config.config.analysis_include_ml == False and config.config.analysis_include_evaluation == False
+
+
+    def test_ml_agg_algo_coupling(self):
+
+        test_config = get_test_config()
+        include_combos = [(True, True), (True, False), (False, True), (False, False)]
+
+        test_config["analysis"]["ml"]["include"] = include_combos[0][0]
+        test_config["analysis"]["ml"]["aggregate_per_algorithm"] = include_combos[0][1]
+        config.init_global(test_config)
+        assert config.config.analysis_include_ml == True and config.config.analysis_include_ml_aggregate_algo == True
+
+
+        test_config["analysis"]["ml"]["include"] = include_combos[1][0]
+        test_config["analysis"]["ml"]["aggregate_per_algorithm"] = include_combos[1][1]
+        config.init_global(test_config)
+        assert config.config.analysis_include_ml == True and config.config.analysis_include_ml_aggregate_algo == False
+
+
+        test_config["analysis"]["ml"]["include"] = include_combos[2][0]
+        test_config["analysis"]["ml"]["aggregate_per_algorithm"] = include_combos[2][1]
+        config.init_global(test_config)
+        assert config.config.analysis_include_ml == False and config.config.analysis_include_ml_aggregate_algo == False
+
+
+        test_config["analysis"]["ml"]["include"] = include_combos[3][0]
+        test_config["analysis"]["ml"]["aggregate_per_algorithm"] = include_combos[3][1]
+        config.init_global(test_config)
+        assert config.config.analysis_include_ml == False and config.config.analysis_include_ml_aggregate_algo == False
+
+    def test_eval_agg_algo_coupling(self):
+
+        test_config = get_test_config()
+        test_config["analysis"]["ml"]["include"] = True
+        test_config["analysis"]["ml"]["aggregate_per_algorithm"] = True
+
+        include_combos = [(True, True), (True, False), (False, True), (False, False)]
+
+        test_config["analysis"]["evaluation"]["include"] = include_combos[0][0]
+        test_config["analysis"]["evaluation"]["aggregate_per_algorithm"] = include_combos[0][1]
+        config.init_global(test_config)
+        assert config.config.analysis_include_evaluation == True and config.config.analysis_include_evaluation_aggregate_algo == True
+
+
+        test_config["analysis"]["evaluation"]["include"] = include_combos[1][0]
+        test_config["analysis"]["evaluation"]["aggregate_per_algorithm"] = include_combos[1][1]
+        config.init_global(test_config)
+        assert config.config.analysis_include_evaluation == True and config.config.analysis_include_evaluation_aggregate_algo == False
+
+
+        test_config["analysis"]["evaluation"]["include"] = include_combos[2][0]
+        test_config["analysis"]["evaluation"]["aggregate_per_algorithm"] = include_combos[2][1]
+        config.init_global(test_config)
+        assert config.config.analysis_include_evaluation == False and config.config.analysis_include_evaluation_aggregate_algo == False
+
+
+        test_config["analysis"]["evaluation"]["include"] = include_combos[3][0]
+        test_config["analysis"]["evaluation"]["aggregate_per_algorithm"] = include_combos[3][1]
+        config.init_global(test_config)
+        assert config.config.analysis_include_evaluation == False and config.config.analysis_include_evaluation_aggregate_algo == False
+
+    def test_eval_ml_agg_algo_coupling(self):
+
+        # the value of ml include and ml aggregate_per_algorithm can affect the value of evaluation include and evaluation aggregate_per_algorithm
+
+        test_config = get_test_config()
+
+        test_config["analysis"]["ml"]["include"] = False
+        test_config["analysis"]["ml"]["aggregate_per_algorithm"] = True
+        test_config["analysis"]["evaluation"]["include"] = True
+        test_config["analysis"]["evaluation"]["aggregate_per_algorithm"] = True
+        config.init_global(test_config)
+        assert config.config.analysis_include_evaluation == False and config.config.analysis_include_evaluation_aggregate_algo == False and config.config.analysis_include_ml == False and config.config.analysis_include_ml_aggregate_algo == False
+
+        test_config["analysis"]["ml"]["include"] = True
+        test_config["analysis"]["ml"]["aggregate_per_algorithm"] = False
+        test_config["analysis"]["evaluation"]["include"] = True
+        test_config["analysis"]["evaluation"]["aggregate_per_algorithm"] = True
+        config.init_global(test_config)
+        assert config.config.analysis_include_evaluation == True and config.config.analysis_include_evaluation_aggregate_algo == False and config.config.analysis_include_ml == True and config.config.analysis_include_ml_aggregate_algo == False
+
+        test_config["analysis"]["ml"]["include"] = False
+        test_config["analysis"]["ml"]["aggregate_per_algorithm"] = False
+        test_config["analysis"]["evaluation"]["include"] = True
+        test_config["analysis"]["evaluation"]["aggregate_per_algorithm"] = True
+        config.init_global(test_config)
+        assert config.config.analysis_include_evaluation == False and config.config.analysis_include_evaluation_aggregate_algo == False and config.config.analysis_include_ml == False and config.config.analysis_include_ml_aggregate_algo == False
+
+        test_config["analysis"]["ml"]["include"] = True
+        test_config["analysis"]["ml"]["aggregate_per_algorithm"] = True
+        test_config["analysis"]["evaluation"]["include"] = True
+        test_config["analysis"]["evaluation"]["aggregate_per_algorithm"] = True
+        config.init_global(test_config)
+        assert config.config.analysis_include_evaluation == True and config.config.analysis_include_evaluation_aggregate_algo == True and config.config.analysis_include_ml == True and config.config.analysis_include_ml_aggregate_algo == True
+
+        test_config["analysis"]["ml"]["include"] = True
+        test_config["analysis"]["ml"]["aggregate_per_algorithm"] = False
+        test_config["analysis"]["evaluation"]["include"] = False
+        test_config["analysis"]["evaluation"]["aggregate_per_algorithm"] = False
+        config.init_global(test_config)
+        assert config.config.analysis_include_evaluation == False and config.config.analysis_include_evaluation_aggregate_algo == False and config.config.analysis_include_ml == True and config.config.analysis_include_ml_aggregate_algo == False
