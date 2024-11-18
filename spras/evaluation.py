@@ -109,12 +109,11 @@ class Evaluation:
         pr_df.sort_values(by=["Recall", "Pathway"], axis=0, ascending=True, inplace=True)
         pr_df.to_csv(output_file, sep="\t", index=False)
 
-        num_of_algorithms_used = 0
         if output_png is not None:
             if not pr_df.empty:
                 plt.figure(figsize=(8, 6))
                 # plot a line per algorithm
-                for algorithm in algorithms: #TODO I think there is a better way than doing this; using split on the filepaths doesn't work bc it is not adaptable
+                for algorithm in algorithms:
                     subset = pr_df[pr_df["Pathway"].str.contains(algorithm)]
                     if not subset.empty:
                         plt.plot(
@@ -124,11 +123,10 @@ class Evaluation:
                             linestyle='-',
                             label=f"{algorithm}"
                         )
-                        num_of_algorithms_used += 1
 
-                # plot overall precision and recall from all the algorithms
-                if num_of_algorithms_used > 1:
-                    plt.plot(pr_df["Recall"], pr_df["Precision"], marker='o', linestyle='-', color='b', label="Overall Precision-Recall")
+                # plot combined precision and recall from all the algorithms
+                if len(algorithms) > 1:
+                    plt.plot(pr_df["Recall"], pr_df["Precision"], linestyle='--', color='b', label="Overall Precision-Recall", alpha = 0.3)
 
                 plt.xlabel("Recall")
                 plt.ylabel("Precision")
