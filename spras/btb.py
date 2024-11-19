@@ -11,10 +11,11 @@ import pandas as pd
 from spras.containers import prepare_volume, run_container
 from spras.interactome import (
     convert_undirected_to_directed,
-    reinsert_direction_col_directed,
+    reinsert_direction_col_undirected,
 )
-
 from spras.prm import PRM
+from spras.util import add_rank_column, raw_pathway_df
+
 
 __all__ = ['BowtieBuilder']
 
@@ -33,11 +34,6 @@ class BowtieBuilder(PRM):
         for input_type in BowtieBuilder.required_inputs:
             if input_type not in filename_map:
                 raise ValueError(f"{input_type} filename is missing")
-        print("FILEMAP NAME: ", filename_map)
-        print("DATA HEAD: ")
-        print( data.node_table.head())
-        print("DATA INTERACTOME: ")
-        print(data.interactome.head())
 
         # Get sources and write to file, repeat for targets
         # Does not check whether a node is a source and a target
@@ -51,21 +47,19 @@ class BowtieBuilder(PRM):
             nodes = nodes.loc[nodes[node_type]]
             if(node_type == "sources"):
                 nodes.to_csv(filename_map["sources"], sep= '\t', index=False, columns=['NODEID'], header=False)
-                print("NODES: ")
-                print(nodes)
             elif(node_type == "targets"):
                 nodes.to_csv(filename_map["targets"], sep= '\t', index=False, columns=['NODEID'], header=False)
-                print("NODES: ")
-                print(nodes)
 
 
         # Create network file
         edges = data.get_interactome()
 
         # Format into directed graph
-        edges = convert_undirected_to_directed(edges)
+        # edges = convert_undirected_to_directed(edges)
 
-        edges.to_csv(filename_map['edges'], sep='\t', index=False, header=False)
+        edges.to_csv(filename_map["edges"], sep="\t", index=False,
+                                      columns=["Interactor1", "Interactor2", "Weight"],
+                                      header=False)
 
 
 
@@ -167,8 +161,9 @@ class BowtieBuilder(PRM):
         @param standardized_pathway_file: the same pathway written in the universal format
         """
         # What about multiple raw_pathway_files
-        print("PARSING OUTPUT BTB")
-        df = pd.read_csv(raw_pathway_file, sep='\t')
-        df = reinsert_direction_col_directed(df)
-        print(df)
-        df.to_csv(standardized_pathway_file, header=False, index=False, sep='\t')
+        df = raw_pathway_df(raw_pathway_file, sep='\t', header=0)
+        if not df.empty:
+            df = add_rank_column(df)
+            df = reinsert_direction_col_undirected(df)
+            df.columns = ['Node1', 'Node2', 'Rank', "Direction"]
+        df.to_csv(standardized_pathway_file, index=False, sep='\t', header=True)
