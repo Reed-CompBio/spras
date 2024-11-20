@@ -10,16 +10,15 @@ import pandas as pd
 
 from spras.containers import prepare_volume, run_container
 from spras.interactome import (
-    convert_undirected_to_directed,
     reinsert_direction_col_undirected,
 )
 from spras.prm import PRM
 from spras.util import add_rank_column, raw_pathway_df
 
 
-__all__ = ['BowtieBuilder']
+__all__ = ['BowTieBuilder']
 
-class BowtieBuilder(PRM):
+class BowTieBuilder(PRM):
     required_inputs = ['sources', 'targets', 'edges']
 
     #generate input taken from meo.py beacuse they have same input requirements
@@ -31,7 +30,7 @@ class BowtieBuilder(PRM):
         @param filename_map: a dict mapping file types in the required_inputs to the filename for that type
         @return:
         """
-        for input_type in BowtieBuilder.required_inputs:
+        for input_type in BowTieBuilder.required_inputs:
             if input_type not in filename_map:
                 raise ValueError(f"{input_type} filename is missing")
 
@@ -79,7 +78,7 @@ class BowtieBuilder(PRM):
         # Testing out here avoids the trouble that container errors provide
         
         if not sources or not targets or not edges or not output_file:
-            raise ValueError('Required BowtieBuilder arguments are missing')
+            raise ValueError('Required BowTieBuilder arguments are missing')
 
         if not Path(sources).exists() or not Path(targets).exists() or not Path(edges).exists():
             raise ValueError('Missing input file')
@@ -132,7 +131,7 @@ class BowtieBuilder(PRM):
         # command = ['ls', '-R']
 
 
-        print('Running BowtieBuilder with arguments: {}'.format(' '.join(command)), flush=True)
+        print('Running BowTieBuilder with arguments: {}'.format(' '.join(command)), flush=True)
 
         container_suffix = "bowtiebuilder:v1"
         out = run_container(container_framework,
@@ -141,16 +140,7 @@ class BowtieBuilder(PRM):
                             volumes,
                             work_dir)
         print(out)
-        print("Source file: ", source_file)
-        print("target file: ", target_file)
-        print("edges file: ", edges_file)
-        print("mapped out dir: ", mapped_out_dir)
-        print("mapped out prefix: ", mapped_out_prefix)
-
-
         # Output is already written to raw-pathway.txt file
-        # output_edges = Path(next(out_dir.glob('out*-ranked-edges.txt')))
-        # output_edges.rename(output_file)
 
 
     @staticmethod

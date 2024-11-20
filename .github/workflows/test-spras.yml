@@ -86,7 +86,7 @@ jobs:
         docker pull reedcompbio/py4cytoscape:v3
         docker pull reedcompbio/spras:v0.1.0
         docker pull reedcompbio/bowtiebuilder:v1
-    - name: Build BowtieBuilder Docker Image
+    - name: Build BowTieBuilder Docker Image
       uses: docker/build-push-action@v1
       with:
         path: docker-wrappers/BowTieBuilder
