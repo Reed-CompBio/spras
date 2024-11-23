@@ -13,7 +13,7 @@ For example:
 ```
 NODEID	prize	sources	targets	active dummy
 A	1.0		True	True	True
-B	3.3	True	    True
+B	3.3	True		True
 C	2.5		True	True
 D	1.9	True	True	True
 ```
