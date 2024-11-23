@@ -35,18 +35,20 @@ def write_conf(filename=Path('config.txt'), w=None, b=None, d=None, mu=None, noi
         f.write('processes = 1\n')
         f.write('threads = 1\n')
 
-"""
-Omics Integrator 1 works with partially directed graphs
-- it takes in the universal input directly
 
-Expected raw input format:
-Interactor1    Interactor2   Weight    Direction
-- the expected raw input file should have node pairs in the 1st and 2nd columns, with a weight in the 3rd column and directionality in the 4th column
-- it can include repeated and bidirectional edges
-- it uses 'U' for undirected edges and 'D' for directed edges
-
-"""
 class OmicsIntegrator1(PRM):
+    """
+    Omics Integrator 1 works with partially directed graphs
+    - it takes in the universal input directly
+
+    Expected raw input format:
+    Interactor1    Interactor2   Weight    Direction
+    - the expected raw input file should have node pairs in the 1st and 2nd columns, with a weight in the 3rd column and
+    directionality in the 4th column
+    - it can include repeated and bidirectional edges
+    - it uses 'U' for undirected edges and 'D' for directed edges
+
+    """
     required_inputs = ['prizes', 'edges', 'dummy_nodes']
 
     @staticmethod
@@ -93,7 +95,6 @@ class OmicsIntegrator1(PRM):
             with open(filename_map['dummy_nodes'], mode='w'):
                 pass
 
-
     # TODO add parameter validation
     # TODO add support for knockout argument
     # TODO add reasonable default values
@@ -132,7 +133,7 @@ class OmicsIntegrator1(PRM):
         #   1. terminals -> connect the dummy node to all nodes that have been assigned prizes
         #   2. all ->  connect the dummy node to all nodes in the interactome i.e. full set of nodes in graph
         #   3. others -> connect the dummy node to all nodes that are not terminal nodes i.e. nodes w/o prizes
-        #   4. file -> custom nodes - connect the dummy node to a specific list of nodes provided in a file
+        #   4. file -> connect the dummy node to a specific list of nodes provided in a file
 
         # add dummy node file to the volume if dummy_mode is not None and it is 'file'
         if dummy_mode == 'file':
