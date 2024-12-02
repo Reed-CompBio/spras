@@ -78,6 +78,7 @@ def summarize_networks(file_paths: Iterable[Union[str, PathLike]]) -> pd.DataFra
                 str(tup[0]): 1,
             }, index=tup[1]
         )
+        dataframe = dataframe[~dataframe.index.duplicated(keep='first')]
         edge_dataframes.append(dataframe)
 
     # concatenating all the algorithm-specific dataframes together
