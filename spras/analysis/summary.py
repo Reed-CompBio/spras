@@ -8,7 +8,7 @@ import networkx as nx
 import pandas as pd
 
 
-def summarize_networks(file_paths: Iterable[Path], node_table: pd.DataFrame, algo_params) -> pd.DataFrame:
+def summarize_networks(file_paths: Iterable[Path], node_table: pd.DataFrame, algo_params, algo_with_params) -> pd.DataFrame:
     """
     Generate a table that aggregates summary information about networks in file_paths,
     including which nodes are present in node_table columns.
@@ -29,10 +29,10 @@ def summarize_networks(file_paths: Iterable[Path], node_table: pd.DataFrame, alg
         # If the property contains boolean data, save the nodes with property values that are True
         nodes_by_col.append(set(node_table.loc[node_table[col] > 0, "NODEID"]))
 
-    print (node_table.columns) #debug statement
-
     # Initialize list to store network summary data
     nw_info = []
+
+    index = 0
 
     # Iterate through each network file path
     for file_path in sorted(file_paths):
@@ -57,13 +57,13 @@ def summarize_networks(file_paths: Iterable[Path], node_table: pd.DataFrame, alg
             cur_nw_info.append(num_nodes)
 
         # String split name to access algorithm and hashcode from filepath
-        # Name of filepath follows format "output/data#-algo-params-hashcode/pathway.txt"
-        # algorithm parameters have format { algo : { hashcode : { parameter combos } } }
+        # Name of filepath follows format "output/.../data#-algo-params-hashcode/pathway.txt"
+        # algorithm parameters have format { algo : { hashcode : { parameter combos } } }   
 
-        filepath = nw_name.split("/")
-        filename = filepath[1].split("-")
-        algo = filename[1]
-        hashcode = filename[3]
+        filename = algo_with_params[index].split("-")
+        algo = filename[0]
+        hashcode = filename[2]
+        index = index + 1
 
         param_combo = algo_params[algo][hashcode]
         params = json.dumps(param_combo)
