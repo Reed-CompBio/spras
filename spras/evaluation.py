@@ -120,14 +120,11 @@ class Evaluation:
                             subset["Recall"],
                             subset["Precision"],
                             marker='o',
-                            linestyle='-',
+                            linestyle='',
                             label=f"{algorithm}"
                         )
 
-                # plot combined precision and recall from all the algorithms
-                if len(algorithms) > 1:
-                    plt.plot(pr_df["Recall"], pr_df["Precision"], linestyle='--', color='b', label="Overall Precision-Recall", alpha = 0.3)
-
+               
                 plt.xlabel("Recall")
                 plt.ylabel("Precision")
                 plt.title(f"Precision and Recall Plot")
