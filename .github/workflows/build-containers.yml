@@ -3,143 +3,69 @@ name: Build SPRAS Containers
 on: [push, pull_request]
 
 jobs:
-  # Builds the Docker images
-  docker:
-    name: Build Docker images
-    runs-on: ${{ matrix.os }}
-    strategy:
-      matrix:
-        os: [ubuntu-latest]
-    steps:
-    - name: Checkout repository
-      uses: actions/checkout@v2
-
-    ###################
-    #     Omics 1     #
-    ###################
-    - name: Build Omics Integrator 1 Docker image
-      uses: docker/build-push-action@v6
-      with:
-        context: docker-wrappers/OmicsIntegrator1/.
-        file: docker-wrappers/OmicsIntegrator1/Dockerfile
-        tags: reedcompbio/omics-integrator-1:latest
-        cache-from: type=registry,ref=reedcompbio/omics-integrator-1:latest
-        push: false
-    - name: Remove Omics Integrator 1 Docker image
-      # Remove the image to prevent the cache from being used. Here we use
-      # `|| true` to prevent the job from failing if the image doesn't exist or
-      # can't be removed for some reason
-      run: docker rmi reedcompbio/omics-integrator-1:latest || true
-
-    ###################
-    #     Omics 2     #
-    ###################
-    - name: Build Omics Integrator 2 Docker image
-      uses: docker/build-push-action@v6
-      with:
-        context: docker-wrappers/OmicsIntegrator2/.
-        file: docker-wrappers/OmicsIntegrator2/Dockerfile
-        tags: reedcompbio/omics-integrator-2:v2
-        repository: reedcompbio/omics-integrator-2:v2
-        cache-from: type=registry,ref=reedcompbio/omics-integrator-2:latest
-        push: false
-    - name: Remove Omics Integrator 2 Docker image
-      run: docker rmi reedcompbio/omics-integrator-2:latest || true
-
-    ###################
-    #    PathLinker   #
-    ###################
-    - name: Build PathLinker Docker image
-      uses: docker/build-push-action@v6
-      with:
-        context: docker-wrappers/PathLinker/.
-        file: docker-wrappers/PathLinker/Dockerfile
-        tags: reedcompbio/pathlinker:v2
-        cache-from: type=registry,ref=reedcompbio/pathlinker:latest
-        push: false
-    - name: Remove PathLinker Docker image
-      run: docker rmi reedcompbio/pathlinker:latest || true
-
-    ###################
-    #       MEO       #
-    ###################
-    - name: Build Maximum Edge Orientation Docker image
-      uses: docker/build-push-action@v6
-      with:
-        context: docker-wrappers/MEO/.
-        file: docker-wrappers/MEO/Dockerfile
-        tags: reedcompbio/meo:latest
-        cache-from: type=registry,ref=reedcompbio/meo:latest
-        push: false
-    - name: Remove MEO Docker image
-      run: docker rmi reedcompbio/meo:latest || true
-
-    ###################
-    #   MinCostFlow   #
-    ###################
-    - name: Build MinCostFlow Docker image
-      uses: docker/build-push-action@v6
-      with:
-        context: docker-wrappers/MinCostFlow/.
-        file: docker-wrappers/MinCostFlow/Dockerfile
-        tags: reedcompbio/mincostflow:latest
-        cache-from: type=registry,ref=reedcompbio/mincostflow:latest
-        push: false
-    - name: Remove MinCostFlow Docker image
-      run: docker rmi reedcompbio/mincostflow:latest || true
-
-    ###################
-    #    All Pairs    #
-    ###################
-    - name: Build All Pairs Shortest Paths Docker image
-      uses: docker/build-push-action@v6
-      with:
-        context: docker-wrappers/AllPairs/.
-        file: docker-wrappers/AllPairs/Dockerfile
-        tags: reedcompbio/allpairs:v2
-        cache-from: type=registry,ref=reedcompbio/allpairs:latest
-        push: false
-    - name: Remove All Pairs Shortest Paths Docker image
-      run: docker rmi reedcompbio/allpairs:latest || true
-
-    ###################
-    #     DOMINO      #
-    ###################
-    - name: Build DOMINO Docker image
-      uses: docker/build-push-action@v6
-      with:
-        context: docker-wrappers/DOMINO/.
-        file: docker-wrappers/DOMINO/Dockerfile
-        tags: reedcompbio/domino:latest
-        cache-from: type=registry,ref=reedcompbio/domino:latest
-        push: false
-    - name: Remove DOMINO Docker image
-      run: docker rmi reedcompbio/domino:latest || true
-
-    ###################
-    #    Cytoscape    #
-    ###################
-    - name: Build Cytoscape Docker image
-      uses: docker/build-push-action@v6
-      with:
-        context: docker-wrappers/Cytoscape/.
-        file: docker-wrappers/Cytoscape/Dockerfile
-        tags: reedcompbio/py4cytoscape:v3
-        cache-from: type=registry,ref=reedcompbio/py4cytoscape:v3
-        push: false
-    - name: Remove Cytoscape Docker image
-      run: docker rmi reedcompbio/py4cytoscape:v3 || true
-
-    ###################
-    #      SPRAS      #
-    ###################
-    - name: Build SPRAS Docker image
-      uses: docker/build-push-action@v6
-      with:
-        context: .
-        file: docker-wrappers/SPRAS/Dockerfile
-        tags: reedcompbio/spras:v0.2.0
-        cache-from: type=registry,ref=reedcompbio/spras:v0.2.0
-        push: false
-    - name: Remove SPRAS Docker image
-      run: docker rmi reedcompbio/spras:v0.2.0 || true
+  build-and-remove-omics1:
+    uses: "./.github/workflows/build-and-remove-template.yml@${{ github.sha }}"
+    with:
+      path: docker-wrappers/OmicsIntegrator1
+      container: reedcompbio/omics-integrator-1
+      tag: latest
+      always-build: false
+  build-and-remove-omics2:
+    uses: "./.github/workflows/build-and-remove-template.yml@${{ github.sha }}"
+    with:
+      path: docker-wrappers/OmicsIntegrator2
+      container: reedcompbio/omics-integrator-2
+      tag: latest
+      always-build: false
+  build-and-remove-pathlinker:
+    uses: "./.github/workflows/build-and-remove-template.yml@${{ github.sha }}"
+    with:
+      path: docker-wrappers/PathLinker/
+      container: reedcompbio/pathlinker
+      tag: v2
+      always-build: false
+  build-and-remove-meo:
+    uses: "./.github/workflows/build-and-remove-template.yml@${{ github.sha }}"
+    with:
+      path: docker-wrappers/MEO/
+      container: reedcompbio/meo
+      tag: latest
+      always-build: false
+  build-and-remove-mincostflow:
+    uses: "./.github/workflows/build-and-remove-template.yml@${{ github.sha }}"
+    with:
+      path: docker-wrappers/MinCostFlow/
+      container: reedcompbio/mincostflow
+      tag: latest
+      always-build: false
+  build-and-remove-allpairs:
+    uses: "./.github/workflows/build-and-remove-template.yml@${{ github.sha }}"
+    with:
+      path: docker-wrappers/AllPairs/
+      container: reedcompbio/allpairs
+      tag: v2
+      always-build: false
+  build-and-remove-domino:
+    uses: "./.github/workflows/build-and-remove-template.yml@${{ github.sha }}"
+    with:
+      path: docker-wrappers/DOMINO/
+      container: reedcompbio/domino
+      tag: latest
+      always-build: false
+  build-and-remove-cytoscape:
+    uses: "./.github/workflows/build-and-remove-template.yml@${{ github.sha }}"
+    with:
+      path: docker-wrappers/Cytoscape/
+      container: reedcompbio/py4cytoscape
+      tag: v3
+      always-build: false
+  build-and-remove-spras:
+    uses: "./.github/workflows/build-and-remove-template.yml@${{ github.sha }}"
+    with:
+      path: docker-wrappers/SPRAS/
+      container: reedcompbio/spras
+      tag: v0.2.0
+      # Since any change to the SPRAS codebase would constitute a change to
+      # the container we produce in this step, build the container regardless
+      # of detected changes.
+      always-build: true

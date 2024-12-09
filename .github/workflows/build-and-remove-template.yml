@@ -1,0 +1,64 @@
+name: Build And Remove Docker Image
+# A workflow template that handles building+removing SPRAS containers.
+
+# Required inputs are:
+# - path: The path to a container's Dockerfile directory, relative to the repo root
+# - container: The registry/container to be built, without a tag
+# - tag: The tag to be built
+# - always-build: A boolean indicating whether the action should condition whether it builds the container
+#       on any detected changes
+on:
+  workflow_call:
+    inputs:
+      path:
+        required: true
+        type: string
+      container:
+        required: true
+        type: string
+      tag:
+        required: true
+        type: string
+      always-build:
+        required: true
+        type: boolean
+
+jobs:
+  build-and-remove-docker-image:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v2
+
+      # Given the input path to the directory containing definitions of the container,
+      # check whether anything at that path has been modified relative to master's head.
+      # If so, we'll build the container.
+      - name: Check for changes
+        if: inputs.always-build == 'false'
+        id: check_changes
+        run: |
+          if git fetch origin master && git diff --name-only origin/master | grep -q "${{ inputs.path }}"; then
+            echo "changed=true" >> $GITHUB_ENV
+          else
+            echo "changed=false" >> $GITHUB_ENV
+          fi
+
+      - name: Set changed to true for always-build
+        if: inputs.always-build == 'true'
+        run: echo "changed=true" >> $GITHUB_ENV
+
+      - name: Build Docker image
+        if: env.changed == 'true'
+        uses: docker/build-push-action@v6
+        with:
+          context: ${{ inputs.path }}/.
+          file: ${{ inputs.path }}/Dockerfile
+          tags: ${{ inputs.container }}:${{ inputs.tag }}
+          cache-from: type=registry,ref=${{ inputs.container }}:latest
+          push: false
+
+      # Clean/remove the container as we go -- we don't actually need it around, and it
+      # counts against our action's disk quota.
+      - name: Remove Docker image
+        if: env.changed == 'true'
+        run: docker rmi ${{ inputs.container }}:${{ inputs.tag }} || true
