@@ -124,7 +124,7 @@ class Evaluation:
                             label=f"{algorithm}"
                         )
 
-               
+
                 plt.xlabel("Recall")
                 plt.ylabel("Precision")
                 plt.title(f"Precision and Recall Plot")
