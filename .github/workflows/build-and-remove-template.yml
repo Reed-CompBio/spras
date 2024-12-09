@@ -7,6 +7,7 @@ name: Build And Remove Docker Image
 # - tag: The tag to be built
 # - always-build: A boolean indicating whether the action should condition whether it builds the container
 #       on any detected changes
+# - context: The optional build context path, relative to the repo root.
 on:
   workflow_call:
     inputs:
@@ -22,6 +23,9 @@ on:
       always-build:
         required: true
         type: boolean
+      context:
+        required: false
+        type: string
 
 jobs:
   build-and-remove-docker-image:
@@ -32,7 +36,7 @@ jobs:
 
       # Given the input path to the directory containing definitions of the container,
       # check whether anything at that path has been modified relative to master's head.
-      # If so, we'll build the container.
+      # If so, we'll set `env.changed=true` to trigger the build in a later step
       - name: Check for changes
         if: inputs.always-build == 'false'
         id: check_changes
@@ -51,9 +55,11 @@ jobs:
         if: env.changed == 'true'
         uses: docker/build-push-action@v6
         with:
-          context: ${{ inputs.path }}/.
+          context: ${{ inputs.context || inputs.path }}/.
           file: ${{ inputs.path }}/Dockerfile
           tags: ${{ inputs.container }}:${{ inputs.tag }}
+          # The cache will always use the `latest` tag, as we assume that results in the highest
+          # amount of reusable container stuff.
           cache-from: type=registry,ref=${{ inputs.container }}:latest
           push: false
 
