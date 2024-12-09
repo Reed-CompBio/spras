@@ -2,11 +2,11 @@ name: Build And Remove Docker Image
 # A workflow template that handles building+removing SPRAS containers.
 
 # Required inputs are:
-# - path: The path to a container's Dockerfile directory, relative to the repo root
-# - container: The registry/container to be built, without a tag
-# - tag: The tag to be built
-# - always-build: A boolean indicating whether the action should condition whether it builds the container
-#       on any detected changes
+# - path: The path to a container's Dockerfile directory, relative to the repo root.
+# - container: The registry/container to be built, without a tag.
+# - tag: The tag to be built.
+# - always_build: A boolean indicating whether the action should condition the container build
+#                 on detected changes.
 # - context: The optional build context path, relative to the repo root.
 on:
   workflow_call:
@@ -20,9 +20,10 @@ on:
       tag:
         required: true
         type: string
-      always-build:
-        required: true
+      always_build:
+        required: false
         type: boolean
+        default: false
       context:
         required: false
         type: string
@@ -38,7 +39,7 @@ jobs:
       # check whether anything at that path has been modified relative to master's head.
       # If so, we'll set `env.changed=true` to trigger the build in a later step
       - name: Check for changes
-        if: ${{ inputs.always-build }} == 'false'
+        if: ${{ inputs.always_build }}
         id: check_changes
         run: |
           if git fetch origin master && git diff --name-only origin/master | grep -q "$(basename ${{ inputs.path }})"; then
@@ -49,10 +50,10 @@ jobs:
             echo "changed=false" >> $GITHUB_ENV
           fi
 
-      - name: Set changed to true for always-build
-        if: ${{ inputs.always-build }} == 'true'
+      - name: Toggle container build if 'always_build'
+        if: ${{ inputs.always_build }}
         run: |
-          echo "Input for job 'always-build' is true -- building regardless of detected changes."
+          echo "Input for job 'always_build' is true -- building regardless of detected changes."
           echo "changed=true" >> $GITHUB_ENV
 
       - name: Build Docker image
