@@ -117,6 +117,8 @@ class Config:
             if container_framework not in ("docker", "singularity", "dsub"):
                 msg = "SPRAS was configured to run with an unknown container framework: '" + raw_config["container_framework"] + "'. Accepted values are 'docker' or 'singularity'."
                 raise ValueError(msg)
+            if container_framework == "dsub":
+                print("Warning: 'dsub' framework integration is experimental and may not be fully supported.")
             self.container_framework = container_framework
         else:
             self.container_framework = "docker"
