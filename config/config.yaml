@@ -3,8 +3,10 @@
 # The length of the hash used to identify a parameter combination
 hash_length: 7
 
-# Specify the container framework. Current supported versions include 'docker' and
-# 'singularity'. If container_framework is not specified, SPRAS will default to docker.
+# Specify the container framework used by each PRM wrapper. Valid options include:
+# - docker (default if not specified)
+# - singularity -- Also known as apptainer, useful in HPC/HTC environments where docker isn't allowed
+# - dsub -- experimental with limited support, used for running on Google Cloud
 container_framework: docker
 
 # Only used if container_framework is set to singularity, this will unpack the singularity containers
