@@ -1,6 +1,11 @@
-Name	Number of nodes	Number of undirected edges	Number of connected components	Nodes in prize	Nodes in sources	Nodes in targets	Parameter combination
-test/analysis/input/egfr/tps-egfr-omicsintegrator1-params-3THRXWW_pathway.txt	26	20	6	26	1	25	{b: 0.55, d: 10, g: 1e-3, r: 0.01, w: 0.1, mu: 0.008}
-test/analysis/input/egfr/tps-egfr-omicsintegrator1-params-5QH767V_pathway.txt	39	33	6	39	1	38	{b: 2, d: 10, g: 1e-3, r: 0.01, w: 0.1, mu: 0.008}
-test/analysis/input/egfr/tps-egfr-omicsintegrator1-params-ITO5EQS_pathway.txt	12	8	4	12	0	12	{b: 10, d: 10, g: 1e-3, r: 0.01, w: 0.1, mu: 0.008}
-test/analysis/input/egfr/tps-egfr-pathlinker-params-7S4SLU6_pathway.txt	12	15	1	7	1	6	{local_search: Yes, max_path_length: 3, rand_restarts: 10}
-test/analysis/input/egfr/tps-egfr-pathlinker-params-TCEMRS7_pathway.txt	23	27	1	14	1	13	{slice_threshold: 0.3, module_threshold: 0.05}
+Name	Number of nodes	Number of undirected edges	Number of connected components	Nodes in prize	Nodes in sources	Nodes in targets	Nodes in active	Parameter combination
+output/egfr/tps_egfr-domino-params-V3X4RW7/pathway.txt	567	537	30	227	1	226	227	{k: 10}
+output/egfr/tps_egfr-meo-params-GKEDDFZ/pathway.txt	1874	12845	1	621	1	620	621	{k: 20}
+output/egfr/tps_egfr-omicsintegrator1-params-3THRXWW/pathway.txt	28	20	8	28	1	27	28	{b: 0.55, d: 10, g: 1e-3, r: 0.01, w: 0.1, mu: 0.008}
+output/egfr/tps_egfr-omicsintegrator1-params-5QH767V/pathway.txt	39	31	8	39	1	38	39	{b: 2, d: 10, g: 1e-3, r: 0.01, w: 0.1, mu: 0.008}
+output/egfr/tps_egfr-omicsintegrator1-params-ITO5EQS/pathway.txt	14	9	5	14	0	14	14	{b: 10, d: 10, g: 1e-3, r: 0.01, w: 0.1, mu: 0.008}
+output/egfr/tps_egfr-omicsintegrator2-params-EHHWPMD/pathway.txt	592	591	1	531	1	530	531	{b: 4, g: 0}
+output/egfr/tps_egfr-omicsintegrator2-params-IV3IPCJ/pathway.txt	703	702	1	616	1	615	616	{b: 2, g: 3}
+output/egfr/tps_egfr-pathlinker-params-7S4SLU6/pathway.txt	14	17	1	6	1	5	6	{local_search: Yes, max_path_length: 3, rand_restarts: 10}
+output/egfr/tps_egfr-pathlinker-params-TCEMRS7/pathway.txt	25	32	1	11	1	10	11	{slice_threshold: 0.3, module_threshold: 0.05}
+
