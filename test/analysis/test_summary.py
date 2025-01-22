@@ -14,10 +14,9 @@ from spras.analysis.summary import summarize_networks
 class TestSummary:
     # Test data from example workflow:
     def test_example_networks(self):
-        init_from_file(Path("test/analysis/input/config.yaml"))
+        config.init_from_file(Path("test/analysis/input/config.yaml"))
         algorithm_params = config.config.algorithm_params
-        algorithm_directed = config.config.algorithm_directed
-        algorithms = list(algorithm_params)
+        list(algorithm_params)
         algorithms_with_params = [f'{algorithm}-params-{params_hash}' for algorithm, param_combos in algorithm_params.items() for params_hash in param_combos.keys()]
 
         example_network_files = Path("test/analysis/input/example").glob("*.txt")
@@ -28,10 +27,9 @@ class TestSummary:
 
     # Test data from EGFR workflow:
     def test_egfr_networks(self):
-        init_from_file(Path("test/analysis/input/egfr.yaml"))
+        config.init_from_file(Path("test/analysis/input/egfr.yaml"))
         algorithm_params = config.config.algorithm_params
-        algorithm_directed = config.config.algorithm_directed
-        algorithms = list(algorithm_params)
+        list(algorithm_params)
         algorithms_with_params = [f'{algorithm}-params-{params_hash}' for algorithm, param_combos in algorithm_params.items() for params_hash in param_combos.keys()]
 
         egfr_network_files = Path("test/analysis/input/egfr").glob("*.txt")
