@@ -78,6 +78,7 @@ def summarize_networks(file_paths: Iterable[Union[str, PathLike]]) -> pd.DataFra
                 str(tup[0]): 1,
             }, index=tup[1]
         )
+        # TODO: remove duplicates before getting to this step
         # Mark the first occurrence of a duplicate as True and all others as False
         # Non-duplicates are also marked as True
         dataframe = dataframe[~dataframe.index.duplicated(keep='first')]
