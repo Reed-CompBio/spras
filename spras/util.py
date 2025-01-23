@@ -87,4 +87,4 @@ def duplicate_edges(df: pd.DataFrame):
     print(df)
     print(new_df == df)
 
-    return new_df, new_df == df  #true if there are duplicate edges 
+    return new_df, new_df == df  #true if there are duplicate edges
