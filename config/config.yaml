@@ -56,6 +56,7 @@ algorithms:
                   b: [5, 6]
                   w: np.linspace(0,5,2)
                   d: [10]
+                  dummy_mode: ["file"] # Or "terminals", "all", "others"
 
       - name: "omicsintegrator2"
         params:
@@ -101,6 +102,8 @@ datasets:
     -
       # Labels can only contain letters, numbers, or underscores
       label: data0
+      # To run OmicsIntegrator1 with dummy nodes, add dummy.txt file to node_files
+      # or a dummy column to the node table
       node_files: ["node-prizes.txt", "sources.txt", "targets.txt"]
       # DataLoader.py can currently only load a single edge file, which is the primary network
       edge_files: ["network.txt"]

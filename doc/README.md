@@ -23,13 +23,21 @@ The graph algorithms below have been used (or have the potential to be used) for
 - Basha et al., ResponseNet2.0: revealing signaling and regulatory pathways connecting your proteins and genes–now with human data. _Nucleic Acids Research._ 2013. [doi:10.1093/nar/gkt532](https://dx.doi.org/10.1093%2Fnar%2Fgkt532)
 - Basha et al. ResponseNet v.3: revealing signaling and regulatory pathways connecting your proteins and genes across human tissues. _Nucleic Acids Research._ 2019. [doi:10.1093/nar/gkz421](https://dx.doi.org/10.1093%2Fnar%2Fgkz421)
 
-## Prize Collecting Steiner Forest (PCSF)
+## Prize Collecting Steiner Forest (PCSF): OmicsIntegrator1 and OmicsIntegrator2
 
 **References:**
 - Huang and Fraenkel. Integrating proteomic, transcriptional, and interactome data reveals hidden components of signaling and regulatory networks. _Science Signaling._ 2009. [doi:10.1126/scisignal.2000350](https://doi.org/10.1126/scisignal.2000350)
 - Tuncbag et al. Simultaneous reconstruction of multiple signaling pathways via the prize-collecting steiner forest problem. _Journal of Computational Biology._ 2013. [doi:10.1089/cmb.2012.0092](https://doi.org/10.1089/cmb.2012.0092)
 - Gitter et al. Sharing information to reconstruct patient-specific pathways in heterogeneous diseases.  _Pacific Symposium on Biocomputing._ 2014. [doi:10.1142/9789814583220_0005](https://doi.org/10.1142/9789814583220_0005)
 - Tuncbag et al., Network-Based Interpretation of Diverse High-Throughput Datasets through the Omics Integrator Software Package. _PLoS Computational Biology._ 2016. [doi:10.1371/journal.pcbi.1004879](https://doi.org/10.1371/journal.pcbi.1004879)
+
+One of the parameter options for OmicsIntegraor1 is `dummy_mode`.
+There are 4 dummy mode possibilities:
+ 1. `terminals`: connect the dummy node to all nodes that have been assigned prizes
+ 2. `all`:  connect the dummy node to all nodes in the interactome i.e. full set of nodes in graph
+ 3. `others`: connect the dummy node to all nodes that are not terminal nodes i.e. nodes w/o prizes
+ 4. `file`: connect the dummy node to a specific list of nodes provided in a file
+To support the `file` dummy node logic as part of OmicsIntegrator1, you can either add a separate `dummy.txt` file (and add this to the `node_files` argument in `config.yaml `) or add a `dummy` column node attribute to a file that contains `NODEID`, `prize`, `source`, etc.
 
 ## PathLinker
 

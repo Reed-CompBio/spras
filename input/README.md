@@ -11,8 +11,8 @@ All other columns specify additional node attributes such as prizes.
 Any nodes that are listed in a node file but are not present in one or more edges in the edge file will be removed.
 For example:
 ```
-NODEID	prize	sources	targets	active
-A	1.0		True	True
+NODEID	prize	sources	targets	active dummy
+A	1.0		True	True	True
 B	3.3	True		True
 C	2.5		True	True
 D	1.9	True	True	True
