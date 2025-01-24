@@ -70,6 +70,8 @@ jobs:
 
       # Clean/remove the container as we go -- we don't actually need it around, and it
       # counts against our action's disk quota.
+      # Here we use `|| true` to prevent the job from failing if the image doesn't exist or
+      # can't be removed for some reason
       - name: Remove Docker image
         if: env.changed == 'true'
         run: docker rmi ${{ inputs.container }}:${{ inputs.tag }} || true
