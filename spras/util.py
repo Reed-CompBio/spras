@@ -78,13 +78,12 @@ def raw_pathway_df(raw_pathway_file: str, sep: str = '\t', header: int = None) -
     return df
 
 def duplicate_edges(df: pd.DataFrame):
+    """
+    Removes duplicate edges (Node1, Node2 pairs) from the input DataFrame
 
-    # write a function to check for duplicates (node1, node2) pairs from the columns node1 and node2 and remove the duplicates if they exist
-    new_df = df.drop_duplicates(subset=['node1', 'node2'], keep='first')
-
-    # TODO: remove these after testing
-    print(new_df)
-    print(df)
-    print(new_df == df)
-
-    return new_df, new_df == df  #true if there are duplicate edges
+    @param df: A DataFrame from a raw file pathway
+    @return pd.DataFrame: A DataFrame with duplicate edges removed
+    @return bool: True if duplicate edges were found and removed, False otherwise.
+    """
+    unique_edges_df = df.drop_duplicates(subset=['Node1', 'Node2'], keep='first')
+    return unique_edges_df, not unique_edges_df.equals(df)
