@@ -224,7 +224,7 @@ The pull request will be closed so that the `master` branch of the fork stays sy
 1. Document the usage of the Docker wrapper and the assumptions made when implementing the wrapper
 1. Add example usage for the new algorithm and its parameters to the template config file
 1. Write test functions and provide example input data in a new test subdirectory `test/<algorithm>`. Provide example data and algorithm/expected files names to lists or dicts in `test/generate-inputs` and `test/parse-outputs`. Use the full path with the names of the test files.
-1. Extend `.github/workflows/test-spras.yml` to pull and build the new Docker image
+1. Extend `.github/workflows/build-containers.yml` to pull and build the new Docker image
 
 When adding new algorithms, there are many other considerations that are not relevant with the simple Local Neighborhood example.
 Most algorithms require dependencies that need to be installed in the `Dockerfile`.
