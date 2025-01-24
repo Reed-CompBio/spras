@@ -6,8 +6,8 @@ name: Release SPRAS on new tags
 on:
   push:
     tags:
-      # run release on any version tag vX.Y.Z, e.g. v0.2.1
-      - v[0-9]+\.[0-9]+\.[0-9]+
+      # run release on any version tag X.Y.Z, e.g. 0.2.1
+      - '[0-9]+\.[0-9]+\.[0-9]+'
 
 jobs:
   build-and-push:
