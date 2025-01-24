@@ -1,0 +1,43 @@
+name: Release SPRAS on new tags
+# This action runs whenever a new tag matching vX.Y.Z is pushed to the repo.
+# Its job is to build the `spras` container and push it to DockerHub with the
+# 'latest' tag, and a tag matching the one supplied to GitHub.
+
+on:
+  push:
+    tags:
+      # run release on any version tag X.Y.Z, e.g. 0.2.1
+      - '[0-9]+\.[0-9]+\.[0-9]+'
+
+jobs:
+  build-and-push:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v2
+
+      - name: Set up Docker Buildx
+        uses: docker/setup-buildx-action@v3
+
+      - name: Log in to Docker Hub
+        uses: docker/login-action@v1
+        with:
+          username: ${{ vars.DOCKER_USERNAME }}
+          # Passwords are set up through the GitHub control pannel. The docs for
+          # the login action are explicit about never using a real password, and
+          # instead setting up a DockerHub personal access token:
+          # https://github.com/docker/login-action?tab=readme-ov-file#docker-hub
+          password: ${{ secrets.DOCKER_PASSWORD }}
+
+      - name: Build and push Docker image
+        uses: docker/build-push-action@v6
+        with:
+          context: ./
+          file: docker-wrappers/SPRAS/Dockerfile
+          tags: |
+            reedcompbio/spras:${{ github.ref_name }}
+            reedcompbio/spras:latest
+          # Use the previous latest for the build cache, assuming they're probably
+          # relatively similar
+          cache-from: type=registry,ref=reedcompbio/spras:latest
+          push: true
