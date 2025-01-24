@@ -1,4 +1,4 @@
-name: Build And Remove Docker Image
+name: Build and Remove Docker Image
 # A workflow template that handles building+removing SPRAS containers.
 
 # Required inputs are:
