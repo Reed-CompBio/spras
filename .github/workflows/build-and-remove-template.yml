@@ -4,7 +4,6 @@ name: Build and Remove Docker Image
 # Required inputs are:
 # - path: The path to a container's Dockerfile directory, relative to the repo root.
 # - container: The registry/container to be built, without a tag.
-# - tag: The tag to be built.
 # - always_build: A boolean indicating whether the action should condition the container build
 #                 on detected changes.
 # - context: The optional build context path, relative to the repo root.
