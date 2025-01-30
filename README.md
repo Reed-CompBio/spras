@@ -13,7 +13,7 @@ Open a [GitHub issue](https://github.com/Reed-CompBio/spras/issues) or contact [
 
 SPRAS is inspired by tools for single-cell transcriptomics such as [BEELINE](https://github.com/Murali-group/Beeline) and [dynverse](https://github.com/dynverse) that provide a unified interface to many related algorithms.
 
-![SPRAS overview](docs/spras-overview.png)
+![SPRAS overview](doc/spras-overview.png)
 SPRAS overview showing [PathLinker](https://github.com/Murali-group/PathLinker) and [Omics Integrator](https://github.com/fraenkel-lab/OmicsIntegrator) as representative pathway reconstruction algorithms.
 
 ## Installing and running SPRAS
