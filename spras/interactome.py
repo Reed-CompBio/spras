@@ -13,7 +13,7 @@ def convert_undirected_to_directed(df: pd.DataFrame) -> pd.DataFrame:
     turns a graph into a fully directed graph
     - turns every undirected edge into a pair of directed edges
     - with the pair of directed edges, we are not losing too much information because the relationship of the undirected
-      edge is still preserved
+    edge is still preserved
 
     @param df: input network df of edges, weights, and directionality
     @return a dataframe with no undirected edges in Direction column
@@ -33,7 +33,7 @@ def convert_directed_to_undirected(df: pd.DataFrame) -> pd.DataFrame:
     turns a graph into a fully undirected graph
     - turns all the directed edges directly into undirected edges
     - we will lose any sense of directionality and the graph won't be inherently accurate, but the basic relationship
-      between the two connected nodes will still remain intact.
+    between the two connected nodes will still remain intact.
 
     @param df: input network df of edges, weights, and directionality
     @return a dataframe with no directed edges in Direction column
