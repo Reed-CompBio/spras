@@ -23,7 +23,7 @@ jobs:
         uses: docker/login-action@v1
         with:
           username: ${{ vars.DOCKER_USERNAME }}
-          # Passwords are set up through the GitHub control pannel. The docs for
+          # Passwords are set up through the GitHub control panel. The docs for
           # the login action are explicit about never using a real password, and
           # instead setting up a DockerHub personal access token:
           # https://github.com/docker/login-action?tab=readme-ov-file#docker-hub
