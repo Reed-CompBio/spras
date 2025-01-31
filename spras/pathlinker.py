@@ -7,7 +7,7 @@ from spras.interactome import (
     reinsert_direction_col_directed,
 )
 from spras.prm import PRM
-from spras.util import raw_pathway_df
+from spras.util import duplicate_edges, raw_pathway_df
 
 __all__ = ['PathLinker']
 
@@ -141,4 +141,7 @@ class PathLinker(PRM):
             df = df.take([0, 1, 2], axis=1)
             df = reinsert_direction_col_directed(df)
             df.columns = ['Node1', 'Node2', 'Rank', "Direction"]
+            df, has_duplicates = duplicate_edges(df)
+            if has_duplicates:
+                print(f"Duplicate edges were removed from {raw_pathway_file}")
         df.to_csv(standardized_pathway_file, header=True, index=False, sep='\t')
