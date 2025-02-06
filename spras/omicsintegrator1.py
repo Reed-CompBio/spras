@@ -35,19 +35,21 @@ def write_conf(filename=Path('config.txt'), w=None, b=None, d=None, mu=None, noi
         f.write('processes = 1\n')
         f.write('threads = 1\n')
 
-"""
-Omics Integrator 1 works with partially directed graphs
-- it takes in the universal input directly
 
-Expected raw input format:
-Interactor1    Interactor2   Weight    Direction
-- the expected raw input file should have node pairs in the 1st and 2nd columns, with a weight in the 3rd column and directionality in the 4th column
-- it can include repeated and bidirectional edges
-- it uses 'U' for undirected edges and 'D' for directed edges
-
-"""
 class OmicsIntegrator1(PRM):
-    required_inputs = ['prizes', 'edges']
+    """
+    Omics Integrator 1 works with partially directed graphs
+    - it takes in the universal input directly
+
+    Expected raw input format:
+    Interactor1    Interactor2   Weight    Direction
+    - the expected raw input file should have node pairs in the 1st and 2nd columns, with a weight in the 3rd column and
+    directionality in the 4th column
+    - it can include repeated and bidirectional edges
+    - it uses 'U' for undirected edges and 'D' for directed edges
+
+    """
+    required_inputs = ['prizes', 'edges', 'dummy_nodes']
 
     @staticmethod
     def generate_inputs(data, filename_map):
@@ -83,13 +85,22 @@ class OmicsIntegrator1(PRM):
                         columns=['Interactor1','Interactor2','Weight','Direction'],
                         header=['protein1','protein2','weight','directionality'])
 
+        # creates the dummy_nodes file
+        if 'dummy' in data.node_table.columns:
+            dummy_df = data.node_table[data.node_table['dummy'] == True]
+            # save as list of dummy nodes
+            dummy_df.to_csv(filename_map['dummy_nodes'], index=False, columns=['NODEID'], header=None)
+        else:
+            # create empty dummy file
+            with open(filename_map['dummy_nodes'], mode='w'):
+                pass
 
     # TODO add parameter validation
     # TODO add support for knockout argument
     # TODO add reasonable default values
     # TODO document required arguments
     @staticmethod
-    def run(edges=None, prizes=None, dummy_mode=None, mu_squared=None, exclude_terms=None,
+    def run(edges=None, prizes=None, dummy_nodes=None, dummy_mode=None, mu_squared=None, exclude_terms=None,
             output_file=None, noisy_edges=None, shuffled_prizes=None, random_terminals=None,
             seed=None, w=None, b=None, d=None, mu=None, noise=None, g=None, r=None, container_framework="docker"):
         """
@@ -118,6 +129,19 @@ class OmicsIntegrator1(PRM):
         bind_path, prize_file = prepare_volume(prizes, work_dir)
         volumes.append(bind_path)
 
+        # 4 dummy mode possibilities:
+        #   1. terminals -> connect the dummy node to all nodes that have been assigned prizes
+        #   2. all ->  connect the dummy node to all nodes in the interactome i.e. full set of nodes in graph
+        #   3. others -> connect the dummy node to all nodes that are not terminal nodes i.e. nodes w/o prizes
+        #   4. file -> connect the dummy node to a specific list of nodes provided in a file
+
+        # add dummy node file to the volume if dummy_mode is not None and it is 'file'
+        if dummy_mode == 'file':
+            if dummy_nodes is None:
+                raise ValueError("dummy_nodes file is required when dummy_mode is set to 'file'")
+            bind_path, dummy_file = prepare_volume(dummy_nodes, work_dir)
+            volumes.append(bind_path)
+
         out_dir = Path(output_file).parent
         # Omics Integrator 1 requires that the output directory exist
         out_dir.mkdir(parents=True, exist_ok=True)
@@ -139,9 +163,16 @@ class OmicsIntegrator1(PRM):
                    '--outpath', mapped_out_dir,
                    '--outlabel', 'oi1']
 
+        # add the dummy mode argument
+        if dummy_mode is not None and dummy_mode:
+            # for custom dummy modes, add the file
+            if dummy_mode == 'file':
+                command.extend(['--dummy', dummy_file])
+            # else pass in the dummy_mode and let oi1 handle it
+            else:
+                command.extend(['--dummy', dummy_mode])
+
         # Add optional arguments
-        if dummy_mode is not None:
-            command.extend(['--dummyMode', str(dummy_mode)])
         if mu_squared is not None and mu_squared:
             command.extend(['--musquared'])
         if exclude_terms is not None and exclude_terms:
