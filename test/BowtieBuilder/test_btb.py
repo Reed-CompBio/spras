@@ -15,20 +15,7 @@ sys.path.append(str(Path(SPRAS_ROOT, 'docker-wrappers', 'BowTieBuilder')))
 from spras.btb import BowTieBuilder as BTB
 
 TEST_DIR = Path('test', 'BowTieBuilder/')
-OUT_FILE = Path(TEST_DIR, 'output', 'output.txt')
 OUT_FILE_DEFAULT = Path(TEST_DIR, 'output', 'raw-pathway.txt')
-BTB_OUT_FILE = Path(TEST_DIR, 'output', 'btb-output.txt')
-DISJOINT_OUT_FILE = Path(TEST_DIR, 'output', 'disjoint-output.txt')
-DISJOINT2_OUT_FILE = Path(TEST_DIR, 'output', 'disjoint2-output.txt')
-SOURCE_TO_SOURCE_OUT_FILE = Path(TEST_DIR, 'output', 'source-to-source-output.txt')
-SOURCE_TO_SOURCE2_OUT_FILE = Path(TEST_DIR, 'output', 'source-to-source2-output.txt')
-SOURCE_TO_SOURCE_DISJOINT_OUT_FILE = Path(TEST_DIR, 'output', 'source-to-source-disjoint-output.txt')
-BIDIRECTIONAL_OUT_FILE = Path(TEST_DIR, 'output', 'bidirectional-output.txt')
-TARGET_TO_SOURCE_OUT_FILE = Path(TEST_DIR, 'output', 'target-to-source-output.txt')
-LOOP_OUT_FILE = Path(TEST_DIR, 'output', 'loop-output.txt')
-WEIGHTED_OUT_FILE = Path(TEST_DIR, 'output', 'weighted-output.txt')
-NO_WEIGHT_OUT_FILE = Path(TEST_DIR, 'output', 'no-weight-output.txt')
-WEIGHT_ONE_OUT_FILE = Path(TEST_DIR, 'output', 'weight-one-output.txt')
 
 
 class TestBowTieBuilder:
