@@ -66,7 +66,7 @@ class BowTieBuilder(PRM):
     @staticmethod
     def run(sources=None, targets=None, edges=None, output_file=None, container_framework="docker"):
         """
-        Run PathLinker with Docker
+        Run BTB with Docker
         @param sources:  input source file (required)
         @param targets:  input target file (required)
         @param edges:    input edge file (required)
@@ -109,10 +109,8 @@ class BowTieBuilder(PRM):
         bind_path, edges_file = prepare_volume(edges, work_dir)
         volumes.append(bind_path)
 
-        # PathLinker does not provide an argument to set the output directory
         # Use its --output argument to set the output file prefix to specify an absolute path and prefix
         out_dir = Path(output_file).parent
-        # PathLinker requires that the output directory exist
         out_dir.mkdir(parents=True, exist_ok=True)
         bind_path, mapped_out_dir = prepare_volume(str(out_dir), work_dir)
         volumes.append(bind_path)
