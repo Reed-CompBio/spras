@@ -18,6 +18,15 @@ from spras.util import add_rank_column, raw_pathway_df
 
 __all__ = ['BowTieBuilder']
 
+"""
+BTB will construct a BowTie-shaped graph from the provided input file.
+BTB works with directed and undirected graphs.
+It generates a graph connecting multiple source nodes to multiple target nodes with the minimal number of intermediate nodes as possible.
+
+Expected raw edge file format:
+Interactor1     Interactor2     Weight
+"""
+
 class BowTieBuilder(PRM):
     required_inputs = ['sources', 'targets', 'edges']
 
@@ -122,16 +131,16 @@ class BowTieBuilder(PRM):
                    edges_file,
                    '--sources',
                    source_file,
-                   '--target',
+                   '--targets',
                    target_file,
-                   '--output',
+                   '--output_file',
                    mapped_out_prefix]
         # command = ['ls', '-R']
 
 
         print('Running BowTieBuilder with arguments: {}'.format(' '.join(command)), flush=True)
 
-        container_suffix = "bowtiebuilder:v1"
+        container_suffix = "bowtiebuilder:v2"
         out = run_container(container_framework,
                             container_suffix,
                             command,
