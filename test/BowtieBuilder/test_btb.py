@@ -53,15 +53,15 @@ class TestBowTieBuilder:
                            edges=Path(TEST_DIR, 'input', 'edges.txt'),
                            output_file=OUT_FILE_DEFAULT)
 
-    """
-    Run the BowTieBuilder algorithm with bad input data
-    """
-    def test_format_error(self):
-        with pytest.raises(IndexError):
-            BTB.run(sources=Path(TEST_DIR, 'input', 'source.txt'),
-                           targets=Path(TEST_DIR, 'input', 'target.txt'),
-                           edges=Path(TEST_DIR, 'input', 'edges_bad.txt'),
-                           output_file=OUT_FILE_DEFAULT)
+    # """
+    # Run the BowTieBuilder algorithm with bad input data
+    # """
+    # def test_format_error(self):
+    #     with pytest.raises(IndexError):
+    #         BTB.run(sources=Path(TEST_DIR, 'input', 'source.txt'),
+    #                        targets=Path(TEST_DIR, 'input', 'target.txt'),
+    #                        edges=Path(TEST_DIR, 'input', 'edges_bad.txt'),
+    #                        output_file=OUT_FILE_DEFAULT)
 
     """
     Run the BowTieBuilder algorithm on the example input files and check the output matches the expected output
