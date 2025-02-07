@@ -15,7 +15,6 @@ from spras.interactome import (
 from spras.prm import PRM
 from spras.util import add_rank_column, raw_pathway_df
 
-
 __all__ = ['BowTieBuilder']
 
 """
@@ -83,9 +82,9 @@ class BowTieBuilder(PRM):
         @param container_framework: choose the container runtime framework, currently supports "docker" or "singularity" (optional)
         """
 
-        # Tests for pytest (docker container also runs this) 
+        # Tests for pytest (docker container also runs this)
         # Testing out here avoids the trouble that container errors provide
-        
+
         if not sources or not targets or not edges or not output_file:
             raise ValueError('Required BowTieBuilder arguments are missing')
 
@@ -100,7 +99,7 @@ class BowTieBuilder(PRM):
                     line = line.strip()
                     line = line.split('\t')
                     line = line[2]
-                    
+
             except Exception as err:
                 raise(err)
 

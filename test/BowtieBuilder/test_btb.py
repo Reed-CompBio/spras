@@ -28,7 +28,7 @@ class TestBowTieBuilder:
             BTB.run(
                            targets=Path(TEST_DIR, 'input', 'target.txt'),
                            sources=Path(TEST_DIR, 'input', 'sources.txt'),
-                           output_file=OUT_FILE_DEFAULT)  
+                           output_file=OUT_FILE_DEFAULT)
         with pytest.raises(ValueError):
             # No source
             BTB.run(
@@ -52,7 +52,7 @@ class TestBowTieBuilder:
                            targets=Path(TEST_DIR, 'input', 'target.txt'),
                            edges=Path(TEST_DIR, 'input', 'edges.txt'),
                            output_file=OUT_FILE_DEFAULT)
-            
+
     """
     Run the BowTieBuilder algorithm on the example input files and check the output matches the expected output
     """
@@ -106,7 +106,7 @@ class TestBowTieBuilder:
                            output_file=OUT_FILE_DEFAULT)
         assert OUT_FILE_DEFAULT.exists(), 'Output file was not written'
         expected_file = Path(TEST_DIR, 'expected', 'disjoint-output.txt')
-        
+
         # Read the content of the output files and expected file into sets
         with open(OUT_FILE_DEFAULT, 'r') as output_file:
             output_content = set(output_file.read().splitlines())
@@ -126,7 +126,7 @@ class TestBowTieBuilder:
                             sources=Path(TEST_DIR, 'input', 'btb-sources.txt'),
                             targets=Path(TEST_DIR, 'input', 'btb-targets.txt'),
                             output_file=OUT_FILE_DEFAULT)
-            
+
 
     """
     Run the BowTieBuilder algorithm on the example source to source input files and check the output matches the expected output
@@ -139,7 +139,7 @@ class TestBowTieBuilder:
                            output_file=OUT_FILE_DEFAULT)
         assert OUT_FILE_DEFAULT.exists(), 'Output file was not written'
         expected_file = Path(TEST_DIR, 'expected', 'source-to-source-output.txt')
-        
+
         # Read the content of the output files and expected file into sets
         with open(OUT_FILE_DEFAULT, 'r') as output_file:
             output_content = set(output_file.read().splitlines())
@@ -160,7 +160,7 @@ class TestBowTieBuilder:
                            output_file=OUT_FILE_DEFAULT)
         assert OUT_FILE_DEFAULT.exists(), 'Output file was not written'
         expected_file = Path(TEST_DIR, 'expected', 'source-to-source2-output.txt')
-        
+
         # Read the content of the output files and expected file into sets
         with open(OUT_FILE_DEFAULT, 'r') as output_file:
             output_content = set(output_file.read().splitlines())
@@ -182,7 +182,7 @@ class TestBowTieBuilder:
                            output_file=OUT_FILE_DEFAULT)
         assert OUT_FILE_DEFAULT.exists(), 'Output file was not written'
         expected_file = Path(TEST_DIR, 'expected', 'source-to-source-disjoint-output.txt')
-        
+
         # Read the content of the output files and expected file into sets
         with open(OUT_FILE_DEFAULT, 'r') as output_file:
             output_content = set(output_file.read().splitlines())
@@ -204,7 +204,7 @@ class TestBowTieBuilder:
                            output_file=OUT_FILE_DEFAULT)
         assert OUT_FILE_DEFAULT.exists(), 'Output file was not written'
         expected_file = Path(TEST_DIR, 'expected', 'bidirectional-output.txt')
-        
+
         # Read the content of the output files and expected file into sets
         with open(OUT_FILE_DEFAULT, 'r') as output_file:
             output_content = set(output_file.read().splitlines())
@@ -226,7 +226,7 @@ class TestBowTieBuilder:
                            output_file=OUT_FILE_DEFAULT)
         assert OUT_FILE_DEFAULT.exists(), 'Output file was not written'
         expected_file = Path(TEST_DIR, 'expected', 'empty-output.txt')
-        
+
         # Read the content of the output files and expected file into sets
         with open(OUT_FILE_DEFAULT, 'r') as output_file:
             output_content = set(output_file.read().splitlines())
@@ -248,7 +248,7 @@ class TestBowTieBuilder:
                            output_file=OUT_FILE_DEFAULT)
         assert OUT_FILE_DEFAULT.exists(), 'Output file was not written'
         expected_file = Path(TEST_DIR, 'expected', 'loop-output.txt')
-        
+
         # Read the content of the output files and expected file into sets
         with open(OUT_FILE_DEFAULT, 'r') as output_file:
             output_content = set(output_file.read().splitlines())
@@ -270,7 +270,7 @@ class TestBowTieBuilder:
                            output_file=OUT_FILE_DEFAULT)
         assert OUT_FILE_DEFAULT.exists(), 'Output file was not written'
         expected_file = Path(TEST_DIR, 'expected', 'weighted-output.txt')
-        
+
         # Read the content of the output files and expected file into sets
         with open(OUT_FILE_DEFAULT, 'r') as output_file:
             output_content = set(output_file.read().splitlines())
@@ -288,7 +288,7 @@ class TestBowTieBuilder:
                            output_file=OUT_FILE_DEFAULT)
         assert OUT_FILE_DEFAULT.exists(), 'Output file was not written'
         expected_file = Path(TEST_DIR, 'expected', 'weighted-output.txt')
-        
+
         # Read the content of the output files and expected file into sets
         with open(OUT_FILE_DEFAULT, 'r') as output_file:
             output_content = set(output_file.read().splitlines())
@@ -297,7 +297,7 @@ class TestBowTieBuilder:
 
         # Check if the sets are equal, regardless of the order of lines
         assert output_content == expected_content, 'Output file does not match expected output file'
-    
+
         """
     Run the BowTieBuilder algorithm with bad input data
     """

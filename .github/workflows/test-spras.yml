@@ -185,14 +185,14 @@ jobs:
         push: false
     - name: Remove Cytoscape Docker image
       run: docker rmi reedcompbio/py4cytoscape:v3 || true
-    
+
     - name: Build BowTieBuilder Docker Image
       uses: docker/build-push-action@v1
       with:
-        path: docker-wrappers/BowTieBuilder
+        path: docker-wrappers/BowTieBuilder/.
         dockerfile: docker-wrappers/BowTieBuilder/Dockerfile
         repository: reedcompbio/bowtiebuilder
-        tags: latest
+        tags: v2
         cache_froms: reedcompbio/bowtiebuilder:v2
         push: false
     - name: Remove BowTieBuilder Docker image
