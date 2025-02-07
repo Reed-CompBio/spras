@@ -161,5 +161,5 @@ class BowTieBuilder(PRM):
         if not df.empty:
             df = add_rank_column(df)
             df = reinsert_direction_col_undirected(df)
-            df.columns = ['Node1', 'Node2', 'Rank', "Direction"]
+            df.columns = ['Node1', 'Node2', 'Rank', 'Direction']
         df.to_csv(standardized_pathway_file, index=False, sep='\t', header=True)
