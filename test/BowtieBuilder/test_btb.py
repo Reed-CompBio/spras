@@ -54,6 +54,16 @@ class TestBowTieBuilder:
                            output_file=OUT_FILE_DEFAULT)
 
     """
+    Run the BowTieBuilder algorithm with bad input data
+    """
+    def test_format_error(self):
+        with pytest.raises(IndexError):
+            BTB.run(sources=Path(TEST_DIR, 'input', 'source.txt'),
+                           targets=Path(TEST_DIR, 'input', 'target.txt'),
+                           edges=Path(TEST_DIR, 'input', 'edges_bad.txt'),
+                           output_file=OUT_FILE_DEFAULT)
+
+    """
     Run the BowTieBuilder algorithm on the example input files and check the output matches the expected output
     """
     def test_btb(self):
@@ -297,13 +307,3 @@ class TestBowTieBuilder:
 
         # Check if the sets are equal, regardless of the order of lines
         assert output_content == expected_content, 'Output file does not match expected output file'
-
-        """
-    Run the BowTieBuilder algorithm with bad input data
-    """
-    def test_format_error(self):
-        with pytest.raises(IndexError):
-            BTB.run(sources=Path(TEST_DIR, 'input', 'source.txt'),
-                           targets=Path(TEST_DIR, 'input', 'target.txt'),
-                           edges=Path(TEST_DIR, 'input', 'edges_bad.txt'),
-                           output_file=OUT_FILE_DEFAULT)
