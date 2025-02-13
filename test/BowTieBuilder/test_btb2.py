@@ -26,20 +26,20 @@ class TestBowTieBuilder:
         with pytest.raises(ValueError):
             # No edges
             BTB.run(
-                           targets=Path(TEST_DIR, 'input', 'target1.txt'),
-                           sources=Path(TEST_DIR, 'input', 'source1.txt'),
+                           targets=Path(TEST_DIR, 'input', 'target.txt'),
+                           sources=Path(TEST_DIR, 'input', 'source.txt'),
                            output_file=OUT_FILE_DEFAULT)
         with pytest.raises(ValueError):
             # No source
             BTB.run(
-                           targets=Path(TEST_DIR, 'input', 'target1.txt'),
-                           edges=Path(TEST_DIR, 'input', 'edges1.txt'),
+                           targets=Path(TEST_DIR, 'input', 'target.txt'),
+                           edges=Path(TEST_DIR, 'input', 'edges.txt'),
                            output_file=OUT_FILE_DEFAULT)
         with pytest.raises(ValueError):
             # No target
             BTB.run(
-                           sources=Path(TEST_DIR, 'input', 'source1.txt'),
-                           edges=Path(TEST_DIR, 'input', 'edges1.txt'),
+                           sources=Path(TEST_DIR, 'input', 'source.txt'),
+                           edges=Path(TEST_DIR, 'input', 'edges.txt'),
                            output_file=OUT_FILE_DEFAULT)
 
 
