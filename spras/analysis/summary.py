@@ -59,8 +59,7 @@ def summarize_networks(file_paths: Iterable[Path], node_table: pd.DataFrame, alg
         # String split name to access algorithm and hashcode from filepath
         # Name of filepath follows format "output/.../data#-algo-params-hashcode/pathway.txt"
         # algorithm parameters have format { algo : { hashcode : { parameter combos } } }
-
-        filename = algo_with_params[index].split("-")
+        filename = sorted(algo_with_params)[index].split("-")
         algo = filename[0]
         hashcode = filename[2]
         index = index + 1
