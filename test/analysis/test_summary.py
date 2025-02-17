@@ -20,15 +20,16 @@ class TestSummary:
                          "node_files" : ["node-prizes.txt", "sources.txt", "targets.txt"], \
                          "data_dir" : "input", \
                          "other_files" : []
-                       } # hardcode dataset_dict for testing purposes
-        example_node_table = Dataset(example_dict) # create instance of Dataset
+                       }
+        example_dataset = Dataset(example_dict)
+        example_node_table = example_dataset.load_files_from_dict(example_dict)
 
-        config.init_from_file(Path("config.yaml"))
+        config.init_from_file(Path("/input/config.yaml"))
         algorithm_params = config.config.algorithm_params
         list(algorithm_params)
         algorithms_with_params = [f'{algorithm}-params-{params_hash}' for algorithm, param_combos in algorithm_params.items() for params_hash in param_combos.keys()]
 
-        example_network_files = Path("example").glob("*.txt")
+        example_network_files = Path("/input/example").glob("*.txt")
         #example_node_table = pd.read_csv(Path("test/analysis/input/example_node_table.txt"), sep = "\t")
         example_output = pd.read_csv(Path("test/analysis/output/example_summary.txt"), sep = "\t")
         example_output["Name"] = example_output["Name"].map(convert_path)
@@ -42,22 +43,36 @@ class TestSummary:
                       "data_dir" : "input", \
                       "other_files" : []
                     }
-        egfr_node_table = Dataset(egfr_dict)
+        egfr_dataset = Dataset(egfr_dict)
+        egfr_node_table = egfr_dataset.load_files_from_dict(egfr_dict)
 
-        config.init_from_file(Path("egfr.yaml"))
+        config.init_from_file(Path("/input/egfr.yaml"))
         algorithm_params = config.config.algorithm_params
         list(algorithm_params)
         algorithms_with_params = [f'{algorithm}-params-{params_hash}' for algorithm, param_combos in algorithm_params.items() for params_hash in param_combos.keys()]
 
-        egfr_network_files = Path("egfr").glob("*.txt")
+        egfr_network_files = Path("/input/egfr").glob("*.txt")
         #egfr_node_table = pd.read_csv(Path("test/analysis/input/egfr_node_table.txt"), sep = "\t")
         egfr_output = pd.read_csv(Path("test/analysis/output/egfr_summary.txt"), sep = "\t")
         egfr_output["Name"] = egfr_output["Name"].map(convert_path)
         assert summarize_networks(egfr_network_files, egfr_node_table, algorithm_params, algorithms_with_params).equals(egfr_output)
 
+    # Test loading files from dataset_dict:
+    def test_load_dataset_dict(self):
+        example_dict = { "label" : "data0", \
+                         "edge_files" : ["network.txt"], \
+                         "node_files" : ["node-prizes.txt", "sources.txt", "targets.txt"], \
+                         "data_dir" : "input", \
+                         "other_files" : []
+                       }
+        example_dataset = Dataset(example_dict)
+        example_node_table = example_dataset.load_files_from_dict(example_dict)
 
-# File paths have to be converted for the stored expected output files because otherwise the dataframes may not
-# match if the test is run on a different operating system than the one used when the expected output was generated
-# due to Linux versus Windows file path conventions
-def convert_path(file_path):
-    return str(Path(file_path))
+        print(example_node_table) # debug statement
+
+
+    # File paths have to be converted for the stored expected output files because otherwise the dataframes may not
+    # match if the test is run on a different operating system than the one used when the expected output was generated
+    # due to Linux versus Windows file path conventions
+    def convert_path(file_path):
+        return str(Path(file_path))
