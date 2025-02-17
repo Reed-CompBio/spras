@@ -11,15 +11,4 @@ output/data0-omicsintegrator2-params-EHHWPMD/pathway.txt	0	0	0	0	0	0	0	{max_path
 output/data0-omicsintegrator2-params-IV3IPCJ/pathway.txt	3	2	1	2	2	1	1	{flow: 1, capacity: 1}
 output/data0-pathlinker-params-6SWY7JS/pathway.txt	3	2	1	2	2	1	1	{spras_placeholder: no parameters}
 output/data0-pathlinker-params-VQL7BDZ/pathway.txt	3	2	1	2	2	1	1	{slice_threshold: 0.3, module_threshold: 0.05}
-output/data1-allpairs-params-BEH6YB2/pathway.txt	7	6	1	2	2	1	4	{spras_placeholder: no parameters}
-output/data1-domino-params-V3X4RW7/pathway.txt	0	0	0	0	0	0	0	{slice_threshold: 0.3, module_threshold: 0.05}
-output/data1-meo-params-GKEDDFZ/pathway.txt	4	4	1	2	2	1	2	{max_path_length: 3, local_search: Yes, rand_restarts: 10}
-output/data1-mincostflow-params-SZPZVU6/pathway.txt	3	2	1	2	2	1	1	{flow: 1, capacity: 1}
-output/data1-omicsintegrator1-params-E3LSEZQ/pathway.txt	3	2	1	2	2	1	1	{b: 5, w: 5.0, d: 10}
-output/data1-omicsintegrator1-params-NFIPHUX/pathway.txt	0	0	0	0	0	0	0	{b: 6, w: 0.0, d: 10}
-output/data1-omicsintegrator1-params-SU2S63Y/pathway.txt	3	2	1	2	2	1	1	{b: 6, w: 5.0, d: 10}
-output/data1-omicsintegrator1-params-V26JBGX/pathway.txt	0	0	0	0	0	0	0	{b: 5, w: 0.0, d: 10}
-output/data1-omicsintegrator2-params-EHHWPMD/pathway.txt	0	0	0	0	0	0	0	{b: 2, g: 3}
-output/data1-omicsintegrator2-params-IV3IPCJ/pathway.txt	3	2	1	2	2	1	1	{b: 4, g: 0}
-output/data1-pathlinker-params-6SWY7JS/pathway.txt	4	3	1	2	2	1	2	{k: 200}
-output/data1-pathlinker-params-VQL7BDZ/pathway.txt	4	3	1	2	2	1	2	{k: 100}
+
