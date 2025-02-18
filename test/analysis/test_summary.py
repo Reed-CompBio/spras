@@ -15,64 +15,70 @@ from spras.dataset import Dataset
 class TestSummary:
     # Test data from example workflow:
     def test_example_networks(self):
-        example_dict = { "label" : "data0", \
-                         "edge_files" : ["network.txt"], \
-                         "node_files" : ["node-prizes.txt", "sources.txt", "targets.txt"], \
-                         "data_dir" : "input", \
+        example_dict = { "label" : "data0",
+                         "edge_files" : ["network.txt"],
+                         "node_files" : ["node-prizes.txt", "sources.txt", "targets.txt"],
+                         "data_dir" : "input",
                          "other_files" : []
                        }
-        example_dataset = Dataset(example_dict)
-        example_node_table = example_dataset.load_files_from_dict(example_dict)
+        example_node_table = Dataset(example_dict)
+        example_node_table.load_files_from_dict(example_dict)
 
-        config.init_from_file(Path("/input/config.yaml"))
+        print(example_node_table) # debug
+
+        config.init_from_file("input/config.yaml")
+        print(config) # debug
         algorithm_params = config.config.algorithm_params
         list(algorithm_params)
+        print(algorithm_params)
         algorithms_with_params = [f'{algorithm}-params-{params_hash}' for algorithm, param_combos in algorithm_params.items() for params_hash in param_combos.keys()]
 
-        example_network_files = Path("/input/example").glob("*.txt")
+        example_network_files = ("/input/example").glob("*.txt")
         #example_node_table = pd.read_csv(Path("test/analysis/input/example_node_table.txt"), sep = "\t")
-        example_output = pd.read_csv(Path("test/analysis/output/example_summary.txt"), sep = "\t")
+        example_output = pd.read_csv(("output/example_summary.txt"), sep = "\t")
         example_output["Name"] = example_output["Name"].map(convert_path)
         assert summarize_networks(example_network_files, example_node_table, algorithm_params, algorithms_with_params).equals(example_output)
 
     # Test data from EGFR workflow:
     def test_egfr_networks(self):
-        egfr_dict = { "label" : "tps_egfr", \
-                      "edge_files" : ["phosphosite-irefindex13.0-uniprot.txt"], \
-                      "node_files" : ["tps-egfr-prizes.txt"], \
-                      "data_dir" : "input", \
+        egfr_dict = { "label" : "tps_egfr",
+                      "edge_files" : ["phosphosite-irefindex13.0-uniprot.txt"],
+                      "node_files" : ["tps-egfr-prizes.txt"],
+                      "data_dir" : "input",
                       "other_files" : []
                     }
-        egfr_dataset = Dataset(egfr_dict)
-        egfr_node_table = egfr_dataset.load_files_from_dict(egfr_dict)
+        egfr_node_table = Dataset(egfr_dict)
+        egfr_node_table.load_files_from_dict(egfr_dict)
 
-        config.init_from_file(Path("/input/egfr.yaml"))
+        config.init_from_file("input/egfr.yaml")
         algorithm_params = config.config.algorithm_params
         list(algorithm_params)
         algorithms_with_params = [f'{algorithm}-params-{params_hash}' for algorithm, param_combos in algorithm_params.items() for params_hash in param_combos.keys()]
 
-        egfr_network_files = Path("/input/egfr").glob("*.txt")
+        egfr_network_files = ("/input/egfr").glob("*.txt")
         #egfr_node_table = pd.read_csv(Path("test/analysis/input/egfr_node_table.txt"), sep = "\t")
-        egfr_output = pd.read_csv(Path("test/analysis/output/egfr_summary.txt"), sep = "\t")
+        egfr_output = pd.read_csv(("output/egfr_summary.txt"), sep = "\t")
         egfr_output["Name"] = egfr_output["Name"].map(convert_path)
         assert summarize_networks(egfr_network_files, egfr_node_table, algorithm_params, algorithms_with_params).equals(egfr_output)
 
     # Test loading files from dataset_dict:
     def test_load_dataset_dict(self):
-        example_dict = { "label" : "data0", \
-                         "edge_files" : ["network.txt"], \
-                         "node_files" : ["node-prizes.txt", "sources.txt", "targets.txt"], \
-                         "data_dir" : "input", \
+        example_dict = { "label" : "data0",
+                         "edge_files" : ["network.txt"],
+                         "node_files" : ["node-prizes.txt", "sources.txt", "targets.txt"],
+                         "data_dir" : "input",
                          "other_files" : []
                        }
-        example_dataset = Dataset(example_dict)
-        example_node_table = example_dataset.load_files_from_dict(example_dict)
+        example_node_table = Dataset(example_dict)
+        example_node_table.load_files_from_dict(example_dict)
 
         print(example_node_table) # debug statement
+        example_expected = "temp" # temp
 
+        assert (example_node_table.load_files_from_dict(example_dict)).equals(example_expected)
 
-    # File paths have to be converted for the stored expected output files because otherwise the dataframes may not
-    # match if the test is run on a different operating system than the one used when the expected output was generated
-    # due to Linux versus Windows file path conventions
-    def convert_path(file_path):
-        return str(Path(file_path))
+# File paths have to be converted for the stored expected output files because otherwise the dataframes may not
+# match if the test is run on a different operating system than the one used when the expected output was generated
+# due to Linux versus Windows file path conventions
+def convert_path(file_path):
+    return str(Path(file_path))
