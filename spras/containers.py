@@ -61,7 +61,7 @@ def download_gcs(gcs_path: str, local_path: str, is_dir: bool):
     # run command
     subprocess.run(cmd, shell=True)
 
-    if is_dir and Path(Path(local_path)/'gcs_temp.txt').exists():
+    if Path(Path(local_path)/'gcs_temp.txt').exists():
         os.remove(Path(Path(local_path)/'gcs_temp.txt'))
 
 
