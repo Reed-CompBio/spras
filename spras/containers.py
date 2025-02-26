@@ -42,6 +42,7 @@ def convert_docker_path(src_path: PurePath, dest_path: PurePath, file_path: Unio
     rel_path = file_path.relative_to(src_path)
     return PurePosixPath(dest_path, rel_path)
 
+
 def download_gcs(gcs_path: str, local_path: str, is_dir: bool):
     # check that output path exists
     if not os.path.exists(Path(local_path).parent):
@@ -62,6 +63,7 @@ def download_gcs(gcs_path: str, local_path: str, is_dir: bool):
 
     if is_dir and Path(Path(local_path)/'gcs_temp.txt').exists():
         os.remove(Path(Path(local_path)/'gcs_temp.txt'))
+
 
 def upload_gcs(local_path: str, gcs_path: str, is_dir: bool):
     # check if path exists in cloud storage
@@ -86,6 +88,7 @@ def upload_gcs(local_path: str, gcs_path: str, is_dir: bool):
     print(cmd)
     # run command
     subprocess.run(cmd, shell=True)
+
 
 def prepare_dsub_cmd(flags: dict):
     # set constant flags
@@ -299,6 +302,7 @@ def run_container_singularity(container: str, command: List[str], volumes: List[
                               options=singularity_options,
                               bind=bind_paths)
 
+
 # Because this is called independently for each file, the same local path can be mounted to multiple volumes
 def prepare_volume(filename: Union[str, PurePath], volume_base: Union[str, PurePath]) -> Tuple[Tuple[PurePath, PurePath], str]:
     """
@@ -334,6 +338,7 @@ def prepare_volume(filename: Union[str, PurePath], volume_base: Union[str, PureP
         src = parent
 
     return (src, dest), container_filename
+
 
 def run_container_dsub(container: str, command: List[str], volumes: List[Tuple[PurePath, PurePath]], working_dir: str, environment: str = 'SPRAS=True'):
     """
