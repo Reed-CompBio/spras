@@ -77,6 +77,7 @@ def raw_pathway_df(raw_pathway_file: str, sep: str = '\t', header: int = None) -
 
     return df
 
+
 def duplicate_edges(df: pd.DataFrame):
     """
     Removes duplicate edges (Node1, Node2 pairs) from the input DataFrame
