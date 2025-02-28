@@ -385,11 +385,11 @@ def run_container_dsub(container: str, command: List[str], volumes: List[Tuple[P
     flags['command'] = ' '.join(container_command)
     flags['command'] = "'" + flags['command'] + "'"
 
-    ## Push volumes to WORKSPACE_BUCKET
+    # Push volumes to WORKSPACE_BUCKET
     for src, _dst, gcs_path, _env in dsub_volumes:
         upload_gcs(local_path=str(src), gcs_path=gcs_path, is_dir=True)
 
-    ## Prepare flags for dsub command
+    # Prepare flags for dsub command
     flags['image'] = container
     flags['env'] = environment
     flags['input-recursive'] = [vol[3]+'='+vol[2] for vol in dsub_volumes]
@@ -407,4 +407,4 @@ def run_container_dsub(container: str, command: List[str], volumes: List[Tuple[P
         download_gcs(local_path=str(src), gcs_path=gcs_path, is_dir=True)
 
     # return location of dsub logs in WORKSPACE_BUCKET
-    return  'dsub logs: {logs}'.format(logs=flags['logging'])
+    return 'dsub logs: {logs}'.format(logs=flags['logging'])

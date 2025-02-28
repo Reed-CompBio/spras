@@ -80,7 +80,7 @@ class Config:
         # Only includes algorithms that are set to be run with 'include: true'.
         self.algorithm_params = None
         # Deprecated. Previously a dict mapping algorithm names to a Boolean tracking whether they used directed graphs.
-        self.algorithm_directed  = None
+        self.algorithm_directed = None
         # A dict with the analysis settings
         self.analysis_params = None
         # A dict with the ML settings
