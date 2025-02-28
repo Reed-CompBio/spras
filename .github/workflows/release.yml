@@ -1,5 +1,5 @@
 name: Release SPRAS on new tags
-# This action runs whenever a new tag matching vX.Y.Z is pushed to the repo.
+# This action runs whenever a new tag matching X.Y.Z is pushed to the repo.
 # Its job is to build the `spras` container and push it to DockerHub with the
 # 'latest' tag, and a tag matching the one supplied to GitHub.
 
