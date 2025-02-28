@@ -3,9 +3,19 @@
 # The length of the hash used to identify a parameter combination
 hash_length: 7
 
-# Specify the container framework. Current supported versions include 'docker' and
-# 'singularity'. If container_framework is not specified, SPRAS will default to docker.
+# Specify the container framework used by each PRM wrapper. Valid options include:
+# - docker (default if not specified)
+# - singularity -- Also known as apptainer, useful in HPC/HTC environments where docker isn't allowed
+# - dsub -- experimental with limited support, used for running on Google Cloud
 container_framework: docker
+
+# Only used if container_framework is set to singularity, this will unpack the singularity containers
+# to the local filesystem. This is useful when PRM containers need to run inside another container,
+# such as would be the case in an HTCondor/OSPool environment.
+# NOTE: This unpacks singularity containers to the local filesystem, which will take up space in a way
+# that persists after the workflow is complete. To clean up the unpacked containers, the user must
+# manually delete them.
+unpack_singularity: false
 
 # Allow the user to configure which container registry containers should be pulled from
 # Note that this assumes container names are consistent across registries, and that the
@@ -37,7 +47,7 @@ container_registry:
 algorithms:
       - name: "pathlinker"
         params:
-              include: false
+              include: true
               run1:
                   k: range(100,201,100)
 
@@ -48,6 +58,7 @@ algorithms:
                   b: [5, 6]
                   w: np.linspace(0,5,2)
                   d: [10]
+                  dummy_mode: ["file"] # Or "terminals", "all", "others"
 
       - name: "omicsintegrator2"
         params:
@@ -91,7 +102,10 @@ algorithms:
 # Assume that if a dataset label does not change, the lists of associated input files do not change
 datasets:
     -
+      # Labels can only contain letters, numbers, or underscores
       label: data0
+      # To run OmicsIntegrator1 with dummy nodes, add dummy.txt file to node_files
+      # or a dummy column to the node table
       node_files: ["node-prizes.txt", "sources.txt", "targets.txt"]
       # DataLoader.py can currently only load a single edge file, which is the primary network
       edge_files: ["network.txt"]
@@ -107,6 +121,21 @@ datasets:
       other_files: []
       # Relative path from the spras directory
       data_dir: "input"
+
+gold_standards:
+    -
+      # Labels can only contain letters, numbers, or underscores
+      label: gs0
+      node_files: ["gs_nodes0.txt"]
+      # edge_files: [] TODO: later iteration
+      data_dir: "input"
+      # List of dataset labels to compare with the specific gold standard dataset
+      dataset_labels: ["data0"]
+    -
+      label: gs1
+      node_files: ["gs_nodes1.txt"]
+      data_dir: "input"
+      dataset_labels: ["data1", "data0"]
 
 # If we want to reconstruct then we should set run to true.
 # TODO: if include is true above but run is false here, algs are not run.
@@ -134,7 +163,11 @@ analysis:
         include: true
       # Machine learning analysis (e.g. clustering) of the pathway output files for each dataset
       ml:
+        # ml analysis per dataset
         include: true
+        # adds ml analysis per algorithm output
+        # only runs for algorithms with multiple parameter combinations chosen
+        aggregate_per_algorithm: true
         # specify how many principal components to calculate
         components: 2
         # boolean to show the labels on the pca graph
@@ -144,3 +177,5 @@ analysis:
         linkage: 'ward'
         # 'euclidean', 'manhattan', 'cosine'
         metric: 'euclidean'
+      evaluation:
+        include: true

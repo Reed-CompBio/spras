@@ -15,6 +15,7 @@ will grab the top level registry configuration option as it appears in the confi
 import copy as copy
 import itertools as it
 import os
+import re
 
 import numpy as np
 import yaml
@@ -61,12 +62,16 @@ class Config:
         # __init__ makes clear exactly what is being configured.
         # Directory used for storing output
         self.out_dir = None
-        # Container framework used by PRMs. Valid options are "docker" and "singularity"
+        # Container framework used by PRMs. Valid options are "docker", "dsub", and "singularity"
         self.container_framework = None
         # The container prefix (host and organization) to use for images. Default is "docker.io/reedcompbio"
         self.container_prefix = DEFAULT_CONTAINER_PREFIX
+        # A Boolean specifying whether to unpack singularity containers. Default is False
+        self.unpack_singularity = False
         # A dictionary to store configured datasets against which SPRAS will be run
         self.datasets = None
+        # A dictionary to store configured gold standard data against output of SPRAS runs
+        self.gold_standards = None
         # The hash length SPRAS will use to identify parameter combinations. Default is 7
         self.hash_length = DEFAULT_HASH_LENGTH
         # The list of algorithms to run in the workflow. Each is a dict with 'name' as an expected key.
@@ -75,11 +80,13 @@ class Config:
         # Only includes algorithms that are set to be run with 'include: true'.
         self.algorithm_params = None
         # Deprecated. Previously a dict mapping algorithm names to a Boolean tracking whether they used directed graphs.
-        self.algorithm_directed  = None
+        self.algorithm_directed = None
         # A dict with the analysis settings
         self.analysis_params = None
         # A dict with the ML settings
         self.ml_params = None
+        # A Boolean specifying whether to run ML analysis for individual algorithms
+        self.analysis_include_ml_aggregate_algo = None
         # A dict with the PCA settings
         self.pca_params = None
         # A dict with the hierarchical clustering settings
@@ -87,11 +94,13 @@ class Config:
         # A Boolean specifying whether to run the summary analysis
         self.analysis_include_summary = None
         # A Boolean specifying whether to run the GraphSpace analysis
-        self.analysis_include_graphspace  = None
+        self.analysis_include_graphspace = None
         # A Boolean specifying whether to run the Cytoscape analysis
-        self.analysis_include_cytoscape  = None
+        self.analysis_include_cytoscape = None
         # A Boolean specifying whether to run the ML analysis
         self.analysis_include_ml = None
+        # A Boolean specifying whether to run the Evaluation analysis
+        self.analysis_include_evaluation = None
 
         _raw_config = copy.deepcopy(raw_config)
         self.process_config(_raw_config)
@@ -107,12 +116,22 @@ class Config:
         # However, if we get a bad value, we raise an exception.
         if "container_framework" in raw_config:
             container_framework = raw_config["container_framework"].lower()
-            if container_framework not in ("docker", "singularity"):
-                msg = "SPRAS was configured to run with an unknown container framework: '" + raw_config["container_framework"] + "'. Accepted values are 'docker' or 'singularity'."
+            if container_framework not in ("docker", "singularity", "dsub"):
+                msg = "SPRAS was configured to run with an unknown container framework: '" + raw_config["container_framework"] + "'. Accepted values are 'docker', 'singularity' or 'dsub'."
                 raise ValueError(msg)
+            if container_framework == "dsub":
+                print("Warning: 'dsub' framework integration is experimental and may not be fully supported.")
             self.container_framework = container_framework
         else:
             self.container_framework = "docker"
+
+        # Unpack settings for running in singularity mode. Needed when running PRM containers if already in a container.
+        if "unpack_singularity" in raw_config:
+            # The value in the config is a string, and we need to convert it to a bool.
+            unpack_singularity = raw_config["unpack_singularity"]
+            if unpack_singularity and self.container_framework != "singularity":
+                print("Warning: unpack_singularity is set to True, but the container framework is not singularity. This setting will have no effect.")
+            self.unpack_singularity = unpack_singularity
 
         # Grab registry from the config, and if none is provided default to docker
         if "container_registry" in raw_config and raw_config["container_registry"]["base_url"] != "" and raw_config["container_registry"]["owner"] != "":
@@ -129,6 +148,30 @@ class Config:
         # When Snakemake parses the config file it loads the datasets as OrderedDicts not dicts
         # Convert to dicts to simplify the yaml logging
         self.datasets = {dataset["label"]: dict(dataset) for dataset in raw_config["datasets"]}
+
+        for key in self.datasets:
+            pattern = r'^\w+$'
+            if not bool(re.match(pattern, key)):
+                raise ValueError(f"Dataset label \'{key}\' contains invalid values. Dataset labels can only contain letters, numbers, or underscores.")
+
+        # parse gold standard information
+        try:
+            self.gold_standards = {gold_standard["label"]: dict(gold_standard) for gold_standard in raw_config["gold_standards"]}
+        except:
+            self.gold_standards = {}
+
+        # check that gold_standard labels are formatted correctly
+        for key in self.gold_standards:
+            pattern = r'^\w+$'
+            if not bool(re.match(pattern, key)):
+                raise ValueError(f"Gold standard label \'{key}\' contains invalid values. Gold standard labels can only contain letters, numbers, or underscores.")
+
+        # check that all the dataset labels in the gold standards are existing datasets labels
+        dataset_labels = set(self.datasets.keys())
+        gold_standard_dataset_labels = {dataset_label for value in self.gold_standards.values() for dataset_label in value['dataset_labels']}
+        for label in gold_standard_dataset_labels:
+            if label not in dataset_labels:
+                raise ValueError(f"Dataset label '{label}' provided in gold standards does not exist in the existing dataset labels.")
 
         # Code snipped from Snakefile that may be useful for assigning default labels
         # dataset_labels = [dataset.get('label', f'dataset{index}') for index, dataset in enumerate(datasets)]
@@ -179,7 +222,7 @@ class Config:
                 run_list_tuples = list(it.product(*all_runs))
                 param_name_tuple = tuple(param_name_list)
                 for r in run_list_tuples:
-                    run_dict = dict(zip(param_name_tuple, r))
+                    run_dict = dict(zip(param_name_tuple, r, strict=True))
                     # TODO temporary workaround for yaml.safe_dump in Snakefile write_parameter_log
                     for param, value in run_dict.copy().items():
                         if isinstance(value, np.float64):
@@ -209,3 +252,13 @@ class Config:
         self.analysis_include_graphspace = raw_config["analysis"]["graphspace"]["include"]
         self.analysis_include_cytoscape = raw_config["analysis"]["cytoscape"]["include"]
         self.analysis_include_ml = raw_config["analysis"]["ml"]["include"]
+        self.analysis_include_evaluation = raw_config["analysis"]["evaluation"]["include"]
+
+        if self.gold_standards == {} and self.analysis_include_evaluation:
+            raise ValueError("Evaluation analysis cannot run as gold standard data not provided. "
+                             "Please set evaluation include to false or provide gold standard data.")
+
+        if 'aggregate_per_algorithm' in self.ml_params and self.analysis_include_ml:
+            self.analysis_include_ml_aggregate_algo = raw_config["analysis"]["ml"]["aggregate_per_algorithm"]
+        else:
+            self.analysis_include_ml_aggregate_algo = False

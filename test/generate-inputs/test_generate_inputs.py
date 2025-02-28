@@ -17,7 +17,7 @@ algo_exp_file = {
     'domino': 'network',
     'pathlinker': 'network',
     'allpairs': 'network'
-    }
+}
 
 
 class TestGenerateInputs:
@@ -29,14 +29,14 @@ class TestGenerateInputs:
         Path(OUTDIR).mkdir(parents=True, exist_ok=True)
 
     def test_prepare_inputs_networks(self):
-        config_loc = os.path.join("config", "config.yaml")
+        config_loc = os.path.join("test", "generate-inputs", "inputs", "test_config.yaml")
 
         with open(config_loc) as config_file:
             config = yaml.load(config_file, Loader=yaml.FullLoader)
         test_file = "test/generate-inputs/output/test_pickled_dataset.pkl"
 
-        data0_dataset = next((ds for ds in config["datasets"] if ds["label"] == "data0"), None)
-        runner.merge_input(data0_dataset, test_file)
+        test_dataset = next((ds for ds in config["datasets"] if ds["label"] == "test_data"), None)
+        runner.merge_input(test_dataset, test_file)
 
         for algo in algo_exp_file.keys():
             inputs = runner.get_required_inputs(algo)

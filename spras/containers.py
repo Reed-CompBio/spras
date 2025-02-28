@@ -1,6 +1,7 @@
 import os
 import platform
 import re
+import subprocess
 from pathlib import Path, PurePath, PurePosixPath
 from typing import Any, Dict, List, Optional, Tuple, Union
 
@@ -42,6 +43,83 @@ def convert_docker_path(src_path: PurePath, dest_path: PurePath, file_path: Unio
     return PurePosixPath(dest_path, rel_path)
 
 
+def download_gcs(gcs_path: str, local_path: str, is_dir: bool):
+    # check that output path exists
+    if not os.path.exists(Path(local_path).parent):
+        os.makedirs(Path(local_path).parent)
+
+    # build command
+    cmd = 'gcloud storage'
+    # rsync with checksums to make file transfer faster for larger files
+    cmd = cmd + ' rsync --checksums-only'
+    # check if directory
+    if is_dir:
+        cmd = cmd + ' -r'
+    cmd = cmd + ' ' + gcs_path + ' ' + local_path
+
+    print(cmd)
+    # run command
+    subprocess.run(cmd, shell=True)
+
+    if Path(Path(local_path)/'gcs_temp.txt').exists():
+        Path(Path(local_path)/'gcs_temp.txt').unlink()
+
+
+def upload_gcs(local_path: str, gcs_path: str, is_dir: bool):
+    # check if path exists in cloud storage
+    exists = len(subprocess.run(f'gcloud storage ls {gcs_path}', shell=True, capture_output=True, text=True).stdout)
+    # if path exists rsync
+    if exists > 0:
+        cmd = 'gcloud storage rsync --checksums-only'
+    # if directory is empty
+    elif exists == 0 and len(os.listdir(local_path)) == 0:
+        # create a temporary file because GCS will not recognize empty directories
+        Path(Path(local_path)/'gcs_temp.txt').touch()
+        # copy path to cloud storage
+        cmd = 'gcloud storage cp -c'
+    # else copy path to cloud storage
+    else:
+        cmd = 'gcloud storage cp -c'
+    # check if directory
+    if is_dir:
+        cmd = cmd + ' -r'
+    cmd = cmd + ' ' + str(Path(local_path).resolve()) + ' ' + gcs_path
+
+    print(cmd)
+    # run command
+    subprocess.run(cmd, shell=True)
+
+
+def prepare_dsub_cmd(flags: dict):
+    # set constant flags
+    dsub_command = 'dsub'
+    flags['provider'] = 'google-cls-v2'
+    flags['regions'] = 'us-central1'
+    flags['user-project'] = os.getenv('GOOGLE_PROJECT')
+    flags['project'] = os.getenv('GOOGLE_PROJECT')
+    flags['network'] = 'network'
+    flags['subnetwork'] = 'subnetwork'
+    flags['service-account'] = subprocess.run(['gcloud', 'config', 'get-value', 'account'], capture_output=True, text=True).stdout.replace('\n', '')
+
+    # order flags according to flag_list
+    flag_list = ["provider", "regions", "zones", "location", "user-project", "project", "network", "subnetwork", "service-account", "image", "env",
+                 "logging", "input", "input-recursive", "mount", "output", "output-recursive", "command", "script"]
+    ordered_flags = {f:flags[f] for f in flag_list if f in flags.keys()}
+
+    # iteratively add flags to the command
+    for flag in ordered_flags.keys():
+        if isinstance(ordered_flags.get(flag), list):
+            for f in ordered_flags.get(flag):
+                dsub_command = dsub_command + " --" + flag + " " + f
+        else:
+            dsub_command = dsub_command + " --" + flag + " " + ordered_flags.get(flag)
+
+    # Wait for dsub job to complete
+    dsub_command = dsub_command + " --wait"
+    print(f"dsub command: {dsub_command}")
+    return dsub_command
+
+
 # TODO consider a better default environment variable
 # TODO environment currently a single string (e.g. 'TMPDIR=/OmicsIntegrator1'), should it be a list?
 # run_container_singularity assumes a single string
@@ -65,6 +143,8 @@ def run_container(framework: str, container_suffix: str, command: List[str], vol
         return run_container_docker(container, command, volumes, working_dir, environment)
     elif normalized_framework == 'singularity':
         return run_container_singularity(container, command, volumes, working_dir, environment)
+    elif normalized_framework == 'dsub':
+        return run_container_dsub(container, command, volumes, working_dir, environment)
     else:
         raise ValueError(f'{framework} is not a recognized container framework. Choose "docker" or "singularity".')
 
@@ -181,6 +261,7 @@ def run_container_singularity(container: str, command: List[str], volumes: List[
     bind_paths = [f'{prepare_path_docker(src)}:{dest}' for src, dest in volumes]
 
     # TODO is try/finally needed for Singularity?
+    # To debug a container add the execute arguments: singularity_options=['--debug'], quiet=False
     singularity_options = ['--cleanenv', '--containall', '--pwd', working_dir]
     # Singularity does not allow $HOME to be set as a regular environment variable
     # Capture it and use the special argument instead
@@ -190,12 +271,38 @@ def run_container_singularity(container: str, command: List[str], volumes: List[
     else:
         singularity_options.extend(['--env', environment])
 
-    # To debug a container add the execute arguments: singularity_options=['--debug'], quiet=False
-    # Adding 'docker://' to the container indicates this is a Docker image Singularity must convert
-    return Client.execute('docker://' + container,
-                          command,
-                          options=singularity_options,
-                          bind=bind_paths)
+    # Handle unpacking singularity image if needed. Potentially needed for running nested unprivileged containers
+    if config.config.unpack_singularity:
+        # Split the string by "/"
+        path_elements = container.split("/")
+
+        # Get the last element, which will indicate the base container name
+        base_cont = path_elements[-1]
+        base_cont = base_cont.replace(":", "_").split(":")[0]
+        sif_file = base_cont + ".sif"
+
+        # Adding 'docker://' to the container indicates this is a Docker image Singularity must convert
+        image_path = Client.pull('docker://' + container, name=sif_file)
+
+        # Check if the directory for base_cont already exists. When running concurrent jobs, it's possible
+        # something else has already pulled/unpacked the container.
+        # Here, we expand the sif image from `image_path` to a directory indicated by `base_cont`
+        if not os.path.exists(base_cont):
+            Client.build(recipe=image_path, image=base_cont, sandbox=True, sudo=False)
+
+        # Execute the locally unpacked container.
+        return Client.execute(base_cont,
+                        command,
+                        options=singularity_options,
+                        bind=bind_paths)
+
+    else:
+        # Adding 'docker://' to the container indicates this is a Docker image Singularity must convert
+        return Client.execute('docker://' + container,
+                              command,
+                              options=singularity_options,
+                              bind=bind_paths)
+
 
 # Because this is called independently for each file, the same local path can be mounted to multiple volumes
 def prepare_volume(filename: Union[str, PurePath], volume_base: Union[str, PurePath]) -> Tuple[Tuple[PurePath, PurePath], str]:
@@ -232,3 +339,72 @@ def prepare_volume(filename: Union[str, PurePath], volume_base: Union[str, PureP
         src = parent
 
     return (src, dest), container_filename
+
+
+def run_container_dsub(container: str, command: List[str], volumes: List[Tuple[PurePath, PurePath]], working_dir: str, environment: str = 'SPRAS=True') -> str:
+    """
+    Runs a command in the Google Cloud using dsub.
+    @param container: name of the container in the Google Cloud Container Registry
+    @param command: command to run
+    @param volumes: a list of volumes to mount where each item is a (source, destination) tuple
+    @param working_dir: the working directory in the container
+    @param environment: environment variables to set in the container
+    @return: path of output from dsub
+    """
+    # Dictionary of flags for dsub command
+    flags = dict()
+
+    workspace_bucket = os.getenv('WORKSPACE_BUCKET')
+    # Add path in the workspace bucket and label for dsub command for each volume
+    dsub_volumes = [(src, dst, workspace_bucket + str(dst), "INPUT_" + str(i),) for i, (src, dst) in enumerate(volumes)]
+
+    # Prepare command that will be run inside the container for dsub
+    container_command = list()
+    for item in command:
+        # Find if item is volume
+        to_replace = [(str(path[1]), "${"+path[3]+'}') for path in dsub_volumes if str(path[1]) in item]
+        # Replace volume path with dsub volume path
+        if len(to_replace) == 1:
+            # Get path that will be replaced
+            path = to_replace[0][0]
+            # Get dsub input variable that will replace path
+            env_variable = to_replace[0][1]
+            # Replace path with env_variable
+            container_path = item.replace(path, env_variable)
+            # Add / if there is no suffix
+            if container_path == env_variable:
+                container_path = container_path + '/'
+            container_command.append(container_path)
+        else:
+            container_command.append(item)
+
+    # Add a command to copy the volumes to the workspace buckets
+    container_command.append(('; cp -rf ' + f'/mnt/data/input/gs/{workspace_bucket}{working_dir}/*' + ' $OUTPUT').replace('gs://', ''))
+
+    # Make the command into a string
+    flags['command'] = ' '.join(container_command)
+    flags['command'] = "'" + flags['command'] + "'"
+
+    # Push volumes to WORKSPACE_BUCKET
+    for src, _dst, gcs_path, _env in dsub_volumes:
+        upload_gcs(local_path=str(src), gcs_path=gcs_path, is_dir=True)
+
+    # Prepare flags for dsub command
+    flags['image'] = container
+    flags['env'] = environment
+    flags['input-recursive'] = [vol[3]+'='+vol[2] for vol in dsub_volumes]
+    flags['output-recursive'] = "OUTPUT=" + workspace_bucket + working_dir
+    flags['logging'] = workspace_bucket + '/dsub/'
+
+    # Create dsub command
+    dsub_command = prepare_dsub_cmd(flags)
+
+    # Run dsub as subprocess
+    subprocess.run(dsub_command, shell=True)
+
+    # Pull output volumes from WORKSPACE_BUCKET
+    for src, _dst, gcs_path, _env in dsub_volumes:
+        download_gcs(local_path=str(src), gcs_path=gcs_path, is_dir=True)
+
+    # return location of dsub logs in WORKSPACE_BUCKET
+    return 'dsub logs: {logs}'.format(logs=flags['logging'])

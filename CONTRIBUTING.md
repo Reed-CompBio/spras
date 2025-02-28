@@ -104,7 +104,7 @@ docker push <username>/local-neighborhood
 Pushing an image requires being logged in, so run `docker login` first if needed using your Docker Hub username and password.
 
 ### Step 3: Write the Local Neighborhood wrapper functions
-Add a new Python file `src/local_neighborhood.py` to implement the wrapper functions for the Local Neighborhood algorithm.
+Add a new Python file `spras/local_neighborhood.py` to implement the wrapper functions for the Local Neighborhood algorithm.
 Use `pathlinker.py` as an example.
 
 Call the new class within `local_neighborhood.py` `LocalNeighborhood` and set `__all__` so the class can be [imported](https://docs.python.org/3/tutorial/modules.html#importing-from-a-package).
@@ -114,7 +114,7 @@ These entries are used to tell Snakemake what input files should be present befo
 Before implementing the `generate_inputs` function, explore the structure of the `Dataset` class interactively.
 In an interactive Python session, run the following commands to load the `data0` dataset and explore the nodes and interactome.
 ```python
-> from src.dataset import Dataset
+> from spras.dataset import Dataset
 > dataset_dict = {'label': 'data0', 'node_files': ['node-prizes.txt', 'sources.txt', 'targets.txt'], 'edge_files': ['network.txt'], 'other_files': [], 'data_dir': 'input'}
 > data = Dataset(dataset_dict)
 > data.node_table.head()
@@ -136,12 +136,13 @@ Also test the functions available in the `Dataset` class.
 Note the behaviors of the `request_node_columns` function when there are missing values in that column of the node table and when multiple columns are requested.
 `request_node_columns` always returns the `NODEID` column in addition to the requested columns.
 
-Now implement the `generate_inputs` function, following the `omicsintegrator1.py` example.
+Now implement the `generate_inputs` function.
+Start by inspecting the `omicsintegrator1.py` example, but note the differences in the expected file formats generated for the two algorithms with respect to the header rows and node prize column.
 The selected nodes should be any node in the dataset that has a prize set, any node that is active, any node that is a source, or any node that is a target.
 As shown in the example dataset above, "active", "sources", and "targets" are Boolean attributes.
 A "prize" is a term for a numeric score on a node in a network, so nodes that have non-empty prizes are considered relevant nodes for the Local Neighborhood algorithm along with active nodes, sources, and targets.
-The network should be all of the edges written in the format `<vertex1>|<vertex2>`.
-`src/dataset.py` provides functions that provide access to node information and the interactome (edge list).
+The network should be all of the edges written in the format `<vertex1>|<vertex2>`, which also differs from the `omicsintegrator1.py` example.
+`spras/dataset.py` provides functions that provide access to node information and the interactome (edge list).
 
 Implement the `run` function, following the PathLinker example.
 The `prepare_volume` utility function is needed to prepare the network and nodes input files to be mounted and used inside the container.
@@ -154,22 +155,30 @@ Use the `run_container` utility function to run the command in the container `<u
 
 Implement the `parse_output` function.
 The edges in the Local Neighborhood output have the same format as the input, `<vertex1>|<vertex2>`.
-Convert these to be tab-separated vertex pairs followed by a tab and a `1` at the end of every line, which indicates all edges have the same rank.
-See the `add_rank_column` function in `src.util.py`.
-The output should have the format `<vertex1> <vertex2> 1`.
+Convert these to be tab-separated vertex pairs followed by a tab `1` and tab `U` at the end of every line, which indicates all edges have the same rank and are undirected.
+See the `add_rank_column` and `raw_pathway_df` function in `spras.util.py` and `reinsert_direction_col_undirected` function in `spras.interactome.py`.
+Make sure header = True with column names: ['Node1', 'Node2', 'Rank', 'Direction'] when the file is created.
+The output should have the format `<vertex1> <vertex2> 1 U`.
 
 ### Step 4: Make the Local Neighborhood wrapper accessible through SPRAS
-Import the new class `LocalNeighborhood` in `src/runner.py` so the wrapper functions can be accessed.
+Import the new class `LocalNeighborhood` in `spras/runner.py` so the wrapper functions can be accessed.
 Add an entry for Local Neighborhood to the configuration file `config/config.yaml` and set `include: true`.
 As a convention, algorithm names are written in all lowercase without special characters.
 Local Neighborhood has no other parameters.
 Optionally set `include: false` for the other pathway reconstruction algorithms to make testing faster.
 
+The config file has an option `owner` under the `container_registry` settings that controls which Docker Hub account will be used when pulling Docker images.
+The same Docker Hub account will be used for all images and cannot currently be set different for each algorithm.
+Set the `owner` to match your Docker Hub username from Step 2.
+
 After completing this step, try running the Local Neighborhood algorithm through SPRAS with
 ```bash
 snakemake --cores 1 --configfile config/config.yaml
 ```
-Make sure to run the command inside the `spras` conda environment. If installing via `pip` instead of using conda, install with the `-e .[dev]` options (the full command to run from the repo root is `python -m pip install -e .[dev]`) so that Python picks up any changes you make and installs all optional development packages. Omitting the `-e` flag will prevent your changes from being reflected unless you force re-install, and omitting `.[dev]` will prevent pip from installing `pre-commit` and `pytest`.
+Make sure to run the command inside the `spras` conda environment.
+
+If installing via `pip` instead of using conda, install with the `-e .[dev]` options (the full command to run from the repo root is `python -m pip install -e .[dev]`) so that Python picks up any changes you make and installs all optional development packages.
+Omitting the `-e` flag will prevent your changes from being reflected unless you force re-install, and omitting `.[dev]` will prevent pip from installing `pre-commit` and `pytest`.
 
 As a workflow manager, Snakemake will consider the work described in the configuration file to be completed once the necessary output files have been written to the relevant output directory (`output` in the `config/config.yaml` configuration).
 That means that if you change your code and rerun the Snakemake command above, nothing may happen if the output files already exist.
@@ -210,12 +219,12 @@ The pull request will be closed so that the `master` branch of the fork stays sy
 1. Open a [GitHub issue](https://github.com/Reed-CompBio/spras/issues/new/choose) to propose adding a new algorithm and discuss it with the SPRAS maintainers
 1. Add a new subdirectory to `docker-wrappers` with the name `<algorithm>`, write a `Dockerfile` to build an image for `<algorithm>`, and include any other files required to build that image in the subdirectory
 1. Build and push the Docker image to the [reedcompbio](https://hub.docker.com/orgs/reedcompbio) Docker organization (SPRAS maintainer required)
-1. Add a new Python file `src/<algorithm>.py` to implement the wrapper functions for `<algorithm>`: specify the list of `required_input` files and the `generate_inputs`, `run`, and `parse_output` functions
-1. Import the new class in `src/runner.py` so the wrapper functions can be accessed
+1. Add a new Python file `spras/<algorithm>.py` to implement the wrapper functions for `<algorithm>`: specify the list of `required_input` files and the `generate_inputs`, `run`, and `parse_output` functions
+1. Import the new class in `spras/runner.py` so the wrapper functions can be accessed
 1. Document the usage of the Docker wrapper and the assumptions made when implementing the wrapper
 1. Add example usage for the new algorithm and its parameters to the template config file
 1. Write test functions and provide example input data in a new test subdirectory `test/<algorithm>`. Provide example data and algorithm/expected files names to lists or dicts in `test/generate-inputs` and `test/parse-outputs`. Use the full path with the names of the test files.
-1. Extend `.github/workflows/test-spras.yml` to pull and build the new Docker image
+1. Extend `.github/workflows/build-containers.yml` to pull and build the new Docker image
 
 When adding new algorithms, there are many other considerations that are not relevant with the simple Local Neighborhood example.
 Most algorithms require dependencies that need to be installed in the `Dockerfile`.
@@ -242,3 +251,35 @@ Additional hooks are [available](https://github.com/pre-commit/pre-commit-hooks#
 These are configured in `.pre-commit-config.yaml`.
 SPRAS also runs [`ruff`](https://github.com/charliermarsh/ruff) as part of the pre-commit hooks to perform the Python code analysis, which supports many more [rules](https://beta.ruff.rs/docs/rules/).
 These are configured in `pyproject.toml`.
+
+## Reviewing pull requests
+Contributors may help review pull requests from other contributors.
+Part of the review process includes running the updated code locally.
+This requires checking out a branch from the other contributor's fork.
+
+We'll use pull request [170](https://github.com/Reed-CompBio/spras/pull/170) as an example from the `ntalluri` fork with branch `implement-eval`.
+First, you need to add the `ntalluri` fork as a git remote from the command line so that you can pull branches from it.
+```
+git remote add ntalluri https://github.com/ntalluri/spras.git
+```
+The first `ntalluri` is the name we give to the new remote.
+It doesn't have to match the GitHub user name, but that is a convenient convention.
+
+Then, confirm the new remote was added
+```
+git remote -v
+```
+You should see the new remote along with your `origin` remote and any others you added previously.
+Now you can pull and fetch branches from any of these remotes and push to any remotes where you have permissions.
+
+To checkout the branch in the pull request locally run
+```
+git fetch ntalluri
+git checkout implement-eval
+```
+Optionally run
+```
+git log
+```
+To confirm that the most recent commit matches the most recent commit in the pull request.
+Now your local version of SPRAS matches the code in the pull request and you can test the code to confirm it runs as expected.
