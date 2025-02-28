@@ -157,6 +157,7 @@ Implement the `parse_output` function.
 The edges in the Local Neighborhood output have the same format as the input, `<vertex1>|<vertex2>`.
 Convert these to be tab-separated vertex pairs followed by a tab `1` and tab `U` at the end of every line, which indicates all edges have the same rank and are undirected.
 See the `add_rank_column` and `raw_pathway_df` function in `spras.util.py` and `reinsert_direction_col_undirected` function in `spras.interactome.py`.
+The `parse_output` function also ensures that there are no duplicate edges in the output pathway using the `spras.util.py` function `duplicate_edges`.
 Make sure header = True with column names: ['Node1', 'Node2', 'Rank', 'Direction'] when the file is created.
 The output should have the format `<vertex1> <vertex2> 1 U`.
 
