@@ -1,5 +1,0 @@
-NODEID	targets
-C	True
-D	True
-H	True
-I	True
