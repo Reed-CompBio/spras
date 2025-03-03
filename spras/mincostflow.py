@@ -140,10 +140,8 @@ class MinCostFlow (PRM):
         """
         Convert a predicted pathway into the universal format
 
-        Although the algorithm constructs a directed network, the resulting network is treated as undirected.
-        This is because the flow within the network doesn't imply causal relationships between nodes.
-        The primary goal of the algorithm is node identification, not the identification of directional edges.
-
+        The algorithm constructs a mixed directional network, the resulting network is treated as mixed directional.
+        
         @param raw_pathway_file: pathway file produced by an algorithm's run function
         @param standardized_pathway_file: the same pathway written in the universal format
         """
