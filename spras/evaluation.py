@@ -78,66 +78,6 @@ class Evaluation:
 
         # TODO: later iteration - chose between node and edge file, or allow both
 
-    @staticmethod
-    def precision_and_recall(file_paths: Iterable[Path], node_table: pd.DataFrame, algorithms: list, output_file: str, output_png:str=None):
-        """
-        Takes in file paths for a specific dataset and an associated gold standard node table.
-        Calculates precision and recall for each pathway file
-        Returns output back to output_file
-        @param file_paths: file paths of pathway reconstruction algorithm outputs
-        @param node_table: the gold standard nodes
-        @param algorithms: list of algorithms used in current run of SPRAS
-        @param output_file: the filename to save the precision and recall of each pathway
-        @param output_png (optional): the filename to plot the precision and recall of each pathway (not a PRC)
-        """
-        y_true = set(node_table['NODEID'])
-        results = []
-        for file in file_paths:
-            df = pd.read_table(file, sep="\t", header=0, usecols=["Node1", "Node2"])
-            # TODO: do we want to include the pathways that are empty for evaluation / in the pr_df?
-            y_pred = set(df['Node1']).union(set(df['Node2']))
-            all_nodes = y_true.union(y_pred)
-            y_true_binary = [1 if node in y_true else 0 for node in all_nodes]
-            y_pred_binary = [1 if node in y_pred else 0 for node in all_nodes]
-            # default to 0.0 if there is a divide by 0 error
-            # not using precision_recall_curve because thresholds are binary (0 or 1); rather we are directly calculating precision and recall per pathway
-            precision = precision_score(y_true_binary, y_pred_binary, zero_division=0.0)
-            recall = recall_score(y_true_binary, y_pred_binary, zero_division=0.0)
-            results.append({"Pathway": file, "Precision": precision, "Recall": recall})
-
-        pr_df = pd.DataFrame(results)
-        pr_df.sort_values(by=["Recall", "Pathway"], axis=0, ascending=True, inplace=True)
-        pr_df.to_csv(output_file, sep="\t", index=False)
-
-        if output_png is not None:
-            if not pr_df.empty:
-                plt.figure(figsize=(8, 6))
-                # plot a line per algorithm
-                for algorithm in algorithms:
-                    subset = pr_df[pr_df["Pathway"].str.contains(algorithm)]
-                    if not subset.empty:
-                        plt.plot(
-                            subset["Recall"],
-                            subset["Precision"],
-                            marker='o',
-                            linestyle='',
-                            label=f"{algorithm}"
-                        )
-
-
-                plt.xlabel("Recall")
-                plt.ylabel("Precision")
-                plt.title(f"Precision and Recall Plot")
-                plt.legend()
-                plt.grid(True)
-                plt.savefig(output_png)
-            else:
-                plt.figure()
-                plt.plot([], [])
-                plt.title("Empty Pathway Files")
-                plt.savefig(output_png)
-
-
     def select_max_freq_and_node(row: pd.Series):
         """
         Selects the node and frequency with the highest frequency value from two potential nodes in a row.
@@ -213,24 +153,3 @@ class Evaluation:
             plt.plot([], [])
             plt.title("Empty Ensemble File")
             plt.savefig(output_png)
-
-    def pca_chosen_pathway(coordinates_file: str, output_dir:str):
-        """
-        Identifies the pathway closest to a specified centroid based on PCA coordinates
-        Calculates the Euclidean distance from each data point to the centroid, then selects the closest pathway.
-        Returns the file path for the representative pathway associated with the closest data point.
-        @param coordinates_file: the pca coordinates file for a dataset or specific algorithm in a datset
-        @param output_dir: the main reconstruction directory
-        """
-        coord_df = pd.read_csv(coordinates_file, delimiter="\t", header=0)
-
-        centroid_row = coord_df[coord_df['datapoint_labels'] == 'centroid']
-        centroid = centroid_row.iloc[0, 1:].tolist()
-        coord_df = coord_df[coord_df['datapoint_labels'] != 'centroid']
-
-        pc_columns = [col for col in coord_df.columns if col.startswith('PC')]
-        coord_df['Distance To Centroid'] = np.sqrt(sum((coord_df[pc] - centroid[i]) ** 2 for i, pc in enumerate(pc_columns)))
-        closest_to_centroid = coord_df.sort_values(by='Distance To Centroid').iloc[0]
-        rep_pathway = [os.path.join(output_dir, f"{closest_to_centroid['datapoint_labels']}", "pathway.txt")]
-
-        return rep_pathway

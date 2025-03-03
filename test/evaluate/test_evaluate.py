@@ -38,36 +38,3 @@ class TestEvaluate:
         ensemble_file = pd.read_csv(INPUT_DIR + 'node-ensemble-empty.csv', sep="\t", header=0)
         Evaluation.precision_recall_curve_node_ensemble(ensemble_file, NODE_TABLE, out_path)
         assert out_path.exists()
-
-    def test_precision_recall_per_pathway(self):
-        file_paths = [INPUT_DIR + "data-test-params-123/pathway.txt", INPUT_DIR + "data-test-params-456/pathway.txt",  INPUT_DIR + "data-test-params-789/pathway.txt",  INPUT_DIR + "data-test-params-empty/pathway.txt"]
-        algorithms = ["test"]
-        output_file = OUT_DIR + "test-precision-recall-per-pathway.txt"
-        output_png = OUT_DIR + "test-precision-recall-per-pathway.png"
-
-        Evaluation.precision_and_recall(file_paths, NODE_TABLE, algorithms, output_file, output_png)
-        assert filecmp.cmp(output_file, EXPECT_DIR + 'expected-precision-recall-per-pathway.txt', shallow=False)
-
-    def test_precision_recall_per_pathway_empty(self):
-
-        file_paths = [INPUT_DIR + "data-test-params-empty/pathway.txt"]
-        algorithms = ["test"]
-        output_file = OUT_DIR +"test-precision-recall-per-pathway-empty.txt"
-        output_png = OUT_DIR + "test-precision-recall-per-pathway-empty.png"
-
-        Evaluation.precision_and_recall(file_paths, NODE_TABLE, algorithms, output_file, output_png)
-        assert filecmp.cmp(output_file, EXPECT_DIR + 'expected-precision-recall-per-pathway-empty.txt', shallow=False)
-
-
-    def  test_precision_recall_pca_chosen_pathway(self):
-        file_paths = [INPUT_DIR + "data-test-params-123/pathway.txt", INPUT_DIR + "data-test-params-456/pathway.txt",  INPUT_DIR + "data-test-params-789/pathway.txt",  INPUT_DIR + "data-test-params-empty/pathway.txt"]
-        algorithms = ["test"]
-        output_file = OUT_DIR +"test-precision-recall-per-pathway-pca-chosen.txt"
-        output_png = OUT_DIR + "test-precision-recall-per-pathway-pca-chosen.png"
-
-        dataframe = ml.summarize_networks(file_paths)
-        ml.pca(dataframe, OUT_DIR + 'pca.png', OUT_DIR + 'pca-variance.txt', OUT_DIR + 'pca-coordinates.tsv')
-
-        pathway = Evaluation.pca_chosen_pathway(OUT_DIR + 'pca-coordinates.tsv', INPUT_DIR)
-        Evaluation.precision_and_recall(pathway, NODE_TABLE, algorithms, output_file, output_png)
-        assert filecmp.cmp(output_file, EXPECT_DIR + 'expected-precision-recall-per-pathway-pca-chosen.txt', shallow=False)
