@@ -3,3 +3,4 @@ B	A	0.52	True
 B	C	0.73	True
 B	A	0.52	True
 B	C	0.73	True
+A	B	0.10	True
