@@ -78,22 +78,9 @@ def raw_pathway_df(raw_pathway_file: str, sep: str = '\t', header: int = None) -
     return df
 
 
-# def duplicate_edges(df: pd.DataFrame):
-#     """
-#     Removes duplicate edges from the input DataFrame
-#     - Duplicate edges are defined as rows with the same combination of 'Node1', 'Node2', 'Rank', and 'Direction'.
-#     - Directed and undirected edges are treated as distinct.
-
-#     @param df: A DataFrame from a raw file pathway
-#     @return pd.DataFrame: A DataFrame with duplicate edges removed
-#     @return bool: True if duplicate edges were found and removed, False otherwise.
-#     """
-#     unique_edges_df = df.drop_duplicates(keep='first', ignore_index=True)
-#     return unique_edges_df, not unique_edges_df.equals(df)
-
-def duplicate_edges(df: pd.DataFrame):
+def duplicate_edges(df: pd.DataFrame) -> (pd.DataFrame, bool):
     """
-    Removes duplicate edges from the input DataFrame.
+    Removes duplicate edges from the input DataFrame. Run within every pathway reconstruction algorithm's parse_output.
     - For duplicate edges (based on Node1, Node2, and Direction), the one with the smallest Rank is kept.
     - For undirected edges, the node pair is sorted (e.g., "B-A" becomes "A-B") before removing duplicates.
 
@@ -101,7 +88,7 @@ def duplicate_edges(df: pd.DataFrame):
     @return pd.DataFrame: A DataFrame with duplicate edges removed.
     @return bool: True if duplicate edges were found and removed, False otherwise.
     """
-    # sort by rank, then by (node1 and node2) to ensure determinstic sorting
+    # sort by rank, then by (node1 and node2) to ensure deterministic sorting
     df_sorted = df.sort_values(by=["Rank", "Node1", "Node2"], ascending=True, ignore_index=True)
 
     # for undirected edges, sort node pairs so that Node1 is always the lesser of the two
@@ -115,6 +102,6 @@ def duplicate_edges(df: pd.DataFrame):
     df_sorted.loc[undirected_mask, "Node1"] = min_nodes
     df_sorted.loc[undirected_mask, "Node2"] = max_nodes
 
-    unique_edges_df = df_sorted.drop_duplicates(subset=["Node1", "Node2", "Direction"], keep="first",ignore_index=True)
+    unique_edges_df = df_sorted.drop_duplicates(subset=["Node1", "Node2", "Direction"], keep="first", ignore_index=True)
 
     return unique_edges_df, not unique_edges_df.equals(df)
