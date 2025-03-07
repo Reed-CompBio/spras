@@ -1,4 +1,7 @@
 Source	Type	Target	Oriented	Weight
 GENE꧁SEP꧂A	pp	GENE꧁SEP꧂C	true	0.5
 GENE꧁SEP꧂C	pd	GENEB	true	0.5
+GENE꧁SEP꧂A	pp	GENE꧁SEP꧂C	true	0.5
+GENE꧁SEP꧂C	pd	GENEB	true	0.5
+GENE꧁SEP꧂C	pp	GENEB	true	0.5
 GENE꧁SEP꧂C	pp	GENEB	true	0.5
