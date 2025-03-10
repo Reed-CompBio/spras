@@ -157,6 +157,7 @@ Implement the `parse_output` function.
 The edges in the Local Neighborhood output have the same format as the input, `<vertex1>|<vertex2>`.
 Convert these to be tab-separated vertex pairs followed by a tab `1` and tab `U` at the end of every line, which indicates all edges have the same rank and are undirected.
 See the `add_rank_column` and `raw_pathway_df` function in `spras.util.py` and `reinsert_direction_col_undirected` function in `spras.interactome.py`.
+The `parse_output` function also ensures that there are no duplicate edges in the output pathway using the `spras.util.py` function `duplicate_edges`.
 Make sure header = True with column names: ['Node1', 'Node2', 'Rank', 'Direction'] when the file is created.
 The output should have the format `<vertex1> <vertex2> 1 U`.
 
@@ -224,7 +225,7 @@ The pull request will be closed so that the `master` branch of the fork stays sy
 1. Document the usage of the Docker wrapper and the assumptions made when implementing the wrapper
 1. Add example usage for the new algorithm and its parameters to the template config file
 1. Write test functions and provide example input data in a new test subdirectory `test/<algorithm>`. Provide example data and algorithm/expected files names to lists or dicts in `test/generate-inputs` and `test/parse-outputs`. Use the full path with the names of the test files.
-1. Extend `.github/workflows/test-spras.yml` to pull and build the new Docker image
+1. Extend `.github/workflows/build-containers.yml` to pull and build the new Docker image
 
 When adding new algorithms, there are many other considerations that are not relevant with the simple Local Neighborhood example.
 Most algorithms require dependencies that need to be installed in the `Dockerfile`.
