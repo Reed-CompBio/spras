@@ -24,14 +24,3 @@ repos:
     rev: 'v0.0.269'
     hooks:
       - id: ruff
-  # Hook to enforce a consistent markdown linewrap policy
-  - repo: https://github.com/executablebooks/mdformat
-    rev: 0.7.17
-    hooks:
-      - id: mdformat
-        args:
-          - --wrap
-          - "80"  # Set maximum line length
-        additional_dependencies:
-          - mdformat-gfm  # GitHub Flavored Markdown support
-        files: \.(md|markdown)$
