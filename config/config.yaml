@@ -174,7 +174,7 @@ analysis:
         metric: 'euclidean'
       evaluation:
         # evaluation per dataset-goldstandard pair
-        # evalution will not run unless ml include is set to true
+        # evaluation will not run unless ml include is set to true
         include: true
         # adds evaluation per algorithm per dataset-goldstandard pair
         # evalution per algortihm will not run unless ml include and ml aggregate_per_algorithm is set to true
