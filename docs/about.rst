@@ -1,7 +1,7 @@
 About SPRAS
 ============
 
-SPRAS, short for "Signalling Pathway Reconstruction Streamliner Analysis" is a work-in-progress dockerized library
+SPRAS, short for "Signaling Pathway Reconstruction Analysis Streamliner" is a work-in-progress dockerized library
 of pathway reconstruction enhancement tools. The framework will contain different pathway reconstruction algorithms
 that connect genes and proteins of interest in the context of a general protein-protein interaction network, allowing
 users to run multiple algorithms on their inputs. See the GLBIO 2021 `slides`_ or `video`_ for more information.

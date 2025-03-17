@@ -8,7 +8,7 @@ The Docs.
 [Read The Docs](https://docs.readthedocs.com/platform/stable/), or RTD, is the
 documentation hosting platform the SPRAS team has chosen to use for hosting its
 official documentation. As a platform, it automatically builds and versions docs
-based on the contents of the `docs/` file in this repository by periodically
+based on the contents of the `docs/` directory in this repository by periodically
 polling for changes. When a new SPRAS version is detected, Read The Docs pulls
 that tag, uses it to build the relevant HTML content, and then hosts the
 newly-versioned HTML content on its website as `https://spras.readthedocs.io`.
@@ -16,8 +16,8 @@ newly-versioned HTML content on its website as `https://spras.readthedocs.io`.
 While Read the Docs is the platform that builds and hosts documentation, it is
 distinct from the actual tool/package responsible for generating the HTML
 content. That tool is [`sphinx`](https://www.sphinx-doc.org/en/master/), a
-popular python python package that tries to make documentation easy to write,
-structure, and maintain.
+popular python package that tries to make documentation easy to write, structure,
+and maintain.
 
 Sphinx uses reStructured Text, or `.rst` files, to build documentation. In most
 cases, your changes to the SPRAS docs will involve editing these files.
@@ -36,7 +36,7 @@ these helpful tutorials that will prime you with some basics:
   in general, this website) walks you through the basics of using sphinx to
   create documentation. In particular, it helps you figure out how to achieve
   the information layouts you may be after, such as certain content appearing in
-  a ToC.
+  a table of contents.
 - reStructured Text Resources:
   - [Getting Started with RST and Sphinx](https://sphinx-tutorial.readthedocs.io/step-1/)
     (from the Sphinx tutorial)
@@ -67,10 +67,9 @@ whether there are any warnings you should consider. It's generally bad to ignore
 these warnings, so if you see any, try to understand what they mean and how you
 can fix them.
 
-Once you have a successful build, the [\_build](_build) directory will contain
-all the new HTML. To see visualize this content, you'll need to open files
-through a browser. For example, to visit the documentation landing page, you'd
-visit:
+Once you have a successful build, the `_build` directory will contain all the
+new HTML. To see visualize this content, you'll need to open files through a
+browser. For example, to visit the documentation landing page, you'd visit:
 
 ```
 file://<path to _build>/html/index.html
