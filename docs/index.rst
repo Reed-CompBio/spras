@@ -26,15 +26,15 @@ methods (PRMs) to omics data.
 
 .. toctree::
    :maxdepth: 1
-   :caption: Supported PRMs
+   :caption: Supported Algorithms
 
    prms/prms
 
 .. toctree::
    :maxdepth: 1
-   :caption: SPRAS For Developers
+   :caption: SPRAS API Docs For Developers
 
-   fordevs/spras
+   fordevs/modules
 
 .. toctree::
    :maxdepth: 1

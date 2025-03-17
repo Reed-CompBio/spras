@@ -89,3 +89,14 @@ files and any python scripts used as part of the build process, such as
 you want the changes to take effect. However, you should never commit the
 `docs/_build` directory because Read The Docs is responsible for generating its
 own build based on other `docs/` content.
+
+### Autogenerating Docs for SPRAS Modules
+
+Sphinx provides tools for creating python module docs directly from docstrings in your code.
+To generate these automodule docs, use the following command from the `docs/` directory:
+```bash
+sphinx-apidoc -o fordevs/ ../spras/
+```
+>NOTE: This command can be adjusted to work from other base directories by adjusting path references.
+
+This automatically creates the relevant `.rst` files, which can then be viewed by once again invoking `make html`.
