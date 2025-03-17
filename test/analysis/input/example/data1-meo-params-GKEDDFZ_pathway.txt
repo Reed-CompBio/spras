@@ -1,5 +1,0 @@
-Node1	Node2	Rank	Direction
-A	B	1	D
-B	C	1	D
-A	D	1	D
-C	D	1	D
