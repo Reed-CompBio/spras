@@ -1,7 +1,9 @@
 from pathlib import Path
 
 import pandas as pd
-import spras 
+
+import spras
+
 # set up necessary dataframes to run summarize_networks
 import spras.config as config
 from spras.analysis.summary import summarize_networks
@@ -10,7 +12,7 @@ from spras.dataset import Dataset
 # Notes:
 # - Column labels are required in the node table
 # - 'NODEID' is required as the first column label in the node table
-# - file_paths must be a iterable, even if a single file path is passed
+# - file_paths must be an iterable, even if a single file path is passed
 
 class TestSummary:
     # Test data from example workflow:
@@ -44,6 +46,7 @@ class TestSummary:
                       "other_files" : []
                     }
         egfr_dataset = Dataset(egfr_dict)
+        print("DATASET: ", egfr_dataset.node_table)
         egfr_node_table = egfr_dataset.node_table
         config.init_from_file(Path("input/egfr.yaml"))
         algorithm_params = config.config.algorithm_params
@@ -52,7 +55,7 @@ class TestSummary:
 
         egfr_network_files = Path("test/analysis/input/egfr").glob("*.txt") # must be path to use .glob()
         #egfr_node_table = pd.read_csv(Path("test/analysis/input/egfr_node_table.txt"), sep = "\t")
-        egfr_output = pd.read_csv(("output/egfr_summary.txt"), sep = "\t")
+        egfr_output = pd.read_csv("output/egfr_summary.txt", sep = "\t")
         egfr_output["Name"] = egfr_output["Name"].map(convert_path)
         assert summarize_networks(egfr_network_files, egfr_node_table, algorithm_params, algorithms_with_params).equals(egfr_output)
 
@@ -68,8 +71,7 @@ class TestSummary:
         example_node_table.load_files_from_dict(example_dict)
 
         #print(example_node_table) # debug statement
-        example_expected = "temp" # temp
-
+        # TODO: implement this method to test loading dataset
         assert True
 
 # File paths have to be converted for the stored expected output files because otherwise the dataframes may not
