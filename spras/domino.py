@@ -9,6 +9,7 @@ from spras.interactome import (
     reinsert_direction_col_undirected,
 )
 from spras.prm import PRM
+from spras.util import duplicate_edges
 
 __all__ = ['DOMINO', 'pre_domino_id_transform', 'post_domino_id_transform']
 
@@ -208,6 +209,10 @@ class DOMINO(PRM):
             edges_df.columns = ['Node1', 'Node2', 'Rank', 'Direction']
         else:
             edges_df = pd.DataFrame(columns=['Node1', 'Node2', 'Rank', 'Direction'])
+
+        edges_df, has_duplicates = duplicate_edges(edges_df)
+        if has_duplicates:
+            print(f"Duplicate edges were removed from {raw_pathway_file}")
 
         edges_df.to_csv(standardized_pathway_file, sep='\t', header=True, index=False)
 
