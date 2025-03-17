@@ -8,6 +8,7 @@
 # doc strings will be scoped to the `docs/` directory.
 import os
 import sys
+from importlib.metadata import PackageNotFoundError
 from importlib.metadata import version as get_version
 
 sys.path.insert(0, os.path.abspath('..'))
@@ -18,7 +19,12 @@ sys.path.insert(0, os.path.abspath('..'))
 project = 'SPRAS'
 copyright = '2025, Anthony Gitter & Anna Ritz'
 author = 'Anthony Gitter & Anna Ritz'
-version = get_version("spras")  # This will pull the version from pyproject.toml
+
+# Attempt to get the version from package metadata
+try:
+    version = get_version("spras")  # This will pull the version from pyproject.toml
+except PackageNotFoundError:
+    version = "unknown"
 
 # -- General configuration ---------------------------------------------------
 # https://www.sphinx-doc.org/en/master/usage/configuration.html#general-configuration

@@ -35,9 +35,13 @@ conda activate spras
 to create a conda environment with the required packages and activate that environment.
 If you have a different version of Python already, you can install the specified versions of the required packages in your preferred manner instead of using Anaconda.
 
-SPRAS can also be installed with Python's package manager `pip` by running `python -m pip install .` from the repo's root directory. This makes SPRAS more portable by allowing you to run
-snakemake anywhere the Snakefile, data, and configuration file can be accessed. However, use caution when pip installing directly to your computer without using some form of virtual
-environment as this can alter your system's underlying python modules, which could lead to unexpected behavior.
+While the `spras` conda environment comes bundled with all of python dependencies needed for `spras` to run, it does not yet have a working installation of `spras` itself.
+To install `spras` in the environment, finish by running the following from the root directory of the repository:
+```bash
+python -m pip install .
+```
+Use caution when pip installing directly to your computer without using some form of virtual/conda environment as this can alter your system's underlying python modules, which could lead to unexpected behavior.
+In most cases, you should only `pip install` spras if you're already working in the `spras` conda environment!
 
 For developers, SPRAS can be installed via `pip` with the `-e` flag, as in `python -m pip install -e .`. This points Python back to the SPRAS repo so that any changes made to the source
 code are reflected in the installed module.
