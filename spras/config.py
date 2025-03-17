@@ -103,7 +103,7 @@ class Config:
         self.analysis_include_evaluation = None
         # A Boolean specifying whether to run the ML per algorithm analysis
         self.analysis_include_ml_aggregate_algo = None
-        # A Boolean specifying whether to run the Evaluation per algorithm aanalysis
+        # A Boolean specifying whether to run the evaluation per algorithm analysis
         self.analysis_include_evaluation_aggregate_algo = None
 
         _raw_config = copy.deepcopy(raw_config)
