@@ -1,5 +1,5 @@
 name: Release SPRAS on new tags
-# This action runs whenever a new tag matching vX.Y.Z is pushed to the repo.
+# This action runs whenever a new tag matching X.Y.Z is pushed to the repo.
 # Its job is to build the `spras` container and push it to DockerHub with the
 # 'latest' tag, and a tag matching the one supplied to GitHub.
 
@@ -20,10 +20,10 @@ jobs:
         uses: docker/setup-buildx-action@v3
 
       - name: Log in to Docker Hub
-        uses: docker/login-action@v1
+        uses: docker/login-action@v3
         with:
-          username: ${{ vars.DOCKER_USERNAME }}
-          # Passwords are set up through the GitHub control pannel. The docs for
+          username: ${{ secrets.DOCKER_USERNAME }}
+          # Passwords are set up through the GitHub control panel. The docs for
           # the login action are explicit about never using a real password, and
           # instead setting up a DockerHub personal access token:
           # https://github.com/docker/login-action?tab=readme-ov-file#docker-hub

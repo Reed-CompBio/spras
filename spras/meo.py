@@ -1,3 +1,4 @@
+import os
 from pathlib import Path
 
 from spras.containers import prepare_volume, run_container
@@ -6,7 +7,7 @@ from spras.interactome import (
     reinsert_direction_col_directed,
 )
 from spras.prm import PRM
-from spras.util import add_rank_column, raw_pathway_df
+from spras.util import add_rank_column, duplicate_edges, raw_pathway_df
 
 __all__ = ['MEO', 'write_properties']
 
@@ -20,7 +21,7 @@ underscore_replacement = '꧁SEP꧂'
 # Does not support MINSAT or MAXCSP
 # TODO add parameter validation
 def write_properties(filename=Path('properties.txt'), edges=None, sources=None, targets=None, edge_output=None,
-                     path_output=None, max_path_length=None, local_search=None, rand_restarts=None):
+                     path_output=None, max_path_length=None, local_search=None, rand_restarts=None, framework='docker'):
     """
     Write the properties file for Maximum Edge Orientation
     See https://github.com/agitter/meo/blob/master/sample.props for property descriptions and the default values at
@@ -31,6 +32,17 @@ def write_properties(filename=Path('properties.txt'), edges=None, sources=None, 
     """
     if edges is None or sources is None or targets is None or edge_output is None or path_output is None:
         raise ValueError('Required Maximum Edge Orientation properties file arguments are missing')
+
+    if framework == 'dsub':
+        # Get path inside dsub container
+        workspace_bucket = os.getenv('WORKSPACE_BUCKET')
+        input_prefix = f'/mnt/data/input/gs/{workspace_bucket}'.replace('gs://', '')
+        # Add input prefix to all MEO paths
+        edges = input_prefix + edges
+        sources = input_prefix + sources
+        targets = input_prefix + targets
+        edge_output = input_prefix + edge_output
+        path_output = input_prefix + path_output
 
     with open(filename, 'w') as f:
         # Write the required properties
@@ -158,7 +170,7 @@ class MEO(PRM):
         properties_file_local = Path(out_dir, properties_file)
         write_properties(filename=properties_file_local, edges=edge_file, sources=source_file, targets=target_file,
                          edge_output=mapped_output_file, path_output=mapped_path_output,
-                         max_path_length=max_path_length, local_search=local_search, rand_restarts=rand_restarts)
+                         max_path_length=max_path_length, local_search=local_search, rand_restarts=rand_restarts, framework=container_framework)
         bind_path, properties_file = prepare_volume(str(properties_file_local), work_dir)
         volumes.append(bind_path)
 
@@ -202,4 +214,7 @@ class MEO(PRM):
             df = reinsert_direction_col_directed(df)
             df.drop(columns=['Type', 'Oriented', 'Weight'], inplace=True)
             df.columns = ['Node1', 'Node2', 'Rank', "Direction"]
+            df, has_duplicates = duplicate_edges(df)
+            if has_duplicates:
+                print(f"Duplicate edges were removed from {raw_pathway_file}")
         df.to_csv(standardized_pathway_file, index=False, sep='\t', header=True)
