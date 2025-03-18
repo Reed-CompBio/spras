@@ -13,7 +13,7 @@ from spras.interactome import (
     reinsert_direction_col_undirected,
 )
 from spras.prm import PRM
-from spras.util import add_rank_column, raw_pathway_df
+from spras.util import add_rank_column, raw_pathway_df, duplicate_edges
 
 __all__ = ['BowTieBuilder']
 
@@ -162,4 +162,7 @@ class BowTieBuilder(PRM):
             df = add_rank_column(df)
             df = reinsert_direction_col_undirected(df)
             df.columns = ['Node1', 'Node2', 'Rank', 'Direction']
+            df, has_duplicates = duplicate_edges(df)
+            if has_duplicates:
+                print(f"Duplicate edges were removed from {raw_pathway_file}")
         df.to_csv(standardized_pathway_file, index=False, sep='\t', header=True)
