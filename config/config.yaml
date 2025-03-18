@@ -45,6 +45,7 @@ container_registry:
 # careful: too many parameters might make your runs take a long time.
 
 algorithms:
+
       - name: "pathlinker"
         params:
               include: true
@@ -95,6 +96,10 @@ algorithms:
               run1:
                   slice_threshold: [0.3]
                   module_threshold: [0.05]
+
+      - name: "bowtiebuilder"
+        params:
+              include: true
 
 
 # Here we specify which pathways to run and other file location information.
