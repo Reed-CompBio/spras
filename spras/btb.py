@@ -13,7 +13,7 @@ from spras.interactome import (
     reinsert_direction_col_undirected,
 )
 from spras.prm import PRM
-from spras.util import add_rank_column, raw_pathway_df, duplicate_edges
+from spras.util import add_rank_column, duplicate_edges, raw_pathway_df
 
 __all__ = ['BowTieBuilder']
 
