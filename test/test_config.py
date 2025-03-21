@@ -166,7 +166,7 @@ class TestConfig:
         (False, True, False, False),
         (False, False, False, False)
     ])
-    def test_ml_agg_algo_coupling(self, ml_include, ml_agg_include,expected_ml, expected_ml_agg):
+    def test_ml_agg_algo_coupling(self, ml_include, ml_agg_include, expected_ml, expected_ml_agg):
         test_config = get_test_config()
         test_config["analysis"]["ml"]["include"] = ml_include
         test_config["analysis"]["ml"]["aggregate_per_algorithm"] = ml_agg_include
@@ -201,8 +201,10 @@ class TestConfig:
         (True,  True,  True,  True,  True,  True,  True,  True),
         (True,  False, False, False, True,  False, False, False),
     ])
-    def test_eval_ml_agg_algo_coupling(self, ml_include, ml_agg, eval_include, eval_agg, expected_ml, expected_ml_agg, expected_eval, expected_eval_agg):
-        # the value of ml include and ml aggregate_per_algorithm can affect the value of evaluation include and evaluation aggregate_per_algorithm
+    def test_eval_ml_agg_algo_coupling(self, ml_include, ml_agg, eval_include, eval_agg, expected_ml, expected_ml_agg,
+                                       expected_eval, expected_eval_agg):
+        # the value of ml include and ml aggregate_per_algorithm can affect the value of evaluation include and
+        # evaluation aggregate_per_algorithm
         test_config = get_test_config()
 
         test_config["analysis"]["ml"]["include"] = ml_include
