@@ -268,8 +268,8 @@ class Config:
             raise ValueError("Evaluation analysis cannot run as gold standard data not provided. "
                              "Please set evaluation include to false or provide gold standard data.")
 
-         # Only run Evaluation if ML is set to True
-        if not self.analysis_include_ml and self.analysis_include_evaluation:
+        # Only run Evaluation if ML is set to True
+        if not self.analysis_include_ml:
             self.analysis_include_evaluation = False
 
         # Only run Evaluation aggregate per algorithm if analysis include ML is set to True
@@ -279,5 +279,5 @@ class Config:
             self.analysis_include_evaluation_aggregate_algo = False
 
         # Only run Evaluation per algorithm if ML per algorithm is set to True
-        if not self.analysis_include_ml_aggregate_algo and self.analysis_include_evaluation_aggregate_algo:
+        if not self.analysis_include_ml_aggregate_algo:
             self.analysis_include_evaluation_aggregate_algo = False
