@@ -209,7 +209,7 @@ Modify parse outputs:
 
 ### Step 6: Update documentation
 SPRAS uses `sphinx` and "Read The Docs" for building and hosting documentation.
-To include your new reconstruction algorithm in this documentation, create a new file at `docs/prms/{alg name}.rst`, where you replace `{alg name}` with a shorthand for your algorithm.
+To include your new reconstruction algorithm in this documentation, create a new file at `docs/prms/{my-alg}.rst`, where you replace `{my-alg}` with a shorthand for your algorithm.
 Once this file exists, you can edit it to document the algorithm in a human-readable way that provides any information that's relevant to users who might wish to use SPRAS with the algorithm.
 For more information about working with `.rst` files in SPRAS documentation, see `docs/README.md`.
 
