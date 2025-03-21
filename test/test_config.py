@@ -145,131 +145,74 @@ class TestConfig:
         with pytest.raises(ValueError):
             config.init_global(test_config)
 
-    def test_eval_ml_coupling(self):
+    @pytest.mark.parametrize("ml_include, eval_include, expected_ml, expected_eval", [
+        (True, True, True, True),
+        (True, False, True, False),
+        (False, True, False, False),
+        (False, False, False, False)
+    ])
+    def test_eval_ml_coupling(self, ml_include, eval_include, expected_ml, expected_eval):
         test_config = get_test_config()
-        include_combos = [(True, True), (True, False), (False, True), (False, False)]
-
-        # ml: True evaluation: True
-        test_config["analysis"]["ml"]["include"] = include_combos[0][0]
-        test_config["analysis"]["evaluation"]["include"] = include_combos[0][1]
+        test_config["analysis"]["ml"]["include"] = ml_include
+        test_config["analysis"]["evaluation"]["include"] = eval_include
         config.init_global(test_config)
-        assert config.config.analysis_include_ml == True and config.config.analysis_include_evaluation == True
 
-        # ml: True evaluation: False
-        test_config["analysis"]["ml"]["include"] = include_combos[1][0]
-        test_config["analysis"]["evaluation"]["include"] = include_combos[1][1]
-        config.init_global(test_config)
-        assert config.config.analysis_include_ml == True and config.config.analysis_include_evaluation == False
+        assert config.config.analysis_include_ml == expected_ml
+        assert config.config.analysis_include_evaluation == expected_eval
 
-        # ml: False evaluation: True
-        test_config["analysis"]["ml"]["include"] = include_combos[2][0]
-        test_config["analysis"]["evaluation"]["include"] = include_combos[2][1]
-        config.init_global(test_config)
-        assert config.config.analysis_include_ml == False and config.config.analysis_include_evaluation == False
-
-        # ml: False evaluation: False
-        test_config["analysis"]["ml"]["include"] = include_combos[3][0]
-        test_config["analysis"]["evaluation"]["include"] = include_combos[3][1]
-        config.init_global(test_config)
-        assert config.config.analysis_include_ml == False and config.config.analysis_include_evaluation == False
-
-
-    def test_ml_agg_algo_coupling(self):
-
+    @pytest.mark.parametrize("ml_include, ml_agg_include, expected_ml, expected_ml_agg", [
+        (True, True, True, True),
+        (True, False, True, False),
+        (False, True, False, False),
+        (False, False, False, False)
+    ])
+    def test_ml_agg_algo_coupling(self, ml_include, ml_agg_include,expected_ml, expected_ml_agg):
         test_config = get_test_config()
-        include_combos = [(True, True), (True, False), (False, True), (False, False)]
-
-        test_config["analysis"]["ml"]["include"] = include_combos[0][0]
-        test_config["analysis"]["ml"]["aggregate_per_algorithm"] = include_combos[0][1]
+        test_config["analysis"]["ml"]["include"] = ml_include
+        test_config["analysis"]["ml"]["aggregate_per_algorithm"] = ml_agg_include
         config.init_global(test_config)
-        assert config.config.analysis_include_ml == True and config.config.analysis_include_ml_aggregate_algo == True
 
+        assert config.config.analysis_include_ml == expected_ml
+        assert config.config.analysis_include_ml_aggregate_algo == expected_ml_agg
 
-        test_config["analysis"]["ml"]["include"] = include_combos[1][0]
-        test_config["analysis"]["ml"]["aggregate_per_algorithm"] = include_combos[1][1]
-        config.init_global(test_config)
-        assert config.config.analysis_include_ml == True and config.config.analysis_include_ml_aggregate_algo == False
-
-
-        test_config["analysis"]["ml"]["include"] = include_combos[2][0]
-        test_config["analysis"]["ml"]["aggregate_per_algorithm"] = include_combos[2][1]
-        config.init_global(test_config)
-        assert config.config.analysis_include_ml == False and config.config.analysis_include_ml_aggregate_algo == False
-
-
-        test_config["analysis"]["ml"]["include"] = include_combos[3][0]
-        test_config["analysis"]["ml"]["aggregate_per_algorithm"] = include_combos[3][1]
-        config.init_global(test_config)
-        assert config.config.analysis_include_ml == False and config.config.analysis_include_ml_aggregate_algo == False
-
-    def test_eval_agg_algo_coupling(self):
-
+    @pytest.mark.parametrize("eval_include, agg_algo, expected_eval, expected_agg_algo", [
+        (True, True, True, True),
+        (True, False, True, False),
+        (False, True, False, False),
+        (False, False, False, False),
+    ])
+    def test_eval_agg_algo_coupling(self, eval_include, agg_algo, expected_eval, expected_agg_algo):
         test_config = get_test_config()
         test_config["analysis"]["ml"]["include"] = True
         test_config["analysis"]["ml"]["aggregate_per_algorithm"] = True
 
-        include_combos = [(True, True), (True, False), (False, True), (False, False)]
+        test_config["analysis"]["evaluation"]["include"] = eval_include
+        test_config["analysis"]["evaluation"]["aggregate_per_algorithm"] = agg_algo
 
-        test_config["analysis"]["evaluation"]["include"] = include_combos[0][0]
-        test_config["analysis"]["evaluation"]["aggregate_per_algorithm"] = include_combos[0][1]
         config.init_global(test_config)
-        assert config.config.analysis_include_evaluation == True and config.config.analysis_include_evaluation_aggregate_algo == True
 
+        assert config.config.analysis_include_evaluation == expected_eval
+        assert config.config.analysis_include_evaluation_aggregate_algo == expected_agg_algo
 
-        test_config["analysis"]["evaluation"]["include"] = include_combos[1][0]
-        test_config["analysis"]["evaluation"]["aggregate_per_algorithm"] = include_combos[1][1]
-        config.init_global(test_config)
-        assert config.config.analysis_include_evaluation == True and config.config.analysis_include_evaluation_aggregate_algo == False
-
-
-        test_config["analysis"]["evaluation"]["include"] = include_combos[2][0]
-        test_config["analysis"]["evaluation"]["aggregate_per_algorithm"] = include_combos[2][1]
-        config.init_global(test_config)
-        assert config.config.analysis_include_evaluation == False and config.config.analysis_include_evaluation_aggregate_algo == False
-
-
-        test_config["analysis"]["evaluation"]["include"] = include_combos[3][0]
-        test_config["analysis"]["evaluation"]["aggregate_per_algorithm"] = include_combos[3][1]
-        config.init_global(test_config)
-        assert config.config.analysis_include_evaluation == False and config.config.analysis_include_evaluation_aggregate_algo == False
-
-    def test_eval_ml_agg_algo_coupling(self):
-
+    @pytest.mark.parametrize("ml_include, ml_agg, eval_include, eval_agg, expected_ml, expected_ml_agg, expected_eval, expected_eval_agg", [
+        (False, True,  True,  True,  False, False, False, False),
+        (True,  False, True,  True,  True,  False, True,  False),
+        (False, False, True,  True,  False, False, False, False),
+        (True,  True,  True,  True,  True,  True,  True,  True),
+        (True,  False, False, False, True,  False, False, False),
+    ])
+    def test_eval_ml_agg_algo_coupling(self, ml_include, ml_agg, eval_include, eval_agg, expected_ml, expected_ml_agg, expected_eval, expected_eval_agg):
         # the value of ml include and ml aggregate_per_algorithm can affect the value of evaluation include and evaluation aggregate_per_algorithm
-
         test_config = get_test_config()
 
-        test_config["analysis"]["ml"]["include"] = False
-        test_config["analysis"]["ml"]["aggregate_per_algorithm"] = True
-        test_config["analysis"]["evaluation"]["include"] = True
-        test_config["analysis"]["evaluation"]["aggregate_per_algorithm"] = True
-        config.init_global(test_config)
-        assert config.config.analysis_include_evaluation == False and config.config.analysis_include_evaluation_aggregate_algo == False and config.config.analysis_include_ml == False and config.config.analysis_include_ml_aggregate_algo == False
+        test_config["analysis"]["ml"]["include"] = ml_include
+        test_config["analysis"]["ml"]["aggregate_per_algorithm"] = ml_agg
+        test_config["analysis"]["evaluation"]["include"] = eval_include
+        test_config["analysis"]["evaluation"]["aggregate_per_algorithm"] = eval_agg
 
-        test_config["analysis"]["ml"]["include"] = True
-        test_config["analysis"]["ml"]["aggregate_per_algorithm"] = False
-        test_config["analysis"]["evaluation"]["include"] = True
-        test_config["analysis"]["evaluation"]["aggregate_per_algorithm"] = True
         config.init_global(test_config)
-        assert config.config.analysis_include_evaluation == True and config.config.analysis_include_evaluation_aggregate_algo == False and config.config.analysis_include_ml == True and config.config.analysis_include_ml_aggregate_algo == False
 
-        test_config["analysis"]["ml"]["include"] = False
-        test_config["analysis"]["ml"]["aggregate_per_algorithm"] = False
-        test_config["analysis"]["evaluation"]["include"] = True
-        test_config["analysis"]["evaluation"]["aggregate_per_algorithm"] = True
-        config.init_global(test_config)
-        assert config.config.analysis_include_evaluation == False and config.config.analysis_include_evaluation_aggregate_algo == False and config.config.analysis_include_ml == False and config.config.analysis_include_ml_aggregate_algo == False
-
-        test_config["analysis"]["ml"]["include"] = True
-        test_config["analysis"]["ml"]["aggregate_per_algorithm"] = True
-        test_config["analysis"]["evaluation"]["include"] = True
-        test_config["analysis"]["evaluation"]["aggregate_per_algorithm"] = True
-        config.init_global(test_config)
-        assert config.config.analysis_include_evaluation == True and config.config.analysis_include_evaluation_aggregate_algo == True and config.config.analysis_include_ml == True and config.config.analysis_include_ml_aggregate_algo == True
-
-        test_config["analysis"]["ml"]["include"] = True
-        test_config["analysis"]["ml"]["aggregate_per_algorithm"] = False
-        test_config["analysis"]["evaluation"]["include"] = False
-        test_config["analysis"]["evaluation"]["aggregate_per_algorithm"] = False
-        config.init_global(test_config)
-        assert config.config.analysis_include_evaluation == False and config.config.analysis_include_evaluation_aggregate_algo == False and config.config.analysis_include_ml == True and config.config.analysis_include_ml_aggregate_algo == False
+        assert config.config.analysis_include_ml == expected_ml
+        assert config.config.analysis_include_ml_aggregate_algo == expected_ml_agg
+        assert config.config.analysis_include_evaluation == expected_eval
+        assert config.config.analysis_include_evaluation_aggregate_algo == expected_eval_agg
