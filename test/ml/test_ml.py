@@ -29,7 +29,7 @@ class TestML:
                                            INPUT_DIR + 'test-data-spaces/spaces.txt',
                                            INPUT_DIR + 'test-data-mixed-direction/mixed-direction.txt',
                                            INPUT_DIR + 'test-data-repeat-edges-directed/repeat-edges-directed.txt'])
-        
+
         dataframe.to_csv(OUT_DIR + 'dataframe.csv')
         assert filecmp.cmp(OUT_DIR + 'dataframe.csv', EXPECT_DIR + 'expected-dataframe.csv', shallow=False)
 
