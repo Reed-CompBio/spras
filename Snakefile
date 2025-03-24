@@ -42,6 +42,7 @@ def algo_has_mult_param_combos(algo):
     return len(algorithm_params.get(algo, {})) > 1
 
 algorithms_mult_param_combos = [algo for algo in algorithms if algo_has_mult_param_combos(algo)]
+
 # Get the parameter dictionary for the specified
 # algorithm and parameter combination hash
 def reconstruction_params(algorithm, params_hash):
@@ -372,8 +373,7 @@ def get_dataset_label(wildcards):
     dataset = parts[0]
     return dataset
 
-
-# Run evaluation for all pathway outputs, ensemble.txt, and pca_coordinates.txt for a dataset against its paired gold standard
+# Run evaluation code for a specific dataset's pathway outputs against its paired gold standard
 rule evaluation:
     input: 
         gold_standard_file = get_gold_standard_pickle_file,

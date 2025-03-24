@@ -62,7 +62,7 @@ class Config:
         # __init__ makes clear exactly what is being configured.
         # Directory used for storing output
         self.out_dir = None
-        # Container framework used by PRMs. Valid options are "docker" and "singularity"
+        # Container framework used by PRMs. Valid options are "docker", "dsub", and "singularity"
         self.container_framework = None
         # The container prefix (host and organization) to use for images. Default is "docker.io/reedcompbio"
         self.container_prefix = DEFAULT_CONTAINER_PREFIX
@@ -103,7 +103,7 @@ class Config:
         self.analysis_include_evaluation = None
         # A Boolean specifying whether to run the ML per algorithm analysis
         self.analysis_include_ml_aggregate_algo = None
-        # A Boolean specifying whether to run the Evaluation per algorithm aanalysis
+        # A Boolean specifying whether to run the evaluation per algorithm analysis
         self.analysis_include_evaluation_aggregate_algo = None
 
         _raw_config = copy.deepcopy(raw_config)
@@ -120,9 +120,11 @@ class Config:
         # However, if we get a bad value, we raise an exception.
         if "container_framework" in raw_config:
             container_framework = raw_config["container_framework"].lower()
-            if container_framework not in ("docker", "singularity"):
-                msg = "SPRAS was configured to run with an unknown container framework: '" + raw_config["container_framework"] + "'. Accepted values are 'docker' or 'singularity'."
+            if container_framework not in ("docker", "singularity", "dsub"):
+                msg = "SPRAS was configured to run with an unknown container framework: '" + raw_config["container_framework"] + "'. Accepted values are 'docker', 'singularity' or 'dsub'."
                 raise ValueError(msg)
+            if container_framework == "dsub":
+                print("Warning: 'dsub' framework integration is experimental and may not be fully supported.")
             self.container_framework = container_framework
         else:
             self.container_framework = "docker"
@@ -268,8 +270,8 @@ class Config:
             raise ValueError("Evaluation analysis cannot run as gold standard data not provided. "
                              "Please set evaluation include to false or provide gold standard data.")
 
-         # Only run Evaluation if ML is set to True
-        if not self.analysis_include_ml and self.analysis_include_evaluation:
+        # Only run Evaluation if ML is set to True
+        if not self.analysis_include_ml:
             self.analysis_include_evaluation = False
 
         # Only run Evaluation aggregate per algorithm if analysis include ML is set to True
@@ -279,5 +281,5 @@ class Config:
             self.analysis_include_evaluation_aggregate_algo = False
 
         # Only run Evaluation per algorithm if ML per algorithm is set to True
-        if not self.analysis_include_ml_aggregate_algo and self.analysis_include_evaluation_aggregate_algo:
+        if not self.analysis_include_ml_aggregate_algo:
             self.analysis_include_evaluation_aggregate_algo = False

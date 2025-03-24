@@ -4,7 +4,7 @@
 SPRAS is a work-in-progress dockerized library of pathway reconstruction enhancement tools.
 The framework will contain different pathway reconstruction algorithms that connect genes and proteins of interest in the context of a general protein-protein interaction network, allowing users to run multiple algorithms on their inputs.
 See the GLBIO 2021 [slides](https://doi.org/10.6084/m9.figshare.14551476) or [video](https://www.youtube.com/watch?v=nU8EARwMqdM&list=PLmX8XnLr6zeHlqhhxDy4fA5o65Q6m76KX&index=19) for more information.
-To read more about the specific pathway reconstruction algorithms that may be supported in the future, refer to [our list of algorithms](doc/) within the `doc/` directory.
+To read more about the specific pathway reconstruction algorithms that may be supported in the future, refer to [our list of algorithms](https://spras.readthedocs.io/en/latest/prms/prms.html).
 
 This repository is very much a work in progress and is not yet stable enough for real data analysis.
 The latest features can be found on various development branches.
@@ -13,7 +13,7 @@ Open a [GitHub issue](https://github.com/Reed-CompBio/spras/issues) or contact [
 
 SPRAS is inspired by tools for single-cell transcriptomics such as [BEELINE](https://github.com/Murali-group/Beeline) and [dynverse](https://github.com/dynverse) that provide a unified interface to many related algorithms.
 
-![SPRAS overview](doc/spras-overview.png)  
+![SPRAS overview](docs/_static/spras-overview.png)
 SPRAS overview showing [PathLinker](https://github.com/Murali-group/PathLinker) and [Omics Integrator](https://github.com/fraenkel-lab/OmicsIntegrator) as representative pathway reconstruction algorithms.
 
 ## Installing and running SPRAS
@@ -35,9 +35,13 @@ conda activate spras
 to create a conda environment with the required packages and activate that environment.
 If you have a different version of Python already, you can install the specified versions of the required packages in your preferred manner instead of using Anaconda.
 
-SPRAS can also be installed with Python's package manager `pip` by running `python -m pip install .` from the repo's root directory. This makes SPRAS more portable by allowing you to run
-snakemake anywhere the Snakefile, data, and configuration file can be accessed. However, use caution when pip installing directly to your computer without using some form of virtual
-environment as this can alter your system's underlying python modules, which could lead to unexpected behavior.
+While the `spras` conda environment comes bundled with all of Python dependencies needed for `spras` to run, it does not yet have a working installation of `spras` itself.
+To install `spras` in the environment, finish by running the following from the root directory of the repository:
+```bash
+python -m pip install .
+```
+Use caution when pip installing directly to your computer without using some form of virtual/conda environment as this can alter your system's underlying Python modules, which could lead to unexpected behavior.
+In most cases, you should only `pip install` spras if you're already working in the `spras` conda environment!
 
 For developers, SPRAS can be installed via `pip` with the `-e` flag, as in `python -m pip install -e .`. This points Python back to the SPRAS repo so that any changes made to the source
 code are reflected in the installed module.

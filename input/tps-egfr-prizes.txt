@@ -1,4 +1,4 @@
-NODEID	prize	sources	targets	active
+NODEID	prize	sources	targets	active	dummy
 1433Z_HUMAN	1.041379133		True	True
 41_HUMAN	3.389112802		True	True
 4ET_HUMAN	2.569973509		True	True
@@ -181,7 +181,7 @@ EF1A1_HUMAN	3.774750081		True	True
 EF1B_HUMAN	0.768939794		True	True
 EF1D_HUMAN	1.240472409		True	True
 EFNB2_HUMAN	2.222686177		True	True
-EGF_HUMAN	10	True		True
+EGF_HUMAN	10	True		True	True
 EGFR_HUMAN	6.787874699		True	True
 EGLN1_HUMAN	1.876580206		True	True
 EIF3B_HUMAN	2.048949271		True	True

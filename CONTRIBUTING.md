@@ -157,6 +157,7 @@ Implement the `parse_output` function.
 The edges in the Local Neighborhood output have the same format as the input, `<vertex1>|<vertex2>`.
 Convert these to be tab-separated vertex pairs followed by a tab `1` and tab `U` at the end of every line, which indicates all edges have the same rank and are undirected.
 See the `add_rank_column` and `raw_pathway_df` function in `spras.util.py` and `reinsert_direction_col_undirected` function in `spras.interactome.py`.
+The `parse_output` function also ensures that there are no duplicate edges in the output pathway using the `spras.util.py` function `duplicate_edges`.
 Make sure header = True with column names: ['Node1', 'Node2', 'Rank', 'Direction'] when the file is created.
 The output should have the format `<vertex1> <vertex2> 1 U`.
 
@@ -206,7 +207,24 @@ Modify parse outputs:
 2. Obtain the expected universal output from the workflow, manually confirm it is correct, and save it to `test/parse-outputs/expected` directory. Name it as `{algorithm_name}-pathway-expected.txt`.
 3. Add the new algorithm's name to the algorithms list in `test/parse-outputs/test_parse_outputs.py`.
 
-### Step 6: Work with SPRAS maintainers to revise the pull request
+### Step 6: Update documentation
+SPRAS uses `sphinx` and "Read The Docs" for building and hosting documentation.
+To include your new reconstruction algorithm in this documentation, create a new file at `docs/prms/{my-alg}.rst`, where you replace `{my-alg}` with a shorthand for your algorithm.
+Once this file exists, you can edit it to document the algorithm in a human-readable way that provides any information that's relevant to users who might wish to use SPRAS with the algorithm.
+For more information about working with `.rst` files in SPRAS documentation, see `docs/README.md`.
+
+Once you've created the docs file, you'll need to create a new reference to it in `docs/prms/prms.rst`, which adds the new page to a table of contents.
+For example, if you created `docs/prms/my-alg.rst`, you'd add something like the following to `docs/prms/prms.rst`:
+```rst
+.. toctree::
+   :maxdepth: 1
+   :caption: My New Algorithm
+
+   my-alg
+```
+>Note: The "caption" field should be a short title for the docs page you're adding, and the `my-alg` section after it must be the name of your new file without the `.rst` extension.
+
+### Step 7: Work with SPRAS maintainers to revise the pull request
 Step 0 previously described how to create a `local-neighborhood` branch and create a pull request.
 Make sure to commit all of the new and modified files and push them to the `local-neighborhood` branch on your fork.
 
@@ -224,7 +242,8 @@ The pull request will be closed so that the `master` branch of the fork stays sy
 1. Document the usage of the Docker wrapper and the assumptions made when implementing the wrapper
 1. Add example usage for the new algorithm and its parameters to the template config file
 1. Write test functions and provide example input data in a new test subdirectory `test/<algorithm>`. Provide example data and algorithm/expected files names to lists or dicts in `test/generate-inputs` and `test/parse-outputs`. Use the full path with the names of the test files.
-1. Extend `.github/workflows/test-spras.yml` to pull and build the new Docker image
+1. Extend `.github/workflows/build-containers.yml` to pull and build the new Docker image
+1. Update SPRAS's online "Read The Docs" documentation by adding a new restructured text page at `docs/prms/{new-alg}.rst` (replacing `{new-alg}` with a sensible name for the algorithm) and linking to it in `docs/prms/prms.rst`
 
 When adding new algorithms, there are many other considerations that are not relevant with the simple Local Neighborhood example.
 Most algorithms require dependencies that need to be installed in the `Dockerfile`.

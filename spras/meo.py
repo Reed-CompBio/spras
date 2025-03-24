@@ -1,3 +1,4 @@
+import os
 from pathlib import Path
 
 from spras.containers import prepare_volume, run_container
@@ -6,16 +7,21 @@ from spras.interactome import (
     reinsert_direction_col_directed,
 )
 from spras.prm import PRM
-from spras.util import add_rank_column, raw_pathway_df
+from spras.util import add_rank_column, duplicate_edges, raw_pathway_df
 
 __all__ = ['MEO', 'write_properties']
+
+# replaces all underscores in the node names with unicode seperator
+# MEO keeps only the substring up to the first underscore when parsing node names
+# https://github.com/agitter/meo/blob/1fe57e8ff3952c494e2b14dfdc563a84596e2fcd/src/alg/Vertex.java#L56-L71
+underscore_replacement = '꧁SEP꧂'
 
 
 # Only supports the Random orientation algorithm
 # Does not support MINSAT or MAXCSP
 # TODO add parameter validation
 def write_properties(filename=Path('properties.txt'), edges=None, sources=None, targets=None, edge_output=None,
-                     path_output=None, max_path_length=None, local_search=None, rand_restarts=None):
+                     path_output=None, max_path_length=None, local_search=None, rand_restarts=None, framework='docker'):
     """
     Write the properties file for Maximum Edge Orientation
     See https://github.com/agitter/meo/blob/master/sample.props for property descriptions and the default values at
@@ -26,6 +32,17 @@ def write_properties(filename=Path('properties.txt'), edges=None, sources=None, 
     """
     if edges is None or sources is None or targets is None or edge_output is None or path_output is None:
         raise ValueError('Required Maximum Edge Orientation properties file arguments are missing')
+
+    if framework == 'dsub':
+        # Get path inside dsub container
+        workspace_bucket = os.getenv('WORKSPACE_BUCKET')
+        input_prefix = f'/mnt/data/input/gs/{workspace_bucket}'.replace('gs://', '')
+        # Add input prefix to all MEO paths
+        edges = input_prefix + edges
+        sources = input_prefix + sources
+        targets = input_prefix + targets
+        edge_output = input_prefix + edge_output
+        path_output = input_prefix + path_output
 
     with open(filename, 'w') as f:
         # Write the required properties
@@ -63,6 +80,8 @@ Interactor1   pp/pd   Interactor2   Weight
 - MEO tracks the directionality of the original edges, but all of its output edges are directed.
 - To remain accurate to MEO's design we will also treat the output graph's as directed
 """
+
+
 class MEO(PRM):
     required_inputs = ['sources', 'targets', 'edges']
 
@@ -88,6 +107,8 @@ class MEO(PRM):
             # TODO test whether this selection is needed, what values could the column contain that we would want to
             # include or exclude?
             nodes = nodes.loc[nodes[node_type]]
+            # replace _'s with underscore_replacement
+            nodes['NODEID'] = nodes['NODEID'].str.replace('_', underscore_replacement)
             nodes.to_csv(filename_map[node_type], index=False, columns=['NODEID'], header=False)
 
         # Create network file
@@ -95,10 +116,11 @@ class MEO(PRM):
 
         # Format network file
         edges = add_directionality_constant(edges, 'EdgeType', '(pd)', '(pp)')
-
+        # replace _'s with ꧁SEP꧂
+        edges['Interactor1'] = edges['Interactor1'].str.replace('_', underscore_replacement)
+        edges['Interactor2'] = edges['Interactor2'].str.replace('_', underscore_replacement)
         edges.to_csv(filename_map['edges'], sep='\t', index=False,
                      columns=['Interactor1', 'EdgeType', 'Interactor2', 'Weight'], header=False)
-
 
     # TODO add parameter validation
     # TODO document required arguments
@@ -148,7 +170,7 @@ class MEO(PRM):
         properties_file_local = Path(out_dir, properties_file)
         write_properties(filename=properties_file_local, edges=edge_file, sources=source_file, targets=target_file,
                          edge_output=mapped_output_file, path_output=mapped_path_output,
-                         max_path_length=max_path_length, local_search=local_search, rand_restarts=rand_restarts)
+                         max_path_length=max_path_length, local_search=local_search, rand_restarts=rand_restarts, framework=container_framework)
         bind_path, properties_file = prepare_volume(str(properties_file_local), work_dir)
         volumes.append(bind_path)
 
@@ -181,6 +203,9 @@ class MEO(PRM):
         # Columns Source Type Target Oriented Weight
         df = raw_pathway_df(raw_pathway_file, sep='\t', header=0)
         if not df.empty:
+            # Replace underscore_replacement with _
+            df['Source'] = df['Source'].str.replace(underscore_replacement, '_')
+            df['Target'] = df['Target'].str.replace(underscore_replacement, '_')
             # Keep only edges that were assigned an orientation (direction)
             df = df.loc[df['Oriented']]
             # TODO what should be the edge rank?
@@ -189,4 +214,7 @@ class MEO(PRM):
             df = reinsert_direction_col_directed(df)
             df.drop(columns=['Type', 'Oriented', 'Weight'], inplace=True)
             df.columns = ['Node1', 'Node2', 'Rank', "Direction"]
+            df, has_duplicates = duplicate_edges(df)
+            if has_duplicates:
+                print(f"Duplicate edges were removed from {raw_pathway_file}")
         df.to_csv(standardized_pathway_file, index=False, sep='\t', header=True)

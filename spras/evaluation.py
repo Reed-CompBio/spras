@@ -3,15 +3,8 @@ import pickle as pkl
 from pathlib import Path
 from typing import Dict, Iterable
 
-import matplotlib.pyplot as plt
-import numpy as np
 import pandas as pd
-from sklearn.metrics import (
-    average_precision_score,
-    precision_recall_curve,
-    precision_score,
-    recall_score,
-)
+from sklearn.metrics import precision_score
 
 
 class Evaluation:
@@ -79,28 +72,26 @@ class Evaluation:
         # TODO: later iteration - chose between node and edge file, or allow both
 
     @staticmethod
-    def precision_and_recall(file_paths: Iterable[Path], node_table: pd.DataFrame, algorithms: list, output_file: str, output_png:str=None):
+    def precision(file_paths: Iterable[Path], node_table: pd.DataFrame, output_file: str):
         """
         Takes in file paths for a specific dataset and an associated gold standard node table.
-        Calculates precision and recall for each pathway file
+        Calculates precision for each pathway file
         Returns output back to output_file
         @param file_paths: file paths of pathway reconstruction algorithm outputs
         @param node_table: the gold standard nodes
-        @param algorithms: list of algorithms used in current run of SPRAS
-        @param output_file: the filename to save the precision and recall of each pathway
-        @param output_png (optional): the filename to plot the precision and recall of each pathway (not a PRC)
+        @param output_file: the filename to save the precision of each pathway
         """
         y_true = set(node_table['NODEID'])
         results = []
+
         for file in file_paths:
             df = pd.read_table(file, sep="\t", header=0, usecols=["Node1", "Node2"])
-            # TODO: do we want to include the pathways that are empty for evaluation / in the pr_df?
             y_pred = set(df['Node1']).union(set(df['Node2']))
             all_nodes = y_true.union(y_pred)
             y_true_binary = [1 if node in y_true else 0 for node in all_nodes]
             y_pred_binary = [1 if node in y_pred else 0 for node in all_nodes]
+
             # default to 0.0 if there is a divide by 0 error
-            # not using precision_recall_curve because thresholds are binary (0 or 1); rather we are directly calculating precision and recall per pathway
             precision = precision_score(y_true_binary, y_pred_binary, zero_division=0.0)
             recall = recall_score(y_true_binary, y_pred_binary, zero_division=0.0)
             results.append({"Pathway": file, "Precision": precision, "Recall": recall})
