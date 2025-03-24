@@ -1,0 +1,73 @@
+name: Build and Remove Docker Image
+# A workflow template that handles building+removing SPRAS containers.
+
+# Required inputs are:
+# - path: The path to a container's Dockerfile directory, relative to the repo root.
+# - container: The registry/container to be built, without a tag.
+# - always_build: A boolean indicating whether the action should condition the container build
+#                 on detected changes.
+# - context: The optional build context path, relative to the repo root.
+on:
+  workflow_call:
+    inputs:
+      path:
+        required: true
+        type: string
+      container:
+        required: true
+        type: string
+      always_build:
+        required: false
+        type: boolean
+        default: false
+      context:
+        required: false
+        type: string
+
+jobs:
+  build-and-remove-docker-image:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v2
+
+      # Given the input path to the directory containing definitions of the container,
+      # check whether anything at that path has been modified relative to master's head.
+      # If so, we'll set `env.changed=true` to trigger the build in a later step
+      - name: Check for changes
+        if: ${{ inputs.always_build == false }}
+        id: check_changes
+        run: |
+          if git fetch origin master && git diff --name-only origin/master | grep -q "$(basename ${{ inputs.path }})"; then
+            echo "Changes detected to ${{inputs.path}}."
+            echo "changed=true" >> $GITHUB_ENV
+          else
+            echo "No changes detected to ${{ inputs.path}}"
+            echo "changed=false" >> $GITHUB_ENV
+          fi
+
+      - name: Toggle container build if 'always_build'
+        if: ${{ inputs.always_build }}
+        run: |
+          echo "Input for job 'always_build' is true -- building regardless of detected changes."
+          echo "changed=true" >> $GITHUB_ENV
+
+      - name: Build Docker image
+        if: env.changed == 'true'
+        uses: docker/build-push-action@v6
+        with:
+          context: ${{ inputs.context || inputs.path }}/.
+          file: ${{ inputs.path }}/Dockerfile
+          tags: ${{ inputs.container }}:latest
+          # The cache will always use the `latest` tag, as we assume that results in the highest
+          # amount of reusable container stuff.
+          cache-from: type=registry,ref=${{ inputs.container }}:latest
+          push: false
+
+      # Clean/remove the container as we go -- we don't actually need it around, and it
+      # counts against our action's disk quota.
+      # Here we use `|| true` to prevent the job from failing if the image doesn't exist or
+      # can't be removed for some reason
+      - name: Remove Docker image
+        if: env.changed == 'true'
+        run: docker rmi ${{ inputs.container }}:latest || true

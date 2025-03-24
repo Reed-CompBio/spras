@@ -19,21 +19,15 @@ class TestEvaluate:
         """
         Path(OUT_DIR).mkdir(parents=True, exist_ok=True)
 
-    def test_precision_recall_per_pathway(self):
+    def  test_precision_recall_pca_chosen_pathway(self):
         file_paths = [INPUT_DIR + "data-test-params-123/pathway.txt", INPUT_DIR + "data-test-params-456/pathway.txt",  INPUT_DIR + "data-test-params-789/pathway.txt",  INPUT_DIR + "data-test-params-empty/pathway.txt"]
         algorithms = ["test"]
-        output_file = OUT_DIR + "test-precision-recall-per-pathway.txt"
-        output_png = OUT_DIR + "test-precision-recall-per-pathway.png"
+        output_file = OUT_DIR +"test-precision-recall-per-pathway-pca-chosen.txt"
+        output_png = OUT_DIR + "test-precision-recall-per-pathway-pca-chosen.png"
 
-        Evaluation.precision_and_recall(file_paths, NODE_TABLE, algorithms, output_file, output_png)
-        assert filecmp.cmp(output_file, EXPECT_DIR + 'expected-precision-recall-per-pathway.txt', shallow=False)
+        dataframe = ml.summarize_networks(file_paths)
+        ml.pca(dataframe, OUT_DIR + 'pca.png', OUT_DIR + 'pca-variance.txt', OUT_DIR + 'pca-coordinates.tsv')
 
-    def test_precision_recall_per_pathway_empty(self):
-
-        file_paths = [INPUT_DIR + "data-test-params-empty/pathway.txt"]
-        algorithms = ["test"]
-        output_file = OUT_DIR +"test-precision-recall-per-pathway-empty.txt"
-        output_png = OUT_DIR + "test-precision-recall-per-pathway-empty.png"
-
-        Evaluation.precision_and_recall(file_paths, NODE_TABLE, algorithms, output_file, output_png)
-        assert filecmp.cmp(output_file, EXPECT_DIR + 'expected-precision-recall-per-pathway-empty.txt', shallow=False)
+        pathway = Evaluation.pca_chosen_pathway(OUT_DIR + 'pca-coordinates.tsv', INPUT_DIR)
+        Evaluation.precision_and_recall(pathway, NODE_TABLE, algorithms, output_file, output_png)
+        assert filecmp.cmp(output_file, EXPECT_DIR + 'expected-precision-recall-per-pathway-pca-chosen.txt', shallow=False)

@@ -1,0 +1,60 @@
+name: Build SPRAS Containers
+
+on:
+  pull_request:
+    types: [opened, synchronize, reopened]
+  push:
+    branches:
+      - master
+
+jobs:
+  build-and-remove-omics1:
+    uses: "./.github/workflows/build-and-remove-template.yml"
+    with:
+      path: docker-wrappers/OmicsIntegrator1
+      container: reedcompbio/omics-integrator-1
+  build-and-remove-omics2:
+    uses: "./.github/workflows/build-and-remove-template.yml"
+    with:
+      path: docker-wrappers/OmicsIntegrator2
+      container: reedcompbio/omics-integrator-2
+  build-and-remove-pathlinker:
+    uses: "./.github/workflows/build-and-remove-template.yml"
+    with:
+      path: docker-wrappers/PathLinker
+      container: reedcompbio/pathlinker
+  build-and-remove-meo:
+    uses: "./.github/workflows/build-and-remove-template.yml"
+    with:
+      path: docker-wrappers/MEO
+      container: reedcompbio/meo
+  build-and-remove-mincostflow:
+    uses: "./.github/workflows/build-and-remove-template.yml"
+    with:
+      path: docker-wrappers/MinCostFlow
+      container: reedcompbio/mincostflow
+  build-and-remove-allpairs:
+    uses: "./.github/workflows/build-and-remove-template.yml"
+    with:
+      path: docker-wrappers/AllPairs
+      container: reedcompbio/allpairs
+  build-and-remove-domino:
+    uses: "./.github/workflows/build-and-remove-template.yml"
+    with:
+      path: docker-wrappers/DOMINO
+      container: reedcompbio/domino
+  build-and-remove-cytoscape:
+    uses: "./.github/workflows/build-and-remove-template.yml"
+    with:
+      path: docker-wrappers/Cytoscape
+      container: reedcompbio/py4cytoscape
+  build-and-remove-spras:
+    uses: "./.github/workflows/build-and-remove-template.yml"
+    with:
+      path: docker-wrappers/SPRAS
+      container: reedcompbio/spras
+      # Since any change to the SPRAS codebase would constitute a change to
+      # the container we produce in this step, build the container regardless
+      # of detected changes.
+      always_build: true
+      context: ./
