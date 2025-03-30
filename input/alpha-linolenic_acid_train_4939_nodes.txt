@@ -1,3 +1,0 @@
-NODEID
-chebi:80457
-chebi:16238

@@ -1,3 +1,0 @@
-NODEID
-chebi:80448
-chebi:80449
