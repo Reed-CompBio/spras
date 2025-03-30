@@ -6,6 +6,8 @@ from typing import Dict, Iterable
 import pandas as pd
 from sklearn.metrics import precision_score
 
+from analysis.ml import summarize_networks
+
 
 class Evaluation:
     NODE_ID = "NODEID"
@@ -98,3 +100,9 @@ class Evaluation:
 
         precision_df = pd.DataFrame(results)
         precision_df.to_csv(output_file, sep="\t", index=False)
+
+    def jaccard_similarity_eval(self, summary_df: pd.DataFrame) -> pd.DataFrame:
+        # calculate the jaccard summary
+        pass
+
+

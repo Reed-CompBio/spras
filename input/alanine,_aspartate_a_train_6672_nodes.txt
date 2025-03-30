@@ -1,0 +1,10 @@
+NODEID
+AGT1_HUMAN
+chebi:17544
+chebi:17364
+chebi:17196
+chebi:18050
+chebi:15428
+chebi:16240
+chebi:16015
+chebi:30915

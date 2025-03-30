@@ -86,6 +86,7 @@ def summarize_networks(file_paths: Iterable[Union[str, PathLike]]) -> pd.DataFra
     concated_df = concated_df.fillna(0)
     concated_df = concated_df.astype('int64')
 
+    print(concated_df)
     return concated_df
 
 

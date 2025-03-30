@@ -1,0 +1,7 @@
+NODEID
+chebi:139105
+chebi:15339
+chebi:32389
+chebi:80453
+chebi:27432
+PLB1_HUMAN

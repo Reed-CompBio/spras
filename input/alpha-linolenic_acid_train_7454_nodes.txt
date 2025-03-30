@@ -1,0 +1,4 @@
+NODEID
+chebi:80449
+ACOX3_HUMAN
+chebi:16238
