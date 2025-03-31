@@ -24,18 +24,20 @@ class TestSummary:
                          "other_files" : []
                        }
         example_dataset = Dataset(example_dict)
-        print("DATASET: ", example_dataset.node_table)
+        # print("DATASET: ", example_dataset.node_table) #debug
         example_node_table = example_dataset.node_table
         config.init_from_file(Path("input/config.yaml"))
         algorithm_params = config.config.algorithm_params
         list(algorithm_params)
         algorithms_with_params = [f'{algorithm}-params-{params_hash}' for algorithm, param_combos in algorithm_params.items() for params_hash in param_combos.keys()]
 
-        example_network_files = Path("test/analysis/input/example").glob("*.txt") # must be path to use .glob()
-        #example_node_table = pd.read_csv(Path("test/analysis/input/example_node_table.txt"), sep = "\t")
-        example_output = pd.read_csv("output/example_summary.txt", sep = "\t")
+        example_network_files = Path("input/example").glob("*.txt") # must be path to use .glob()
+        #example_node_table = pd.read_csv(Path("test/analysis/input/example_node_table.txt"), sep = "\t") #old
+        example_output = pd.read_csv(Path("output/example_summary.txt"), sep = "\t")
         example_output["Name"] = example_output["Name"].map(convert_path)
-        assert summarize_networks(example_network_files, example_node_table, algorithm_params, algorithms_with_params).equals(example_output)
+        # print(example_output) #debug
+        summarize = summarize_networks(example_network_files, example_node_table, algorithm_params, algorithms_with_params)
+        assert summarize.equals(example_output)
 
     # Test data from EGFR workflow:
     def test_egfr_networks(self):
@@ -46,14 +48,14 @@ class TestSummary:
                       "other_files" : []
                     }
         egfr_dataset = Dataset(egfr_dict)
-        print("DATASET: ", egfr_dataset.node_table)
+        # print("DATASET: ", egfr_dataset.node_table) #debug
         egfr_node_table = egfr_dataset.node_table
         config.init_from_file(Path("input/egfr.yaml"))
         algorithm_params = config.config.algorithm_params
         list(algorithm_params)
         algorithms_with_params = [f'{algorithm}-params-{params_hash}' for algorithm, param_combos in algorithm_params.items() for params_hash in param_combos.keys()]
 
-        egfr_network_files = Path("test/analysis/input/egfr").glob("*.txt") # must be path to use .glob()
+        egfr_network_files = Path("input/egfr").glob("*.txt") # must be path to use .glob()
         #egfr_node_table = pd.read_csv(Path("test/analysis/input/egfr_node_table.txt"), sep = "\t")
         egfr_output = pd.read_csv("output/egfr_summary.txt", sep = "\t")
         egfr_output["Name"] = egfr_output["Name"].map(convert_path)

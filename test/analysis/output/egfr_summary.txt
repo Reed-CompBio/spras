@@ -1,4 +1,4 @@
-Name	Number of nodes	Number of undirected edges	Number of connected components	Nodes in prize	Nodes in sources	Nodes in targets	Nodes in active	Parameter combination
+Name	Number of nodes	Number of edges	Number of connected components	Nodes in prize	Nodes in sources	Nodes in targets	Nodes in active	Parameter combination
 output/egfr/tps_egfr-domino-params-V3X4RW7/pathway.txt	567	537	30	227	1	226	227	{slice_threshold: 0.3, module_threshold: 0.05}
 output/egfr/tps_egfr-meo-params-GKEDDFZ/pathway.txt	1874	12845	1	621	1	620	621	{local_search: Yes, max_path_length: 3, rand_restarts: 10}
 output/egfr/tps_egfr-omicsintegrator1-params-3THRXWW/pathway.txt	28	20	8	28	1	27	28	{b: 2, d: 10, g: 1e-3, r: 0.01, w: 0.1, mu: 0.008}
