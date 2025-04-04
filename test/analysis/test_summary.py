@@ -64,18 +64,22 @@ class TestSummary:
 
     # Test loading files from dataset_dict:
     def test_load_dataset_dict(self):
-        example_dict = { "label" : "data0",
-                         "edge_files" : ["network.txt"],
-                         "node_files" : ["node-prizes.txt", "sources.txt", "targets.txt"],
-                         "data_dir" : "input",
-                         "other_files" : []
-                       }
-        example_node_table = Dataset(example_dict)
-        example_node_table.load_files_from_dict(example_dict)
+        example_dict = { "label": "data0",
+                         "edge_files": ["network.txt"],
+                         "node_files": ["node-prizes.txt", "sources.txt", "targets.txt"],
+                         "data_dir": "input",
+                         "other_files": []
+                        }
+        example_dataset = Dataset(example_dict)
+        example_node_table = example_dataset.node_table
 
-        #print(example_node_table) # debug statement
-        # TODO: implement this method to test loading dataset
-        assert True
+        # node_table contents are not generated consistently in the same order,
+        # so we will check that the contents are the same, but row order doesn't matter
+        expected_node_table = pd.read_csv(Path("output/expected_node_table.txt"), sep="\t")
+        same_df = example_node_table.sort_values(by=example_node_table.columns.tolist()).reset_index(drop=True).equals(
+            expected_node_table.sort_values(by=expected_node_table.columns.tolist()).reset_index(drop=True)
+        )
+        assert same_df
 
 # File paths have to be converted for the stored expected output files because otherwise the dataframes may not
 # match if the test is run on a different operating system than the one used when the expected output was generated

@@ -33,17 +33,19 @@ def summarize_networks(file_paths: Iterable[Path], node_table: pd.DataFrame, alg
     nw_info = []
 
     index = 0
+    col_names = []
 
     # Iterate through each network file path
     for file_path in sorted(file_paths):
-
+        # print(file_path)
         with open(file_path, 'r') as f:
             lines = f.readlines()[1:]  # skip the header line
 
+        # directed or mixed graph are parsed and summarized as an undirected graph
         nw = nx.read_edgelist(lines, data=(('weight', float), ('Direction', str)))
 
         # Save the network name, number of nodes, number edges, and number of connected components
-        nw_name = str(file_path)
+        nw_name = str(file_path).replace("\\\\", "\\") #replace \\ in filepath with \
         number_nodes = nw.number_of_nodes()
         number_edges = nw.number_of_edges()
         ncc = nx.number_connected_components(nw)
@@ -69,21 +71,21 @@ def summarize_networks(file_paths: Iterable[Path], node_table: pd.DataFrame, alg
         params = params.replace("\"", "") #removes extra double quotes from string
         cur_nw_info.append(params)
 
-        # Prepare column names
-        col_names = ["Name", "Number of nodes", "Number of undirected edges", "Number of connected components"]
-        col_names.extend(nodes_by_col_labs)
-        col_names.append("Parameter combination")
-
         # Save the current network information to the network summary list
         nw_info.append(cur_nw_info)
+
+    # Prepare column names
+    col_names = ["Name", "Number of nodes", "Number of edges", "Number of connected components"]
+    col_names.extend(nodes_by_col_labs)
+    col_names.append("Parameter combination")
 
     # Convert the network summary data to pandas dataframe
     # Could refactor to create the dataframe line by line instead of storing data as lists and then converting
     nw_info = pd.DataFrame(
         nw_info,
-        columns=[col_names]
+        columns=col_names
     )
-
+    # print(nw_info) #debug
     return nw_info
 
 
