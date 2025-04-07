@@ -32,17 +32,14 @@ class TestSummary:
 
         example_network_files = Path("input/example").glob("*.txt") # must be path to use .glob()
         #example_node_table = pd.read_csv(Path("test/analysis/input/example_node_table.txt"), sep = "\t") #old
-
-        summarize_example = summarize_networks(example_network_files, example_node_table, algorithm_params, algorithms_with_params)
-        this_dir = Path(__file__).parent
-        summary_path = this_dir / "output" / "example_summary.txt"
-        example_output = pd.read_csv(summary_path, sep="\t")
+        example_output = pd.read_csv(Path("output/example_summary.txt"), sep = "\t")
         example_output["Name"] = example_output["Name"].map(convert_path)
+        summarize_example = summarize_networks(example_network_files, example_node_table, algorithm_params, algorithms_with_params)
         assert summarize_example.equals(example_output)
 
     # Test data from EGFR workflow:
     def test_egfr_networks(self):
-        egfr_dict = {"label" : "tps_egfr",
+        egfr_dict = { "label" : "tps_egfr",
                       "edge_files" : ["phosphosite-irefindex13.0-uniprot.txt"],
                       "node_files" : ["tps-egfr-prizes.txt"],
                       "data_dir" : "input",
@@ -59,12 +56,9 @@ class TestSummary:
 
         egfr_network_files = Path("input/egfr").glob("*.txt")  # must be path to use .glob()
         # egfr_node_table = pd.read_csv(Path("test/analysis/input/egfr_node_table.txt"), sep = "\t") #old
-        summarize_egfr = summarize_networks(egfr_network_files, egfr_node_table, algorithm_params, algorithms_with_params)
-
-        this_dir = Path(__file__).parent
-        summary_path = this_dir / "output" / "egfr_summary.txt"
-        egfr_output = pd.read_csv(summary_path, sep="\t")
+        egfr_output = pd.read_csv(Path("output/egfr_summary.txt"), sep="\t")
         egfr_output["Name"] = egfr_output["Name"].map(convert_path)
+        summarize_egfr = summarize_networks(egfr_network_files, egfr_node_table, algorithm_params, algorithms_with_params)
         assert summarize_egfr.equals(egfr_output)
 
     # Test loading files from dataset_dict:
@@ -80,9 +74,7 @@ class TestSummary:
 
         # node_table contents are not generated consistently in the same order,
         # so we will check that the contents are the same, but row order doesn't matter
-        this_dir = Path(__file__).parent
-        summary_path = this_dir / "output" / "expected_node_table.txt"
-        expected_node_table = pd.read_csv(summary_path, sep="\t")
+        expected_node_table = pd.read_csv(Path("output/expected_node_table.txt"), sep="\t")
         same_df = example_node_table.sort_values(by=example_node_table.columns.tolist()).reset_index(drop=True).equals(
             expected_node_table.sort_values(by=expected_node_table.columns.tolist()).reset_index(drop=True)
         )
