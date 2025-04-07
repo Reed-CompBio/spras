@@ -6,7 +6,7 @@ from spras.containers import prepare_volume, run_container
 from spras.dataset import Dataset
 from spras.interactome import reinsert_direction_col_undirected
 from spras.prm import PRM
-from spras.util import add_rank_column
+from spras.util import add_rank_column, duplicate_edges
 
 __all__ = ['OmicsIntegrator2']
 
@@ -163,5 +163,9 @@ class OmicsIntegrator2(PRM):
                 df.columns = ['Node1', 'Node2', 'Rank', "Direction"]
             else: # corrupted data
                 df = pd.DataFrame(columns=['Node1', 'Node2', 'Rank', 'Direction'])
+
+            df, has_duplicates = duplicate_edges(df)
+            if has_duplicates:
+                print(f"Duplicate edges were removed from {raw_pathway_file}")
 
         df.to_csv(standardized_pathway_file, header=True, index=False, sep='\t')

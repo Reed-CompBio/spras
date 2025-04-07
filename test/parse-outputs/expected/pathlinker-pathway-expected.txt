@@ -1,8 +1,8 @@
 Node1	Node2	Rank	Direction
 S2	T3	1	D
 A	E	2	D
-S1	A	2	D
 E	T1	2	D
+S1	A	2	D
 B	F	3	D
 F	T2	3	D
 S2	B	3	D
@@ -15,4 +15,4 @@ E	F	7	D
 B	C	8	D
 F	E	11	D
 G	F	13	D
-F	A	16	D
+F	A	15	D

@@ -3,8 +3,10 @@
 # The length of the hash used to identify a parameter combination
 hash_length: 7
 
-# Specify the container framework. Current supported versions include 'docker' and
-# 'singularity'. If container_framework is not specified, SPRAS will default to docker.
+# Specify the container framework used by each PRM wrapper. Valid options include:
+# - docker (default if not specified)
+# - singularity -- Also known as apptainer, useful in HPC/HTC environments where docker isn't allowed
+# - dsub -- experimental with limited support, used for running on Google Cloud
 container_framework: docker
 
 # Only used if container_framework is set to singularity, this will unpack the singularity containers
@@ -56,6 +58,7 @@ algorithms:
                   b: [5, 6]
                   w: np.linspace(0,5,2)
                   d: [10]
+                  dummy_mode: ["file"] # Or "terminals", "all", "others"
 
       - name: "omicsintegrator2"
         params:
@@ -101,6 +104,8 @@ datasets:
     -
       # Labels can only contain letters, numbers, or underscores
       label: data0
+      # To run OmicsIntegrator1 with dummy nodes, add dummy.txt file to node_files
+      # or a dummy column to the node table
       node_files: ["node-prizes.txt", "sources.txt", "targets.txt"]
       # DataLoader.py can currently only load a single edge file, which is the primary network
       edge_files: ["network.txt"]
@@ -173,4 +178,9 @@ analysis:
         # 'euclidean', 'manhattan', 'cosine'
         metric: 'euclidean'
       evaluation:
+        # evaluation per dataset-goldstandard pair
+        # evaluation will not run unless ml include is set to true
         include: true
+        # adds evaluation per algorithm per dataset-goldstandard pair
+        # evaluation per algortihm will not run unless ml include and ml aggregate_per_algorithm are set to true
+        aggregate_per_algorithm: true
