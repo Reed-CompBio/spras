@@ -1,22 +1,27 @@
 import shutil
 from pathlib import Path
-
 import pytest
 
 import spras.config as config
 from spras.analysis.cytoscape import run_cytoscape
 
-config.init_from_file("config/config.yaml")
+config.init_from_file("input/config.yaml")
 
-INPUT_DIR = 'test/analysis/input/example/'
+INPUT_DIR = 'input/example/'
 INPUT_PATHWAYS = [INPUT_DIR + 'data0-meo-params-GKEDDFZ_pathway.txt',
-                  INPUT_DIR + 'data0-omicsintegrator1-params-RQCQ4YN_pathway.txt',
-                  INPUT_DIR + 'data0-omicsintegrator1-params-WY4V42C_pathway.txt',
+                  INPUT_DIR + 'data0-omicsintegrator1-params-E3LSEZQ_pathway.txt', #changed
+                  INPUT_DIR + 'data0-omicsintegrator1-params-NFIPHUX_pathway.txt', #changed
                   INPUT_DIR + 'data0-omicsintegrator2-params-IV3IPCJ_pathway.txt',
                   INPUT_DIR + 'data0-pathlinker-params-6SWY7JS_pathway.txt',
                   INPUT_DIR + 'data0-pathlinker-params-VQL7BDZ_pathway.txt']
-OUT_FILE = 'test/analysis/output/cytoscape.cys'
+OUT_FILE = 'output/data0-cytoscape.cys'
 
+''' hard coded list does not include all input files
+INPUT_PATHWAYS = sorted([
+    str(f) for f in INPUT_DIR.glob("*_pathway.txt")
+    if not f.name.startswith(".")
+])
+''' # attempts to resolve PermissionError: Permission denied: '._.DS_Store'
 
 class TestCytoscape:
     """
