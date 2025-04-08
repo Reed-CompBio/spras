@@ -4,10 +4,7 @@ from pathlib import Path
 from typing import Dict, Iterable
 
 import pandas as pd
-import numpy as np
-from sklearn.metrics import precision_score, jaccard_score
-
-from analysis.ml import summarize_networks
+from sklearn.metrics import precision_score
 
 
 class Evaluation:
@@ -101,20 +98,3 @@ class Evaluation:
 
         precision_df = pd.DataFrame(results)
         precision_df.to_csv(output_file, sep="\t", index=False)
-
-    def jaccard_similarity_eval(self, summary_df: pd.DataFrame) -> pd.DataFrame:
-        # combine the columns for each algorithm together 
-        algorithm_sum_df = summary_df.groupby(lambda col: col.split('-')[1], axis=1).sum()
-        # calculate the jaccard similarity between all combinations for algorithms
-        binarized_df = algorithm_sum_df.applymap(lambda x: 1 if x!=0 else 0)
-        algorithms = binarized_df.columns
-        jaccard_matrix = pd.DataFrame(np.identity(len(algorithms)), index=algorithms, columns=algorithms)
-        for i, alg1 in enumerate(algorithms):
-            for j, alg2 in enumerate(algorithms[i+1:], start=i+1):
-                sim_value = jaccard_score(binarized_df[alg1], binarized_df[alg2])
-                jaccard_matrix.loc[alg1, alg2] = sim_value
-                jaccard_matrix.loc[alg2, alg1] = sim_value
-        #TODO: output the matrix - in CSV? 
-        pass
-
-

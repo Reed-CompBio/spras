@@ -11,6 +11,7 @@ from scipy.cluster.hierarchy import dendrogram, fcluster
 from sklearn.cluster import AgglomerativeClustering
 from sklearn.decomposition import PCA
 from sklearn.preprocessing import StandardScaler
+from sklearn.metrics import precision_score, jaccard_score
 
 from spras.util import make_required_dirs
 
@@ -348,3 +349,19 @@ def ensemble_network(dataframe: pd.DataFrame, output_file: str):
 
     make_required_dirs(output_file)
     row_means[['Node1', 'Node2', 'Frequency', "Direction"]].to_csv(output_file, sep='\t', index=False, header=True)
+
+
+def jaccard_similarity_eval(summary_df: pd.DataFrame, output_file: str) -> pd.DataFrame:
+    # combine the columns for each algorithm together 
+    algorithm_sum_df = summary_df.groupby(lambda col: col.split('-')[1], axis=1).sum()
+    # calculate the jaccard similarity between all combinations for algorithms
+    binarized_df = algorithm_sum_df.applymap(lambda x: 1 if x!=0 else 0)
+    print(binarized_df)
+    algorithms = binarized_df.columns
+    jaccard_matrix = pd.DataFrame(np.identity(len(algorithms)), index=algorithms, columns=algorithms)
+    for i, alg1 in enumerate(algorithms):
+        for j, alg2 in enumerate(algorithms[i+1:], start=i+1):
+            sim_value = jaccard_score(binarized_df[alg1], binarized_df[alg2])
+            jaccard_matrix.loc[alg1, alg2] = sim_value
+            jaccard_matrix.loc[alg2, alg1] = sim_value
+    jaccard_matrix.to_csv(output_file, sep='\t', index=True, header=True)

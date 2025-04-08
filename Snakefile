@@ -93,6 +93,7 @@ def make_final_input(wildcards):
         final_input.extend(expand('{out_dir}{sep}{dataset}-ml{sep}hac-horizontal.png',out_dir=out_dir,sep=SEP,dataset=dataset_labels,algorithm_params=algorithms_with_params))
         final_input.extend(expand('{out_dir}{sep}{dataset}-ml{sep}hac-clusters-horizontal.txt',out_dir=out_dir,sep=SEP,dataset=dataset_labels,algorithm_params=algorithms_with_params))
         final_input.extend(expand('{out_dir}{sep}{dataset}-ml{sep}ensemble-pathway.txt',out_dir=out_dir,sep=SEP,dataset=dataset_labels,algorithm_params=algorithms_with_params))
+        final_input.extend(expand('{out_dir}{sep}{dataset}-ml{sep}jaccard.txt',out_dir=out_dir,sep=SEP,dataset=dataset_labels,algorithm_params=algorithms_with_params))
     
     if _config.config.analysis_include_ml_aggregate_algo:
         final_input.extend(expand('{out_dir}{sep}{dataset}-ml{sep}{algorithm}-pca.png',out_dir=out_dir,sep=SEP,dataset=dataset_labels,algorithm=algorithms_mult_param_combos))
@@ -324,13 +325,10 @@ rule algorithm_similarity_eval:
         pathways = expand('{out_dir}{sep}{{dataset}}-{algorithm_params}{sep}pathway.txt',
                           out_dir=out_dir, sep=SEP, algorithm_params=algorithms_with_params)
     output:
-        algo_similarity = SEP.join([out_dir, '{dataset}-ml', 'jaccard.txt'])
+        algo_similarity_file = SEP.join([out_dir, '{dataset}-ml', 'jaccard.txt'])
     run:
         summary_df = ml.summarize_networks(input.pathways)
-        evalclass = Evaluation()
-        jaccard = evalclass.jaccard_similarity_eval(summary_df)
-        with open(output.algo_similarity, "w") as out_f:
-            out_f.write(str(jaccard))
+        jaccard = ml.jaccard_similarity_eval(summary_df, output.algo_similarity_file)
 
 
 # Ensemble the output pathways for each dataset
