@@ -93,7 +93,8 @@ def make_final_input(wildcards):
         final_input.extend(expand('{out_dir}{sep}{dataset}-ml{sep}hac-horizontal.png',out_dir=out_dir,sep=SEP,dataset=dataset_labels,algorithm_params=algorithms_with_params))
         final_input.extend(expand('{out_dir}{sep}{dataset}-ml{sep}hac-clusters-horizontal.txt',out_dir=out_dir,sep=SEP,dataset=dataset_labels,algorithm_params=algorithms_with_params))
         final_input.extend(expand('{out_dir}{sep}{dataset}-ml{sep}ensemble-pathway.txt',out_dir=out_dir,sep=SEP,dataset=dataset_labels,algorithm_params=algorithms_with_params))
-        final_input.extend(expand('{out_dir}{sep}{dataset}-ml{sep}jaccard.txt',out_dir=out_dir,sep=SEP,dataset=dataset_labels,algorithm_params=algorithms_with_params))
+        final_input.extend(expand('{out_dir}{sep}{dataset}-ml{sep}jaccard-matrix.txt',out_dir=out_dir,sep=SEP,dataset=dataset_labels,algorithm_params=algorithms_with_params))
+        final_input.extend(expand('{out_dir}{sep}{dataset}-ml{sep}jaccard-heatmap.png',out_dir=out_dir,sep=SEP,dataset=dataset_labels,algorithm_params=algorithms_with_params))
     
     if _config.config.analysis_include_ml_aggregate_algo:
         final_input.extend(expand('{out_dir}{sep}{dataset}-ml{sep}{algorithm}-pca.png',out_dir=out_dir,sep=SEP,dataset=dataset_labels,algorithm=algorithms_mult_param_combos))
@@ -104,6 +105,7 @@ def make_final_input(wildcards):
         final_input.extend(expand('{out_dir}{sep}{dataset}-ml{sep}{algorithm}-hac-horizontal.png',out_dir=out_dir,sep=SEP,dataset=dataset_labels,algorithm=algorithms_mult_param_combos))
         final_input.extend(expand('{out_dir}{sep}{dataset}-ml{sep}{algorithm}-hac-clusters-horizontal.txt',out_dir=out_dir,sep=SEP,dataset=dataset_labels,algorithm=algorithms_mult_param_combos))
         final_input.extend(expand('{out_dir}{sep}{dataset}-ml{sep}{algorithm}-ensemble-pathway.txt',out_dir=out_dir,sep=SEP,dataset=dataset_labels,algorithm=algorithms))
+        #TODO: add algo similarity outputs per algo
 
     if _config.config.analysis_include_evaluation:
         final_input.extend(expand('{out_dir}{sep}{dataset_gold_standard_pair}-evaluation.txt',out_dir=out_dir,sep=SEP,dataset_gold_standard_pair=dataset_gold_standard_pairs,algorithm_params=algorithms_with_params))
@@ -325,10 +327,11 @@ rule algorithm_similarity_eval:
         pathways = expand('{out_dir}{sep}{{dataset}}-{algorithm_params}{sep}pathway.txt',
                           out_dir=out_dir, sep=SEP, algorithm_params=algorithms_with_params)
     output:
-        algo_similarity_file = SEP.join([out_dir, '{dataset}-ml', 'jaccard.txt'])
+        algo_similarity_matrix = SEP.join([out_dir, '{dataset}-ml', 'jaccard-matrix.txt']),
+        algo_similarity_heatmap = SEP.join([out_dir, '{dataset}-ml', 'jaccard-heatmap.png'])
     run:
         summary_df = ml.summarize_networks(input.pathways)
-        jaccard = ml.jaccard_similarity_eval(summary_df, output.algo_similarity_file)
+        jaccard = ml.jaccard_similarity_eval(summary_df, output.algo_similarity_matrix, output.algo_similarity_heatmap)
 
 
 # Ensemble the output pathways for each dataset

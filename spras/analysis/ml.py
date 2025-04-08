@@ -351,7 +351,7 @@ def ensemble_network(dataframe: pd.DataFrame, output_file: str):
     row_means[['Node1', 'Node2', 'Frequency', "Direction"]].to_csv(output_file, sep='\t', index=False, header=True)
 
 
-def jaccard_similarity_eval(summary_df: pd.DataFrame, output_file: str) -> pd.DataFrame:
+def jaccard_similarity_eval(summary_df: pd.DataFrame, output_file: str, output_png: str) -> pd.DataFrame:
     # combine the columns for each algorithm together 
     algorithm_sum_df = summary_df.groupby(lambda col: col.split('-')[1], axis=1).sum()
     # calculate the jaccard similarity between all combinations for algorithms
@@ -364,4 +364,20 @@ def jaccard_similarity_eval(summary_df: pd.DataFrame, output_file: str) -> pd.Da
             sim_value = jaccard_score(binarized_df[alg1], binarized_df[alg2])
             jaccard_matrix.loc[alg1, alg2] = sim_value
             jaccard_matrix.loc[alg2, alg1] = sim_value
+    # save the jaccard matrix as a csv
     jaccard_matrix.to_csv(output_file, sep='\t', index=True, header=True)
+    # make a heatmap from the jaccard matrix
+    fig, ax = plt.subplots(figsize=(8, 6))
+    cax = ax.imshow(jaccard_matrix.values, interpolation='nearest', cmap='viridis')
+    ax.set_title("Algorithm Similarity Evaluation: Jaccard Similarity Heatmap")
+    # set tick labels with algorithm names
+    ax.set_xticks(np.arange(len(algorithms)))
+    ax.set_yticks(np.arange(len(algorithms)))
+    ax.set_xticklabels(algorithms)
+    ax.set_yticklabels(algorithms)
+    plt.colorbar(cax, ax=ax)
+    # annotate each cell with the corresponding similarity value
+    for i in range(len(algorithms)):
+        for j in range(len(algorithms)):
+            ax.text(j, i, f'{jaccard_matrix.values[i, j]:.2f}', ha='center', va='center', color='white')
+    plt.savefig(output_png, bbox_inches="tight", dpi=DPI)
