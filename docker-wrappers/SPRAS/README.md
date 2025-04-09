@@ -159,6 +159,32 @@ To investigate issues, start by referring to your logging directory. Each Snakem
 
 If your workflow gets stuck on the same error after multiple consecutive retries and prevents your workflow from completing, this indicates some user/developer intervention is likely required. If you choose to open a github issue, please include a description of the error(s) and what troubleshooting steps you've already taken.
 
+#### How To Fix HTCondor Creds Error
+If you attempt to run a SPRAS HTCondor workflow and encounter an error containing:
+```
+raise CredsError("Credentials not found for this workflow")
+```
+it indicates you must upgrade the version of the HTCondor Snakemake executor bundled with your conda environment.
+
+To upgrade, from your activated `spras` conda environment run:
+```bash
+pip install --force-reinstall git+https://github.com/htcondor/snakemake-executor-plugin-htcondor.git
+```
+
+Subsequently, verify that the git sha of the installed version matches the latest commit sha from the repo:
+```bash
+pip freeze | grep snakemake-executor-plugin-htcondor
+```
+This should result in something like:
+```
+snakemake-executor-plugin-htcondor @ git+https://github.com/htcondor/snakemake-executor-plugin-htcondor.git@68a345f8b9a281d8188fc33f134190c9f4ef7f27
+```
+where the trailing hexadecimal (everything after `@`) indicates the commit. You can find the latest upstream commit by
+visiting [the executor repository](https://github.com/htcondor/snakemake-executor-plugin-htcondor) and inspecting
+the commit history.
+
+If the preceding steps did not update the installed version, you may need to delete and rebuild your `spras` conda environment.
+
 ## Versions:
 
 The versions of this image match the version of the spras package within it.
