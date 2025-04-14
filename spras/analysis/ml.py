@@ -11,6 +11,7 @@ from scipy.cluster.hierarchy import dendrogram, fcluster
 from sklearn.cluster import AgglomerativeClustering
 from sklearn.decomposition import PCA
 from sklearn.preprocessing import StandardScaler
+from sklearn.metrics import precision_score, jaccard_score
 
 from spras.util import make_required_dirs
 
@@ -86,6 +87,7 @@ def summarize_networks(file_paths: Iterable[Union[str, PathLike]]) -> pd.DataFra
     concated_df = concated_df.fillna(0)
     concated_df = concated_df.astype('int64')
 
+    print(concated_df)
     return concated_df
 
 
@@ -347,3 +349,35 @@ def ensemble_network(dataframe: pd.DataFrame, output_file: str):
 
     make_required_dirs(output_file)
     row_means[['Node1', 'Node2', 'Frequency', "Direction"]].to_csv(output_file, sep='\t', index=False, header=True)
+
+
+def jaccard_similarity_eval(summary_df: pd.DataFrame, output_file: str, output_png: str) -> pd.DataFrame:
+    # combine the columns for each algorithm together 
+    algorithm_sum_df = summary_df.groupby(lambda col: col.split('-')[1], axis=1).sum()
+    # calculate the jaccard similarity between all combinations for algorithms
+    binarized_df = algorithm_sum_df.applymap(lambda x: 1 if x!=0 else 0)
+    print(binarized_df)
+    algorithms = binarized_df.columns
+    jaccard_matrix = pd.DataFrame(np.identity(len(algorithms)), index=algorithms, columns=algorithms)
+    for i, alg1 in enumerate(algorithms):
+        for j, alg2 in enumerate(algorithms[i+1:], start=i+1):
+            sim_value = jaccard_score(binarized_df[alg1], binarized_df[alg2])
+            jaccard_matrix.loc[alg1, alg2] = sim_value
+            jaccard_matrix.loc[alg2, alg1] = sim_value
+    # save the jaccard matrix as a csv
+    jaccard_matrix.to_csv(output_file, sep='\t', index=True, header=True)
+    # make a heatmap from the jaccard matrix
+    fig, ax = plt.subplots(figsize=(8, 6))
+    cax = ax.imshow(jaccard_matrix.values, interpolation='nearest', cmap='viridis')
+    ax.set_title("Algorithm Similarity Evaluation: Jaccard Similarity Heatmap")
+    # set tick labels with algorithm names
+    ax.set_xticks(np.arange(len(algorithms)))
+    ax.set_yticks(np.arange(len(algorithms)))
+    ax.set_xticklabels(algorithms)
+    ax.set_yticklabels(algorithms)
+    plt.colorbar(cax, ax=ax)
+    # annotate each cell with the corresponding similarity value
+    for i in range(len(algorithms)):
+        for j in range(len(algorithms)):
+            ax.text(j, i, f'{jaccard_matrix.values[i, j]:.2f}', ha='center', va='center', color='white')
+    plt.savefig(output_png, bbox_inches="tight", dpi=DPI)
