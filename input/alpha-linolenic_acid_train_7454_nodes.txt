@@ -1,4 +1,0 @@
-NODEID	prize
-chebi:16238	1.0
-chebi:80449	1.0
-ACOX3_HUMAN	1.0
