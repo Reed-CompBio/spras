@@ -43,6 +43,11 @@ jobs:
     with:
       path: docker-wrappers/DOMINO
       container: reedcompbio/domino
+  build-and-remove-btb:
+    uses: "./.github/workflows/build-and-remove-template.yml"
+    with:
+      path: docker-wrappers/BowTieBuilder
+      container: reedcompbio/bowtiebuilder
   build-and-remove-cytoscape:
     uses: "./.github/workflows/build-and-remove-template.yml"
     with:
