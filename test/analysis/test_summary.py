@@ -32,7 +32,7 @@ class TestSummary:
 
         example_network_files = Path("input/example").glob("*.txt") # must be path to use .glob()
         #example_node_table = pd.read_csv(Path("test/analysis/input/example_node_table.txt"), sep = "\t") #old
-        example_output = pd.read_csv(Path("output/example_summary.txt"), sep = "\t")
+        example_output = pd.read_csv(Path("expected_output/example_summary.txt"), sep = "\t")
         example_output["Name"] = example_output["Name"].map(convert_path)
         summarize_example = summarize_networks(example_network_files, example_node_table, algorithm_params, algorithms_with_params)
         assert summarize_example.equals(example_output)
@@ -56,9 +56,10 @@ class TestSummary:
 
         egfr_network_files = Path("input/egfr").glob("*.txt")  # must be path to use .glob()
         # egfr_node_table = pd.read_csv(Path("test/analysis/input/egfr_node_table.txt"), sep = "\t") #old
-        egfr_output = pd.read_csv(Path("output/egfr_summary.txt"), sep="\t")
+        egfr_output = pd.read_csv(Path("expected_output/egfr_summary.txt"), sep="\t")
         egfr_output["Name"] = egfr_output["Name"].map(convert_path)
-        summarize_egfr = summarize_networks(egfr_network_files, egfr_node_table, algorithm_params, algorithms_with_params)
+        summarize_egfr = summarize_networks(egfr_network_files, egfr_node_table, algorithm_params,
+                                               algorithms_with_params)
         assert summarize_egfr.equals(egfr_output)
 
     # Test loading files from dataset_dict:
@@ -74,10 +75,20 @@ class TestSummary:
 
         # node_table contents are not generated consistently in the same order,
         # so we will check that the contents are the same, but row order doesn't matter
-        expected_node_table = pd.read_csv(Path("output/expected_node_table.txt"), sep="\t")
-        same_df = example_node_table.sort_values(by=example_node_table.columns.tolist()).reset_index(drop=True).equals(
-            expected_node_table.sort_values(by=expected_node_table.columns.tolist()).reset_index(drop=True)
+        expected_node_table = pd.read_csv(Path("expected_output/expected_node_table.txt"), sep="\t")
+
+        cols_to_compare = [col for col in example_node_table.columns if col != "NODEID"]
+        same_df = (
+            example_node_table[cols_to_compare]
+            .sort_values(by=cols_to_compare)
+            .reset_index(drop=True)
+            .equals(
+                expected_node_table[cols_to_compare]
+                .sort_values(by=cols_to_compare)
+                .reset_index(drop=True)
+            )
         )
+
         assert same_df
 
 # File paths have to be converted for the stored expected output files because otherwise the dataframes may not

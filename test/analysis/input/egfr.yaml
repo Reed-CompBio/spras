@@ -84,7 +84,7 @@ analysis:
   graphspace:
     include: false
   cytoscape:
-    include: false
+    include: true
   summary:
     include: true
   ml:

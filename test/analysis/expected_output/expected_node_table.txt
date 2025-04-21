@@ -1,0 +1,4 @@
+NODEID	prize	active	sources	targets
+0	C	5.7	True	NaN	True
+1	A	2.0	True	True	NaN
+2	B	NaN	NaN	NaN	NaN
