@@ -35,9 +35,13 @@ def summarize_networks(file_paths: Iterable[Path], node_table: pd.DataFrame, alg
     index = 0
     col_names = []
 
+    root_dir = Path(__file__).resolve().parents[2]
+
     # Iterate through each network file path
     for file_path in sorted(file_paths):
-        # print(file_path)
+        file_path = Path(file_path)
+        file_path = (root_dir / file_path).resolve()
+        rel_path = file_path.relative_to(root_dir)
         with open(file_path, 'r') as f:
             lines = f.readlines()[1:]  # skip the header line
 
@@ -45,7 +49,7 @@ def summarize_networks(file_paths: Iterable[Path], node_table: pd.DataFrame, alg
         nw = nx.read_edgelist(lines, data=(('weight', float), ('Direction', str)))
 
         # Save the network name, number of nodes, number edges, and number of connected components
-        nw_name = str(file_path).replace("\\\\", "\\") #replace \\ in filepath with \
+        nw_name = str(rel_path).replace("\\\\", "\\") #replace \\ in filepath with \
         number_nodes = nw.number_of_nodes()
         number_edges = nw.number_of_edges()
         ncc = nx.number_connected_components(nw)

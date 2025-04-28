@@ -1,4 +1,4 @@
-NODEID	prize	sources	targets	active
+NODEID	prize	sources	targets	active	dummy
 1433Z_HUMAN	1.041379133		True	True
 41_HUMAN	3.389112802		True	True
 4ET_HUMAN	2.569973509		True	True

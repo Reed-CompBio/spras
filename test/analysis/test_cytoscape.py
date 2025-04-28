@@ -15,7 +15,7 @@ INPUT_PATHWAYS = [INPUT_DIR + 'data0-meo-params-GKEDDFZ_pathway.txt',
                   INPUT_DIR + 'data0-omicsintegrator2-params-IV3IPCJ_pathway.txt',
                   INPUT_DIR + 'data0-pathlinker-params-6SWY7JS_pathway.txt',
                   INPUT_DIR + 'data0-pathlinker-params-VQL7BDZ_pathway.txt']
-OUT_FILE = 'output/data0-cytoscape.cys'
+OUT_FILE = 'expected_output/data0-cytoscape.cys'
 
 ''' hard coded list does not include all input files
 INPUT_PATHWAYS = sorted([
