@@ -120,8 +120,8 @@ class Config:
         # However, if we get a bad value, we raise an exception.
         if "container_framework" in raw_config:
             container_framework = raw_config["container_framework"].lower()
-            if container_framework not in ("docker", "singularity", "dsub"):
-                msg = "SPRAS was configured to run with an unknown container framework: '" + raw_config["container_framework"] + "'. Accepted values are 'docker', 'singularity' or 'dsub'."
+            if container_framework not in ("docker", "singularity", "apptainer", "dsub"):
+                msg = "SPRAS was configured to run with an unknown container framework: '" + raw_config["container_framework"] + "'. Accepted values are 'docker', 'singularity', 'apptainer', or 'dsub'."
                 raise ValueError(msg)
             if container_framework == "dsub":
                 print("Warning: 'dsub' framework integration is experimental and may not be fully supported.")
@@ -133,8 +133,8 @@ class Config:
         if "unpack_singularity" in raw_config:
             # The value in the config is a string, and we need to convert it to a bool.
             unpack_singularity = raw_config["unpack_singularity"]
-            if unpack_singularity and self.container_framework != "singularity":
-                print("Warning: unpack_singularity is set to True, but the container framework is not singularity. This setting will have no effect.")
+            if unpack_singularity and not (self.container_framework == "singularity" or self.container_framework == "apptainer"):
+                print("Warning: unpack_singularity is set to True, but the container framework is not singularity/apptainer. This setting will have no effect.")
             self.unpack_singularity = unpack_singularity
 
         # Grab registry from the config, and if none is provided default to docker
