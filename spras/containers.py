@@ -147,7 +147,7 @@ def run_container(framework: str, container_suffix: str, command: List[str], vol
     container = config.config.container_prefix + "/" + container_suffix
     if normalized_framework == 'docker':
         return run_container_docker(container, command, volumes, working_dir, environment)
-    elif normalized_framework == 'singularity':
+    elif normalized_framework == 'singularity' or normalized_framework == "apptainer":
         return run_container_singularity(container, command, volumes, working_dir, environment)
     elif normalized_framework == 'dsub':
         return run_container_dsub(container, command, volumes, working_dir, environment)
@@ -290,7 +290,52 @@ def run_container_docker(container: str, command: List[str], volumes: List[Tuple
     return out
 
 
-def run_container_singularity(container: str, command: List[str], volumes: List[Tuple[PurePath, PurePath]], working_dir: str, environment: Optional[dict[str, str]] = None):
+def create_cgroup():
+    # 1. Find current cgroup path
+    with open("/proc/self/cgroup") as f:
+        first_line = next(f).strip()
+        cgroup_rel = first_line.split(":")[-1].strip()
+
+    print(f"Current cgroup path: {cgroup_rel}")
+    mycgroup = os.path.join("/sys/fs/cgroup", cgroup_rel.lstrip("/"))
+    print(f"My cgroup path: {mycgroup}")
+
+    peer_cgroup = os.path.join(os.path.dirname(mycgroup), f"spras-peer-{os.getpid()}")
+    print(f"Peer cgroup path: {peer_cgroup}")
+
+    # 2. Create peer cgroup
+    try:
+        os.makedirs(peer_cgroup, exist_ok=True)
+    except Exception as e:
+        print(f"Failed to create cgroup: {e}")
+
+    # 3. Move this process into the peer cgroup (so child inherits it)
+    try:
+        with open(os.path.join(peer_cgroup, "cgroup.procs"), "w") as f:
+            f.write(str(os.getpid()))
+    except Exception as e:
+        print(f"Failed to move process into cgroup: {e}")
+
+    return peer_cgroup
+
+
+def read_container_memory_peak(cgroup_path: str):
+    try:
+        with open(os.path.join(cgroup_path, "memory.peak")) as f:
+            peak_mem = f.read().strip()
+        print(f"Peak Container Memory Usage from cgroup: {peak_mem}")
+    except Exception as e:
+        print(f"Failed to read memory usage from cgroup: {e}")
+
+    try:
+        with open(os.path.join(cgroup_path, "cpu.stat")) as f:
+            cpu_stat = f.read().strip()
+        print(f"CPU Stat from cgroup:\n{cpu_stat}")
+    except Exception as e:
+        print(f"Failed to read cpu.stat from cgroup: {e}")
+
+
+def run_container_singularity(container: str, command: List[str], volumes: List[Tuple[PurePath, PurePath]], working_dir: str, out_dir: str, environment: Optional[dict[str, str]] = None):
     """
     Runs a command in the container using Singularity.
     Only available on Linux.
@@ -308,6 +353,9 @@ def run_container_singularity(container: str, command: List[str], volumes: List[
     # spython is not compatible with Windows
     if platform.system() != 'Linux':
         raise NotImplementedError('Singularity support is only available on Linux')
+
+    print("Creating cgroup for memory and CPU tracking")
+    mycgroup = create_cgroup()
 
     # See https://stackoverflow.com/questions/3095071/in-python-what-happens-when-you-import-inside-of-a-function
     from spython.main import Client
@@ -355,17 +403,23 @@ def run_container_singularity(container: str, command: List[str], volumes: List[
             Client.build(recipe=image_path, image=str(base_cont_path), sandbox=True, sudo=False)
 
         # Execute the locally unpacked container.
-        return Client.execute(str(base_cont_path),
+        result =  Client.execute(str(base_cont_path),
+                        command,
+                        options=singularity_options,
+                        bind=bind_paths)
+
+    else:
+        # Adding 'docker://' to the container indicates this is a Docker image Singularity must convert
+        result =  Client.execute('docker://' + container,
                               command,
                               options=singularity_options,
                               bind=bind_paths)
 
-    else:
-        # Adding 'docker://' to the container indicates this is a Docker image Singularity must convert
-        return Client.execute('docker://' + container,
-                              command,
-                              options=singularity_options,
-                              bind=bind_paths)
+    # Read stats from the container cgroup
+    print("Reading memory and CPU stats from cgroup")
+    read_container_memory_peak(mycgroup)
+
+    return result
 
 
 # Because this is called independently for each file, the same local path can be mounted to multiple volumes
