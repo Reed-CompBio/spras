@@ -11,7 +11,7 @@ from scipy.cluster.hierarchy import dendrogram, fcluster
 from sklearn.cluster import AgglomerativeClustering
 from sklearn.decomposition import PCA
 from sklearn.preprocessing import StandardScaler
-from sklearn.metrics import precision_score, jaccard_score
+from sklearn.metrics import jaccard_score
 
 from spras.util import make_required_dirs
 
@@ -351,12 +351,17 @@ def ensemble_network(dataframe: pd.DataFrame, output_file: str):
     row_means[['Node1', 'Node2', 'Frequency', "Direction"]].to_csv(output_file, sep='\t', index=False, header=True)
 
 
-def jaccard_similarity_eval(summary_df: pd.DataFrame, output_file: str, output_png: str) -> pd.DataFrame:
-    # combine the columns for each algorithm together 
-    algorithm_sum_df = summary_df.groupby(lambda col: col.split('-')[1], axis=1).sum()
-    # calculate the jaccard similarity between all combinations for algorithms
-    binarized_df = algorithm_sum_df.applymap(lambda x: 1 if x!=0 else 0)
-    print(binarized_df)
+def jaccard_similarity_eval(summary_df: pd.DataFrame, output_file: str, output_png: str):
+    """
+    Calculates the pairwise Jaccard similarity matrix from the binary representation of `summary_df`.
+    Save the resulting similarity matrix as a tab-delimited file and generates and save a heatmap 
+    visualization of the similarities.
+    @param summary_df: pandas dataframe with algorithm-parameter summary information
+    @param output_file: the filename to save the ensemble network
+    @param output_png: the file name to save the heatmap image
+    """
+    # calculate the jaccard similarity between all combinations of algorithms & parameters
+    binarized_df = summary_df.applymap(lambda x: 1 if x !=0 else 0)
     algorithms = binarized_df.columns
     jaccard_matrix = pd.DataFrame(np.identity(len(algorithms)), index=algorithms, columns=algorithms)
     for i, alg1 in enumerate(algorithms):
@@ -368,8 +373,8 @@ def jaccard_similarity_eval(summary_df: pd.DataFrame, output_file: str, output_p
     jaccard_matrix.to_csv(output_file, sep='\t', index=True, header=True)
     # make a heatmap from the jaccard matrix
     fig, ax = plt.subplots(figsize=(8, 6))
-    cax = ax.imshow(jaccard_matrix.values, interpolation='nearest', cmap='viridis')
-    ax.set_title("Algorithm Similarity Evaluation: Jaccard Similarity Heatmap")
+    cax = ax.imshow(jaccard_matrix.values, interpolation='nearest', cmap='viridis', vmin=0, vmax=1)
+    ax.set_title("Jaccard similarity heatmap")
     # set tick labels with algorithm names
     ax.set_xticks(np.arange(len(algorithms)))
     ax.set_yticks(np.arange(len(algorithms)))
