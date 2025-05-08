@@ -10,9 +10,8 @@ from adjustText import adjust_text
 from scipy.cluster.hierarchy import dendrogram, fcluster
 from sklearn.cluster import AgglomerativeClustering
 from sklearn.decomposition import PCA
-from sklearn.metrics import jaccard_score, precision_score
 from sklearn.preprocessing import StandardScaler
-from sklearn.metrics import precision_score, jaccard_score
+from sklearn.metrics import jaccard_score
 
 from spras.util import make_required_dirs
 
