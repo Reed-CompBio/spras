@@ -1,9 +1,9 @@
 import filecmp
+import shutil
 from pathlib import Path
 
 import pandas as pd
 import pytest
-import shutil
 
 import spras.analysis.ml as ml
 

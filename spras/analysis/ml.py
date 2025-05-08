@@ -10,8 +10,9 @@ from adjustText import adjust_text
 from scipy.cluster.hierarchy import dendrogram, fcluster
 from sklearn.cluster import AgglomerativeClustering
 from sklearn.decomposition import PCA
+from sklearn.metrics import jaccard_score, precision_score
 from sklearn.preprocessing import StandardScaler
-from sklearn.metrics import jaccard_score
+from sklearn.metrics import precision_score, jaccard_score
 
 from spras.util import make_required_dirs
 
@@ -365,7 +366,7 @@ def jaccard_similarity_eval(summary_df: pd.DataFrame, output_file: str, output_p
     algorithms = binarized_df.columns
     jaccard_matrix = pd.DataFrame(np.identity(len(algorithms)), index=algorithms, columns=algorithms)
     for i, alg1 in enumerate(algorithms):
-        for j, alg2 in enumerate(algorithms[i+1:], start=i+1):
+        for _j, alg2 in enumerate(algorithms[i+1:], start=i+1):
             sim_value = jaccard_score(binarized_df[alg1], binarized_df[alg2])
             jaccard_matrix.loc[alg1, alg2] = sim_value
             jaccard_matrix.loc[alg2, alg1] = sim_value
