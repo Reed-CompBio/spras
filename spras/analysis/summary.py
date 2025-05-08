@@ -1,3 +1,4 @@
+import json
 import os
 import sys
 from pathlib import Path
@@ -7,7 +8,7 @@ import networkx as nx
 import pandas as pd
 
 
-def summarize_networks(file_paths: Iterable[Path], node_table: pd.DataFrame) -> pd.DataFrame:
+def summarize_networks(file_paths: Iterable[Path], node_table: pd.DataFrame, algo_params, algo_with_params) -> pd.DataFrame:
     """
     Generate a table that aggregates summary information about networks in file_paths,
     including which nodes are present in node_table columns.
@@ -31,41 +32,64 @@ def summarize_networks(file_paths: Iterable[Path], node_table: pd.DataFrame) -> 
     # Initialize list to store network summary data
     nw_info = []
 
+    index = 0
+    col_names = []
+
+    root_dir = Path(__file__).resolve().parents[2]
+
     # Iterate through each network file path
     for file_path in sorted(file_paths):
-
+        file_path = Path(file_path)
+        file_path = (root_dir / file_path).resolve()
+        rel_path = file_path.relative_to(root_dir)
         with open(file_path, 'r') as f:
             lines = f.readlines()[1:]  # skip the header line
 
+        # directed or mixed graph are parsed and summarized as an undirected graph
         nw = nx.read_edgelist(lines, data=(('weight', float), ('Direction', str)))
 
         # Save the network name, number of nodes, number edges, and number of connected components
-        nw_name = str(file_path)
+        nw_name = str(rel_path).replace("\\\\", "\\") #replace \\ in filepath with \
         number_nodes = nw.number_of_nodes()
         number_edges = nw.number_of_edges()
         ncc = nx.number_connected_components(nw)
+
         # Initialize list to store current network information
         cur_nw_info = [nw_name, number_nodes, number_edges, ncc]
+
         # Iterate through each node property and save the intersection with the current network
         for node_list in nodes_by_col:
             num_nodes = len(set(nw).intersection(node_list))
             cur_nw_info.append(num_nodes)
+
+        # String split name to access algorithm and hashcode from filepath
+        # Name of filepath follows format "output/.../data#-algo-params-hashcode/pathway.txt"
+        # algorithm parameters have format { algo : { hashcode : { parameter combos } } }
+        filename = sorted(algo_with_params)[index].split("-")
+        algo = filename[0]
+        hashcode = filename[2]
+        index = index + 1
+
+        param_combo = algo_params[algo][hashcode]
+        params = json.dumps(param_combo)
+        params = params.replace("\"", "") #removes extra double quotes from string
+        cur_nw_info.append(params)
+
         # Save the current network information to the network summary list
         nw_info.append(cur_nw_info)
+
+    # Prepare column names
+    col_names = ["Name", "Number of nodes", "Number of edges", "Number of connected components"]
+    col_names.extend(nodes_by_col_labs)
+    col_names.append("Parameter combination")
 
     # Convert the network summary data to pandas dataframe
     # Could refactor to create the dataframe line by line instead of storing data as lists and then converting
     nw_info = pd.DataFrame(
         nw_info,
-        columns=[
-                    "Name",
-                    "Number of nodes",
-                    "Number of undirected edges",
-                    "Number of connected components"
-                ]
-                +
-                nodes_by_col_labs
+        columns=col_names
     )
+    # print(nw_info) #debug
     return nw_info
 
 
