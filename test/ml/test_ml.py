@@ -1,4 +1,5 @@
 import filecmp
+import shutil
 from pathlib import Path
 
 import pandas as pd
@@ -145,3 +146,12 @@ class TestML:
         expected = pd.read_table(EXPECT_DIR + 'expected-ensemble-network-empty.tsv')
 
         assert en.equals(expected)
+
+    # NOTE: binary comparison of generated binary files may be fragile across matplotlib versions
+    # if this test begins failing unexpectedly, consider loosening or disabling test
+    def test_jaccard_similarity_eval(self):
+        dataframe = ml.summarize_networks([INPUT_DIR + 'test-data-s1/s1.txt', INPUT_DIR + 'test-data-s2/s2.txt', INPUT_DIR + 'test-data-s3/s3.txt'])
+        ml.jaccard_similarity_eval(dataframe, OUT_DIR + 'jaccard-matrix.txt', OUT_DIR + 'jaccard-heatmap.png')
+
+        assert filecmp.cmp(OUT_DIR + 'jaccard-matrix.txt', EXPECT_DIR + 'expected-jaccard-matrix.txt', shallow=False)
+        assert filecmp.cmp(OUT_DIR + 'jaccard-heatmap.png', EXPECT_DIR + 'expected-jaccard-heatmap.png', shallow=False)
