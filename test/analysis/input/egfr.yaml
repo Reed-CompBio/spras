@@ -83,7 +83,7 @@ reconstruction_settings:
   run: true
 analysis:
   graphspace:
-    include: false
+    include: true
   cytoscape:
     include: true
   summary:

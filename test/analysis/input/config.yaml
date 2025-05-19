@@ -153,7 +153,7 @@ analysis:
         include: true
       # Create output files for each pathway that can be visualized with GraphSpace
       graphspace:
-        include: false
+        include: true
       # Create Cytoscape session file with all pathway graphs for each dataset
       cytoscape:
         include: true
