@@ -8,6 +8,7 @@ from spras.analysis.cytoscape import run_cytoscape
 
 config.init_from_file("test/analysis/input/config.yaml") #changed
 
+OUT_DIR = 'test/analysis/output/'
 INPUT_DIR = 'test/analysis/input/example/'
 INPUT_PATHWAYS = [INPUT_DIR + 'data0-meo-params-GKEDDFZ_pathway.txt',
                   INPUT_DIR + 'data0-omicsintegrator1-params-E3LSEZQ_pathway.txt', #changed
@@ -18,6 +19,12 @@ INPUT_PATHWAYS = [INPUT_DIR + 'data0-meo-params-GKEDDFZ_pathway.txt',
 OUT_FILE = 'test/analysis/output/cytoscape.cys' # to be generated
 
 class TestCytoscape:
+    @classmethod
+    def setup_class(cls):
+        """
+        Create the expected output directory
+        """
+        Path(OUT_DIR).mkdir(parents=True, exist_ok=True)
     """
     Test creating a Cytoscape session file from a list of pathways
     """
