@@ -4,13 +4,14 @@ import spras.analysis.graphspace as graphspace
 import spras.analysis.summary as summary
 
 TEST_DIR = 'test/analysis/'
+OUT_DIR = 'test/analysis/output'
 class TestAnalysis:
     @classmethod
     def setup_class(cls):
         """
         Create the expected output directory
         """
-        Path(TEST_DIR).mkdir(parents=True, exist_ok=True)
+        Path(OUT_DIR).mkdir(parents=True, exist_ok=True)
     """
     Test the summary statistics
     """
@@ -34,11 +35,11 @@ class TestAnalysis:
     # test GraphSpace json output on an undirected graph.
     def test_graphspace_ranked(self):
         graphspace.write_json(TEST_DIR + 'input/standardized-ranked.txt',
-                              TEST_DIR + 'output/standardized-ranked-undirected-gs.json',
-                              TEST_DIR + 'output/standardized-ranked-undirected-gs-style.json')
+                              OUT_DIR + 'standardized-ranked-undirected-gs.json',
+                              OUT_DIR + 'standardized-ranked-undirected-gs-style.json')
 
     # test GraphSpace json output on a directed graph.
     def test_graphspace_ranked_directed(self):
         graphspace.write_json(TEST_DIR + 'input/standardized-ranked.txt',
-                              TEST_DIR + 'output/standardized-ranked-directed-gs.json',
-                              TEST_DIR + 'output/standardized-ranked-directed-gs-style.json')
+                              OUT_DIR + 'standardized-ranked-directed-gs.json',
+                              OUT_DIR + 'standardized-ranked-directed-gs-style.json')
