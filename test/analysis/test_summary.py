@@ -40,11 +40,12 @@ class TestSummary:
         list(algorithm_params)
         algorithms_with_params = [f'{algorithm}-params-{params_hash}' for algorithm, param_combos in algorithm_params.items() for params_hash in param_combos.keys()]
 
-        example_network_files = (INPUT_DIR + "example").glob("*.txt") # must be path to use .glob()
+        example_network_files = Path(INPUT_DIR + "example").glob("*.txt") # must be path to use .glob()
         #example_node_table = pd.read_csv(Path("test/analysis/input/example_node_table.txt"), sep = "\t") #old
         example_output = pd.read_csv((EXPECT_DIR + "test_example_summary.txt"), sep = "\t")
         example_output["Name"] = example_output["Name"].map(convert_path)
-        summarize_example = summarize_networks(example_network_files, example_node_table, algorithm_params, algorithms_with_params)
+        summarize_example = summarize_networks(example_network_files, example_node_table, algorithm_params,
+                                               algorithms_with_params)
         assert summarize_example.equals(example_output)
 
     # Test data from EGFR workflow:
@@ -64,7 +65,7 @@ class TestSummary:
         algorithms_with_params = [f'{algorithm}-params-{params_hash}' for algorithm, param_combos in
                                   algorithm_params.items() for params_hash in param_combos.keys()]
 
-        egfr_network_files = (INPUT_DIR + "egfr").glob("*.txt")  # must be path to use .glob()
+        egfr_network_files = Path(INPUT_DIR + "egfr").glob("*.txt")  # must be path to use .glob()
         # egfr_node_table = pd.read_csv(Path("test/analysis/input/egfr_node_table.txt"), sep = "\t") #old
         egfr_output = pd.read_csv((EXPECT_DIR + "test_egfr_summary.txt"), sep="\t")
         egfr_output["Name"] = egfr_output["Name"].map(convert_path)
