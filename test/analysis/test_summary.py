@@ -19,6 +19,7 @@ OUT_DIR = 'test/analysis/output/'
 EXPECT_DIR = 'test/analysis/expected_output/'
 
 class TestSummary:
+    @classmethod
     def setup_class(cls):
         """
         Create the expected output directory

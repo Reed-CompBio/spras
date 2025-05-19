@@ -6,7 +6,7 @@ import pytest
 import spras.config as config
 from spras.analysis.cytoscape import run_cytoscape
 
-config.init_from_file("input/config.yaml") #changed
+config.init_from_file("test/analysis/input/config.yaml") #changed
 
 INPUT_DIR = 'test/analysis/input/example/'
 INPUT_PATHWAYS = [INPUT_DIR + 'data0-meo-params-GKEDDFZ_pathway.txt',
