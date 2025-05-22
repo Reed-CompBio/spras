@@ -75,7 +75,6 @@ class LocalNeighborhood(PRM):
 
         # Rename the primary output file to match the desired output filename
         # Currently PathLinker only writes one output file so we do not need to delete others
-        # We may not know the value of k that was used
         output_vertices = out_dir.joinpath('out').joinpath('ln-output.txt')
         output_vertices.rename(output_file)
 
