@@ -2,6 +2,7 @@ import os
 import platform
 import re
 import subprocess
+import traceback
 from pathlib import Path, PurePath, PurePosixPath
 from typing import Any, Dict, List, Optional, Tuple, Union
 
@@ -166,7 +167,11 @@ def run_container_docker(container: str, command: List[str], volumes: List[Tuple
     out = None
     try:
         # Initialize a Docker client using environment variables
-        client = docker.from_env()
+        try:
+            client = docker.from_env()
+        except Exception as err:
+            err.add_note("An error occurred when fetching the docker daemon: is docker installed?")
+            raise err
         # Track the contents of the local directories that will be bound so that new files added can have their owner
         # changed
         pre_volume_contents = {}
@@ -233,7 +238,7 @@ def run_container_docker(container: str, command: List[str], volumes: List[Tuple
         client.close()
 
     except Exception as err:
-        print(err)
+        print(traceback.format_exc())
     # Removed the finally block to address bugbear B012
     # "`return` inside `finally` blocks cause exceptions to be silenced"
     # finally:
