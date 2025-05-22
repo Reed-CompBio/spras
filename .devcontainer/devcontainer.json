@@ -1,0 +1,15 @@
+// Small devcontainer which loads anaconda. All postinstallation steps have to be done manually.
+// This comes with snakemake and docker-in-docker.
+
+// For format details, see https://aka.ms/devcontainer.json. For config options, see the
+// README at: https://github.com/devcontainers/templates/tree/main/src/anaconda
+{
+	"name": "Anaconda (Python 3)",
+	"build": { 
+		"context": "..",
+		"dockerfile": "Dockerfile"
+	},
+	"features": {
+		"ghcr.io/devcontainers/features/docker-in-docker:2": {}
+	}
+}
