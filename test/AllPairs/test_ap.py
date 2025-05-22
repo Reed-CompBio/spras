@@ -104,6 +104,20 @@ class TestAllPairs:
             correct_edges.append((node1, node2))
 
         assert output_edges == correct_edges
+    
+    def test_allpairs_directed(self):
+        out_path = Path(OUT_DIR+'directed-out.txt')
+        out_path.unlink(missing_ok=True)
+
+        Path(OUT_DIR+'directed-flag.txt').touch()
+
+        AllPairs.run(
+            nodetypes=TEST_DIR+'input/directed-nodetypes.txt',
+            network=TEST_DIR+'input/directed-network.txt',
+            output_file=OUT_DIR+'directed-out.txt',
+            directed_flag=OUT_DIR+'directed-flag.txt'
+        )
+        assert out_path.exists()
 
     def test_allpairs_zero_length(self):
         """

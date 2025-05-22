@@ -93,7 +93,8 @@ class AllPairs(PRM):
                    '/AllPairs/all-pairs-shortest-paths.py',
                    '--network', network_file,
                    '--nodes', node_file,
-                   '--output', mapped_out_file].extend(["--directed"] if Path(directed_flag).exists() else [])
+                   '--output', mapped_out_file]
+        command.extend(["--directed"] if directed_flag and Path(directed_flag).exists() else [])
 
         print('Running All Pairs Shortest Paths with arguments: {}'.format(' '.join(command)), flush=True)
 
