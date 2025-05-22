@@ -7,6 +7,15 @@ Methods for converting from the universal network input format and to the univer
 
 import pandas as pd
 
+def has_direction(df: pd.DataFrame) -> bool:
+    """
+    Checks if a graph has any directed edge.
+    """
+    # Does the dataframe masked by directed edges
+    directed_mask = df['Direction'] == 'D';
+    directed_df = df[directed_mask]
+    # have at least one element?
+    return not directed_df.empty()
 
 def convert_undirected_to_directed(df: pd.DataFrame) -> pd.DataFrame:
     """

@@ -23,11 +23,12 @@ def parse_arguments():
     parser.add_argument("--nodes", type=Path, required=True, help="Nodes file of the form <node> <source-or-target>. "
                                                                   "Tab-delimited.")
     parser.add_argument("--output", type=Path, required=True, help="Output file")
+    parser.add_argument("--directed", type=bool, required=False, help="Specify if the graph is directed.")
 
     return parser.parse_args()
 
 
-def allpairs(network_file: Path, nodes_file: Path, output_file: Path):
+def allpairs(network_file: Path, nodes_file: Path, output_file: Path, directed: bool):
     if not network_file.exists():
         raise OSError(f"Network file {str(network_file)} does not exist")
     if not nodes_file.exists():
@@ -54,7 +55,7 @@ def allpairs(network_file: Path, nodes_file: Path, output_file: Path):
     assert len(targets) > 0, 'There are no targets.'
 
     # Read graph & assert all the sources/targets are in network
-    graph = nx.read_weighted_edgelist(network_file, delimiter='\t')
+    graph = nx.read_weighted_edgelist(network_file, delimiter='\t', create_using=(nx.DiGraph if directed else None))
     assert len(sources.intersection(graph.nodes())) == len(sources), 'At least one source is not in the interactome.'
     assert len(targets.intersection(graph.nodes())) == len(targets), 'At least one target is not in the interactome.'
 
@@ -75,7 +76,7 @@ def main():
     Parse arguments and run pathway reconstruction
     """
     args = parse_arguments()
-    allpairs(args.network, args.nodes, args.output)
+    allpairs(args.network, args.nodes, args.output, args.directed)
 
 
 if __name__ == "__main__":
