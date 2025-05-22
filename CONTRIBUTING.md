@@ -70,7 +70,7 @@ Complete the `Dockerfile` in the [`docker-wrappers/LocalNeighborhood`](docker-wr
 The PathLinker `Dockerfile` demonstrates how to begin with a Python image and copy files into the image with `COPY`.
 Browse the official [Python images](https://hub.docker.com/_/python) to select a recent version of Python based on Alpine Linux, a small Linux distribution.
 Note that the PathLinker example uses an old version of Python, but this Local Neighborhood Docker image should be based on a more modern version of Python.
-In addition, not all pathway reconstruction algorithms are compatible with Alpine Linux, so the default Debian-based Python image is required.
+In addition, not all pathway reconstruction algorithms are compatible with Alpine Linux, so the default Debian-based Python image is sometimes required.
 The `Dockerfile` does not need an `ENTRYPOINT` or `CMD` line.
 It will be used to run a Python command.
 

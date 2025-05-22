@@ -48,6 +48,11 @@ jobs:
     with:
       path: docker-wrappers/Cytoscape
       container: reedcompbio/py4cytoscape
+  build-and-remove-localneighborhood:
+    uses: "./.github/workflows/build-and-remove-template.yml"
+    with:
+      path: docker-wrappers/LocalNeighborhood
+      container: pubtristanf/localneighborhood
   build-and-remove-spras:
     uses: "./.github/workflows/build-and-remove-template.yml"
     with:
