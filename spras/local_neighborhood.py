@@ -36,7 +36,7 @@ class LocalNeighborhood(PRM):
     @staticmethod
     def run(nodes=None, network=None, output_file=None, container_framework="docker"):
         if not nodes or not network or not output_file:
-            raise ValueError('Required PathLinker arguments are missing')
+            raise ValueError('Required LocalNeighborhood arguments are missing!')
         
         work_dir = '/spras'
 
