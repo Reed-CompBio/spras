@@ -65,7 +65,7 @@ class NetMix2(PRM):
         mapped_out_prefix = mapped_out_dir + '/out'  # Use posix path inside the container
 
         command = ['python',
-                   '/NetMix2/run_netmix2.py.py',
+                   '/NetMix2/run_netmix2.py',
                    '-el',
                    network_file,
                    '-gs',

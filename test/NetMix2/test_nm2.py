@@ -15,7 +15,7 @@ class TestNetMix2:
     def test_nm2(self):
         OUT_FILE.unlink(missing_ok=True)
         NetMix2.run(
-            network=TEST_DIR / 'input' / 'network=basic.txt',
+            network=TEST_DIR / 'input' / 'network-basic.txt',
             scores=TEST_DIR / 'input' / 'scores-basic.txt',
             output_file=OUT_FILE
         )
