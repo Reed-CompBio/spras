@@ -170,7 +170,7 @@ def run_container_docker(container: str, command: List[str], volumes: List[Tuple
         try:
             client = docker.from_env()
         except Exception as err:
-            err.add_note("An error occurred when fetching the docker daemon: is docker installed?")
+            err.add_note("An error occurred when fetching the docker daemon: is docker installed and is dockerd running?")
             raise err
         # Track the contents of the local directories that will be bound so that new files added can have their owner
         # changed
