@@ -48,6 +48,11 @@ jobs:
     with:
       path: docker-wrappers/Cytoscape
       container: reedcompbio/py4cytoscape
+  build-and-remove-netmix2:
+    uses: "./.github/workflows/build-and-remove-template.yml"
+    with:
+      path: docker-wrappers/NetMix2
+      container: reedcompbio/netmix2
   build-and-remove-spras:
     uses: "./.github/workflows/build-and-remove-template.yml"
     with:
