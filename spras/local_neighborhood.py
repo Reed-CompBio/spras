@@ -31,7 +31,7 @@ class LocalNeighborhood(PRM):
         node_df.to_csv(filename_map['nodes'], index=False, columns=['NODEID'], header=False)
 
         edges_df = data.get_interactome()
-        edges_df.to_csv(filename_map['network'], index=False, sep = "|", columns=['Interactor1','Interactor2'], header=False)
+        edges_df.to_csv(filename_map['network'], index=False, sep="|", columns=['Interactor1', 'Interactor2'], header=False)
 
     @staticmethod
     def run(nodes=None, network=None, output_file=None, container_framework="docker"):
