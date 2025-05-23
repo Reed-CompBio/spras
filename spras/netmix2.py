@@ -7,7 +7,7 @@ from spras.prm import PRM
 __all__ = ['NetMix2']
 
 class NetMix2(PRM):
-    required_inputs = ['edges', 'scores']
+    required_inputs = ['network', 'scores']
 
     @staticmethod
     def generate_inputs(data: Dataset, filename_map):
@@ -25,17 +25,21 @@ class NetMix2(PRM):
             node_df = data.request_node_columns(['prize'])
         else:
             raise ValueError("Node prizes are required for NetMix2.")
+        node_df.to_csv(filename_map['scores'], index=False, columns=['prize', 'NODEID'], header=False, sep='\t')
+
+        edges_df = data.get_interactome()
+        edges_df.to_csv(filename_map['network'], index=False, sep='\t', columns=['Interactor1', 'Interactor2'], header=False)
     
     @staticmethod
-    def run(edges=None, scores=None, output_file=None, container_framework="docker"):
-        if not edges or not scores or not output_file:
+    def run(network=None, scores=None, output_file=None, container_framework="docker"):
+        if not network or not scores or not output_file:
             raise ValueError('Required NetMix2 arguments are missing')
 
         work_dir = '/spras'
 
         volumes = list()
 
-        bind_path, edges_file = prepare_volume(edges, work_dir)
+        bind_path, network_file = prepare_volume(network, work_dir)
         volumes.append(bind_path)
 
         bind_path, scores_file = prepare_volume(scores, work_dir)
@@ -51,7 +55,7 @@ class NetMix2(PRM):
         command = ['python',
                    '/NetMix2/run_netmix2.py.py',
                    '-el',
-                   edges_file,
+                   network_file,
                    '-gs',
                    scores_file,
                    '-o', mapped_out_prefix + '/v-output.txt']

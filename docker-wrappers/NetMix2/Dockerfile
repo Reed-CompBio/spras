@@ -1,4 +1,4 @@
-FROM python:3.6.15-alpine
+FROM python:3.6.15-bullseye
 
 RUN COMMIT_SHA_NETMIX2=110954e27ec1911b6fe68b6a34352fecca494922 && \
     wget https://github.com/raphael-group/netmix2/tarball/$COMMIT_SHA_NETMIX2 && \
@@ -14,3 +14,7 @@ RUN COMMIT_SHA_NETMIX2=110954e27ec1911b6fe68b6a34352fecca494922 && \
     mv leekgroup-locfdr-python-* locfdr && \
     cd locfdr && \
     python setup.py install
+
+COPY requirements.txt .
+
+RUN pip install -r requirements.txt
