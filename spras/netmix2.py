@@ -31,7 +31,19 @@ class NetMix2(PRM):
         edges_df.to_csv(filename_map['network'], index=False, sep='\t', columns=['Interactor1', 'Interactor2'], header=False)
     
     @staticmethod
-    def run(network=None, scores=None, output_file=None, container_framework="docker"):
+    def run(network=None, scores=None, output_file=None, delta=None, num_edges=None, density=None,
+            time_limit=None,
+            container_framework="docker"):
+        """
+        Run NetMix2 with Docker
+        @param network: input network file (required)
+        @param scores: scores file (required)
+        @param output_file: path to the output pathway file (required)
+        @param delta: The similarity threshold (optional).
+        @param num_edges: The number of edges in similarity threshold graph (optional). Default: 175000
+        @param density: The minimum edge density of the altered subnetwork (optional). Default: 0.05
+        @param time_limit: The time limit (in hours). Default: 12
+        """
         if not network or not scores or not output_file:
             raise ValueError('Required NetMix2 arguments are missing')
 
@@ -59,6 +71,16 @@ class NetMix2(PRM):
                    '-gs',
                    scores_file,
                    '-o', mapped_out_prefix + '/v-output.txt']
+
+        # Add optional arguments
+        if delta is not None:
+            command.extend(['-d', delta])
+        if num_edges is not None:
+            command.extend(['-ne', num_edges])
+        if density is not None:
+            command.extend(['-p', density])
+        if time_limit is not None:
+            command.extend(['-t', time_limit])
 
         print('Running NetMix2 with arguments: {}'.format(' '.join(command)), flush=True)
 
