@@ -12,7 +12,7 @@ def has_direction(df: pd.DataFrame) -> bool:
     Checks if a graph has any directed edge.
     """
     # Does the dataframe masked by directed edges
-    directed_mask = df['Direction'] == 'D';
+    directed_mask = df['Direction'] == 'D'
     directed_df = df[directed_mask]
     # have at least one element?
     return not directed_df.empty()

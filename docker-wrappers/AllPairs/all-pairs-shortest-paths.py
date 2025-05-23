@@ -23,7 +23,8 @@ def parse_arguments():
     parser.add_argument("--nodes", type=Path, required=True, help="Nodes file of the form <node> <source-or-target>. "
                                                                   "Tab-delimited.")
     parser.add_argument("--output", type=Path, required=True, help="Output file")
-    parser.add_argument("--directed", type=bool, required=False, help="Specify if the graph is directed.")
+    parser.add_argument("--directed", type=bool, required=False, help="Specify if the graph is directed.",
+                        action=argparse.BooleanOptionalAction)
 
     return parser.parse_args()
 
