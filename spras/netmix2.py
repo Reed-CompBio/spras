@@ -77,4 +77,5 @@ class NetMix2(PRM):
 
     @staticmethod
     def parse_output(raw_pathway_file, standardized_pathway_file):
-        pass
+        with open(raw_pathway_file) as raw_pathway_file:
+            vertices = [line.rstrip('\n') for line in raw_pathway_file if not str.isspace(line)]
