@@ -74,13 +74,13 @@ class NetMix2(PRM):
 
         # Add optional arguments
         if delta is not None:
-            command.extend(['-d', delta])
+            command.extend(['--delta', str(delta)])
         if num_edges is not None:
-            command.extend(['-ne', num_edges])
+            command.extend(['--num_edges', str(num_edges)])
         if density is not None:
-            command.extend(['-p', density])
+            command.extend(['--density', str(density)])
         if time_limit is not None:
-            command.extend(['-t', time_limit])
+            command.extend(['--time_limit', str(time_limit)])
 
         print('Running NetMix2 with arguments: {}'.format(' '.join(command)), flush=True)
 

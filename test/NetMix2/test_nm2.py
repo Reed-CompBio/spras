@@ -17,6 +17,7 @@ class TestNetMix2:
         NetMix2.run(
             network=TEST_DIR / 'input' / 'network-basic.txt',
             scores=TEST_DIR / 'input' / 'scores-basic.txt',
+            num_edges=2,
             output_file=OUT_FILE
         )
         assert OUT_FILE.exists(), 'Output file was not written'
