@@ -95,6 +95,10 @@ algorithms:
               run1:
                   slice_threshold: [0.3]
                   module_threshold: [0.05]
+      
+      - name: "netmix2"
+        params:
+              include: true
 
 
 # Here we specify which pathways to run and other file location information.
