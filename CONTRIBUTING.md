@@ -135,7 +135,7 @@ Also test the functions available in the `Dataset` class.
 ```
 
 Note: If you get a 'no module named' error, make sure that you are running
-inside the spras environment (your terminal should begin with (spras) instead of (base)), and your editor's interpreter is set to using the spras environment over the base environment (on VSCode and Intellij editors, this should be in the bottom right.)
+your interactive python session inside the SPRAS conda environment (your terminal should begin with `(spras)` instead of `(base)`), and your editor's interpreter is set to using the SPRAS environment over the base environment (on VSCode and IntelliJ editors, this should be in the bottom right.)
 
 Note the behaviors of the `request_node_columns` function when there are missing values in that column of the node table and when multiple columns are requested.
 `request_node_columns` always returns the `NODEID` column in addition to the requested columns.
