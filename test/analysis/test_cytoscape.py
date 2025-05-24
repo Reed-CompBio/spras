@@ -1,4 +1,3 @@
-import shutil
 from pathlib import Path
 
 import pytest
@@ -6,28 +5,31 @@ import pytest
 import spras.config as config
 from spras.analysis.cytoscape import run_cytoscape
 
-config.init_from_file("test/analysis/input/config.yaml") #changed
+config.init_from_file("test/analysis/input/config.yaml")
 
 OUT_DIR = 'test/analysis/output/'
 INPUT_DIR = 'test/analysis/input/example/'
 INPUT_PATHWAYS = [INPUT_DIR + 'data0-meo-params-GKEDDFZ_pathway.txt',
-                  INPUT_DIR + 'data0-omicsintegrator1-params-E3LSEZQ_pathway.txt', #changed
-                  INPUT_DIR + 'data0-omicsintegrator1-params-NFIPHUX_pathway.txt', #changed
+                  INPUT_DIR + 'data0-omicsintegrator1-params-E3LSEZQ_pathway.txt',
+                  INPUT_DIR + 'data0-omicsintegrator1-params-NFIPHUX_pathway.txt',
                   INPUT_DIR + 'data0-omicsintegrator2-params-IV3IPCJ_pathway.txt',
                   INPUT_DIR + 'data0-pathlinker-params-6SWY7JS_pathway.txt',
                   INPUT_DIR + 'data0-pathlinker-params-VQL7BDZ_pathway.txt']
-OUT_FILE = 'test/analysis/output/cytoscape.cys' # to be generated
+OUT_FILE = 'test/analysis/output/cytoscape.cys'
+
 
 class TestCytoscape:
+    """
+    Test creating a Cytoscape session file from a list of pathways
+    """
+
     @classmethod
     def setup_class(cls):
         """
         Create the expected output directory
         """
         Path(OUT_DIR).mkdir(parents=True, exist_ok=True)
-    """
-    Test creating a Cytoscape session file from a list of pathways
-    """
+
     def test_cytoscape(self):
         out_path = Path(OUT_FILE)
         out_path.unlink(missing_ok=True)

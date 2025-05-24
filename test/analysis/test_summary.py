@@ -1,10 +1,8 @@
+import filecmp
 from pathlib import Path
 
 import pandas as pd
 
-import spras
-
-# set up necessary dataframes to run summarize_networks
 import spras.config as config
 from spras.analysis.summary import summarize_networks
 from spras.dataset import Dataset
@@ -18,6 +16,7 @@ INPUT_DIR = 'test/analysis/input/'
 OUT_DIR = 'test/analysis/output/'
 EXPECT_DIR = 'test/analysis/expected_output/'
 
+
 class TestSummary:
     @classmethod
     def setup_class(cls):
@@ -26,61 +25,70 @@ class TestSummary:
         """
         Path(OUT_DIR).mkdir(parents=True, exist_ok=True)
 
-    # Test data from example workflow:
     def test_example_networks(self):
-        example_dict = { "label" : "data0",
-                         "edge_files" : ["network.txt"],
-                         "node_files" : ["node-prizes.txt", "sources.txt", "targets.txt"],
-                         "data_dir" : "input",
-                         "other_files" : []
-                       }
+        """Test data from example workflow"""
+        example_dict = {"label": "data0",
+                        "edge_files": ["network.txt"],
+                        "node_files": ["node-prizes.txt", "sources.txt", "targets.txt"],
+                        "data_dir": "input",
+                        "other_files": []
+                        }
         example_dataset = Dataset(example_dict)
         example_node_table = example_dataset.node_table
         config.init_from_file(INPUT_DIR + "config.yaml")
         algorithm_params = config.config.algorithm_params
-        list(algorithm_params)
-        algorithms_with_params = [f'{algorithm}-params-{params_hash}' for algorithm, param_combos in algorithm_params.items() for params_hash in param_combos.keys()]
+        algorithms_with_params = [f'{algorithm}-params-{params_hash}' for algorithm, param_combos in
+                                  algorithm_params.items() for params_hash in param_combos.keys()]
 
-        example_network_files = Path(INPUT_DIR + "example").glob("*.txt") # must be path to use .glob()
-        #example_node_table = pd.read_csv(Path("test/analysis/input/example_node_table.txt"), sep = "\t") #old
-        example_output = pd.read_csv((EXPECT_DIR + "test_example_summary.txt"), sep = "\t")
-        example_output["Name"] = example_output["Name"].map(convert_path)
+        example_network_files = Path(INPUT_DIR + "example").glob("*.txt")  # must be path to use .glob()
+
+        out_path = Path(OUT_DIR + "test_example_summary.txt")
+        out_path.unlink(missing_ok=True)
         summarize_example = summarize_networks(example_network_files, example_node_table, algorithm_params,
                                                algorithms_with_params)
-        assert summarize_example.equals(example_output)
+        summarize_example["Name"] = summarize_example["Name"].map(convert_path_posix)
+        summarize_example.to_csv(out_path, sep='\t', index=False)
 
-    # Test data from EGFR workflow:
+        # Comparing the dataframes directly with equals does not match because of how the parameter
+        # combinations column is loaded from disk. Therefore, write both to disk and compare the files.
+        assert filecmp.cmp(out_path, EXPECT_DIR + "test_example_summary.txt", shallow=False)
+
     def test_egfr_networks(self):
-        egfr_dict = { "label" : "tps_egfr",
-                      "edge_files" : ["phosphosite-irefindex13.0-uniprot.txt"],
-                      "node_files" : ["tps-egfr-prizes.txt"],
-                      "data_dir" : "input",
-                      "other_files" : []
-                    }
+        """Test data from EGFR workflow"""
+        egfr_dict = {"label": "tps_egfr",
+                     "edge_files": ["phosphosite-irefindex13.0-uniprot.txt"],
+                     "node_files": ["tps-egfr-prizes.txt"],
+                     "data_dir": "input",
+                     "other_files": []
+                     }
 
         egfr_dataset = Dataset(egfr_dict)
         egfr_node_table = egfr_dataset.node_table
         config.init_from_file(INPUT_DIR + "egfr.yaml")
         algorithm_params = config.config.algorithm_params
-        list(algorithm_params)
         algorithms_with_params = [f'{algorithm}-params-{params_hash}' for algorithm, param_combos in
                                   algorithm_params.items() for params_hash in param_combos.keys()]
 
         egfr_network_files = Path(INPUT_DIR + "egfr").glob("*.txt")  # must be path to use .glob()
-        # egfr_node_table = pd.read_csv(Path("test/analysis/input/egfr_node_table.txt"), sep = "\t") #old
-        egfr_output = pd.read_csv((EXPECT_DIR + "test_egfr_summary.txt"), sep="\t")
-        egfr_output["Name"] = egfr_output["Name"].map(convert_path)
-        summarize_egfr = summarize_networks(egfr_network_files, egfr_node_table, algorithm_params,
-                                               algorithms_with_params)
-        assert summarize_egfr.equals(egfr_output)
 
-    # Test loading files from dataset_dict:
+        out_path = Path(OUT_DIR + "test_egfr_summary.txt")
+        out_path.unlink(missing_ok=True)
+        summarize_egfr = summarize_networks(egfr_network_files, egfr_node_table, algorithm_params,
+                                            algorithms_with_params)
+        summarize_egfr["Name"] = summarize_egfr["Name"].map(convert_path_posix)
+        summarize_egfr.to_csv(out_path, sep="\t", index=False)
+
+        # Comparing the dataframes directly with equals does not match because of how the parameter
+        # combinations column is loaded from disk. Therefore, write both to disk and compare the files.
+        assert filecmp.cmp(out_path, EXPECT_DIR + "test_egfr_summary.txt", shallow=False)
+
     def test_load_dataset_dict(self):
-        example_dict = { "label": "data0",
-                         "edge_files": ["network.txt"],
-                         "node_files": ["node-prizes.txt", "sources.txt", "targets.txt"],
-                         "data_dir": "input",
-                         "other_files": []
+        """Test loading files from dataset_dict"""
+        example_dict = {"label": "data0",
+                        "edge_files": ["network.txt"],
+                        "node_files": ["node-prizes.txt", "sources.txt", "targets.txt"],
+                        "data_dir": "input",
+                        "other_files": []
                         }
         example_dataset = Dataset(example_dict)
         example_node_table = example_dataset.node_table
@@ -95,7 +103,7 @@ class TestSummary:
             example_node_table[cols_to_compare]
             .sort_values(by=cols_to_compare)
             .reset_index(drop=True)
-            .equals (
+            .equals(
                 expected_node_table[cols_to_compare]
                 .sort_values(by=cols_to_compare)
                 .reset_index(drop=True)
@@ -104,8 +112,13 @@ class TestSummary:
 
         assert same_df
 
-# File paths have to be converted for the stored expected output files because otherwise the dataframes may not
-# match if the test is run on a different operating system than the one used when the expected output was generated
-# due to Linux versus Windows file path conventions
-def convert_path(file_path):
-    return str(Path(file_path))
+
+# PurePosixPath will not convert the separators in strings
+def convert_path_posix(file_path: str) -> str:
+    """
+    File paths have to be converted to posix (Linux) style before writing to disk and checking if files match
+    because the tests might be run on Windows
+    @param file_path: input file path
+    @return: string representation of converted file path
+    """
+    return file_path.replace("\\", "/")
