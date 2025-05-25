@@ -2,7 +2,7 @@ from pathlib import Path
 
 import spras.analysis.graphspace as graphspace
 
-IN_DIR = 'test/analysis/test/'
+IN_DIR = 'test/analysis/input/'
 OUT_DIR = 'test/analysis/output/'
 
 
