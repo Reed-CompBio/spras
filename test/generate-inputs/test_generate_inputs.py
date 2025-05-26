@@ -16,8 +16,9 @@ algo_exp_file = {
     'omicsintegrator2': 'edges',
     'domino': 'network',
     'pathlinker': 'network',
-    'allpairs': 'network'
-}
+    'allpairs': 'network',
+    'bowtiebuilder': 'edges'
+    }
 
 
 class TestGenerateInputs:
