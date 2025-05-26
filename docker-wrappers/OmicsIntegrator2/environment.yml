@@ -19,4 +19,3 @@ dependencies:
   - goenrich==1.7.0
   - axial==0.1.10
   - git+file:///OmicsIntegrator2
-  
