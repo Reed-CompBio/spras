@@ -254,24 +254,23 @@ def run_container_podman(container: str, command: List[str], volumes: List[Tuple
     @return: output from Docker/Podman run
     """
     out = None
-    try:
-        # Initialize a Podman client using a hardcoded base URL.
-        client = podman.from_env()
-        bind_paths = {prepare_path_docker(src):{'bind': str(dest), 'mode': 'rw'} for src, dest in volumes}
+    
+    with podman.Client() as client:
+        if client.ping():
+            bind_paths = {prepare_path_docker(src):{'bind': str(dest), 'mode': 'rw'} for src, dest in volumes}
 
-        wrapped_container = client.containers.create(container,
-                                                     volumes=bind_paths,
-                                                     working_dir=working_dir,
-                                                     environment=[environment])
-        (_code, out) = wrapped_container.exec_run(stderr=True, command=command)
-        out = str(out, 'utf-8')
+            wrapped_container = client.containers.create(container,
+                                                        volumes=bind_paths,
+                                                        working_dir=working_dir,
+                                                        environment=[environment])
+            (code, out) = wrapped_container.exec_run(stderr=True, command=command)
+            out = str(out, 'utf-8')
 
-        
-        # TODO: Not sure whether this is needed or where to close the client
-        client.close()
+            if code != 0:
+                print(f"Podman container {container} exited with non-zero exit code {code}.")
+        else:
+            raise RuntimeError("podman socket is not responding to pings.")
 
-    except Exception as err:
-        raise err
     # Removed the finally block to address bugbear B012
     # "`return` inside `finally` blocks cause exceptions to be silenced"
     # finally:
