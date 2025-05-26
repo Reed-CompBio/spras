@@ -125,7 +125,7 @@ def prepare_dsub_cmd(flags: dict):
 # run_container_singularity assumes a single string
 # Follow docker-py's naming conventions (https://docker-py.readthedocs.io/en/stable/containers.html)
 # Technically the argument is an image, not a container, but we use container here.
-def run_container(framework: str, container_suffix: str, command: List[str], volumes: List[Tuple[PurePath, PurePath]], working_dir: str, environment: str = 'SPRAS=True'):
+def run_container(framework: str, container_suffix: str, command: List[str], volumes: List[Tuple[PurePath, PurePath]], working_dir: str, environment: str = 'SPRAS=True', network_disabled=False):
     """
     Runs a command in the container using Singularity or Docker
     @param framework: singularity or docker
@@ -134,6 +134,7 @@ def run_container(framework: str, container_suffix: str, command: List[str], vol
     @param volumes: a list of volumes to mount where each item is a (source, destination) tuple
     @param working_dir: the working directory in the container
     @param environment: environment variables to set in the container
+    @param network_disabled: Disables the network on the container. Only works for docker for now. This acts as a 'runtime assertion' that a container works w/o networking.
     @return: output from Singularity execute or Docker run
     """
     normalized_framework = framework.casefold()
@@ -150,7 +151,7 @@ def run_container(framework: str, container_suffix: str, command: List[str], vol
 
 
 # TODO any issue with creating a new client each time inside this function?
-def run_container_docker(container: str, command: List[str], volumes: List[Tuple[PurePath, PurePath]], working_dir: str, environment: str = 'SPRAS=True'):
+def run_container_docker(container: str, command: List[str], volumes: List[Tuple[PurePath, PurePath]], working_dir: str, environment: str = 'SPRAS=True', network_disabled=False):
     """
     Runs a command in the container using Docker.
     Attempts to automatically correct file owner and group for new files created by the container, setting them to the
@@ -189,6 +190,7 @@ def run_container_docker(container: str, command: List[str], volumes: List[Tuple
                                     stderr=True,
                                     volumes=bind_paths,
                                     working_dir=working_dir,
+                                    network_disabled=network_disabled,
                                     environment=[environment]).decode('utf-8')
 
         # TODO does this cleanup need to still run even if there was an error in the above run command?
