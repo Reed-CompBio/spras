@@ -6,6 +6,7 @@ from pathlib import Path, PurePath, PurePosixPath
 from typing import Any, Dict, List, Optional, Tuple, Union
 
 import docker
+import podman
 
 import spras.config as config
 from spras.util import hash_filename
@@ -127,20 +128,22 @@ def prepare_dsub_cmd(flags: dict):
 # Technically the argument is an image, not a container, but we use container here.
 def run_container(framework: str, container_suffix: str, command: List[str], volumes: List[Tuple[PurePath, PurePath]], working_dir: str, environment: str = 'SPRAS=True'):
     """
-    Runs a command in the container using Singularity or Docker
+    Runs a command in the container using Singularity, Docker, or Podman
     @param framework: singularity or docker
     @param container_suffix: name of the DockerHub container without the 'docker://' prefix
     @param command: command to run in the container
     @param volumes: a list of volumes to mount where each item is a (source, destination) tuple
     @param working_dir: the working directory in the container
     @param environment: environment variables to set in the container
-    @return: output from Singularity execute or Docker run
+    @return: output from Singularity execute or Docker/Podman run
     """
     normalized_framework = framework.casefold()
 
     container = config.config.container_prefix + "/" + container_suffix
     if normalized_framework == 'docker':
         return run_container_docker(container, command, volumes, working_dir, environment)
+    elif normalized_framework == 'podman':
+        return run_container_podman(container, command, volumes, working_dir, environment)
     elif normalized_framework == 'singularity':
         return run_container_singularity(container, command, volumes, working_dir, environment)
     elif normalized_framework == 'dsub':
@@ -165,7 +168,7 @@ def run_container_docker(container: str, command: List[str], volumes: List[Tuple
     """
     out = None
     try:
-        # Initialize a Docker client using environment variables
+        # Initialize a Docker client using environment variables.
         client = docker.from_env()
         # Track the contents of the local directories that will be bound so that new files added can have their owner
         # changed
@@ -234,6 +237,41 @@ def run_container_docker(container: str, command: List[str], volumes: List[Tuple
 
     except Exception as err:
         print(err)
+    # Removed the finally block to address bugbear B012
+    # "`return` inside `finally` blocks cause exceptions to be silenced"
+    # finally:
+    return out
+
+# TODO any issue with creating a new client each time inside this function?
+def run_container_podman(container: str, command: List[str], volumes: List[Tuple[PurePath, PurePath]], working_dir: str, environment: str = 'SPRAS=True'):
+    """
+    Runs a command in the container using Podman.
+    @param container: name of the DockerHub container without the 'docker://' prefix
+    @param command: command to run in the container
+    @param volumes: a list of volumes to mount where each item is a (source, destination) tuple
+    @param working_dir: the working directory in the container
+    @param environment: environment variables to set in the container
+    @return: output from Docker/Podman run
+    """
+    out = None
+    try:
+        # Initialize a Podman client using a hardcoded base URL.
+        client = podman.from_env()
+        bind_paths = {prepare_path_docker(src):{'bind': str(dest), 'mode': 'rw'} for src, dest in volumes}
+
+        wrapped_container = client.containers.create(container,
+                                                     volumes=bind_paths,
+                                                     working_dir=working_dir,
+                                                     environment=[environment])
+        (_code, out) = wrapped_container.exec_run(stderr=True, command=command)
+        out = str(out, 'utf-8')
+
+        
+        # TODO: Not sure whether this is needed or where to close the client
+        client.close()
+
+    except Exception as err:
+        raise err
     # Removed the finally block to address bugbear B012
     # "`return` inside `finally` blocks cause exceptions to be silenced"
     # finally:
