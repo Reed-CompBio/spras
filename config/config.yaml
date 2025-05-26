@@ -5,9 +5,10 @@ hash_length: 7
 
 # Specify the container framework used by each PRM wrapper. Valid options include:
 # - docker (default if not specified)
+# - podman - rootless version of docker, which should be a simple swap - if any algorithm doesn't work with podman, that is a bug.
 # - singularity -- Also known as apptainer, useful in HPC/HTC environments where docker isn't allowed
 # - dsub -- experimental with limited support, used for running on Google Cloud
-container_framework: docker
+container_framework: podman
 
 # Only used if container_framework is set to singularity, this will unpack the singularity containers
 # to the local filesystem. This is useful when PRM containers need to run inside another container,
