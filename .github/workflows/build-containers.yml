@@ -8,6 +8,11 @@ on:
       - master
 
 jobs:
+  build-and-remove-LN:
+    uses: "./.github/workflows/build-and-remove-template.yml"
+    with:
+      path: docker-wrappers/LocalNeighborhood
+      container: ade0brien/local-neighborhood
   build-and-remove-omics1:
     uses: "./.github/workflows/build-and-remove-template.yml"
     with:

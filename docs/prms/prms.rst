@@ -42,3 +42,9 @@ Pathway Reconstruction Methods
    :caption: PathLinker
 
    pathlinker
+
+.. toctree::
+   :maxdepth: 1
+   :caption: Local Neighborhood
+
+   localn
