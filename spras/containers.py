@@ -164,7 +164,7 @@ def run_container_pretty(name: str, framework: str, container_suffix: str, comma
     print('Running {} on framework "{}" with command: {}'.format(name, framework, ' '.join(command)), flush=True)
     try:
         out = run_container(framework=framework, container_suffix=container_suffix, command=command, volumes=volumes, working_dir=working_dir, environment=environment)
-        if out != None:
+        if out is not None:
             print(indent(out))
     except docker.errors.ContainerError as err:
         print(f"(Command formatted as list: `{err.command}`)")
