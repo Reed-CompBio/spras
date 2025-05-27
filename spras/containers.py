@@ -167,6 +167,15 @@ def run_container_pretty(name: str, framework: str, container_suffix: str, comma
         if out is not None:
             if isinstance(out, list):
                 out = ''.join(out)
+            elif isinstance(out, dict):
+                if 'message' in out:
+                    # singularity message - lets print it.
+                    if 'return_code' in out and not out['return_code'] == 0:
+                        print(f"(Program exited with non-zero exit code '{out['return_code']}')") 
+                    out = ''.join(out['message'])
+                else:
+                    print("Note: This is an unknown message format - if you want this pretty printed, please file out an issue.")
+                    out = str(out)
             elif not isinstance(out, str):
                 out = str(out, "utf-8")
             print(indent(out))
