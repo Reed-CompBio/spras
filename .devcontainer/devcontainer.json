@@ -10,6 +10,8 @@
 		"dockerfile": "Dockerfile"
 	},
 	"features": {
-		"ghcr.io/devcontainers/features/docker-in-docker:2": {}
+		"ghcr.io/devcontainers/features/docker-in-docker:2": {},
+		// For building singularity
+		"ghcr.io/devcontainers/features/go:1": {}
 	}
 }
