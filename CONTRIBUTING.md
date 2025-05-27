@@ -193,7 +193,7 @@ Use `test_pathlinker.py` as an example.
 There are input files for testing in the [`test/LocalNeighborhood/input`](test/LocalNeighborhood/input) directory.
 The new test functions will be automatically run as part of the pytest testing.
 
-Extend `.github/workflows/test-spras.yml` to pull and build the new Docker image.
+Extend `.github/workflows/build-containers.yml` to pull and build the new Docker image.
 Follow the example for any of the other pathway reconstruction algorithm.
 First pull the image `<username>/local-neighborhood` from Docker Hub.
 Then build the Docker image using the `Dockerfile` that was completed in Step 2.

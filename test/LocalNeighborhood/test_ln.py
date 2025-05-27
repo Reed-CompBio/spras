@@ -12,7 +12,7 @@ config.init_from_file("config/config.yaml")
 # Modify the path because of the - in the directory
 SPRAS_ROOT = Path(__file__).parent.parent.parent.absolute()
 sys.path.append(str(Path(SPRAS_ROOT, 'docker-wrappers', 'LocalNeighborhood')))
-from local_neighborhood import local_neighborhood
+from local_neighborhood_alg import local_neighborhood
 
 TEST_DIR = Path('test', 'LocalNeighborhood/')
 OUT_FILE = Path(TEST_DIR, 'output', 'ln-output.txt')
@@ -49,4 +49,6 @@ class TestLocalNeighborhood:
                                nodes_file=Path(TEST_DIR, 'input', 'ln-nodes.txt'),
                                output_file=OUT_FILE)
 
-    # Write tests for the Local Neighborhood run function here
+    # Write tests for the Local Neighborhood run function here.
+    # The tests above test the internal python code for local_neighborhood - can you
+    # write the same tests above but for Docker using LocalNeighborhood, and one for Singularity.
