@@ -22,9 +22,8 @@ class NetMix2(PRM):
             if input_type not in filename_map:
                 raise ValueError(f"{input_type} filename is missing")
 
-        gurobi_license = gurobi()
-        if not gurobi_license:
-            raise RuntimeError("gurobi license path is not present - make sure to enable it in secrets.gurobi in config.yaml!")
+        if not gurobi():
+            raise RuntimeError("gurobi license path is not present - make sure to specify the path in secrets.gurobi in `config.yaml`.")
 
         if data.contains_node_columns('prize'):
             node_df = data.request_node_columns(['prize'])
@@ -51,6 +50,10 @@ class NetMix2(PRM):
         """
         if not network or not scores or not output_file:
             raise ValueError('Required NetMix2 arguments are missing')
+
+        gurobi_license = gurobi()
+        if not gurobi_license:
+            raise RuntimeError("gurobi license path is not present (this should have errored earlier - have you moved files around?)\nMake sure to specify the path in secrets.gurobi in `config.yaml`.")
 
         work_dir = '/spras'
 
@@ -89,12 +92,16 @@ class NetMix2(PRM):
 
         print('Running NetMix2 with arguments: {}'.format(' '.join(command)), flush=True)
 
+        # TODO i can't pass in multiple env variables? i'll make another pr
+        environment = f'SPRAS=true'
+
         container_suffix = "netmix2"
         out = run_container(container_framework,
                             container_suffix,
                             command,
                             volumes,
-                            work_dir)
+                            work_dir,
+                            environment=environment)
         print(out)
 
         # Rename the primary output file to match the desired output filename
