@@ -29,7 +29,7 @@ class TestDOMINO:
         out_path = Path(OUT_FILE_DEFAULT)
         out_path.unlink(missing_ok=True)
         DOMINO.run(
-            network=TEST_DIR+'input/domino-network.txt',
+            network=TEST_DIR+'input/domino-network.sif',
             active_genes=TEST_DIR+'input/domino-active-genes.txt',
             output_file=OUT_FILE_DEFAULT)
         # output_file should be empty
@@ -40,7 +40,7 @@ class TestDOMINO:
         out_path = Path(OUT_FILE_OPTIONAL)
         out_path.unlink(missing_ok=True)
         DOMINO.run(
-            network=TEST_DIR+'input/domino-network.txt',
+            network=TEST_DIR+'input/domino-network.sif',
             active_genes=TEST_DIR+'input/domino-active-genes.txt',
             output_file=OUT_FILE_OPTIONAL,
             slice_threshold=0.4,
@@ -53,7 +53,7 @@ class TestDOMINO:
         with pytest.raises(ValueError):
             # No active_genes
             DOMINO.run(
-                network=TEST_DIR+'input/domino-network.txt',
+                network=TEST_DIR+'input/domino-network.sif',
                 output_file=OUT_FILE_DEFAULT)
 
     def test_domino_missing_network(self):
@@ -72,7 +72,7 @@ class TestDOMINO:
         out_path.unlink(missing_ok=True)
         # Only include required arguments and run with Singularity
         DOMINO.run(
-            network=TEST_DIR+'input/domino-network.txt',
+            network=TEST_DIR+'input/domino-network.sif',
             active_genes=TEST_DIR+'input/domino-active-genes.txt',
             output_file=OUT_FILE_DEFAULT,
             container_framework="singularity")

@@ -173,6 +173,14 @@ rule merge_gs_input:
         gold_standard_dict = get_dataset(_config.config.gold_standards, wildcards.gold_standard)
         Evaluation.merge_gold_standard_input(gold_standard_dict, output.gold_standard_file)
 
+# Adds a default file extension if none is provided.
+# https://stackoverflow.com/a/49689414/7589775
+def extend_filename(file_name: str, extension=".txt") -> str:
+    root, ext = os.path.splitext(file_name)
+    if not ext:
+        ext = extend_filename
+    return f'{root}{ext}'
+
 # The checkpoint is like a rule but can be used in dynamic workflows
 # The workflow directed acyclic graph is re-evaluated after the checkpoint job runs
 # If the checkpoint has not executed for the provided wildcard values, it will be run and then the rest of the
@@ -190,7 +198,9 @@ checkpoint prepare_input:
         # Use the algorithm's generate_inputs function to load the merged dataset, extract the relevant columns,
         # and write the output files specified by required_inputs
         # The filename_map provides the output file path for each required input file type
-        filename_map = {input_type: SEP.join([out_dir, 'prepared', f'{wildcards.dataset}-{wildcards.algorithm}-inputs', f'{input_type}.txt']) for input_type in runner.get_required_inputs(wildcards.algorithm)}
+        filename_map = {input_type: SEP.join(
+            [out_dir, 'prepared', f'{wildcards.dataset}-{wildcards.algorithm}-inputs', extend_filename(input_type)]
+        ) for input_type in runner.get_required_inputs(wildcards.algorithm)}
         runner.prepare_inputs(wildcards.algorithm, input.dataset_file, filename_map)
 
 # Collect the prepared input files from the specified directory
@@ -208,7 +218,7 @@ def collect_prepared_input(wildcards):
     prepared_dir = SEP.join([out_dir, 'prepared', f'{wildcards.dataset}-{wildcards.algorithm}-inputs'])
 
     # Construct the list of expected prepared input files for the reconstruction algorithm
-    prepared_inputs = expand(f'{prepared_dir}{SEP}{{type}}.txt',type=runner.get_required_inputs(algorithm=wildcards.algorithm))
+    prepared_inputs = expand(f'{prepared_dir}{SEP}{{extend_filename(type)}}',type=runner.get_required_inputs(algorithm=wildcards.algorithm))
     # If the directory is missing, do nothing because the missing output triggers running prepare_input
     if os.path.isdir(prepared_dir):
         # If the directory exists, confirm all prepared input files exist as well (as opposed to some or none)

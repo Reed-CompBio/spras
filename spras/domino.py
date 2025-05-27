@@ -27,7 +27,7 @@ Interactor1     ppi     Interactor2
 - it can include repeated and bidirectional edges
 """
 class DOMINO(PRM):
-    required_inputs = ['network', 'active_genes']
+    required_inputs = ['network.sif', 'active_genes']
 
     @staticmethod
     def generate_inputs(data, filename_map):
@@ -108,13 +108,13 @@ class DOMINO(PRM):
         volumes.append(bind_path)
 
         # Make the Python command to run within the container
-        slicer_command = ['slicer',
+        slicer_command = ['python', '/DOMINO/src/runner_slice.py',
                           '--network_file', network_file,
                           '--output_file', mapped_slices_file]
 
         print('Running slicer with arguments: {}'.format(' '.join(slicer_command)), flush=True)
 
-        container_suffix = "domino"
+        container_suffix = "domino:latest"
         slicer_out = run_container(container_framework,
                                    container_suffix,
                                    slicer_command,
@@ -123,7 +123,7 @@ class DOMINO(PRM):
         print(slicer_out)
 
         # Make the Python command to run within the container
-        domino_command = ['domino',
+        domino_command = ['python', '/DOMINO/src/runner.py',
                           '--active_genes_files', node_file,
                           '--network_file', network_file,
                           '--slices_file', mapped_slices_file,

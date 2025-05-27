@@ -1,0 +1,98 @@
+From 9781c1e6c6b884f3666f3ade47d584dd7a2b50fe Mon Sep 17 00:00:00 2001
+From: "Tristan F.-R." <pub.tristanf@gmail.com>
+Date: Tue, 27 May 2025 14:40:05 -0700
+Subject: [PATCH 2/2] fix: update imports
+
+since we are no longer using venv, we need to update all of our imports.
+---
+ src/core/domino.py               | 8 ++++----
+ src/runner.py                    | 8 ++++----
+ src/runner_slice.py              | 8 ++++----
+ src/utils/ensembl2gene_symbol.py | 2 +-
+ src/utils/visualize_modules.py   | 4 ++--
+ 5 files changed, 15 insertions(+), 15 deletions(-)
+
+diff --git a/src/core/domino.py b/src/core/domino.py
+index 89c3e87..d4e1663 100644
+--- a/src/core/domino.py
++++ b/src/core/domino.py
+@@ -18,10 +18,10 @@ from networkx.algorithms.community.centrality import girvan_newman
+ from networkx.algorithms.components import connected_components
+ 
+ from functools import reduce
+-from src.utils.graph_influence_linear_th import linear_threshold
+-from src.core.preprocess_slices import read_preprocessed_slices
+-from src.core.network_builder import build_network
+-import src.constants as constants
++from utils.graph_influence_linear_th import linear_threshold
++from core.preprocess_slices import read_preprocessed_slices
++from core.network_builder import build_network
++import constants as constants
+ 
+ G_modularity = None
+ 
+diff --git a/src/runner.py b/src/runner.py
+index 7a504ab..955e465 100755
+--- a/src/runner.py
++++ b/src/runner.py
+@@ -1,9 +1,9 @@
+ import argparse
+ import os
+-from src.core.domino import main as domino_main
+-from src.core.preprocess_slices import create_slices
+-from src.utils.visualize_modules import visualize_modules
+-import src.constants as constants
++from core.domino import main as domino_main
++from core.preprocess_slices import create_slices
++from utils.visualize_modules import visualize_modules
++import constants as constants
+ def main_domino():
+ 
+     parser = argparse.ArgumentParser(description='DOMINO: An active module identification algorithm with reduce rate of false.\n NOTE YOU SHOULD RUN THE SLICES SCRIPT FIRST! (more info, type slicer -h) \n Example input files are available @ https://github.com/Shamir-Lab/DOMINO/tree/master/examples')
+diff --git a/src/runner_slice.py b/src/runner_slice.py
+index a00130b..3ea8e04 100644
+--- a/src/runner_slice.py
++++ b/src/runner_slice.py
+@@ -1,9 +1,9 @@
+ import argparse
+ import os
+-from src.core.domino import main as domino_main
+-from src.core.preprocess_slices import create_slices
+-from src.utils.visualize_modules import visualize_modules
+-import src.constants as constants
++from core.domino import main as domino_main
++from core.preprocess_slices import create_slices
++from utils.visualize_modules import visualize_modules
++import constants as constants
+ def main_domino():
+ 
+     parser = argparse.ArgumentParser(description='DOMINO: An active module identification algorithm with reduce rate of false.\n NOTE YOU SHOULD RUN THE SLICES SCRIPT FIRST! (more info, type slicer -h) \n Example input files are available @ https://github.com/Shamir-Lab/DOMINO/tree/master/examples')
+diff --git a/src/utils/ensembl2gene_symbol.py b/src/utils/ensembl2gene_symbol.py
+index 72d395a..62ae9d2 100755
+--- a/src/utils/ensembl2gene_symbol.py
++++ b/src/utils/ensembl2gene_symbol.py
+@@ -1,4 +1,4 @@
+-import src.constants as constants
++import constants as constants
+ import os
+ g2e_dict = None
+ e2g_dict = None
+diff --git a/src/utils/visualize_modules.py b/src/utils/visualize_modules.py
+index aecc29f..c27587b 100755
+--- a/src/utils/visualize_modules.py
++++ b/src/utils/visualize_modules.py
+@@ -9,8 +9,8 @@ import json
+ import pandas as pd
+ 
+-from src import constants
+-from src.utils.scripts import format_script
+-from src.utils.ensembl2gene_symbol import  e2g_convertor
++import constants
++from utils.scripts import format_script
++from utils.ensembl2gene_symbol import  e2g_convertor
+ import zipfile
+ 
+ import multiprocessing
+-- 
+2.47.0
+
