@@ -144,3 +144,6 @@ TempMat.mat
 
 # SPRAS singularity container
 spras.sif
+
+# Secrets and Licenses
+licenses

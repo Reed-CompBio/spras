@@ -188,3 +188,9 @@ analysis:
         # adds evaluation per algorithm per dataset-goldstandard pair
         # evaluation per algortihm will not run unless ml include and ml aggregate_per_algorithm are set to true
         aggregate_per_algorithm: true
+
+# Secrets (API tokens for services used inside various docker containers)
+secrets:
+  # Gurobi is used by NetMix2, and requires a Gurobi license.
+  # Academics get free Gurobi licenses: https://www.gurobi.com/academia/academic-program-and-licenses/
+  gurobi: 'licenses/gurobi.lic'

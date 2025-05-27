@@ -3,6 +3,7 @@ from pathlib import Path
 from spras.containers import prepare_volume, run_container
 from spras.dataset import Dataset
 from spras.prm import PRM
+from spras.secrets import gurobi
 
 __all__ = ['NetMix2']
 
@@ -20,6 +21,10 @@ class NetMix2(PRM):
         for input_type in NetMix2.required_inputs:
             if input_type not in filename_map:
                 raise ValueError(f"{input_type} filename is missing")
+
+        gurobi_license = gurobi()
+        if not gurobi_license:
+            raise RuntimeError("gurobi license path is not present - make sure to enable it in secrets.gurobi in config.yaml!")
 
         if data.contains_node_columns('prize'):
             node_df = data.request_node_columns(['prize'])
