@@ -3,6 +3,7 @@ from spras.allpairs import AllPairs as allpairs
 from spras.dataset import Dataset
 from spras.domino import DOMINO as domino
 from spras.meo import MEO as meo
+from spras.netmix2 import NetMix2 as netmix2
 from spras.mincostflow import MinCostFlow as mincostflow
 from spras.omicsintegrator1 import OmicsIntegrator1 as omicsintegrator1
 from spras.omicsintegrator2 import OmicsIntegrator2 as omicsintegrator2
