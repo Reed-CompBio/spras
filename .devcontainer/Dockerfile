@@ -1,10 +1,19 @@
 FROM mcr.microsoft.com/devcontainers/anaconda:1-3
 
 RUN sudo apt-get update && sudo apt-get install -y \
-    build-essential \
-    libssl-dev \
-    uuid-dev \
-    libgpgme11-dev \
-    squashfs-tools \
+    autoconf \
+    automake \
+    cryptsetup \
+    fuse2fs \
+    git \
+    fuse \
+    libfuse-dev \
     libseccomp-dev \
-    pkg-config
+    libtool \
+    pkg-config \
+    runc \
+    squashfs-tools \
+    squashfs-tools-ng \
+    uidmap \
+    wget \
+    zlib1g-dev
