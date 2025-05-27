@@ -165,7 +165,11 @@ def run_container_pretty(name: str, framework: str, container_suffix: str, comma
     try:
         out = run_container(framework=framework, container_suffix=container_suffix, command=command, volumes=volumes, working_dir=working_dir, environment=environment)
         if out is not None:
-            print(indent(str(out, "utf-8")))
+            if isinstance(out, list):
+                out = ''.join(out)
+            elif not isinstance(out, str):
+                out = str(out, "utf-8")
+            print(indent(out))
     except docker.errors.ContainerError as err:
         print(f"(Command formatted as list: `{err.command}`)")
         print(f"An unexpected non-zero exit status ({err.exit_status}) inside the docker image {err.image} occurred:")
