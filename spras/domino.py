@@ -162,7 +162,7 @@ class DOMINO(PRM):
         # Clean up DOMINO intermediate and pickle files
         slices_file.unlink(missing_ok=True)
         Path(out_dir, 'network.slices.pkl').unlink(missing_ok=True)
-        Path(network + '.pkl').unlink(missing_ok=True)
+        Path(network).with_suffix('.pkl').unlink(missing_ok=True)
 
     @staticmethod
     def parse_output(raw_pathway_file, standardized_pathway_file):
