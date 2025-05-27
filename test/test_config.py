@@ -23,10 +23,13 @@ def get_test_config():
         "gold_standards": [{"label": "gs1", "dataset_labels": []}],
         "algorithms": [
             {"params": ["param2", "param2"]},
-            {"name": "singleton", "params": {
-                "include": True,
-                "run1": {"test": 1, "test2": [2, 3]}
-            }}
+            {
+                "name": "singleton",
+                "params": {
+                    "include": True,
+                    "run1": {"test": 1, "test2": [2, 3]}
+                }
+            }
         ],
         "analysis": {
             "summary": {
