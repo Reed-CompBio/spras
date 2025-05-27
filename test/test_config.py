@@ -36,6 +36,13 @@ def get_test_config():
                     "include": True,
                     "run1": {"test": "str1", "test2": "np.linspace(0,5,2)"}
                 }
+            },
+            {
+                "name": "strings",
+                "params": {
+                    "include": True,
+                    "run1": {"test": "str1", "test2": ["str2", "str3"]}
+                }
             }
         ],
         "analysis": {
@@ -185,6 +192,18 @@ class TestConfig:
         assert value1['test'] == "str1"
         assert value2['test'] == "str1"
         assert value1['test2'] == 0.0
+
+        assert 'strings' in config.config.algorithm_params
+        assert len(config.config.algorithm_params['strings']) == 2
+        [key1, key2] = config.config.algorithm_params['strings']
+        value1 = config.config.algorithm_params['strings'][key1]
+        value2 = config.config.algorithm_params['strings'][key2]
+        assert value1['test'] == "str1"
+        assert value2['test'] == "str1"
+        assert ((value1['test2'] == "str2" and
+                 value2['test2'] == "str3") or
+                (value1['test2'] == "str3" and
+                 value2['test2'] == "str2"))
 
     @pytest.mark.parametrize("ml_include, eval_include, expected_ml, expected_eval", [
         (True, True, True, True),
