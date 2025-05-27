@@ -184,6 +184,7 @@ class TestConfig:
         value2 = config.config.algorithm_params['objs'][key2]
         assert value1['test'] == "str1"
         assert value2['test'] == "str1"
+        assert value1['test2'] == 0.0
 
     @pytest.mark.parametrize("ml_include, eval_include, expected_ml, expected_eval", [
         (True, True, True, True),
