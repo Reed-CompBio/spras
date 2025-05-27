@@ -29,6 +29,13 @@ def get_test_config():
                     "include": True,
                     "run1": {"test": 1, "test2": [2, 3]}
                 }
+            },
+            {
+                "name": "objs",
+                "params": {
+                    "include": True,
+                    "run1": {"test": "str1", "test2": "np.linspace(0,5,2)"}
+                }
             }
         ],
         "analysis": {
@@ -169,6 +176,14 @@ class TestConfig:
                  value2['test2'] == 3) or
                 (value1['test2'] == 3 and
                  value2['test2'] == 2))
+
+        assert 'objs' in config.config.algorithm_params
+        assert len(config.config.algorithm_params['objs']) == 2
+        [key1, key2] = config.config.algorithm_params['objs']
+        value1 = config.config.algorithm_params['objs'][key1]
+        value2 = config.config.algorithm_params['objs'][key2]
+        assert value1['test'] == "str1"
+        assert value2['test'] == "str1"
 
     @pytest.mark.parametrize("ml_include, eval_include, expected_ml, expected_eval", [
         (True, True, True, True),
