@@ -49,8 +49,10 @@ class AllPairs(PRM):
         # Create network file
         edges_df = data.get_interactome()
 
-        # Since we don't use the directed/undirected column, this allows us to 
-        # use directed edges if we have any of them at all.
+        # Since APSP doesn't use the directed/undirected column because of a lack of support for mixed graphs (in NetworkX),
+        # this function dynamically detects the usage of directed edges in user input
+        # and, if the graph has a directed edge, it switches the entire graph to use directed edges, with a dummy file used to
+        # signal to `run` that the graph is directed.
         if has_direction(edges_df):
             edges_df = convert_undirected_to_directed(edges_df)
             # we also touch a 'directed_flag.txt' file to say that this is directed
