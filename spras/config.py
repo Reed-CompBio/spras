@@ -16,6 +16,7 @@ import copy as copy
 import itertools as it
 import os
 import re
+from collections.abc import Iterable
 
 import numpy as np
 import yaml
@@ -222,7 +223,20 @@ class Config:
                 if cur_params[run_params]:
                     for p in cur_params[run_params]:
                         param_name_list.append(p)
-                        all_runs.append(eval(str(cur_params[run_params][p])))
+                        obj = str(cur_params[run_params][p])
+                        try:
+                            obj = [int(obj)]
+                        except ValueError:
+                            try:
+                                obj = [float(obj)]
+                            except ValueError:
+                                if obj.startswith(("range", "np.linspace", "np.arange", "np.logspace", "[")):
+                                    obj = eval(obj)
+                                else:
+                                    obj = [obj]
+                            if not isinstance(obj, Iterable):
+                                raise ValueError(f"The object `{obj}` in algorithm {alg['name']} at key '{p}' in run '{run_params}' is not iterable!") from None
+                        all_runs.append(obj)
                 run_list_tuples = list(it.product(*all_runs))
                 param_name_tuple = tuple(param_name_list)
                 for r in run_list_tuples:
