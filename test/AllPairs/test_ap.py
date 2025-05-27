@@ -108,7 +108,7 @@ class TestAllPairs:
         )
 
         edge_equality_test_util(out_path, EXPECTED_DIR / 'correctness-expected.txt')
-    
+
     def test_allpairs_directed(self):
         out_path = OUT_DIR / 'directed-out.txt'
         out_path.unlink(missing_ok=True)
