@@ -7,6 +7,7 @@ Methods for converting from the universal network input format and to the univer
 
 import pandas as pd
 
+
 def has_direction(df: pd.DataFrame) -> bool:
     """
     Checks if a graph has any directed edge.

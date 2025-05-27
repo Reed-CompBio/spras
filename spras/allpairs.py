@@ -4,8 +4,8 @@ from pathlib import Path
 from spras.containers import prepare_volume, run_container
 from spras.interactome import (
     convert_undirected_to_directed,
+    has_direction,
     reinsert_direction_col_undirected,
-    has_direction
 )
 from spras.prm import PRM
 from spras.util import add_rank_column, duplicate_edges, raw_pathway_df
