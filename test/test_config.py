@@ -153,7 +153,7 @@ class TestConfig:
 
         with pytest.raises(ValueError):
             config.init_global(test_config)
-        
+
     def test_config_singleton(self):
         test_config = get_test_config()
         config.init_global(test_config)
