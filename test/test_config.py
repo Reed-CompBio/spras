@@ -21,7 +21,13 @@ def get_test_config():
         },
         "datasets": [{"label": "alg1"}, {"label": "alg2"}],
         "gold_standards": [{"label": "gs1", "dataset_labels": []}],
-        "algorithms": [{"params": ["param2", "param2"]}],
+        "algorithms": [
+            {"params": ["param2", "param2"]},
+            {"name": "singleton", "params": {
+                "include": True,
+                "run1": {"test": 1, "test2": [2, 3]}
+            }}
+        ],
         "analysis": {
             "summary": {
                 "include": False
@@ -144,6 +150,22 @@ class TestConfig:
 
         with pytest.raises(ValueError):
             config.init_global(test_config)
+        
+    def test_config_singleton(self):
+        test_config = get_test_config()
+        config.init_global(test_config)
+
+        assert 'singleton' in config.config.algorithm_params
+        assert len(config.config.algorithm_params['singleton']) == 2
+        [key1, key2] = config.config.algorithm_params['singleton']
+        value1 = config.config.algorithm_params['singleton'][key1]
+        value2 = config.config.algorithm_params['singleton'][key2]
+        assert value1['test'] == 1
+        assert value2['test'] == 1
+        assert ((value1['test2'] == 2 and
+                 value2['test2'] == 3) or
+                (value1['test2'] == 3 and
+                 value2['test2'] == 2))
 
     @pytest.mark.parametrize("ml_include, eval_include, expected_ml, expected_eval", [
         (True, True, True, True),
