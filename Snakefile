@@ -42,6 +42,7 @@ def algo_has_mult_param_combos(algo):
     return len(algorithm_params.get(algo, {})) > 1
 
 algorithms_mult_param_combos = [algo for algo in algorithms if algo_has_mult_param_combos(algo)]
+
 # Get the parameter dictionary for the specified
 # algorithm and parameter combination hash
 def reconstruction_params(algorithm, params_hash):
