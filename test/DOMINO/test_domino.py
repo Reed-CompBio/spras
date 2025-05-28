@@ -69,8 +69,8 @@ class TestDOMINO:
         OUT_FILE_DEFAULT.unlink(missing_ok=True)
         # Only include required arguments and run with Singularity
         DOMINO.run(
-            network=TEST_DIR / 'input' / 'domino-network-medium.sif',
-            active_genes=TEST_DIR / 'input' / 'domino-active-genes-medium.txt',
+            network=TEST_DIR / 'input' / 'domino-network-egfr.sif',
+            active_genes=TEST_DIR / 'input' / 'domino-active-genes-egfr.txt',
             output_file=OUT_FILE_DEFAULT,
             container_framework="singularity")
         assert OUT_FILE_DEFAULT.exists()
