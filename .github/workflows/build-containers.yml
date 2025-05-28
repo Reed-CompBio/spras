@@ -1,12 +1,10 @@
 name: Build SPRAS Containers
-
 on:
   pull_request:
     types: [opened, synchronize, reopened]
   push:
     branches:
       - master
-
 jobs:
   build-and-remove-omics1:
     uses: "./.github/workflows/build-and-remove-template.yml"
