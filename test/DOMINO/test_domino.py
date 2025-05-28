@@ -28,7 +28,7 @@ class TestDOMINO:
         # Only include required arguments
         OUT_FILE_DEFAULT.unlink(missing_ok=True)
         DOMINO.run(
-            network=TEST_DIR / 'input' / 'domino-network.sif',
+            network_sif=TEST_DIR / 'input' / 'domino-network.sif',
             active_genes=TEST_DIR / 'input' / 'domino-active-genes.txt',
             output_file=OUT_FILE_DEFAULT)
         # output_file should be empty
@@ -38,7 +38,7 @@ class TestDOMINO:
         # Include optional arguments
         OUT_FILE_OPTIONAL.unlink(missing_ok=True)
         DOMINO.run(
-            network=TEST_DIR / 'input' / 'domino-network.sif',
+            network_sif=TEST_DIR / 'input' / 'domino-network.sif',
             active_genes=TEST_DIR / 'input' / 'domino-active-genes.txt',
             output_file=OUT_FILE_OPTIONAL,
             slice_threshold=0.4,
@@ -51,7 +51,7 @@ class TestDOMINO:
         with pytest.raises(ValueError):
             # No active_genes
             DOMINO.run(
-                network=TEST_DIR / 'input' / 'domino-network.sif',
+                network_sif=TEST_DIR / 'input' / 'domino-network.sif',
                 output_file=OUT_FILE_DEFAULT)
 
     def test_domino_missing_network(self):
@@ -69,7 +69,7 @@ class TestDOMINO:
         OUT_FILE_DEFAULT.unlink(missing_ok=True)
         # Only include required arguments and run with Singularity
         DOMINO.run(
-            network=TEST_DIR / 'input' / 'domino-network-egfr.sif',
+            network_sif=TEST_DIR / 'input' / 'domino-network-egfr.sif',
             active_genes=TEST_DIR / 'input' / 'domino-active-genes-egfr.txt',
             output_file=OUT_FILE_DEFAULT,
             container_framework="singularity")
