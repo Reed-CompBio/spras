@@ -6,6 +6,7 @@ from spras.dataset import Dataset
 from spras.evaluation import Evaluation
 from spras.analysis import ml, summary, graphspace, cytoscape
 import spras.config as _config
+from spras.util import extend_filename
 
 # Snakemake updated the behavior in the 6.5.0 release https://github.com/snakemake/snakemake/pull/1037
 # and using the wrong separator prevents Snakemake from matching filenames to the rules that can produce them
@@ -172,14 +173,6 @@ rule merge_gs_input:
     run:
         gold_standard_dict = get_dataset(_config.config.gold_standards, wildcards.gold_standard)
         Evaluation.merge_gold_standard_input(gold_standard_dict, output.gold_standard_file)
-
-# Adds a default file extension if none is provided.
-# https://stackoverflow.com/a/49689414/7589775
-def extend_filename(file_name: str, extension=".txt") -> str:
-    root, ext = os.path.splitext(file_name)
-    if not ext:
-        ext = extension
-    return f'{root}{ext}'
 
 # The checkpoint is like a rule but can be used in dynamic workflows
 # The workflow directed acyclic graph is re-evaluated after the checkpoint job runs
