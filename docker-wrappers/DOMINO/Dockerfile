@@ -3,10 +3,10 @@
 FROM python:3.8.20-bullseye
 
 COPY requirements.txt .
-COPY 0001-fix-split-runner-domino-and-runner-slice.patch .
-COPY 0002-fix-update-imports.patch .
 
 RUN pip install -r requirements.txt
+
+COPY *.patch .
 
 RUN git clone https://github.com/Shamir-Lab/DOMINO/ && \
     cd /DOMINO && \

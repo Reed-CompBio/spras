@@ -219,7 +219,8 @@ class DOMINO(PRM):
 
 def pre_domino_id_transform(node_id):
     """
-    DOMINO requires module edges to have the 'ENSG0' string as a prefix for visualization.
+    DOMINO requires module edges to have the 'ENSG0' string (Ensemble format)
+    as a prefix for visualization.
     Prepend each node id with this ID_PREFIX.
     @param node_id: the node id to transform
     @return the node id with the prefix added
