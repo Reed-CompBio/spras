@@ -202,10 +202,7 @@ class MEO(PRM):
         """
         # Columns Source Type Target Oriented Weight
         df = raw_pathway_df(raw_pathway_file, sep='\t', header=0)
-        if df.empty:
-            df.drop(columns=['Type'], inplace=True)
-            df.columns = ['Node1', 'Node2', 'Rank', "Direction"]
-        else:
+        if not df.empty:
             # Replace underscore_replacement with _
             df['Source'] = df['Source'].str.replace(underscore_replacement, '_')
             df['Target'] = df['Target'].str.replace(underscore_replacement, '_')
