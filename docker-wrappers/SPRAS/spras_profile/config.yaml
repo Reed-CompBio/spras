@@ -12,7 +12,6 @@ shared-fs-usage: none
 # can happen. If something goes wrong, try again up to 5 times. After that, we assume there's
 # a real error that requires user/admin intervention
 retries: 5
-
 # Default resources will apply to all workflow steps. If a single workflow step fails due
 # to insufficient resources, it can be re-run with modified values. Snakemake will handle
 # picking up where it left off, and won't re-run steps that have already completed.
