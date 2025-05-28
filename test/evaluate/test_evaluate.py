@@ -10,7 +10,7 @@ from spras.evaluation import Evaluation
 INPUT_DIR = 'test/evaluate/input/'
 OUT_DIR = 'test/evaluate/output/'
 EXPECT_DIR = 'test/evaluate/expected/'
-NODE_TABLE = pd.read_csv(INPUT_DIR + "node_table.csv", header=0)
+GS_NODE_TABLE = pd.read_csv(INPUT_DIR + "gs_node_table.csv", header=0)
 class TestEvaluate:
     @classmethod
     def setup_class(cls):
@@ -21,20 +21,26 @@ class TestEvaluate:
 
     def test_node_ensemble(self):
         ensemble_file = INPUT_DIR + 'ensemble-network.tsv'
-        edge_freq = Evaluation.edge_frequency_node_ensemble(ensemble_file)
+        edge_freq = Evaluation.edge_frequency_node_ensemble(GS_NODE_TABLE, ensemble_file)
         edge_freq.to_csv(OUT_DIR + 'node-ensemble.csv', sep="\t", index=False)
         assert filecmp.cmp(OUT_DIR + 'node-ensemble.csv', EXPECT_DIR + 'expected-node-ensemble.csv', shallow=False)
+
+    def test_empty_node_ensemble(self):
+        ensemble_file = INPUT_DIR + 'ensemble-network-empty.tsv'
+        edge_freq = Evaluation.edge_frequency_node_ensemble(GS_NODE_TABLE, ensemble_file)
+        edge_freq.to_csv(OUT_DIR + 'empty-node-ensemble.csv', sep="\t", index=False)
+        assert filecmp.cmp(OUT_DIR + 'empty-node-ensemble.csv', EXPECT_DIR + 'expected-node-ensemble-empty.csv', shallow=False)
 
     def test_precision_recal_curve_ensemble_nodes(self):
         out_path = Path(OUT_DIR+"test-precision-recall-curve-ensemble-nodes.png")
         out_path.unlink(missing_ok=True)
         ensemble_file = pd.read_csv(INPUT_DIR + 'node-ensemble.csv', sep="\t", header=0)
-        Evaluation.precision_recall_curve_node_ensemble(ensemble_file, NODE_TABLE, out_path)
+        Evaluation.precision_recall_curve_node_ensemble(ensemble_file, GS_NODE_TABLE, out_path)
         assert out_path.exists()
 
     def test_precision_recal_curve_ensemble_nodes_empty(self):
         out_path = Path(OUT_DIR+"test-precision-recall-curve-ensemble-nodes-empty.png")
         out_path.unlink(missing_ok=True)
         ensemble_file = pd.read_csv(INPUT_DIR + 'node-ensemble-empty.csv', sep="\t", header=0)
-        Evaluation.precision_recall_curve_node_ensemble(ensemble_file, NODE_TABLE, out_path)
+        Evaluation.precision_recall_curve_node_ensemble(ensemble_file, GS_NODE_TABLE, out_path)
         assert out_path.exists()
