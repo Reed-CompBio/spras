@@ -2,6 +2,7 @@ import filecmp
 from pathlib import Path
 
 import pytest
+
 from spras import runner
 
 INDIR = Path("test", "parse-outputs", "input")
@@ -61,7 +62,7 @@ class TestParseOutputs:
 
             runner.parse_output(algo, test_file, out_file)
             assert filecmp.cmp(OUTDIR / f"{algo}-duplicate-pathway.txt", EXPDIR / f"{algo}-pathway-expected.txt", shallow=False)
-    
+
     def test_meo_present_headers(self):
         test_file = INDIR / f"meo-present-headers.txt"
         out_file = OUTDIR / f"meo-present-headers-output.txt"
