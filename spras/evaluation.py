@@ -78,78 +78,72 @@ class Evaluation:
 
         # TODO: later iteration - chose between node and edge file, or allow both
 
-    def select_max_freq_and_node(row: pd.Series):
+    @staticmethod
+    def edge_frequency_node_ensemble(node_table: pd.DataFrame, ensemble_file: str):
         """
-        Selects the node and frequency with the highest frequency value from two potential nodes in a row.
-        Handles cases where one of the nodes or frequencies may be missing and returns the node associated with the maximum frequency.
+        Create a node ensemble using the edge ensemble frequencies by:
+        1. Extracting Node1 and corresponding edge frequencies from the ensemble DataFrame.
+        2. Appending Node2 and corresponding edge frequencies to include both sides of each undirected edge.
+        3. Grouping by node and taking the maximum edge frequency per node.
+        4. Adding any nodes from the gold standard (node_table) that are missing in the ensemble with a default frequency of 0.
+        - If the node ensemble does not include all of the gold standard nodes, we cannot achieve full recall.
+        @param node_table: the gold standard nodes
+        @param ensemble_file: the edge ensemble file
+        returns a node ensemble or an empty dataframe
         """
-        max_freq = 0
-        node = ""
-        if pd.isna(row['Node2']) and pd.isna(row['Freq2']):
-            max_freq = row['Freq1']
-            node = row['Node1']
-        elif pd.isna(row['Node1']) and pd.isna(row['Freq1']):
-            max_freq = row['Freq2']
-            node = row['Node2']
-        else:
-            max_freq = max(row['Freq1'], row['Freq2'])
-            node = row['Node1']
-        return node, max_freq
-
-    def edge_frequency_node_ensemble(ensemble_file: str):
-        """
-        Processes an ensemble of edge frequencies to identify the highest frequency associated with each node
-        Reads ensemble_file, separates frequencies by node, and then calculates the maximum frequency for each node.
-        Returns a DataFrame of nodes with their respective maximum frequencies, or an empty DataFrame if ensemble_file is empty.
-        @param ensemble_file: the pre-computed node_ensemble
-        """
-        ensemble_df = pd.read_table(ensemble_file, sep="\t", header=0)
+        ensemble_df = pd.read_table(ensemble_file, sep='\t', header=0)
 
         if not ensemble_df.empty:
-            node1_freq = ensemble_df.drop(columns = ['Node2', 'Direction'])
-            node2_freq = ensemble_df.drop(columns = ['Node1', 'Direction'])
+            node1 = ensemble_df[['Node1', 'Frequency']].rename(columns={'Node1':'Node'})
+            node2 = ensemble_df[['Node2', 'Frequency']].rename(columns={'Node2':'Node'})
 
-            max_node1_freq = node1_freq.groupby(['Node1']).max().reset_index()
-            max_node1_freq.rename(columns = {'Frequency': 'Freq1'}, inplace = True)
-            max_node2_freq = node2_freq.groupby(['Node2']).max().reset_index()
-            max_node2_freq.rename(columns = {'Frequency': 'Freq2'}, inplace = True)
+            gs_nodes = node_table[['NODEID']].rename(columns={'NODEID':'Node'})
+            gs_nodes['Frequency'] = 0.0
 
-            node_ensemble = max_node1_freq.merge(max_node2_freq, left_on='Node1', right_on='Node2', how='outer')
-            node_ensemble[['Node', 'max_freq']] = node_ensemble.apply(Evaluation.select_max_freq_and_node, axis=1, result_type='expand')
-            node_ensemble.drop(columns = ['Node1', 'Node2', 'Freq1', 'Freq2'], inplace = True)
-            node_ensemble.sort_values('max_freq', ascending= False, inplace = True)
+            all_nodes = pd.concat([node1, node2, gs_nodes])
+
+            node_ensemble = all_nodes.groupby(['Node']).max().reset_index()
             return node_ensemble
-        else:
-            return pd.DataFrame(columns = ['Node', 'max_freq'])
 
+        else:
+            return pd.DataFrame(columns = ['Node', 'Frequency'])
+
+
+    @staticmethod
     def precision_recall_curve_node_ensemble(node_ensemble:pd.DataFrame, node_table:pd.DataFrame, output_png: str):
         """
-        Takes in an node ensemble for specific dataset or specific algorithm in a dataset, and an associated gold standard node table.
+        Takes in a node ensemble for specific dataset or specific algorithm in a dataset, and an associated gold standard node table.
         Plots a precision and recall curve for the node ensemble against its associated gold standard node table
         Returns output back to output_png
         @param node_ensemble: the pre-computed node_ensemble
         @param node_table: the gold standard nodes
-        @param output_file: the filename to save the precision and recall curves
+        @param output_png: the filename to save the precision and recall curves
         """
         gold_standard_nodes = set(node_table['NODEID'])
 
         if not node_ensemble.empty:
             y_true = [1 if node in gold_standard_nodes else 0 for node in node_ensemble['Node']]
-            y_scores = node_ensemble['max_freq'].tolist()
+            y_scores = node_ensemble['Frequency'].tolist()
             precision, recall, thresholds = precision_recall_curve(y_true, y_scores)
-            auc_precision_recall = average_precision_score(y_true, y_scores)
+            # avg precision summarizes a precision-recall curve as the weighted mean of precisions achieved at each threshold
+            avg_precision = average_precision_score(y_true, y_scores)
+            # the (number positives)/(number instances)
+            baseline_precision = np.sum(y_true) / len(y_true)
 
             plt.figure()
-            plt.plot(recall, precision, marker='o', label='Precision-Recall curve')
-            plt.axhline(y=auc_precision_recall, color='r', linestyle='--', label=f'Avg Precision: {auc_precision_recall:.4f}')
+            plt.plot(recall, precision, marker='o', label=f'Precision-Recall curve (AP:{avg_precision:.4f})')
+            plt.axhline(y=baseline_precision, color='red', linestyle='--', label=f'Baseline: {baseline_precision:.4f}')
             plt.xlabel('Recall')
             plt.ylabel('Precision')
             plt.title('Precision-Recall Curve')
             plt.legend()
             plt.grid(True)
             plt.savefig(output_png)
+            plt.close()
         else:
             plt.figure()
             plt.plot([], [])
-            plt.title("Empty Ensemble File")
+            plt.title("Precision-Recall Curve")
             plt.savefig(output_png)
+            print("Empty ensemble file used")
+            plt.close()
