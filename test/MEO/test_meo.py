@@ -1,3 +1,4 @@
+import filecmp
 import shutil
 from pathlib import Path
 
@@ -10,6 +11,8 @@ config.init_from_file("config/config.yaml")
 
 TEST_DIR = Path('test', 'MEO')
 OUT_FILE = TEST_DIR / 'output' / 'edges.txt'
+EXPECTED_FILE = TEST_DIR / 'expected' / 'edges-standardized.txt'
+OUT_FILE_PROCESSED = TEST_DIR / 'output' / 'edges-standardized.txt'
 
 
 class TestMaximumEdgeOrientation:
@@ -48,8 +51,10 @@ class TestMaximumEdgeOrientation:
 
         MEO.parse_output(
             raw_pathway_file=OUT_FILE,
-            standardized_pathway_file=TEST_DIR / 'output' / 'edges-standardized.txt'
+            standardized_pathway_file=OUT_FILE_PROCESSED
         )
+
+        assert filecmp.cmp(EXPECTED_FILE, OUT_FILE_PROCESSED, shallow=False)
 
     def test_meo_missing(self):
         # Test the expected error is raised when required arguments are missing
