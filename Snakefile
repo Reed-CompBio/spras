@@ -104,9 +104,9 @@ def make_final_input(wildcards):
         final_input.extend(expand('{out_dir}{sep}{dataset}-ml{sep}{algorithm}-ensemble-pathway.txt',out_dir=out_dir,sep=SEP,dataset=dataset_labels,algorithm=algorithms))
 
     if _config.config.analysis_include_evaluation:
-        final_input.extend(expand('{out_dir}{sep}{dataset_gold_standard_pair}-eval{sep}precision-recall-curve-ensemble-nodes.png',out_dir=out_dir,sep=SEP,dataset_gold_standard_pair=dataset_gold_standard_pairs,algorithm_params=algorithms_with_params))
+        final_input.extend(expand('{out_dir}{sep}{dataset_gold_standard_pair}-eval{sep}pr-curve-ensemble-nodes.png',out_dir=out_dir,sep=SEP,dataset_gold_standard_pair=dataset_gold_standard_pairs))
     if _config.config.analysis_include_evaluation_aggregate_algo:
-        final_input.extend(expand('{out_dir}{sep}{dataset_gold_standard_pair}-eval{sep}{algorithm}-precision-recall-curve-ensemble-nodes.png',out_dir=out_dir,sep=SEP,dataset_gold_standard_pair=dataset_gold_standard_pairs,algorithm=algorithms))
+        final_input.extend(expand('{out_dir}{sep}{dataset_gold_standard_pair}-eval{sep}{algorithm}-pr-curve-ensemble-nodes.png',out_dir=out_dir,sep=SEP,dataset_gold_standard_pair=dataset_gold_standard_pairs,algorithm=algorithms))
     if len(final_input) == 0:
         # No analysis added yet, so add reconstruction output files if they exist.
         # (if analysis is specified, these should be implicitly run).
@@ -372,17 +372,22 @@ def get_dataset_label(wildcards):
     dataset = parts[0]
     return dataset
 
+# Returns ensemble file for each dataset
+def collect_ensemble_per_dataset(wildcards):
+    dataset_label = get_dataset_label(wildcards)
+    return f'{out_dir}{SEP}{dataset_label}-ml{SEP}ensemble-pathway.txt'
 
-# Run evaluation for each ensemble.txt for a dataset against its paired gold standard
+# Run evaluation for each ensemble pathway for a dataset against its paired gold standard
 rule evaluation:
     input: 
         gold_standard_file = get_gold_standard_pickle_file,
-        ensemble_file=lambda wildcards: f"{out_dir}{SEP}{get_dataset_label(wildcards)}-ml{SEP}ensemble-pathway.txt",
+        ensemble_file = collect_ensemble_per_dataset,
     output: 
-        pr_curve_png = SEP.join([out_dir, '{dataset_gold_standard_pairs}-eval', 'precision-recall-curve-ensemble-nodes.png']),
+        pr_curve_png = SEP.join([out_dir, '{dataset_gold_standard_pairs}-eval', 'pr-curve-ensemble-nodes.png']),
     run:
         node_table = Evaluation.from_file(input.gold_standard_file).node_table
-        node_ensemble = Evaluation.edge_frequency_node_ensemble(input.ensemble_file)
+        # node_ensemble = Evaluation.edge_frequency_node_ensemble(input.ensemble_file)
+        node_ensemble = Evaluation.edge_frequency_node_ensemble(node_table, input.ensemble_file)
         Evaluation.precision_recall_curve_node_ensemble(node_ensemble, node_table, output.pr_curve_png)
 
 # Returns ensemble file for a specific algorithm and dataset
@@ -390,16 +395,16 @@ def collect_ensemble_per_algo_per_dataset(wildcards):
     dataset_label = get_dataset_label(wildcards)
     return f"{out_dir}{SEP}{dataset_label}-ml{SEP}{wildcards.algorithm}-ensemble-pathway.txt"
 
-# Run evaluation per algortihm for each ensemble.txt for a dataset against its paired gold standard
+# Run evaluation per algorithm for each ensemble pathway for a dataset against its paired gold standard
 rule evaluation_per_algo_ensemble_pr_curve:
     input: 
         gold_standard_file = get_gold_standard_pickle_file,
         ensemble_file = collect_ensemble_per_algo_per_dataset,
     output: 
-        pr_curve_png = SEP.join([out_dir, '{dataset_gold_standard_pairs}-eval', '{algorithm}-precision-recall-curve-ensemble-nodes.png']),
+        pr_curve_png = SEP.join([out_dir, '{dataset_gold_standard_pairs}-eval', '{algorithm}-pr-curve-ensemble-nodes.png']),
     run:
         node_table = Evaluation.from_file(input.gold_standard_file).node_table
-        node_ensemble = Evaluation.edge_frequency_node_ensemble(input.ensemble_file)
+        node_ensemble = Evaluation.edge_frequency_node_ensemble(node_table, input.ensemble_file)
         Evaluation.precision_recall_curve_node_ensemble(node_ensemble, node_table, output.pr_curve_png)
 
 # Remove the output directory
