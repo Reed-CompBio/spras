@@ -1,0 +1,6 @@
+gene_or_protein,study_bias_score
+A,0
+B,0
+C,1
+D,0
+E,0
