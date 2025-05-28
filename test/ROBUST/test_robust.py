@@ -10,8 +10,8 @@ TEST_DIR = Path('test', 'ROBUST')
 OUT_FILE = TEST_DIR / 'output' / 'edges.txt'
 
 
-class TestOmicsIntegrator1:
-    def test_oi1_required(self):
+class TestROBUST:
+    def test_robust_required(self):
         OUT_FILE.unlink(missing_ok=True)
         ROBUST.run(network=TEST_DIR / 'input' / 'robust-network.txt',
                    scores=TEST_DIR / 'input' / 'robust-scores.txt',

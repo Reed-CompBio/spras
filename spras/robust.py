@@ -1,13 +1,12 @@
-import warnings
+import pandas as pd
 from pathlib import Path
 
 from spras.containers import prepare_volume, run_container
 from spras.interactome import (
-    convert_directed_to_undirected,
     reinsert_direction_col_undirected,
 )
 from spras.prm import PRM
-from spras.util import add_rank_column, duplicate_edges, raw_pathway_df
+from spras.util import add_rank_column
 
 __all__ = ['ROBUST']
 
@@ -100,4 +99,7 @@ class ROBUST(PRM):
         @param raw_pathway_file: pathway file produced by an algorithm's run function
         @param standardized_pathway_file: the same pathway written in the universal format
         """
-        pass
+        df = pd.read_csv(raw_pathway_file, sep=" ", header=None)
+        df = add_rank_column(df)
+        df = reinsert_direction_col_undirected(df)
+        df.to_csv(standardized_pathway_file, header=['Node1', 'Node2', 'Rank', 'Direction'], index=False, sep='\t')
