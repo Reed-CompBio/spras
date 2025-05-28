@@ -67,11 +67,11 @@ class DOMINO(PRM):
         edges_df['Interactor1'] = edges_df['Interactor1'].apply(pre_domino_id_transform)
         edges_df['Interactor2'] = edges_df['Interactor2'].apply(pre_domino_id_transform)
 
-        edges_df.to_csv(filename_map['network'], sep='\t', index=False, columns=['Interactor1', 'ppi', 'Interactor2'],
+        edges_df.to_csv(filename_map['network.sif'], sep='\t', index=False, columns=['Interactor1', 'ppi', 'Interactor2'],
                         header=['ID_interactor_A', 'ppi', 'ID_interactor_B'])
 
     @staticmethod
-    def run(network=None, active_genes=None, output_file=None, slice_threshold=None, module_threshold=None, container_framework="docker"):
+    def run(network_sif=None, active_genes=None, output_file=None, slice_threshold=None, module_threshold=None, container_framework="docker"):
         """
         Run DOMINO with Docker.
         Let visualization be always true, parallelization be always 1 thread, and use_cache be always false.
@@ -84,7 +84,7 @@ class DOMINO(PRM):
         @param container_framework: choose the container runtime framework, currently supports "docker" or "singularity" (optional)
         """
 
-        if not network or not active_genes or not output_file:
+        if not network_sif or not active_genes or not output_file:
             raise ValueError('Required DOMINO arguments are missing')
 
         work_dir = '/spras'
@@ -92,7 +92,7 @@ class DOMINO(PRM):
         # Each volume is a tuple (source, destination)
         volumes = list()
 
-        bind_path, network_file = prepare_volume(network, work_dir)
+        bind_path, network_file = prepare_volume(network_sif, work_dir)
         volumes.append(bind_path)
 
         bind_path, node_file = prepare_volume(active_genes, work_dir)
@@ -162,7 +162,7 @@ class DOMINO(PRM):
         # Clean up DOMINO intermediate and pickle files
         slices_file.unlink(missing_ok=True)
         Path(out_dir, 'network.slices.pkl').unlink(missing_ok=True)
-        Path(network).with_suffix('.pkl').unlink(missing_ok=True)
+        Path(network_sif).with_suffix('.pkl').unlink(missing_ok=True)
 
     @staticmethod
     def parse_output(raw_pathway_file, standardized_pathway_file):

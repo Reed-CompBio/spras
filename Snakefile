@@ -178,7 +178,7 @@ rule merge_gs_input:
 def extend_filename(file_name: str, extension=".txt") -> str:
     root, ext = os.path.splitext(file_name)
     if not ext:
-        ext = extend_filename
+        ext = extension
     return f'{root}{ext}'
 
 # The checkpoint is like a rule but can be used in dynamic workflows
@@ -218,7 +218,7 @@ def collect_prepared_input(wildcards):
     prepared_dir = SEP.join([out_dir, 'prepared', f'{wildcards.dataset}-{wildcards.algorithm}-inputs'])
 
     # Construct the list of expected prepared input files for the reconstruction algorithm
-    prepared_inputs = expand(f'{prepared_dir}{SEP}{{extend_filename(type)}}',type=runner.get_required_inputs(algorithm=wildcards.algorithm))
+    prepared_inputs = expand(f'{prepared_dir}{SEP}{{type}}',type=map(extend_filename, runner.get_required_inputs(algorithm=wildcards.algorithm)))
     # If the directory is missing, do nothing because the missing output triggers running prepare_input
     if os.path.isdir(prepared_dir):
         # If the directory exists, confirm all prepared input files exist as well (as opposed to some or none)
@@ -249,7 +249,10 @@ rule reconstruct:
         # Create a copy so that the updates are not written to the parameters logfile
         params = reconstruction_params(wildcards.algorithm, wildcards.params).copy()
         # Add the input files
-        params.update(dict(zip(runner.get_required_inputs(wildcards.algorithm), *{input}, strict=True)))
+        params.update(dict(zip(
+            [inp.replace(".", "_") for inp in runner.get_required_inputs(wildcards.algorithm)],
+            *{input}, strict=True
+        )))
         # Add the output file
         # All run functions can accept a relative path to the output file that should be written that is called 'output_file'
         params['output_file'] = output.pathway_file
