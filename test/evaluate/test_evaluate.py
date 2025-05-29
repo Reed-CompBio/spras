@@ -40,26 +40,47 @@ class TestEvaluate:
         assert filecmp.cmp(OUT_DIR + 'empty-node-ensemble.csv', EXPECT_DIR + 'expected-node-ensemble-empty.csv', shallow=False)
 
     def test_precision_recall_curve_ensemble_nodes(self):
-        out_path = Path(OUT_DIR+"test-precision-recall-curve-ensemble-nodes.png")
-        out_path.unlink(missing_ok=True)
+        out_path_png = Path(OUT_DIR+"pr-curve-ensemble-nodes.png")
+        out_path_png.unlink(missing_ok=True)
+        out_path_file = Path(OUT_DIR+"pr-curve-ensemble-nodes.txt")
+        out_path_file.unlink(missing_ok=True)
         ensemble_file = pd.read_csv(INPUT_DIR + 'node-ensemble.csv', sep="\t", header=0)
         node_ensembles_dict = {'ensemble': ensemble_file}
-        Evaluation.precision_recall_curve_node_ensemble(node_ensembles_dict, GS_NODE_TABLE, out_path)
-        assert out_path.exists()
+        Evaluation.precision_recall_curve_node_ensemble(node_ensembles_dict, GS_NODE_TABLE, out_path_png, out_path_file)
+        assert out_path_png.exists()
+        assert filecmp.cmp(out_path_file, EXPECT_DIR + 'expected-pr-curve-ensemble-nodes.txt', shallow=False)
 
     def test_precision_recall_curve_ensemble_nodes_empty(self):
-        out_path = Path(OUT_DIR+"test-precision-recall-curve-ensemble-nodes-empty.png")
-        out_path.unlink(missing_ok=True)
+        out_path_png = Path(OUT_DIR+"pr-curve-ensemble-nodes-empty.png")
+        out_path_png.unlink(missing_ok=True)
+        out_path_file = Path(OUT_DIR+"pr-curve-ensemble-nodes-empty.txt")
+        out_path_file.unlink(missing_ok=True)
         empty_ensemble_file = pd.read_csv(INPUT_DIR + 'node-ensemble-empty.csv', sep="\t", header=0)
         node_ensembles_dict = {'ensemble': empty_ensemble_file}
-        Evaluation.precision_recall_curve_node_ensemble(node_ensembles_dict, GS_NODE_TABLE, out_path)
-        assert out_path.exists()
+        Evaluation.precision_recall_curve_node_ensemble(node_ensembles_dict, GS_NODE_TABLE, out_path_png, out_path_file)
+        assert out_path_png.exists()
+        assert filecmp.cmp(out_path_file, EXPECT_DIR + 'expected-pr-curve-ensemble-nodes-empty.txt', shallow=False)
 
     def test_precision_recall_curve_multiple_ensemble_nodes(self):
-        out_path = Path(OUT_DIR+"test-precision-recall-curve-multiple-ensemble-nodes.png")
-        out_path.unlink(missing_ok=True)
+        out_path_png = Path(OUT_DIR+"pr-curve-multiple-ensemble-nodes.png")
+        out_path_png.unlink(missing_ok=True)
+        out_path_file = Path(OUT_DIR+"pr-curve-multiple-ensemble-nodes.txt")
+        out_path_file.unlink(missing_ok=True)
         ensemble_file = pd.read_csv(INPUT_DIR + 'node-ensemble.csv', sep="\t", header=0)
         empty_ensemble_file = pd.read_csv(INPUT_DIR + 'node-ensemble-empty.csv', sep="\t", header=0)
         node_ensembles_dict = {'ensemble1': ensemble_file, 'ensemble2': ensemble_file, 'ensemble3': empty_ensemble_file}
-        Evaluation.precision_recall_curve_node_ensemble(node_ensembles_dict, GS_NODE_TABLE, out_path)
-        assert out_path.exists()
+        Evaluation.precision_recall_curve_node_ensemble(node_ensembles_dict, GS_NODE_TABLE, out_path_png, out_path_file)
+        assert out_path_png.exists()
+        assert filecmp.cmp(out_path_file, EXPECT_DIR + 'expected-pr-curve-multiple-ensemble-nodes.txt', shallow=False)
+
+    def test_precision_recall_curve_multiple_empty_ensemble_nodes(self):
+        out_path_png = Path(OUT_DIR+"pr-curve-multiple-empty-ensemble-nodes.png")
+        out_path_png.unlink(missing_ok=True)
+        out_path_file = Path(OUT_DIR+"pr-curve-multiple-empty-ensemble-nodes.txt")
+        out_path_file.unlink(missing_ok=True)
+        empty_ensemble_file = pd.read_csv(INPUT_DIR + 'node-ensemble-empty.csv', sep="\t", header=0)
+        node_ensembles_dict = {'ensemble1': empty_ensemble_file, 'ensemble2': empty_ensemble_file, 'ensemble3': empty_ensemble_file}
+        Evaluation.precision_recall_curve_node_ensemble(node_ensembles_dict, GS_NODE_TABLE, out_path_png, out_path_file)
+        assert out_path_png.exists()
+        assert filecmp.cmp(out_path_file, EXPECT_DIR + 'expected-pr-curve-multiple-empty-ensemble-nodes.txt', shallow=False)
+
