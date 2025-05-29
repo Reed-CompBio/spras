@@ -62,7 +62,7 @@ algorithms:
 
       - name: "omicsintegrator1"
         params:
-              include: false
+              include: true
               run1:
                   b: [5, 6]
                   w: np.linspace(0,5,2)
@@ -71,7 +71,7 @@ algorithms:
 
       - name: "omicsintegrator2"
         params:
-              include: false
+              include: true
               run1:
                   b: [4]
                   g: [0]
@@ -81,7 +81,7 @@ algorithms:
 
       - name: "meo"
         params:
-              include: false
+              include: true
               run1:
                   max_path_length: [3]
                   local_search: ["Yes"]
@@ -89,18 +89,18 @@ algorithms:
 
       - name: "mincostflow"
         params:
-              include: false
+              include: true
               run1:
                   flow: [1] # The flow must be an int
                   capacity: [1]
 
       - name: "allpairs"
         params:
-              include: false
+              include: true
 
       - name: "domino"
         params:
-              include: false
+              include: true
               run1:
                   slice_threshold: [0.3]
                   module_threshold: [0.05]
