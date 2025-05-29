@@ -6,6 +6,7 @@ from typing import Dict, Iterable
 import matplotlib.pyplot as plt
 import numpy as np
 import pandas as pd
+import seaborn as sns
 from sklearn.metrics import (
     average_precision_score,
     precision_recall_curve,
@@ -79,38 +80,55 @@ class Evaluation:
         # TODO: later iteration - chose between node and edge file, or allow both
 
     @staticmethod
-    def edge_frequency_node_ensemble(node_table: pd.DataFrame, ensemble_file: str):
+    def edge_frequency_node_ensemble(node_table: pd.DataFrame, ensemble_files: list) -> dict:
         """
-        Create a node ensemble using the edge ensemble frequencies by:
+        Create a dictionary of node ensemble using the edge ensemble frequencies by:
         1. Extracting Node1 and corresponding edge frequencies from the ensemble DataFrame.
         2. Appending Node2 and corresponding edge frequencies to include both sides of each undirected edge.
         3. Grouping by node and taking the maximum edge frequency per node.
         4. Adding any nodes from the gold standard (node_table) that are missing in the ensemble with a default frequency of 0.
         - If the node ensemble does not include all of the gold standard nodes, we cannot achieve full recall.
+        5. Saves the node ensemble in a dictionary under its associated algorithm ensemble or combined ensemble.
         @param node_table: the gold standard nodes
         @param ensemble_file: the edge ensemble file
-        returns a node ensemble or an empty dataframe
+        returns a dictionary of node ensembles
         """
-        ensemble_df = pd.read_table(ensemble_file, sep='\t', header=0)
+        node_ensembles_dict = dict()
 
-        if not ensemble_df.empty:
-            node1 = ensemble_df[['Node1', 'Frequency']].rename(columns={'Node1':'Node'})
-            node2 = ensemble_df[['Node2', 'Frequency']].rename(columns={'Node2':'Node'})
+        for ensemble_file in ensemble_files:
+            label = ensemble_file.split("/")[-1].split("-")[0]
+            ensemble_df = pd.read_table(ensemble_file, sep='\t', header=0)
 
-            gs_nodes = node_table[['NODEID']].rename(columns={'NODEID':'Node'})
-            gs_nodes['Frequency'] = 0.0
+            if not ensemble_df.empty:
+                node1 = ensemble_df[['Node1', 'Frequency']].rename(columns={'Node1':'Node'})
+                node2 = ensemble_df[['Node2', 'Frequency']].rename(columns={'Node2':'Node'})
 
-            all_nodes = pd.concat([node1, node2, gs_nodes])
+                gs_nodes = node_table[['NODEID']].rename(columns={'NODEID':'Node'})
+                gs_nodes['Frequency'] = 0.0
 
-            node_ensemble = all_nodes.groupby(['Node']).max().reset_index()
-            return node_ensemble
+                all_nodes = pd.concat([node1, node2, gs_nodes])
 
-        else:
-            return pd.DataFrame(columns = ['Node', 'Frequency'])
+                node_ensemble = all_nodes.groupby(['Node']).max().reset_index()
+                node_ensembles_dict[label] = node_ensemble
+
+            else:
+                node_ensembles_dict[label] = pd.DataFrame(columns=['Node', 'Frequency'])
+
+        return node_ensembles_dict
 
 
     @staticmethod
-    def precision_recall_curve_node_ensemble(node_ensemble:pd.DataFrame, node_table:pd.DataFrame, output_png: str):
+    def create_palette(label_names:list) -> dict:
+        """
+        Generates a dictionary mapping each ensemble label to a unique color from the specified palette.
+        """
+        unique_column_names = list(sorted(set(label_names)))
+        custom_palette = sns.color_palette(palette = "tab20", n_colors = len(unique_column_names))
+        label_color_map = {label: color for label, color in zip(unique_column_names, custom_palette, strict=True)}
+        return label_color_map
+
+    @staticmethod
+    def precision_recall_curve_node_ensemble(node_ensembles:dict, node_table:pd.DataFrame, output_png:str):
         """
         Takes in a node ensemble for specific dataset or specific algorithm in a dataset, and an associated gold standard node table.
         Plots a precision and recall curve for the node ensemble against its associated gold standard node table
@@ -121,29 +139,32 @@ class Evaluation:
         """
         gold_standard_nodes = set(node_table['NODEID'])
 
-        if not node_ensemble.empty:
-            y_true = [1 if node in gold_standard_nodes else 0 for node in node_ensemble['Node']]
-            y_scores = node_ensemble['Frequency'].tolist()
-            precision, recall, thresholds = precision_recall_curve(y_true, y_scores)
-            # avg precision summarizes a precision-recall curve as the weighted mean of precisions achieved at each threshold
-            avg_precision = average_precision_score(y_true, y_scores)
-            # the (number positives)/(number instances)
-            baseline_precision = np.sum(y_true) / len(y_true)
+        label_names = list(node_ensembles)
+        color_palette = Evaluation.create_palette(label_names)
 
-            plt.figure()
-            plt.plot(recall, precision, marker='o', label=f'Precision-Recall curve (AP:{avg_precision:.4f})')
-            plt.axhline(y=baseline_precision, color='red', linestyle='--', label=f'Baseline: {baseline_precision:.4f}')
-            plt.xlabel('Recall')
-            plt.ylabel('Precision')
-            plt.title('Precision-Recall Curve')
-            plt.legend()
-            plt.grid(True)
-            plt.savefig(output_png)
-            plt.close()
-        else:
-            plt.figure()
-            plt.plot([], [])
-            plt.title("Precision-Recall Curve")
-            plt.savefig(output_png)
-            print("Empty ensemble file used")
-            plt.close()
+        plt.figure(figsize=(10, 7))
+
+        for label, node_ensemble in node_ensembles.items():
+
+            if not node_ensemble.empty:
+                y_true = [1 if node in gold_standard_nodes else 0 for node in node_ensemble['Node']]
+                y_scores = node_ensemble['Frequency'].tolist()
+                precision, recall, thresholds = precision_recall_curve(y_true, y_scores)
+                # avg precision summarizes a precision-recall curve as the weighted mean of precisions achieved at each threshold
+                avg_precision = average_precision_score(y_true, y_scores)
+                # the (number positives)/(number instances)
+                baseline_precision = np.sum(y_true) / len(y_true)
+
+                plt.plot(recall, precision, color=color_palette[label], marker='o', label=f'{label} PR curve (AP:{avg_precision:.4f})')
+                plt.axhline(y=baseline_precision, color=color_palette[label], linestyle='--', label=f'Baseline: {baseline_precision:.4f}')
+
+            else:
+                plt.plot([], [], color=color_palette[label], marker='o', label=f'{label} PR curve - Empty Ensemble')
+
+        plt.xlabel('Recall')
+        plt.ylabel('Precision')
+        plt.title('Precision-Recall Curve')
+        plt.legend(loc='lower left', bbox_to_anchor=(1, 0.5))
+        plt.grid(True)
+        plt.savefig(output_png, bbox_inches='tight')
+        plt.close()
