@@ -5,7 +5,7 @@ import pandas as pd
 from spras.containers import prepare_volume, run_container
 from spras.interactome import (
     convert_undirected_to_directed,
-    reinsert_direction_col_directed,
+    reinsert_direction_col_undirected,
 )
 from spras.prm import PRM
 from spras.util import add_rank_column, duplicate_edges, raw_pathway_df
@@ -139,6 +139,7 @@ class ResponseNet(PRM):
         Although the algorithm constructs a directed network, the resulting network is treated as undirected.
         This is because the flow within the network doesn't imply causal relationships between nodes.
         The primary goal of the algorithm is node identification, not the identification of directional edges.
+        See "Directionality of ResponseNet output" in https://www.ncbi.nlm.nih.gov/pmc/articles/PMC2733244/bin/NIHMS109939-supplement-supp.pdf
 
         @param raw_pathway_file: pathway file produced by an algorithm's run function
         @param standardized_pathway_file: the same pathway written in the universal format
@@ -149,9 +150,8 @@ class ResponseNet(PRM):
             df.columns = ['Node1', 'Node2', 'Flow']
             df = df.drop(columns=['Flow'], axis=1)
             df = add_rank_column(df)
-            # Currently directed edges in the input will be converted to undirected edges in the output
-            # TODO: do we want this?
-            df = reinsert_direction_col_directed(df)
+            # ResponseNet's outputs should be treated as undirected outputs.
+            df = reinsert_direction_col_undirected(df)
             df, has_duplicates = duplicate_edges(df)
             if has_duplicates:
                 print(f"Duplicate edges were removed from {raw_pathway_file}")
