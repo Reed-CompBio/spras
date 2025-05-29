@@ -2,6 +2,7 @@ import pandas as pd
 from pathlib import Path
 
 from spras.containers import prepare_volume, run_container
+from spras.dataset import Dataset
 from spras.interactome import (
     reinsert_direction_col_undirected,
 )
@@ -15,7 +16,7 @@ class ROBUST(PRM):
     required_inputs = ['seeds', 'network', 'scores']
 
     @staticmethod
-    def generate_inputs(data, filename_map):
+    def generate_inputs(data: Dataset, filename_map):
         """
         Access fields from the dataset and write the required input files
         @param data: dataset
@@ -29,15 +30,19 @@ class ROBUST(PRM):
         sources_targets = data.request_node_columns(["sources", "targets"])
         if sources_targets is None:
             return False
-    
+        seeds = sources_targets[(sources_targets["sources"] == True) | (sources_targets["targets"] == True)]
+        seeds = seeds.sort_values(by=[Dataset.NODE_ID], ascending=True, ignore_index=True)
+        seeds.to_csv(filename_map['seeds'], index=False, columns=[Dataset.NODE_ID], header=None)
+        
         # Create network file
         edges = data.get_interactome()
-        edges.to_csv(filename_map["network"], columns=["Interactor1", "Interactor2"], header=None, sep=' ')
+        edges.to_csv(filename_map["network"], columns=["Interactor1", "Interactor2"], index=False, header=None, sep=' ')
 
         # Create scores file
         if data.contains_node_columns('prize'):
             # NODEID is always included in the node table
             node_df = data.request_node_columns(['prize'])
+            node_df = node_df.sort_values(by=[Dataset.NODE_ID], ascending=True, ignore_index=True)
             node_df.to_csv(filename_map['scores'], sep=',', index=False, columns=['NODEID', 'prize'], header=['gene_or_protein', 'study_bias_score'])
         else:
             # TODO: fallback when there are no prizes
