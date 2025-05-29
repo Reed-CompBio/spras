@@ -8,3 +8,5 @@ O	P	0.25	U
 P	Q	0.25	U
 A	B	0.25	D
 B	A	0.25	D
+A	F	0.25	U
+E	F	0.9	D
