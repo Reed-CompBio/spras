@@ -22,7 +22,7 @@ Interactor1   Interactor2   Weight
 - the expected raw input file should have node pairs in the 1st and 2nd columns, with a weight in the 3rd column
 - it can include bidirectional edges, but will only keep one copy of repeated edges
 """
-class ResponseNet (PRM):
+class ResponseNet(PRM):
     required_inputs = ['sources', 'targets', 'edges']
 
     @staticmethod
