@@ -139,7 +139,7 @@ class ResponseNet(PRM):
         Although the algorithm constructs a directed network, the resulting network is treated as undirected.
         This is because the flow within the network doesn't imply causal relationships between nodes.
         The primary goal of the algorithm is node identification, not the identification of directional edges.
-        See "Directionality of ResponseNet output" in "Bridging high-throughput genetic and transcriptional data reveals cellular
+        See "Directionality of ResponseNet output" in the supplement of "Bridging high-throughput genetic and transcriptional data reveals cellular
         responses to alpha-synuclein toxicity" (https://www.nature.com/articles/ng.337)
 
         @param raw_pathway_file: pathway file produced by an algorithm's run function
