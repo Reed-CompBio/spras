@@ -49,6 +49,7 @@ class TestOmicsIntegrator1:
         # Include all optional arguments
         OmicsIntegrator1.run(edges=TEST_DIR+'input/oi1-edges.txt',
                              prizes=TEST_DIR+'input/oi1-prizes.txt',
+                             dummy_nodes=None,
                              dummy_mode='terminals',
                              mu_squared=True,
                              exclude_terms=True,
@@ -61,6 +62,23 @@ class TestOmicsIntegrator1:
                              b=1,
                              d=10,
                              mu=0,
+                             noise=0.333,
+                             g=0.001,
+                             r=0)
+        assert out_path.exists()
+
+    def test_oi1_dummy_file(self):
+        out_path = Path(OUT_FILE)
+        out_path.unlink(missing_ok=True)
+        # Include optional argument
+        OmicsIntegrator1.run(edges=TEST_DIR+'input/oi1-edges.txt',
+                             prizes=TEST_DIR+'input/oi1-prizes.txt',
+                             dummy_nodes=TEST_DIR + 'input/oi1-dummy.txt',
+                             dummy_mode='file',
+                             output_file=OUT_FILE,
+                             w=5,
+                             b=1,
+                             d=10,
                              noise=0.333,
                              g=0.001,
                              r=0)
@@ -80,6 +98,18 @@ class TestOmicsIntegrator1:
             write_conf(Path('.'),
                        b=1,
                        d=10)
+
+    def test_oi1_missing_dummy(self):
+        # Test the expected error is raised when the dummy_nodes file is missing and the dummy_mode is 'file'
+        with pytest.raises(ValueError):
+            # No edges
+            OmicsIntegrator1.run(edges=TEST_DIR+'input/oi1-edges.txt',
+                                 prizes=TEST_DIR + 'input/oi1-prizes.txt',
+                                 output_file=TEST_DIR+'output/test_optimalForest.sif',
+                                 w=5,
+                                 b=1,
+                                 d=10,
+                                 dummy_mode='file')
 
     # Only run Singularity test if the binary is available on the system
     # spython is only available on Unix, but do not explicitly skip non-Unix platforms

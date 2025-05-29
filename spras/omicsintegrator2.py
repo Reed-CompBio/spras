@@ -6,7 +6,7 @@ from spras.containers import prepare_volume, run_container
 from spras.dataset import Dataset
 from spras.interactome import reinsert_direction_col_undirected
 from spras.prm import PRM
-from spras.util import add_rank_column
+from spras.util import add_rank_column, duplicate_edges
 
 __all__ = ['OmicsIntegrator2']
 
@@ -148,14 +148,24 @@ class OmicsIntegrator2(PRM):
         """
         # Omicsintegrator2 returns a single line file if no network is found
         num_lines = sum(1 for line in open(raw_pathway_file))
+        # Omicsintegrator2 has corrupted output; list of correct column names
+        sorted_correct_column_names = ['cost', 'in_solution', 'protein1', 'protein2'] # the order of edge attributes in the NetworkX graph is not guaranteed.
+
         if num_lines < 2:
             df = pd.DataFrame(columns=['Node1', 'Node2', 'Rank', 'Direction'])
         else:
             df = pd.read_csv(raw_pathway_file, sep='\t', header=0)
-            df = df[df['in_solution'] == True]  # Check whether this column can be empty before revising this line
-            df = df.take([0, 1], axis=1)
-            df = add_rank_column(df)
-            df = reinsert_direction_col_undirected(df)
-            df.columns = ['Node1', 'Node2', 'Rank', "Direction"]
+            if sorted(df.columns) == sorted_correct_column_names: # if column header names are all correct
+                df = df[df['in_solution'] == True]  # the 'in_solution' column exists when the forest is not empty.
+                df = df.take([0, 1], axis=1) # the first two columns in the df will be 'protein1' and 'protein2', followed by the edge attributes.
+                df = add_rank_column(df)
+                df = reinsert_direction_col_undirected(df)
+                df.columns = ['Node1', 'Node2', 'Rank', "Direction"]
+            else: # corrupted data
+                df = pd.DataFrame(columns=['Node1', 'Node2', 'Rank', 'Direction'])
+
+            df, has_duplicates = duplicate_edges(df)
+            if has_duplicates:
+                print(f"Duplicate edges were removed from {raw_pathway_file}")
 
         df.to_csv(standardized_pathway_file, header=True, index=False, sep='\t')

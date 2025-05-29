@@ -33,6 +33,7 @@ algorithms:
           - 0.1
         mu:
           - 0.008
+        dummy_mode: ["file"]
   -
     name: omicsintegrator2
     params:
@@ -88,4 +89,6 @@ analysis:
   summary:
     include: true
   ml:
+    include: false
+  evaluation:
     include: false
