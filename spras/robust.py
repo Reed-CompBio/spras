@@ -5,6 +5,7 @@ import pandas as pd
 from spras.containers import prepare_volume, run_container
 from spras.dataset import Dataset
 from spras.interactome import (
+    convert_directed_to_undirected,
     reinsert_direction_col_undirected,
 )
 from spras.prm import PRM
@@ -14,6 +15,10 @@ __all__ = ['ROBUST']
 
 
 class ROBUST(PRM):
+    """
+    ROBUST as a Pathway Reconstruction Algorithm. This tries to connect a set of seed nodes (union of sources targets)
+    with prize-collecting sterner trees. This only takes in undirected input.
+    """
     required_inputs = ['seeds', 'network', 'scores']
 
     @staticmethod
@@ -27,17 +32,20 @@ class ROBUST(PRM):
             if input_type not in filename_map:
                 raise ValueError("{input_type} filename is missing")
 
-        # TODO: Create seeds file
+        # Create seeds file - while ROBUST usually expects more seeds,
+        # it will still try to construct PCSTs between all the seed nodes,
+        # effectively reconstructing a PPI network.
         sources_targets = data.request_node_columns(["sources", "targets"])
         if sources_targets is None:
             return False
-        seeds = sources_targets[(sources_targets["sources"] == True) | (sources_targets["targets"] == True)]
-        seeds = seeds.sort_values(by=[Dataset.NODE_ID], ascending=True, ignore_index=True)
-        seeds.to_csv(filename_map['seeds'], index=False, columns=[Dataset.NODE_ID], header=None)
+        seeds_df = sources_targets[(sources_targets["sources"] == True) | (sources_targets["targets"] == True)]
+        seeds_df = seeds_df.sort_values(by=[Dataset.NODE_ID], ascending=True, ignore_index=True)
+        seeds_df.to_csv(filename_map['seeds'], index=False, columns=[Dataset.NODE_ID], header=None)
 
         # Create network file
-        edges = data.get_interactome()
-        edges.to_csv(filename_map["network"], columns=["Interactor1", "Interactor2"], index=False, header=None, sep=' ')
+        edges_df = data.get_interactome()
+        edges_df = convert_directed_to_undirected(edges_df)
+        edges_df.to_csv(filename_map["network"], columns=["Interactor1", "Interactor2"], index=False, header=None, sep=' ')
 
         # Create scores file
         if data.contains_node_columns('prize'):
@@ -46,8 +54,7 @@ class ROBUST(PRM):
             node_df = node_df.sort_values(by=[Dataset.NODE_ID], ascending=True, ignore_index=True)
             node_df.to_csv(filename_map['scores'], sep=',', index=False, columns=['NODEID', 'prize'], header=['gene_or_protein', 'study_bias_score'])
         else:
-            # TODO: fallback when there are no prizes
-            raise ValueError("ROBUST doesn't require prizes, but we do not support no prizes yet.")
+            raise ValueError("ROBUST requires provided prizes.")
 
     @staticmethod
     def run(seeds=None, network=None, scores=None, output_file=None, alpha=None, beta=None, n=None, tau=None, gamma=None, container_framework="docker"):
