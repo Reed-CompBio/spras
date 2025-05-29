@@ -8,7 +8,7 @@ from spras.interactome import (
     reinsert_direction_col_directed,
 )
 from spras.prm import PRM
-from spras.util import add_rank_column
+from spras.util import add_rank_column, raw_pathway_df
 
 __all__ = ['ResponseNet']
 
@@ -93,10 +93,10 @@ class ResponseNet(PRM):
         out_dir.mkdir(parents=True, exist_ok=True)
         bind_path, mapped_out_dir = prepare_volume(str(out_dir), work_dir)
         volumes.append(bind_path)
-        
+
         mapped_out_prefix = Path(mapped_out_dir)
         out_file_suffixed = out_dir / f'output_gamma{str(gamma)}.txt'
-        
+
         # Makes the Python command to run within in the container
         command = ['python',
                     'responsenet.py',
@@ -144,9 +144,13 @@ class ResponseNet(PRM):
         @param standardized_pathway_file: the same pathway written in the universal format
         """
 
-        df = pd.read_csv(raw_pathway_file, sep='\t', header=None)
-        df = add_rank_column(df)
-        # Currently directed edges in the input will be converted to undirected edges in the output
-        df = reinsert_direction_col_directed(df)
-        df.to_csv(standardized_pathway_file, header=False, index=False, sep='\t')
+        df = raw_pathway_df(raw_pathway_file, sep='\t', header=None)
+        if not df.empty:
+            df.columns = ['Node1', 'Node2', 'Flow']
+            df = df.drop(columns=['Flow'], axis=1)
+            df = add_rank_column(df)
+            # Currently directed edges in the input will be converted to undirected edges in the output
+            # TODO: do we want this?
+            df = reinsert_direction_col_directed(df)
+        df.to_csv(standardized_pathway_file, header=True, index=False, sep='\t')
 

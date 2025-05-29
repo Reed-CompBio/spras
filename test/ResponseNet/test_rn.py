@@ -49,7 +49,7 @@ class TestResponseNet:
             ResponseNet.run(sources=TEST_DIR / 'input' / 'rn-sources.txt',
                             targets=TEST_DIR / 'input' / 'rn-targets.txt',
                             output_file=OUT_FILE)
-    
+
     # Only run Singularity test if the binary is available on the system
     # spython is only available on Unix, but do not explicitly skip non-Unix platforms
     @pytest.mark.skipif(not shutil.which('singularity'), reason='Singularity not found on system')
