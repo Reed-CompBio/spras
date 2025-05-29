@@ -128,7 +128,7 @@ class Evaluation:
         return label_color_map
 
     @staticmethod
-    def precision_recall_curve_node_ensemble(node_ensembles:dict, node_table:pd.DataFrame, output_png:str):
+    def precision_recall_curve_node_ensemble(node_ensembles:dict, node_table:pd.DataFrame, output_png:str, output_file:str):
         """
         Takes in a node ensemble for specific dataset or specific algorithm in a dataset, and an associated gold standard node table.
         Plots a precision and recall curve for the node ensemble against its associated gold standard node table
@@ -136,6 +136,7 @@ class Evaluation:
         @param node_ensemble: the pre-computed node_ensemble
         @param node_table: the gold standard nodes
         @param output_png: the filename to save the precision and recall curves
+        @param output_file: the filename to save the precision, recall, and threshold values
         """
         gold_standard_nodes = set(node_table['NODEID'])
 
@@ -143,6 +144,8 @@ class Evaluation:
         color_palette = Evaluation.create_palette(label_names)
 
         plt.figure(figsize=(10, 7))
+
+        dfs = []
 
         for label, node_ensemble in node_ensembles.items():
 
@@ -156,10 +159,37 @@ class Evaluation:
                 baseline_precision = np.sum(y_true) / len(y_true)
 
                 plt.plot(recall, precision, color=color_palette[label], marker='o', label=f'{label} PR curve (AP:{avg_precision:.4f})')
-                plt.axhline(y=baseline_precision, color=color_palette[label], linestyle='--', label=f'Baseline: {baseline_precision:.4f}')
+                plt.axhline(y=baseline_precision, color=color_palette[label], linestyle='--', label=f'Baseline Precision: {baseline_precision:.4f}')
+
+                if label == 'ensemble':
+                    df = pd.DataFrame({
+                        'Threshold': thresholds,
+                        'Precision': precision[:-1],
+                        'Recall': recall[:-1],
+                        'Average_Precison': avg_precision,
+                        'Baseline_Precision': baseline_precision
+                    })
+                    dfs.append(df)
+                else:
+                    df = pd.DataFrame({
+                        'Algorithm': [label] * len(thresholds),
+                        'Threshold': thresholds,
+                        'Precision': precision[:-1],
+                        'Recall': recall[:-1],
+                        'Average_Precison': avg_precision,
+                        'Baseline_Precision': baseline_precision
+                    })
+                    dfs.append(df)
 
             else:
                 plt.plot([], [], color=color_palette[label], marker='o', label=f'{label} PR curve - Empty Ensemble')
+
+                if label == 'ensemble':
+                    df = pd.DataFrame(columns=['Threshold', 'Precision', 'Recall', 'Average_Precison', 'Baseline_Precision'])
+                    dfs.append(df)
+                else:
+                    df = pd.DataFrame(columns=['Algorithm', 'Threshold', 'Precision', 'Recall', 'Average_Precison', 'Baseline_Precision'])
+                    dfs.append(df)
 
         plt.xlabel('Recall')
         plt.ylabel('Precision')
@@ -168,3 +198,6 @@ class Evaluation:
         plt.grid(True)
         plt.savefig(output_png, bbox_inches='tight')
         plt.close()
+
+        combined_df = pd.concat(dfs, ignore_index=True)
+        combined_df.to_csv(output_file, index=False, header=True, sep="\t")
