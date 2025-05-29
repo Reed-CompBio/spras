@@ -1,5 +1,6 @@
-import pandas as pd
 from pathlib import Path
+
+import pandas as pd
 
 from spras.containers import prepare_volume, run_container
 from spras.dataset import Dataset
@@ -33,7 +34,7 @@ class ROBUST(PRM):
         seeds = sources_targets[(sources_targets["sources"] == True) | (sources_targets["targets"] == True)]
         seeds = seeds.sort_values(by=[Dataset.NODE_ID], ascending=True, ignore_index=True)
         seeds.to_csv(filename_map['seeds'], index=False, columns=[Dataset.NODE_ID], header=None)
-        
+
         # Create network file
         edges = data.get_interactome()
         edges.to_csv(filename_map["network"], columns=["Interactor1", "Interactor2"], index=False, header=None, sep=' ')
@@ -49,7 +50,7 @@ class ROBUST(PRM):
             raise ValueError("ROBUST doesn't require prizes, but we do not support no prizes yet.")
 
     @staticmethod
-    def run(seeds=None, network=None, scores=None, output_file=None, container_framework="docker"):
+    def run(seeds=None, network=None, scores=None, output_file=None, alpha=None, beta=None, n=None, tau=None, gamma=None, container_framework="docker"):
         """
         Run All Pairs Shortest Paths with Docker
         @param seeds: input seeds with concatenated sources and targets (required)
@@ -57,6 +58,13 @@ class ROBUST(PRM):
         @param scores: input scores from genes (required)
         @param container_framework: choose the container runtime framework, currently supports "docker" or "singularity" (optional)
         @param output_file: path to the output pathway file (required)
+        @param alpha: initial fraction, in range [0, 1]. (optional) default: 0.25
+        @param beta: reduction factor, float, in range [0, 1]. (optional) default: 0.90
+        @param n: number of steiner trees. positive integer (optional) default: 30
+        @param tau: threshold value, positive float. (optional) default: 0.1
+        @param gamma: Hyper-parameter gamma used by bias-aware edge weights.
+            This hyperparameter regulates to what extent the study bias data is being leveraged.
+            float in range [0,1]. (optional) default: 1.00
         """
         if not seeds or not network or not scores or not output_file:
             raise ValueError('Required All Pairs Shortest Paths arguments are missing')
@@ -86,6 +94,18 @@ class ROBUST(PRM):
                    mapped_out_file,
                    '--network', network_file,
                    '--study-bias-scores', scores_file]
+
+        # Add optional arguments
+        if alpha is not None:
+            command.extend(['--alpha', str(alpha)])
+        if beta is not None:
+            command.extend(['--beta', str(beta)])
+        if n is not None:
+            command.extend(['--n', str(n)])
+        if tau is not None:
+            command.extend(['--tau', str(tau)])
+        if gamma is not None:
+            command.extend(['--gamma', str(gamma)])
 
         print('Running ROBUST with arguments: {}'.format(' '.join(command)), flush=True)
 

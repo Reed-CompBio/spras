@@ -43,7 +43,7 @@ class TestGenerateInputs:
             inputs = runner.get_required_inputs(algo)
             filename_map = {input_str: os.path.join("test", "generate-inputs", "output", f"{algo}-{input_str}.txt")
                             for input_str in inputs}
-            
+
             # clean up inputs
             for exp_file_name in exp_file_names:
                 (OUTDIR / f"{algo}-{exp_file_name}.txt").unlink(missing_ok=True)
