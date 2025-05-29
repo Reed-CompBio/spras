@@ -1,4 +1,3 @@
-import warnings
 from pathlib import Path
 
 import pandas as pd
@@ -9,6 +8,7 @@ from spras.interactome import (
     reinsert_direction_col_directed,
 )
 from spras.prm import PRM
+from spras.util import add_rank_column
 
 __all__ = ['ResponseNet']
 
@@ -68,7 +68,6 @@ class ResponseNet(PRM):
         @param gamma: integer representing gamma (optional, default is 10)
         @param container_framework: choose the container runtime framework, currently supports "docker" or "singularity" (optional)
         """
-        print("testing 2")
 
         # ensures that these parameters are required
         if not sources or not targets or not edges or not output_file:
@@ -94,16 +93,18 @@ class ResponseNet(PRM):
         out_dir.mkdir(parents=True, exist_ok=True)
         bind_path, mapped_out_dir = prepare_volume(str(out_dir), work_dir)
         volumes.append(bind_path)
-        mapped_out_prefix = mapped_out_dir + '/out'
-
+        
+        mapped_out_prefix = Path(mapped_out_dir)
+        out_file_suffixed = out_dir / f'output_gamma{str(gamma)}.txt'
+        
         # Makes the Python command to run within in the container
         command = ['python',
                     'responsenet.py',
                     '--edges_file', edges_file,
                     '--sources_file', sources_file,
                     '--targets_file', targets_file,
-                    '--output', mapped_out_prefix,
-                    '--gamma', gamma]
+                    '--output', str(mapped_out_prefix / 'output'),
+                    '--gamma', str(gamma)]
 
         # add optional flags, value can be changed in config/config.yaml
         if _include_st:
@@ -114,9 +115,9 @@ class ResponseNet(PRM):
             command.append('-o')
 
         # choosing to run in docker or singularity container
-        container_suffix = "responsenet"
+        container_suffix = "responsenet:latest"
 
-        #print(container_framework, container_suffix, command, volumes, work_dir, sep="\n")
+        print('Running ResponseNet with arguments: {}'.format(' '.join(command)), flush=True)
 
         # constructs a docker run call
         out = run_container(container_framework,
@@ -126,7 +127,8 @@ class ResponseNet(PRM):
                             work_dir)
         print(out)
 
-    # TODO: Make sure we get an output file and a log file for user inspection, see DOMINO
+        # Rename the primary output file to match the desired output filename
+        out_file_suffixed.rename(output_file)
 
 
     @staticmethod
