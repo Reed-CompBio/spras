@@ -6,7 +6,7 @@ from spras.containers import prepare_volume, run_container
 from spras.dataset import Dataset
 from spras.interactome import convert_directed_to_undirected
 from spras.prm import PRM
-from spras.util import raw_pathway_df, df_nodes_from_networkx_graph, add_rank_column
+from spras.util import add_rank_column, df_nodes_from_networkx_graph, raw_pathway_df
 
 __all__ = ['DIAMOnD']
 
@@ -110,11 +110,11 @@ class DIAMOnD(PRM):
                 if node not in nodes:
                     nodes.append(node)
             G: nx.Graph | nx.DiGraph = original_dataset.interactome_to_networkx_undirected_graph().subgraph(nodes)
+
             # add default rank information
             nx.set_edge_attributes(G, 1, "Rank")
 
             # convert back into a dataframe
-            
             df = df_nodes_from_networkx_graph(G)
             df = add_rank_column(df)
         df.to_csv(standardized_pathway_file, header=True, index=False, sep='\t')

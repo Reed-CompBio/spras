@@ -2,16 +2,20 @@
 Utility functions for pathway reconstruction
 """
 
-import networkx as nx
 import base64
 import hashlib
 import json
 from pathlib import Path, PurePath, PurePosixPath
 from typing import Any, Dict, List, Optional, Tuple, Union
 
+import networkx as nx
 import pandas as pd
 
-from spras.interactome import reinsert_direction_col_undirected, reinsert_direction_col_directed
+from spras.interactome import (
+    reinsert_direction_col_directed,
+    reinsert_direction_col_undirected,
+)
+
 
 def hash_params_sha1_base32(params_dict: Dict[str, Any], length: Optional[int] = None) -> str:
     """
