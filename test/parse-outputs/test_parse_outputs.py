@@ -2,6 +2,7 @@ import filecmp
 from pathlib import Path
 
 from spras import runner
+from spras.dataset import Dataset
 
 INDIR = Path("test", "parse-outputs", "input")
 OUTDIR = Path("test", "parse-outputs", "output")
@@ -12,7 +13,27 @@ DUPLICATE_EDGES_DIR = Path('test', 'parse-outputs', 'input', 'duplicate-edges')
 # the DOMINO output of the network dip.sif and the nodes tnfa_active_genes_file.txt
 # from https://github.com/Shamir-Lab/DOMINO/tree/master/examples
 
-algorithms = ['mincostflow', 'meo', 'omicsintegrator1', 'omicsintegrator2', 'pathlinker', 'allpairs', 'domino', 'diamond']
+# algorithms is a list of implemented algorithms, and their dataset parameter, if any
+algorithms: dict[str, Dataset] = {
+    'mincostflow': None,
+    'meo': None,
+    'omicsintegrator1': None,
+    'omicsintegrator2': None,
+    'pathlinker': None,
+    'allpairs': None,
+    'domino': None,
+    'diamond': Dataset({
+        'label': 'test_dataset',
+        'node_files': ['diamond-dataset-prizes.txt', 'diamond-dataset-sources.txt', 'diamond-dataset-targets.txt'],
+        'edge_files': ['diamond-dataset-network.txt'],
+        'data_dir': INDIR / 'dataset'
+    }),
+}
+
+def get_dataset(algo, dataset: tuple[str, bool]) -> Dataset:
+    return Dataset({
+        'label': 'test_dataset'
+    })
 
 class TestParseOutputs:
     @classmethod
@@ -23,20 +44,20 @@ class TestParseOutputs:
         OUTDIR.mkdir(parents=True, exist_ok=True)
 
     def test_parse_outputs(self):
-        for algo in algorithms:
+        for algo, dataset in algorithms.items():
             test_file = INDIR / f"{algo}-raw-pathway.txt"
             out_file = OUTDIR / f"{algo}-pathway.txt"
             expected_file = EXPDIR / f"{algo}-pathway-expected.txt"
 
-            runner.parse_output(algo, test_file, out_file, relaxed_data_file=True)
+            runner.parse_output(algo, test_file, out_file, data_file=dataset, relaxed_data_file=True)
             assert filecmp.cmp(out_file, expected_file, shallow=False)
 
     def test_empty_file(self):
-        for algo in algorithms:
+        for algo, dataset in algorithms.items():
             test_file = INDIR / f"empty-raw-pathway.txt"
             out_file = OUTDIR / f"{algo}-empty-pathway.txt"
 
-            runner.parse_output(algo, test_file, out_file, relaxed_data_file=True)
+            runner.parse_output(algo, test_file, out_file, data_file=dataset, relaxed_data_file=True)
             assert filecmp.cmp(OUTDIR / f"{algo}-empty-pathway.txt", EXPDIR / f"empty-pathway-expected.txt", shallow=False)
 
     def test_oi2_miss_insolution(self):
@@ -54,9 +75,9 @@ class TestParseOutputs:
         assert filecmp.cmp(out_file, EXPDIR / f"omicsintegrator2-pathway-expected.txt", shallow=False)
 
     def test_duplicate_edges(self):
-        for algo in algorithms:
+        for algo, dataset in algorithms.items():
             test_file = DUPLICATE_EDGES_DIR / f"{algo}-raw-pathway.txt"
             out_file = OUTDIR / f"{algo}-duplicate-pathway.txt"
 
-            runner.parse_output(algo, test_file, out_file, relaxed_data_file=True)
+            runner.parse_output(algo, test_file, out_file, data_file=dataset, relaxed_data_file=True)
             assert filecmp.cmp(OUTDIR / f"{algo}-duplicate-pathway.txt", EXPDIR / f"{algo}-pathway-expected.txt", shallow=False)

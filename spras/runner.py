@@ -73,7 +73,12 @@ def parse_output(algorithm, raw_pathway_file, standardized_pathway_file, data_fi
         algorithm_runner = globals()[algorithm.lower()]
     except KeyError as exc:
         raise NotImplementedError(f'{algorithm} is not currently supported') from exc
-    if not relaxed_data_file and data_file is None:
-        raise ValueError("data_file is None and relaxed_data_file is False - do you want to pass in a data file?")
-    original_dataset = None if data_file is None else Dataset.from_file(data_file)
+    if data_file is None:
+        if not relaxed_data_file:
+            raise ValueError("data_file is None and relaxed_data_file is False - do you want to pass in a data file?")
+        original_dataset = None
+    elif isinstance(data_file, Dataset):
+        original_dataset = data_file
+    else:
+        original_dataset = Dataset.from_file(data_file)
     return algorithm_runner.parse_output(raw_pathway_file, standardized_pathway_file, original_dataset)
