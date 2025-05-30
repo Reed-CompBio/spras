@@ -56,11 +56,11 @@ class ROBUST(PRM):
             node_df = data.request_node_columns(['prize'])
             node_df = node_df.sort_values(by=[Dataset.NODE_ID], ascending=True, ignore_index=True)
             # We incorporate the node prizes by translating them into ROBUST's "study bias scores," or penalties associated
-            # to nodes if they are overstudied. By taking the inverse of these, this deincentivizes ROBUST from exploring nodes
+            # to nodes if they are overstudied. By flipping them from 0-1 and 1-0, this deincentivizes ROBUST from exploring nodes
             # with low prizes, which approximates the idea of incentivizing exploring nodes with positive prizes.
             # See more at "Online bias-aware disease module mining with ROBUST-Web," as the original ROBUST paper
             # did not incorporate study bias scores.
-            node_df = node_df['prize'].map(lambda x: 1 / x if x != 0 else 10)
+            node_df = node_df['prize'].map(lambda x: 1 - x)
             node_df.to_csv(filename_map['scores'], sep=',', index=False, columns=['NODEID', 'prize'], header=['gene_or_protein', 'study_bias_score'])
         else:
             print("[WARNING] No scores provided to ROBUST - scores will be uniform.")
