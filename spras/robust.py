@@ -16,8 +16,11 @@ __all__ = ['ROBUST']
 
 class ROBUST(PRM):
     """
-    ROBUST as a Pathway Reconstruction Algorithm. This tries to connect a set of seed nodes (union of sources targets)
-    with prize-collecting sterner trees. This only takes in undirected input.
+    ROBUST as a Pathway Reconstruction Algorithm. This tries to connect a set of seed nodes (union of sources targets, internally
+    referred to as terminal nodes) with prize-collecting sterner trees. This only takes in undirected input.
+
+    We also use the prizes associated with each node to create a scores file. The 'scores' file is ROBUST's way of handling study bias,
+    but it also provides us a direct way of associating edges with weights, as long as `gamma` is positive.
     """
     required_inputs = ['seeds', 'network', 'scores']
 
@@ -52,14 +55,20 @@ class ROBUST(PRM):
             # NODEID is always included in the node table
             node_df = data.request_node_columns(['prize'])
             node_df = node_df.sort_values(by=[Dataset.NODE_ID], ascending=True, ignore_index=True)
+            # We incorporate the node prizes by translating them into ROBUST's "study bias scores," or penalties associated
+            # to nodes if they are overstudied. By taking the inverse of these, this deincentivizes ROBUST from exploring nodes
+            # with low prizes, which approximates the idea of incentivizing exploring nodes with positive prizes.
+            # See more at "Online bias-aware disease module mining with ROBUST-Web," as the original ROBUST paper
+            # did not incorporate study bias scores.
+            node_df = node_df['prize'].map(lambda x: 1 / x if x != 0 else 10)
             node_df.to_csv(filename_map['scores'], sep=',', index=False, columns=['NODEID', 'prize'], header=['gene_or_protein', 'study_bias_score'])
         else:
-            raise ValueError("ROBUST requires provided prizes.")
+            print("[WARNING] No scores provided to ROBUST - scores will be uniform.")
 
     @staticmethod
     def run(seeds=None, network=None, scores=None, output_file=None, alpha=None, beta=None, n=None, tau=None, gamma=None, container_framework="docker"):
         """
-        Run All Pairs Shortest Paths with Docker
+        Run ROBUST with Docker
         @param seeds: input seeds with concatenated sources and targets (required)
         @param network: input network file (required)
         @param scores: input scores from genes (required)
@@ -70,11 +79,11 @@ class ROBUST(PRM):
         @param n: number of steiner trees. positive integer (optional) default: 30
         @param tau: threshold value, positive float. (optional) default: 0.1
         @param gamma: Hyper-parameter gamma used by bias-aware edge weights.
-            This hyperparameter regulates to what extent the study bias data is being leveraged.
+            This hyperparameter regulates to what extent the study bias data (scores) are being leveraged.
             float in range [0,1]. (optional) default: 1.00
         """
-        if not seeds or not network or not scores or not output_file:
-            raise ValueError('Required All Pairs Shortest Paths arguments are missing')
+        if not seeds or not network or not output_file:
+            raise ValueError('Required ROBUST arguments are missing')
 
         work_dir = '/apsp'
 
@@ -87,9 +96,6 @@ class ROBUST(PRM):
         bind_path, network_file = prepare_volume(network, work_dir)
         volumes.append(bind_path)
 
-        bind_path, scores_file = prepare_volume(scores, work_dir)
-        volumes.append(bind_path)
-
         # Create the parent directories for the output file if needed
         Path(output_file).parent.mkdir(parents=True, exist_ok=True)
         bind_path, mapped_out_file = prepare_volume(output_file, work_dir)
@@ -99,10 +105,15 @@ class ROBUST(PRM):
                    '/ROBUST/robust.py',
                    seeds_file,
                    mapped_out_file,
-                   '--network', network_file,
-                   '--study-bias-scores', scores_file]
+                   '--network', network_file]
 
         # Add optional arguments
+        if scores is not None:
+            bind_path, scores_file = prepare_volume(scores, work_dir)
+            volumes.append(bind_path)
+            command.extend(['--study-bias-scores', scores_file])
+        else:
+            command.extend(['--study-bias-scores', 'NONE'])
         if alpha is not None:
             command.extend(['--alpha', str(alpha)])
         if beta is not None:

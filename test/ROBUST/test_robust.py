@@ -16,12 +16,25 @@ class TestROBUST:
     def test_robust_required(self):
         OUT_FILE.unlink(missing_ok=True)
         ROBUST.run(network=TEST_DIR / 'input' / 'robust-network.txt',
+                   seeds=TEST_DIR / 'input' / 'robust-seeds.txt',
+                   output_file=OUT_FILE)
+        assert OUT_FILE.exists()
+
+        assert "A" in OUT_FILE.read_text()
+        assert "Z" in OUT_FILE.read_text()
+    
+    def test_robust_scores(self):
+        OUT_FILE.unlink(missing_ok=True)
+        ROBUST.run(network=TEST_DIR / 'input' / 'robust-network.txt',
                    scores=TEST_DIR / 'input' / 'robust-scores.txt',
                    seeds=TEST_DIR / 'input' / 'robust-seeds.txt',
                    output_file=OUT_FILE)
         assert OUT_FILE.exists()
 
-        assert "B" in (TEST_DIR / 'expected' / 'robust-edges-required.txt').read_text()
+        # Unfortunately, despite repeated tests indicating that ROBUST is more likely
+        # to traverse the non-penalized edges, we still can't guarantee that ROBUST won't explore them.
+        assert "A" in OUT_FILE.read_text()
+        assert "Z" in OUT_FILE.read_text()
 
     def test_robust_optional(self):
         OUT_FILE.unlink(missing_ok=True)
@@ -40,9 +53,8 @@ class TestROBUST:
     def test_robust_missing(self):
         # Test the expected error is raised when required arguments are missing
         with pytest.raises(ValueError):
-            # No scores
+            # No seeds
             ROBUST.run(network=TEST_DIR / 'input' / 'robust-network.txt',
-                   seeds=TEST_DIR / 'input' / 'robust-seeds.txt',
                    output_file=OUT_FILE)
 
 
@@ -52,7 +64,6 @@ class TestROBUST:
     def test_robust_singularity(self):
         OUT_FILE.unlink(missing_ok=True)
         ROBUST.run(network=TEST_DIR / 'input' / 'robust-network.txt',
-                   scores=TEST_DIR / 'input' / 'robust-scores.txt',
                    seeds=TEST_DIR / 'input' / 'robust-seeds.txt',
                    container_framework='singularity',
                    output_file=OUT_FILE)
