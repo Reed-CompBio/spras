@@ -1,7 +1,7 @@
-NODEID	prize	active
+NODEID	prize	active	dummy
 A	1	true	true
-B	1	true	true
-C	1	true	true
-D	1	true	true
-E	1	true	true
-F	1	true	true
+B	1	true
+C	1	true
+D	1	true
+E	1	true
+F	1	true

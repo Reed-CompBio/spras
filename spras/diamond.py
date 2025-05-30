@@ -100,18 +100,21 @@ class DIAMOnD(PRM):
         if not df.empty:
             # preprocessing - drop [useful] p_hyper information, and rename columns to Rank and Node
             df = df.drop(columns=["p_hyper"])
-            print(df)
             df.columns = ["Rank", "Node"]
 
             # TODO: we throw away rank information - we want this.
-            # get induced subgraph of nodes
-            nodes = df["Node"]
+            # get induced subgraph of nodes, handling duplicates
+            nodes_unprocessed = list(set(df["Node"].tolist()))
+            nodes: list[str] = []
+            for node in nodes_unprocessed:
+                if node not in nodes:
+                    nodes.append(node)
             G: nx.Graph | nx.DiGraph = original_dataset.interactome_to_networkx_undirected_graph().subgraph(nodes)
-
             # add default rank information
-            nx.set_edge_attributes(G, 1, "rank")
+            nx.set_edge_attributes(G, 1, "Rank")
 
             # convert back into a dataframe
+            
             df = df_nodes_from_networkx_graph(G)
             df = add_rank_column(df)
         df.to_csv(standardized_pathway_file, header=True, index=False, sep='\t')

@@ -122,9 +122,12 @@ class Dataset:
             # will be ignored
             # TODO may want to warn about duplicate before removing them, for instance, if a user loads two files that
             #  both have prizes
-            self.node_table = self.node_table.merge(
-                single_node_table, how="left", on=self.NODE_ID, suffixes=(None, "_DROP")
-            ).filter(regex="^(?!.*DROP)")
+            try:
+                self.node_table = self.node_table.merge(
+                    single_node_table, how="left", on=self.NODE_ID, suffixes=(None, "_DROP")
+                ).filter(regex="^(?!.*DROP)")
+            except ValueError as error:
+                raise ValueError(f"An error occured when trying to merge {node_file} with the rest of the node files.") from error
         # Ensure that the NODEID column always appears first, which is required for some downstream analyses
         self.node_table.insert(0, "NODEID", self.node_table.pop("NODEID"))
         self.other_files = dataset_dict["other_files"]
@@ -172,14 +175,19 @@ class Dataset:
     def get_interactome(self):
         return self.interactome.copy(deep = True)
 
-    def interactome_to_networkx_undirected_graph(self):
+    def interactome_to_networkx_undirected_graph(self, weight=False):
         """
         Converts the interactome in a dataset into a networkx undirected graph in SPRAS's output format (Node1, Node2, ..)
         NOTE: This preserves weight information.
+
+        @params weight: whether to add weight as information to the graph
         """
         # TODO: another function with more detailed data (e.g. what are the source & target nodes,
         # what are the scores associated with the vertices?)
         G = networkx.Graph()
         for _index, row in self.interactome.iterrows():
-            G.add_edge(row['Node1'], row['Node2'], weight=row['Weight'])
+            if weight:
+                G.add_edge(row['Interactor1'], row['Interactor2'], weight=row['Weight'])
+            else:
+                G.add_edge(row['Interactor1'], row['Interactor2'])
         return G
