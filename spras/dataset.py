@@ -174,11 +174,12 @@ class Dataset:
 
     def interactome_to_networkx_undirected_graph(self):
         """
-        Converts the interactome in a dataset into a networkx undirected graph
+        Converts the interactome in a dataset into a networkx undirected graph in SPRAS's output format (Node1, Node2, ..)
+        NOTE: This preserves weight information.
         """
         # TODO: another function with more detailed data (e.g. what are the source & target nodes,
         # what are the scores associated with the vertices?)
         G = networkx.Graph()
         for _index, row in self.interactome.iterrows():
-            G.add_edge(row['Interactor1'], row['Interactor2'], weight=row['Weight'])
+            G.add_edge(row['Node1'], row['Node2'], weight=row['Weight'])
         return G

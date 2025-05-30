@@ -4,9 +4,9 @@ import networkx as nx
 
 from spras.containers import prepare_volume, run_container
 from spras.dataset import Dataset
-from spras.interactome import convert_directed_to_undirected, from_networkx_graph
+from spras.interactome import convert_directed_to_undirected
 from spras.prm import PRM
-from spras.util import add_rank_column, duplicate_edges, raw_pathway_df
+from spras.util import raw_pathway_df, df_nodes_from_networkx_graph, add_rank_column
 
 __all__ = ['DIAMOnD']
 
@@ -96,7 +96,22 @@ class DIAMOnD(PRM):
 
     @staticmethod
     def parse_output(raw_pathway_file, standardized_pathway_file, original_dataset: Dataset):
-        vertices = Path(raw_pathway_file).read_text().splitlines()
-        G = nx.induced_subgraph(original_dataset.to_networkx_undirected_graph(), vertices)
-        df = from_networkx_graph(G)
+        df = raw_pathway_df(raw_pathway_file, sep='\t', header=0)
+        if not df.empty:
+            # preprocessing - drop [useful] p_hyper information, and rename columns to Rank and Node
+            df = df.drop(columns=["p_hyper"])
+            print(df)
+            df.columns = ["Rank", "Node"]
+
+            # TODO: we throw away rank information - we want this.
+            # get induced subgraph of nodes
+            nodes = df["Node"]
+            G: nx.Graph | nx.DiGraph = original_dataset.interactome_to_networkx_undirected_graph().subgraph(nodes)
+
+            # add default rank information
+            nx.set_edge_attributes(G, 1, "rank")
+
+            # convert back into a dataframe
+            df = df_nodes_from_networkx_graph(G)
+            df = add_rank_column(df)
         df.to_csv(standardized_pathway_file, header=True, index=False, sep='\t')

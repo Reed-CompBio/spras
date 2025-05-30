@@ -14,7 +14,6 @@ DUPLICATE_EDGES_DIR = Path('test', 'parse-outputs', 'input', 'duplicate-edges')
 
 algorithms = ['mincostflow', 'meo', 'omicsintegrator1', 'omicsintegrator2', 'pathlinker', 'allpairs', 'domino', 'diamond']
 
-
 class TestParseOutputs:
     @classmethod
     def setup_class(cls):

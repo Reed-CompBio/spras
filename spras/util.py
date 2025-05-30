@@ -2,6 +2,7 @@
 Utility functions for pathway reconstruction
 """
 
+import networkx as nx
 import base64
 import hashlib
 import json
@@ -10,6 +11,7 @@ from typing import Any, Dict, List, Optional, Tuple, Union
 
 import pandas as pd
 
+from spras.interactome import reinsert_direction_col_undirected, reinsert_direction_col_directed
 
 def hash_params_sha1_base32(params_dict: Dict[str, Any], length: Optional[int] = None) -> str:
     """
@@ -75,6 +77,21 @@ def raw_pathway_df(raw_pathway_file: str, sep: str = '\t', header: int = None) -
     except pd.errors.EmptyDataError:  # read an empty file
         df = pd.DataFrame(columns=['Node1', 'Node2', 'Rank', 'Direction'])
 
+    return df
+
+def df_nodes_from_networkx_graph(graph: nx.Graph | nx.DiGraph) -> pd.DataFrame:
+    """
+    Converts a networkx graph/digraph into a pandas DataFrame in SPRAS output format.
+    Requires that each edge is associated with some ranking.
+    """
+    df: pd.DataFrame = nx.to_pandas_edgelist(graph)
+    df = df[['Node1', 'Node2', 'Rank']]
+    if isinstance(graph, nx.Graph):
+        reinsert_direction_col_undirected(df)
+    elif isinstance(graph, nx.digraph):
+        reinsert_direction_col_directed(df)
+    else:
+        raise TypeError(f"Provided graph is not a nx.Graph or nx.DiGraph! It is of type {type(graph)}. Graph: {graph}")
     return df
 
 
