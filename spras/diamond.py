@@ -1,12 +1,9 @@
-import warnings
 from pathlib import Path
+import networkx as nx
 
 from spras.containers import prepare_volume, run_container
 from spras.dataset import Dataset
-from spras.interactome import (
-    convert_directed_to_undirected,
-    reinsert_direction_col_undirected,
-)
+from spras.interactome import convert_directed_to_undirected, from_networkx_graph
 from spras.prm import PRM
 from spras.util import add_rank_column, duplicate_edges, raw_pathway_df
 
@@ -97,9 +94,15 @@ class DIAMOnD(PRM):
         print(out)
 
     @staticmethod
-    def parse_output(raw_pathway_file, standardized_pathway_file):
-        df = raw_pathway_df(raw_pathway_file, sep='\t', header=["#rank", "DIAMOnD_node", "p_hyper"])
-        df.drop(columns=["p_hyper"])
-        df.columns = ["Rank", "Node"]
+    def parse_output(raw_pathway_file, standardized_pathway_file, original_dataset: Dataset):
+        vertices = Path(standardized_pathway_file).read_text().splitlines()
+
+        df = raw_pathway_df(raw_pathway_file, sep='\t', header=0)
+        if not df.empty:
+            df.drop(columns=["p_hyper"])
+            df.columns = ["Rank", "Node"]
+            G = nx.induced_subgraph(original_dataset.to_networkx_undirected_graph(), vertices)
+            df = from_networkx_graph(G)
+        df.to_csv(standardized_pathway_file, header=True, index=False, sep='\t')
         # TODO: actually output to standardized_pathway_file, get induced subgraph (modify workflow
         # to see original inputs?)

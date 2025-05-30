@@ -4,7 +4,7 @@ Author: Neha Talluri
 
 Methods for converting from the universal network input format and to the universal network output format
 """
-
+import networkx as nx
 import pandas as pd
 
 
@@ -131,4 +131,17 @@ def reinsert_direction_col_directed(df: pd.DataFrame) -> pd.DataFrame:
     """
     df.insert(df.shape[1], "Direction", "D")
 
+    return df
+
+def from_networkx_graph(graph: nx.Graph | nx.DiGraph) -> pd.DataFrame:
+    if isinstance(graph, nx.Graph):
+        df: pd.DataFrame = nx.to_pandas_edgelist(graph)
+        df.columns = ['Interactor1', 'Interactor2', 'Weight']
+        reinsert_direction_col_undirected(df)
+    elif isinstance(graph, nx.digraph):
+        df: pd.DataFrame = nx.to_pandas_edgelist(graph)
+        df.columns = ['Interactor1', 'Interactor2', 'Weight']
+        reinsert_direction_col_directed(df)
+    else:
+        raise TypeError(f"Provided graph is not a nx.Graph or nx.DiGraph! It is of type {type(graph)}. Graph: {graph}")
     return df
