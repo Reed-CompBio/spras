@@ -14,13 +14,22 @@ OUT_FILE = TEST_DIR / 'output' / 'diamond-output.txt'
 
 
 class TestDIAMOnD:
+    # `medium` is the "medium-sized" DIAMOnD-provided dataset
+    def test_diamond_medium(self):
+        OUT_FILE.unlink(missing_ok=True)
+        DIAMOnD.run(
+            network=TEST_DIR / 'input' / 'diamond-medium-network.txt',
+            seeds=TEST_DIR / 'input' / 'diamond-medium-seeds.txt',
+            output_file=OUT_FILE)
+        assert OUT_FILE.exists()
 
     def test_diamond_required(self):
         OUT_FILE.unlink(missing_ok=True)
         DIAMOnD.run(
             network=TEST_DIR / 'input' / 'diamond-network.txt',
             seeds=TEST_DIR / 'input' / 'diamond-seeds.txt',
-            output_file=OUT_FILE)
+            output_file=OUT_FILE,
+            n=2)
         assert OUT_FILE.exists()
 
     def test_diamond_optional(self):
@@ -29,14 +38,15 @@ class TestDIAMOnD:
             network=TEST_DIR / 'input' / 'diamond-network.txt',
             seeds=TEST_DIR / 'input' / 'diamond-seeds.txt',
             alpha=0,
-            output_file=OUT_FILE)
+            output_file=OUT_FILE,
+            n=2)
         assert OUT_FILE.exists()
 
     def test_DIAMOnD_missing_seeds(self):
         with pytest.raises(ValueError):
             # No seeds
             DIAMOnD.run(
-                network=TEST_DIR+'input/domino-network.txt',
+                network=TEST_DIR / 'input' / 'diamond-network.txt',
                 output_file=OUT_FILE)
 
     def test_domino_missing_network(self):
@@ -55,5 +65,6 @@ class TestDIAMOnD:
         DIAMOnD.run(
             network=TEST_DIR / 'input' / 'diamond-network.txt',
             seeds=TEST_DIR / 'input' / 'diamond-seeds.txt',
-            output_file=OUT_FILE)
+            output_file=OUT_FILE,
+            n=2)
         assert OUT_FILE.exists()

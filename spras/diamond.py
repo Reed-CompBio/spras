@@ -14,6 +14,11 @@ __all__ = ['DIAMOnD']
 
 
 class DIAMOnD(PRM):
+    """
+    DIAMOnD (https://doi.org/10.1371/journal.pcbi.1004120) is a disease module detection algorithm,
+    which has been modified here, using sources and targets as seeds, to act as a pathway reconstruction algorithm.
+    It does not account for node scores, and takes in undirected graphs as input.
+    """
     required_inputs = ['seeds', 'network']
 
     @staticmethod
@@ -38,7 +43,7 @@ class DIAMOnD(PRM):
         # Create network file
         edges_df = data.get_interactome()
         edges_df = convert_directed_to_undirected(edges_df)
-        edges_df.to_csv(filename_map["network"], columns=["Interactor1", "Interactor2"], index=False, header=None, sep='\t')
+        edges_df.to_csv(filename_map["network"], columns=["Interactor1", "Interactor2"], index=False, header=None, sep=',')
 
     @staticmethod
     def run(seeds=None, network=None, output_file=None, n=200, alpha=1, container_framework="docker"):
@@ -53,6 +58,8 @@ class DIAMOnD(PRM):
         """
         if not seeds or not network or not output_file:
             raise ValueError('DIAMOnD arguments are missing')
+
+        # TODO we should dynamically calculate n.
 
         work_dir = '/apsp'
 
@@ -72,8 +79,8 @@ class DIAMOnD(PRM):
 
         command = ['python',
                    '/DIAMOnD.py',
-                   seeds_file,
                    network_file,
+                   seeds_file,
                    str(n),
                    str(alpha),
                    mapped_out_file]
@@ -91,4 +98,8 @@ class DIAMOnD(PRM):
 
     @staticmethod
     def parse_output(raw_pathway_file, standardized_pathway_file):
-        pass # TODO
+        df = raw_pathway_df(raw_pathway_file, sep='\t', header=["#rank", "DIAMOnD_node", "p_hyper"])
+        df.drop(columns=["p_hyper"])
+        df.columns = ["Rank", "Node"]
+        # TODO: actually output to standardized_pathway_file, get induced subgraph (modify workflow
+        # to see original inputs?)
