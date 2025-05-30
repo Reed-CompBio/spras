@@ -85,6 +85,10 @@ algorithms:
                   flow: [1] # The flow must be an int
                   capacity: [1]
 
+      - name: "robust"
+        params:
+              include: true
+
       - name: "allpairs"
         params:
               include: true
