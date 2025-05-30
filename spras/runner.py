@@ -60,16 +60,20 @@ def prepare_inputs(algorithm, data_file, filename_map):
     return algorithm_runner.generate_inputs(dataset, filename_map)
 
 
-def parse_output(algorithm, raw_pathway_file, standardized_pathway_file, data_file = None):
+def parse_output(algorithm, raw_pathway_file, standardized_pathway_file, data_file=None, relaxed_data_file=False):
     """
     Convert a predicted pathway into the universal format
     @param algorithm: algorithm name
     @param raw_pathway_file: pathway file produced by an algorithm's run function
     @param standardized_pathway_file: the same pathway written in the universal format
+    @param data_file: path to the original dataset file used in the prepare_inputs call preceeding this.
+    @param relaxed_data_file: allows data_file to be None - useful for testing.
     """
     try:
         algorithm_runner = globals()[algorithm.lower()]
     except KeyError as exc:
         raise NotImplementedError(f'{algorithm} is not currently supported') from exc
-    original_dataset = Dataset.from_file(data_file)
+    if not relaxed_data_file and data_file is None:
+        raise ValueError("data_file is None and relaxed_data_file is False - do you want to pass in a data file?")
+    original_dataset = None if data_file is None else Dataset.from_file(data_file)
     return algorithm_runner.parse_output(raw_pathway_file, standardized_pathway_file, original_dataset)

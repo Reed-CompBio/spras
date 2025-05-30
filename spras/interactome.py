@@ -134,13 +134,11 @@ def reinsert_direction_col_directed(df: pd.DataFrame) -> pd.DataFrame:
     return df
 
 def from_networkx_graph(graph: nx.Graph | nx.DiGraph) -> pd.DataFrame:
+    df: pd.DataFrame = nx.to_pandas_edgelist(graph)
+    df.columns = ['Interactor1', 'Interactor2', 'Weight']
     if isinstance(graph, nx.Graph):
-        df: pd.DataFrame = nx.to_pandas_edgelist(graph)
-        df.columns = ['Interactor1', 'Interactor2', 'Weight']
         reinsert_direction_col_undirected(df)
     elif isinstance(graph, nx.digraph):
-        df: pd.DataFrame = nx.to_pandas_edgelist(graph)
-        df.columns = ['Interactor1', 'Interactor2', 'Weight']
         reinsert_direction_col_directed(df)
     else:
         raise TypeError(f"Provided graph is not a nx.Graph or nx.DiGraph! It is of type {type(graph)}. Graph: {graph}")

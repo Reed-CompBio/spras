@@ -1,4 +1,5 @@
 from pathlib import Path
+
 import networkx as nx
 
 from spras.containers import prepare_volume, run_container
@@ -28,7 +29,7 @@ class DIAMOnD(PRM):
         for input_type in DIAMOnD.required_inputs:
             if input_type not in filename_map:
                 raise ValueError("{input_type} filename is missing")
-    
+
         # Create seeds file - we set the seeds as the sources and targets
         sources_targets = data.request_node_columns(["sources", "targets"])
         if sources_targets is None:
@@ -95,14 +96,7 @@ class DIAMOnD(PRM):
 
     @staticmethod
     def parse_output(raw_pathway_file, standardized_pathway_file, original_dataset: Dataset):
-        vertices = Path(standardized_pathway_file).read_text().splitlines()
-
-        df = raw_pathway_df(raw_pathway_file, sep='\t', header=0)
-        if not df.empty:
-            df.drop(columns=["p_hyper"])
-            df.columns = ["Rank", "Node"]
-            G = nx.induced_subgraph(original_dataset.to_networkx_undirected_graph(), vertices)
-            df = from_networkx_graph(G)
+        vertices = Path(raw_pathway_file).read_text().splitlines()
+        G = nx.induced_subgraph(original_dataset.to_networkx_undirected_graph(), vertices)
+        df = from_networkx_graph(G)
         df.to_csv(standardized_pathway_file, header=True, index=False, sep='\t')
-        # TODO: actually output to standardized_pathway_file, get induced subgraph (modify workflow
-        # to see original inputs?)
