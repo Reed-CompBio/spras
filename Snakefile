@@ -106,7 +106,10 @@ def make_final_input(wildcards):
         final_input.extend(expand('{out_dir}{sep}{dataset}-ml{sep}{algorithm}-hac-clusters-horizontal.txt',out_dir=out_dir,sep=SEP,dataset=dataset_labels,algorithm=algorithms_mult_param_combos))
         final_input.extend(expand('{out_dir}{sep}{dataset}-ml{sep}{algorithm}-ensemble-pathway.txt',out_dir=out_dir,sep=SEP,dataset=dataset_labels,algorithm=algorithms))
         #TODO: add algo similarity outputs per algo
-
+        # figure out if algorithms_mult_param_combos or algorithms
+        final_input.extend(expand('{out_dir}{sep}{dataset}-ml{sep}{algorithm}-jaccard-matrix.txt',out_dir=out_dir,sep=SEP,dataset=dataset_labels,algorithm=algorithms_mult_param_combos))
+        final_input.extend(expand('{out_dir}{sep}{dataset}-ml{sep}{algorithm}-jaccard-heatmap.png',out_dir=out_dir,sep=SEP,dataset=dataset_labels,algorithm=algorithms_mult_param_combos))
+    
     if _config.config.analysis_include_evaluation:
         final_input.extend(expand('{out_dir}{sep}{dataset_gold_standard_pair}-evaluation.txt',out_dir=out_dir,sep=SEP,dataset_gold_standard_pair=dataset_gold_standard_pairs,algorithm_params=algorithms_with_params))
     
@@ -375,6 +378,16 @@ rule ensemble_per_algo:
     run:
         summary_df = ml.summarize_networks(input.pathways)
         ml.ensemble_network(summary_df, output.ensemble_network_file)
+
+rule algorithm_similarity_eval_per_algo:
+    input:
+         pathways = collect_pathways_per_algo
+    output:
+        algo_similarity_matrix = SEP.join([out_dir, '{dataset}-ml', '{algorithm}-jaccard-matrix.txt']),
+        algo_similarity_heatmap = SEP.join([out_dir, '{dataset}-ml', '{algorithm}-jaccard-heatmap.png'])
+    run:
+        summary_df = ml.summarize_networks(input.pathways)
+        ml.jaccard_similarity_eval(summary_df, output.algo_similarity_matrix, output.algo_similarity_heatmap)
 
 # Return the gold standard pickle file for a specific gold standard
 def get_gold_standard_pickle_file(wildcards):

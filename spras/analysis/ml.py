@@ -359,6 +359,9 @@ def jaccard_similarity_eval(summary_df: pd.DataFrame, output_file: str, output_p
     @param output_file: the filename to save the ensemble network
     @param output_png: the file name to save the heatmap image
     """
+    # TODO: do a bunch of testing, such as validate_df(dataframe)
+    # decide if we do algorithm = algorithms_mult_param_combos or algorithms
+
     algorithms = summary_df.columns
     jaccard_matrix = pd.DataFrame(np.identity(len(algorithms)), index=algorithms, columns=algorithms)
     for i, alg1 in enumerate(algorithms):
