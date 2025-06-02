@@ -194,7 +194,7 @@ class DOMINO(PRM):
                     module_df = pd.DataFrame(entries)
                     try:
                         module_df = module_df.loc[:, ['source', 'target']].dropna()
-                    except KeyError as err:
+                    except KeyError:
                         module_df = pd.DataFrame()
                     # Add the edges from this module to the cumulative pathway edges
                     edges_df = pd.concat([edges_df, module_df], axis=0)
