@@ -241,10 +241,17 @@ class Config:
                 param_name_tuple = tuple(param_name_list)
                 for r in run_list_tuples:
                     run_dict = dict(zip(param_name_tuple, r, strict=True))
-                    # TODO: Workaround for yaml.safe_dump in Snakefile write_parameter_log and hash_params_sha1_base32
+                    # TODO: Workaround for yaml.safe_dump in Snakefile write_parameter_log.
+                    # We would like to preserve np info for larger floats and integers on the config,
+                    # but this isn't strictly necessary for the pretty yaml logging that's happening - if we
+                    # want to preserve the precision, we need to output this into yaml as strings.
                     for param, value in run_dict.copy().items():
-                        if isinstance(value, np.float64):
+                        if isinstance(value, np.integer):
+                            run_dict[param] = int(value)
+                        if isinstance(value, np.floating):
                             run_dict[param] = float(value)
+                        if isinstance(value, np.ndarray):
+                            run_dict[param] = value.tolist()
                     params_hash = hash_params_sha1_base32(run_dict, self.hash_length, cls=NpEncoder)
                     if params_hash in prior_params_hashes:
                         raise ValueError(f'Parameter hash collision detected. Increase the hash_length in the config file '
