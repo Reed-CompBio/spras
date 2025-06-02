@@ -142,6 +142,8 @@ and your editor's interpreter is set to using the SPRAS environment over the bas
 Note the behaviors of the `request_node_columns` function when there are missing values in that column of the node table and when multiple columns are requested.
 `request_node_columns` always returns the `NODEID` column in addition to the requested columns.
 
+Note: If you encounter a `'property' object is not iterable` error arising from inside the Snakefile, this means that `required_inputs` is not set. This is because when `required_inputs` is not set inside an algorithm wrapper, it falls back to the underlying unimplemented function inside the PRM base class, which, while it is marked as a property function, is non-static; therefore, when the runner utility class tries to dynamically fetch `required_inputs` with reflection, it ends up grabbing the `property` function instead of the underlying error, and tries to iterate over it (since `required_inputs` is usually a list.)
+
 Now implement the `generate_inputs` function.
 Start by inspecting the `omicsintegrator1.py` example, but note the differences in the expected file formats generated for the two algorithms with respect to the header rows and node prize column.
 The selected nodes should be any node in the dataset that has a prize set, any node that is active, any node that is a source, or any node that is a target.
