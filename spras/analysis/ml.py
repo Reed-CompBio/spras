@@ -371,7 +371,7 @@ def jaccard_similarity_eval(summary_df: pd.DataFrame, output_file: str, output_p
     # make a heatmap from the jaccard matrix
     fig, ax = plt.subplots(figsize=(10, 7))
     cax = ax.imshow(jaccard_matrix.values, interpolation='nearest', cmap='viridis', vmin=0, vmax=1)
-    ax.set_title("Jaccard similarity heatmap")
+    ax.set_title("Jaccard Similarity Heatmap")
     # set tick labels with algorithm names
     ax.set_xticks(np.arange(len(algorithms)))
     ax.set_yticks(np.arange(len(algorithms)))

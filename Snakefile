@@ -330,7 +330,7 @@ rule algorithm_similarity_eval:
         algo_similarity_heatmap = SEP.join([out_dir, '{dataset}-ml', 'jaccard-heatmap.png'])
     run:
         summary_df = ml.summarize_networks(input.pathways)
-        jaccard = ml.jaccard_similarity_eval(summary_df, output.algo_similarity_matrix, output.algo_similarity_heatmap)
+        ml.jaccard_similarity_eval(summary_df, output.algo_similarity_matrix, output.algo_similarity_heatmap)
 
 
 # Ensemble the output pathways for each dataset
