@@ -205,7 +205,7 @@ Modify generate inputs:
 Modify parse outputs:
 1. Obtain the raw-pathway output (e.g. from the run function in your wrapper by running the Snakemake workflow) and save it to `test/parse-outputs/input`. Name it as `{algorithm_name}-raw-pathway.txt`.
 2. Obtain the expected universal output from the workflow, manually confirm it is correct, and save it to `test/parse-outputs/expected` directory. Name it as `{algorithm_name}-pathway-expected.txt`.
-3. Add an `{algorithm-name}-empty-raw-pathway.txt` file inside `test/parse-outputs/input/empty` containing an output file with no useful graph output, with any decorating information (e.g. headers)
+3. Add an `{algorithm-name}-empty-raw-pathway.txt` file inside `test/parse-outputs/input/empty` containing an output file associated with an empty subnetwork, still including any decorating information (e.g. headers)
 4. Add the new algorithm's name to the algorithms list in `test/parse-outputs/test_parse_outputs.py`.
 
 ### Step 6: Update documentation
