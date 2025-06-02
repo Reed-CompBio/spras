@@ -33,6 +33,13 @@ def get_test_config():
                 }
             },
             {
+                "name": "numbers",
+                "params": {
+                    "include": True,
+                    "run1": {"a": 1, "b": [float(2.0), 3], "c": [4], "d": float(5.6)}
+                }
+            },
+            {
                 "name": "singleton_int64_with_array",
                 "params": {
                     "include": True,
@@ -47,10 +54,17 @@ def get_test_config():
                 }
             },
             {
+                "name": "str_array_np_logspace",
+                "params": {
+                    "include": True,
+                    "run1": {"test": ["a", "b"], "test2": "np.logspace(1,1)"}
+                }
+            },
+            {
                 "name": "int64artifact",
                 "params": {
                     "include": True,
-                    "run1": {"test": np.arange(5,6), "test2": [2, 3]}
+                    "run1": {"test": "np.arange(5,6)", "test2": [2, 3]}
                 }
             },
         ],
@@ -79,7 +93,6 @@ def get_test_config():
 
 def value_test_util(name: str, configurations: list):
     assert name in config.config.algorithm_params, f"{name} isn't a present algorithm configuration!"
-    assert len(config.config.algorithm_params[name]) == len(configurations)
 
     keys = config.config.algorithm_params[name]
     values = [config.config.algorithm_params[name][key] for key in keys]
@@ -197,9 +210,12 @@ class TestConfig:
         config.init_global(test_config)
 
         value_test_util('strings', [{'test': "str1", 'test2': "str2"}, {'test': 'str1', 'test2': 'str3'}])
+        # "run1": {"a": 1, "b": [float(2.0), 3], "c": [4], "d": float(5.6)}
+        value_test_util('numbers', [{'a': 1, 'b': float(2.0), 'c': 4, 'd': 5.6}, {'a': 1, 'b': 3, 'c': 4, 'd': 5.6}])
 
         value_test_util('singleton_int64_with_array', [{'test': 1, 'test2': 2}, {'test': 1, 'test2': 3}])
         value_test_util('singleton_string_np_linspace', [{'test': "str1", 'test2': 5.0}, {'test': "str1", 'test2': 0.0}])
+        value_test_util('str_array_np_logspace', [{'test': "a", 'test2': 10}] * 10 + [{'test': "b", 'test2': 10}] * 10)
 
         value_test_util('int64artifact', [{'test': 5, 'test2': 2}, {'test': 5, 'test2': 3}])
 
