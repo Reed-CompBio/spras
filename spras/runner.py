@@ -1,5 +1,3 @@
-from collections.abc import Iterable
-
 # supported algorithm imports
 from spras.allpairs import AllPairs as allpairs
 from spras.dataset import Dataset
@@ -32,10 +30,7 @@ def get_required_inputs(algorithm):
         algorithm_runner = globals()[algorithm.lower()]
     except KeyError as exc:
         raise NotImplementedError(f'{algorithm} is not currently supported') from exc
-    if isinstance(algorithm_runner.required_inputs, Iterable):
-        return algorithm_runner.required_inputs
-    else:
-        raise TypeError(f"{algorithm}'s `required_inputs` property is not iterable - was `required_inputs` set?")
+    return algorithm_runner.required_inputs
 
 
 def merge_input(dataset_dict, dataset_file):

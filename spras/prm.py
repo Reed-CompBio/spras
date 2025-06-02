@@ -17,16 +17,16 @@ class PRM(ABC):
     @property
     @abstractmethod
     def required_inputs(self):
-        raise NotImplementedError
+        return NotImplementedError
 
     @abstractmethod
     def generate_inputs(self):
-        raise NotImplementedError
+        return NotImplementedError
 
     @abstractmethod
     def run(self):
-        raise NotImplementedError
+        return NotImplementedError
 
     @abstractmethod
     def parse_output(self):
-        raise NotImplementedError
+        return NotImplementedError
