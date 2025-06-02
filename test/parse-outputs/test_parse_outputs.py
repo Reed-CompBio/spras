@@ -1,4 +1,5 @@
 import filecmp
+from glob import glob
 from pathlib import Path
 
 import pytest
@@ -65,8 +66,10 @@ class TestParseOutputs:
 
     def test_empty_raw_pathway(self):
         for algo in algorithms:
-            test_file = INDIR / "empty" / f"{algo}-empty-raw-pathway.txt"
-            out_file = OUTDIR / f"{algo}-empty-raw-pathway-output.txt"
+            files = glob(str(INDIR / "empty" / f"{algo}-empty-raw-pathway*"))
+            assert len(files) >= 1, "can't test on no empty raw pathways!"
+            for test_file in glob(str(INDIR / "empty" / f"{algo}-empty-raw-pathway*")):
+                out_file = OUTDIR / f"{algo}-empty-raw-pathway-output.txt"
 
-            runner.parse_output(algo, test_file, out_file)
-            assert filecmp.cmp(out_file, EXPDIR / f"empty-pathway-expected.txt", shallow=False)
+                runner.parse_output(algo, test_file, out_file)
+                assert filecmp.cmp(out_file, EXPDIR / f"empty-pathway-expected.txt", shallow=False)
