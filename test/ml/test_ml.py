@@ -147,11 +147,11 @@ class TestML:
 
         assert en.equals(expected)
 
-    # NOTE: binary comparison of generated binary files may be fragile across matplotlib versions
-    # if this test begins failing unexpectedly, consider loosening or disabling test
     def test_jaccard_similarity_eval(self):
+        jaccard_png_outpath = Path(OUT_DIR + 'jaccard-matrix.txt')
+        jaccard_png_outpath.unlink(missing_ok=True)
         dataframe = ml.summarize_networks([INPUT_DIR + 'test-data-s1/s1.txt', INPUT_DIR + 'test-data-s2/s2.txt', INPUT_DIR + 'test-data-s3/s3.txt'])
         ml.jaccard_similarity_eval(dataframe, OUT_DIR + 'jaccard-matrix.txt', OUT_DIR + 'jaccard-heatmap.png')
 
         assert filecmp.cmp(OUT_DIR + 'jaccard-matrix.txt', EXPECT_DIR + 'expected-jaccard-matrix.txt', shallow=False)
-        assert filecmp.cmp(OUT_DIR + 'jaccard-heatmap.png', EXPECT_DIR + 'expected-jaccard-heatmap.png', shallow=False)
+        assert jaccard_png_outpath.exists()

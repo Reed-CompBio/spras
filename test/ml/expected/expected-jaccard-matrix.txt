@@ -1,2 +1,4 @@
-	data
-data	1.0
+	test-data-s1	test-data-s2	test-data-s3
+test-data-s1	1.0	0.75	0.0
+test-data-s2	0.75	1.0	0.14285714285714285
+test-data-s3	0.0	0.14285714285714285	1.0

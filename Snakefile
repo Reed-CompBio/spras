@@ -320,8 +320,7 @@ rule ml_analysis:
         ml.hac_vertical(summary_df, output.hac_image_vertical, output.hac_clusters_vertical, **hac_params)
         ml.hac_horizontal(summary_df, output.hac_image_horizontal, output.hac_clusters_horizontal, **hac_params)
 
-# Algorithm similarity evaluation - jaccard similarity
-#TODO: will have to add visualiztion - start with jaccard eval though
+# Calculated Jaccard similarity between output pathways for each dataset
 rule algorithm_similarity_eval:
     input:
         pathways = expand('{out_dir}{sep}{{dataset}}-{algorithm_params}{sep}pathway.txt',
