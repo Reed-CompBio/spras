@@ -1,6 +1,7 @@
-import pytest
-import numpy as np
 import pickle
+
+import numpy as np
+import pytest
 
 import spras.config as config
 

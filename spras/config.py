@@ -21,7 +21,7 @@ from collections.abc import Iterable
 import numpy as np
 import yaml
 
-from spras.util import hash_params_sha1_base32, NpEncoder
+from spras.util import NpEncoder, hash_params_sha1_base32
 
 # The default length of the truncated hash used to identify parameter combinations
 DEFAULT_HASH_LENGTH = 7

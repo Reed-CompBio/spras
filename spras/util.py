@@ -8,8 +8,9 @@ import json
 from pathlib import Path, PurePath, PurePosixPath
 from typing import Any, Dict, List, Optional, Tuple, Union
 
-import pandas as pd
 import numpy as np
+import pandas as pd
+
 
 # https://stackoverflow.com/a/57915246/7589775
 class NpEncoder(json.JSONEncoder):
