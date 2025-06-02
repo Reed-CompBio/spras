@@ -47,13 +47,13 @@ container_registry:
 algorithms:
       - name: "pathlinker"
         params:
-              include: false
+              include: true
               run1:
                   k: range(100,201,100)
 
       - name: "omicsintegrator1"
         params:
-              include: false
+              include: true
               run1:
                   b: [5, 6]
                   w: np.linspace(0,5,2)
@@ -80,7 +80,7 @@ algorithms:
 
       - name: "mincostflow"
         params:
-              include: false
+              include: true
               run1:
                   flow: [1] # The flow must be an int
                   capacity: [1]
@@ -91,7 +91,7 @@ algorithms:
 
       - name: "domino"
         params:
-              include: false
+              include: true
               run1:
                   slice_threshold: [0.3]
                   module_threshold: [0.05]
