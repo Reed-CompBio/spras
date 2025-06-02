@@ -63,9 +63,10 @@ class TestParseOutputs:
             runner.parse_output(algo, test_file, out_file)
             assert filecmp.cmp(OUTDIR / f"{algo}-duplicate-pathway.txt", EXPDIR / f"{algo}-pathway-expected.txt", shallow=False)
 
-    def test_meo_present_headers(self):
-        test_file = INDIR / f"meo-present-headers.txt"
-        out_file = OUTDIR / f"meo-present-headers-output.txt"
+    def test_empty_raw_pathway(self):
+        for algo in algorithms:
+            test_file = INDIR / "empty" / f"{algo}-empty-raw-pathway.txt"
+            out_file = OUTDIR / f"{algo}-empty-raw-pathway-output.txt"
 
-        runner.parse_output('meo', test_file, out_file)
-        assert filecmp.cmp(OUTDIR / f"meo-present-headers-output.txt", EXPDIR / f"meo-present-headers-expected.txt", shallow=False)
+            runner.parse_output(algo, test_file, out_file)
+            assert filecmp.cmp(out_file, EXPDIR / f"empty-pathway-expected.txt", shallow=False)
