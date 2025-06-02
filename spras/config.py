@@ -21,7 +21,7 @@ from collections.abc import Iterable
 import numpy as np
 import yaml
 
-from spras.util import hash_params_sha1_base32
+from spras.util import hash_params_sha1_base32, NpEncoder
 
 # The default length of the truncated hash used to identify parameter combinations
 DEFAULT_HASH_LENGTH = 7
@@ -241,11 +241,11 @@ class Config:
                 param_name_tuple = tuple(param_name_list)
                 for r in run_list_tuples:
                     run_dict = dict(zip(param_name_tuple, r, strict=True))
-                    # TODO temporary workaround for yaml.safe_dump in Snakefile write_parameter_log
+                    # TODO: Workaround for yaml.safe_dump in Snakefile write_parameter_log and hash_params_sha1_base32
                     for param, value in run_dict.copy().items():
                         if isinstance(value, np.float64):
                             run_dict[param] = float(value)
-                    params_hash = hash_params_sha1_base32(run_dict, self.hash_length)
+                    params_hash = hash_params_sha1_base32(run_dict, self.hash_length, cls=NpEncoder)
                     if params_hash in prior_params_hashes:
                         raise ValueError(f'Parameter hash collision detected. Increase the hash_length in the config file '
                                         f'(current length {self.hash_length}).')

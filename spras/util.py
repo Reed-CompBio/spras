@@ -9,9 +9,20 @@ from pathlib import Path, PurePath, PurePosixPath
 from typing import Any, Dict, List, Optional, Tuple, Union
 
 import pandas as pd
+import numpy as np
 
+# https://stackoverflow.com/a/57915246/7589775
+class NpEncoder(json.JSONEncoder):
+    def default(self, obj):
+        if isinstance(obj, np.integer):
+            return int(obj)
+        if isinstance(obj, np.floating):
+            return float(obj)
+        if isinstance(obj, np.ndarray):
+            return obj.tolist()
+        return super(NpEncoder, self).default(obj)
 
-def hash_params_sha1_base32(params_dict: Dict[str, Any], length: Optional[int] = None) -> str:
+def hash_params_sha1_base32(params_dict: Dict[str, Any], length: Optional[int] = None, cls=None) -> str:
     """
     Hash of a dictionary.
     Derived from https://www.doc.ic.ac.uk/~nuric/coding/how-to-hash-a-dictionary-in-python.html
@@ -22,7 +33,7 @@ def hash_params_sha1_base32(params_dict: Dict[str, Any], length: Optional[int] =
     @param length: the length of the returned hash, which is ignored if it is None, < 1, or > the full hash length
     """
     params_hash = hashlib.sha1()
-    params_encoded = json.dumps(params_dict, sort_keys=True).encode()
+    params_encoded = json.dumps(params_dict, sort_keys=True, cls=cls).encode()
     params_hash.update(params_encoded)
     # base32 includes capital letters and the numbers 2-7
     # https://en.wikipedia.org/wiki/Base32#RFC_4648_Base32_alphabet

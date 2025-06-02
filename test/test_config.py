@@ -1,4 +1,6 @@
 import pytest
+import numpy as np
+import pickle
 
 import spras.config as config
 
@@ -24,26 +26,33 @@ def get_test_config():
         "algorithms": [
             {"params": ["param2", "param2"]},
             {
-                "name": "singleton",
+                "name": "strings",
                 "params": {
                     "include": True,
-                    "run1": {"test": 1, "test2": [2, 3]}
+                    "run1": {"test": "str1", "test2": ["str2", "str3"]}
                 }
             },
             {
-                "name": "objs",
+                "name": "singleton_int64_with_array",
+                "params": {
+                    "include": True,
+                    "run1": {"test": np.int64(1), "test2": [2, 3]}
+                }
+            },
+            {
+                "name": "singleton_string_np_linspace",
                 "params": {
                     "include": True,
                     "run1": {"test": "str1", "test2": "np.linspace(0,5,2)"}
                 }
             },
             {
-                "name": "strings",
+                "name": "int64artifact",
                 "params": {
                     "include": True,
-                    "run1": {"test": "str1", "test2": ["str2", "str3"]}
+                    "run1": {"test": np.arange(5,6), "test2": [2, 3]}
                 }
-            }
+            },
         ],
         "analysis": {
             "summary": {
@@ -68,6 +77,21 @@ def get_test_config():
 
     return test_raw_config
 
+def value_test_util(name: str, configurations: list):
+    assert name in config.config.algorithm_params, f"{name} isn't a present algorithm configuration!"
+    assert len(config.config.algorithm_params[name]) == len(configurations)
+
+    keys = config.config.algorithm_params[name]
+    values = [config.config.algorithm_params[name][key] for key in keys]
+
+    # https://stackoverflow.com/a/50486270/7589775
+    set_values = set(tuple(sorted(d.items())) for d in sorted(values, key=lambda x: pickle.dumps(x, protocol=3)))
+    set_configurations = set(tuple(sorted(d.items())) for d in sorted(configurations, key=lambda x: pickle.dumps(x, protocol=3)))
+
+    if set_values != set_configurations:
+        print(f'Got: {set_values}')
+        print(f'Expected: {set_configurations}')
+        assert set_values == set_configurations
 
 class TestConfig:
     """
@@ -168,42 +192,16 @@ class TestConfig:
         with pytest.raises(ValueError):
             config.init_global(test_config)
 
-    def test_config_singleton(self):
+    def test_config_values(self):
         test_config = get_test_config()
         config.init_global(test_config)
 
-        assert 'singleton' in config.config.algorithm_params
-        assert len(config.config.algorithm_params['singleton']) == 2
-        [key1, key2] = config.config.algorithm_params['singleton']
-        value1 = config.config.algorithm_params['singleton'][key1]
-        value2 = config.config.algorithm_params['singleton'][key2]
-        assert value1['test'] == 1
-        assert value2['test'] == 1
-        assert ((value1['test2'] == 2 and
-                 value2['test2'] == 3) or
-                (value1['test2'] == 3 and
-                 value2['test2'] == 2))
+        value_test_util('strings', [{'test': "str1", 'test2': "str2"}, {'test': 'str1', 'test2': 'str3'}])
 
-        assert 'objs' in config.config.algorithm_params
-        assert len(config.config.algorithm_params['objs']) == 2
-        [key1, key2] = config.config.algorithm_params['objs']
-        value1 = config.config.algorithm_params['objs'][key1]
-        value2 = config.config.algorithm_params['objs'][key2]
-        assert value1['test'] == "str1"
-        assert value2['test'] == "str1"
-        assert value1['test2'] == 0.0
+        value_test_util('singleton_int64_with_array', [{'test': 1, 'test2': 2}, {'test': 1, 'test2': 3}])
+        value_test_util('singleton_string_np_linspace', [{'test': "str1", 'test2': 5.0}, {'test': "str1", 'test2': 0.0}])
 
-        assert 'strings' in config.config.algorithm_params
-        assert len(config.config.algorithm_params['strings']) == 2
-        [key1, key2] = config.config.algorithm_params['strings']
-        value1 = config.config.algorithm_params['strings'][key1]
-        value2 = config.config.algorithm_params['strings'][key2]
-        assert value1['test'] == "str1"
-        assert value2['test'] == "str1"
-        assert ((value1['test2'] == "str2" and
-                 value2['test2'] == "str3") or
-                (value1['test2'] == "str3" and
-                 value2['test2'] == "str2"))
+        value_test_util('int64artifact', [{'test': 5, 'test2': 2}, {'test': 5, 'test2': 3}])
 
     @pytest.mark.parametrize("ml_include, eval_include, expected_ml, expected_eval", [
         (True, True, True, True),
