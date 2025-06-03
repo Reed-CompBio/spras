@@ -22,12 +22,14 @@ class TestEvaluate:
     def test_precision_recall_pca_chosen_pathway(self):
         file_paths = [INPUT_DIR + "data-test-params-123/pathway.txt", INPUT_DIR + "data-test-params-456/pathway.txt",  INPUT_DIR + "data-test-params-789/pathway.txt",  INPUT_DIR + "data-test-params-empty/pathway.txt"]
         algorithms = ["test"]
-        output_file = OUT_DIR +"test-precision-recall-per-pathway-pca-chosen.txt"
-        # output_png = OUT_DIR + "test-precision-recall-per-pathway-pca-chosen.png"
+        output_file = OUT_DIR +"test-pr-per-pathway-pca-chosen.txt"
+        output_png = Path(OUT_DIR + "test-pr-per-pathway-pca-chosen.png")
+        output_png.unlink(missing_ok=True)
 
         dataframe = ml.summarize_networks(file_paths)
         ml.pca(dataframe, OUT_DIR + 'pca.png', OUT_DIR + 'pca-variance.txt', OUT_DIR + 'pca-coordinates.tsv')
 
         pathway = Evaluation.pca_chosen_pathway([OUT_DIR + 'pca-coordinates.tsv'], INPUT_DIR)
-        Evaluation.precision_and_recall(pathway, GS_NODE_TABLE, algorithms, output_file)
-        assert filecmp.cmp(output_file, EXPECT_DIR + 'expected-precision-recall-per-pathway-pca-chosen.txt', shallow=False)
+        Evaluation.precision_and_recall(pathway, GS_NODE_TABLE, algorithms, output_file, output_png)
+        assert filecmp.cmp(output_file, EXPECT_DIR + 'expected-pr-per-pathway-pca-chosen.txt', shallow=False)
+        assert output_png.exists()

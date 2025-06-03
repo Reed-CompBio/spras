@@ -124,14 +124,17 @@ class Evaluation:
 
                 plt.xlabel("Recall")
                 plt.ylabel("Precision")
+                plt.xlim(-0.05, 1.05)
+                plt.ylim(-0.05, 1.05)
                 plt.title("Precision and Recall Plot")
                 plt.legend()
                 plt.grid(True)
                 plt.savefig(output_png)
-            else:
+            else: # TODO: figure out if this would ever happen; maybe when all the pathways are empty?
                 plt.figure()
-                plt.plot([], [])
+                plt.plot([], [], label="No Pathways")
                 plt.title("Precision and Recall Plot")
+                plt.legend()
                 plt.savefig(output_png)
 
     def pca_chosen_pathway(coordinates_files: list, output_dir:str):
