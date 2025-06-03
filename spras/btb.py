@@ -5,7 +5,7 @@ from spras.interactome import (
     reinsert_direction_col_undirected,
 )
 from spras.prm import PRM
-from spras.util import add_rank_column, duplicate_edges, raw_pathway_df
+from spras.util import add_rank_column, duplicate_edges, raw_pathway_df, convert_undirected_to_directed
 
 __all__ = ['BowTieBuilder']
 
@@ -53,8 +53,8 @@ class BowTieBuilder(PRM):
         # Create network file
         edges = data.get_interactome()
 
-        # Format into directed graph
-        # edges = convert_undirected_to_directed(edges)
+        # Format into directed graph (BTB uses the nx.DiGraph constructor internally)
+        edges = convert_undirected_to_directed(edges)
 
         edges.to_csv(filename_map["edges"], sep="\t", index=False,
                                       columns=["Interactor1", "Interactor2", "Weight"],
