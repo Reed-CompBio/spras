@@ -50,7 +50,7 @@ algorithms:
               include: true
               run1:
                   k: range(100,201,100)
-      
+
       - name: "edgelinker"
         params:
               include: true
