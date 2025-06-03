@@ -25,7 +25,7 @@ class EdgeLinker(PRM):
         for input_type in EdgeLinker.required_inputs:
             if input_type not in filename_map:
                 raise ValueError("{input_type} filename is missing")
-        
+
         # Handle sources and targets (from MCF - TODO: deduplicate this?)
         for node_type in ['sources', 'targets']:
             nodes = data.request_node_columns([node_type])

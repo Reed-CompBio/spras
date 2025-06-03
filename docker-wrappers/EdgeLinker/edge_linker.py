@@ -1,7 +1,8 @@
 import argparse
+from itertools import chain, islice
 from pathlib import Path
+
 import networkx as nx
-from itertools import islice, chain
 
 # The tiny and miny game actions from combinatorial game theory.
 # These two symbols are meant to be widely unused.
@@ -33,7 +34,7 @@ def edge_linker(network_file: Path, sources_file: Path, targets_file: Path) -> t
         raise OSError(f"Sources file {str(sources_file)} does not exist.")
     if not targets_file.exists():
         raise OSError(f"Targets file {str(targets_file)} does not exist.")
-    
+
     sources = filter(lambda source: source.strip(), sources_file.read_text().splitlines())
     targets = filter(lambda target: target.strip(), targets_file.read_text().splitlines())
 
@@ -46,7 +47,7 @@ def edge_linker(network_file: Path, sources_file: Path, targets_file: Path) -> t
                 raise IndexError(f"Line {line} does not have 3 items!")
             [source, target, weight] = line.split('\t')
             G.add_edge(source, target, weight=weight)
-    
+
     # Add super source/target. TODO: check if these nodes already exist
     G.add_node(SUPER_SOURCE)
     G.add_node(SUPER_TARGET)
@@ -64,7 +65,7 @@ def edge_linker(network_file: Path, sources_file: Path, targets_file: Path) -> t
         end_path = shortest_paths_reverse[middle]
         path = path[:-1] + end_path
         joined_paths.append(path)
-    
+
     return (G, sorted(joined_paths, key=lambda path: score_path(G, path)))
 
 def path_subgraph(G: nx.DiGraph, paths: list[list[str]]):
@@ -85,7 +86,7 @@ def main():
 
     arguments = parser.parse_args()
     (G, paths) = edge_linker(arguments.network, arguments.sources, arguments.targets)
-    
+
     # Avoid missing directory errors
     arguments.output.parent.mkdir(parents=True, exist_ok=True)
 
@@ -99,4 +100,4 @@ def main():
             out_writer.write(f"{source}\t{target}\n")
 
 if __name__ == '__main__':
-    main() 
+    main()
