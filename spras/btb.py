@@ -92,7 +92,7 @@ class BowTieBuilder(PRM):
 
             except Exception as err:
                 # catches a much harder to debug error in BTB.
-                raise RuntimeError("BTB edges arenot formatted correctly") from err
+                raise IndexError("BTB edges arenot formatted correctly") from err
 
         work_dir = '/btb'
 
