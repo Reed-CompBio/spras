@@ -107,14 +107,9 @@ class Dataset:
         self.node_table = pd.DataFrame(node_set, columns=[self.NODE_ID])
         for node_file in node_data_files:
             single_node_table = pd.read_table(os.path.join(data_loc, node_file))
-            # If we have only 1 column, assume this is an indicator variable
+            # If we have only 1 column, mention that indicator files are deprecated.
             if len(single_node_table.columns) == 1:
-                single_node_table = pd.read_table(
-                    os.path.join(data_loc, node_file), header=None
-                )
-                single_node_table.columns = [self.NODE_ID]
-                new_col_name = node_file.split(".")[0]
-                single_node_table[new_col_name] = True
+                raise ValueError("Indicator files are deprecated. See: https://github.com/Reed-CompBio/spras/issues/192.")
 
             # Use only keys from the existing node table so that nodes that are not in the interactome are ignored
             # If there duplicate columns, keep the existing column and add the suffix '_DROP' to the new column so it

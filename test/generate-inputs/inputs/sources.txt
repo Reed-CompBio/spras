@@ -1,1 +1,2 @@
-test_A
+NODEID	sources
+test_A	True
