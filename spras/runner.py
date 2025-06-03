@@ -1,3 +1,5 @@
+from collections.abc import Iterable
+
 # supported algorithm imports
 from spras.allpairs import AllPairs as allpairs
 from spras.dataset import Dataset
@@ -7,6 +9,7 @@ from spras.mincostflow import MinCostFlow as mincostflow
 from spras.omicsintegrator1 import OmicsIntegrator1 as omicsintegrator1
 from spras.omicsintegrator2 import OmicsIntegrator2 as omicsintegrator2
 from spras.pathlinker import PathLinker as pathlinker
+from spras.local_neighborhood import LocalNeighborhood as localneighborhood
 
 
 def run(algorithm, params):
@@ -30,7 +33,10 @@ def get_required_inputs(algorithm):
         algorithm_runner = globals()[algorithm.lower()]
     except KeyError as exc:
         raise NotImplementedError(f'{algorithm} is not currently supported') from exc
-    return algorithm_runner.required_inputs
+    if isinstance(algorithm_runner.required_inputs, Iterable):
+        return algorithm_runner.required_inputs
+    else:
+        raise TypeError(f"{algorithm}'s required_inputs property is not iterable - was required_inputs set?")
 
 
 def merge_input(dataset_dict, dataset_file):
