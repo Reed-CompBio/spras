@@ -21,9 +21,9 @@ def window(seq, n=2):
 def score_path(G: nx.DiGraph, path: list[str]) -> int:
     score = 0
     for i in range(0, len(path) - 1):
-        start = path[i]
+        source = path[i]
         target = path[i + 1]
-        score = score + G.get_edge_data(start, target)['weight']
+        score = score + float(G.get_edge_data(source, target)['weight'])
     return score
 
 def edge_linker(network_file: Path, sources_file: Path, targets_file: Path) -> tuple[nx.DiGraph, list[str]]:
@@ -47,6 +47,8 @@ def edge_linker(network_file: Path, sources_file: Path, targets_file: Path) -> t
             [source, target, weight] = line.split('\t')
             G.add_edge(source, target, weight=weight)
     
+    print(G.edges(data=True))
+
     # Add super source/target. TODO: check if these nodes already exist
     G.add_node(SUPER_SOURCE)
     G.add_node(SUPER_TARGET)
@@ -62,10 +64,10 @@ def edge_linker(network_file: Path, sources_file: Path, targets_file: Path) -> t
     joined_paths: list[list[str]] = []
     for middle, path in shortest_paths.items():
         end_path = shortest_paths_reverse[middle]
-        path = path[:-1] + end_path[1:]
+        path = path[:-1] + end_path
         joined_paths.append(path)
     
-    return sorted(joined_paths, key=lambda path: score_path(G, path))
+    return (G, sorted(joined_paths, key=lambda path: score_path(G, path)))
 
 def path_subgraph(G: nx.DiGraph, paths: list[list[str]]):
     edges = map(lambda path: window(path, n=2), paths)
@@ -73,7 +75,7 @@ def path_subgraph(G: nx.DiGraph, paths: list[list[str]]):
     edges = list(chain.from_iterable(edges))
     return G.edge_subgraph(edges)
 
-def __main__():
+def main():
     parser = argparse.ArgumentParser(
         description="EdgeLinker Pathway Reconstruction"
     )
@@ -85,14 +87,18 @@ def __main__():
 
     arguments = parser.parse_args()
     (G, paths) = edge_linker(arguments.network, arguments.sources, arguments.targets)
-
-    if not arguments.output_file.exists():
-        raise OSError(f"Output file {str(arguments.output_file)} does not exist.")
     
     # Avoid missing directory errors
-    arguments.output_file.parent.mkdir(parents=True, exist_ok=True)
+    arguments.output.parent.mkdir(parents=True, exist_ok=True)
 
-    sub_G = path_subgraph(paths[:arguments.k], G)
-    with Path(arguments.output_file).open('+w', encoding="utf-8") as out_writer:
+    print(f"Found {len(paths)} paths - the k value, {arguments.k}, prunes a path count of {len(paths) - len(paths[:arguments.k])}")
+
+    sub_G = path_subgraph(G, paths[:arguments.k])
+    with Path(arguments.output).open('+w', encoding="utf-8") as out_writer:
         for (source, target) in sub_G.edges():
-            out_writer.write(f"{source}\t{target}")
+            if source == SUPER_SOURCE or target == SUPER_TARGET:
+                continue
+            out_writer.write(f"{source}\t{target}\n")
+
+if __name__ == '__main__':
+    main() 

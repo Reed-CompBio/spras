@@ -26,7 +26,19 @@ class EdgeLinker(PRM):
             if input_type not in filename_map:
                 raise ValueError("{input_type} filename is missing")
         
-        # TODO
+        # Handle sources and targets (from MCF - TODO: deduplicate this?)
+        for node_type in ['sources', 'targets']:
+            nodes = data.request_node_columns([node_type])
+            if nodes is None:
+                raise ValueError(f'No {node_type} found in the node files.')
+            nodes = nodes.loc[nodes[node_type]]
+            nodes.to_csv(filename_map[node_type], index=False, columns=['NODEID'], header=False)
+
+        # Create network file
+        network = data.get_interactome()
+        network = convert_undirected_to_directed(network)
+        network.to_csv(filename_map['network'], sep='\t', index=False, columns=["Interactor1", "Interactor2", "Weight"],
+                     header=False)
 
     @staticmethod
     def run(network=None, sources=None, targets=None, output_file=None, k=100, container_framework="docker"):
@@ -65,7 +77,7 @@ class EdgeLinker(PRM):
                    '--network', network_file,
                    '--sources', sources_file,
                    '--targets', targets_file,
-                   '-k', k,
+                   '-k', str(k),
                    '--output', mapped_out_file]
 
         print('Running EdgeLinker with arguments: {}'.format(' '.join(command)), flush=True)

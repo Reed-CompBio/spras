@@ -9,7 +9,7 @@ from spras.edgelinker import EdgeLinker
 config.init_from_file("config/config.yaml")
 
 TEST_DIR = Path('test', 'EdgeLinker')
-OUT_FILE = TEST_DIR / 'output' / 'pathlinker-ranked-edges.txt'
+OUT_FILE = TEST_DIR / 'output' / 'edgelinker-ranked-edges.txt'
 
 
 class TestEdgeLinker:
