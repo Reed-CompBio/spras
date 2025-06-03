@@ -88,6 +88,9 @@ algorithms:
       - name: "allpairs"
         params:
               include: true
+      - name: "diamond"
+        params:
+              include: true
 
       - name: "domino"
         params:
