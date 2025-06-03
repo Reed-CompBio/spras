@@ -5,6 +5,7 @@ dependencies:
   - adjusttext=0.7.3.1
   - bioconda::snakemake-minimal=8.17.0
   - docker-py=5.0
+  - podman=5.4.0
   - matplotlib=3.6
   - networkx=2.8
   - pandas=1.5
