@@ -89,6 +89,9 @@ class Dataset:
                 "Direction",
             ]
 
+            if not pd.Series(self.interactome.Weight).between(0, 1).all():
+                raise ValueError("A member of the Weight column is not between 0 and 1.")
+
             # Make directionality column case-insensitive
             self.interactome["Direction"] = self.interactome["Direction"].str.upper()
             if not self.interactome["Direction"].isin(["U", "D"]).all():
