@@ -109,10 +109,10 @@ def create_palette(column_names):
     to a unique color from the specified palette.
     """
     # TODO: could add a way for the user to customize the color palette?
-    custom_palette = sns.color_palette("husl", len(column_names))
-    label_color_map = {label: color for label, color in zip(column_names, custom_palette, strict=True)}
+    unique_column_names = list(sorted(set(column_names)))
+    custom_palette = sns.color_palette(palette = "tab20c", n_colors = len(unique_column_names))
+    label_color_map = {label: color for label, color in zip(unique_column_names, custom_palette, strict=True)}
     return label_color_map
-
 
 def pca(dataframe: pd.DataFrame, output_png: str, output_var: str, output_coord: str, components: int = 2, labels: bool = True):
     """

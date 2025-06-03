@@ -109,7 +109,7 @@ class Evaluation:
 
         if output_png is not None:
             if not pr_df.empty:
-                plt.figure(figsize=(8, 6))
+                plt.figure(figsize=(10, 7))
                 # plot a line per algorithm
                 for algorithm in algorithms:
                     subset = pr_df[pr_df["Pathway"].str.contains(algorithm)]
@@ -122,36 +122,40 @@ class Evaluation:
                             label=f"{algorithm}"
                         )
 
-
                 plt.xlabel("Recall")
                 plt.ylabel("Precision")
-                plt.title(f"Precision and Recall Plot")
+                plt.title("Precision and Recall Plot")
                 plt.legend()
                 plt.grid(True)
                 plt.savefig(output_png)
             else:
                 plt.figure()
                 plt.plot([], [])
-                plt.title("Empty Pathway Files")
+                plt.title("Precision and Recall Plot")
                 plt.savefig(output_png)
 
-    def pca_chosen_pathway(coordinates_file: str, output_dir:str):
+    def pca_chosen_pathway(coordinates_files: list, output_dir:str):
         """
         Identifies the pathway closest to a specified centroid based on PCA coordinates
         Calculates the Euclidean distance from each data point to the centroid, then selects the closest pathway.
-        Returns the file path for the representative pathway associated with the closest data point.
-        @param coordinates_file: the pca coordinates file for a dataset or specific algorithm in a datset
+        Returns a list of file paths for the representative pathway associated with the closest data point to the centroid.
+        @param coordinates_files: a list of pca coordinates files for a dataset or specific algorithm in a dataset
         @param output_dir: the main reconstruction directory
         """
-        coord_df = pd.read_csv(coordinates_file, delimiter="\t", header=0)
+        rep_pathways = []
 
-        centroid_row = coord_df[coord_df['datapoint_labels'] == 'centroid']
-        centroid = centroid_row.iloc[0, 1:].tolist()
-        coord_df = coord_df[coord_df['datapoint_labels'] != 'centroid']
+        for coordinates_file in coordinates_files:
+            coord_df = pd.read_csv(coordinates_file, delimiter="\t", header=0)
 
-        pc_columns = [col for col in coord_df.columns if col.startswith('PC')]
-        coord_df['Distance To Centroid'] = np.sqrt(sum((coord_df[pc] - centroid[i]) ** 2 for i, pc in enumerate(pc_columns)))
-        closest_to_centroid = coord_df.sort_values(by='Distance To Centroid').iloc[0]
-        rep_pathway = [os.path.join(output_dir, f"{closest_to_centroid['datapoint_labels']}", "pathway.txt")]
+            centroid_row = coord_df[coord_df['datapoint_labels'] == 'centroid']
+            centroid = centroid_row.iloc[0, 1:].tolist()
+            coord_df = coord_df[coord_df['datapoint_labels'] != 'centroid']
 
-        return rep_pathway
+            pc_columns = [col for col in coord_df.columns if col.startswith('PC')]
+            coord_df['Distance To Centroid'] = np.sqrt(sum((coord_df[pc] - centroid[i]) ** 2 for i, pc in enumerate(pc_columns)))
+            closest_to_centroid = coord_df.sort_values(by='Distance To Centroid').iloc[0]
+
+            rep_pathway = os.path.join(output_dir, f"{closest_to_centroid['datapoint_labels']}", "pathway.txt")
+            rep_pathways.append(rep_pathway)
+
+        return rep_pathways

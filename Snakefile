@@ -105,9 +105,9 @@ def make_final_input(wildcards):
         final_input.extend(expand('{out_dir}{sep}{dataset}-ml{sep}{algorithm}-ensemble-pathway.txt',out_dir=out_dir,sep=SEP,dataset=dataset_labels,algorithm=algorithms))
 
     if _config.config.analysis_include_evaluation:
-        final_input.extend(expand('{out_dir}{sep}{dataset_gold_standard_pair}-eval{sep}precision-recall-pca-chosen-pathway.txt',out_dir=out_dir,sep=SEP,dataset_gold_standard_pair=dataset_gold_standard_pairs))
+        final_input.extend(expand('{out_dir}{sep}{dataset_gold_standard_pair}-eval{sep}pr-pca-chosen-pathway.txt',out_dir=out_dir,sep=SEP,dataset_gold_standard_pair=dataset_gold_standard_pairs))
     if _config.config.analysis_include_evaluation_aggregate_algo:
-        final_input.extend(expand('{out_dir}{sep}{dataset_gold_standard_pair}-eval{sep}{algorithm}-precision-recall-pca-chosen-pathway.txt',out_dir=out_dir,sep=SEP,dataset_gold_standard_pair=dataset_gold_standard_pairs,algorithm=algorithms_mult_param_combos))
+        final_input.extend(expand('{out_dir}{sep}{dataset_gold_standard_pair}-eval{sep}pr-pca-chosen-pathway-per-algorithm.txt',out_dir=out_dir,sep=SEP,dataset_gold_standard_pair=dataset_gold_standard_pairs,algorithm=algorithms_mult_param_combos))
     if len(final_input) == 0:
         # No analysis added yet, so add reconstruction output files if they exist.
         # (if analysis is specified, these should be implicitly run).
@@ -373,13 +373,18 @@ def get_dataset_label(wildcards):
     dataset = parts[0]
     return dataset
 
+def collect_pca_coordinates_per_dataset(wildcards):
+    dataset_label = get_dataset_label(wildcards)
+    return [f'{out_dir}{SEP}{dataset_label}-ml{SEP}pca-coordinates.txt']
+
 # Run evaluation code for a specific dataset's pathway outputs against its paired gold standard
-rule evaluation:
+rule evaluation_pca_chosen:
     input: 
         gold_standard_file = get_gold_standard_pickle_file,
-        pca_coordinates_file =lambda wildcards: f"{out_dir}{SEP}{get_dataset_label(wildcards)}-ml{SEP}pca-coordinates.txt"
+        pca_coordinates_file = collect_pca_coordinates_per_dataset
     output: 
-        pca_chosen_pr_file = SEP.join([out_dir, '{dataset_gold_standard_pairs}-eval', "precision-recall-pca-chosen-pathway.txt"]),
+       # TODO: add in png? test what this would be and if useful
+        pca_chosen_pr_file = SEP.join([out_dir, '{dataset_gold_standard_pairs}-eval', "pr-pca-chosen-pathway.txt"]),
     run:
         node_table = Evaluation.from_file(input.gold_standard_file).node_table
         pca_chosen_pathway = Evaluation.pca_chosen_pathway(input.pca_coordinates_file, out_dir)
@@ -388,7 +393,8 @@ rule evaluation:
 # Returns pca coordinates for a specific algorithm and dataset
 def collect_pca_coordinates_per_algo_per_dataset(wildcards):
     dataset_label = get_dataset_label(wildcards)
-    return f"{out_dir}{SEP}{dataset_label}-ml{SEP}{wildcards.algorithm}-pca-coordinates.txt"
+    # return f"{out_dir}{SEP}{dataset_label}-ml{SEP}{wildcards.algorithm}-pca-coordinates.txt"
+    return expand('{out_dir}{sep}{dataset}-ml{sep}{algorithm}-pca-coordinates.txt', out_dir=out_dir, sep=SEP, dataset=dataset_label, algorithm=algorithms_mult_param_combos)
 
 # Run evaluation per algortihm for all associated pca_coordinates.txt for a dataset against its paired gold standard
 rule evaluation_per_algo_pca_chosen:
@@ -396,11 +402,12 @@ rule evaluation_per_algo_pca_chosen:
         gold_standard_file = get_gold_standard_pickle_file,
         pca_coordinates_file = collect_pca_coordinates_per_algo_per_dataset
     output: 
-        pca_chosen_pr_file = SEP.join([out_dir, '{dataset_gold_standard_pairs}-eval', "{algorithm}-precision-recall-pca-chosen-pathway.txt"]),
+        # TODO: add in png? test what this would be and if useful
+        pca_chosen_pr_file = SEP.join([out_dir, '{dataset_gold_standard_pairs}-eval', "pr-pca-chosen-pathway-per-algorithm.txt"]),
     run:
         node_table = Evaluation.from_file(input.gold_standard_file).node_table
-        pca_chosen_pathway = Evaluation.pca_chosen_pathway(input.pca_coordinates_file, out_dir)
-        Evaluation.precision_and_recall(pca_chosen_pathway, node_table, algorithms, output.pca_chosen_pr_file)
+        pca_chosen_pathways = Evaluation.pca_chosen_pathway(input.pca_coordinates_file, out_dir)
+        Evaluation.precision_and_recall(pca_chosen_pathways, node_table, algorithms, output.pca_chosen_pr_file)
 
 # Remove the output directory
 rule clean:
