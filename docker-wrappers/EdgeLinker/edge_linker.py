@@ -47,8 +47,6 @@ def edge_linker(network_file: Path, sources_file: Path, targets_file: Path) -> t
             [source, target, weight] = line.split('\t')
             G.add_edge(source, target, weight=weight)
     
-    print(G.edges(data=True))
-
     # Add super source/target. TODO: check if these nodes already exist
     G.add_node(SUPER_SOURCE)
     G.add_node(SUPER_TARGET)
