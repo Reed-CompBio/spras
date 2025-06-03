@@ -2,6 +2,7 @@
 from spras.allpairs import AllPairs as allpairs
 from spras.dataset import Dataset
 from spras.domino import DOMINO as domino
+from spras.edgelinker import EdgeLinker as edgelinker
 from spras.meo import MEO as meo
 from spras.mincostflow import MinCostFlow as mincostflow
 from spras.omicsintegrator1 import OmicsIntegrator1 as omicsintegrator1

@@ -50,6 +50,12 @@ algorithms:
               include: true
               run1:
                   k: range(100,201,100)
+      
+      - name: "edgelinker"
+        params:
+              include: true
+              run1:
+                  k: [150, 175]
 
       - name: "omicsintegrator1"
         params:
