@@ -1,12 +1,4 @@
-# need to define a new btb class and contain the following functions
-# - generate_inputs
-# - run
-# - parse_output
-
-import warnings
 from pathlib import Path
-
-import pandas as pd
 
 from spras.containers import prepare_volume, run_container
 from spras.interactome import (
@@ -52,9 +44,9 @@ class BowTieBuilder(PRM):
             # TODO test whether this selection is needed, what values could the column contain that we would want to
             # include or exclude?
             nodes = nodes.loc[nodes[node_type]]
-            if(node_type == "sources"):
+            if node_type == "sources":
                 nodes.to_csv(filename_map["sources"], sep= '\t', index=False, columns=['NODEID'], header=False)
-            elif(node_type == "targets"):
+            elif node_type == "targets":
                 nodes.to_csv(filename_map["targets"], sep= '\t', index=False, columns=['NODEID'], header=False)
 
 
@@ -96,12 +88,11 @@ class BowTieBuilder(PRM):
         with open(edges, 'r') as edge_file:
             try:
                 for line in edge_file:
-                    line = line.strip()
-                    line = line.split('\t')
-                    line = line[2]
+                    line = line.strip().split('\t')[2]
 
             except Exception as err:
-                raise(err)
+                # catches a much harder to debug error in BTB.
+                raise RuntimeError("BTB edges arenot formatted correctly") from err
 
         work_dir = '/btb'
 
@@ -134,7 +125,6 @@ class BowTieBuilder(PRM):
                    target_file,
                    '--output_file',
                    mapped_out_prefix]
-        # command = ['ls', '-R']
 
 
         print('Running BowTieBuilder with arguments: {}'.format(' '.join(command)), flush=True)
@@ -156,7 +146,7 @@ class BowTieBuilder(PRM):
         @param raw_pathway_file: pathway file produced by an algorithm's run function
         @param standardized_pathway_file: the same pathway written in the universal format
         """
-        # What about multiple raw_pathway_files
+        # TODO: consider using multiple raw_pathway_files
         df = raw_pathway_df(raw_pathway_file, sep='\t', header=0)
         if not df.empty:
             df = add_rank_column(df)
