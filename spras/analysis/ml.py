@@ -131,7 +131,6 @@ def pca(dataframe: pd.DataFrame, output_png: str, output_var: str, output_coord:
     columns = dataframe.columns
     column_names = [element.split('-')[-3] for element in columns]  # assume algorithm names do not contain '-'
     df = df.transpose()  # based on the algorithms rather than the edges
-    print(df)
     X = df.values
 
     min_shape = min(df.shape)
@@ -143,11 +142,15 @@ def pca(dataframe: pd.DataFrame, output_png: str, output_var: str, output_coord:
     if not isinstance(labels, bool):
         raise ValueError(f"labels={labels} must be True or False")
 
+    # TODO: decide how to scale the data
     # center binary data by subtracting the column-wise mean
     # allows PCA to focus on edge inclusion patterns across runs rather than raw output volume.
     scaler = StandardScaler(with_std=False)
     scaler.fit(X)  # compute mean inclusion rate per edge
     X_scaled = scaler.transform(X)
+
+    # no scaling
+    # X_scaled = X
 
     # choosing the PCA
     pca_instance = PCA(n_components=components)
