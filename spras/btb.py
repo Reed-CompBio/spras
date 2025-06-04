@@ -3,11 +3,11 @@ from pathlib import Path
 from spras.containers import prepare_volume, run_container
 from spras.interactome import (
     reinsert_direction_col_undirected,
+    convert_undirected_to_directed
 )
 from spras.prm import PRM
 from spras.util import (
     add_rank_column,
-    convert_undirected_to_directed,
     duplicate_edges,
     raw_pathway_df,
 )
