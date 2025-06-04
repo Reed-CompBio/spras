@@ -2,8 +2,8 @@ from pathlib import Path
 
 from spras.containers import prepare_volume, run_container
 from spras.interactome import (
+    convert_undirected_to_directed,
     reinsert_direction_col_undirected,
-    convert_undirected_to_directed
 )
 from spras.prm import PRM
 from spras.util import (
