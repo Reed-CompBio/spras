@@ -25,7 +25,7 @@ class TestEvaluate:
         output_png.unlink(missing_ok=True)
         output_coordinates = Path(OUT_DIR + 'pca-coordinates.tsv')
         output_coordinates.unlink(missing_ok=True)
-        
+
         file_paths = [INPUT_DIR + "data-test-params-123/pathway.txt", INPUT_DIR + "data-test-params-456/pathway.txt",  INPUT_DIR + "data-test-params-789/pathway.txt",  INPUT_DIR + "data-test-params-empty/pathway.txt"]
         algorithms = ["test"]
 
