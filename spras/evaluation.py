@@ -129,13 +129,14 @@ class Evaluation:
                 plt.legend()
                 plt.grid(True)
                 plt.savefig(output_png)
-            else: # for pca based this else case won't be hit, but for no tuning idea, it will
+            else:
                 plt.figure()
                 plt.plot([], [], label="Empty Pathways")
                 plt.title("Precision and Recall Plot")
                 plt.legend()
                 plt.savefig(output_png)
 
+    @staticmethod
     def pca_chosen_pathway(coordinates_files: list, output_dir:str):
         """
         Identifies the pathway closest to a specified centroid based on PCA coordinates
