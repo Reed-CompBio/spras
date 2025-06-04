@@ -131,6 +131,7 @@ def pca(dataframe: pd.DataFrame, output_png: str, output_var: str, output_coord:
     columns = dataframe.columns
     column_names = [element.split('-')[-3] for element in columns]  # assume algorithm names do not contain '-'
     df = df.transpose()  # based on the algorithms rather than the edges
+    print(df)
     X = df.values
 
     min_shape = min(df.shape)
@@ -142,15 +143,14 @@ def pca(dataframe: pd.DataFrame, output_png: str, output_var: str, output_coord:
     if not isinstance(labels, bool):
         raise ValueError(f"labels={labels} must be True or False")
 
-    #TODO: MinMaxScaler changes nothing about the data
-    # scaler = MinMaxScaler()
-    # scaler.fit(X)  # calc mean and standard deviation
-    # X_scaled = scaler.transform(X)
-
-    scaler = StandardScaler()  # TODO: StandardScalar doesn't make sense on binary data because the mean and variance lead to values outside the binary range
-    scaler.fit(X)  # calc mean and standard deviation
-    scaler.transform(X)
+    # center binary data by subtracting the column-wise mean
+    # removes bias from runs that select more or fewer edges overall
+    # allows PCA to focus on edge inclusion patterns across runs rather than raw output volume.
+    scaler = StandardScaler(with_std=False)
+    scaler.fit(X)  # compute mean edge inclusion rate per run
     X_scaled = scaler.transform(X)
+    print(X)
+    print(X_scaled)
 
     # choosing the PCA
     pca_instance = PCA(n_components=components)
