@@ -1,7 +1,7 @@
 import warnings
 from pathlib import Path
 
-from spras.containers import prepare_volume, run_container_pretty
+from spras.containers import prepare_volume, run_container_and_log
 from spras.interactome import (
     convert_directed_to_undirected,
     reinsert_direction_col_undirected,
@@ -92,7 +92,7 @@ class AllPairs(PRM):
                    '--output', mapped_out_file]
 
         container_suffix = "allpairs:v2"
-        run_container_pretty(
+        run_container_and_log(
             'All Pairs Shortest Paths',
             container_framework,
             container_suffix,

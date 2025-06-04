@@ -1,7 +1,7 @@
 import warnings
 from pathlib import Path
 
-from spras.containers import prepare_volume, run_container_pretty
+from spras.containers import prepare_volume, run_container_and_log
 from spras.interactome import (
     convert_undirected_to_directed,
     reinsert_direction_col_directed,
@@ -113,7 +113,7 @@ class PathLinker(PRM):
             command.extend(['-k', str(k)])
 
         container_suffix = "pathlinker:v2"
-        run_container_pretty('PathLinker',
+        run_container_and_log('PathLinker',
                              container_framework,
                              container_suffix,
                              command,

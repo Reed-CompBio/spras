@@ -2,7 +2,7 @@ from pathlib import Path
 
 import pandas as pd
 
-from spras.containers import prepare_volume, run_container_pretty
+from spras.containers import prepare_volume, run_container_and_log
 from spras.dataset import Dataset
 from spras.interactome import reinsert_direction_col_undirected
 from spras.prm import PRM
@@ -119,7 +119,7 @@ class OmicsIntegrator2(PRM):
             command.extend(['--seed', str(seed)])
 
         container_suffix = "omics-integrator-2:v2"
-        run_container_pretty('Omics Integrator 2',
+        run_container_and_log('Omics Integrator 2',
                              container_framework,
                              container_suffix,
                              command,

@@ -2,7 +2,7 @@ from pathlib import Path, PurePath
 from shutil import rmtree
 from typing import List, Union
 
-from spras.containers import prepare_volume, run_container_pretty
+from spras.containers import prepare_volume, run_container_and_log
 
 
 def run_cytoscape(pathways: List[Union[str, PurePath]], output_file: str, container_framework="docker") -> None:
@@ -47,7 +47,7 @@ def run_cytoscape(pathways: List[Union[str, PurePath]], output_file: str, contai
         command.extend(['--pathway', f'{mapped_pathway}|{pathway}'])
 
     container_suffix = "py4cytoscape:v3"
-    run_container_pretty('Cytoscape',
+    run_container_and_log('Cytoscape',
                          container_framework,
                          container_suffix,
                          command,

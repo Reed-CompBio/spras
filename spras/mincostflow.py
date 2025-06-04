@@ -1,6 +1,6 @@
 from pathlib import Path
 
-from spras.containers import prepare_volume, run_container_pretty
+from spras.containers import prepare_volume, run_container_and_log
 from spras.interactome import (
     convert_undirected_to_directed,
     reinsert_direction_col_undirected,
@@ -115,7 +115,7 @@ class MinCostFlow (PRM):
         container_suffix = "mincostflow"
 
         # constructs a docker run call
-        run_container_pretty('MinCostFlow',
+        run_container_and_log('MinCostFlow',
                              container_framework,
                              container_suffix,
                              command,

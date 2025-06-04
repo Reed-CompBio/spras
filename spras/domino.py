@@ -3,7 +3,7 @@ from pathlib import Path
 
 import pandas as pd
 
-from spras.containers import prepare_volume, run_container_pretty
+from spras.containers import prepare_volume, run_container_and_log
 from spras.interactome import (
     add_constant,
     reinsert_direction_col_undirected,
@@ -113,7 +113,7 @@ class DOMINO(PRM):
                           '--output_file', mapped_slices_file]
 
         container_suffix = "domino"
-        run_container_pretty('slicer',
+        run_container_and_log('slicer',
                              container_framework,
                              container_suffix,
                              slicer_command,
@@ -137,7 +137,7 @@ class DOMINO(PRM):
         if module_threshold is not None:
             domino_command.extend(['--module_threshold', str(module_threshold)])
 
-        run_container_pretty('DOMINO',
+        run_container_and_log('DOMINO',
                              container_framework,
                              container_suffix,
                              domino_command,

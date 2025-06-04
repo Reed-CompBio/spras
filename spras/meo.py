@@ -1,7 +1,7 @@
 import os
 from pathlib import Path
 
-from spras.containers import prepare_volume, run_container_pretty
+from spras.containers import prepare_volume, run_container_and_log
 from spras.interactome import (
     add_directionality_constant,
     reinsert_direction_col_directed,
@@ -177,7 +177,7 @@ class MEO(PRM):
         command = ['java', '-jar', '/meo/EOMain.jar', properties_file]
 
         container_suffix = "meo"
-        run_container_pretty('Maximum Edge Orientation',
+        run_container_and_log('Maximum Edge Orientation',
                              container_framework,
                              container_suffix,
                              command,

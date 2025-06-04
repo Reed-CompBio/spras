@@ -1,6 +1,6 @@
 from pathlib import Path
 
-from spras.containers import prepare_volume, run_container_pretty
+from spras.containers import prepare_volume, run_container_and_log
 from spras.interactome import reinsert_direction_col_mixed
 from spras.prm import PRM
 from spras.util import add_rank_column, duplicate_edges, raw_pathway_df
@@ -187,7 +187,7 @@ class OmicsIntegrator1(PRM):
             command.extend(['--seed', str(seed)])
 
         container_suffix = "omics-integrator-1:no-conda" # no-conda version is the default
-        run_container_pretty('Omics Integrator 1',
+        run_container_and_log('Omics Integrator 1',
                              container_framework,
                              container_suffix,  # no-conda version is the default
                              command,

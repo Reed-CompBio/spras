@@ -150,7 +150,7 @@ def run_container(framework: str, container_suffix: str, command: List[str], vol
     else:
         raise ValueError(f'{framework} is not a recognized container framework. Choose "docker" or "singularity".')
 
-def run_container_pretty(name: str, framework: str, container_suffix: str, command: List[str], volumes: List[Tuple[PurePath, PurePath]], working_dir: str, environment: str = 'SPRAS=True'):
+def run_container_and_log(name: str, framework: str, container_suffix: str, command: List[str], volumes: List[Tuple[PurePath, PurePath]], working_dir: str, environment: str = 'SPRAS=True'):
     """
     Runs a command in the container using Singularity or Docker with associated pretty printed messages.
     @param framework: singularity or docker
