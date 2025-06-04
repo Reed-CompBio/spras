@@ -330,7 +330,7 @@ rule ml_analysis:
         hac_image_horizontal = SEP.join([out_dir, '{dataset}-ml', 'hac-horizontal.png']),
         hac_clusters_horizontal = SEP.join([out_dir, '{dataset}-ml', 'hac-clusters-horizontal.txt']),
     run: 
-        summary_df = pandas.read_pickle(network_ml_summary)
+        summary_df = pandas.read_pickle(input.network_ml_summary)
         ml.pca(summary_df, output.pca_image, output.pca_variance, output.pca_coordinates, **pca_params)
         ml.hac_vertical(summary_df, output.hac_image_vertical, output.hac_clusters_vertical, **hac_params)
         ml.hac_horizontal(summary_df, output.hac_image_horizontal, output.hac_clusters_horizontal, **hac_params)
@@ -342,7 +342,7 @@ rule ensemble:
     output:
         ensemble_network_file = SEP.join([out_dir,'{dataset}-ml', 'ensemble-pathway.txt'])
     run:
-        summary_df = pandas.read_pickle(network_ml_summary)
+        summary_df = pandas.read_pickle(input.network_ml_summary)
         ml.ensemble_network(summary_df, output.ensemble_network_file)
 
 # Cluster the output pathways for each dataset per algorithm
@@ -358,7 +358,7 @@ rule ml_analysis_aggregate_algo:
         hac_image_horizontal = SEP.join([out_dir, '{dataset}-ml', '{algorithm}-hac-horizontal.png']),
         hac_clusters_horizontal = SEP.join([out_dir, '{dataset}-ml', '{algorithm}-hac-clusters-horizontal.txt']),
     run:
-        summary_df = pandas.read_pickle(network_ml_summary)
+        summary_df = pandas.read_pickle(input.network_ml_summary)
         ml.pca(summary_df, output.pca_image, output.pca_variance, output.pca_coordinates, **pca_params)
         ml.hac_vertical(summary_df, output.hac_image_vertical, output.hac_clusters_vertical, **hac_params)
         ml.hac_horizontal(summary_df, output.hac_image_horizontal, output.hac_clusters_horizontal, **hac_params)
@@ -370,7 +370,7 @@ rule ensemble_per_algo:
     output:
         ensemble_network_file = SEP.join([out_dir,'{dataset}-ml', '{algorithm}-ensemble-pathway.txt'])
     run:
-        summary_df = pandas.read_pickle(network_ml_summary)
+        summary_df = pandas.read_pickle(input.network_ml_summary)
         ml.ensemble_network(summary_df, output.ensemble_network_file)
 
 # Return the gold standard pickle file for a specific gold standard
