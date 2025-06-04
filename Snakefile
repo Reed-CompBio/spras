@@ -302,16 +302,28 @@ rule summary_table:
         summary_df.to_csv(output.summary_table, sep='\t', index=False)
 
 # Returns all pathways for a specific algorithm
-def collect_pathways_per_algo(wildcards):
-    filtered_algo_params = [algo_param for algo_param in algorithms_with_params if wildcards.algorithm in algo_param] if "algorithm" in wildcards else algorithms_with_params
-    return expand('{out_dir}{sep}{{dataset}}-{algorithm_params}{sep}pathway.txt', out_dir=out_dir, sep=SEP, algorithm_params=filtered_algo_params)
+def collect_pathways(per_algo=False):
+    return def collect_pathways_inter(wildcards):
+        filtered_algo_params = [algo_param for algo_param in algorithms_with_params if wildcards.algorithm in algo_param] if per_algo else algorithms_with_params
+        return expand('{out_dir}{sep}{{dataset}}-{algorithm_params}{sep}pathway.txt', out_dir=out_dir, sep=SEP, algorithm_params=filtered_algo_params)
 
-# Store the expensive summarize_networks call
+# Store the expensive summarize_networks call per algorithm
+rule pickle_summarize_networks_per_algo:
+    input:
+        pathways = collect_pathways(per_algo=True)
+    output:
+        network_ml_summary_algo = SEP.join([out_dir, '{dataset}-ml', 'ml-summary-{algorithm}.pickle'])
+    run:
+        summary_df = ml.summarize_networks(input.pathways)
+        with open(output.network_ml_summary, 'wb') as pickle_writer:
+            pickle.dump(summary_df, pickle_writer)
+
+# Same as pickle_summarize_networks_per_algo, but in general.
 rule pickle_summarize_networks:
     input:
-        pathways = collect_pathways_per_algo
+        pathways = collect_pathways(per_algo=False)
     output:
-        network_ml_summary = SEP.join([out_dir, '{dataset}-ml', 'ml-summary.pickle'])
+        network_ml_summary_algo = SEP.join([out_dir, '{dataset}-ml', 'ml-summary.pickle'])
     run:
         summary_df = ml.summarize_networks(input.pathways)
         with open(output.network_ml_summary, 'wb') as pickle_writer:
@@ -348,7 +360,7 @@ rule ensemble:
 # Cluster the output pathways for each dataset per algorithm
 rule ml_analysis_aggregate_algo:
     input:
-        network_ml_summary = SEP.join([out_dir, '{dataset}-ml', 'ml-summary.pickle'])
+        network_ml_summary = SEP.join([out_dir, '{dataset}-ml', 'ml-summary-{algorithm}.pickle'])
     output:
         pca_image = SEP.join([out_dir, '{dataset}-ml', '{algorithm}-pca.png']),
         pca_variance= SEP.join([out_dir, '{dataset}-ml', '{algorithm}-pca-variance.txt']),
@@ -366,7 +378,7 @@ rule ml_analysis_aggregate_algo:
 # Ensemble the output pathways for each dataset per algorithm
 rule ensemble_per_algo:
     input:
-        network_ml_summary = SEP.join([out_dir, '{dataset}-ml', 'ml-summary.pickle'])
+        network_ml_summary = SEP.join([out_dir, '{dataset}-ml', 'ml-summary-{algorithm}.pickle'])
     output:
         ensemble_network_file = SEP.join([out_dir,'{dataset}-ml', '{algorithm}-ensemble-pathway.txt'])
     run:
