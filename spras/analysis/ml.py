@@ -10,7 +10,7 @@ from adjustText import adjust_text
 from scipy.cluster.hierarchy import dendrogram, fcluster
 from sklearn.cluster import AgglomerativeClustering
 from sklearn.decomposition import PCA
-from sklearn.preprocessing import MinMaxScaler, StandardScaler
+from sklearn.preprocessing import StandardScaler
 
 from spras.util import make_required_dirs
 
