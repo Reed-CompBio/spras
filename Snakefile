@@ -303,9 +303,10 @@ rule summary_table:
 
 # Returns all pathways for a specific algorithm
 def collect_pathways(per_algo=False):
-    return def collect_pathways_inter(wildcards):
+    def collect_pathways_inter(wildcards):
         filtered_algo_params = [algo_param for algo_param in algorithms_with_params if wildcards.algorithm in algo_param] if per_algo else algorithms_with_params
         return expand('{out_dir}{sep}{{dataset}}-{algorithm_params}{sep}pathway.txt', out_dir=out_dir, sep=SEP, algorithm_params=filtered_algo_params)
+    return collect_pathways_inter
 
 # Store the expensive summarize_networks call per algorithm
 rule pickle_summarize_networks_per_algo:
