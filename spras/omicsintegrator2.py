@@ -2,7 +2,7 @@ from pathlib import Path
 
 import pandas as pd
 
-from spras.containers import prepare_volume, run_container
+from spras.containers import prepare_volume, run_container_and_log
 from spras.dataset import Dataset
 from spras.interactome import reinsert_direction_col_undirected
 from spras.prm import PRM
@@ -118,15 +118,13 @@ class OmicsIntegrator2(PRM):
         if seed is not None:
             command.extend(['--seed', str(seed)])
 
-        print('Running Omics Integrator 2 with arguments: {}'.format(' '.join(command)), flush=True)
-
         container_suffix = "omics-integrator-2:v2"
-        out = run_container(container_framework,
-                            container_suffix,
-                            command,
-                            volumes,
-                            work_dir)
-        print(out)
+        run_container_and_log('Omics Integrator 2',
+                             container_framework,
+                             container_suffix,
+                             command,
+                             volumes,
+                             work_dir)
 
         # TODO do we want to retain other output files?
         # TODO if deleting other output files, write them all to a tmp directory and copy

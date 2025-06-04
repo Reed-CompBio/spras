@@ -3,7 +3,7 @@ from pathlib import Path
 
 import pandas as pd
 
-from spras.containers import prepare_volume, run_container
+from spras.containers import prepare_volume, run_container_and_log
 from spras.interactome import (
     add_constant,
     reinsert_direction_col_undirected,
@@ -112,15 +112,13 @@ class DOMINO(PRM):
                           '--network_file', network_file,
                           '--output_file', mapped_slices_file]
 
-        print('Running slicer with arguments: {}'.format(' '.join(slicer_command)), flush=True)
-
         container_suffix = "domino"
-        slicer_out = run_container(container_framework,
-                                   container_suffix,
-                                   slicer_command,
-                                   volumes,
-                                   work_dir)
-        print(slicer_out)
+        run_container_and_log('slicer',
+                             container_framework,
+                             container_suffix,
+                             slicer_command,
+                             volumes,
+                             work_dir)
 
         # Make the Python command to run within the container
         domino_command = ['domino',
@@ -139,14 +137,12 @@ class DOMINO(PRM):
         if module_threshold is not None:
             domino_command.extend(['--module_threshold', str(module_threshold)])
 
-        print('Running DOMINO with arguments: {}'.format(' '.join(domino_command)), flush=True)
-
-        domino_out = run_container(container_framework,
-                                   container_suffix,
-                                   domino_command,
-                                   volumes,
-                                   work_dir)
-        print(domino_out)
+        run_container_and_log('DOMINO',
+                             container_framework,
+                             container_suffix,
+                             domino_command,
+                             volumes,
+                             work_dir)
 
         # DOMINO creates a new folder in out_dir to output its modules HTML files into called active_genes
         # The filename is determined by the input active_genes and cannot be configured
