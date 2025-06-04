@@ -47,7 +47,19 @@ container_registry:
 algorithms:
       - name: "localneighborhood"
         params:
+              include: false
+
+      - name: "strwr"
+        params:
+              include: false
+              run1:
+                  alpha: [0.85]
+      
+      - name: "rwr"
+        params:
               include: true
+              run1:
+                  alpha: [0.85]
 
       - name: "pathlinker"
         params:
@@ -168,7 +180,7 @@ analysis:
       # Machine learning analysis (e.g. clustering) of the pathway output files for each dataset
       ml:
         # ml analysis per dataset
-        include: true
+        include: false
         # adds ml analysis per algorithm output
         # only runs for algorithms with multiple parameter combinations chosen
         aggregate_per_algorithm: true

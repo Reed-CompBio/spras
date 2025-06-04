@@ -17,7 +17,8 @@ algo_exp_file = {
     'domino': 'network',
     'pathlinker': 'network',
     'allpairs': 'network',
-    'localnetwork': 'network'
+    'strwr': 'network',
+    'rwr': 'network'
 }
 
 
