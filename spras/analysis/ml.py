@@ -144,13 +144,10 @@ def pca(dataframe: pd.DataFrame, output_png: str, output_var: str, output_coord:
         raise ValueError(f"labels={labels} must be True or False")
 
     # center binary data by subtracting the column-wise mean
-    # removes bias from runs that select more or fewer edges overall
     # allows PCA to focus on edge inclusion patterns across runs rather than raw output volume.
     scaler = StandardScaler(with_std=False)
-    scaler.fit(X)  # compute mean edge inclusion rate per run
+    scaler.fit(X)  # compute mean inclusion rate per edge
     X_scaled = scaler.transform(X)
-    print(X)
-    print(X_scaled)
 
     # choosing the PCA
     pca_instance = PCA(n_components=components)

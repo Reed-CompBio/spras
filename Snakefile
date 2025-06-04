@@ -385,7 +385,6 @@ rule evaluation_pca_chosen:
         gold_standard_file = get_gold_standard_pickle_file,
         pca_coordinates_file = collect_pca_coordinates_per_dataset
     output: 
-       # TODO: add in png? test what this would be and if useful
         pca_chosen_pr_file = SEP.join([out_dir, '{dataset_gold_standard_pairs}-eval', "pr-pca-chosen-pathway.txt"]),
         pca_chosen_pr_png = SEP.join([out_dir, '{dataset_gold_standard_pairs}-eval', "pr-pca-chosen-pathway.png"]),
     run:
@@ -396,7 +395,6 @@ rule evaluation_pca_chosen:
 # Returns pca coordinates for a specific algorithm and dataset
 def collect_pca_coordinates_per_algo_per_dataset(wildcards):
     dataset_label = get_dataset_label(wildcards)
-    # return f"{out_dir}{SEP}{dataset_label}-ml{SEP}{wildcards.algorithm}-pca-coordinates.txt"
     return expand('{out_dir}{sep}{dataset}-ml{sep}{algorithm}-pca-coordinates.txt', out_dir=out_dir, sep=SEP, dataset=dataset_label, algorithm=algorithms_mult_param_combos)
 
 # Run evaluation per algortihm for all associated pca_coordinates.txt for a dataset against its paired gold standard
@@ -405,7 +403,6 @@ rule evaluation_per_algo_pca_chosen:
         gold_standard_file = get_gold_standard_pickle_file,
         pca_coordinates_file = collect_pca_coordinates_per_algo_per_dataset
     output: 
-        # TODO: add in png? test what this would be and if useful
         pca_chosen_pr_file = SEP.join([out_dir, '{dataset_gold_standard_pairs}-eval', "pr-pca-chosen-pathway-per-algorithm.txt"]),
         pca_chosen_pr_png = SEP.join([out_dir, '{dataset_gold_standard_pairs}-eval', "pr-pca-chosen-pathway-per-algorithm.png"]),
     run:
