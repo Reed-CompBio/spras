@@ -3,7 +3,7 @@ from pathlib import Path
 from spras.containers import prepare_volume, run_container
 from spras.interactome import (
     convert_undirected_to_directed,
-    reinsert_direction_col_undirected,
+    reinsert_direction_col_directed,
 )
 from spras.prm import PRM
 from spras.util import (
@@ -97,7 +97,7 @@ class BowTieBuilder(PRM):
 
             except Exception as err:
                 # catches a much harder to debug error in BTB.
-                raise IndexError("BTB edges arenot formatted correctly") from err
+                raise IndexError("BTB edges are not formatted correctly") from err
 
         work_dir = '/btb'
 
@@ -155,7 +155,7 @@ class BowTieBuilder(PRM):
         df = raw_pathway_df(raw_pathway_file, sep='\t', header=0)
         if not df.empty:
             df = add_rank_column(df)
-            df = reinsert_direction_col_undirected(df)
+            df = reinsert_direction_col_directed(df)
             df.columns = ['Node1', 'Node2', 'Rank', 'Direction']
             df, has_duplicates = duplicate_edges(df)
             if has_duplicates:

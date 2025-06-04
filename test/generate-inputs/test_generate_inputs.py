@@ -18,7 +18,7 @@ algo_exp_file = {
     'pathlinker': 'network',
     'allpairs': 'network',
     'bowtiebuilder': 'edges'
-    }
+}
 
 
 class TestGenerateInputs:
