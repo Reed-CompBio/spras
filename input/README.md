@@ -39,6 +39,22 @@ A	B	0.98
 B	C	0.77 
 ```
 
+### Gold Standard
+#### Nodes
+Gold standard node files are txt files and do not include a header row.
+
+Each row in the file represents a single node identifier. The file is structured as a single column with one node per line. These nodes typically correspond to gene or protein identifiers that are relevant to the biological pathway of interest.
+
+For example:
+```
+A
+B
+C
+```
+
+#### Edges
+TBD
+
 ## Toy datasets
 The following files are very small toy datasets used to illustrate the supported file formats
 - `alternative-network.txt`
@@ -75,3 +91,10 @@ Peter V Hornbeck, Bin Zhang, Beth Murray, Jon M Kornhauser, Vaughan Latham, Elzb
 
 The TPS [publication](https://doi.org/10.1016/j.celrep.2018.08.085) describes how the network data and protein prizes were prepared.
 
+### EGFR Gold Standard
+
+This EGFR gold standard nodes were prepared by downloading the EGFR reference node dataset from the Gitter Lab fork of the TPS repository: [EGFR Node File](https://github.com/gitter-lab/tps/blob/ca7cafd1e1c17f45ddea07c3fb54d0d70b86ff45/data/resources/eight-egfr-reference-all.txt).
+
+We filtered the dataset by removing all nodes with the _PSEUDONODE suffix to focus only on biologically meaningful interactions.
+
+This work is part of our ongoing effort to integrate an EGFR-specific gold standard into SPRAS, as discussed in issue [#178](https://github.com/Reed-CompBio/spras/issues/178).
