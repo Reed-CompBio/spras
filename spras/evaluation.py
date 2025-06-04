@@ -92,7 +92,6 @@ class Evaluation:
         results = []
         for file in file_paths:
             df = pd.read_table(file, sep="\t", header=0, usecols=["Node1", "Node2"])
-            # TODO: do we want to include the pathways that are empty for evaluation / in the pr_df?
             y_pred = set(df['Node1']).union(set(df['Node2']))
             all_nodes = y_true.union(y_pred)
             y_true_binary = [1 if node in y_true else 0 for node in all_nodes]
@@ -130,9 +129,9 @@ class Evaluation:
                 plt.legend()
                 plt.grid(True)
                 plt.savefig(output_png)
-            else: # TODO: figure out if this would ever happen; maybe when all the pathways are empty?
+            else: # for pca based this else case won't be hit, but for no tuning idea, it will
                 plt.figure()
-                plt.plot([], [], label="No Pathways")
+                plt.plot([], [], label="Empty Pathways")
                 plt.title("Precision and Recall Plot")
                 plt.legend()
                 plt.savefig(output_png)
