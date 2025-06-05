@@ -11,6 +11,8 @@ from sklearn.metrics import (
     recall_score,
 )
 
+from spras.analysis.ml import create_palette
+
 
 class Evaluation:
     NODE_ID = "NODEID"
@@ -109,6 +111,7 @@ class Evaluation:
             pr_df.to_csv(output_file, sep="\t", index=False)
             if output_png is not None:
                 plt.figure(figsize=(10, 7))
+                color_palette = create_palette(algorithms)
                 # plot a line per algorithm
                 for algorithm in algorithms:
                     subset = pr_df[pr_df["Pathway"].str.contains(algorithm)]
@@ -116,6 +119,7 @@ class Evaluation:
                         plt.plot(
                             subset["Recall"],
                             subset["Precision"],
+                            color = color_palette[algorithm],
                             marker='o',
                             linestyle='',
                             label=f"{algorithm}"
