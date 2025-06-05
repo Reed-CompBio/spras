@@ -1,1 +1,4 @@
 Algorithm	Threshold	Precision	Recall	Average_Precison	Baseline_Precision
+ensemble1	None	None	None	None	None
+ensemble2	None	None	None	None	None
+ensemble3	None	None	None	None	None
