@@ -14,6 +14,8 @@ from sklearn.metrics import (
     recall_score,
 )
 
+from spras.analysis.ml import create_palette
+
 
 class Evaluation:
     NODE_ID = "NODEID"
@@ -116,17 +118,6 @@ class Evaluation:
 
         return node_ensembles_dict
 
-
-    @staticmethod
-    def create_palette(label_names:list) -> dict:
-        """
-        Generates a dictionary mapping each ensemble label to a unique color from the specified palette.
-        """
-        unique_column_names = list(sorted(set(label_names)))
-        custom_palette = sns.color_palette(palette = "tab20", n_colors = len(unique_column_names))
-        label_color_map = {label: color for label, color in zip(unique_column_names, custom_palette, strict=True)}
-        return label_color_map
-
     @staticmethod
     def precision_recall_curve_node_ensemble(node_ensembles:dict, node_table:pd.DataFrame, output_png:str, output_file:str):
         """
@@ -141,7 +132,7 @@ class Evaluation:
         gold_standard_nodes = set(node_table['NODEID'])
 
         label_names = list(node_ensembles)
-        color_palette = Evaluation.create_palette(label_names)
+        color_palette = create_palette(label_names)
 
         plt.figure(figsize=(10, 7))
 
@@ -159,37 +150,44 @@ class Evaluation:
                 baseline_precision = np.sum(y_true) / len(y_true)
 
                 plt.plot(recall, precision, color=color_palette[label], marker='o', label=f'{label} PR curve (AP:{avg_precision:.4f})')
-                plt.axhline(y=baseline_precision, color=color_palette[label], linestyle='--', label=f'Baseline Precision: {baseline_precision:.4f}')
+                plt.axhline(y=baseline_precision, color=color_palette[label], linestyle='--', label=f'{label} Baseline Precision: {baseline_precision:.4f}')
 
-                if label == 'ensemble':
-                    df = pd.DataFrame({
-                        'Threshold': thresholds,
-                        'Precision': precision[:-1],
-                        'Recall': recall[:-1],
-                        'Average_Precison': avg_precision,
-                        'Baseline_Precision': baseline_precision
-                    })
-                    dfs.append(df)
+                data = {
+                    'Threshold': thresholds,
+                    'Precision': precision[:-1],
+                    'Recall': recall[:-1],
+                    'Average_Precison': avg_precision,
+                    'Baseline_Precision': baseline_precision
+                }
+
+                if label != 'ensemble':
+                    data['Algorithm'] = [label] * len(thresholds)
+                    cols = ['Algorithm'] + [col for col in data if col != 'Algorithm']
                 else:
-                    df = pd.DataFrame({
-                        'Algorithm': [label] * len(thresholds),
-                        'Threshold': thresholds,
-                        'Precision': precision[:-1],
-                        'Recall': recall[:-1],
-                        'Average_Precison': avg_precision,
-                        'Baseline_Precision': baseline_precision
-                    })
-                    dfs.append(df)
+                    cols = list(data.keys())
+
+                df = pd.DataFrame(data)[cols]
+                dfs.append(df)
 
             else:
                 plt.plot([], [], color=color_palette[label], marker='o', label=f'{label} PR curve - Empty Ensemble')
 
-                if label == 'ensemble':
-                    df = pd.DataFrame(columns=['Threshold', 'Precision', 'Recall', 'Average_Precison', 'Baseline_Precision'])
-                    dfs.append(df)
+                data = {
+                    'Threshold': ["None"],
+                    'Precision': ["None"],
+                    'Recall': ["None"],
+                    'Average_Precison': ["None"],
+                    'Baseline_Precision': ["None"]
+                }
+
+                if label != 'ensemble':
+                    data['Algorithm'] = [label]
+                    cols = ['Algorithm'] + [col for col in data if col != 'Algorithm']
                 else:
-                    df = pd.DataFrame(columns=['Algorithm', 'Threshold', 'Precision', 'Recall', 'Average_Precison', 'Baseline_Precision'])
-                    dfs.append(df)
+                    cols = list(data.keys())
+
+                df = pd.DataFrame(data)[cols]
+                dfs.append(df)
 
         plt.xlabel('Recall')
         plt.ylabel('Precision')

@@ -378,9 +378,9 @@ def get_dataset_label(wildcards):
 # Returns ensemble file for each dataset
 def collect_ensemble_per_dataset(wildcards):
     dataset_label = get_dataset_label(wildcards)
-    return [f'{out_dir}{SEP}{dataset_label}-ml{SEP}ensemble-pathway.txt']
+    return expand('{out_dir}{sep}{dataset}-ml{sep}ensemble-pathway.txt', out_dir=out_dir, sep=SEP, dataset=dataset_label)
 
-# Run evaluation for each ensemble pathway for a dataset against its paired gold standard
+# Run precision-recall curves for each ensemble pathway within a dataset evaluated against its corresponding gold standard
 rule evaluation_ensemble_pr_curve:
     input: 
         gold_standard_file = get_gold_standard_pickle_file,
@@ -398,7 +398,7 @@ def collect_ensemble_per_algo_per_dataset(wildcards):
     dataset_label = get_dataset_label(wildcards)
     return expand('{out_dir}{sep}{dataset}-ml{sep}{algorithm}-ensemble-pathway.txt', out_dir=out_dir, sep=SEP, dataset=dataset_label, algorithm=algorithms)
 
-# Run evaluation per algorithm for each ensemble pathway for a dataset against its paired gold standard
+# Run precision-recall curves for each algorithm's ensemble pathway within a dataset evaluated against its corresponding gold standard
 rule evaluation_per_algo_ensemble_pr_curve:
     input: 
         gold_standard_file = get_gold_standard_pickle_file,
