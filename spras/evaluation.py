@@ -129,6 +129,7 @@ class Evaluation:
                 plt.legend()
                 plt.grid(True)
                 plt.savefig(output_png)
+                plt.close()
         else: # TODO: I don't think this case will ever hit
             pr_df.to_csv(output_file, sep="\t", index=False)
             if output_png is not None:
@@ -137,6 +138,7 @@ class Evaluation:
                 plt.title("Precision and Recall Plot")
                 plt.legend()
                 plt.savefig(output_png)
+                plt.close()
 
 
 

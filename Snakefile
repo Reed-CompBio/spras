@@ -378,7 +378,7 @@ def get_dataset_label(wildcards):
 # Returns all pathways for a specific dataset
 def collect_pathways_per_dataset(wildcards):
     dataset_label = get_dataset_label(wildcards)
-    return expand('{out_dir}{sep}{dataset_label}-{algorithm_params}{sep}pathway.txt', out_dir=out_dir, sep=SEP, algorithm_params=algorithms_with_params, dataset_label=dataset_label),
+    return expand('{out_dir}{sep}{dataset_label}-{algorithm_params}{sep}pathway.txt', out_dir=out_dir, sep=SEP, algorithm_params=algorithms_with_params, dataset_label=dataset_label)
 
 # Run precision and recall for all pathway outputs for a dataset against its paired gold standard
 rule evaluation_pr_per_pathways:
