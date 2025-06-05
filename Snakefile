@@ -378,7 +378,8 @@ def get_dataset_label(wildcards):
 # Returns pca coordinate per dataset
 def collect_pca_coordinates_per_dataset(wildcards):
     dataset_label = get_dataset_label(wildcards)
-    return [f'{out_dir}{SEP}{dataset_label}-ml{SEP}pca-coordinates.txt']
+    return expand('{out_dir}{sep}{dataset}-ml{sep}pca-coordinates.txt', out_dir=out_dir, sep=SEP, dataset=dataset_label)
+
 
 # Run PCA chosen to select the representative from all pathway outputs for a given dataset, 
 # then evaluate with precision and recall against the corresponding gold standard
