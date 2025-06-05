@@ -105,11 +105,11 @@ def make_final_input(wildcards):
         final_input.extend(expand('{out_dir}{sep}{dataset}-ml{sep}{algorithm}-ensemble-pathway.txt',out_dir=out_dir,sep=SEP,dataset=dataset_labels,algorithm=algorithms))
 
     if _config.config.analysis_include_evaluation:
-        final_input.extend(expand('{out_dir}{sep}{dataset_gold_standard_pair}-eval{sep}precision-recall-per-pathway.txt',out_dir=out_dir,sep=SEP,dataset_gold_standard_pair=dataset_gold_standard_pairs,algorithm_params=algorithms_with_params))
-        final_input.extend(expand('{out_dir}{sep}{dataset_gold_standard_pair}-eval{sep}precision-recall-per-pathway.png',out_dir=out_dir,sep=SEP,dataset_gold_standard_pair=dataset_gold_standard_pairs)) 
+        final_input.extend(expand('{out_dir}{sep}{dataset_gold_standard_pair}-eval{sep}pr-per-pathway.txt',out_dir=out_dir,sep=SEP,dataset_gold_standard_pair=dataset_gold_standard_pairs,algorithm_params=algorithms_with_params))
+        final_input.extend(expand('{out_dir}{sep}{dataset_gold_standard_pair}-eval{sep}pr-per-pathway.png',out_dir=out_dir,sep=SEP,dataset_gold_standard_pair=dataset_gold_standard_pairs)) 
     if _config.config.analysis_include_evaluation_aggregate_algo:
-        final_input.extend(expand('{out_dir}{sep}{dataset_gold_standard_pair}-eval{sep}{algorithm}-precision-recall-per-pathway.txt',out_dir=out_dir,sep=SEP,dataset_gold_standard_pair=dataset_gold_standard_pairs,algorithm=algorithms))
-        final_input.extend(expand('{out_dir}{sep}{dataset_gold_standard_pair}-eval{sep}{algorithm}-precision-recall-per-pathway.png',out_dir=out_dir,sep=SEP,dataset_gold_standard_pair=dataset_gold_standard_pairs,algorithm=algorithms))
+        final_input.extend(expand('{out_dir}{sep}{dataset_gold_standard_pair}-eval{sep}pr-per-pathway-per-{algorithm}.txt',out_dir=out_dir,sep=SEP,dataset_gold_standard_pair=dataset_gold_standard_pairs,algorithm=algorithms))
+        final_input.extend(expand('{out_dir}{sep}{dataset_gold_standard_pair}-eval{sep}pr-per-pathway-per-{algorithm}.png',out_dir=out_dir,sep=SEP,dataset_gold_standard_pair=dataset_gold_standard_pairs,algorithm=algorithms))
     if len(final_input) == 0:
         # No analysis added yet, so add reconstruction output files if they exist.
         # (if analysis is specified, these should be implicitly run).
@@ -375,14 +375,19 @@ def get_dataset_label(wildcards):
     dataset = parts[0]
     return dataset
 
-# Run evaluation for all pathway outputs, ensemble.txt, and pca_coordinates.txt for a dataset against its paired gold standard
-rule evaluation:
+# Returns all pathways for a specific dataset
+def collect_pathways_per_dataset(wildcards):
+    dataset_label = get_dataset_label(wildcards)
+    return expand('{out_dir}{sep}{dataset_label}-{algorithm_params}{sep}pathway.txt', out_dir=out_dir, sep=SEP, algorithm_params=algorithms_with_params, dataset_label=dataset_label),
+
+# Run precision and recall for all pathway outputs for a dataset against its paired gold standard
+rule evaluation_pr_per_pathways:
     input: 
         gold_standard_file = get_gold_standard_pickle_file,
-        pathways = expand('{out_dir}{sep}{dataset_label}-{algorithm_params}{sep}pathway.txt', out_dir=out_dir, sep=SEP, algorithm_params=algorithms_with_params, dataset_label=get_dataset_label),
+        pathways = collect_pathways_per_dataset
     output: 
-        pr_file = SEP.join([out_dir, '{dataset_gold_standard_pairs}-eval', "precision-recall-per-pathway.txt"]),
-        pr_png = SEP.join([out_dir, '{dataset_gold_standard_pairs}-eval', 'precision-recall-per-pathway.png']),
+        pr_file = SEP.join([out_dir, '{dataset_gold_standard_pairs}-eval', "pr-per-pathway.txt"]),
+        pr_png = SEP.join([out_dir, '{dataset_gold_standard_pairs}-eval', 'pr-per-pathway.png']),
     run:
         node_table = Evaluation.from_file(input.gold_standard_file).node_table
         Evaluation.precision_and_recall(input.pathways, node_table, algorithms, output.pr_file, output.pr_png)
@@ -393,14 +398,14 @@ def collect_pathways_per_algo_per_dataset(wildcards):
     filtered_algo_params = [algo_param for algo_param in algorithms_with_params if wildcards.algorithm in algo_param]
     return expand('{out_dir}{sep}{dataset_label}-{algorithm_params}{sep}pathway.txt', out_dir=out_dir, sep=SEP, algorithm_params=filtered_algo_params, dataset_label= dataset_label)
 
-# Run evaluation per algortihm for all associated pathway outputs for a dataset against its paired gold standard
-rule evaluation_per_algo_pathways:
+# Run precision and recall per algorithm for all pathway outputs for a dataset against its paired gold standard
+rule evaluation_per_algo_pr_per_pathways:
     input: 
         gold_standard_file = get_gold_standard_pickle_file,
         pathways =  collect_pathways_per_algo_per_dataset,
     output: 
-        pr_file = SEP.join([out_dir, '{dataset_gold_standard_pairs}-eval', "{algorithm}-precision-recall-per-pathway.txt"]),
-        pr_png = SEP.join([out_dir, '{dataset_gold_standard_pairs}-eval', '{algorithm}-precision-recall-per-pathway.png']),
+        pr_file = SEP.join([out_dir, '{dataset_gold_standard_pairs}-eval', "pr-per-pathway-per-{algorithm}.txt"]),
+        pr_png = SEP.join([out_dir, '{dataset_gold_standard_pairs}-eval', 'pr-per-pathway-per-{algorithm}.png']),
     run:
         node_table = Evaluation.from_file(input.gold_standard_file).node_table
         Evaluation.precision_and_recall(input.pathways, node_table, algorithms, output.pr_file, output.pr_png)

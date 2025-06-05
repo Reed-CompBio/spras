@@ -37,3 +37,13 @@ class TestEvaluate:
 
         Evaluation.precision_and_recall(file_paths, NODE_TABLE, algorithms, output_file, output_png)
         assert filecmp.cmp(output_file, EXPECT_DIR + 'expected-precision-recall-per-pathway-empty.txt', shallow=False)
+
+    def test_precision_recall_per_pathway_nothing(self):
+
+        file_paths = []
+        algorithms = []
+        output_file = OUT_DIR +"test-precision-recall-per-pathway-nothing.txt"
+        output_png = OUT_DIR + "test-precision-recall-per-pathway-nothing.png"
+
+        Evaluation.precision_and_recall(file_paths, NODE_TABLE, algorithms, output_file, output_png)
+        assert filecmp.cmp(output_file, EXPECT_DIR + 'expected-precision-recall-per-pathway-nothing.txt', shallow=False)

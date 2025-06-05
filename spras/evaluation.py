@@ -90,9 +90,8 @@ class Evaluation:
         """
         y_true = set(node_table['NODEID'])
         results = []
-        for file in file_paths:
-            df = pd.read_table(file, sep="\t", header=0, usecols=["Node1", "Node2"])
-            # TODO: do we want to include the pathways that are empty for evaluation / in the pr_df?
+        for f in file_paths:
+            df = pd.read_table(f, sep="\t", header=0, usecols=["Node1", "Node2"])
             y_pred = set(df['Node1']).union(set(df['Node2']))
             all_nodes = y_true.union(y_pred)
             y_true_binary = [1 if node in y_true else 0 for node in all_nodes]
@@ -101,15 +100,15 @@ class Evaluation:
             # not using precision_recall_curve because thresholds are binary (0 or 1); rather we are directly calculating precision and recall per pathway
             precision = precision_score(y_true_binary, y_pred_binary, zero_division=0.0)
             recall = recall_score(y_true_binary, y_pred_binary, zero_division=0.0)
-            results.append({"Pathway": file, "Precision": precision, "Recall": recall})
+            results.append({"Pathway": f, "Precision": precision, "Recall": recall})
 
         pr_df = pd.DataFrame(results)
-        pr_df.sort_values(by=["Recall", "Pathway"], axis=0, ascending=True, inplace=True)
-        pr_df.to_csv(output_file, sep="\t", index=False)
 
-        if output_png is not None:
-            if not pr_df.empty:
-                plt.figure(figsize=(8, 6))
+        if not pr_df.empty:
+            pr_df.sort_values(by=["Recall", "Pathway"], axis=0, ascending=True, inplace=True)
+            pr_df.to_csv(output_file, sep="\t", index=False)
+            if output_png is not None:
+                plt.figure(figsize=(10, 7))
                 # plot a line per algorithm
                 for algorithm in algorithms:
                     subset = pr_df[pr_df["Pathway"].str.contains(algorithm)]
@@ -122,17 +121,21 @@ class Evaluation:
                             label=f"{algorithm}"
                         )
 
-
                 plt.xlabel("Recall")
                 plt.ylabel("Precision")
-                plt.title(f"Precision and Recall Plot")
+                plt.xlim(-0.05, 1.05)
+                plt.ylim(-0.05, 1.05)
+                plt.title("Precision and Recall Plot")
                 plt.legend()
                 plt.grid(True)
                 plt.savefig(output_png)
-            else:
-                plt.figure()
-                plt.plot([], [])
-                plt.title("Empty Pathway Files")
+        else: # TODO: I don't think this case will ever hit
+            pr_df.to_csv(output_file, sep="\t", index=False)
+            if output_png is not None:
+                plt.figure(figsize=(10, 7))
+                plt.plot([], [], label="No Pathways Given")
+                plt.title("Precision and Recall Plot")
+                plt.legend()
                 plt.savefig(output_png)
 
 
