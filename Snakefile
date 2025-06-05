@@ -375,11 +375,13 @@ def get_dataset_label(wildcards):
     dataset = parts[0]
     return dataset
 
+# Returns pca coordinate per dataset
 def collect_pca_coordinates_per_dataset(wildcards):
     dataset_label = get_dataset_label(wildcards)
     return [f'{out_dir}{SEP}{dataset_label}-ml{SEP}pca-coordinates.txt']
 
-# Run evaluation code for a specific dataset's pathway outputs against its paired gold standard
+# Run PCA chosen to select the representative from all pathway outputs for a given dataset, 
+# then evaluate with precision and recall against the corresponding gold standard
 rule evaluation_pca_chosen:
     input: 
         gold_standard_file = get_gold_standard_pickle_file,
@@ -397,7 +399,8 @@ def collect_pca_coordinates_per_algo_per_dataset(wildcards):
     dataset_label = get_dataset_label(wildcards)
     return expand('{out_dir}{sep}{dataset}-ml{sep}{algorithm}-pca-coordinates.txt', out_dir=out_dir, sep=SEP, dataset=dataset_label, algorithm=algorithms_mult_param_combos)
 
-# Run evaluation per algortihm for all associated pca_coordinates.txt for a dataset against its paired gold standard
+# Run PCA chosen to select the representative pathway per algorithm pathway outputs for a given dataset, 
+# then evaluate with precision and recall against the corresponding gold standard
 rule evaluation_per_algo_pca_chosen:
     input: 
         gold_standard_file = get_gold_standard_pickle_file,
