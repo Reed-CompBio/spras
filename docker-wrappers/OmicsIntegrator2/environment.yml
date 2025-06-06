@@ -1,21 +1,21 @@
 name: oi2
 dependencies:
-- git-lfs=2.13
-- numpy=1.19
-- pandas=0.23.4
-- scikit-learn=0.19
-- networkx=2.1
-- jinja2=2.9
-- python-louvain=0.11
-- scipy=1.1
-- python=3.6
-- pip=21.0
-- patsy=0.5
-- requests=2.25
-- statsmodels=0.12
-- pybind11=2.5
-- pip:
-  - pcst_fast==1.0.7
-  - goenrich==1.7.0
-  - axial==0.1.10
-  - git+https://github.com/agitter/OmicsIntegrator2@568f170eae388e42e923c478ac9f3308b487760b
+  - git-lfs=2.13
+  - numpy=1.19
+  - pandas=0.23.4
+  - scikit-learn=0.19
+  - networkx=2.1
+  - jinja2=2.9
+  - python-louvain=0.11
+  - scipy=1.1
+  - python=3.6
+  - pip=21.0
+  - patsy=0.5
+  - requests=2.25
+  - statsmodels=0.12
+  - pybind11=2.5
+  - pip:
+      - pcst_fast==1.0.7
+      - goenrich==1.7.0
+      - axial==0.1.10
+      - git+https://github.com/agitter/OmicsIntegrator2@568f170eae388e42e923c478ac9f3308b487760b
