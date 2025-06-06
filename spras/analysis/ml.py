@@ -370,7 +370,8 @@ def jaccard_similarity_eval(summary_df: pd.DataFrame, output_file: str, output_p
     jaccard_matrix.to_csv(output_file, sep='\t', index=True, header=True)
     # make a heatmap from the jaccard matrix
     fig, ax = plt.subplots(figsize=(10, 7))
-    cax = ax.imshow(jaccard_matrix.values, interpolation='nearest', cmap='viridis', vmin=0, vmax=1)
+    # TODO: could add a way for the user to customize the cmap?
+    cax = ax.imshow(jaccard_matrix.values, interpolation='nearest', cmap='copper', vmin=0, vmax=1)
     ax.set_title("Jaccard Similarity Heatmap")
     # set tick labels with algorithm names
     ax.set_xticks(np.arange(len(algorithms)))
