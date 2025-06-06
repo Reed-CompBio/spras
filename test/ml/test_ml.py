@@ -68,7 +68,7 @@ class TestML:
             ml.hac_horizontal(dataframe, OUT_DIR + 'hac-single-line-horizontal.png', OUT_DIR + 'hac-single-line-clusters-horizontal.txt')
         with pytest.raises(ValueError):
             ml.hac_vertical(dataframe, OUT_DIR + 'hac-single-line-vertical.png', OUT_DIR + 'hac-single-line-clusters-vertical.txt')
-        
+
     def test_pca(self):
         dataframe = ml.summarize_networks([INPUT_DIR + 'test-data-s1/s1.txt', INPUT_DIR + 'test-data-s2/s2.txt', INPUT_DIR + 'test-data-s3/s3.txt'])
         ml.pca(dataframe, OUT_DIR + 'pca.png', OUT_DIR + 'pca-variance.txt',
@@ -168,7 +168,7 @@ class TestML:
 
         assert filecmp.cmp(jaccard_txt_outpath, EXPECT_DIR + 'expected-jaccard-matrix-empty.txt', shallow=False)
         assert jaccard_png_outpath.exists()
-    
+
     def test_jaccard_similarity_eval_single_line(self):
         jaccard_png_outpath = Path(OUT_DIR + 'jaccard-matrix-single-line.png')
         jaccard_png_outpath.unlink(missing_ok=True)
