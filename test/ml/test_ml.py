@@ -148,7 +148,7 @@ class TestML:
         assert en.equals(expected)
 
     def test_jaccard_similarity_eval(self):
-        jaccard_png_outpath = Path(OUT_DIR + 'jaccard-matrix.png')
+        jaccard_png_outpath = Path(OUT_DIR + 'jaccard-heatmap.png')
         jaccard_png_outpath.unlink(missing_ok=True)
         jaccard_txt_outpath = Path(OUT_DIR + 'jaccard-matrix.txt')
         jaccard_txt_outpath.unlink(missing_ok=True)
@@ -159,7 +159,7 @@ class TestML:
         assert jaccard_png_outpath.exists()
 
     def test_jaccard_similarity_eval_empty(self):
-        jaccard_png_outpath = Path(OUT_DIR + 'jaccard-matrix-empty.png')
+        jaccard_png_outpath = Path(OUT_DIR + 'jaccard-heatmap-empty.png')
         jaccard_png_outpath.unlink(missing_ok=True)
         jaccard_txt_outpath = Path(OUT_DIR + 'jaccard-matrix-empty.txt')
         jaccard_txt_outpath.unlink(missing_ok=True)
@@ -170,7 +170,7 @@ class TestML:
         assert jaccard_png_outpath.exists()
 
     def test_jaccard_similarity_eval_single_line(self):
-        jaccard_png_outpath = Path(OUT_DIR + 'jaccard-matrix-single-line.png')
+        jaccard_png_outpath = Path(OUT_DIR + 'jaccard-heatmap-single-line.png')
         jaccard_png_outpath.unlink(missing_ok=True)
         jaccard_txt_outpath = Path(OUT_DIR + 'jaccard-matrix-single-line.txt')
         jaccard_txt_outpath.unlink(missing_ok=True)
