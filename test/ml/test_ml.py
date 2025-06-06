@@ -60,7 +60,7 @@ class TestML:
             ml.hac_vertical(dataframe, OUT_DIR + 'hac-empty-vertical.png', OUT_DIR + 'hac-empty-clusters-vertical.txt')
 
     def test_single_line(self):
-        dataframe = ml.summarize_networks([INPUT_DIR + 'test-data-empty/empty.txt'])
+        dataframe = ml.summarize_networks([INPUT_DIR + 'test-data-single/single.txt'])
         with pytest.raises(ValueError):  # raises error if single line in file s.t. single row in dataframe is used for post processing
             ml.pca(dataframe, OUT_DIR + 'pca-single-line.png', OUT_DIR + 'pca-single-line-variance.txt',
                OUT_DIR + 'pca-single-line-coordinates.tsv')
@@ -68,7 +68,7 @@ class TestML:
             ml.hac_horizontal(dataframe, OUT_DIR + 'hac-single-line-horizontal.png', OUT_DIR + 'hac-single-line-clusters-horizontal.txt')
         with pytest.raises(ValueError):
             ml.hac_vertical(dataframe, OUT_DIR + 'hac-single-line-vertical.png', OUT_DIR + 'hac-single-line-clusters-vertical.txt')
-
+        
     def test_pca(self):
         dataframe = ml.summarize_networks([INPUT_DIR + 'test-data-s1/s1.txt', INPUT_DIR + 'test-data-s2/s2.txt', INPUT_DIR + 'test-data-s3/s3.txt'])
         ml.pca(dataframe, OUT_DIR + 'pca.png', OUT_DIR + 'pca-variance.txt',
@@ -148,10 +148,34 @@ class TestML:
         assert en.equals(expected)
 
     def test_jaccard_similarity_eval(self):
-        jaccard_png_outpath = Path(OUT_DIR + 'jaccard-matrix.txt')
+        jaccard_png_outpath = Path(OUT_DIR + 'jaccard-matrix.png')
         jaccard_png_outpath.unlink(missing_ok=True)
+        jaccard_txt_outpath = Path(OUT_DIR + 'jaccard-matrix.txt')
+        jaccard_txt_outpath.unlink(missing_ok=True)
         dataframe = ml.summarize_networks([INPUT_DIR + 'test-data-s1/s1.txt', INPUT_DIR + 'test-data-s2/s2.txt', INPUT_DIR + 'test-data-s3/s3.txt'])
-        ml.jaccard_similarity_eval(dataframe, OUT_DIR + 'jaccard-matrix.txt', OUT_DIR + 'jaccard-heatmap.png')
+        ml.jaccard_similarity_eval(dataframe, jaccard_txt_outpath, jaccard_png_outpath)
 
-        assert filecmp.cmp(OUT_DIR + 'jaccard-matrix.txt', EXPECT_DIR + 'expected-jaccard-matrix.txt', shallow=False)
+        assert filecmp.cmp(jaccard_txt_outpath, EXPECT_DIR + 'expected-jaccard-matrix.txt', shallow=False)
+        assert jaccard_png_outpath.exists()
+
+    def test_jaccard_similarity_eval_empty(self):
+        jaccard_png_outpath = Path(OUT_DIR + 'jaccard-matrix-empty.png')
+        jaccard_png_outpath.unlink(missing_ok=True)
+        jaccard_txt_outpath = Path(OUT_DIR + 'jaccard-matrix-empty.txt')
+        jaccard_txt_outpath.unlink(missing_ok=True)
+        dataframe = ml.summarize_networks([INPUT_DIR + 'test-data-empty/empty.txt'])
+        ml.jaccard_similarity_eval(dataframe, jaccard_txt_outpath, jaccard_png_outpath)
+
+        assert filecmp.cmp(jaccard_txt_outpath, EXPECT_DIR + 'expected-jaccard-matrix-empty.txt', shallow=False)
+        assert jaccard_png_outpath.exists()
+    
+    def test_jaccard_similarity_eval_single_line(self):
+        jaccard_png_outpath = Path(OUT_DIR + 'jaccard-matrix-single-line.png')
+        jaccard_png_outpath.unlink(missing_ok=True)
+        jaccard_txt_outpath = Path(OUT_DIR + 'jaccard-matrix-single-line.txt')
+        jaccard_txt_outpath.unlink(missing_ok=True)
+        dataframe = ml.summarize_networks([INPUT_DIR + 'test-data-single/single.txt'])
+        ml.jaccard_similarity_eval(dataframe, jaccard_txt_outpath, jaccard_png_outpath)
+
+        assert filecmp.cmp(jaccard_txt_outpath, EXPECT_DIR + 'expected-jaccard-matrix-single-line.txt', shallow=False)
         assert jaccard_png_outpath.exists()
