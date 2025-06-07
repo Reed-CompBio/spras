@@ -1,17 +1,13 @@
 import os
 import pickle as pkl
-from pathlib import Path
-from typing import Dict, Iterable
+from typing import Dict
 
 import matplotlib.pyplot as plt
 import numpy as np
 import pandas as pd
-import seaborn as sns
 from sklearn.metrics import (
     average_precision_score,
     precision_recall_curve,
-    precision_score,
-    recall_score,
 )
 
 from spras.analysis.ml import create_palette
@@ -88,11 +84,12 @@ class Evaluation:
         1. Extracting Node1 and corresponding edge frequencies from the ensemble DataFrame.
         2. Appending Node2 and corresponding edge frequencies to include both sides of each undirected edge.
         3. Grouping by node and taking the maximum edge frequency per node.
-        4. Adding any nodes from the gold standard (node_table) that are missing in the ensemble with a default frequency of 0.
-        - If the node ensemble does not include all of the gold standard nodes, we cannot achieve full recall.
+        4. Adding any nodes from the gold standard (node_table) that are missing in the ensemble with a default
+           frequency of 0. If the node ensemble does not include all of the gold standard nodes, we cannot achieve full
+           recall.
         5. Saves the node ensemble in a dictionary under its associated algorithm ensemble or combined ensemble.
         @param node_table: the gold standard nodes
-        @param ensemble_file: the edge ensemble file
+        @param ensemble_files: the edge ensemble files
         returns a dictionary of node ensembles
         """
         node_ensembles_dict = dict()
@@ -102,10 +99,10 @@ class Evaluation:
             ensemble_df = pd.read_table(ensemble_file, sep='\t', header=0)
 
             if not ensemble_df.empty:
-                node1 = ensemble_df[['Node1', 'Frequency']].rename(columns={'Node1':'Node'})
-                node2 = ensemble_df[['Node2', 'Frequency']].rename(columns={'Node2':'Node'})
+                node1 = ensemble_df[['Node1', 'Frequency']].rename(columns={'Node1': 'Node'})
+                node2 = ensemble_df[['Node2', 'Frequency']].rename(columns={'Node2': 'Node'})
 
-                gs_nodes = node_table[['NODEID']].rename(columns={'NODEID':'Node'})
+                gs_nodes = node_table[['NODEID']].rename(columns={'NODEID': 'Node'})
                 gs_nodes['Frequency'] = 0.0
 
                 all_nodes = pd.concat([node1, node2, gs_nodes])
@@ -119,12 +116,13 @@ class Evaluation:
         return node_ensembles_dict
 
     @staticmethod
-    def precision_recall_curve_node_ensemble(node_ensembles:dict, node_table:pd.DataFrame, output_png:str, output_file:str):
+    def precision_recall_curve_node_ensemble(node_ensembles: dict, node_table: pd.DataFrame, output_png: str,
+                                             output_file: str):
         """
         Takes in a node ensemble for specific dataset or specific algorithm in a dataset, and an associated gold standard node table.
         Plots a precision and recall curve for the node ensemble against its associated gold standard node table
         Returns output back to output_png
-        @param node_ensemble: the pre-computed node_ensemble
+        @param node_ensembles: the pre-computed node_ensembles
         @param node_table: the gold standard nodes
         @param output_png: the filename to save the precision and recall curves
         @param output_file: the filename to save the precision, recall, and threshold values
@@ -149,8 +147,10 @@ class Evaluation:
                 # the (number positives)/(number instances)
                 baseline_precision = np.sum(y_true) / len(y_true)
 
-                plt.plot(recall, precision, color=color_palette[label], marker='o', label=f'{label} PR curve (AP:{avg_precision:.4f})')
-                plt.axhline(y=baseline_precision, color=color_palette[label], linestyle='--', label=f'{label} Baseline Precision: {baseline_precision:.4f}')
+                plt.plot(recall, precision, color=color_palette[label], marker='o',
+                         label=f'{label} PR curve (AP: {avg_precision:.4f})')
+                plt.axhline(y=baseline_precision, color=color_palette[label], linestyle='--',
+                            label=f'{label} Baseline Precision: {baseline_precision:.4f}')
 
                 data = {
                     'Threshold': thresholds,
