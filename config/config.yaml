@@ -10,6 +10,13 @@ hash_length: 7
 #   - There is no support for other environments at the moment.
 container_framework: docker
 
+# Enabling profiling adds a file called 'usage-profile.txt' to the output directory of each algorithm.
+# The contents of this file describe the CPU utilization and peak memory consumption of the algorithm
+# as seen by its runtime container.
+# NOTE: Profiling is currently supported only when the container framework is set to apptainer/singularity
+#       and when the host system supports the 'cgroup' filesystem.
+enable_profiling: false
+
 # Only used if container_framework is set to singularity, this will unpack the singularity containers
 # to the local filesystem. This is useful when PRM containers need to run inside another container,
 # such as would be the case in an HTCondor/OSPool environment.
