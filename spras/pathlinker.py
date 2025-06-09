@@ -119,7 +119,8 @@ class PathLinker(PRM):
                             container_suffix,
                             command,
                             volumes,
-                            work_dir)
+                            work_dir,
+                            out_dir)
         print(out)
 
         # Rename the primary output file to match the desired output filename

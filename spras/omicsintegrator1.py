@@ -194,6 +194,7 @@ class OmicsIntegrator1(PRM):
                             command,
                             volumes,
                             work_dir,
+                            out_dir,
                             f'TMPDIR={mapped_out_dir}')
         print(out)
 
