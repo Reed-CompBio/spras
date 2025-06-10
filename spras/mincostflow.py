@@ -119,7 +119,8 @@ class MinCostFlow (PRM):
                             container_suffix,
                             command,
                             volumes,
-                            work_dir)
+                            work_dir,
+                            out_dir)
         print(out)
 
         # Check the output of the container
