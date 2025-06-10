@@ -16,6 +16,7 @@ from spras.strwr import ST_RWR
 
 TEST_DIR = Path('test', 'ST_RWR/')
 OUT_FILE = Path(TEST_DIR, 'output', 'strwr-output.txt')
+EXPECTED_OUTPUT = Path(TEST_DIR, 'expected_output', 'strwr-output.txt')
 
 
 class TestSTRWR:
@@ -30,7 +31,6 @@ class TestSTRWR:
                            alpha = 0.85,
                            output_file= OUT_FILE)
         assert OUT_FILE.exists(), 'Output file was not written'
-        expected_file = Path(TEST_DIR, 'expected_output', 'strwr-output.txt')
         # The test below will always fail until thresholding is implemented
         # assert cmp(OUT_FILE, expected_file, shallow=False), 'Output file does not match expected output file'
 

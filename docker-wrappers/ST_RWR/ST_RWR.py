@@ -1,6 +1,8 @@
 import argparse
 from pathlib import Path
+
 import networkx as nx
+
 
 def parse_arguments():
     """

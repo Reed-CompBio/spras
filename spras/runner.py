@@ -7,8 +7,9 @@ from spras.mincostflow import MinCostFlow as mincostflow
 from spras.omicsintegrator1 import OmicsIntegrator1 as omicsintegrator1
 from spras.omicsintegrator2 import OmicsIntegrator2 as omicsintegrator2
 from spras.pathlinker import PathLinker as pathlinker
-from spras.strwr import ST_RWR as strwr
 from spras.rwr import RWR as rwr
+from spras.strwr import ST_RWR as strwr
+
 
 def run(algorithm, params):
     """

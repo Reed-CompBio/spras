@@ -1,9 +1,9 @@
-from spras.prm import PRM
-from spras.containers import prepare_volume, run_container
 from pathlib import Path
-from spras.interactome import reinsert_direction_col_undirected
-from spras.util import duplicate_edges, raw_pathway_df, add_rank_column
 
+from spras.containers import prepare_volume, run_container
+from spras.interactome import reinsert_direction_col_undirected
+from spras.prm import PRM
+from spras.util import add_rank_column, duplicate_edges, raw_pathway_df
 
 __all__ = ['ST_RWR']
 
