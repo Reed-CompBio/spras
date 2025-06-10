@@ -438,7 +438,9 @@ def run_container_singularity(container: str, command: List[str], volumes: List[
             Client.build(recipe=image_path, image=str(base_cont_path), sandbox=True, sudo=False)
         expanded_image = base_cont_path  # This is the sandbox directory
 
-    image_to_run = expanded_image if expanded_image else container
+    # If not using the expanded sandbox image, we still need to prepend the docker:// prefix
+    # so apptainer knows to pull the image.
+    image_to_run = expanded_image if expanded_image else "docker://" + container
     if config.config.enable_profiling:
         # We won't end up using the spython client if profiling is enabled because
         # we need to run everything manually to set up the cgroup
