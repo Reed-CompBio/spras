@@ -161,7 +161,7 @@ def run_container_and_log(name: str, framework: str, container_suffix: str, comm
     @param environment: environment variables to set in the container
     @return: output from Singularity execute or Docker run
     """
-    print('Running {} on framework "{}" with command: {}'.format(name, framework, ' '.join(command)), flush=True)
+    print('Running {} on container framework "{}" with command: {}'.format(name, framework, ' '.join(command)), flush=True)
     try:
         out = run_container(framework=framework, container_suffix=container_suffix, command=command, volumes=volumes, working_dir=working_dir, environment=environment)
         if out is not None:
@@ -169,12 +169,13 @@ def run_container_and_log(name: str, framework: str, container_suffix: str, comm
                 out = ''.join(out)
             elif isinstance(out, dict):
                 if 'message' in out:
-                    # singularity message - lets print it.
+                    # This is the format of a singularity message.
+                    # See https://singularityhub.github.io/singularity-cli/api/source/spython.main.html?highlight=execute#spython.main.execute.execute.
                     if 'return_code' in out and not out['return_code'] == 0:
                         print(f"(Program exited with non-zero exit code '{out['return_code']}')")
                     out = ''.join(out['message'])
                 else:
-                    print("Note: This is an unknown message format - if you want this pretty printed, please file out an issue.")
+                    print("Note: This is an unknown message format - if you want this pretty printed, please file out an issue at https://github.com/Reed-CompBio/spras/issues/new.")
                     out = str(out)
             elif not isinstance(out, str):
                 out = str(out, "utf-8")
