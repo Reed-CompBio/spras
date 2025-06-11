@@ -2,7 +2,6 @@ import os
 import platform
 import re
 import subprocess
-import traceback
 from pathlib import Path, PurePath, PurePosixPath
 from typing import Any, Dict, List, Optional, Tuple, Union
 
@@ -148,11 +147,12 @@ def run_container(framework: str, container_suffix: str, command: List[str], vol
     elif normalized_framework == 'dsub':
         return run_container_dsub(container, command, volumes, working_dir, environment)
     else:
-        raise ValueError(f'{framework} is not a recognized container framework. Choose "docker" or "singularity".')
+        raise ValueError(f'{framework} is not a recognized container framework. Choose "docker", "dsub", or "singularity".')
 
 def run_container_and_log(name: str, framework: str, container_suffix: str, command: List[str], volumes: List[Tuple[PurePath, PurePath]], working_dir: str, environment: str = 'SPRAS=True'):
     """
     Runs a command in the container using Singularity or Docker with associated pretty printed messages.
+    @param name: the display name of the running container for logging purposes
     @param framework: singularity or docker
     @param container_suffix: name of the DockerHub container without the 'docker://' prefix
     @param command: command to run in the container
@@ -175,7 +175,7 @@ def run_container_and_log(name: str, framework: str, container_suffix: str, comm
                         print(f"(Program exited with non-zero exit code '{out['return_code']}')")
                     out = ''.join(out['message'])
                 else:
-                    print("Note: This is an unknown message format - if you want this pretty printed, please file out an issue at https://github.com/Reed-CompBio/spras/issues/new.")
+                    print("Note: This is an unknown message format - if you want this pretty printed, please file an issue at https://github.com/Reed-CompBio/spras/issues/new.")
                     out = str(out)
             elif not isinstance(out, str):
                 out = str(out, "utf-8")
@@ -202,7 +202,6 @@ def run_container_docker(container: str, command: List[str], volumes: List[Tuple
     @param environment: environment variables to set in the container
     @return: output from Docker run, or will error if the container errored.
     """
-    out = None
     # Initialize a Docker client using environment variables
     try:
         client = docker.from_env()

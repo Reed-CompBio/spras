@@ -151,7 +151,7 @@ The functionality of `prepare_volume` is similar to how you had to manually spec
 It is not necessary to create the output directory in advance because the Local Neighborhood algorithm will create it if it does not exist.
 
 Prepare the command to run inside the container, which will resemble the command used when running Local Neighborhood in Step 1.
-Use the `run_container` utility function to run the command in the container `<username>/local-neighborhood` that was pushed to Docker Hub in Step 2.
+Use the `run_container_and_log` utility function to run the command in the container `<username>/local-neighborhood` that was pushed to Docker Hub in Step 2.
 
 Implement the `parse_output` function.
 The edges in the Local Neighborhood output have the same format as the input, `<vertex1>|<vertex2>`.
