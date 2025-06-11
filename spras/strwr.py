@@ -12,7 +12,6 @@ class ST_RWR(PRM):
 
     @staticmethod
     def generate_inputs(data, filename_map):
-
         for input_type in ST_RWR.required_inputs:
             if input_type not in filename_map:
                 raise ValueError(f"{input_type} filename is missing")
@@ -31,10 +30,8 @@ class ST_RWR(PRM):
         edges = data.get_interactome()
         edges.to_csv(filename_map['network'],sep='|',index=False,columns=['Interactor1','Interactor2'],header=False)
 
-
     @staticmethod
     def run(network=None, sources=None, targets=None, alpha=None, output_file=None,  container_framework="docker"):
-
         if not sources or not targets or not network or not output_file:
             raise ValueError('Required local_neighborhood arguments are missing')
 
@@ -87,7 +84,6 @@ class ST_RWR(PRM):
 
         print(out)
         # Rename the primary output file to match the desired output filenameAdd commentMore actions
-        # Currently ST_RWR only writes one output file so we do not need to delete others
         output_edges = Path(out_dir,'out')
         output_edges.rename(output_file)
 

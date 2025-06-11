@@ -14,7 +14,6 @@ class RWR(PRM):
 
     @staticmethod
     def generate_inputs(data, filename_map):
-
         for input_type in RWR.required_inputs:
             if input_type not in filename_map:
                 raise ValueError(f"{input_type} filename is missing")
@@ -32,10 +31,8 @@ class RWR(PRM):
         edges = data.get_interactome()
         edges.to_csv(filename_map['network'],sep='|',index=False,columns=['Interactor1','Interactor2'],header=False)
 
-
     @staticmethod
     def run(network=None, nodes=None, alpha=None, output_file=None,  container_framework="docker", threshold=None):
-
         if not nodes:
             raise ValueError('Required RWR arguments are missing')
 
@@ -83,8 +80,7 @@ class RWR(PRM):
 
         print(out)
         # Rename the primary output file to match the desired output filename
-        # Currently RWR only writes one output file so we do not need to delete others
-        output_edges = Path(out_dir,'out')
+        output_edges = Path(out_dir, 'out')
         output_edges.rename(output_file)
 
     @staticmethod

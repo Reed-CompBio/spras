@@ -261,7 +261,6 @@ rule parse_output:
         params['dataset'] = input.dataset_file
         runner.parse_output(wildcards.algorithm, input.raw_file, output.standardized_file, params)
 
-
 # TODO: reuse in the future once we make summary work for mixed graphs. See https://github.com/Reed-CompBio/spras/issues/128
 # Collect summary statistics for a single pathway
 # rule summarize_pathway:
