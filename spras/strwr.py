@@ -90,7 +90,7 @@ class ST_RWR(PRM):
 
     @staticmethod
     def parse_output(raw_pathway_file, standardized_pathway_file, params):
-        df = raw_pathway_df(raw_pathway_file, sep='\t',header = 0)
+        df = raw_pathway_df(raw_pathway_file, sep='\t', header=0)
         if not df.empty:
             df.columns = ['node','score']
             if params is not None:
