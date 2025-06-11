@@ -1,7 +1,5 @@
 from pathlib import Path
 
-import pandas as pd
-
 from spras.containers import prepare_volume, run_container
 from spras.interactome import (
     convert_undirected_to_directed,
