@@ -92,12 +92,12 @@ class RWR(PRM):
         df = raw_pathway_df(raw_pathway_file, sep='\t',header = 0)
         if not df.empty:
             df.columns = ['node','score']
-            if params != None:
+            if params is not None:
                 threshold = params.get('threshold')
                 df = df[df.score >= threshold]
             raw_dataset = pd.read_pickle(params.get('dataset'))
             interactome = raw_dataset.get_interactome().get(['Interactor1','Interactor2'])
-            interactome = interactome[interactome['Interactor1'].isin(df['node']) 
+            interactome = interactome[interactome['Interactor1'].isin(df['node'])
                                       & interactome['Interactor2'].isin(df['node'])]
             interactome = add_rank_column(interactome)
             interactome = reinsert_direction_col_undirected(interactome)
