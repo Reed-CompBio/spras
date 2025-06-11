@@ -30,9 +30,6 @@ def get_test_config():
                 "include": False,
                 "aggregate_per_algorithm": False
             },
-            "graphspace": {
-                "include": False
-            },
             "cytoscape": {
                 "include": False
             },
