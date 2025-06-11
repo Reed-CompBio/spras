@@ -61,7 +61,7 @@ def prepare_inputs(algorithm, data_file, filename_map):
     return algorithm_runner.generate_inputs(dataset, filename_map)
 
 
-def parse_output(algorithm, raw_pathway_file, standardized_pathway_file, params=None):
+def parse_output(algorithm, raw_pathway_file, standardized_pathway_file, params):
     """
     Convert a predicted pathway into the universal format
     @param algorithm: algorithm name

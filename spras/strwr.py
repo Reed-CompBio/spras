@@ -1,3 +1,4 @@
+import pandas as pd
 from pathlib import Path
 
 from spras.containers import prepare_volume, run_container
@@ -63,7 +64,7 @@ class ST_RWR(PRM):
         out_dir.mkdir(parents=True, exist_ok=True)
         bind_path, mapped_out_dir = prepare_volume(str(out_dir), work_dir)
         volumes.append(bind_path)
-        mapped_out_prefix = mapped_out_dir + "/out"
+        mapped_out_prefix = mapped_out_dir + "/output.txt"
         command = ['python',
                    '/ST_RWR/ST_RWR.py',
                    '--network',network_file,
@@ -75,7 +76,7 @@ class ST_RWR(PRM):
         if alpha is not None:
             command.extend(['--alpha', str(alpha)])
 
-        container_suffix = 'st-rwr'
+        container_suffix = 'st-rwr:latest'
         out = run_container(container_framework,
                             container_suffix,
                             command,
@@ -83,19 +84,26 @@ class ST_RWR(PRM):
                             work_dir)
 
         print(out)
-        # Rename the primary output file to match the desired output filenameAdd commentMore actions
-        output_edges = Path(out_dir,'out')
+        # Rename the primary output file to match the desired output filename
+        output_edges = Path(out_dir, 'output.txt')
         output_edges.rename(output_file)
 
     @staticmethod
-    def parse_output(raw_pathway_file, standardized_pathway_file):
-
-        df = raw_pathway_df(raw_pathway_file, sep='\t')
+    def parse_output(raw_pathway_file, standardized_pathway_file, params):
+        df = raw_pathway_df(raw_pathway_file, sep='\t',header = 0)
         if not df.empty:
-            df = add_rank_column(df)
-            df = reinsert_direction_col_undirected(df)
-            df.columns = ['Node1', 'Node2', 'Rank', "Direction"]
-            df, has_duplicates = duplicate_edges(df)
+            df.columns = ['node','score']
+            if params is not None:
+                threshold = params.get('threshold')
+                df = df[df.score >= threshold]
+            raw_dataset = pd.read_pickle(params.get('dataset'))
+            interactome = raw_dataset.get_interactome().get(['Interactor1','Interactor2'])
+            interactome = interactome[interactome['Interactor1'].isin(df['node'])
+                                      & interactome['Interactor2'].isin(df['node'])]
+            interactome = add_rank_column(interactome)
+            interactome = reinsert_direction_col_undirected(interactome)
+            interactome.columns = ['Node1', 'Node2', 'Rank', "Direction"]
+            interactome, has_duplicates = duplicate_edges(interactome)
             if has_duplicates:
                 print(f"Duplicate edges were removed from {raw_pathway_file}")
-        df.to_csv(standardized_pathway_file, header = True, index=False, sep='\t')
+            interactome.to_csv(standardized_pathway_file, header = True, index=False, sep='\t')

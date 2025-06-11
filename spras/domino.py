@@ -165,7 +165,7 @@ class DOMINO(PRM):
         Path(network + '.pkl').unlink(missing_ok=True)
 
     @staticmethod
-    def parse_output(raw_pathway_file, standardized_pathway_file):
+    def parse_output(raw_pathway_file, standardized_pathway_file, params):
         """
         Convert the merged HTML modules into the universal pathway format
         @param raw_pathway_file: the merged HTML modules file

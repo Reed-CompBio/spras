@@ -1,6 +1,5 @@
-from pathlib import Path
-
 import pandas as pd
+from pathlib import Path
 
 from spras.containers import prepare_volume, run_container
 from spras.interactome import reinsert_direction_col_undirected
@@ -60,7 +59,7 @@ class RWR(PRM):
         out_dir.mkdir(parents=True, exist_ok=True)
         bind_path, mapped_out_dir = prepare_volume(str(out_dir), work_dir)
         volumes.append(bind_path)
-        mapped_out_prefix = mapped_out_dir + "/out"
+        mapped_out_prefix = mapped_out_dir + "/output.txt"
         command = ['python',
                    '/RWR/RWR.py',
                    '--network',network_file,
@@ -80,7 +79,7 @@ class RWR(PRM):
 
         print(out)
         # Rename the primary output file to match the desired output filename
-        output_edges = Path(out_dir, 'out')
+        output_edges = Path(out_dir, 'output.txt')
         output_edges.rename(output_file)
 
     @staticmethod
