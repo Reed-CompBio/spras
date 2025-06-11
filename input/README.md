@@ -18,8 +18,7 @@ C	2.5		True	True
 D	1.9	True	True	True
 ```
 
-A secondary format provides only a list of node identifiers and uses the filename as the node attribute, as in the example `sources.txt`.
-This format may be deprecated.
+A secondary format provides a table of node identifiers and with the columns specifying node attributes, as in the example `sources.txt`.
 
 ### Edge file
 Edge files do not include a header row.
@@ -41,17 +40,15 @@ B	C	0.77
 
 ### Gold Standard
 #### Nodes
-Gold standard node files are txt files which must have a header row.
+Gold standard node files are txt files and do not include a header row.
 
-Each row in the file represents a single node identifier. The file is structured as two
-columns with `NODEID` and what markers are true for them. These nodes typically correspond to gene or protein identifiers that are relevant to the biological pathway of interest.
+Each row in the file represents a single node identifier. The file is structured as a single column with one node per line. These nodes typically correspond to gene or protein identifiers that are relevant to the biological pathway of interest.
 
-For example, a `sources.txt` file may look like so:
+For example:
 ```
-NODEID	sources
-A	True
-B	True
-C	True
+A
+B
+C
 ```
 
 #### Edges
