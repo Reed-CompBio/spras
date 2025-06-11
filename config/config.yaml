@@ -50,9 +50,6 @@ algorithms:
               include: true
               run1:
                   gamma: [10]
-                  _include_st: [false]
-                  _verbose: [false]
-                  _output_log: [false]
 
       - name: "pathlinker"
         params:

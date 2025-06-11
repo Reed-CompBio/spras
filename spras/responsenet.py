@@ -58,7 +58,7 @@ class ResponseNet(PRM):
                      header=False)
 
     @staticmethod
-    def run(sources=None, targets=None, edges=None, output_file=None, gamma=10, _include_st=False, _verbose=False ,_output_log=False, container_framework="docker"):
+    def run(sources=None, targets=None, edges=None, output_file=None, gamma=10, container_framework="docker"):
         """
         Run ResponseNet with Docker (or singularity)
         @param sources: input sources (required)
@@ -105,14 +105,6 @@ class ResponseNet(PRM):
                     '--targets_file', targets_file,
                     '--output', str(mapped_out_prefix / 'output'),
                     '--gamma', str(gamma)]
-
-        # add optional flags, value can be changed in config/config.yaml
-        if _include_st:
-            command.append('-st')
-        if _verbose:
-            command.append('-v')
-        if _output_log:
-            command.append('-o')
 
         # choosing to run in docker or singularity container
         container_suffix = "responsenet:latest"
