@@ -61,7 +61,7 @@ def prepare_inputs(algorithm, data_file, filename_map):
     return algorithm_runner.generate_inputs(dataset, filename_map)
 
 
-def parse_output(algorithm, raw_pathway_file, standardized_pathway_file):
+def parse_output(algorithm, raw_pathway_file, standardized_pathway_file, params=None ):
     """
     Convert a predicted pathway into the universal format
     @param algorithm: algorithm name
@@ -72,4 +72,4 @@ def parse_output(algorithm, raw_pathway_file, standardized_pathway_file):
         algorithm_runner = globals()[algorithm.lower()]
     except KeyError as exc:
         raise NotImplementedError(f'{algorithm} is not currently supported') from exc
-    return algorithm_runner.parse_output(raw_pathway_file, standardized_pathway_file)
+    return algorithm_runner.parse_output(raw_pathway_file, standardized_pathway_file, params)
