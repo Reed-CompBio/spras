@@ -41,15 +41,17 @@ B	C	0.77
 
 ### Gold Standard
 #### Nodes
-Gold standard node files are txt files and do not include a header row.
+Gold standard node files are txt files which must have a header row.
 
-Each row in the file represents a single node identifier. The file is structured as a single column with one node per line. These nodes typically correspond to gene or protein identifiers that are relevant to the biological pathway of interest.
+Each row in the file represents a single node identifier. The file is structured as two
+columns with `NODEID` and what markers are true for them. These nodes typically correspond to gene or protein identifiers that are relevant to the biological pathway of interest.
 
-For example:
+For example, a `sources.txt` file may look like so:
 ```
-A
-B
-C
+NODEID	sources
+A	True
+B	True
+C	True
 ```
 
 #### Edges
