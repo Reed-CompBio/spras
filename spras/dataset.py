@@ -36,6 +36,10 @@ class Dataset:
 
     @classmethod
     def from_file(cls, file_name):
+        if isinstance(file_name, Dataset):
+            # No work to be done
+            # (this use-case is useful for testing.)
+            return file_name
         """
         Loads dataset object from a pickle file.
         Usage: dataset = Dataset.from_file(pickle_file)

@@ -2,6 +2,7 @@ import pandas as pd
 from pathlib import Path
 
 from spras.containers import prepare_volume, run_container
+from spras.dataset import Dataset
 from spras.interactome import reinsert_direction_col_undirected
 from spras.prm import PRM
 from spras.util import add_rank_column, duplicate_edges, raw_pathway_df
@@ -32,7 +33,7 @@ class ST_RWR(PRM):
         edges.to_csv(filename_map['network'],sep='|',index=False,columns=['Interactor1','Interactor2'],header=False)
 
     @staticmethod
-    def run(network=None, sources=None, targets=None, alpha=None, output_file=None,  container_framework="docker"):
+    def run(network=None, sources=None, targets=None, alpha=None, output_file=None, container_framework="docker"):
         if not sources or not targets or not network or not output_file:
             raise ValueError('Required local_neighborhood arguments are missing')
 
@@ -67,9 +68,9 @@ class ST_RWR(PRM):
         mapped_out_prefix = mapped_out_dir + "/output.txt"
         command = ['python',
                    '/ST_RWR/ST_RWR.py',
-                   '--network',network_file,
-                   '--sources',source_file,
-                   '--targets',target_file,
+                   '--network', network_file,
+                   '--sources', source_file,
+                   '--targets', target_file,
                    '--output', mapped_out_prefix]
 
         # Add alpha as an optional argument
@@ -96,7 +97,7 @@ class ST_RWR(PRM):
             if params is not None:
                 threshold = params.get('threshold')
                 df = df[df.score >= threshold]
-            raw_dataset = pd.read_pickle(params.get('dataset'))
+            raw_dataset = Dataset.from_file(params.get('dataset'))
             interactome = raw_dataset.get_interactome().get(['Interactor1','Interactor2'])
             interactome = interactome[interactome['Interactor1'].isin(df['node'])
                                       & interactome['Interactor2'].isin(df['node'])]
@@ -106,4 +107,5 @@ class ST_RWR(PRM):
             interactome, has_duplicates = duplicate_edges(interactome)
             if has_duplicates:
                 print(f"Duplicate edges were removed from {raw_pathway_file}")
-            interactome.to_csv(standardized_pathway_file, header = True, index=False, sep='\t')
+            df = interactome
+        df.to_csv(standardized_pathway_file, header = True, index=False, sep='\t')
