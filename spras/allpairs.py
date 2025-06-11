@@ -2,6 +2,7 @@ import warnings
 from pathlib import Path
 
 from spras.containers import prepare_volume, run_container
+from spras.dataset import Dataset
 from spras.interactome import (
     convert_undirected_to_directed,
     has_direction,
@@ -17,7 +18,7 @@ class AllPairs(PRM):
     required_inputs = ['nodetypes', 'network', 'directed_flag']
 
     @staticmethod
-    def generate_inputs(data, filename_map):
+    def generate_inputs(data: Dataset, filename_map):
         """
         Access fields from the dataset and write the required input files
         @param data: dataset
@@ -48,6 +49,9 @@ class AllPairs(PRM):
 
         # Create network file
         edges_df = data.get_interactome()
+
+        if edges_df is None:
+            raise ValueError("Dataset does not have an interactome.")
 
         # Since APSP doesn't use the directed/undirected column because of a lack of support for mixed graphs (in NetworkX),
         # this function dynamically detects the usage of directed edges in user input
