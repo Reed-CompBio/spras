@@ -92,12 +92,15 @@ class ST_RWR(PRM):
 
     @staticmethod
     def parse_output(raw_pathway_file, standardized_pathway_file, params):
-        df = raw_pathway_df(raw_pathway_file, sep='\t', header=0)
+        df = raw_pathway_df(raw_pathway_file, sep='\t',header=0)
         if not df.empty:
-            df.columns = ['node','score']
-            if params is not None:
-                threshold = params.get('threshold')
-                df = df[df.score >= threshold]
+            df.columns = ['node', 'score']
+            if not "threshold" in params:
+                raise ValueError("threshold is a required parameter.")
+            threshold = params['threshold']
+            df = df.drop_duplicates(subset=['node'])
+            df = df.sort_values(by=['score'], ascending=False)
+            df = df.head(int(threshold))
             raw_dataset = Dataset.from_file(params.get('dataset'))
             interactome = raw_dataset.get_interactome().get(['Interactor1','Interactor2'])
             interactome = interactome[interactome['Interactor1'].isin(df['node'])

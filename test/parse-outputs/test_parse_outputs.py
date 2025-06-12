@@ -22,7 +22,7 @@ algorithms = {
     'allpairs': {},
     'domino': {},
     'strwr': {
-        'threshold': 0.3,
+        'threshold': 3,
         'dataset': Dataset({
             'label': 'test_dataset',
             'node_files': ['strwr-dataset-prizes.txt', 'strwr-dataset-sources.txt', 'strwr-dataset-targets.txt'],
@@ -32,7 +32,7 @@ algorithms = {
         })
     },
     'rwr': {
-        'threshold': 0.5,
+        'threshold': 2,
         'dataset': Dataset({
             'label': 'test_dataset',
             'node_files': ['rwr-dataset-prizes.txt', 'rwr-dataset-sources.txt', 'rwr-dataset-targets.txt'],
