@@ -48,7 +48,7 @@ class PathLinker(PRM):
             warnings.warn(warn_msg, stacklevel=1)
 
         # Create nodetype file
-        input_df = sources_targets[Dataset.NODE_ID].copy()
+        input_df = sources_targets[[Dataset.NODE_ID]].copy()
         input_df.columns = ["#Node"]
         input_df.loc[sources_targets["sources"] == True,"Node type"]="source"
         input_df.loc[sources_targets["targets"] == True,"Node type"]="target"
