@@ -2,6 +2,7 @@ from abc import ABC, abstractmethod
 
 from spras.dataset import Dataset
 
+
 class PRM(ABC):
     """
     The PRM (Pathway Reconstruction Module) class,
