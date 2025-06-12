@@ -4,7 +4,7 @@ import pandas as pd
 
 from spras.containers import prepare_volume, run_container
 from spras.dataset import Dataset
-from spras.interactome import reinsert_direction_col_undirected
+from spras.interactome import reinsert_direction_col_directed
 from spras.prm import PRM
 from spras.util import add_rank_column, duplicate_edges, raw_pathway_df
 
@@ -97,7 +97,7 @@ class RWR(PRM):
             interactome = interactome[interactome['Interactor1'].isin(df['node'])
                                       & interactome['Interactor2'].isin(df['node'])]
             interactome = add_rank_column(interactome)
-            interactome = reinsert_direction_col_undirected(interactome)
+            interactome = reinsert_direction_col_directed(interactome)
             interactome.columns = ['Node1', 'Node2', 'Rank', "Direction"]
             interactome, has_duplicates = duplicate_edges(interactome)
             if has_duplicates:
