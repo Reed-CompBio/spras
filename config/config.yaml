@@ -45,19 +45,6 @@ container_registry:
 # careful: too many parameters might make your runs take a long time.
 
 algorithms:
-      - name: "strwr"
-        params:
-              include: true
-              run1:
-                  alpha: [0.85]
-
-      - name: "rwr"
-        params:
-              include: true
-              run1:
-                  alpha: [0.85]
-                  threshold: [0.17]
-
       - name: "pathlinker"
         params:
               include: true
@@ -109,6 +96,18 @@ algorithms:
                   slice_threshold: [0.3]
                   module_threshold: [0.05]
 
+      - name: "strwr"
+        params:
+              include: true
+              run1:
+                  alpha: [0.85]
+
+      - name: "rwr"
+        params:
+              include: true
+              run1:
+                  alpha: [0.85]
+                  threshold: [0.17]
 
 # Here we specify which pathways to run and other file location information.
 # DataLoader.py can currently only load a single dataset
