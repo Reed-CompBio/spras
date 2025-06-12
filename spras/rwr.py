@@ -89,7 +89,7 @@ class RWR(PRM):
         df = raw_pathway_df(raw_pathway_file, sep='\t',header=0)
         if not df.empty:
             df.columns = ['node', 'score']
-            if not "threshold" in params:
+            if 'threshold' not in params:
                 raise ValueError("threshold is a required parameter.")
             threshold = params['threshold']
             df = df.drop_duplicates(subset=['node'])
