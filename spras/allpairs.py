@@ -2,10 +2,8 @@ import warnings
 from pathlib import Path
 
 from spras.containers import prepare_volume, run_container
-from spras.interactome import (
-    convert_directed_to_undirected,
-    reinsert_direction_col_undirected,
-)
+from spras.dataset import Dataset
+from spras.interactome import reinsert_direction_col_undirected
 from spras.prm import PRM
 from spras.util import add_rank_column, duplicate_edges, raw_pathway_df
 
@@ -38,7 +36,7 @@ class AllPairs(PRM):
             warnings.warn(warn_msg, stacklevel=2)
 
         # Create nodetype file
-        input_df = sources_targets[["NODEID"]].copy()
+        input_df = sources_targets[[Dataset.NODE_ID]].copy()
         input_df.columns = ["#Node"]
         input_df.loc[sources_targets["sources"] == True, "Node type"] = "source"
         input_df.loc[sources_targets["targets"] == True, "Node type"] = "target"
