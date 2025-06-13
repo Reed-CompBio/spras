@@ -18,8 +18,7 @@ C	2.5		True	True
 D	1.9	True	True	True
 ```
 
-A secondary format provides only a list of node identifiers and uses the filename as the node attribute, as in the example `sources.txt`.
-This format may be deprecated.
+A secondary format provides a table of node identifiers and with the columns specifying node attributes, as in the example `sources.txt`.
 
 ### Edge file
 Edge files do not include a header row.
