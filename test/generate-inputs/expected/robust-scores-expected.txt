@@ -1,0 +1,3 @@
+gene_or_protein,study_bias_score
+C,5.7
+test_A,2.0
