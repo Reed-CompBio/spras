@@ -2,7 +2,7 @@ from pathlib import Path
 
 import pandas as pd
 
-from spras.containers import prepare_volume, run_container
+from spras.containers import prepare_volume, run_container_and_log
 from spras.dataset import Dataset
 from spras.interactome import (
     convert_directed_to_undirected,
@@ -125,15 +125,13 @@ class ROBUST(PRM):
         if gamma is not None:
             command.extend(['--gamma', str(gamma)])
 
-        print('Running ROBUST with arguments: {}'.format(' '.join(command)), flush=True)
-
         container_suffix = "robust:latest"
-        out = run_container(container_framework,
-                            container_suffix,
-                            command,
-                            volumes,
-                            work_dir)
-        print(out)
+        run_container_and_log('ROBUST',
+                              container_framework,
+                              container_suffix,
+                              command,
+                              volumes,
+                              work_dir)
 
     @staticmethod
     def parse_output(raw_pathway_file, standardized_pathway_file):
@@ -142,7 +140,7 @@ class ROBUST(PRM):
         @param raw_pathway_file: pathway file produced by an algorithm's run function
         @param standardized_pathway_file: the same pathway written in the universal format
         """
-        df = raw_pathway_df(raw_pathway_file, sep="\s+", header=None)
+        df = raw_pathway_df(raw_pathway_file, sep="\\s+", header=None)
         if not df.empty:
             df = add_rank_column(df)
             df = reinsert_direction_col_undirected(df)
