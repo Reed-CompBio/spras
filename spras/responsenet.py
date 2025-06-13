@@ -1,6 +1,6 @@
 from pathlib import Path
 
-from spras.containers import prepare_volume, run_container
+from spras.containers import prepare_volume, run_container_and_log
 from spras.interactome import (
     convert_undirected_to_directed,
     reinsert_direction_col_undirected,
@@ -107,15 +107,13 @@ class ResponseNet(PRM):
         # choosing to run in docker or singularity container
         container_suffix = "responsenet:latest"
 
-        print('Running ResponseNet with arguments: {}'.format(' '.join(command)), flush=True)
-
         # constructs a docker run call
-        out = run_container(container_framework,
-                            container_suffix,
-                            command,
-                            volumes,
-                            work_dir)
-        print(out)
+        run_container_and_log('ResponseNet',
+                              container_framework,
+                              container_suffix,
+                              command,
+                              volumes,
+                              work_dir)
 
         # Rename the primary output file to match the desired output filename
         out_file_suffixed.rename(output_file)
