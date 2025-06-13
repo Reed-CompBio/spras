@@ -1,9 +1,10 @@
 import warnings
 from pathlib import Path
 
-from spras.containers import prepare_volume, run_container
+from spras.containers import prepare_volume, run_container_and_log
 from spras.dataset import Dataset
 from spras.interactome import reinsert_direction_col_undirected
+from spras.containers import prepare_volume, run_container_and_log
 from spras.prm import PRM
 from spras.util import add_rank_column, duplicate_edges, raw_pathway_df
 
@@ -89,16 +90,14 @@ class AllPairs(PRM):
                    '--nodes', node_file,
                    '--output', mapped_out_file]
 
-        print('Running All Pairs Shortest Paths with arguments: {}'.format(' '.join(command)), flush=True)
-
         container_suffix = "allpairs:v2"
-        out = run_container(
-                            container_framework,
-                            container_suffix,
-                            command,
-                            volumes,
-                            work_dir)
-        print(out)
+        run_container_and_log(
+            'All Pairs Shortest Paths',
+            container_framework,
+            container_suffix,
+            command,
+            volumes,
+            work_dir)
 
     @staticmethod
     def parse_output(raw_pathway_file, standardized_pathway_file):
