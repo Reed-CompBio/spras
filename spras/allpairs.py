@@ -1,7 +1,7 @@
 import warnings
 from pathlib import Path
 
-from spras.containers import prepare_volume, run_container
+from spras.containers import prepare_volume, run_container_and_log
 from spras.dataset import Dataset
 from spras.interactome import (
     convert_undirected_to_directed,
@@ -40,7 +40,7 @@ class AllPairs(PRM):
             warnings.warn(warn_msg, stacklevel=2)
 
         # Create nodetype file
-        input_df = sources_targets[["NODEID"]].copy()
+        input_df = sources_targets[[Dataset.NODE_ID]].copy()
         input_df.columns = ["#Node"]
         input_df.loc[sources_targets["sources"] == True, "Node type"] = "source"
         input_df.loc[sources_targets["targets"] == True, "Node type"] = "target"
@@ -103,16 +103,14 @@ class AllPairs(PRM):
         if directed_flag and Path(directed_flag).exists():
             command.append("--directed")
 
-        print('Running All Pairs Shortest Paths with arguments: {}'.format(' '.join(command)), flush=True)
-
         container_suffix = "allpairs:v2"
-        out = run_container(
-                            container_framework,
-                            container_suffix,
-                            command,
-                            volumes,
-                            work_dir)
-        print(out)
+        run_container_and_log(
+            'All Pairs Shortest Paths',
+            container_framework,
+            container_suffix,
+            command,
+            volumes,
+            work_dir)
 
     @staticmethod
     def parse_output(raw_pathway_file, standardized_pathway_file):

@@ -1,6 +1,0 @@
-Name	Number of nodes	Number of undirected edges	Number of connected components	Nodes in source	Nodes in target	Nodes in prize
-test/analysis/input/toy/network1.txt	8	6	3	4	4	3
-test/analysis/input/toy/network2.txt	6	15	1	3	3	3
-test/analysis/input/toy/network3.txt	12	11	1	5	4	5
-test/analysis/input/toy/network4.txt	7	6	1	4	3	3
-test/analysis/input/toy/network5.txt	5	4	1	3	2	2
