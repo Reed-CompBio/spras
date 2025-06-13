@@ -1,6 +1,6 @@
 from pathlib import Path
 
-from spras.containers import prepare_volume, run_container
+from spras.containers import prepare_volume, run_container_and_log
 from spras.interactome import (
     convert_undirected_to_directed,
     reinsert_direction_col_directed,
@@ -131,16 +131,13 @@ class BowTieBuilder(PRM):
                    '--output_file',
                    mapped_out_prefix]
 
-
-        print('Running BowTieBuilder with arguments: {}'.format(' '.join(command)), flush=True)
-
         container_suffix = "bowtiebuilder:v2"
-        out = run_container(container_framework,
-                            container_suffix,
-                            command,
-                            volumes,
-                            work_dir)
-        print(out)
+        run_container_and_log('BowTieBuilder',
+                              container_framework,
+                              container_suffix,
+                              command,
+                              volumes,
+                              work_dir)
         # Output is already written to raw-pathway.txt file
 
 
