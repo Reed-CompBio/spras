@@ -145,7 +145,7 @@ class DOMINO(PRM):
                                 volumes,
                                 work_dir)
         except ContainerError as err:
-            # TODO: can we more appropiately handle this case? Here, DOMINO
+            # TODO: is this too general of an error to handle? Here, DOMINO
             # still outputs to our output folder with a still viable HTML output.
             # https://github.com/Reed-CompBio/spras/pull/103#issuecomment-1681526958
             if not err.streams_contain("ValueError: cannot apply union_all to an empty list"):
