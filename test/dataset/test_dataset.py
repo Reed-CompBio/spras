@@ -24,5 +24,16 @@ class TestDataset:
                 'edge_files': ['network.txt'],
                 'node_files': ['node-prizes.txt', 'sources.txt', 'targets.txt'],
                 'other_files': [],
-                'data_dir': FIXTURES_PATH / 'in-range'
+                'data_dir': FIXTURES_PATH / 'not-in-range'
             })
+
+    def test_normal(self):
+        dataset = Dataset({
+            'label': 'empty',
+            'edge_files': ['network.txt'],
+            'node_files': ['node-prizes.txt', 'sources.txt', 'targets.txt'],
+            'other_files': [],
+            'data_dir': FIXTURES_PATH / 'in-range'
+        })
+
+        assert len(dataset.get_interactome()) == 2
