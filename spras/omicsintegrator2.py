@@ -2,7 +2,7 @@ from pathlib import Path
 
 import pandas as pd
 
-from spras.containers import prepare_volume, run_container_and_log
+from spras.containers import ContainerError, prepare_volume, run_container_and_log
 from spras.dataset import Dataset
 from spras.interactome import reinsert_direction_col_undirected
 from spras.prm import PRM
@@ -119,12 +119,27 @@ class OmicsIntegrator2(PRM):
             command.extend(['--seed', str(seed)])
 
         container_suffix = "omics-integrator-2:v2"
-        run_container_and_log('Omics Integrator 2',
-                             container_framework,
-                             container_suffix,
-                             command,
-                             volumes,
-                             work_dir)
+
+        # We use this later either if we encounter unrecoverable OI2 errors
+        # or as the main output file we want to post-process in parse_output.
+        output_tsv = Path(out_dir, 'oi2.tsv')
+
+        try:
+            run_container_and_log('Omics Integrator 2',
+                                container_framework,
+                                container_suffix,
+                                command,
+                                volumes,
+                                work_dir)
+        except ContainerError as err:
+            needle = "all the input arrays must have same number of dimensions, but the array at index 0 has 2 dimension(s) and the array at index 1 has 1 dimension(s)"
+            if not err.streams_contain(needle):
+                raise err
+            else:
+                # https://github.com/Reed-CompBio/spras/issues/218
+                # This error occurs when we have an empty dataframe passed to OI2.
+                Path(output_tsv).write_text("protein1\tprotein2\tcost\n")
+            
 
         # TODO do we want to retain other output files?
         # TODO if deleting other output files, write them all to a tmp directory and copy
