@@ -3444,8 +3444,6 @@ reconstruction_settings:
 analysis:
   summary:
     include: true
-  graphspace:
-    include: false
   cytoscape:
     include: false
   ml:

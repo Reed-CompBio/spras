@@ -12,14 +12,6 @@ spras.analysis.cytoscape module
    :undoc-members:
    :show-inheritance:
 
-spras.analysis.graphspace module
---------------------------------
-
-.. automodule:: spras.analysis.graphspace
-   :members:
-   :undoc-members:
-   :show-inheritance:
-
 spras.analysis.ml module
 ------------------------
 
