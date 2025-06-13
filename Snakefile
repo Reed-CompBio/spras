@@ -316,8 +316,7 @@ rule pickle_summarize_networks_per_algo:
         network_ml_summary_algo = SEP.join([out_dir, '{dataset}-ml', 'ml-summary-{algorithm}.pickle'])
     run:
         summary_df = ml.summarize_networks(input.pathways)
-        with open(output.network_ml_summary_algo, 'wb') as pickle_writer:
-            pickle.dump(summary_df, pickle_writer)
+        summary_df.to_pickle(output.network_ml_summary_algo)
 
 # Same as pickle_summarize_networks_per_algo, but in general.
 rule pickle_summarize_networks:
@@ -327,8 +326,7 @@ rule pickle_summarize_networks:
         network_ml_summary_algo = SEP.join([out_dir, '{dataset}-ml', 'ml-summary.pickle'])
     run:
         summary_df = ml.summarize_networks(input.pathways)
-        with open(output.network_ml_summary_algo, 'wb') as pickle_writer:
-            pickle.dump(summary_df, pickle_writer)
+        summary_df.to_pickle(output.network_ml_summary_algo)
 
 # Cluster the output pathways for each dataset
 rule ml_analysis:
