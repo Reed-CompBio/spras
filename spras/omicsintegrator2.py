@@ -139,7 +139,7 @@ class OmicsIntegrator2(PRM):
                 # https://github.com/Reed-CompBio/spras/issues/218
                 # This error occurs when we have an empty dataframe passed to OI2.
                 Path(output_tsv).write_text("protein1\tprotein2\tcost\n")
-            
+
 
         # TODO do we want to retain other output files?
         # TODO if deleting other output files, write them all to a tmp directory and copy

@@ -2,8 +2,8 @@ import os
 import platform
 import re
 import subprocess
-from pathlib import Path, PurePath, PurePosixPath
 import textwrap
+from pathlib import Path, PurePath, PurePosixPath
 from typing import Any, Dict, List, Optional, Tuple, Union
 
 import docker
@@ -132,7 +132,7 @@ class ContainerError(RuntimeError):
     def __init__(self, message: str, error_code: int, stdout: Optional[str], stderr: Optional[str], *args):
         """
         Constructs a new ContainerError.
-        
+
         @param message: The message to display to the user. This should usually refer to the indent call to differentriate between
         general logging done by Snakemake/logging calls.
         @param error_code: Also known as exit status; this should generally be non-zero for ContainerErrors.
@@ -147,14 +147,14 @@ class ContainerError(RuntimeError):
         self.stdout = stdout
         self.stderr = stderr
 
-        super(ContainerError, self).__init__(message, error_code, stdout, stderr, *args) 
+        super(ContainerError, self).__init__(message, error_code, stdout, stderr, *args)
 
     def streams_contain(self, snippet: str):
         stdout = self.stdout if self.stdout else ''
         stderr = self.stderr if self.stderr else ''
 
         return snippet in stdout or snippet in stderr
-    
+
     # Due to
     # https://github.com/snakemake/snakemake/blob/d4890b4da691506b6a258f7534ac41fdb7ef5ab4/src/snakemake/exceptions.py#L18
     # this overrides the tostr implementation to have nicer container errors
@@ -227,14 +227,15 @@ def run_container_and_log(name: str, framework: str, container_suffix: str, comm
     except docker.errors.ContainerError as err:
         # TODO: does this lose us any information provided by stdout while the container was running?
         # ContainerError doesn't expose any stdout property.
-        
+
         stderr = err.stderr if err.stderr else ''
         stderr = str(stderr, 'utf-8') if isinstance(stderr, bytes) else stderr
 
         message = textwrap.dedent(f'''\
                                   (Command formatted as list: `{err.command}`)
                                   An unexpected non-zero exit status ({err.exit_status}) inside the docker image {err.image} occurred:\n''') + indent(stderr)
-        raise ContainerError(message, err.exit_status, None, stderr)
+        # We retrieved all of the information from docker.errors.ContainerError, so here, we ignore the original error.
+        raise ContainerError(message, err.exit_status, None, stderr) from None
 
 # TODO any issue with creating a new client each time inside this function?
 def run_container_docker(container: str, command: List[str], volumes: List[Tuple[PurePath, PurePath]], working_dir: str, environment: str = 'SPRAS=True'):
