@@ -1,7 +1,8 @@
 import warnings
 from pathlib import Path
 
-from spras.containers import prepare_volume, run_container
+from spras.containers import prepare_volume, run_container_and_log
+from spras.dataset import Dataset
 from spras.interactome import (
     convert_undirected_to_directed,
     reinsert_direction_col_directed,
@@ -47,7 +48,7 @@ class PathLinker(PRM):
             warnings.warn(warn_msg, stacklevel=1)
 
         # Create nodetype file
-        input_df = sources_targets[["NODEID"]].copy()
+        input_df = sources_targets[[Dataset.NODE_ID]].copy()
         input_df.columns = ["#Node"]
         input_df.loc[sources_targets["sources"] == True,"Node type"]="source"
         input_df.loc[sources_targets["targets"] == True,"Node type"]="target"
@@ -112,15 +113,13 @@ class PathLinker(PRM):
         if k is not None:
             command.extend(['-k', str(k)])
 
-        print('Running PathLinker with arguments: {}'.format(' '.join(command)), flush=True)
-
         container_suffix = "pathlinker:v2"
-        out = run_container(container_framework,
-                            container_suffix,
-                            command,
-                            volumes,
-                            work_dir)
-        print(out)
+        run_container_and_log('PathLinker',
+                             container_framework,
+                             container_suffix,
+                             command,
+                             volumes,
+                             work_dir)
 
         # Rename the primary output file to match the desired output filename
         # Currently PathLinker only writes one output file so we do not need to delete others
