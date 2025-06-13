@@ -8,6 +8,7 @@ from typing import Any, Dict, List, Optional, Tuple, Union
 import docker
 
 import spras.config as config
+from spras.logging import indent
 from spras.util import hash_filename
 
 
@@ -146,8 +147,46 @@ def run_container(framework: str, container_suffix: str, command: List[str], vol
     elif normalized_framework == 'dsub':
         return run_container_dsub(container, command, volumes, working_dir, environment)
     else:
-        raise ValueError(f'{framework} is not a recognized container framework. Choose "docker" or "singularity".')
+        raise ValueError(f'{framework} is not a recognized container framework. Choose "docker", "dsub", or "singularity".')
 
+def run_container_and_log(name: str, framework: str, container_suffix: str, command: List[str], volumes: List[Tuple[PurePath, PurePath]], working_dir: str, environment: str = 'SPRAS=True'):
+    """
+    Runs a command in the container using Singularity or Docker with associated pretty printed messages.
+    @param name: the display name of the running container for logging purposes
+    @param framework: singularity or docker
+    @param container_suffix: name of the DockerHub container without the 'docker://' prefix
+    @param command: command to run in the container
+    @param volumes: a list of volumes to mount where each item is a (source, destination) tuple
+    @param working_dir: the working directory in the container
+    @param environment: environment variables to set in the container
+    @return: output from Singularity execute or Docker run
+    """
+    print('Running {} on container framework "{}" with command: {}'.format(name, framework, ' '.join(command)), flush=True)
+    try:
+        out = run_container(framework=framework, container_suffix=container_suffix, command=command, volumes=volumes, working_dir=working_dir, environment=environment)
+        if out is not None:
+            if isinstance(out, list):
+                out = ''.join(out)
+            elif isinstance(out, dict):
+                if 'message' in out:
+                    # This is the format of a singularity message.
+                    # See https://singularityhub.github.io/singularity-cli/api/source/spython.main.html?highlight=execute#spython.main.execute.execute.
+                    if 'return_code' in out and not out['return_code'] == 0:
+                        print(f"(Program exited with non-zero exit code '{out['return_code']}')")
+                    out = ''.join(out['message'])
+                else:
+                    print("Note: This is an unknown message format - if you want this pretty printed, please file an issue at https://github.com/Reed-CompBio/spras/issues/new.")
+                    out = str(out)
+            elif not isinstance(out, str):
+                out = str(out, "utf-8")
+            print(indent(out))
+    except docker.errors.ContainerError as err:
+        print(f"(Command formatted as list: `{err.command}`)")
+        print(f"An unexpected non-zero exit status ({err.exit_status}) inside the docker image {err.image} occurred:")
+        err = str(err.stderr if err.stderr is not None else "", "utf-8")
+        print(indent(err))
+    except Exception as err:
+        raise err
 
 # TODO any issue with creating a new client each time inside this function?
 def run_container_docker(container: str, command: List[str], volumes: List[Tuple[PurePath, PurePath]], working_dir: str, environment: str = 'SPRAS=True'):
@@ -161,79 +200,78 @@ def run_container_docker(container: str, command: List[str], volumes: List[Tuple
     @param volumes: a list of volumes to mount where each item is a (source, destination) tuple
     @param working_dir: the working directory in the container
     @param environment: environment variables to set in the container
-    @return: output from Docker run
+    @return: output from Docker run, or will error if the container errored.
     """
-    out = None
+    # Initialize a Docker client using environment variables
     try:
-        # Initialize a Docker client using environment variables
         client = docker.from_env()
-        # Track the contents of the local directories that will be bound so that new files added can have their owner
-        # changed
-        pre_volume_contents = {}
-        src_dest_map = {}
-        for src, dest in volumes:
-            src_path = Path(src)
-            # The same source path can be in volumes more than once if there were multiple input or output files
-            # in the same directory
-            # Only check each unique source path once and track which of the possible destination paths was used
-            if src_path not in pre_volume_contents:
-                # Only list files in the directory, do not walk recursively because it could include
-                # a massive number of files
-                pre_volume_contents[src_path] = set(src_path.iterdir())
-                src_dest_map[src_path] = dest
-
-        bind_paths = [f'{prepare_path_docker(src)}:{dest}' for src, dest in volumes]
-
-        out = client.containers.run(container,
-                                    command,
-                                    stderr=True,
-                                    volumes=bind_paths,
-                                    working_dir=working_dir,
-                                    environment=[environment]).decode('utf-8')
-
-        # TODO does this cleanup need to still run even if there was an error in the above run command?
-        # On Unix, files written by the above Docker run command will be owned by root and cannot be modified
-        # outside the container by a non-root user
-        # Reset the file owner and the group inside the container
-        try:
-            # Only available on Unix
-            uid = os.getuid()
-            gid = os.getgid()
-
-            all_modified_volume_contents = set()
-            for src_path in pre_volume_contents.keys():
-                # Assumes the Docker run call is the only process that modified the contents
-                # Only considers files that were added, not files that were modified
-                post_volume_contents = set(src_path.iterdir())
-                modified_volume_contents = post_volume_contents - pre_volume_contents[src_path]
-                modified_volume_contents = [str(convert_docker_path(src_path, src_dest_map[src_path], p)) for p in
-                                            modified_volume_contents]
-                all_modified_volume_contents.update(modified_volume_contents)
-
-            # This command changes the ownership of output files so we don't
-            # get a permissions error when snakemake or the user try to touch the files
-            # Use --recursive because new directories could have been created inside the container
-            # Do not run the command if no files were modified
-            if len(all_modified_volume_contents) > 0:
-                chown_command = ['chown', f'{uid}:{gid}', '--recursive']
-                chown_command.extend(all_modified_volume_contents)
-                chown_command = ' '.join(chown_command)
-                client.containers.run(container,
-                                    chown_command,
-                                    stderr=True,
-                                    volumes=bind_paths,
-                                    working_dir=working_dir,
-                                    environment=[environment]).decode('utf-8')
-
-        # Raised on non-Unix systems
-        except AttributeError:
-            pass
-
-        # TODO: Not sure whether this is needed or where to close the client
-        client.close()
-
     except Exception as err:
-        print(err)
+        err.add_note("An error occurred when fetching the docker daemon: is docker installed and is dockerd running?")
+        raise err
+    # Track the contents of the local directories that will be bound so that new files added can have their owner
+    # changed
+    pre_volume_contents = {}
+    src_dest_map = {}
+    for src, dest in volumes:
+        src_path = Path(src)
+        # The same source path can be in volumes more than once if there were multiple input or output files
+        # in the same directory
+        # Only check each unique source path once and track which of the possible destination paths was used
+        if src_path not in pre_volume_contents:
+            # Only list files in the directory, do not walk recursively because it could include
+            # a massive number of files
+            pre_volume_contents[src_path] = set(src_path.iterdir())
+            src_dest_map[src_path] = dest
+
+    bind_paths = [f'{prepare_path_docker(src)}:{dest}' for src, dest in volumes]
+
+    out = client.containers.run(container,
+                                command,
+                                stderr=True,
+                                volumes=bind_paths,
+                                working_dir=working_dir,
+                                environment=[environment]).decode('utf-8')
+
+    # TODO does this cleanup need to still run even if there was an error in the above run command?
+    # On Unix, files written by the above Docker run command will be owned by root and cannot be modified
+    # outside the container by a non-root user
+    # Reset the file owner and the group inside the container
+    try:
+        # Only available on Unix
+        uid = os.getuid()
+        gid = os.getgid()
+
+        all_modified_volume_contents = set()
+        for src_path in pre_volume_contents.keys():
+            # Assumes the Docker run call is the only process that modified the contents
+            # Only considers files that were added, not files that were modified
+            post_volume_contents = set(src_path.iterdir())
+            modified_volume_contents = post_volume_contents - pre_volume_contents[src_path]
+            modified_volume_contents = [str(convert_docker_path(src_path, src_dest_map[src_path], p)) for p in
+                                        modified_volume_contents]
+            all_modified_volume_contents.update(modified_volume_contents)
+
+        # This command changes the ownership of output files so we don't
+        # get a permissions error when snakemake or the user try to touch the files
+        # Use --recursive because new directories could have been created inside the container
+        # Do not run the command if no files were modified
+        if len(all_modified_volume_contents) > 0:
+            chown_command = ['chown', f'{uid}:{gid}', '--recursive']
+            chown_command.extend(all_modified_volume_contents)
+            chown_command = ' '.join(chown_command)
+            client.containers.run(container,
+                                chown_command,
+                                stderr=True,
+                                volumes=bind_paths,
+                                working_dir=working_dir,
+                                environment=[environment]).decode('utf-8')
+
+    # Raised on non-Unix systems
+    except AttributeError:
+        pass
+
+    # TODO: Not sure whether this is needed or where to close the client
+    client.close()
     # Removed the finally block to address bugbear B012
     # "`return` inside `finally` blocks cause exceptions to be silenced"
     # finally:
