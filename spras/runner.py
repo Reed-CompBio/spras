@@ -1,3 +1,5 @@
+from typing import Any
+
 # supported algorithm imports
 from spras.allpairs import AllPairs as allpairs
 from spras.dataset import Dataset
@@ -11,7 +13,7 @@ from spras.rwr import RWR as rwr
 from spras.strwr import ST_RWR as strwr
 
 
-def run(algorithm, params):
+def run(algorithm: str, params):
     """
     A generic interface to the algorithm-specific run functions
     """
@@ -22,7 +24,7 @@ def run(algorithm, params):
     algorithm_runner.run(**params)
 
 
-def get_required_inputs(algorithm):
+def get_required_inputs(algorithm: str):
     """
     Get the input files requires to run this algorithm
     @param algorithm: algorithm name
@@ -35,7 +37,7 @@ def get_required_inputs(algorithm):
     return algorithm_runner.required_inputs
 
 
-def merge_input(dataset_dict, dataset_file):
+def merge_input(dataset_dict, dataset_file: str):
     """
     Merge files listed for this dataset and write the dataset to disk
     @param dataset_dict: dataset to process
@@ -45,7 +47,7 @@ def merge_input(dataset_dict, dataset_file):
     dataset.to_file(dataset_file)
 
 
-def prepare_inputs(algorithm, data_file, filename_map):
+def prepare_inputs(algorithm: str, data_file: str, filename_map: dict[str, str]):
     """
     Prepare general dataset files for this algorithm
     @param algorithm: algorithm name
@@ -61,7 +63,7 @@ def prepare_inputs(algorithm, data_file, filename_map):
     return algorithm_runner.generate_inputs(dataset, filename_map)
 
 
-def parse_output(algorithm, raw_pathway_file, standardized_pathway_file, params):
+def parse_output(algorithm: str, raw_pathway_file: str, standardized_pathway_file: str, params: dict[str, Any]):
     """
     Convert a predicted pathway into the universal format
     @param algorithm: algorithm name

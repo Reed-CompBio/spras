@@ -27,7 +27,7 @@ class Dataset:
         self.load_files_from_dict(dataset_dict)
         return
 
-    def to_file(self, file_name):
+    def to_file(self, file_name: str):
         """
         Saves dataset object to pickle file
         """
@@ -35,15 +35,16 @@ class Dataset:
             pkl.dump(self, f)
 
     @classmethod
-    def from_file(cls, file_name):
-        if isinstance(file_name, Dataset):
-            # No work to be done
-            # (this use-case is useful for testing.)
-            return file_name
+    def from_file(cls, file_name: str):
         """
         Loads dataset object from a pickle file.
         Usage: dataset = Dataset.from_file(pickle_file)
         """
+        if isinstance(file_name, Dataset):
+            # No work to be done
+            # (this use-case is useful for testing.)
+            return file_name
+
         with open(file_name, "rb") as f:
             return pkl.load(f)
 
