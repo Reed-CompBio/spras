@@ -168,5 +168,5 @@ class Dataset:
     def get_other_files(self):
         return self.other_files.copy()
 
-    def get_interactome(self):
+    def get_interactome(self) -> pd.DataFrame | None:
         return self.interactome.copy(deep = True)
