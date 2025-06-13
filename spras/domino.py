@@ -139,11 +139,11 @@ class DOMINO(PRM):
 
         try:
             run_container_and_log('DOMINO',
-                                container_framework,
-                                container_suffix,
-                                domino_command,
-                                volumes,
-                                work_dir)
+                                  container_framework,
+                                  container_suffix,
+                                  domino_command,
+                                  volumes,
+                                  work_dir)
         except ContainerError as err:
             # TODO: is this too general of an error to handle? Here, DOMINO
             # still outputs to our output folder with a still viable HTML output.

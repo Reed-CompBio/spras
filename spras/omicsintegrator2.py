@@ -126,11 +126,11 @@ class OmicsIntegrator2(PRM):
 
         try:
             run_container_and_log('Omics Integrator 2',
-                                container_framework,
-                                container_suffix,
-                                command,
-                                volumes,
-                                work_dir)
+                                  container_framework,
+                                  container_suffix,
+                                  command,
+                                  volumes,
+                                  work_dir)
         except ContainerError as err:
             needle = "all the input arrays must have same number of dimensions, but the array at index 0 has 2 dimension(s) and the array at index 1 has 1 dimension(s)"
             if not err.streams_contain(needle):
