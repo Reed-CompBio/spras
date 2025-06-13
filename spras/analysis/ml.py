@@ -109,10 +109,10 @@ def create_palette(column_names):
     to a unique color from the specified palette.
     """
     # TODO: could add a way for the user to customize the color palette?
-    custom_palette = sns.color_palette("husl", len(column_names))
-    label_color_map = {label: color for label, color in zip(column_names, custom_palette, strict=True)}
+    unique_column_names = list(sorted(set(column_names)))
+    custom_palette = sns.color_palette(palette = "tab20c", n_colors = len(unique_column_names))
+    label_color_map = {label: color for label, color in zip(unique_column_names, custom_palette, strict=True)}
     return label_color_map
-
 
 def pca(dataframe: pd.DataFrame, output_png: str, output_var: str, output_coord: str, components: int = 2, labels: bool = True):
     """
@@ -142,9 +142,15 @@ def pca(dataframe: pd.DataFrame, output_png: str, output_var: str, output_coord:
     if not isinstance(labels, bool):
         raise ValueError(f"labels={labels} must be True or False")
 
-    scaler = StandardScaler()
-    scaler.fit(X)  # calc mean and standard deviation
+    # TODO: decide how to scale the data
+    # center binary data by subtracting the column-wise mean
+    # allows PCA to focus on edge inclusion patterns across runs rather than raw output volume.
+    scaler = StandardScaler(with_std=False)
+    scaler.fit(X)  # compute mean inclusion rate per edge
     X_scaled = scaler.transform(X)
+
+    # no scaling
+    # X_scaled = X
 
     # choosing the PCA
     pca_instance = PCA(n_components=components)
@@ -152,19 +158,27 @@ def pca(dataframe: pd.DataFrame, output_png: str, output_var: str, output_coord:
     X_pca = pca_instance.transform(X_scaled)
     variance = pca_instance.explained_variance_ratio_ * 100
 
+    # calculating the centroid
+    centroid = np.mean(X_pca, axis=0) # mean of each principal component across all samples
+
     # making the plot
     label_color_map = create_palette(column_names)
     plt.figure(figsize=(10, 7))
-    sns.scatterplot(x=X_pca[:, 0], y=X_pca[:, 1], s=70, hue=column_names, legend=True, palette=label_color_map)
+    sns.scatterplot(x=X_pca[:, 0], y=X_pca[:, 1], s=70, hue=column_names, palette=label_color_map)
+    plt.scatter(centroid[0], centroid[1], color='red', marker='X', s=100, label='Centroid')
     plt.title("PCA")
+    plt.legend()
     plt.xlabel(f"PC1 ({variance[0]:.1f}% variance)")
     plt.ylabel(f"PC2 ({variance[1]:.1f}% variance)")
 
     # saving the coordinates of each algorithm
     make_required_dirs(output_coord)
     coordinates_df = pd.DataFrame(X_pca, columns=['PC' + str(i) for i in range(1, components+1)])
-    coordinates_df.insert(0, 'algorithm', columns.tolist())
+    coordinates_df.insert(0, 'datapoint_labels', columns.tolist())
+    centroid_row = ['centroid'] + centroid.tolist()
+    coordinates_df.loc[len(coordinates_df)] = centroid_row
     coordinates_df.to_csv(output_coord, sep='\t', index=False)
+
 
     # saving the principal components
     make_required_dirs(output_var)
