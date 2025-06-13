@@ -2,7 +2,7 @@ from pathlib import Path
 
 import networkx as nx
 
-from spras.containers import prepare_volume, run_container
+from spras.containers import prepare_volume, run_container_and_log
 from spras.dataset import Dataset
 from spras.interactome import convert_directed_to_undirected
 from spras.prm import PRM
@@ -83,16 +83,13 @@ class DIAMOnD(PRM):
                    str(alpha),
                    mapped_out_file]
 
-        print('Running DIAMOnD with arguments: {}'.format(' '.join(command)), flush=True)
-
         container_suffix = "diamond:latest"
-        out = run_container(
-                            container_framework,
-                            container_suffix,
-                            command,
-                            volumes,
-                            work_dir)
-        print(out)
+        run_container_and_log('DIAMOND',
+                              container_framework,
+                              container_suffix,
+                              command,
+                              volumes,
+                              work_dir)
 
     @staticmethod
     def parse_output(raw_pathway_file, standardized_pathway_file, original_dataset: Dataset):
