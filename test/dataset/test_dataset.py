@@ -1,5 +1,6 @@
-import pandas
 from pathlib import Path
+
+import pandas
 import pytest
 
 from spras.dataset import Dataset
@@ -16,7 +17,7 @@ class TestDataset:
                 'other_files': [],
                 'data_dir': FIXTURES_PATH / 'empty'
             })
-    
+
     def test_not_allow_edge_weights_oor(self):
         with pytest.raises(ValueError):
             Dataset({
