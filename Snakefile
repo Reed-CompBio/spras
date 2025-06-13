@@ -104,8 +104,11 @@ def make_final_input(wildcards):
         final_input.extend(expand('{out_dir}{sep}{dataset}-ml{sep}{algorithm}-ensemble-pathway.txt',out_dir=out_dir,sep=SEP,dataset=dataset_labels,algorithm=algorithms))
 
     if _config.config.analysis_include_evaluation:
-        final_input.extend(expand('{out_dir}{sep}{dataset_gold_standard_pair}-evaluation.txt',out_dir=out_dir,sep=SEP,dataset_gold_standard_pair=dataset_gold_standard_pairs,algorithm_params=algorithms_with_params))
-    
+        final_input.extend(expand('{out_dir}{sep}{dataset_gold_standard_pair}-eval{sep}pr-curve-ensemble-nodes.png',out_dir=out_dir,sep=SEP,dataset_gold_standard_pair=dataset_gold_standard_pairs))
+        final_input.extend(expand('{out_dir}{sep}{dataset_gold_standard_pair}-eval{sep}pr-curve-ensemble-nodes.txt',out_dir=out_dir,sep=SEP,dataset_gold_standard_pair=dataset_gold_standard_pairs))
+    if _config.config.analysis_include_evaluation_aggregate_algo:
+        final_input.extend(expand('{out_dir}{sep}{dataset_gold_standard_pair}-eval{sep}pr-curve-ensemble-nodes-per-algorithm.png',out_dir=out_dir,sep=SEP,dataset_gold_standard_pair=dataset_gold_standard_pairs))
+        final_input.extend(expand('{out_dir}{sep}{dataset_gold_standard_pair}-eval{sep}pr-curve-ensemble-nodes-per-algorithm.txt',out_dir=out_dir,sep=SEP,dataset_gold_standard_pair=dataset_gold_standard_pairs))
     if len(final_input) == 0:
         # No analysis added yet, so add reconstruction output files if they exist.
         # (if analysis is specified, these should be implicitly run).
@@ -371,15 +374,41 @@ def get_dataset_label(wildcards):
     dataset = parts[0]
     return dataset
 
-# Run evaluation code for a specific dataset's pathway outputs against its paired gold standard
-rule evaluation:
+# Returns ensemble file for each dataset
+def collect_ensemble_per_dataset(wildcards):
+    dataset_label = get_dataset_label(wildcards)
+    return expand('{out_dir}{sep}{dataset}-ml{sep}ensemble-pathway.txt', out_dir=out_dir, sep=SEP, dataset=dataset_label)
+
+# Run precision-recall curves for each ensemble pathway within a dataset evaluated against its corresponding gold standard
+rule evaluation_ensemble_pr_curve:
     input: 
         gold_standard_file = get_gold_standard_pickle_file,
-        pathways = expand('{out_dir}{sep}{dataset_label}-{algorithm_params}{sep}pathway.txt', out_dir=out_dir, sep=SEP, algorithm_params=algorithms_with_params, dataset_label=get_dataset_label),
-    output: eval_file = SEP.join([out_dir, "{dataset_gold_standard_pairs}-evaluation.txt"])
+        ensemble_file = collect_ensemble_per_dataset,
+    output: 
+        pr_curve_png = SEP.join([out_dir, '{dataset_gold_standard_pairs}-eval', 'pr-curve-ensemble-nodes.png']),
+        pr_curve_file = SEP.join([out_dir, '{dataset_gold_standard_pairs}-eval', 'pr-curve-ensemble-nodes.txt']),
     run:
         node_table = Evaluation.from_file(input.gold_standard_file).node_table
-        Evaluation.precision(input.pathways, node_table, output.eval_file)
+        node_ensemble_dict = Evaluation.edge_frequency_node_ensemble(node_table, input.ensemble_file)
+        Evaluation.precision_recall_curve_node_ensemble(node_ensemble_dict, node_table, output.pr_curve_png, output.pr_curve_file)
+
+# Returns list of algorithm specific ensemble files per dataset
+def collect_ensemble_per_algo_per_dataset(wildcards):
+    dataset_label = get_dataset_label(wildcards)
+    return expand('{out_dir}{sep}{dataset}-ml{sep}{algorithm}-ensemble-pathway.txt', out_dir=out_dir, sep=SEP, dataset=dataset_label, algorithm=algorithms)
+
+# Run precision-recall curves for each algorithm's ensemble pathway within a dataset evaluated against its corresponding gold standard
+rule evaluation_per_algo_ensemble_pr_curve:
+    input: 
+        gold_standard_file = get_gold_standard_pickle_file,
+        ensemble_files = collect_ensemble_per_algo_per_dataset,
+    output: 
+        pr_curve_png = SEP.join([out_dir, '{dataset_gold_standard_pairs}-eval', 'pr-curve-ensemble-nodes-per-algorithm.png']),
+        pr_curve_file = SEP.join([out_dir, '{dataset_gold_standard_pairs}-eval', 'pr-curve-ensemble-nodes-per-algorithm.txt']),
+    run:
+        node_table = Evaluation.from_file(input.gold_standard_file).node_table
+        node_ensembles_dict = Evaluation.edge_frequency_node_ensemble(node_table, input.ensemble_files)
+        Evaluation.precision_recall_curve_node_ensemble(node_ensembles_dict, node_table, output.pr_curve_png, output.pr_curve_file)
 
 # Remove the output directory
 rule clean:
