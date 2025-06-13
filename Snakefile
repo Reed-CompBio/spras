@@ -1,6 +1,5 @@
 import os
 from spras import runner
-import pickle
 import pandas
 import shutil
 import yaml
