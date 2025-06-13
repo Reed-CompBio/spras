@@ -105,6 +105,8 @@ class Config:
         self.analysis_include_ml_aggregate_algo = None
         # A Boolean specifying whether to run the evaluation per algorithm analysis
         self.analysis_include_evaluation_aggregate_algo = None
+        # A dict with secret file paths (e.g. licenses)
+        self.secrets = None
 
         _raw_config = copy.deepcopy(raw_config)
         self.process_config(_raw_config)
@@ -140,6 +142,12 @@ class Config:
         # Grab registry from the config, and if none is provided default to docker
         if "container_registry" in raw_config and raw_config["container_registry"]["base_url"] != "" and raw_config["container_registry"]["owner"] != "":
             self.container_prefix = raw_config["container_registry"]["base_url"] + "/" + raw_config["container_registry"]["owner"]
+
+        # Parse secrets
+        if "secrets" in raw_config:
+            self.secrets = {}
+            if raw_config["secrets"]["gurobi"]:
+                self.secrets["gurobi"] = raw_config["secrets"]["gurobi"]
 
         # Parse dataset information
         # Datasets is initially a list, where each list entry has a dataset label and lists of input files
