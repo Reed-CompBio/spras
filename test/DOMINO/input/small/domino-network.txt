@@ -1,0 +1,4 @@
+ID_interactor_A	ppi	ID_interactor_b
+A	ppi	B
+B	ppi	C
+C	ppi	B
