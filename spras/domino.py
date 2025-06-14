@@ -145,10 +145,15 @@ class DOMINO(PRM):
                                   volumes,
                                   work_dir)
         except ContainerError as err:
-            # TODO: is this too general of an error to handle? Here, DOMINO
+            # TODO: should we let DOMINO output an empty file here? Here, DOMINO
             # still outputs to our output folder with a still viable HTML output.
             # https://github.com/Reed-CompBio/spras/pull/103#issuecomment-1681526958
-            if not err.streams_contain("ValueError: cannot apply union_all to an empty list"):
+            if err.streams_contain("ValueError: cannot apply union_all to an empty list"):
+                pass
+            # Occurs when DOMINO gets passed some empty dataframe.
+            elif err.streams_contain("pandas.errors.EmptyDataError: No columns to parse from file"):
+                pass
+            else:
                 raise err
 
         # DOMINO creates a new folder in out_dir to output its modules HTML files into called active_genes
@@ -165,7 +170,7 @@ class DOMINO(PRM):
         # Clean up DOMINO intermediate and pickle files
         slices_file.unlink(missing_ok=True)
         Path(out_dir, 'network.slices.pkl').unlink(missing_ok=True)
-        Path(network + '.pkl').unlink(missing_ok=True)
+        Path(str(network) + '.pkl').unlink(missing_ok=True)
 
     @staticmethod
     def parse_output(raw_pathway_file, standardized_pathway_file):
