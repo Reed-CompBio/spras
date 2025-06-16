@@ -58,7 +58,7 @@ algorithms:
                   b: [5, 6]
                   w: np.linspace(0,5,2)
                   d: 10
-                  dummy_mode: ["file"] # Or "terminals", "all", "others"
+                  dummy_mode: x"file" # Or "terminals", "all", "others"
 
       - name: "omicsintegrator2"
         params:

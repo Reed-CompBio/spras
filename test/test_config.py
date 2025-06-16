@@ -34,10 +34,10 @@ def get_test_config():
                 }
             },
             {
-                "name": "numbers",
+                "name": "numbersAndBools",
                 "params": {
                     "include": True,
-                    "run1": {"a": 1, "b": [float(2.0), 3], "c": [4], "d": float(5.6)}
+                    "run1": {"a": 1, "b": [float(2.0), 3], "c": [4], "d": float(5.6), "f": False}
                 }
             },
             {
@@ -68,6 +68,13 @@ def get_test_config():
                     "run1": {"test": "np.arange(5,6)", "test2": [2, 3]}
                 }
             },
+            {
+                "name": "boolArrTest",
+                "params": {
+                    "include": True,
+                    "run1": {"flags": [True, False], "range": "range(1, 3)"}
+                }
+            }
         ],
         "analysis": {
             "summary": {
@@ -99,6 +106,8 @@ def value_test_util(name: str, configurations: list):
     values = [config.config.algorithm_params[name][key] for key in keys]
 
     # https://stackoverflow.com/a/50486270/7589775
+    # Note: We use pickle as we also compare dictionaries in these two sets - some kind of consistent total ordering
+    # is required for the tests to consistently pass when comparing them to `configurations`.
     set_values = set(tuple(sorted(d.items())) for d in sorted(values, key=lambda x: pickle.dumps(x, protocol=3)))
     set_configurations = set(tuple(sorted(d.items())) for d in sorted(configurations, key=lambda x: pickle.dumps(x, protocol=3)))
 
@@ -212,13 +221,16 @@ class TestConfig:
 
         value_test_util('strings', [{'test': "str1", 'test2': "str2"}, {'test': 'str1', 'test2': 'str3'}])
         # "run1": {"a": 1, "b": [float(2.0), 3], "c": [4], "d": float(5.6)}
-        value_test_util('numbers', [{'a': 1, 'b': float(2.0), 'c': 4, 'd': 5.6}, {'a': 1, 'b': 3, 'c': 4, 'd': 5.6}])
+        value_test_util('numbersAndBools', [{'a': 1, 'b': float(2.0), 'c': 4, 'd': 5.6, 'f': False}, {'a': 1, 'b': 3, 'c': 4, 'd': 5.6, 'f': False}])
 
         value_test_util('singleton_int64_with_array', [{'test': 1, 'test2': 2}, {'test': 1, 'test2': 3}])
         value_test_util('singleton_string_np_linspace', [{'test': "str1", 'test2': 5.0}, {'test': "str1", 'test2': 0.0}])
         value_test_util('str_array_np_logspace', [{'test': "a", 'test2': 10}] * 10 + [{'test': "b", 'test2': 10}] * 10)
 
         value_test_util('int64artifact', [{'test': 5, 'test2': 2}, {'test': 5, 'test2': 3}])
+
+        value_test_util('boolArrTest', [{'flags': True, 'range': 1}, {'flags': False, 'range': 2},
+                                     {'flags': False, 'range': 1}, {'flags': True, 'range': 2}])
 
     @pytest.mark.parametrize("ml_include, eval_include, expected_ml, expected_eval", [
         (True, True, True, True),

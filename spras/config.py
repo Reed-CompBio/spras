@@ -230,9 +230,16 @@ class Config:
                             try:
                                 obj = [float(obj)]
                             except ValueError:
+                                # Handles arrays and special evaluation types
+                                # TODO: do we want to explicitly bar `eval` if we may use untrusted user inputs later?
                                 if obj.startswith(("range", "np.linspace", "np.arange", "np.logspace", "[")):
                                     obj = eval(obj)
+                                elif obj.lower() == "true":
+                                    obj = [True]
+                                elif obj.lower() == "false":
+                                    obj = [False]
                                 else:
+                                    # Catch-all for strings
                                     obj = [obj]
                             if not isinstance(obj, Iterable):
                                 raise ValueError(f"The object `{obj}` in algorithm {alg['name']} at key '{p}' in run '{run_params}' is not iterable!") from None
