@@ -37,6 +37,13 @@ class CapDSD(PRM):
 
     @staticmethod
     def run(ppi=None, ppip=None, output_file=None, container_framework="docker"):
+        """
+        Run BTB with Docker
+        @param ppi:  input interactome file containing only undirected edges (required)
+        @param ppip:  input interactome file containing only directed edges (required)
+        @param output_file: path to the output matrix (required)
+        @param container_framework: specify a container framework
+        """
         if not ppi or not ppip or not output_file:
             raise ValueError("Required capDSD arguments are missing")
     

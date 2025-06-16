@@ -48,6 +48,11 @@ jobs:
     with:
       path: docker-wrappers/Cytoscape
       container: reedcompbio/py4cytoscape
+  build-and-remove-capdsd:
+    uses: "./.github/workflows/build-and-remove-template.yml"
+    with:
+      path: docker-wrappers/capDSD
+      container: reedcompbio/capdsd
   build-and-remove-spras:
     uses: "./.github/workflows/build-and-remove-template.yml"
     with:

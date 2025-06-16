@@ -96,6 +96,10 @@ algorithms:
         slice_threshold: [0.3]
         module_threshold: [0.05]
 
+  - name: "capdsd"
+    params:
+      include: true
+
 # Here we specify which pathways to run and other file location information.
 # DataLoader.py can currently only load a single dataset
 # Assume that if a dataset label does not change, the lists of associated input files do not change
