@@ -51,4 +51,5 @@ class TestLocalNeighborhood:
 
     # Write tests for the Local Neighborhood run function here.
     # The tests above test the internal python code for local_neighborhood - can you
-    # write the same tests above but for Docker using LocalNeighborhood, and one for Singularity.
+    # write the `missing_file` and `ln` tests above but for Docker using LocalNeighborhood,
+    # and at least one for Singularity?

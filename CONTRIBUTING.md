@@ -60,7 +60,7 @@ git push agitter local-neighborhood
 The Local Neighborhood pathway reconstruction is implemented and described in the [`docker-wrappers/LocalNeighborhood`](docker-wrappers/LocalNeighborhood) directory.
 The readme in that directory describes the usage and the three required arguments.
 This algorithm does not require any third-party packages, only Python 3.x.
-Run `local_neighborhood.py` from the command line.
+Run `local_neighborhood_alg.py` from the command line.
 There are example input files `ln-network.txt` and `ln-nodes.txt` in [`test/LocalNeighborhood/input`](test/LocalNeighborhood/input).
 Copy them to the `LocalNeighborhood` directory for testing.
 Confirm that the output file matches expectations.
@@ -84,7 +84,7 @@ Docker must be running on your system before executing this command.
 Test the image by running it with the example input files
 ```
 docker run -w /data --mount type=bind,source=/${PWD},target=/data \
-  <username>/local-neighborhood python local_neighborhood.py \
+  <username>/local-neighborhood python local_neighborhood_alg.py \
   --network /data/ln-network.txt --nodes /data/ln-nodes.txt \
   --output /data/ln-output.txt
 ```
