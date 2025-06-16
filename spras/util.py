@@ -13,12 +13,16 @@ import pandas as pd
 
 
 # https://stackoverflow.com/a/57915246/7589775
+# numpy variables are not, by default, encodable by python's JSONEncoder.
+# Thus, we need to wrap the encoder to reduce np-objects down to regular floats and ints.
+# To preserve precision, we stringify the objects instead,
+# but this is still fed specifically for hashing.
 class NpEncoder(json.JSONEncoder):
     def default(self, obj):
         if isinstance(obj, np.integer):
-            return int(obj)
+            return str(obj)
         if isinstance(obj, np.floating):
-            return float(obj)
+            return str(obj)
         if isinstance(obj, np.ndarray):
             return obj.tolist()
         return super(NpEncoder, self).default(obj)
