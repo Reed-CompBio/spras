@@ -153,7 +153,7 @@ class ContainerError(RuntimeError):
         stdout = self.stdout if self.stdout else ''
         stderr = self.stderr if self.stderr else ''
 
-        return snippet in stdout or snippet in stderr
+        return (snippet in stdout) or (snippet in stderr)
 
     # Due to
     # https://github.com/snakemake/snakemake/blob/d4890b4da691506b6a258f7534ac41fdb7ef5ab4/src/snakemake/exceptions.py#L18

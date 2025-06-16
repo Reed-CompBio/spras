@@ -113,12 +113,19 @@ class DOMINO(PRM):
                           '--output_file', mapped_slices_file]
 
         container_suffix = "domino"
-        run_container_and_log('slicer',
-                             container_framework,
-                             container_suffix,
-                             slicer_command,
-                             volumes,
-                             work_dir)
+        try:
+            run_container_and_log('slicer',
+                                container_framework,
+                                container_suffix,
+                                slicer_command,
+                                volumes,
+                                work_dir)
+        except ContainerError as err:
+            # Occurs when DOMINO gets passed some empty dataframe.
+            if err.streams_contain("pandas.errors.EmptyDataError: No columns to parse from file"):
+                pass
+            else:
+                raise err
 
         # Make the Python command to run within the container
         domino_command = ['domino',
@@ -145,13 +152,13 @@ class DOMINO(PRM):
                                   volumes,
                                   work_dir)
         except ContainerError as err:
+            # Occurs when DOMINO gets passed some empty dataframe.
+            if err.streams_contain("pandas.errors.EmptyDataError: No columns to parse from file"):
+                pass
             # TODO: should we let DOMINO output an empty file here? Here, DOMINO
             # still outputs to our output folder with a still viable HTML output.
             # https://github.com/Reed-CompBio/spras/pull/103#issuecomment-1681526958
-            if err.streams_contain("ValueError: cannot apply union_all to an empty list"):
-                pass
-            # Occurs when DOMINO gets passed some empty dataframe.
-            elif err.streams_contain("pandas.errors.EmptyDataError: No columns to parse from file"):
+            elif err.streams_contain("ValueError: cannot apply union_all to an empty list"):
                 pass
             else:
                 raise err
