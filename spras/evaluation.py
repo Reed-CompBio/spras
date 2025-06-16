@@ -3,8 +3,15 @@ import pickle as pkl
 from pathlib import Path
 from typing import Dict, Iterable
 
+import matplotlib.pyplot as plt
+import numpy as np
 import pandas as pd
-from sklearn.metrics import precision_score
+from sklearn.metrics import (
+    precision_score,
+    recall_score,
+)
+
+from spras.analysis.ml import create_palette
 
 
 class Evaluation:
@@ -72,29 +79,70 @@ class Evaluation:
         # TODO: later iteration - chose between node and edge file, or allow both
 
     @staticmethod
-    def precision(file_paths: Iterable[Path], node_table: pd.DataFrame, output_file: str):
+    def precision_and_recall(file_paths: Iterable[Path], node_table: pd.DataFrame, algorithms: list, output_file: str, output_png:str=None):
         """
         Takes in file paths for a specific dataset and an associated gold standard node table.
-        Calculates precision for each pathway file
+        Calculates precision and recall for each pathway file
         Returns output back to output_file
         @param file_paths: file paths of pathway reconstruction algorithm outputs
         @param node_table: the gold standard nodes
-        @param output_file: the filename to save the precision of each pathway
+        @param algorithms: list of algorithms used in current run of SPRAS
+        @param output_file: the filename to save the precision and recall of each pathway
+        @param output_png (optional): the filename to plot the precision and recall of each pathway (not a PRC)
         """
         y_true = set(node_table['NODEID'])
         results = []
-
-        for file in file_paths:
-            df = pd.read_table(file, sep="\t", header=0, usecols=["Node1", "Node2"])
+        for f in file_paths:
+            df = pd.read_table(f, sep="\t", header=0, usecols=["Node1", "Node2"])
             y_pred = set(df['Node1']).union(set(df['Node2']))
             all_nodes = y_true.union(y_pred)
             y_true_binary = [1 if node in y_true else 0 for node in all_nodes]
             y_pred_binary = [1 if node in y_pred else 0 for node in all_nodes]
-
             # default to 0.0 if there is a divide by 0 error
+            # not using precision_recall_curve because thresholds are binary (0 or 1); rather we are directly calculating precision and recall per pathway
             precision = precision_score(y_true_binary, y_pred_binary, zero_division=0.0)
+            recall = recall_score(y_true_binary, y_pred_binary, zero_division=0.0)
+            results.append({"Pathway": f, "Precision": precision, "Recall": recall})
 
-            results.append({"Pathway": file, "Precision": precision})
+        pr_df = pd.DataFrame(results)
 
-        precision_df = pd.DataFrame(results)
-        precision_df.to_csv(output_file, sep="\t", index=False)
+        if not pr_df.empty:
+            pr_df.sort_values(by=["Recall", "Pathway"], axis=0, ascending=True, inplace=True)
+            pr_df.to_csv(output_file, sep="\t", index=False)
+            if output_png is not None:
+                plt.figure(figsize=(10, 7))
+                color_palette = create_palette(algorithms)
+                # plot a line per algorithm
+                for algorithm in algorithms:
+                    subset = pr_df[pr_df["Pathway"].str.contains(algorithm)]
+                    if not subset.empty:
+                        plt.plot(
+                            subset["Recall"],
+                            subset["Precision"],
+                            color = color_palette[algorithm],
+                            marker='o',
+                            linestyle='',
+                            label=f"{algorithm}"
+                        )
+
+                plt.xlabel("Recall")
+                plt.ylabel("Precision")
+                plt.xlim(-0.05, 1.05)
+                plt.ylim(-0.05, 1.05)
+                plt.title("Precision and Recall Plot")
+                plt.legend()
+                plt.grid(True)
+                plt.savefig(output_png)
+                plt.close()
+        else: # TODO: I don't think this case will ever hit
+            pr_df.to_csv(output_file, sep="\t", index=False)
+            if output_png is not None:
+                plt.figure(figsize=(10, 7))
+                plt.plot([], [], label="No Pathways Given")
+                plt.title("Precision and Recall Plot")
+                plt.legend()
+                plt.savefig(output_png)
+                plt.close()
+
+
+
