@@ -325,6 +325,7 @@ def run_container_singularity(container: str, command: List[str], volumes: List[
     if 'HOME' in environment:
         home_dir = environment['HOME']
         singularity_options.extend(['--home', home_dir])
+        # We delete HOME to avoid adding it to `--env` right after.
         del environment['HOME']
 
     # https://docs.sylabs.io/guides/3.7/user-guide/environment_and_metadata.html#env-option
