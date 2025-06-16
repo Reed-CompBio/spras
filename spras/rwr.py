@@ -72,7 +72,7 @@ class RWR(PRM):
         if alpha is not None:
             command.extend(['--alpha', str(alpha)])
 
-        container_suffix = 'rwr'
+        container_suffix = 'rwr:v1'
         out = run_container(container_framework,
                             container_suffix,
                             command,

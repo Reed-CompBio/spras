@@ -79,7 +79,7 @@ class ST_RWR(PRM):
         if alpha is not None:
             command.extend(['--alpha', str(alpha)])
 
-        container_suffix = 'st-rwr:latest'
+        container_suffix = 'st-rwr:v1'
         out = run_container(container_framework,
                             container_suffix,
                             command,
