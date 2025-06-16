@@ -1,5 +1,6 @@
 import os
 from spras import runner
+import pandas
 import shutil
 import yaml
 from spras.dataset import Dataset
@@ -298,10 +299,37 @@ rule summary_table:
         summary_df = summary.summarize_networks(input.pathways, node_table, algorithm_params, algorithms_with_params)
         summary_df.to_csv(output.summary_table, sep='\t', index=False)
 
+# Returns all pathways for a specific algorithm
+def collect_pathways(per_algo=False):
+    def collect_pathways_inter(wildcards):
+        filtered_algo_params = [algo_param for algo_param in algorithms_with_params if wildcards.algorithm in algo_param] if per_algo else algorithms_with_params
+        return expand('{out_dir}{sep}{{dataset}}-{algorithm_params}{sep}pathway.txt', out_dir=out_dir, sep=SEP, algorithm_params=filtered_algo_params)
+    return collect_pathways_inter
+
+# Store the expensive summarize_networks call per algorithm
+rule pickle_summarize_networks_per_algo:
+    input:
+        pathways = collect_pathways(per_algo=True)
+    output:
+        network_ml_summary_algo = SEP.join([out_dir, '{dataset}-ml', 'ml-summary-{algorithm}.pickle'])
+    run:
+        summary_df = ml.summarize_networks(input.pathways)
+        summary_df.to_pickle(output.network_ml_summary_algo)
+
+# Same as pickle_summarize_networks_per_algo, but in general.
+rule pickle_summarize_networks:
+    input:
+        pathways = collect_pathways(per_algo=False)
+    output:
+        network_ml_summary_algo = SEP.join([out_dir, '{dataset}-ml', 'ml-summary.pickle'])
+    run:
+        summary_df = ml.summarize_networks(input.pathways)
+        summary_df.to_pickle(output.network_ml_summary_algo)
+
 # Cluster the output pathways for each dataset
 rule ml_analysis:
     input: 
-        pathways = expand('{out_dir}{sep}{{dataset}}-{algorithm_params}{sep}pathway.txt', out_dir=out_dir, sep=SEP, algorithm_params=algorithms_with_params)
+        network_ml_summary = SEP.join([out_dir, '{dataset}-ml', 'ml-summary.pickle'])
     output: 
         pca_image = SEP.join([out_dir, '{dataset}-ml', 'pca.png']),
         pca_variance= SEP.join([out_dir, '{dataset}-ml', 'pca-variance.txt']),
@@ -311,7 +339,7 @@ rule ml_analysis:
         hac_image_horizontal = SEP.join([out_dir, '{dataset}-ml', 'hac-horizontal.png']),
         hac_clusters_horizontal = SEP.join([out_dir, '{dataset}-ml', 'hac-clusters-horizontal.txt']),
     run: 
-        summary_df = ml.summarize_networks(input.pathways)
+        summary_df = pandas.read_pickle(input.network_ml_summary)
         ml.pca(summary_df, output.pca_image, output.pca_variance, output.pca_coordinates, **pca_params)
         ml.hac_vertical(summary_df, output.hac_image_vertical, output.hac_clusters_vertical, **hac_params)
         ml.hac_horizontal(summary_df, output.hac_image_horizontal, output.hac_clusters_horizontal, **hac_params)
@@ -319,22 +347,17 @@ rule ml_analysis:
 # Ensemble the output pathways for each dataset
 rule ensemble: 
     input:
-        pathways = expand('{out_dir}{sep}{{dataset}}-{algorithm_params}{sep}pathway.txt', out_dir=out_dir, sep=SEP, algorithm_params=algorithms_with_params)
+        network_ml_summary = SEP.join([out_dir, '{dataset}-ml', 'ml-summary.pickle'])
     output:
         ensemble_network_file = SEP.join([out_dir,'{dataset}-ml', 'ensemble-pathway.txt'])
     run:
-        summary_df = ml.summarize_networks(input.pathways)
+        summary_df = pandas.read_pickle(input.network_ml_summary)
         ml.ensemble_network(summary_df, output.ensemble_network_file)
-
-# Returns all pathways for a specific algorithm
-def collect_pathways_per_algo(wildcards):
-    filtered_algo_params = [algo_param for algo_param in algorithms_with_params if wildcards.algorithm in algo_param]
-    return expand('{out_dir}{sep}{{dataset}}-{algorithm_params}{sep}pathway.txt', out_dir=out_dir, sep=SEP, algorithm_params=filtered_algo_params)
 
 # Cluster the output pathways for each dataset per algorithm
 rule ml_analysis_aggregate_algo:
     input:
-        pathways = collect_pathways_per_algo
+        network_ml_summary = SEP.join([out_dir, '{dataset}-ml', 'ml-summary-{algorithm}.pickle'])
     output:
         pca_image = SEP.join([out_dir, '{dataset}-ml', '{algorithm}-pca.png']),
         pca_variance= SEP.join([out_dir, '{dataset}-ml', '{algorithm}-pca-variance.txt']),
@@ -344,7 +367,7 @@ rule ml_analysis_aggregate_algo:
         hac_image_horizontal = SEP.join([out_dir, '{dataset}-ml', '{algorithm}-hac-horizontal.png']),
         hac_clusters_horizontal = SEP.join([out_dir, '{dataset}-ml', '{algorithm}-hac-clusters-horizontal.txt']),
     run:
-        summary_df = ml.summarize_networks(input.pathways)
+        summary_df = pandas.read_pickle(input.network_ml_summary)
         ml.pca(summary_df, output.pca_image, output.pca_variance, output.pca_coordinates, **pca_params)
         ml.hac_vertical(summary_df, output.hac_image_vertical, output.hac_clusters_vertical, **hac_params)
         ml.hac_horizontal(summary_df, output.hac_image_horizontal, output.hac_clusters_horizontal, **hac_params)
@@ -352,11 +375,11 @@ rule ml_analysis_aggregate_algo:
 # Ensemble the output pathways for each dataset per algorithm
 rule ensemble_per_algo:
     input:
-        pathways = collect_pathways_per_algo
+        network_ml_summary = SEP.join([out_dir, '{dataset}-ml', 'ml-summary-{algorithm}.pickle'])
     output:
         ensemble_network_file = SEP.join([out_dir,'{dataset}-ml', '{algorithm}-ensemble-pathway.txt'])
     run:
-        summary_df = ml.summarize_networks(input.pathways)
+        summary_df = pandas.read_pickle(input.network_ml_summary)
         ml.ensemble_network(summary_df, output.ensemble_network_file)
 
 # Return the gold standard pickle file for a specific gold standard
