@@ -1,6 +1,7 @@
 # supported algorithm imports
 from spras.allpairs import AllPairs as allpairs
 from spras.dataset import Dataset
+from spras.capDSD import CapDSD as capdsd
 from spras.domino import DOMINO as domino
 from spras.meo import MEO as meo
 from spras.mincostflow import MinCostFlow as mincostflow
