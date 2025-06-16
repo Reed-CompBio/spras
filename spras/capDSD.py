@@ -8,7 +8,7 @@ from spras.prm import PRM
 __all__ = ['CapDSD']
 
 class CapDSD(PRM):
-    required_inputs = ['ppi', 'ppip']
+    required_inputs = ['ppi', 'ppip.ppip']
 
     @staticmethod
     def generate_inputs(data: Dataset, filename_map: dict[str, str]):
@@ -32,7 +32,7 @@ class CapDSD(PRM):
         # trusted edges.
         ppip = data.get_interactome()
         ppip = ppip[ppip["Direction"] == "D"]
-        ppip.to_csv(filename_map['ppip'], sep='\t', index=False, columns=["Interactor1", "Interactor2"], header=False)
+        ppip.to_csv(filename_map['ppip.ppip'], sep='\t', index=False, columns=["Interactor1", "Interactor2"], header=False)
 
     @staticmethod
     def run(ppi=None, ppip=None, output_file=None, container_framework="docker"):
@@ -65,15 +65,8 @@ class CapDSD(PRM):
 
         container_suffix = "capdsd"
 
-
-        # First, we move ppip_file to a subdirectory
-        run_container_and_log('capDSD',
-                              container_framework,
-                              container_suffix,
-                              ['sh', '-c', f'mkdir ppip && mv {ppip_file} ppip/{ppip_file}'],
-                              volumes,
-                              work_dir)
-
+        # Since the volumes are binded under different folders, we can safely
+        # use the ppip_file's parent.
         command = ['python',
                    '/capDSD/DSD.py',
                    '-pathmode', '1',
