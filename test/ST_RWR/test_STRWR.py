@@ -1,4 +1,5 @@
 import shutil
+from filecmp import cmp
 from pathlib import Path
 
 import pytest
@@ -25,6 +26,8 @@ class TestSTRWR:
                    alpha=0.85,
                    output_file=OUT_FILE)
         assert OUT_FILE.exists(), 'Output file was not written'
+        expected_file = Path(TEST_DIR, 'expected_output', 'strwr-output.txt')
+        assert cmp(OUT_FILE, expected_file, shallow=False), 'Output file does not match expected output file'
 
     """
     Run the ST_RWR algorithm with a missing input file
@@ -47,6 +50,7 @@ class TestSTRWR:
                        targets=Path(TEST_DIR, 'input','strwr-targets.txt'),
                        alpha=0.85,
                        output_file=OUT_FILE)
+    
     # Only run Singularity test if the binary is available on the system
     # spython is only available on Unix, but do not explicitly skip non-Unix platforms
     @pytest.mark.skipif(not shutil.which('singularity'), reason='Singularity not found on system')

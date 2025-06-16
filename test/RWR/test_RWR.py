@@ -1,19 +1,13 @@
 import shutil
-import sys
 from filecmp import cmp
 from pathlib import Path
 
 import pytest
 
 import spras.config as config
+from spras.rwr import RWR
 
 config.init_from_file("config/config.yaml")
-
-# TODO consider refactoring to simplify the import
-# Modify the path because of the - in the directory
-SPRAS_ROOT = Path(__file__).parent.parent.parent.absolute()
-sys.path.append(str(Path(SPRAS_ROOT, 'docker-wrappers', 'RWR')))
-from spras.rwr import RWR
 
 TEST_DIR = Path('test', 'RWR/')
 OUT_FILE = Path(TEST_DIR, 'output', 'rwr-output.txt')
