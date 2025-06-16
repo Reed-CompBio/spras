@@ -35,7 +35,7 @@ class ST_RWR(PRM):
         edges.to_csv(filename_map['network'],sep='|',index=False,columns=['Interactor1','Interactor2'],header=False)
 
     @staticmethod
-    def run(network=None, sources=None, targets=None, alpha=None, output_file=None, container_framework="docker"):
+    def run(network=None, sources=None, targets=None, alpha=None, output_file=None, container_framework="docker", threshold=None):
         if not sources or not targets or not network or not output_file:
             raise ValueError('Required local_neighborhood arguments are missing')
 
