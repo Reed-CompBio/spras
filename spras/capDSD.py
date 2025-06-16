@@ -5,7 +5,6 @@ from spras.dataset import Dataset
 from spras.interactome import convert_directed_to_undirected
 from spras.prm import PRM
 
-
 __all__ = ['CapDSD']
 
 class CapDSD(PRM):
@@ -21,13 +20,13 @@ class CapDSD(PRM):
         for input_type in CapDSD.required_inputs:
             if input_type not in filename_map:
                 raise ValueError(f"{input_type} filename is missing")
-        
+
         # create the ppi
         ppi = data.get_interactome()
         ppi = convert_directed_to_undirected(ppi)
         ppi.to_csv(filename_map['ppi'], sep='\t', index=False, columns=["Interactor1", "Interactor2", "Weight"],
                    header=False)
-        
+
         # then, we want to 'guide' the ppi with a .ppip file, which is a secondary,
         # trusted interactome: we use the directed edges from the interactome as our
         # trusted edges.
@@ -46,7 +45,7 @@ class CapDSD(PRM):
         """
         if not ppi or not ppip or not output_file:
             raise ValueError("Required capDSD arguments are missing")
-    
+
         work_dir = '/capDSD'
 
         volumes = list()
@@ -65,7 +64,7 @@ class CapDSD(PRM):
         mapped_out_prefix = mapped_out_dir + '/output'
 
         container_suffix = "capdsd"
-        
+
 
         # First, we move ppip_file to a subdirectory
         run_container_and_log('capDSD',
@@ -80,7 +79,7 @@ class CapDSD(PRM):
                    '-pathmode', '1',
                    '-p', str(Path(ppip_file).parent),
                    ppi_file, mapped_out_prefix]
-        
+
 
         run_container_and_log('capDSD',
                               container_framework,
@@ -88,11 +87,10 @@ class CapDSD(PRM):
                               command,
                               volumes,
                               work_dir)
-        
+
         output_matrix = Path(out_dir) / 'output.dsd'
         output_matrix.rename(output_file)
 
     @staticmethod
     def parse_output(raw_pathway_file: str, standardized_pathway_file: str):
         pass
-    
