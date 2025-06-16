@@ -16,8 +16,14 @@ import pandas as pd
 # numpy variables are not, by default, encodable by python's JSONEncoder.
 # Thus, we need to wrap the encoder to reduce np-objects down to regular floats and ints.
 # To preserve precision, we stringify the objects instead,
-# but this is still fed specifically for hashing.
-class NpEncoder(json.JSONEncoder):
+# which is okay, as this is specifically for hashing.
+# TODO: this can still have a hashing conflict if someone uses `np.integer` for one paramater combination,
+# and lists the entire exact number out as a string for the other. Is this a problem?
+class NpHashEncoder(json.JSONEncoder):
+    """
+    A numpy compatible JSON encoder meant to be fed as a cls for hashing,
+    as this encoder does not decode the other way around.
+    """
     def default(self, obj):
         if isinstance(obj, np.integer):
             return str(obj)
@@ -25,7 +31,7 @@ class NpEncoder(json.JSONEncoder):
             return str(obj)
         if isinstance(obj, np.ndarray):
             return obj.tolist()
-        return super(NpEncoder, self).default(obj)
+        return super(NpHashEncoder, self).default(obj)
 
 def hash_params_sha1_base32(params_dict: Dict[str, Any], length: Optional[int] = None, cls=None) -> str:
     """

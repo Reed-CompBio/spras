@@ -21,7 +21,7 @@ from collections.abc import Iterable
 import numpy as np
 import yaml
 
-from spras.util import NpEncoder, hash_params_sha1_base32
+from spras.util import NpHashEncoder, hash_params_sha1_base32
 
 # The default length of the truncated hash used to identify parameter combinations
 DEFAULT_HASH_LENGTH = 7
@@ -259,7 +259,7 @@ class Config:
                             run_dict[param] = float(value)
                         if isinstance(value, np.ndarray):
                             run_dict[param] = value.tolist()
-                    params_hash = hash_params_sha1_base32(run_dict, self.hash_length, cls=NpEncoder)
+                    params_hash = hash_params_sha1_base32(run_dict, self.hash_length, cls=NpHashEncoder)
                     if params_hash in prior_params_hashes:
                         raise ValueError(f'Parameter hash collision detected. Increase the hash_length in the config file '
                                         f'(current length {self.hash_length}).')
