@@ -10,6 +10,7 @@ from spras.util import add_rank_column, duplicate_edges, raw_pathway_df
 
 __all__ = ['ST_RWR']
 
+# Note: This class is almost identical to the rwr.py file.
 class ST_RWR(PRM):
     required_inputs = ['network','sources','targets']
 
