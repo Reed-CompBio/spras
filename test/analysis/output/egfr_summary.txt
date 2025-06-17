@@ -1,6 +1,0 @@
-Name	Number of nodes	Number of undirected edges	Number of connected components	Nodes in prize	Nodes in sources	Nodes in targets
-test/analysis/input/egfr/tps-egfr-omicsintegrator1-params-3THRXWW_pathway.txt	26	20	6	26	1	25
-test/analysis/input/egfr/tps-egfr-omicsintegrator1-params-5QH767V_pathway.txt	39	33	6	39	1	38
-test/analysis/input/egfr/tps-egfr-omicsintegrator1-params-ITO5EQS_pathway.txt	12	8	4	12	0	12
-test/analysis/input/egfr/tps-egfr-pathlinker-params-7S4SLU6_pathway.txt	12	15	1	7	1	6
-test/analysis/input/egfr/tps-egfr-pathlinker-params-TCEMRS7_pathway.txt	23	27	1	14	1	13

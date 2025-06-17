@@ -1,32 +1,34 @@
-#
-# Implement an abstract PRM class
-#
-#
 from abc import ABC, abstractmethod
+
+from spras.dataset import Dataset
 
 
 class PRM(ABC):
-    def __init__(self, params):
-        self.name = params['name']
-        self.inputdir = params['inputdir']
-        self.outputdir = params['outputdir']
-        self.params = params['params']
-        # debugging
-        #print('Params:',self.params)
+    """
+    The PRM (Pathway Reconstruction Module) class,
+    which defines the interface that `runner.py` uses to handle
+    algorithms.
+    """
 
     @property
+    @staticmethod
     @abstractmethod
     def required_inputs(self):
-        return NotImplementedError
+        # Note: This NotImplementedError will never trigger.
+        # See CONTRIBUTING.md for more information.
+        raise NotImplementedError
 
+    @staticmethod
     @abstractmethod
-    def generate_inputs(self):
-        return NotImplementedError
+    def generate_inputs(data: Dataset, filename_map: dict[str, str]):
+        raise NotImplementedError
 
+    @staticmethod
     @abstractmethod
-    def run(self):
-        return NotImplementedError
+    def run(**kwargs):
+        raise NotImplementedError
 
+    @staticmethod
     @abstractmethod
-    def parse_output(self):
-        return NotImplementedError
+    def parse_output(raw_pathway_file: str, standardized_pathway_file: str):
+        raise NotImplementedError

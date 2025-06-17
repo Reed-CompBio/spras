@@ -1,0 +1,13 @@
+Name	Number of nodes	Number of edges	Number of connected components	Nodes in prize	Nodes in active	Nodes in dummy	Nodes in sources	Nodes in targets	Parameter combination
+test/analysis/input/example/data0-allpairs-params-BEH6YB2_pathway.txt	3	2	1	2	2	1	1	1	{'spras_placeholder': 'no parameters'}
+test/analysis/input/example/data0-domino-params-V3X4RW7_pathway.txt	0	0	0	0	0	0	0	0	{'slice_threshold': 0.3, 'module_threshold': 0.05}
+test/analysis/input/example/data0-meo-params-GKEDDFZ_pathway.txt	3	2	1	2	2	1	1	1	{'max_path_length': 3, 'local_search': 'Yes', 'rand_restarts': 10}
+test/analysis/input/example/data0-mincostflow-params-SZPZVU6_pathway.txt	3	2	1	2	2	1	1	1	{'flow': 1, 'capacity': 1}
+test/analysis/input/example/data0-omicsintegrator1-params-E3LSEZQ_pathway.txt	3	2	1	2	2	1	1	1	{'b': 6, 'w': 5.0, 'd': 10, 'dummy_mode': 'file'}
+test/analysis/input/example/data0-omicsintegrator1-params-NFIPHUX_pathway.txt	0	0	0	0	0	0	0	0	{'b': 6, 'w': 0.0, 'd': 10, 'dummy_mode': 'file'}
+test/analysis/input/example/data0-omicsintegrator1-params-SU2S63Y_pathway.txt	3	2	1	2	2	1	1	1	{'b': 5, 'w': 0.0, 'd': 10, 'dummy_mode': 'file'}
+test/analysis/input/example/data0-omicsintegrator1-params-V26JBGX_pathway.txt	0	0	0	0	0	0	0	0	{'b': 5, 'w': 5.0, 'd': 10, 'dummy_mode': 'file'}
+test/analysis/input/example/data0-omicsintegrator2-params-EHHWPMD_pathway.txt	0	0	0	0	0	0	0	0	{'b': 2, 'g': 3}
+test/analysis/input/example/data0-omicsintegrator2-params-IV3IPCJ_pathway.txt	3	2	1	2	2	1	1	1	{'b': 4, 'g': 0}
+test/analysis/input/example/data0-pathlinker-params-6SWY7JS_pathway.txt	3	2	1	2	2	1	1	1	{'k': 200}
+test/analysis/input/example/data0-pathlinker-params-VQL7BDZ_pathway.txt	3	2	1	2	2	1	1	1	{'k': 100}

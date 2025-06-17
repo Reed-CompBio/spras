@@ -3,7 +3,7 @@ channels:
   - conda-forge
 dependencies:
   - adjusttext=0.7.3.1
-  - bioconda::snakemake-minimal=8.16.0
+  - bioconda::snakemake-minimal=8.17.0
   - docker-py=5.0
   - matplotlib=3.6
   - networkx=2.8
@@ -32,6 +32,6 @@ dependencies:
   - sphinx=6.0
   - sphinx-rtd-theme=2.0.0
   - pip:
-     - graphspace_python==1.3.1
-     - dsub==0.4.13
+      - graphspace_python==1.3.1
+      - dsub==0.4.13
 

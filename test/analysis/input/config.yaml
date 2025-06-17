@@ -1,0 +1,134 @@
+# The length of the hash used to identify a parameter combination
+hash_length: 7
+
+# Specify the container framework. Current supported versions include 'docker' and
+# 'singularity'. If container_framework is not specified, SPRAS will default to docker.
+container_framework: docker
+
+# Only used if container_framework is set to singularity, this will unpack the singularity containers
+# to the local filesystem. This is useful when PRM containers need to run inside another container,
+# such as would be the case in an HTCondor/OSPool environment.
+# NOTE: This unpacks singularity containers to the local filesystem, which will take up space in a way
+# that persists after the workflow is complete. To clean up the unpacked containers, the user must
+# manually delete them.
+unpack_singularity: false
+
+# Allow the user to configure which container registry containers should be pulled from
+# Note that this assumes container names are consistent across registries, and that the
+# registry being passed doesn't require authentication for pull actions
+container_registry:
+  base_url: docker.io
+  # The owner or project of the registry
+  # For example, "reedcompbio" if the image is available as docker.io/reedcompbio/allpairs
+  owner: reedcompbio
+
+algorithms:
+  - name: "pathlinker"
+    params:
+      include: true
+      run1:
+        k: range(100,201,100)
+
+  - name: "omicsintegrator1"
+    params:
+      include: true
+      run1:
+        b: [5, 6]
+        w: np.linspace(0,5,2)
+        d: [10]
+        dummy_mode: ["file"]
+
+  - name: "omicsintegrator2"
+    params:
+      include: true
+      run1:
+        b: [4]
+        g: [0]
+      run2:
+        b: [2]
+        g: [3]
+
+  - name: "meo"
+    params:
+      include: true
+      run1:
+        max_path_length: [3]
+        local_search: ["Yes"]
+        rand_restarts: [10]
+
+  - name: "mincostflow"
+    params:
+      include: true
+      run1:
+        flow: [1] # The flow must be an int
+        capacity: [1]
+
+  - name: "allpairs"
+    params:
+      include: true
+
+  - name: "domino"
+    params:
+      include: true
+      run1:
+        slice_threshold: [0.3]
+        module_threshold: [0.05]
+
+# Here we specify which pathways to run and other file location information.
+# DataLoader.py can currently only load a single dataset
+# Assume that if a dataset label does not change, the lists of associated input files do not change
+datasets:
+  - # Labels can only contain letters, numbers, or underscores
+    label: data0
+    node_files: ["node-prizes.txt", "sources.txt", "targets.txt"]
+    # DataLoader.py can currently only load a single edge file, which is the primary network
+    edge_files: ["network.txt"]
+    # Placeholder
+    other_files: []
+    # Relative path from the spras directory
+    data_dir: "input"
+
+gold_standards:
+  - # Labels can only contain letters, numbers, or underscores
+    label: gs0
+    node_files: ["gs_nodes0.txt"]
+    data_dir: "input"
+    # List of dataset labels to compare with the specific gold standard dataset
+    dataset_labels: ["data0"]
+
+# If we want to reconstruct then we should set run to true.
+reconstruction_settings:
+  #set where everything is saved
+  locations:
+    #place the save path here
+    reconstruction_dir: "output"
+  run: true
+
+analysis:
+  # Create one summary per pathway file and a single summary table for all pathways for each dataset
+  summary:
+    include: true
+  # Create output files for each pathway that can be visualized with GraphSpace
+  graphspace:
+    include: true
+  # Create Cytoscape session file with all pathway graphs for each dataset
+  cytoscape:
+    include: true
+  # Machine learning analysis (e.g. clustering) of the pathway output files for each dataset
+  ml:
+    # ml analysis per dataset
+    include: false
+    # adds ml analysis per algorithm output
+    # only runs for algorithms with multiple parameter combinations chosen
+    aggregate_per_algorithm: true
+    # specify how many principal components to calculate
+    components: 2
+    # boolean to show the labels on the pca graph
+    labels: true
+    # 'ward', 'complete', 'average', 'single'
+    # if linkage: ward, must use metric: euclidean
+    linkage: 'ward'
+    # 'euclidean', 'manhattan', 'cosine'
+    metric: 'euclidean'
+  evaluation:
+    include: false
