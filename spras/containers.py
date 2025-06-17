@@ -127,7 +127,7 @@ def prepare_dsub_cmd(flags: dict):
 # run_container_singularity assumes a single string
 # Follow docker-py's naming conventions (https://docker-py.readthedocs.io/en/stable/containers.html)
 # Technically the argument is an image, not a container, but we use container here.
-def run_container(framework: str, container_suffix: str, command: List[str], volumes: List[Tuple[PurePath, PurePath]], working_dir: str, out_dir: str, environment: str = 'SPRAS=True'):
+def run_container(framework: str, container_suffix: str, command: List[str], volumes: List[Tuple[PurePath, PurePath]], working_dir: str, out_dir: str | os.PathLike, environment: str = 'SPRAS=True'):
     """
     Runs a command in the container using Singularity or Docker
     @param framework: singularity or docker
@@ -151,7 +151,7 @@ def run_container(framework: str, container_suffix: str, command: List[str], vol
     else:
         raise ValueError(f'{framework} is not a recognized container framework. Choose "docker", "dsub", or "singularity".')
 
-def run_container_and_log(name: str, framework: str, container_suffix: str, command: List[str], volumes: List[Tuple[PurePath, PurePath]], working_dir: str, environment: str = 'SPRAS=True'):
+def run_container_and_log(name: str, framework: str, container_suffix: str, command: List[str], volumes: List[Tuple[PurePath, PurePath]], working_dir: str, out_dir: str | os.PathLike, environment: str = 'SPRAS=True'):
     """
     Runs a command in the container using Singularity or Docker with associated pretty printed messages.
     @param name: the display name of the running container for logging purposes
@@ -165,7 +165,7 @@ def run_container_and_log(name: str, framework: str, container_suffix: str, comm
     """
     print('Running {} on container framework "{}" with command: {}'.format(name, framework, ' '.join(command)), flush=True)
     try:
-        out = run_container(framework=framework, container_suffix=container_suffix, command=command, volumes=volumes, working_dir=working_dir, environment=environment)
+        out = run_container(framework=framework, container_suffix=container_suffix, command=command, volumes=volumes, working_dir=working_dir, out_dir=out_dir, environment=environment)
         if out is not None:
             if isinstance(out, list):
                 out = ''.join(out)

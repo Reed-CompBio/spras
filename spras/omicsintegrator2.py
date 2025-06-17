@@ -124,8 +124,8 @@ class OmicsIntegrator2(PRM):
                              container_suffix,
                              command,
                              volumes,
-                             out_dir,
-                             work_dir)
+                             work_dir,
+                             out_dir)
 
         # TODO do we want to retain other output files?
         # TODO if deleting other output files, write them all to a tmp directory and copy

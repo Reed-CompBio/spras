@@ -119,7 +119,7 @@ class DOMINO(PRM):
                              slicer_command,
                              volumes,
                              work_dir,
-                             out_dir=str(out_dir))
+                             out_dir)
 
         # Make the Python command to run within the container
         domino_command = ['domino',
