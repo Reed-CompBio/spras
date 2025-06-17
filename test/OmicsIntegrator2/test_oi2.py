@@ -14,9 +14,6 @@ OUT_FILE = Path(TEST_DIR, 'output', 'test.tsv')
 EDGE_FILE = TEST_DIR / 'input' / 'simple' / 'oi2-edges.txt'
 PRIZE_FILE = TEST_DIR / 'input' / 'simple' / 'oi2-prizes.txt'
 
-EDGE_FILE_EMPTY = TEST_DIR / 'input' / 'empty' / 'oi2-edges.txt'
-PRIZE_FILE_EMPTY = TEST_DIR / 'input' / 'empty' / 'oi2-prizes.txt'
-
 class TestOmicsIntegrator2:
     """
     Run Omics Integrator 2 in the Docker image
@@ -60,13 +57,6 @@ class TestOmicsIntegrator2:
             # No output_file
             OmicsIntegrator2.run(edges=EDGE_FILE,
                                  prizes=PRIZE_FILE)
-
-    def test_oi2_empty(self):
-        OUT_FILE.unlink(missing_ok=True)
-        OmicsIntegrator2.run(edges=EDGE_FILE_EMPTY,
-                             prizes=PRIZE_FILE_EMPTY,
-                             output_file=OUT_FILE)
-        assert OUT_FILE.exists()
 
     # Only run Singularity test if the binary is available on the system
     # spython is only available on Unix, but do not explicitly skip non-Unix platforms

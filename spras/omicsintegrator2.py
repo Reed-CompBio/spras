@@ -124,21 +124,12 @@ class OmicsIntegrator2(PRM):
         # or as the main output file we want to post-process in parse_output.
         output_tsv = Path(out_dir, 'oi2.tsv')
 
-        try:
-            run_container_and_log('Omics Integrator 2',
-                                  container_framework,
-                                  container_suffix,
-                                  command,
-                                  volumes,
-                                  work_dir)
-        except ContainerError as err:
-            needle = "all the input arrays must have same number of dimensions, but the array at index 0 has 2 dimension(s) and the array at index 1 has 1 dimension(s)"
-            if not err.streams_contain(needle):
-                raise err
-            else:
-                # https://github.com/Reed-CompBio/spras/issues/218
-                # This error occurs when we have an empty dataframe passed to OI2.
-                Path(output_tsv).write_text("protein1\tprotein2\tcost\n")
+        run_container_and_log('Omics Integrator 2',
+                                container_framework,
+                                container_suffix,
+                                command,
+                                volumes,
+                                work_dir)
 
 
         # TODO do we want to retain other output files?
