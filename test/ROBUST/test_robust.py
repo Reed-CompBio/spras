@@ -22,7 +22,7 @@ class TestROBUST:
 
         assert "A" in OUT_FILE.read_text()
         assert "Z" in OUT_FILE.read_text()
-    
+
     def test_robust_scores(self):
         OUT_FILE.unlink(missing_ok=True)
         ROBUST.run(network=TEST_DIR / 'input' / 'robust-network.txt',
