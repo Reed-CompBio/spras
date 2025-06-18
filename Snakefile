@@ -368,12 +368,17 @@ def get_gold_standard_pickle_file(wildcards):
     parts = wildcards.dataset_gold_standard_pairs.split('-')
     gs = parts[1]
     return SEP.join([out_dir, f'{gs}-merged.pickle'])
-    
+
 # Returns the dataset corresponding to the gold standard pair
 def get_dataset_label(wildcards):
     parts = wildcards.dataset_gold_standard_pairs.split('-')
     dataset = parts[0]
     return dataset
+
+# Return the dataset pickle file for a specific dataset
+def get_dataset_pickle_file(wildcards):
+    dataset_label = get_dataset_label(wildcards)
+    return SEP.join([out_dir, f'{dataset_label}-merged.pickle'])
 
 # Returns ensemble file for each dataset
 def collect_ensemble_per_dataset(wildcards):
@@ -384,13 +389,14 @@ def collect_ensemble_per_dataset(wildcards):
 rule evaluation_ensemble_pr_curve:
     input: 
         gold_standard_file = get_gold_standard_pickle_file,
-        ensemble_file = collect_ensemble_per_dataset,
+        dataset_file = get_dataset_pickle_file,
+        ensemble_file = collect_ensemble_per_dataset
     output: 
         pr_curve_png = SEP.join([out_dir, '{dataset_gold_standard_pairs}-eval', 'pr-curve-ensemble-nodes.png']),
         pr_curve_file = SEP.join([out_dir, '{dataset_gold_standard_pairs}-eval', 'pr-curve-ensemble-nodes.txt']),
     run:
         node_table = Evaluation.from_file(input.gold_standard_file).node_table
-        node_ensemble_dict = Evaluation.edge_frequency_node_ensemble(node_table, input.ensemble_file)
+        node_ensemble_dict = Evaluation.edge_frequency_node_ensemble(node_table, input.ensemble_file, input.dataset_file)
         Evaluation.precision_recall_curve_node_ensemble(node_ensemble_dict, node_table, output.pr_curve_png, output.pr_curve_file)
 
 # Returns list of algorithm specific ensemble files per dataset
@@ -402,13 +408,14 @@ def collect_ensemble_per_algo_per_dataset(wildcards):
 rule evaluation_per_algo_ensemble_pr_curve:
     input: 
         gold_standard_file = get_gold_standard_pickle_file,
-        ensemble_files = collect_ensemble_per_algo_per_dataset,
+        dataset_file = get_dataset_pickle_file,
+        ensemble_files = collect_ensemble_per_algo_per_dataset
     output: 
         pr_curve_png = SEP.join([out_dir, '{dataset_gold_standard_pairs}-eval', 'pr-curve-ensemble-nodes-per-algorithm.png']),
         pr_curve_file = SEP.join([out_dir, '{dataset_gold_standard_pairs}-eval', 'pr-curve-ensemble-nodes-per-algorithm.txt']),
     run:
         node_table = Evaluation.from_file(input.gold_standard_file).node_table
-        node_ensembles_dict = Evaluation.edge_frequency_node_ensemble(node_table, input.ensemble_files)
+        node_ensembles_dict = Evaluation.edge_frequency_node_ensemble(node_table, input.ensemble_files, input.dataset_file)
         Evaluation.precision_recall_curve_node_ensemble(node_ensembles_dict, node_table, output.pr_curve_png, output.pr_curve_file)
 
 # Remove the output directory

@@ -1,11 +1,13 @@
 import os
 import pickle as pkl
+from pathlib import Path
 from typing import Dict
 
 import matplotlib.pyplot as plt
 import numpy as np
 import pandas as pd
 from sklearn.metrics import (
+    auc,
     average_precision_score,
     precision_recall_curve,
 )
@@ -78,40 +80,68 @@ class Evaluation:
         # TODO: later iteration - chose between node and edge file, or allow both
 
     @staticmethod
-    def edge_frequency_node_ensemble(node_table: pd.DataFrame, ensemble_files: list) -> dict:
+    def edge_frequency_node_ensemble(node_table: pd.DataFrame, ensemble_files: list, dataset_file:str) -> dict:
         """
-        Create a dictionary of node ensemble using the edge ensemble frequencies by:
-        1. Extracting Node1 and corresponding edge frequencies from the ensemble DataFrame.
-        2. Appending Node2 and corresponding edge frequencies to include both sides of each undirected edge.
-        3. Grouping by node and taking the maximum edge frequency per node.
-        4. Adding any nodes from the gold standard (node_table) that are missing in the ensemble with a default
-           frequency of 0. If the node ensemble does not include all of the gold standard nodes, we cannot achieve full
-           recall.
-        5. Saves the node ensemble in a dictionary under its associated algorithm ensemble or combined ensemble.
-        @param node_table: the gold standard nodes
-        @param ensemble_files: the edge ensemble files
-        returns a dictionary of node ensembles
+        Generates a dictionary of node ensembles using edge frequency data from a list of ensemble files.
+        - a list of ensemble files can contain an aggregated ensemble or algorithm specific ensembles per dataset
+
+        1. Prepare a set of default nodes (from the interactome and gold standard) with frequency 0,
+        ensuring all nodes are represented in the ensemble.
+            - Answering "Did the algorithm(s) select the correct nodes from the entire network?"
+            - It measures whether the algorithm(s) can distinguish relevant gold standard nodes
+            from the full 'universe' of possible nodes present in the input network.
+        3. For each edge ensemble file:
+            a. Read edges and their frequencies.
+            b. Convert edges frequencies into node-level frequencies for Node1 and Node2.
+            c. Merge with the default node set and group by node, taking the maximum frequency per node.
+        4. Store the resulting node-frequency ensemble under the corresponding ensemble source (label).
+
+        If the interactome or gold standard table is empty, a ValueError is raised.
+
+        @param node_table: dataFrame of gold standard nodes (column: NODEID)
+        @param ensemble_files: list of file paths containing edge ensemble outputs
+        @param dataset_file: path to the dataset file used to load the interactome
+        @return: dictionary mapping each ensemble source to its node ensemble DataFrame
         """
+
         node_ensembles_dict = dict()
 
+        pickle = Evaluation.from_file(dataset_file)
+        interactome = pickle.get_interactome()
+
+        if interactome.empty:
+              raise ValueError(
+                    f"Cannot compute PRC curve or generate node ensemble. Input network for dataset '{dataset_file.split('-')[0]}' is empty."
+                )
+        if node_table.empty:
+            raise ValueError(
+                f"Cannot compute PRC curve or generate node ensemble. Gold standard associated with dataset '{dataset_file.split('-')[0]}' is empty."
+            )
+
+        node1_interactome = interactome[['Interactor1']].rename(columns={'Interactor1': 'Node'})
+        node1_interactome['Frequency'] = 0.0
+        node2_interactome = interactome[['Interactor2']].rename(columns={'Interactor2': 'Node'})
+        node2_interactome['Frequency'] = 0.0
+        gs_nodes = node_table[['NODEID']].rename(columns={'NODEID': 'Node'})
+        gs_nodes['Frequency'] = 0.0
+
+        # combine gold standard and network nodes
+        other_nodes = pd.concat([node1_interactome, node2_interactome, gs_nodes])
+
         for ensemble_file in ensemble_files:
-            label = ensemble_file.split("/")[-1].split("-")[0]
+            label = Path(ensemble_file).name.split("-")[0]
             ensemble_df = pd.read_table(ensemble_file, sep='\t', header=0)
 
             if not ensemble_df.empty:
                 node1 = ensemble_df[['Node1', 'Frequency']].rename(columns={'Node1': 'Node'})
                 node2 = ensemble_df[['Node2', 'Frequency']].rename(columns={'Node2': 'Node'})
-
-                gs_nodes = node_table[['NODEID']].rename(columns={'NODEID': 'Node'})
-                gs_nodes['Frequency'] = 0.0
-
-                all_nodes = pd.concat([node1, node2, gs_nodes])
-
+                all_nodes = pd.concat([node1, node2, other_nodes])
                 node_ensemble = all_nodes.groupby(['Node']).max().reset_index()
-                node_ensembles_dict[label] = node_ensemble
 
             else:
-                node_ensembles_dict[label] = pd.DataFrame(columns=['Node', 'Frequency'])
+                node_ensemble = other_nodes.groupby(['Node']).max().reset_index()
+
+            node_ensembles_dict[label] = node_ensemble
 
         return node_ensembles_dict
 
@@ -119,83 +149,90 @@ class Evaluation:
     def precision_recall_curve_node_ensemble(node_ensembles: dict, node_table: pd.DataFrame, output_png: str,
                                              output_file: str):
         """
-        Takes in a node ensemble for specific dataset or specific algorithm in a dataset, and an associated gold standard node table.
-        Plots a precision and recall curve for the node ensemble against its associated gold standard node table
-        Returns output back to output_png
-        @param node_ensembles: the pre-computed node_ensembles
-        @param node_table: the gold standard nodes
-        @param output_png: the filename to save the precision and recall curves
-        @param output_file: the filename to save the precision, recall, and threshold values
+        Plots precision-recall (PR) curves for a set of node ensembles evaluated against a gold standard.
+
+        Takes in a dictionary containing either algorithm-specific node ensembles or an aggregated node ensemble
+        for a given dataset, along with the corresponding gold standard node table. Computes PC curves for
+        each ensemble and plots all curves on a single figure.
+
+        @param node_ensembles: dict of the pre-computed node_ensemble(s)
+        @param node_table: gold standard nodes
+        @param output_png: filename to save the precision and recall curves
+        @param output_file: filename to save the precision, recall, threshold values, average precision, AUC, and baseline precision
         """
         gold_standard_nodes = set(node_table['NODEID'])
 
+        # make color palette per ensemble label name
         label_names = list(node_ensembles)
         color_palette = create_palette(label_names)
 
         plt.figure(figsize=(10, 7))
 
-        dfs = []
+        prc_dfs = []
+        metric_dfs = []
 
         for label, node_ensemble in node_ensembles.items():
-
             if not node_ensemble.empty:
                 y_true = [1 if node in gold_standard_nodes else 0 for node in node_ensemble['Node']]
                 y_scores = node_ensemble['Frequency'].tolist()
                 precision, recall, thresholds = precision_recall_curve(y_true, y_scores)
                 # avg precision summarizes a precision-recall curve as the weighted mean of precisions achieved at each threshold
                 avg_precision = average_precision_score(y_true, y_scores)
-                # the (number positives)/(number instances)
-                baseline_precision = np.sum(y_true) / len(y_true)
+                auc_score = auc(recall, precision)
 
                 plt.plot(recall, precision, color=color_palette[label], marker='o',
-                         label=f'{label} PR curve (AP: {avg_precision:.4f})')
-                plt.axhline(y=baseline_precision, color=color_palette[label], linestyle='--',
-                            label=f'{label} Baseline Precision: {baseline_precision:.4f}')
+                         label=f'{label.capitalize()} PR curve (AP: {avg_precision:.4f})')
 
-                data = {
+                # Dropping last elements because scikit-learn adds (1, 0) to precision/recall for plotting, not tied to real thresholds
+                # https://scikit-learn.org/stable/modules/generated/sklearn.metrics.precision_recall_curve.html#sklearn.metrics.precision_recall_curve:~:text=Returns%3A-,precision,predictions%20with%20score%20%3E%3D%20thresholds%5Bi%5D%20and%20the%20last%20element%20is%200.,-thresholds
+                prc_data = {
                     'Threshold': thresholds,
                     'Precision': precision[:-1],
                     'Recall': recall[:-1],
-                    'Average_Precison': avg_precision,
-                    'Baseline_Precision': baseline_precision
                 }
 
-                if label != 'ensemble':
-                    data['Algorithm'] = [label] * len(thresholds)
-                    cols = ['Algorithm'] + [col for col in data if col != 'Algorithm']
-                else:
-                    cols = list(data.keys())
+                metric_data = {
+                    'Average_Precision': [avg_precision],
+                    'AUC': [auc_score]
+                }
 
-                df = pd.DataFrame(data)[cols]
-                dfs.append(df)
+                ensemble_source = label.capitalize() if label != 'ensemble' else "Aggregated"
+                prc_data = {'Ensemble_Source': [ensemble_source] * len(thresholds), **prc_data}
+                metric_data = {'Ensemble_Source': [ensemble_source], **metric_data}
+
+                prc_df = pd.DataFrame.from_dict(prc_data)
+                prc_dfs.append(prc_df)
+                metric_df = pd.DataFrame.from_dict(metric_data)
+                metric_dfs.append(metric_df)
 
             else:
-                plt.plot([], [], color=color_palette[label], marker='o', label=f'{label} PR curve - Empty Ensemble')
+                raise ValueError(
+                    "Cannot compute PRC curve: the ensemble network is empty."
+                    f"This should not happen unless the input network for pathway reconstruction is empty"
+                )
 
-                data = {
-                    'Threshold': ["None"],
-                    'Precision': ["None"],
-                    'Recall': ["None"],
-                    'Average_Precison': ["None"],
-                    'Baseline_Precision': ["None"]
-                }
+        baseline_precision = np.sum(y_true) / len(y_true) # same baseline value for all algorithms since all network nodes are included in the ensemble
+        plt.axhline(y=baseline_precision, color="black", linestyle='--', label=f'Baseline_Precision: {baseline_precision:.4f}')
 
-                if label != 'ensemble':
-                    data['Algorithm'] = [label]
-                    cols = ['Algorithm'] + [col for col in data if col != 'Algorithm']
-                else:
-                    cols = list(data.keys())
-
-                df = pd.DataFrame(data)[cols]
-                dfs.append(df)
-
+        plt.xlim(0, 1)
+        plt.ylim(0, 1)
+        if label != 'ensemble':
+            plt.title('Precision-Recall Curve Per Algorithm Specific Ensemble')
+        else:
+            plt.title('Precision-Recall Curve for Aggregated Ensemble Across Algorithms')
         plt.xlabel('Recall')
         plt.ylabel('Precision')
-        plt.title('Precision-Recall Curve')
         plt.legend(loc='lower left', bbox_to_anchor=(1, 0.5))
         plt.grid(True)
         plt.savefig(output_png, bbox_inches='tight')
         plt.close()
 
-        combined_df = pd.concat(dfs, ignore_index=True)
-        combined_df.to_csv(output_file, index=False, header=True, sep="\t")
+        combined_prc_df = pd.concat(prc_dfs, ignore_index=True)
+        combined_metrics_df = pd.concat(metric_dfs, ignore_index=True)
+        combined_metrics_df["Baseline_Precision"] = baseline_precision
+
+        # merge dfs and NaN out metric values except for first row of each Ensemble_Source
+        complete_df = combined_prc_df.merge(combined_metrics_df, on="Ensemble_Source", how="left")
+        not_last_rows = complete_df.duplicated(subset="Ensemble_Source", keep='first')
+        complete_df.loc[not_last_rows, ["Average_Precision", "AUC", "Baseline_Precision"]] = None
+        complete_df.to_csv(output_file, index=False, sep="\t")
