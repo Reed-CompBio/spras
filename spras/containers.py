@@ -319,20 +319,27 @@ def run_container_singularity(container: str, command: List[str], volumes: List[
         base_cont = base_cont.replace(":", "_").split(":")[0]
         sif_file = base_cont + ".sif"
 
+        # To allow caching unpacked singularity images without polluting git on local runs,
+        # we move all of the unpacked image files into a `.gitignore`d folder.
+        unpacked_dir = Path("unpacked")
+        unpacked_dir.mkdir(exist_ok=True)
+
         # Adding 'docker://' to the container indicates this is a Docker image Singularity must convert
-        image_path = Client.pull('docker://' + container, name=sif_file)
+        image_path = Client.pull('docker://' + container, name=str(unpacked_dir / sif_file))
+
+        base_cont_path = unpacked_dir / Path(base_cont)
 
         # Check if the directory for base_cont already exists. When running concurrent jobs, it's possible
         # something else has already pulled/unpacked the container.
         # Here, we expand the sif image from `image_path` to a directory indicated by `base_cont`
-        if not os.path.exists(base_cont):
-            Client.build(recipe=image_path, image=base_cont, sandbox=True, sudo=False)
+        if not base_cont_path.exists():
+            Client.build(recipe=image_path, image=str(base_cont_path), sandbox=True, sudo=False)
 
         # Execute the locally unpacked container.
-        return Client.execute(base_cont,
-                        command,
-                        options=singularity_options,
-                        bind=bind_paths)
+        return Client.execute(str(base_cont_path),
+                              command,
+                              options=singularity_options,
+                              bind=bind_paths)
 
     else:
         # Adding 'docker://' to the container indicates this is a Docker image Singularity must convert
