@@ -220,7 +220,6 @@ class TestConfig:
         config.init_global(test_config)
 
         value_test_util('strings', [{'test': "str1", 'test2': "str2"}, {'test': 'str1', 'test2': 'str3'}])
-        # "run1": {"a": 1, "b": [float(2.0), 3], "c": [4], "d": float(5.6)}
         value_test_util('numbersAndBools', [{'a': 1, 'b': float(2.0), 'c': 4, 'd': 5.6, 'f': False}, {'a': 1, 'b': 3, 'c': 4, 'd': 5.6, 'f': False}])
 
         value_test_util('singleton_int64_with_array', [{'test': 1, 'test2': 2}, {'test': 1, 'test2': 3}])
