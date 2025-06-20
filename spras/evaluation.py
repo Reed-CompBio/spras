@@ -80,21 +80,21 @@ class Evaluation:
         # TODO: later iteration - chose between node and edge file, or allow both
 
     @staticmethod
-    def edge_frequency_node_ensemble(node_table: pd.DataFrame, ensemble_files: list, dataset_file:str) -> dict:
+    def edge_frequency_node_ensemble(node_table: pd.DataFrame, ensemble_files: list, dataset_file: str) -> dict:
         """
         Generates a dictionary of node ensembles using edge frequency data from a list of ensemble files.
-        - a list of ensemble files can contain an aggregated ensemble or algorithm specific ensembles per dataset
+        A list of ensemble files can contain an aggregated ensemble or algorithm-specific ensembles per dataset
 
         1. Prepare a set of default nodes (from the interactome and gold standard) with frequency 0,
         ensuring all nodes are represented in the ensemble.
-            - Answering "Did the algorithm(s) select the correct nodes from the entire network?"
+            - Answers "Did the algorithm(s) select the correct nodes from the entire network?"
             - It measures whether the algorithm(s) can distinguish relevant gold standard nodes
             from the full 'universe' of possible nodes present in the input network.
-        3. For each edge ensemble file:
+        2. For each edge ensemble file:
             a. Read edges and their frequencies.
             b. Convert edges frequencies into node-level frequencies for Node1 and Node2.
             c. Merge with the default node set and group by node, taking the maximum frequency per node.
-        4. Store the resulting node-frequency ensemble under the corresponding ensemble source (label).
+        3. Store the resulting node-frequency ensemble under the corresponding ensemble source (label).
 
         If the interactome or gold standard table is empty, a ValueError is raised.
 
@@ -110,26 +110,27 @@ class Evaluation:
         interactome = pickle.get_interactome()
 
         if interactome.empty:
-              raise ValueError(
-                    f"Cannot compute PRC curve or generate node ensemble. Input network for dataset '{dataset_file.split('-')[0]}' is empty."
-                )
+            raise ValueError(
+                f"Cannot compute PRC curve or generate node ensemble. Input network for dataset '{dataset_file.split('-')[0]}' is empty."
+            )
         if node_table.empty:
             raise ValueError(
                 f"Cannot compute PRC curve or generate node ensemble. Gold standard associated with dataset '{dataset_file.split('-')[0]}' is empty."
             )
 
+        # set the initial default frequencies to 0 for all interactome and gold standard nodes
         node1_interactome = interactome[['Interactor1']].rename(columns={'Interactor1': 'Node'})
         node1_interactome['Frequency'] = 0.0
         node2_interactome = interactome[['Interactor2']].rename(columns={'Interactor2': 'Node'})
         node2_interactome['Frequency'] = 0.0
-        gs_nodes = node_table[['NODEID']].rename(columns={'NODEID': 'Node'})
+        gs_nodes = node_table[[Evaluation.NODE_ID]].rename(columns={Evaluation.NODE_ID: 'Node'})
         gs_nodes['Frequency'] = 0.0
 
         # combine gold standard and network nodes
         other_nodes = pd.concat([node1_interactome, node2_interactome, gs_nodes])
 
         for ensemble_file in ensemble_files:
-            label = Path(ensemble_file).name.split("-")[0]
+            label = Path(ensemble_file).name.split('-')[0]
             ensemble_df = pd.read_table(ensemble_file, sep='\t', header=0)
 
             if not ensemble_df.empty:
@@ -137,7 +138,6 @@ class Evaluation:
                 node2 = ensemble_df[['Node2', 'Frequency']].rename(columns={'Node2': 'Node'})
                 all_nodes = pd.concat([node1, node2, other_nodes])
                 node_ensemble = all_nodes.groupby(['Node']).max().reset_index()
-
             else:
                 node_ensemble = other_nodes.groupby(['Node']).max().reset_index()
 
@@ -152,15 +152,15 @@ class Evaluation:
         Plots precision-recall (PR) curves for a set of node ensembles evaluated against a gold standard.
 
         Takes in a dictionary containing either algorithm-specific node ensembles or an aggregated node ensemble
-        for a given dataset, along with the corresponding gold standard node table. Computes PC curves for
+        for a given dataset, along with the corresponding gold standard node table. Computes PR curves for
         each ensemble and plots all curves on a single figure.
 
         @param node_ensembles: dict of the pre-computed node_ensemble(s)
         @param node_table: gold standard nodes
-        @param output_png: filename to save the precision and recall curves
+        @param output_png: filename to save the precision and recall curves as a .png image
         @param output_file: filename to save the precision, recall, threshold values, average precision, AUC, and baseline precision
         """
-        gold_standard_nodes = set(node_table['NODEID'])
+        gold_standard_nodes = set(node_table[Evaluation.NODE_ID])
 
         # make color palette per ensemble label name
         label_names = list(node_ensembles)
@@ -207,8 +207,8 @@ class Evaluation:
 
             else:
                 raise ValueError(
-                    "Cannot compute PRC curve: the ensemble network is empty."
-                    f"This should not happen unless the input network for pathway reconstruction is empty"
+                    "Cannot compute PR curve: the ensemble network is empty."
+                    f"This should not happen unless the input network for pathway reconstruction is empty."
                 )
 
         baseline_precision = np.sum(y_true) / len(y_true) # same baseline value for all algorithms since all network nodes are included in the ensemble

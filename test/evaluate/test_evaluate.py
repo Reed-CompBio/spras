@@ -2,15 +2,15 @@ import filecmp
 from pathlib import Path
 
 import pandas as pd
-import pytest
 
-import spras.analysis.ml as ml
 from spras.evaluation import Evaluation
 
 INPUT_DIR = 'test/evaluate/input/'
 OUT_DIR = 'test/evaluate/output/'
 EXPECT_DIR = 'test/evaluate/expected/'
 GS_NODE_TABLE = pd.read_csv(INPUT_DIR + "gs_node_table.csv", header=0)
+
+
 class TestEvaluate:
     @classmethod
     def setup_class(cls):
@@ -20,7 +20,7 @@ class TestEvaluate:
         Path(OUT_DIR).mkdir(parents=True, exist_ok=True)
 
     def test_node_ensemble(self):
-        out_path_file = Path(OUT_DIR+'node-ensemble.csv')
+        out_path_file = Path(OUT_DIR + 'node-ensemble.csv')
         out_path_file.unlink(missing_ok=True)
         ensemble_network = [INPUT_DIR + 'ensemble-network.tsv']
         input_network = INPUT_DIR + 'data.pickle'
@@ -29,7 +29,7 @@ class TestEvaluate:
         assert filecmp.cmp(out_path_file, EXPECT_DIR + 'expected-node-ensemble.csv', shallow=False)
 
     def test_empty_node_ensemble(self):
-        out_path_file = Path(OUT_DIR+ 'empty-node-ensemble.csv')
+        out_path_file = Path(OUT_DIR + 'empty-node-ensemble.csv')
         out_path_file.unlink(missing_ok=True)
         empty_ensemble_network = [INPUT_DIR + 'empty-ensemble-network.tsv']
         input_network = INPUT_DIR + 'data.pickle'
@@ -47,9 +47,9 @@ class TestEvaluate:
         assert filecmp.cmp(OUT_DIR + 'empty-node-ensemble.csv', EXPECT_DIR + 'expected-empty-node-ensemble.csv', shallow=False)
 
     def test_precision_recall_curve_ensemble_nodes(self):
-        out_path_png = Path(OUT_DIR+"pr-curve-ensemble-nodes.png")
+        out_path_png = Path(OUT_DIR + "pr-curve-ensemble-nodes.png")
         out_path_png.unlink(missing_ok=True)
-        out_path_file = Path(OUT_DIR+"pr-curve-ensemble-nodes.txt")
+        out_path_file = Path(OUT_DIR + "pr-curve-ensemble-nodes.txt")
         out_path_file.unlink(missing_ok=True)
         ensemble_file = pd.read_csv(INPUT_DIR + 'node-ensemble.csv', sep="\t", header=0)
         node_ensembles_dict = {'ensemble': ensemble_file}
