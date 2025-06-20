@@ -144,3 +144,8 @@ TempMat.mat
 
 # SPRAS singularity container
 spras.sif
+
+# pixi environments
+.pixi
+pixi.lock
+*.egg-info

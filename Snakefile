@@ -12,8 +12,8 @@ import spras.config as _config
 SEP = '/'
 
 wildcard_constraints:
-    params="params-\w+",
-    dataset="\w+"
+    params=r"params-\w+",
+    dataset=r"\w+"
 
 # Elsewhere we import this as config, but in the Snakefile, the variable config is already populated
 # with the parsed config.yaml. This is done by Snakemake, which magically pipes config into this file
@@ -380,7 +380,3 @@ rule evaluation:
     run:
         node_table = Evaluation.from_file(input.gold_standard_file).node_table
         Evaluation.precision(input.pathways, node_table, output.eval_file)
-
-# Remove the output directory
-rule clean:
-    shell: f'rm -rf {out_dir}'
