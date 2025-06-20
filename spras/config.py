@@ -68,6 +68,8 @@ class Config:
         self.container_prefix = DEFAULT_CONTAINER_PREFIX
         # A Boolean specifying whether to unpack singularity containers. Default is False
         self.unpack_singularity = False
+        # A Boolean indicating whether SPRAS should benchmark/profile PRMs. Only applies to apptainer/singularity containers. Default is False
+        self.enable_profiling = False
         # A dictionary to store configured datasets against which SPRAS will be run
         self.datasets = None
         # A dictionary to store configured gold standard data against output of SPRAS runs
@@ -120,8 +122,8 @@ class Config:
         # However, if we get a bad value, we raise an exception.
         if "container_framework" in raw_config:
             container_framework = raw_config["container_framework"].lower()
-            if container_framework not in ("docker", "singularity", "dsub"):
-                msg = "SPRAS was configured to run with an unknown container framework: '" + raw_config["container_framework"] + "'. Accepted values are 'docker', 'singularity' or 'dsub'."
+            if container_framework not in ("docker", "singularity", "apptainer", "dsub"):
+                msg = "SPRAS was configured to run with an unknown container framework: '" + raw_config["container_framework"] + "'. Accepted values are 'docker', 'singularity', 'apptainer', or 'dsub'."
                 raise ValueError(msg)
             if container_framework == "dsub":
                 print("Warning: 'dsub' framework integration is experimental and may not be fully supported.")
@@ -133,13 +135,21 @@ class Config:
         if "unpack_singularity" in raw_config:
             # The value in the config is a string, and we need to convert it to a bool.
             unpack_singularity = raw_config["unpack_singularity"]
-            if unpack_singularity and self.container_framework != "singularity":
-                print("Warning: unpack_singularity is set to True, but the container framework is not singularity. This setting will have no effect.")
+            if unpack_singularity and not (self.container_framework == "singularity" or self.container_framework == "apptainer"):
+                print("Warning: unpack_singularity is set to True, but the container framework is not singularity/apptainer. This setting will have no effect.")
             self.unpack_singularity = unpack_singularity
 
         # Grab registry from the config, and if none is provided default to docker
         if "container_registry" in raw_config and raw_config["container_registry"]["base_url"] != "" and raw_config["container_registry"]["owner"] != "":
             self.container_prefix = raw_config["container_registry"]["base_url"] + "/" + raw_config["container_registry"]["owner"]
+
+        # Benchmarking is currently only supported for singularity/apptainer environments where
+        # the running process is able to create new cgroups.
+        if "enable_profiling" in raw_config:
+            enable_profiling = raw_config["enable_profiling"]
+            if enable_profiling and not (self.container_framework == "singularity" or self.container_framework == "apptainer"):
+                print("Warning: enable_profiling is set to true, but the container framework is not singularity/apptainer. This setting will have no effect.")
+            self.enable_profiling = enable_profiling
 
         # Parse dataset information
         # Datasets is initially a list, where each list entry has a dataset label and lists of input files
