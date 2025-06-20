@@ -62,7 +62,7 @@ jobs:
         shell: bash --login {0}
         # Verbose output and disable stdout and stderr capturing
         # [this pytest-split workflow was borrowed from Snakemake CI]
-        run: pytest -vs --splits --group ${{ matrix.test_group }} 
+        run: pytest -vs --splits --group ${{ matrix.test_group }}
   workflow:
     name: Run workflow
     runs-on: ${{ matrix.os }}
