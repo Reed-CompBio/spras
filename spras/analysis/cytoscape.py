@@ -17,7 +17,7 @@ def run_cytoscape(pathways: List[Union[str, PurePath]], output_file: str, contai
     # To work with Singularity, /spras must be mapped to a writeable location because that directory is fixed as
     # the home directory inside the container and Cytoscape writes configuration files there
     # $HOME cannot be set in the Dockerfile because Singularity overwrites home at launch
-    env = f'HOME={work_dir}'
+    env = {'HOME': work_dir}
 
     # Each volume is a tuple (src, dest)
     volumes = list()
