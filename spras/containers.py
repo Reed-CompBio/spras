@@ -109,8 +109,7 @@ def prepare_dsub_cmd(flags: dict[str, str | list[str]]):
     ordered_flags = {f:flags[f] for f in flag_list if f in flags.keys()}
 
     # iteratively add flags to the command
-    for flag in ordered_flags.keys():
-        value = ordered_flags.get(flag)
+    for flag, value in ordered_flags.items():
         if isinstance(value, list):
             for f in value:
                 dsub_command = dsub_command + " --" + flag + " " + f
@@ -130,8 +129,6 @@ def env_to_items(environment: dict[str, str]) -> Iterator[str]:
     return (f"{key}={value}" for key, value in environment.items())
 
 # TODO consider a better default environment variable
-# TODO environment currently a single string (e.g. 'TMPDIR=/OmicsIntegrator1'), should it be a list?
-# run_container_singularity assumes a single string
 # Follow docker-py's naming conventions (https://docker-py.readthedocs.io/en/stable/containers.html)
 # Technically the argument is an image, not a container, but we use container here.
 def run_container(framework: str, container_suffix: str, command: List[str], volumes: List[Tuple[PurePath, PurePath]], working_dir: str, environment: Optional[dict[str, str]] = None):
