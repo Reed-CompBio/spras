@@ -17,7 +17,7 @@ import pandas as pd
 # Thus, we need to wrap the encoder to reduce np-objects down to regular floats and ints.
 # To preserve precision, we stringify the objects instead,
 # which is okay, as this is specifically for hashing.
-# TODO: this can still have a hashing conflict if someone uses `np.integer` for one paramater combination,
+# TODO: this can still have a hashing conflict if someone uses `np.integer` for one parameter combination,
 # and lists the entire exact number out as a string for the other. Is this a problem?
 class NpHashEncoder(json.JSONEncoder):
     """
