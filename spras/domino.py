@@ -28,6 +28,7 @@ Interactor1     ppi     Interactor2
 """
 class DOMINO(PRM):
     required_inputs = ['network', 'active_genes']
+    doi = ["10.15252/msb.20209593"]
 
     @staticmethod
     def generate_inputs(data, filename_map):

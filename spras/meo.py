@@ -84,6 +84,7 @@ Interactor1   pp/pd   Interactor2   Weight
 
 class MEO(PRM):
     required_inputs = ['sources', 'targets', 'edges']
+    doi = ["10.1093/nar/gkq1207"]
 
     @staticmethod
     def generate_inputs(data, filename_map):
