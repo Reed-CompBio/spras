@@ -147,7 +147,7 @@ reconstruction_settings:
 
               #place the save path here
               # TODO move to global
-              reconstruction_dir: "output"
+              reconstruction_dir: "output/config"
 
         run: true
 
@@ -177,6 +177,19 @@ analysis:
         linkage: 'ward'
         # 'euclidean', 'manhattan', 'cosine'
         metric: 'euclidean'
+        # adds kernel density to pca plots
+        # default metric used is euclidean for kernel_density
+        kernel_density: true
+        # hyperparameter to control the smoothness of estimated kernel density
+        # float, 'scott', 'silverman'
+        # can be a single value or list
+        band_width: np.logspace(-1, 1, 20)
+        # hyperparameter kernel to use for kernel_density
+        # 'gaussian', 'tophat', 'epanechnikov', 'exponential', 'linear', 'cosine'
+        # can be a single value or list
+        kernel: 'gaussian'
+        # removes empty pathways from consideration in ml analysis (or just pca only?)
+        remove_empty_pathways: true
       evaluation:
         # evaluation per dataset-goldstandard pair
         # evaluation will not run unless ml include is set to true

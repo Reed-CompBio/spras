@@ -11,6 +11,7 @@ from scipy.cluster.hierarchy import dendrogram, fcluster
 from sklearn.cluster import AgglomerativeClustering
 from sklearn.decomposition import PCA
 from sklearn.preprocessing import StandardScaler
+from sklearn.neighbors import KernelDensity
 
 from spras.util import make_required_dirs
 
@@ -110,11 +111,11 @@ def create_palette(column_names):
     """
     # TODO: could add a way for the user to customize the color palette?
     unique_column_names = list(sorted(set(column_names)))
-    custom_palette = sns.color_palette(palette = "tab20c", n_colors = len(unique_column_names))
+    custom_palette = sns.color_palette(palette = "tab20b", n_colors = len(unique_column_names))
     label_color_map = {label: color for label, color in zip(unique_column_names, custom_palette, strict=True)}
     return label_color_map
 
-def pca(dataframe: pd.DataFrame, output_png: str, output_var: str, output_coord: str, components: int = 2, labels: bool = True):
+def pca(dataframe: pd.DataFrame, output_png: str, output_var: str, output_coord: str, components: int = 2, labels: bool = True, kernel_density: bool = False, kernel_density_parameters:dict = {}, remove_empty_pathways: bool = False):
     """
     Performs PCA on the data and creates a scatterplot of the top two principal components.
     It saves the plot, the variance explained by each component, and the
@@ -164,6 +165,29 @@ def pca(dataframe: pd.DataFrame, output_png: str, output_var: str, output_coord:
     # making the plot
     label_color_map = create_palette(column_names)
     plt.figure(figsize=(10, 7))
+    
+    if kernel_density:
+        # grid = GridSearchCV(KernelDensity(), params)
+
+        kde_model = KernelDensity(kernel='gaussian', bandwidth=0.5) # Note that the normalization of the density output is correct only for the Euclidean distance metric.
+        kde_model.fit(X_pca)
+
+        # Create a mesh grid over PCA space
+        xmin, xmax = X_pca[:, 0].min(), X_pca[:, 0].max()
+        ymin, ymax = X_pca[:, 1].min(), X_pca[:, 1].max()
+        xx, yy = np.meshgrid(np.linspace(xmin, xmax, 100), np.linspace(ymin, ymax, 100))
+        grid_points = np.vstack([xx.ravel(), yy.ravel()]).T
+
+        # Evaluate KDE
+        # Compute the log-likelihood of each sample under the model
+        log_density = kde_model.score_samples(grid_points)
+        z = np.exp(log_density).reshape(xx.shape)
+
+        plt.pcolormesh(xx, yy, z, cmap='Oranges')
+        plt.colorbar(label="Density")
+
+        # sns.kdeplot(x=X_pca[:, 0], y=X_pca[:, 1], fill=True, cmap='Oranges', bw_adjust=0.5)
+
     sns.scatterplot(x=X_pca[:, 0], y=X_pca[:, 1], s=70, hue=column_names, palette=label_color_map)
     plt.scatter(centroid[0], centroid[1], color='red', marker='X', s=100, label='Centroid')
     plt.title("PCA")
