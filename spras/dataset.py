@@ -39,6 +39,11 @@ class Dataset:
         Loads dataset object from a pickle file.
         Usage: dataset = Dataset.from_file(pickle_file)
         """
+        if isinstance(file_name, Dataset):
+            # No work to be done
+            # (this use-case is useful for testing.)
+            return file_name
+
         with open(file_name, "rb") as f:
             return pkl.load(f)
 

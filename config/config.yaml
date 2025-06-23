@@ -96,6 +96,20 @@ algorithms:
         slice_threshold: 0.3
         module_threshold: 0.05
 
+  - name: "strwr"
+    params:
+      include: true
+      run1:
+        alpha: [0.85]
+        threshold: [100, 200]
+
+  - name: "rwr"
+    params:
+      include: true
+      run1:
+        alpha: [0.85]
+        threshold: [100, 200]
+
 # Here we specify which pathways to run and other file location information.
 # DataLoader.py can currently only load a single dataset
 # Assume that if a dataset label does not change, the lists of associated input files do not change
