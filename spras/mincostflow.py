@@ -24,7 +24,7 @@ Interactor1  Interactor2   Weight
 """
 class MinCostFlow (PRM):
     required_inputs = ['sources', 'targets', 'edges']
-    doi = ["10.1038/s41540-020-00167-1"]
+    dois = ["10.1038/s41540-020-00167-1"]
 
     @staticmethod
     def generate_inputs(data, filename_map):

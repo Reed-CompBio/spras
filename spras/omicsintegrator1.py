@@ -50,7 +50,7 @@ class OmicsIntegrator1(PRM):
 
     """
     required_inputs = ['prizes', 'edges', 'dummy_nodes']
-    doi = ["10.1371/journal.pcbi.1004879"]
+    dois = ["10.1371/journal.pcbi.1004879"]
 
     @staticmethod
     def generate_inputs(data, filename_map):

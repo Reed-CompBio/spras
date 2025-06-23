@@ -12,7 +12,7 @@ __all__ = ['AllPairs']
 
 class AllPairs(PRM):
     required_inputs = ['nodetypes', 'network']
-    doi = []
+    dois = []
 
     @staticmethod
     def generate_inputs(data, filename_map):

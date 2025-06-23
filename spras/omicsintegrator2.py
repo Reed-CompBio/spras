@@ -22,6 +22,7 @@ Interactor1   Interactor2   Weight
 """
 class OmicsIntegrator2(PRM):
     required_inputs = ['prizes', 'edges']
+    dois = []
 
     def generate_inputs(data: Dataset, filename_map):
         """
