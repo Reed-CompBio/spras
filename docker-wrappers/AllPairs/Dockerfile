@@ -7,4 +7,4 @@ RUN apk add --no-cache bash
 WORKDIR /AllPairs
 
 RUN pip install networkx==3.4.2
-COPY all-pairs-shortest-paths.py /AllPairs/all-pairs-shortest-paths.py
+RUN wget -O /AllPairs/all-pairs-shortest-paths.py https://raw.githubusercontent.com/Reed-CompBio/all-pairs-shortest-paths/b4fcc4f7d665a51213488e93b4664afbe4eca6c1/allpairs.py

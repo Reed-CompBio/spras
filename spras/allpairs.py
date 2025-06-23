@@ -103,7 +103,7 @@ class AllPairs(PRM):
         if directed_flag and Path(directed_flag).exists():
             command.append("--directed")
 
-        container_suffix = "allpairs:v2"
+        container_suffix = "allpairs:v3"
         run_container_and_log(
             'All Pairs Shortest Paths',
             container_framework,
