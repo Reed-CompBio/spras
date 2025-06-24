@@ -7,7 +7,6 @@ import matplotlib.pyplot as plt
 import numpy as np
 import pandas as pd
 from sklearn.metrics import (
-    auc,
     average_precision_score,
     precision_recall_curve,
 )
@@ -111,11 +110,11 @@ class Evaluation:
 
         if interactome.empty:
             raise ValueError(
-                f"Cannot compute PRC curve or generate node ensemble. Input network for dataset '{dataset_file.split('-')[0]}' is empty."
+                f"Cannot compute PR curve or generate node ensemble. Input network for dataset '{dataset_file.split('-')[0]}' is empty."
             )
         if node_table.empty:
             raise ValueError(
-                f"Cannot compute PRC curve or generate node ensemble. Gold standard associated with dataset '{dataset_file.split('-')[0]}' is empty."
+                f"Cannot compute PR curve or generate node ensemble. Gold standard associated with dataset '{dataset_file.split('-')[0]}' is empty."
             )
 
         # set the initial default frequencies to 0 for all interactome and gold standard nodes
@@ -158,7 +157,7 @@ class Evaluation:
         @param node_ensembles: dict of the pre-computed node_ensemble(s)
         @param node_table: gold standard nodes
         @param output_png: filename to save the precision and recall curves as a .png image
-        @param output_file: filename to save the precision, recall, threshold values, average precision, AUC, and baseline precision
+        @param output_file: filename to save the precision, recall, threshold values, average precision, and baseline precision
         """
         gold_standard_nodes = set(node_table[Evaluation.NODE_ID])
 
@@ -171,6 +170,8 @@ class Evaluation:
         prc_dfs = []
         metric_dfs = []
 
+        baseline = None
+
         for label, node_ensemble in node_ensembles.items():
             if not node_ensemble.empty:
                 y_true = [1 if node in gold_standard_nodes else 0 for node in node_ensemble['Node']]
@@ -178,10 +179,15 @@ class Evaluation:
                 precision, recall, thresholds = precision_recall_curve(y_true, y_scores)
                 # avg precision summarizes a precision-recall curve as the weighted mean of precisions achieved at each threshold
                 avg_precision = average_precision_score(y_true, y_scores)
-                auc_score = auc(recall, precision)
+
+                # only set baseline precision once
+                # the same for every algorithm per dataset/goldstandard pair
+                if baseline is None:
+                    baseline = np.sum(y_true) / len(y_true)
+                    plt.axhline(y=baseline, color="black", linestyle='--', label=f'Baseline: {baseline:.4f}')
 
                 plt.plot(recall, precision, color=color_palette[label], marker='o',
-                         label=f'{label.capitalize()} PR curve (AP: {avg_precision:.4f})')
+                         label=f'{label.capitalize()} (AP: {avg_precision:.4f})')
 
                 # Dropping last elements because scikit-learn adds (1, 0) to precision/recall for plotting, not tied to real thresholds
                 # https://scikit-learn.org/stable/modules/generated/sklearn.metrics.precision_recall_curve.html#sklearn.metrics.precision_recall_curve:~:text=Returns%3A-,precision,predictions%20with%20score%20%3E%3D%20thresholds%5Bi%5D%20and%20the%20last%20element%20is%200.,-thresholds
@@ -193,7 +199,6 @@ class Evaluation:
 
                 metric_data = {
                     'Average_Precision': [avg_precision],
-                    'AUC': [auc_score]
                 }
 
                 ensemble_source = label.capitalize() if label != 'ensemble' else "Aggregated"
@@ -211,15 +216,14 @@ class Evaluation:
                     f"This should not happen unless the input network for pathway reconstruction is empty."
                 )
 
-        baseline_precision = np.sum(y_true) / len(y_true) # same baseline value for all algorithms since all network nodes are included in the ensemble
-        plt.axhline(y=baseline_precision, color="black", linestyle='--', label=f'Baseline_Precision: {baseline_precision:.4f}')
 
-        plt.xlim(0, 1)
-        plt.ylim(0, 1)
-        if label != 'ensemble':
+        if 'ensemble' not in label_names:
             plt.title('Precision-Recall Curve Per Algorithm Specific Ensemble')
         else:
             plt.title('Precision-Recall Curve for Aggregated Ensemble Across Algorithms')
+
+        plt.xlim(0, 1)
+        plt.ylim(0, 1)
         plt.xlabel('Recall')
         plt.ylabel('Precision')
         plt.legend(loc='lower left', bbox_to_anchor=(1, 0.5))
@@ -229,10 +233,10 @@ class Evaluation:
 
         combined_prc_df = pd.concat(prc_dfs, ignore_index=True)
         combined_metrics_df = pd.concat(metric_dfs, ignore_index=True)
-        combined_metrics_df["Baseline_Precision"] = baseline_precision
+        combined_metrics_df["Baseline"] = baseline
 
         # merge dfs and NaN out metric values except for first row of each Ensemble_Source
         complete_df = combined_prc_df.merge(combined_metrics_df, on="Ensemble_Source", how="left")
         not_last_rows = complete_df.duplicated(subset="Ensemble_Source", keep='first')
-        complete_df.loc[not_last_rows, ["Average_Precision", "AUC", "Baseline_Precision"]] = None
+        complete_df.loc[not_last_rows, ["Average_Precision", "Baseline"]] = None
         complete_df.to_csv(output_file, index=False, sep="\t")
