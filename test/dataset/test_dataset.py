@@ -13,7 +13,7 @@ class TestDataset:
             Dataset({
                 'label': 'empty',
                 'edge_files': ['network.txt'],
-                'node_files': ['scores.txt', 'nodes.txt'],
+                'node_files': ['sources.txt', 'node-prizes.txt'],
                 'other_files': [],
                 'data_dir': FIXTURES_PATH / 'empty'
             })
