@@ -17,7 +17,7 @@ class TestDataset:
                 'other_files': [],
                 'data_dir': FIXTURES_PATH / 'empty'
             })
-    
+
     def test_not_allow_no_cols_headers(self):
         with pytest.raises(pandas.errors.EmptyDataError):
             Dataset({
@@ -27,7 +27,7 @@ class TestDataset:
                 'other_files': [],
                 'data_dir': FIXTURES_PATH / 'empty-headers'
             })
-    
+
     def test_dataless(self):
         with pytest.raises(pandas.errors.EmptyDataError):
             Dataset({
@@ -37,7 +37,7 @@ class TestDataset:
                 'other_files': [],
                 'data_dir': FIXTURES_PATH / 'dataless'
             })
-    
+
     def test_empty_network(self):
         with pytest.raises(pandas.errors.EmptyDataError):
             Dataset({
