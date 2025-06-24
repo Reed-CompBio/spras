@@ -112,7 +112,7 @@ class OmicsIntegrator1(PRM):
         All other output files are deleted.
         @param output_file: the name of the output sif file for the optimal forest, which will overwrite any
         existing file with this name
-        @param noisy_edges: How many times you would like to add noise to the given edge values and re-run the algorithm. 
+        @param noisy_edges: How many times you would like to add noise to the given edge values and re-run the algorithm.
         @param shuffled_prizes: How many times the algorithm should shuffle the prizes and re-run
         @param random_terminals: How many times to apply the given prizes to random nodes in the interactome
         @param seed: the randomness seed to use
