@@ -13,12 +13,15 @@ Methods and intermediate state for loading data and putting it into pandas table
 """
 
 class DatasetDict(TypedDict):
+    """
+    Type class containing a collection of information pertaining to creating a Dataset
+    object. This layout is replicated directly in SPRAS configuration files.
+    """
     label: str
     node_files: list[str | os.PathLike]
     edge_files: list[str | os.PathLike]
     other_files: list[str | os.PathLike]
     data_dir: str | os.PathLike
-
 
 class Dataset:
 
