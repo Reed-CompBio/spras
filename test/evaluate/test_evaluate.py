@@ -42,7 +42,6 @@ class TestEvaluate:
         out_path_file.unlink(missing_ok=True)
         out_path_empty_file = Path(OUT_DIR + 'empty-node-ensemble.csv')
         out_path_empty_file.unlink(missing_ok=True)
-        empty_ensemble_network = [INPUT_DIR + 'empty-ensemble-network.tsv']
         ensemble_networks = [INPUT_DIR + 'ensemble-network.tsv', INPUT_DIR + 'empty-ensemble-network.tsv']
         input_network = INPUT_DIR + 'data.pickle'
         node_ensemble_dict = Evaluation.edge_frequency_node_ensemble(GS_NODE_TABLE, ensemble_networks, input_network)
