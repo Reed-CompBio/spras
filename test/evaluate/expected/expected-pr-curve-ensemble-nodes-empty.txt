@@ -1,2 +1,2 @@
-Ensemble_Source	Threshold	Precision	Recall	Average_Precision	AUC	Baseline_Precision
-Aggregated	0.0	0.15384615384615385	1.0	0.15384615384615385	0.5769230769230769	0.15384615384615385
+Ensemble_Source	Threshold	Precision	Recall	Average_Precision	Baseline
+Aggregated	0.0	0.15384615384615385	1.0	0.15384615384615385	0.15384615384615385
