@@ -17,6 +17,26 @@ class TestDataset:
                 'other_files': [],
                 'data_dir': FIXTURES_PATH / 'empty'
             })
+    
+    def test_dataless(self):
+        with pytest.raises(pandas.errors.EmptyDataError):
+            Dataset({
+                'label': 'dataless',
+                'edge_files': ['network.txt'],
+                'node_files': ['sources.txt', 'node-prizes.txt'],
+                'other_files': [],
+                'data_dir': FIXTURES_PATH / 'dataless'
+            })
+    
+    def test_empty_network(self):
+        with pytest.raises(pandas.errors.EmptyDataError):
+            Dataset({
+                'label': 'empty-network',
+                'edge_files': ['network.txt'],
+                'node_files': ['sources.txt', 'node-prizes.txt'],
+                'other_files': [],
+                'data_dir': FIXTURES_PATH / 'empty-network'
+            })
 
     def test_not_allow_edge_weights_oor(self):
         with pytest.raises(ValueError):
