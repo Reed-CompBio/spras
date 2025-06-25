@@ -246,7 +246,7 @@ class Config:
             self.pca_params["components"] = self.ml_params["components"]
         if "labels" in self.ml_params:
             self.pca_params["labels"] = self.ml_params["labels"]
-        if "kernel_density" in self.ml_params:
+        if "kernel_density" in self.ml_params: # TODO: add a check to make sure this is turned to true if evaluation is true
             self.pca_params["kernel_density"] = self.ml_params["kernel_density"]
         # TODO should I keep thye kernel parameters as seperate parameters and make a dict in the code itself or store them in a dict to use in gridsearchCV?
         if "remove_empty_pathways" in self.ml_params:
