@@ -214,14 +214,22 @@ def collect_prepared_input(wildcards):
     prepared_inputs = expand(f'{prepared_dir}{SEP}{{type}}.txt',type=runner.get_required_inputs(algorithm=wildcards.algorithm))
     # If the directory is missing, do nothing because the missing output triggers running prepare_input
     if os.path.isdir(prepared_dir):
-        # If the directory exists, confirm all prepared input files exist as well (as opposed to some or none)
-        missing_inputs = False
-        for input in prepared_inputs:
-            if not os.path.isfile(input):
-                missing_inputs = True
-        # If any expected files were missing, delete the entire directory so the call below triggers running prepare_input
-        if missing_inputs:
-            shutil.rmtree(prepared_dir)
+        # First, check if .snakemake_timestamp, the last written file in a directory rule,
+        # exists. This prevents multithreading errors if we accidentally read a directory
+        # before it finishes. A proper API for querying this is opened as an issue at
+        # https://github.com/snakemake/snakemake/issues/439.
+        if not os.path.isfile(os.path.join(prepared_dir, '.snakemake_timestamp')):
+            checkpoints.prepare_input.get(**wildcards)
+        else:
+            # If the directory exists, confirm all prepared input files exist as well (as opposed to some or none)
+            missing_inputs = []
+            for input in prepared_inputs:
+                if not os.path.isfile(input):
+                    missing_inputs.append(input)
+            # If any expected files were missing, delete the entire directory so the call below triggers running prepare_input
+            if len(missing_inputs) != 0:
+                raise RuntimeError(f"Not all input files were provided. (Missing {missing_inputs})\n" +
+                    "fTo prevent multithreading errors, please remove the {prepared_inputs} directory.")
 
     # Check whether prepare_input has been run for these wildcards (dataset-algorithm pair) and run if needed
     # The check is executed by checking whether the prepare_input output exists, which is a directory
