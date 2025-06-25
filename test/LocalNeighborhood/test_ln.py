@@ -50,3 +50,54 @@ class TestLocalNeighborhood:
                                output_file=OUT_FILE)
 
     # Write tests for the Local Neighborhood run function here
+    """
+    Test the LocalNeighborhood wrapper's run function with required arguments.
+    This will run the Dockerized version of the algorithm.
+    """
+    def test_local_neighborhood_run_required(self):
+        # Ensure the output file from a previous run is deleted
+        OUT_FILE.unlink(missing_ok=True)
+        
+        # Call the static run method of the LocalNeighborhood wrapper class
+        local_neighborhood.run(
+            network=str(Path(TEST_DIR, 'input', 'ln-network.txt')), # Pass as string
+            nodes=str(Path(TEST_DIR, 'input', 'ln-nodes.txt')),     # Pass as string
+            output_file=str(OUT_FILE)                      # Pass as string
+        )
+        
+        # Assert that the output file was created by the Dockerized algorithm
+        assert OUT_FILE.exists(), 'Dockerized Local Neighborhood output file was not written'
+        
+        # Optionally, compare the output to an expected file.
+        # This requires an 'expected_output_run_test.txt' which accurately reflects
+        # the Dockerized algorithm's output. For initial testing, just checking existence is often enough.
+        # expected_run_file = Path(TEST_DIR, 'expected_output', 'ln-output.txt') # Assuming it's the same expected output
+        # assert cmp(OUT_FILE_RUN_TEST, expected_run_file, shallow=False), 'Dockerized output file does not match expected'
+
+
+    """
+    Test that the LocalNeighborhood wrapper's run function raises an error
+    when required arguments are missing.
+    """
+    def test_local_neighborhood_run_missing(self):
+        with pytest.raises(ValueError):
+            # Attempt to run without the 'nodes' argument
+            local_neighborhood.run(
+                network=str(Path(TEST_DIR, 'input', 'ln-network.txt')),
+                output_file=str(OUT_FILE)
+            )
+
+        with pytest.raises(ValueError):
+            # Attempt to run without the 'network' argument
+            local_neighborhood.run(
+                nodes=str(Path(TEST_DIR, 'input', 'ln-nodes.txt')),
+                output_file=str(OUT_FILE)
+            )
+        
+        with pytest.raises(ValueError):
+            # Attempt to run without the 'output_file' argument
+            local_neighborhood.run(
+                network=str(Path(TEST_DIR, 'input', 'ln-network.txt')),
+                nodes=str(Path(TEST_DIR, 'input', 'ln-nodes.txt'))
+            )
+
