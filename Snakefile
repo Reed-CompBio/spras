@@ -226,7 +226,7 @@ def collect_prepared_input(wildcards):
             for input in prepared_inputs:
                 if not os.path.isfile(input):
                     missing_inputs.append(input)
-            # If any expected files were missing, delete the entire directory so the call below triggers running prepare_input
+            # If any expected files were missing, ask to delete the entire directory so the call below triggers running prepare_input
             if len(missing_inputs) != 0:
                 raise RuntimeError(f"Not all input files were provided. (Missing {missing_inputs})\n" +
                     "fTo prevent multithreading errors, please remove the {prepared_inputs} directory.")
