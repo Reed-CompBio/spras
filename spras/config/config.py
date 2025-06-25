@@ -239,6 +239,11 @@ class Config:
 
         self.pca_params = self.ml_params
 
+        self.hac_params = {
+            "linkage": self.ml_params.linkage,
+            "metric": self.ml_params.metric
+        }
+
         self.analysis_include_summary = raw_config.analysis.summary.include
         self.analysis_include_graphspace = raw_config.analysis.graphspace.include
         self.analysis_include_cytoscape = raw_config.analysis.cytoscape.include
