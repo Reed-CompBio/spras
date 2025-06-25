@@ -163,9 +163,8 @@ class Evaluation:
             coord_df = coord_df[coord_df['datapoint_labels'] != 'kde_peak']
 
             pc_columns = [col for col in coord_df.columns if col.startswith('PC')]
-            # coord_df['Distance To Centroid'] = np.sqrt(sum((coord_df[pc] - centroid[i]) ** 2 for i, pc in enumerate(pc_columns)))
             coord_df['Distance To KDE peak'] = np.sqrt(sum((coord_df[pc] - kde_peak[i]) ** 2 for i, pc in enumerate(pc_columns)))
-            closest_to_kde_peak = coord_df.sort_values(by='Distance To KDE peak').iloc[0] # TODO deal with >1 closest. Choose the pathway that is smallest? choose all of them?
+            closest_to_kde_peak = coord_df.sort_values(by='Distance To KDE peak').iloc[0] # TODO deal with >1 closest. Choose the pathway that is smallest using summary.txt? choose all of them?
 
             rep_pathway = os.path.join(output_dir, f"{closest_to_kde_peak['datapoint_labels']}", "pathway.txt")
             rep_pathways.append(rep_pathway)

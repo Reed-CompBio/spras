@@ -131,8 +131,8 @@ def pca(dataframe: pd.DataFrame, output_png: str, output_var: str, output_coord:
 
     # remove empty pathways from dataframe
     if remove_empty_pathways:
-        df = df.loc[:, df.any(axis=0)] # return True for columns that have at least one 1
-
+        df = df.loc[:, df.any(axis=0)] 
+    
     validate_df(df)
 
     columns = df.columns
@@ -191,16 +191,16 @@ def pca(dataframe: pd.DataFrame, output_png: str, output_var: str, output_coord:
         log_density = kde_model.score_samples(grid_points)
         z = np.exp(log_density).reshape(xx.shape)
 
+        # plot on pca figure
         plt.contourf(xx, yy, z, levels=100, cmap='Reds')
-        # plt.pcolormesh(xx, yy, z, cmap='Reds', shading='auto')
         plt.colorbar(label="Density")
 
         df_kde = pd.DataFrame({
-            "x": grid_points[:, 0],
-            "y": grid_points[:, 1],
-            "density": np.exp(log_density)
+            "X_coordinate": grid_points[:, 0],
+            "Y_coordinate": grid_points[:, 1],
+            "Density": np.exp(log_density)
         })
-        df_kde.to_csv(output_kde, index=False)
+        df_kde.to_csv(output_kde, index=False, sep="\t")
 
     sns.scatterplot(x=X_pca[:, 0], y=X_pca[:, 1], s=70, hue=column_names, palette=label_color_map)
     plt.scatter(centroid[0], centroid[1], color='red', marker='X', s=100, label='Centroid')
