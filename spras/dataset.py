@@ -21,13 +21,12 @@ class Dataset:
         self.label = None
         self.interactome = None
         self.node_table = None
-        self.edge_table = None
         self.node_set = set()
         self.other_files = []
         self.load_files_from_dict(dataset_dict)
         return
 
-    def to_file(self, file_name):
+    def to_file(self, file_name: str):
         """
         Saves dataset object to pickle file
         """
@@ -35,7 +34,7 @@ class Dataset:
             pkl.dump(self, f)
 
     @classmethod
-    def from_file(cls, file_name):
+    def from_file(cls, file_name: str):
         """
         Loads dataset object from a pickle file.
         Usage: dataset = Dataset.from_file(pickle_file)
@@ -47,7 +46,7 @@ class Dataset:
         """
         Loads data files from dataset_dict, which is one dataset dictionary from the list
         in the config file with the fields in the config file.
-        Populates node_table, edge_table, and interactome.
+        Populates node_table and interactome.
 
         node_table is a single merged pandas table.
 

@@ -6,17 +6,20 @@ hash_length: 7
 singularity: false
 
 algorithms:
-  -
-    name: pathlinker
+  - name: pathlinker
     params:
       include: true
       run1:
         k:
           - 10
           - 20
+<<<<<<< param-tuning-ensembling-2.0
           - 70
   -
     name: omicsintegrator1
+=======
+  - name: omicsintegrator1
+>>>>>>> main
     params:
       include: true
       run1:
@@ -35,8 +38,7 @@ algorithms:
         mu:
           - 0.008
         dummy_mode: ["file"]
-  -
-    name: omicsintegrator2
+  - name: omicsintegrator2
     params:
       include: true
       run1:
@@ -49,8 +51,7 @@ algorithms:
           - 2
         g:
           - 3
-  -
-    name: meo
+  - name: meo
     params:
       include: true
       run1:
@@ -60,6 +61,7 @@ algorithms:
           - 3
         rand_restarts:
           - 10
+<<<<<<< param-tuning-ensembling-2.0
       run2:
         local_search:
           - 'No'
@@ -72,6 +74,9 @@ algorithms:
       include: true
   -
     name: domino
+=======
+  - name: domino
+>>>>>>> main
     params:
       include: true
       run1:
@@ -99,8 +104,7 @@ algorithms:
         flow:
           - 60
 datasets:
-  -
-    data_dir: input
+  - data_dir: input
     edge_files:
       - phosphosite-irefindex13.0-uniprot.txt
     label: tps_egfr
