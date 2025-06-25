@@ -18,12 +18,13 @@ import os
 import re
 import warnings
 from collections.abc import Iterable
+from typing import Any
 
 import numpy as np
 import yaml
 
 from spras.util import NpHashEncoder, hash_params_sha1_base32
-from spras.config.raw_config import ContainerFramework, RawConfig, DEFAULT_HASH_LENGTH
+from spras.config.raw_config import ContainerFramework, RawConfig
 
 config = None
 
@@ -52,12 +53,15 @@ def init_from_file(filepath):
 
 
 class Config:
-    def __init__(self, raw_config):
-        # Member vars populated by process_config. Any values that don't have sensible initial values are set to None
+    def __init__(self, raw_config: dict[str, Any]):
+        parsed_raw_config = RawConfig.model_validate(raw_config)
+        self.process_config(parsed_raw_config)
+
+        # Member vars populated by process_config. Any values that don't have quick initial values are set to None
         # before they are populated for __init__ to show exactly what is being configured.
 
         # Directory used for storing output
-        self.out_dir = None
+        self.out_dir = parsed_raw_config.reconstruction_settings.locations.reconstruction_dir
         # Container framework used by PRMs. Valid options are "docker", "dsub", and "singularity"
         self.container_framework = None
         # The container prefix (host and organization) to use for images. Default is "docker.io/reedcompbio"
@@ -68,8 +72,8 @@ class Config:
         self.datasets = None
         # A dictionary to store configured gold standard data against output of SPRAS runs
         self.gold_standards = None
-        # The hash length SPRAS will use to identify parameter combinations. Default is 7
-        self.hash_length: int = DEFAULT_HASH_LENGTH
+        # The hash length SPRAS will use to identify parameter combinations.
+        self.hash_length = parsed_raw_config.hash_length
         # The list of algorithms to run in the workflow. Each is a dict with 'name' as an expected key.
         self.algorithms = None
         # A nested dict mapping algorithm names to dicts that map parameter hashes to parameter combinations.
@@ -106,13 +110,6 @@ class Config:
         # wrapper error first before passing validation to pydantic.
         if raw_config == {}:
             raise ValueError("Config file cannot be empty. Use --configfile <filename> to set a config file.")
-
-        # Since process_config winds up modifying the raw_config passed to it as a side effect,
-        # we'll make a deep copy here to guarantee we don't break anything. This preserves the
-        # config as it's given to the Snakefile by Snakemake
-        _raw_config = copy.deepcopy(raw_config)
-        parsed_raw_config = RawConfig.model_validate_json(_raw_config)
-        self.process_config(parsed_raw_config)
     
     def process_datasets(self, raw_config: RawConfig):
         """
@@ -178,8 +175,12 @@ class Config:
             if cur_params.directed != None:
                 warnings.warn("UPDATE: we no longer use the directed key in the config file")
 
+            cur_params = cur_params.__pydantic_extra__
+            if not cur_params:
+                raise RuntimeError("An internal error occured: ConfigDict extra should be set on AlgorithmParams.")
+
             # The algorithm has no named arguments so create a default placeholder
-            if len(cur_params) == 0:
+            if len(cur_params.keys()) == 0:
                 cur_params["run1"] = {"spras_placeholder": ["no parameters"]}
 
             # Each set of runs should be 1 level down in the config file
@@ -210,7 +211,7 @@ class Config:
                                     # Catch-all for strings
                                     obj = [obj]
                             if not isinstance(obj, Iterable):
-                                raise ValueError(f"The object `{obj}` in algorithm {alg['name']} at key '{p}' in run '{run_params}' is not iterable!") from None
+                                raise ValueError(f"The object `{obj}` in algorithm {alg.name} at key '{p}' in run '{run_params}' is not iterable!") from None
                         all_runs.append(obj)
                 run_list_tuples = list(it.product(*all_runs))
                 param_name_tuple = tuple(param_name_list)
@@ -231,47 +232,18 @@ class Config:
                     if params_hash in prior_params_hashes:
                         raise ValueError(f'Parameter hash collision detected. Increase the hash_length in the config file '
                                         f'(current length {self.hash_length}).')
-                    self.algorithm_params[alg["name"]][params_hash] = run_dict
+                    self.algorithm_params[alg.name][params_hash] = run_dict
 
-    def process_config(self, raw_config: RawConfig):
-        # Set up a few top-level config variables
-        self.out_dir = raw_config.reconstruction_settings.locations.reconstruction_dir
+    def process_analysis(self, raw_config: RawConfig):
+        if not raw_config.analysis:
+            return
 
-        # We allow the container framework not to be defined in the config. In the case it isn't, default to docker.
-        # However, if we get a bad value, we raise an exception.
-        if raw_config.container_framework != None:
-            container_framework = raw_config.container_framework
-            if container_framework == ContainerFramework.dsub:
-                warnings.warn("'dsub' framework integration is experimental and may not be fully supported.")
-            self.container_framework = container_framework
-        else:
-            self.container_framework = "docker"
-
-        # Unpack settings for running in singularity mode. Needed when running PRM containers if already in a container.
-        if raw_config.unpack_singularity:
-            # The value in the config is a string, and we need to convert it to a bool.
-            unpack_singularity = raw_config["unpack_singularity"]
-            if unpack_singularity and self.container_framework != "singularity":
-                warnings.warn("unpack_singularity is set to True, but the container framework is not singularity. This setting will have no effect.")
-            self.unpack_singularity = unpack_singularity
-
-        # Grab registry from the config, and if none is provided default to docker
-        if raw_config.container_registry and raw_config["container_registry"]["base_url"] != "" and raw_config["container_registry"]["owner"] != "":
-            self.container_prefix = raw_config["container_registry"]["base_url"] + "/" + raw_config["container_registry"]["owner"]
-
-        # Override the default parameter hash length if specified in the config file
-        if "hash_length" in raw_config and raw_config["hash_length"] != "":
-            self.hash_length = int(raw_config["hash_length"])
-
-        self.process_datasets(raw_config)
-        self.process_algorithms(raw_config)
-
-        self.analysis_params = raw_config["analysis"] if "analysis" in raw_config else {}
-        self.ml_params = self.analysis_params["ml"] if "ml" in self.analysis_params else {}
-        self.evaluation_params = self.analysis_params["evaluation"] if "evaluation" in self.analysis_params else {}
+        self.analysis_params = raw_config.analysis
+        self.ml_params = self.analysis_params.ml if self.analysis_params.ml else {}
+        self.evaluation_params = self.analysis_params.evaluation if self.analysis_params.evaluation else {}
 
         self.pca_params = {}
-        if "components" in self.ml_params:
+        if self.ml_params.components:
             self.pca_params["components"] = self.ml_params["components"]
         if "labels" in self.ml_params:
             self.pca_params["labels"] = self.ml_params["labels"]
@@ -282,14 +254,14 @@ class Config:
         if "metric" in self.ml_params:
             self.hac_params["metric"] = self.ml_params ["metric"]
 
-        self.analysis_include_summary = raw_config["analysis"]["summary"]["include"]
-        self.analysis_include_graphspace = raw_config["analysis"]["graphspace"]["include"]
-        self.analysis_include_cytoscape = raw_config["analysis"]["cytoscape"]["include"]
-        self.analysis_include_ml = raw_config["analysis"]["ml"]["include"]
-        self.analysis_include_evaluation = raw_config["analysis"]["evaluation"]["include"]
+        self.analysis_include_summary = raw_config.analysis.summary.include
+        self.analysis_include_graphspace = raw_config.analysis.graphspace.include
+        self.analysis_include_cytoscape = raw_config.analysis.cytoscape.include
+        self.analysis_include_ml = raw_config.analysis.ml.include
+        self.analysis_include_evaluation = raw_config.analysis.evaluation.include
 
         # Only run ML aggregate per algorithm if analysis include ML is set to True
-        if 'aggregate_per_algorithm' in self.ml_params and self.analysis_include_ml:
+        if self.ml_params.aggregate_per_algorithm and self.analysis_include_ml:
             self.analysis_include_ml_aggregate_algo = raw_config["analysis"]["ml"]["aggregate_per_algorithm"]
         else:
             self.analysis_include_ml_aggregate_algo = False
@@ -304,11 +276,32 @@ class Config:
             self.analysis_include_evaluation = False
 
         # Only run Evaluation aggregate per algorithm if analysis include ML is set to True
-        if 'aggregate_per_algorithm' in self.evaluation_params and self.analysis_include_evaluation:
-            self.analysis_include_evaluation_aggregate_algo = raw_config["analysis"]["evaluation"]["aggregate_per_algorithm"]
+        if self.evaluation_params.aggregate_per_algorithm and self.analysis_include_evaluation:
+            self.analysis_include_evaluation_aggregate_algo = raw_config.analysis.evaluation.aggregate_per_algorithm
         else:
             self.analysis_include_evaluation_aggregate_algo = False
 
         # Only run Evaluation per algorithm if ML per algorithm is set to True
         if not self.analysis_include_ml_aggregate_algo:
             self.analysis_include_evaluation_aggregate_algo = False
+
+    def process_config(self, raw_config: RawConfig):
+        # Set up a few top-level config variables
+        self.out_dir = raw_config.reconstruction_settings.locations.reconstruction_dir
+
+        if raw_config.container_framework == ContainerFramework.dsub:
+            warnings.warn("'dsub' framework integration is experimental and may not be fully supported.")
+        self.container_framework = raw_config.container_framework
+
+        # Unpack settings for running in singularity mode. Needed when running PRM containers if already in a container.
+        if raw_config.unpack_singularity and self.container_framework != "singularity":
+            warnings.warn("unpack_singularity is set to True, but the container framework is not singularity. This setting will have no effect.")
+        self.unpack_singularity = raw_config.unpack_singularity
+
+        # Grab registry from the config, and if none is provided default to docker
+        if raw_config.container_registry and raw_config.container_registry.base_url != "" and raw_config.container_registry.owner != "":
+            self.container_prefix = raw_config.container_registry.base_url + "/" + raw_config.container_registry.owner
+
+        self.process_datasets(raw_config)
+        self.process_algorithms(raw_config)
+        self.process_analysis(raw_config)
