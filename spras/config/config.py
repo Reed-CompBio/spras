@@ -43,10 +43,10 @@ def init_from_file(filepath):
     try:
         with open(filepath, 'r') as yaml_file:
             config_dict = yaml.safe_load(yaml_file)
-    except FileNotFoundError:
-        raise RuntimeError(f"Error: The specified config '{filepath}' could not be found.")
+    except FileNotFoundError as e:
+        raise RuntimeError(f"Error: The specified config '{filepath}' could not be found.") from e
     except yaml.YAMLError as e:
-        raise RuntimeError(f"Error: Failed to parse config '{filepath}': {e}")
+        raise RuntimeError(f"Error: Failed to parse config '{filepath}'") from e
 
     # And finally, initialize
     config = Config(config_dict)

@@ -25,7 +25,6 @@ def get_test_config():
         "datasets": [{"label": "alg1"}, {"label": "alg2"}],
         "gold_standards": [{"label": "gs1", "dataset_labels": []}],
         "algorithms": [
-            {"params": ["param2", "param2"]},
             {
                 "name": "strings",
                 "params": {

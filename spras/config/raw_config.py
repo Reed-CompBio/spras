@@ -25,8 +25,8 @@ class ContainerRegistry(BaseModel):
     model_config = ConfigDict(extra='forbid')
 
 class AlgorithmParams(BaseModel):
-    include: bool = Field(default=False)
-    directed: Optional[bool]
+    include: bool = False
+    directed: Optional[bool] = None
 
     # TODO: use array of runs instead
     model_config = ConfigDict(extra='allow')
@@ -66,8 +66,8 @@ class ReconstructionSettings(BaseModel):
 
 class RawConfig(BaseModel):
     # TODO: move these container values to a nested container key
-    container_framework: ContainerFramework = Field(default=ContainerFramework.docker)
-    unpack_singularity: bool = Field(default=False)
+    container_framework: ContainerFramework = ContainerFramework.docker
+    unpack_singularity: bool = False
     container_registry: ContainerRegistry
 
     hash_length: int = Field(
@@ -76,8 +76,8 @@ class RawConfig(BaseModel):
 
     algorithms: list[Algorithm]
     datasets: list[Dataset]
-    gold_standards: list[GoldStandard] = Field(default=[])
-    analysis: Optional[Analysis]
+    gold_standards: list[GoldStandard] = []
+    analysis: Optional[Analysis] = None
 
     reconstruction_settings: ReconstructionSettings
 

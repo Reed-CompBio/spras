@@ -27,10 +27,10 @@ class MlMetric(str, Enum):
 class MlAnalysis(BaseModel):
     include: bool
     aggregate_per_algorithm: bool
-    components: int
-    labels: bool
-    linkage: MlLinkage
-    metric: MlMetric
+    components: int = 2
+    labels: bool = True
+    linkage: MlLinkage = MlLinkage.ward
+    metric: MlMetric = MlMetric.euclidean
 
 class EvaluationAnalysis(BaseModel):
     include: bool
@@ -38,8 +38,8 @@ class EvaluationAnalysis(BaseModel):
 
 
 class Analysis(BaseModel):
-    summary: Optional[SummaryAnalysis]
-    graphspace: Optional[GraphspaceAnalysis]
-    cytoscape: Optional[CytoscapeAnalysis]
-    ml: Optional[MlAnalysis]
-    evaluation: Optional[EvaluationAnalysis]
+    summary: Optional[SummaryAnalysis] = None
+    graphspace: Optional[GraphspaceAnalysis] = None
+    cytoscape: Optional[CytoscapeAnalysis] = None
+    ml: Optional[MlAnalysis] = None
+    evaluation: Optional[EvaluationAnalysis] = None
