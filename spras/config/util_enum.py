@@ -1,6 +1,7 @@
 from enum import Enum
 from typing import Any
 
+
 # https://stackoverflow.com/a/76883868/7589775
 class CaseInsensitiveEnum(str, Enum):
     @classmethod

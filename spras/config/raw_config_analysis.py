@@ -1,6 +1,6 @@
-from spras.config.util_enum import CaseInsensitiveEnum
-
 from pydantic import BaseModel
+
+from spras.config.util_enum import CaseInsensitiveEnum
 
 
 class SummaryAnalysis(BaseModel):

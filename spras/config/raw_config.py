@@ -3,12 +3,12 @@ Contains the raw pydantic schema for the configuration file.
 """
 
 import re
-from spras.config.util_enum import CaseInsensitiveEnum
 from typing import Annotated, Optional
 
 from pydantic import AfterValidator, BaseModel, ConfigDict, Field
 
 from spras.config.raw_config_analysis import Analysis
+from spras.config.util_enum import CaseInsensitiveEnum
 
 # The default length of the truncated hash used to identify parameter combinations
 DEFAULT_HASH_LENGTH = 7

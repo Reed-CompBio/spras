@@ -130,7 +130,7 @@ class Config:
             if label in self.datasets:
                 raise ValueError(f"Datasets must have unique labels, but the label {label} appears at least twice.")
             self.datasets[label] = dict(dataset)
-        
+
         # parse gold standard information
         self.gold_standards = {gold_standard.label: dict(gold_standard) for gold_standard in raw_config.gold_standards}
 
