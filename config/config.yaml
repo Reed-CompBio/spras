@@ -63,11 +63,6 @@ algorithms:
   - name: "omicsintegrator2"
     params:
       include: true
-      runs:
-        - b: 4
-          g: 0
-        - b: 2
-          g: 3
       run1:
         b: 4
         g: 0
@@ -148,7 +143,6 @@ reconstruction_settings:
     #place the save path here
     # TODO move to global
     reconstruction_dir: "output"
-
 
 analysis:
   # Create one summary per pathway file and a single summary table for all pathways for each dataset

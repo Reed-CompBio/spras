@@ -3,8 +3,9 @@ Contains the raw pydantic schema for the configuration file.
 """
 
 from enum import Enum
-from pydantic import BaseModel, ConfigDict, Field
 from typing import Optional
+
+from pydantic import BaseModel, ConfigDict, Field
 
 from spras.config.raw_config_analysis import Analysis
 

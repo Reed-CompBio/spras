@@ -23,8 +23,8 @@ from typing import Any
 import numpy as np
 import yaml
 
-from spras.util import NpHashEncoder, hash_params_sha1_base32
 from spras.config.raw_config import ContainerFramework, RawConfig
+from spras.util import NpHashEncoder, hash_params_sha1_base32
 
 config = None
 
@@ -110,7 +110,7 @@ class Config:
         # wrapper error first before passing validation to pydantic.
         if raw_config == {}:
             raise ValueError("Config file cannot be empty. Use --configfile <filename> to set a config file.")
-    
+
     def process_datasets(self, raw_config: RawConfig):
         """
         Parse dataset information
@@ -150,7 +150,7 @@ class Config:
         # dataset_labels = [dataset.get('label', f'dataset{index}') for index, dataset in enumerate(datasets)]
         # Maps from the dataset label to the dataset list index
         # dataset_dict = {dataset.get('label', f'dataset{index}'): index for index, dataset in enumerate(datasets)}
-    
+
     def process_algorithms(self, raw_config: RawConfig):
         """
         Parse algorithm information
@@ -172,7 +172,7 @@ class Config:
                 # Do not parse the rest of the parameters for this algorithm if it is not included
                 continue
 
-            if cur_params.directed != None:
+            if cur_params.directed is not None:
                 warnings.warn("UPDATE: we no longer use the directed key in the config file")
 
             cur_params = cur_params.__pydantic_extra__
