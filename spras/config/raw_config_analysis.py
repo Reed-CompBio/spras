@@ -1,5 +1,4 @@
-from enum import Enum
-from typing import Optional
+from spras.config.util_enum import CaseInsensitiveEnum
 
 from pydantic import BaseModel
 
@@ -13,20 +12,20 @@ class GraphspaceAnalysis(BaseModel):
 class CytoscapeAnalysis(BaseModel):
     include: bool
 
-class MlLinkage(str, Enum):
+class MlLinkage(CaseInsensitiveEnum):
     ward = 'ward'
     complete = 'complete'
     average = 'average'
     single = 'single'
 
-class MlMetric(str, Enum):
+class MlMetric(CaseInsensitiveEnum):
     euclidean = 'euclidean'
     manhattan = 'manhattan'
     cosine = 'cosine'
 
 class MlAnalysis(BaseModel):
     include: bool
-    aggregate_per_algorithm: bool
+    aggregate_per_algorithm: bool = False
     components: int = 2
     labels: bool = True
     linkage: MlLinkage = MlLinkage.ward
@@ -34,12 +33,12 @@ class MlAnalysis(BaseModel):
 
 class EvaluationAnalysis(BaseModel):
     include: bool
-    aggregate_per_algorithm: bool
+    aggregate_per_algorithm: bool = False
 
 
 class Analysis(BaseModel):
-    summary: Optional[SummaryAnalysis] = None
-    graphspace: Optional[GraphspaceAnalysis] = None
-    cytoscape: Optional[CytoscapeAnalysis] = None
-    ml: Optional[MlAnalysis] = None
-    evaluation: Optional[EvaluationAnalysis] = None
+    summary: SummaryAnalysis = SummaryAnalysis(include=False)
+    graphspace: GraphspaceAnalysis = GraphspaceAnalysis(include=False)
+    cytoscape: CytoscapeAnalysis = CytoscapeAnalysis(include=False)
+    ml: MlAnalysis = MlAnalysis(include=False)
+    evaluation: EvaluationAnalysis = EvaluationAnalysis(include=False)

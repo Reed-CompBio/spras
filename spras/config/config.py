@@ -54,8 +54,12 @@ def init_from_file(filepath):
 
 class Config:
     def __init__(self, raw_config: dict[str, Any]):
+        # Since snakemake provides an empty config, we provide this
+        # wrapper error first before passing validation to pydantic.
+        if raw_config == {}:
+            raise ValueError("Config file cannot be empty. Use --configfile <filename> to set a config file.")
+
         parsed_raw_config = RawConfig.model_validate(raw_config)
-        self.process_config(parsed_raw_config)
 
         # Member vars populated by process_config. Any values that don't have quick initial values are set to None
         # before they are populated for __init__ to show exactly what is being configured.
@@ -106,10 +110,7 @@ class Config:
         # A Boolean specifying whether to run the evaluation per algorithm analysis
         self.analysis_include_evaluation_aggregate_algo = None
 
-        # Since snakemake provides an empty config, we provide this
-        # wrapper error first before passing validation to pydantic.
-        if raw_config == {}:
-            raise ValueError("Config file cannot be empty. Use --configfile <filename> to set a config file.")
+        self.process_config(parsed_raw_config)
 
     def process_datasets(self, raw_config: RawConfig):
         """
@@ -118,7 +119,6 @@ class Config:
         Convert the dataset list into a dict where the label is the key and update the config data structure
         """
         # TODO allow labels to be optional and assign default labels
-        # TODO check for collisions in dataset labels, warn, and make the labels unique
         # Need to work more on input file naming to make less strict assumptions
         # about the filename structure
         # Currently assumes all datasets have a label and the labels are unique
@@ -130,12 +130,7 @@ class Config:
             if label in self.datasets:
                 raise ValueError(f"Datasets must have unique labels, but the label {label} appears at least twice.")
             self.datasets[label] = dict(dataset)
-
-            # Validate dataset labels
-            label_pattern = r'^\w+$'
-            if not bool(re.match(label_pattern, label)):
-                raise ValueError(f"Dataset label '{label}' contains invalid values. Dataset labels can only contain letters, numbers, or underscores.")
-
+        
         # parse gold standard information
         self.gold_standards = {gold_standard.label: dict(gold_standard) for gold_standard in raw_config.gold_standards}
 
@@ -173,7 +168,7 @@ class Config:
                 continue
 
             if cur_params.directed is not None:
-                warnings.warn("UPDATE: we no longer use the directed key in the config file")
+                warnings.warn("UPDATE: we no longer use the directed key in the config file", stacklevel=2)
 
             cur_params = cur_params.__pydantic_extra__
             if not cur_params:
@@ -239,20 +234,10 @@ class Config:
             return
 
         self.analysis_params = raw_config.analysis
-        self.ml_params = self.analysis_params.ml if self.analysis_params.ml else {}
-        self.evaluation_params = self.analysis_params.evaluation if self.analysis_params.evaluation else {}
+        self.ml_params = self.analysis_params.ml
+        self.evaluation_params = self.analysis_params.evaluation
 
-        self.pca_params = {}
-        if self.ml_params.components:
-            self.pca_params["components"] = self.ml_params["components"]
-        if "labels" in self.ml_params:
-            self.pca_params["labels"] = self.ml_params["labels"]
-
-        self.hac_params = {}
-        if "linkage" in self.ml_params:
-            self.hac_params["linkage"] = self.ml_params["linkage"]
-        if "metric" in self.ml_params:
-            self.hac_params["metric"] = self.ml_params ["metric"]
+        self.pca_params = self.ml_params
 
         self.analysis_include_summary = raw_config.analysis.summary.include
         self.analysis_include_graphspace = raw_config.analysis.graphspace.include
@@ -262,7 +247,7 @@ class Config:
 
         # Only run ML aggregate per algorithm if analysis include ML is set to True
         if self.ml_params.aggregate_per_algorithm and self.analysis_include_ml:
-            self.analysis_include_ml_aggregate_algo = raw_config["analysis"]["ml"]["aggregate_per_algorithm"]
+            self.analysis_include_ml_aggregate_algo = raw_config.analysis.ml.aggregate_per_algorithm
         else:
             self.analysis_include_ml_aggregate_algo = False
 
@@ -290,12 +275,12 @@ class Config:
         self.out_dir = raw_config.reconstruction_settings.locations.reconstruction_dir
 
         if raw_config.container_framework == ContainerFramework.dsub:
-            warnings.warn("'dsub' framework integration is experimental and may not be fully supported.")
+            warnings.warn("'dsub' framework integration is experimental and may not be fully supported.", stacklevel=2)
         self.container_framework = raw_config.container_framework
 
         # Unpack settings for running in singularity mode. Needed when running PRM containers if already in a container.
         if raw_config.unpack_singularity and self.container_framework != "singularity":
-            warnings.warn("unpack_singularity is set to True, but the container framework is not singularity. This setting will have no effect.")
+            warnings.warn("unpack_singularity is set to True, but the container framework is not singularity. This setting will have no effect.", stacklevel=2)
         self.unpack_singularity = raw_config.unpack_singularity
 
         # Grab registry from the config, and if none is provided default to docker

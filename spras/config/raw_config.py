@@ -2,17 +2,26 @@
 Contains the raw pydantic schema for the configuration file.
 """
 
-from enum import Enum
-from typing import Optional
+import re
+from spras.config.util_enum import CaseInsensitiveEnum
+from typing import Annotated, Optional
 
-from pydantic import BaseModel, ConfigDict, Field
+from pydantic import AfterValidator, BaseModel, ConfigDict, Field
 
 from spras.config.raw_config_analysis import Analysis
 
 # The default length of the truncated hash used to identify parameter combinations
 DEFAULT_HASH_LENGTH = 7
 
-class ContainerFramework(str, Enum):
+def label_validator(name: str):
+    label_pattern = r'^\w+$'
+    def validate(label: str):
+        if not bool(re.match(label_pattern, label)):
+            raise ValueError(f"{name} label '{label}' contains invalid values. {name} labels can only contain letters, numbers, or underscores.")
+        return label
+    return validate
+
+class ContainerFramework(CaseInsensitiveEnum):
     docker = 'docker'
     # TODO: add apptainer variant once #260 gets merged
     singularity = 'singularity'
@@ -26,7 +35,7 @@ class ContainerRegistry(BaseModel):
 
 class AlgorithmParams(BaseModel):
     include: bool = False
-    directed: Optional[bool] = None
+    directed: Annotated[Optional[bool], Field(deprecated=True)] = None
 
     # TODO: use array of runs instead
     model_config = ConfigDict(extra='allow')
@@ -38,7 +47,7 @@ class Algorithm(BaseModel):
     model_config = ConfigDict(extra='forbid')
 
 class Dataset(BaseModel):
-    label: str
+    label: Annotated[str, AfterValidator(label_validator("Dataset"))]
     node_files: list[str]
     edge_files: list[str]
     other_files: list[str]
@@ -47,7 +56,7 @@ class Dataset(BaseModel):
     model_config = ConfigDict(extra='forbid')
 
 class GoldStandard(BaseModel):
-    label: str
+    label: Annotated[str, AfterValidator(label_validator("Gold Standard"))]
     node_files: list[str]
     data_dir: str
     dataset_labels: list[str]
