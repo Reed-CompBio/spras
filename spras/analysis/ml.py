@@ -115,7 +115,7 @@ def create_palette(column_names):
     label_color_map = {label: color for label, color in zip(unique_column_names, custom_palette, strict=True)}
     return label_color_map
 
-def pca(dataframe: pd.DataFrame, output_png: str, output_var: str, output_coord: str, components: int = 2, labels: bool = True, kernel_density: bool = False, kernel_density_parameters:dict = {}, remove_empty_pathways: bool = False):
+def pca(dataframe: pd.DataFrame, output_png: str, output_var: str, output_coord: str, output_kde: str = None, components: int = 2, labels: bool = True, kernel_density: bool = False, kernel_density_parameters:dict = {}, remove_empty_pathways: bool = False):
     """
     Performs PCA on the data and creates a scatterplot of the top two principal components.
     It saves the plot, the variance explained by each component, and the
@@ -127,10 +127,17 @@ def pca(dataframe: pd.DataFrame, output_png: str, output_var: str, output_coord:
     @param components: the number of principal components to calculate (Default is 2)
     @param labels: determines if labels will be included in the scatterplot (Default is True)
     """
-    validate_df(dataframe)
     df = dataframe.reset_index(drop=True)
-    columns = dataframe.columns
+
+    # remove empty pathways from dataframe
+    if remove_empty_pathways:
+        df = df.loc[:, df.any(axis=0)] # return True for columns that have at least one 1
+
+    validate_df(df)
+
+    columns = df.columns
     column_names = [element.split('-')[-3] for element in columns]  # assume algorithm names do not contain '-'
+   
     df = df.transpose()  # based on the algorithms rather than the edges
     X = df.values
 
@@ -143,16 +150,12 @@ def pca(dataframe: pd.DataFrame, output_png: str, output_var: str, output_coord:
     if not isinstance(labels, bool):
         raise ValueError(f"labels={labels} must be True or False")
 
-    # TODO: decide how to scale the data
     # center binary data by subtracting the column-wise mean
     # allows PCA to focus on edge inclusion patterns across runs rather than raw output volume.
     scaler = StandardScaler(with_std=False)
     scaler.fit(X)  # compute mean inclusion rate per edge
     X_scaled = scaler.transform(X)
-
-    # no scaling
-    # X_scaled = X
-
+    
     # choosing the PCA
     pca_instance = PCA(n_components=components)
     pca_instance.fit(X_scaled)
@@ -167,14 +170,19 @@ def pca(dataframe: pd.DataFrame, output_png: str, output_var: str, output_coord:
     plt.figure(figsize=(10, 7))
     
     if kernel_density:
+        # TODO: add the grid search part? or make people do it individually?
         # grid = GridSearchCV(KernelDensity(), params)
 
-        kde_model = KernelDensity(kernel='gaussian', bandwidth=0.5) # Note that the normalization of the density output is correct only for the Euclidean distance metric.
+        kde_model = KernelDensity(kernel='gaussian', bandwidth=0.5, metric="euclidean") # Note that the normalization of the density output is correct only for the Euclidean distance metric.
         kde_model.fit(X_pca)
 
         # Create a mesh grid over PCA space
-        xmin, xmax = X_pca[:, 0].min(), X_pca[:, 0].max()
-        ymin, ymax = X_pca[:, 1].min(), X_pca[:, 1].max()
+        padding_x = 0.05 * (X_pca[:, 0].max() - X_pca[:, 0].min())
+        padding_y = 0.05 * (X_pca[:, 1].max() - X_pca[:, 1].min())
+        xmin = X_pca[:, 0].min() - padding_x
+        xmax = X_pca[:, 0].max() + padding_x
+        ymin = X_pca[:, 1].min() - padding_y
+        ymax = X_pca[:, 1].max() + padding_y
         xx, yy = np.meshgrid(np.linspace(xmin, xmax, 100), np.linspace(ymin, ymax, 100))
         grid_points = np.vstack([xx.ravel(), yy.ravel()]).T
 
@@ -183,10 +191,16 @@ def pca(dataframe: pd.DataFrame, output_png: str, output_var: str, output_coord:
         log_density = kde_model.score_samples(grid_points)
         z = np.exp(log_density).reshape(xx.shape)
 
-        plt.pcolormesh(xx, yy, z, cmap='Oranges')
+        plt.contourf(xx, yy, z, levels=100, cmap='Reds')
+        # plt.pcolormesh(xx, yy, z, cmap='Reds', shading='auto')
         plt.colorbar(label="Density")
 
-        # sns.kdeplot(x=X_pca[:, 0], y=X_pca[:, 1], fill=True, cmap='Oranges', bw_adjust=0.5)
+        df_kde = pd.DataFrame({
+            "x": grid_points[:, 0],
+            "y": grid_points[:, 1],
+            "density": np.exp(log_density)
+        })
+        df_kde.to_csv(output_kde, index=False)
 
     sns.scatterplot(x=X_pca[:, 0], y=X_pca[:, 1], s=70, hue=column_names, palette=label_color_map)
     plt.scatter(centroid[0], centroid[1], color='red', marker='X', s=100, label='Centroid')
@@ -201,6 +215,10 @@ def pca(dataframe: pd.DataFrame, output_png: str, output_var: str, output_coord:
     coordinates_df.insert(0, 'datapoint_labels', columns.tolist())
     centroid_row = ['centroid'] + centroid.tolist()
     coordinates_df.loc[len(coordinates_df)] = centroid_row
+    if kernel_density:
+        max_row = df_kde.loc[df_kde["density"].idxmax()] #TODO: what if there are > 1 maxes?
+        kde_row = ['kde_peak', max_row["x"], max_row["y"]]
+        coordinates_df.loc[len(coordinates_df)] = kde_row
     coordinates_df.to_csv(output_coord, sep='\t', index=False)
 
 

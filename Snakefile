@@ -25,6 +25,7 @@ algorithm_params = _config.config.algorithm_params
 algorithm_directed = _config.config.algorithm_directed
 pca_params = _config.config.pca_params
 hac_params = _config.config.hac_params
+generate_kde = pca_params["kernel_density"]
 FRAMEWORK = _config.config.container_framework
 print(f"Running {FRAMEWORK} containers")
 
@@ -93,7 +94,9 @@ def make_final_input(wildcards):
         final_input.extend(expand('{out_dir}{sep}{dataset}-ml{sep}hac-horizontal.png',out_dir=out_dir,sep=SEP,dataset=dataset_labels,algorithm_params=algorithms_with_params))
         final_input.extend(expand('{out_dir}{sep}{dataset}-ml{sep}hac-clusters-horizontal.txt',out_dir=out_dir,sep=SEP,dataset=dataset_labels,algorithm_params=algorithms_with_params))
         final_input.extend(expand('{out_dir}{sep}{dataset}-ml{sep}ensemble-pathway.txt',out_dir=out_dir,sep=SEP,dataset=dataset_labels,algorithm_params=algorithms_with_params))
-    
+        if generate_kde:
+            final_input.extend(expand('{out_dir}{sep}{dataset}-ml{sep}pca-kde.txt',out_dir=out_dir,sep=SEP,dataset=dataset_labels,algorithm_params=algorithms_with_params))
+
     if _config.config.analysis_include_ml_aggregate_algo:
         final_input.extend(expand('{out_dir}{sep}{dataset}-ml{sep}{algorithm}-pca.png',out_dir=out_dir,sep=SEP,dataset=dataset_labels,algorithm=algorithms_mult_param_combos))
         final_input.extend(expand('{out_dir}{sep}{dataset}-ml{sep}{algorithm}-pca-variance.txt',out_dir=out_dir,sep=SEP,dataset=dataset_labels,algorithm=algorithms_mult_param_combos))
@@ -103,7 +106,9 @@ def make_final_input(wildcards):
         final_input.extend(expand('{out_dir}{sep}{dataset}-ml{sep}{algorithm}-hac-horizontal.png',out_dir=out_dir,sep=SEP,dataset=dataset_labels,algorithm=algorithms_mult_param_combos))
         final_input.extend(expand('{out_dir}{sep}{dataset}-ml{sep}{algorithm}-hac-clusters-horizontal.txt',out_dir=out_dir,sep=SEP,dataset=dataset_labels,algorithm=algorithms_mult_param_combos))
         final_input.extend(expand('{out_dir}{sep}{dataset}-ml{sep}{algorithm}-ensemble-pathway.txt',out_dir=out_dir,sep=SEP,dataset=dataset_labels,algorithm=algorithms))
-
+        if generate_kde:
+            final_input.extend(expand('{out_dir}{sep}{dataset}-ml{sep}{algorithm}-pca-kde.txt',out_dir=out_dir,sep=SEP,dataset=dataset_labels,algorithm=algorithms_mult_param_combos))
+    
     if _config.config.analysis_include_evaluation:
         final_input.extend(expand('{out_dir}{sep}{dataset_gold_standard_pair}-eval{sep}pr-pca-chosen-pathway.txt',out_dir=out_dir,sep=SEP,dataset_gold_standard_pair=dataset_gold_standard_pairs))
         final_input.extend(expand('{out_dir}{sep}{dataset_gold_standard_pair}-eval{sep}pr-pca-chosen-pathway.png',out_dir=out_dir,sep=SEP,dataset_gold_standard_pair=dataset_gold_standard_pairs))
@@ -314,11 +319,16 @@ rule ml_analysis:
         hac_clusters_vertical = SEP.join([out_dir, '{dataset}-ml', 'hac-clusters-vertical.txt']),
         hac_image_horizontal = SEP.join([out_dir, '{dataset}-ml', 'hac-horizontal.png']),
         hac_clusters_horizontal = SEP.join([out_dir, '{dataset}-ml', 'hac-clusters-horizontal.txt']),
+        pca_kde = SEP.join([out_dir, '{dataset}-ml', 'pca-kde.txt']),
     run: 
         summary_df = ml.summarize_networks(input.pathways)
-        ml.pca(summary_df, output.pca_image, output.pca_variance, output.pca_coordinates, **pca_params)
         ml.hac_vertical(summary_df, output.hac_image_vertical, output.hac_clusters_vertical, **hac_params)
         ml.hac_horizontal(summary_df, output.hac_image_horizontal, output.hac_clusters_horizontal, **hac_params)
+        if generate_kde:
+            ml.pca(summary_df, output.pca_image, output.pca_variance, output.pca_coordinates, output.pca_kde, **pca_params)
+        else: #TODO try to find a different way that doesn't make a dummy file
+            ml.pca(summary_df, output.pca_image, output.pca_variance, output.pca_coordinates, **pca_params)
+            Path(output.pca_kde).touch()
 
 # Ensemble the output pathways for each dataset
 rule ensemble: 
@@ -347,11 +357,16 @@ rule ml_analysis_aggregate_algo:
         hac_clusters_vertical = SEP.join([out_dir, '{dataset}-ml', '{algorithm}-hac-clusters-vertical.txt']),
         hac_image_horizontal = SEP.join([out_dir, '{dataset}-ml', '{algorithm}-hac-horizontal.png']),
         hac_clusters_horizontal = SEP.join([out_dir, '{dataset}-ml', '{algorithm}-hac-clusters-horizontal.txt']),
+        pca_kde = SEP.join([out_dir, '{dataset}-ml', '{algorithm}-pca-kde.txt']),
     run:
         summary_df = ml.summarize_networks(input.pathways)
-        ml.pca(summary_df, output.pca_image, output.pca_variance, output.pca_coordinates, **pca_params)
         ml.hac_vertical(summary_df, output.hac_image_vertical, output.hac_clusters_vertical, **hac_params)
         ml.hac_horizontal(summary_df, output.hac_image_horizontal, output.hac_clusters_horizontal, **hac_params)
+        if generate_kde:
+            ml.pca(summary_df, output.pca_image, output.pca_variance, output.pca_coordinates, output.pca_kde, **pca_params)
+        else: #TODO try to find a different way that doesn't make a dummy file
+            ml.pca(summary_df, output.pca_image, output.pca_variance, output.pca_coordinates, **pca_params)
+            Path(output.pca_kde).touch()
 
 # Ensemble the output pathways for each dataset per algorithm
 rule ensemble_per_algo:
