@@ -16,18 +16,18 @@ import copy as copy
 import itertools as it
 import os
 import re
+import warnings
 from collections.abc import Iterable
 
 import numpy as np
 import yaml
 
 from spras.util import NpHashEncoder, hash_params_sha1_base32
-
-# The default length of the truncated hash used to identify parameter combinations
-DEFAULT_HASH_LENGTH = 7
-DEFAULT_CONTAINER_PREFIX = "docker.io/reedcompbio"
+from spras.config.raw_config import ContainerFramework, RawConfig, DEFAULT_HASH_LENGTH
 
 config = None
+
+DEFAULT_CONTAINER_PREFIX = "docker.io/reedcompbio"
 
 # This will get called in the Snakefile, instantiating the singleton with the raw config
 def init_global(config_dict):
@@ -43,11 +43,9 @@ def init_from_file(filepath):
         with open(filepath, 'r') as yaml_file:
             config_dict = yaml.safe_load(yaml_file)
     except FileNotFoundError:
-        print(f"Error: The specified config '{filepath}' could not be found.")
-        return False
+        raise RuntimeError(f"Error: The specified config '{filepath}' could not be found.")
     except yaml.YAMLError as e:
-        print(f"Error: Failed to parse config '{filepath}': {e}")
-        return False
+        raise RuntimeError(f"Error: Failed to parse config '{filepath}': {e}")
 
     # And finally, initialize
     config = Config(config_dict)
@@ -55,18 +53,15 @@ def init_from_file(filepath):
 
 class Config:
     def __init__(self, raw_config):
-        # Since process_config winds up modifying the raw_config passed to it as a side effect,
-        # we'll make a deep copy here to guarantee we don't break anything. This preserves the
-        # config as it's given to the Snakefile by Snakemake
+        # Member vars populated by process_config. Any values that don't have sensible initial values are set to None
+        # before they are populated for __init__ to show exactly what is being configured.
 
-        # Member vars populated by process_config. Set to None before they are populated so that our
-        # __init__ makes clear exactly what is being configured.
         # Directory used for storing output
         self.out_dir = None
         # Container framework used by PRMs. Valid options are "docker", "dsub", and "singularity"
         self.container_framework = None
         # The container prefix (host and organization) to use for images. Default is "docker.io/reedcompbio"
-        self.container_prefix = DEFAULT_CONTAINER_PREFIX
+        self.container_prefix: str = DEFAULT_CONTAINER_PREFIX
         # A Boolean specifying whether to unpack singularity containers. Default is False
         self.unpack_singularity = False
         # A dictionary to store configured datasets against which SPRAS will be run
@@ -74,7 +69,7 @@ class Config:
         # A dictionary to store configured gold standard data against output of SPRAS runs
         self.gold_standards = None
         # The hash length SPRAS will use to identify parameter combinations. Default is 7
-        self.hash_length = DEFAULT_HASH_LENGTH
+        self.hash_length: int = DEFAULT_HASH_LENGTH
         # The list of algorithms to run in the workflow. Each is a dict with 'name' as an expected key.
         self.algorithms = None
         # A nested dict mapping algorithm names to dicts that map parameter hashes to parameter combinations.
@@ -107,44 +102,24 @@ class Config:
         # A Boolean specifying whether to run the evaluation per algorithm analysis
         self.analysis_include_evaluation_aggregate_algo = None
 
-        _raw_config = copy.deepcopy(raw_config)
-        self.process_config(_raw_config)
-
-    def process_config(self, raw_config):
+        # Since snakemake provides an empty config, we provide this
+        # wrapper error first before passing validation to pydantic.
         if raw_config == {}:
             raise ValueError("Config file cannot be empty. Use --configfile <filename> to set a config file.")
 
-        # Set up a few top-level config variables
-        self.out_dir = raw_config["reconstruction_settings"]["locations"]["reconstruction_dir"]
-
-        # We allow the container framework not to be defined in the config. In the case it isn't, default to docker.
-        # However, if we get a bad value, we raise an exception.
-        if "container_framework" in raw_config:
-            container_framework = raw_config["container_framework"].lower()
-            if container_framework not in ("docker", "singularity", "dsub"):
-                msg = "SPRAS was configured to run with an unknown container framework: '" + raw_config["container_framework"] + "'. Accepted values are 'docker', 'singularity' or 'dsub'."
-                raise ValueError(msg)
-            if container_framework == "dsub":
-                print("Warning: 'dsub' framework integration is experimental and may not be fully supported.")
-            self.container_framework = container_framework
-        else:
-            self.container_framework = "docker"
-
-        # Unpack settings for running in singularity mode. Needed when running PRM containers if already in a container.
-        if "unpack_singularity" in raw_config:
-            # The value in the config is a string, and we need to convert it to a bool.
-            unpack_singularity = raw_config["unpack_singularity"]
-            if unpack_singularity and self.container_framework != "singularity":
-                print("Warning: unpack_singularity is set to True, but the container framework is not singularity. This setting will have no effect.")
-            self.unpack_singularity = unpack_singularity
-
-        # Grab registry from the config, and if none is provided default to docker
-        if "container_registry" in raw_config and raw_config["container_registry"]["base_url"] != "" and raw_config["container_registry"]["owner"] != "":
-            self.container_prefix = raw_config["container_registry"]["base_url"] + "/" + raw_config["container_registry"]["owner"]
-
-        # Parse dataset information
-        # Datasets is initially a list, where each list entry has a dataset label and lists of input files
-        # Convert the dataset list into a dict where the label is the key and update the config data structure
+        # Since process_config winds up modifying the raw_config passed to it as a side effect,
+        # we'll make a deep copy here to guarantee we don't break anything. This preserves the
+        # config as it's given to the Snakefile by Snakemake
+        _raw_config = copy.deepcopy(raw_config)
+        parsed_raw_config = RawConfig.model_validate_json(_raw_config)
+        self.process_config(parsed_raw_config)
+    
+    def process_datasets(self, raw_config: RawConfig):
+        """
+        Parse dataset information
+        Datasets is initially a list, where each list entry has a dataset label and lists of input files
+        Convert the dataset list into a dict where the label is the key and update the config data structure
+        """
         # TODO allow labels to be optional and assign default labels
         # TODO check for collisions in dataset labels, warn, and make the labels unique
         # Need to work more on input file naming to make less strict assumptions
@@ -152,24 +127,20 @@ class Config:
         # Currently assumes all datasets have a label and the labels are unique
         # When Snakemake parses the config file it loads the datasets as OrderedDicts not dicts
         # Convert to dicts to simplify the yaml logging
-        self.datasets = {dataset["label"]: dict(dataset) for dataset in raw_config["datasets"]}
+        self.datasets = {}
+        for dataset in raw_config.datasets:
+            label = dataset.label
+            if label in self.datasets:
+                raise ValueError(f"Datasets must have unique labels, but the label {label} appears at least twice.")
+            self.datasets[label] = dict(dataset)
 
-        for key in self.datasets:
-            pattern = r'^\w+$'
-            if not bool(re.match(pattern, key)):
-                raise ValueError(f"Dataset label \'{key}\' contains invalid values. Dataset labels can only contain letters, numbers, or underscores.")
+            # Validate dataset labels
+            label_pattern = r'^\w+$'
+            if not bool(re.match(label_pattern, label)):
+                raise ValueError(f"Dataset label '{label}' contains invalid values. Dataset labels can only contain letters, numbers, or underscores.")
 
         # parse gold standard information
-        try:
-            self.gold_standards = {gold_standard["label"]: dict(gold_standard) for gold_standard in raw_config["gold_standards"]}
-        except:
-            self.gold_standards = {}
-
-        # check that gold_standard labels are formatted correctly
-        for key in self.gold_standards:
-            pattern = r'^\w+$'
-            if not bool(re.match(pattern, key)):
-                raise ValueError(f"Gold standard label \'{key}\' contains invalid values. Gold standard labels can only contain letters, numbers, or underscores.")
+        self.gold_standards = {gold_standard.label: dict(gold_standard) for gold_standard in raw_config.gold_standards}
 
         # check that all the dataset labels in the gold standards are existing datasets labels
         dataset_labels = set(self.datasets.keys())
@@ -182,33 +153,30 @@ class Config:
         # dataset_labels = [dataset.get('label', f'dataset{index}') for index, dataset in enumerate(datasets)]
         # Maps from the dataset label to the dataset list index
         # dataset_dict = {dataset.get('label', f'dataset{index}'): index for index, dataset in enumerate(datasets)}
-
-        # Override the default parameter hash length if specified in the config file
-        if "hash_length" in raw_config and raw_config["hash_length"] != "":
-            self.hash_length = int(raw_config["hash_length"])
-
+    
+    def process_algorithms(self, raw_config: RawConfig):
+        """
+        Parse algorithm information
+        Each algorithm's parameters are provided as a list of dictionaries
+        Defaults are handled in the Python function or class that wraps
+        running that algorithm
+        Keys in the parameter dictionary are strings
+        """
         prior_params_hashes = set()
-
-        # Parse algorithm information
-        # Each algorithm's parameters are provided as a list of dictionaries
-        # Defaults are handled in the Python function or class that wraps
-        # running that algorithm
-        # Keys in the parameter dictionary are strings
         self.algorithm_params = dict()
         self.algorithm_directed = dict()
-        self.algorithms = raw_config["algorithms"]
+        self.algorithms = raw_config.algorithms
         for alg in self.algorithms:
-            cur_params = alg["params"]
-            if "include" in cur_params and cur_params.pop("include"):
+            cur_params = alg.params
+            if cur_params.include:
                 # This dict maps from parameter combinations hashes to parameter combination dictionaries
-                self.algorithm_params[alg["name"]] = dict()
+                self.algorithm_params[alg.name] = dict()
             else:
                 # Do not parse the rest of the parameters for this algorithm if it is not included
                 continue
 
-            if "directed" in cur_params:
-                print("UPDATE: we no longer use the directed key in the config file")
-                cur_params.pop("directed")
+            if cur_params.directed != None:
+                warnings.warn("UPDATE: we no longer use the directed key in the config file")
 
             # The algorithm has no named arguments so create a default placeholder
             if len(cur_params) == 0:
@@ -264,6 +232,39 @@ class Config:
                         raise ValueError(f'Parameter hash collision detected. Increase the hash_length in the config file '
                                         f'(current length {self.hash_length}).')
                     self.algorithm_params[alg["name"]][params_hash] = run_dict
+
+    def process_config(self, raw_config: RawConfig):
+        # Set up a few top-level config variables
+        self.out_dir = raw_config.reconstruction_settings.locations.reconstruction_dir
+
+        # We allow the container framework not to be defined in the config. In the case it isn't, default to docker.
+        # However, if we get a bad value, we raise an exception.
+        if raw_config.container_framework != None:
+            container_framework = raw_config.container_framework
+            if container_framework == ContainerFramework.dsub:
+                warnings.warn("'dsub' framework integration is experimental and may not be fully supported.")
+            self.container_framework = container_framework
+        else:
+            self.container_framework = "docker"
+
+        # Unpack settings for running in singularity mode. Needed when running PRM containers if already in a container.
+        if raw_config.unpack_singularity:
+            # The value in the config is a string, and we need to convert it to a bool.
+            unpack_singularity = raw_config["unpack_singularity"]
+            if unpack_singularity and self.container_framework != "singularity":
+                warnings.warn("unpack_singularity is set to True, but the container framework is not singularity. This setting will have no effect.")
+            self.unpack_singularity = unpack_singularity
+
+        # Grab registry from the config, and if none is provided default to docker
+        if raw_config.container_registry and raw_config["container_registry"]["base_url"] != "" and raw_config["container_registry"]["owner"] != "":
+            self.container_prefix = raw_config["container_registry"]["base_url"] + "/" + raw_config["container_registry"]["owner"]
+
+        # Override the default parameter hash length if specified in the config file
+        if "hash_length" in raw_config and raw_config["hash_length"] != "":
+            self.hash_length = int(raw_config["hash_length"])
+
+        self.process_datasets(raw_config)
+        self.process_algorithms(raw_config)
 
         self.analysis_params = raw_config["analysis"] if "analysis" in raw_config else {}
         self.ml_params = self.analysis_params["ml"] if "ml" in self.analysis_params else {}

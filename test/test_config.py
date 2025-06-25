@@ -3,7 +3,7 @@ import pickle
 import numpy as np
 import pytest
 
-import spras.config as config
+import spras.config.config as config
 
 
 # Set up a dummy config for testing. For now, only include things that MUST exist in the dict

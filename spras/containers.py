@@ -7,7 +7,7 @@ from typing import Any, Dict, List, Optional, Tuple, Union
 
 import docker
 
-import spras.config as config
+import spras.config.config as config
 from spras.logging import indent
 from spras.util import hash_filename
 
