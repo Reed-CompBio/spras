@@ -362,7 +362,7 @@ def jaccard_similarity_eval(summary_df: pd.DataFrame, output_file: str, output_p
     algorithms = summary_df.columns
     jaccard_matrix = pd.DataFrame(np.identity(len(algorithms)), index=algorithms, columns=algorithms)
     for i, alg1 in enumerate(algorithms):
-        for _j, alg2 in enumerate(algorithms[i+1:], start=i+1):
+        for alg2 in algorithms[i+1:]:
             sim_value = jaccard_score(summary_df[alg1], summary_df[alg2])
             jaccard_matrix.loc[alg1, alg2] = sim_value
             jaccard_matrix.loc[alg2, alg1] = sim_value
