@@ -30,9 +30,7 @@ class OmicsIntegrator2(PRM):
         @param data: dataset
         @param filename_map: a dict mapping file types in the required_inputs to the filename for that type
         """
-        for input_type in OmicsIntegrator2.required_inputs:
-            if input_type not in filename_map:
-                raise ValueError(f"{input_type} filename is missing")
+        OmicsIntegrator2.validate_required_inputs(filename_map)
 
         if data.contains_node_columns('prize'):
             # NODEID is always included in the node table

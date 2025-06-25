@@ -33,10 +33,7 @@ class MinCostFlow (PRM):
         @param filename_map: a dict mapping file types in the required_inputs to the filename for that type
         """
 
-        # ensures the required input are within the filename_map
-        for input_type in MinCostFlow.required_inputs:
-            if input_type not in filename_map:
-                raise ValueError(f"{input_type} filename is missing")
+        MinCostFlow.validate_required_inputs(filename_map)
 
         # will take the sources and write them to files, and repeats with targets
         for node_type in ['sources', 'targets']:
