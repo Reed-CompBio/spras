@@ -6,7 +6,7 @@ to take the value of the actual config provided by Snakemake. After that point, 
 module that imports this module can access a config option by checking the object's
 value. For example
 
-import spras.config as config
+import spras.config.config as config
 container_framework = config.config.container_framework
 
 will grab the top level registry configuration option as it appears in the config file
