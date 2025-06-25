@@ -37,7 +37,7 @@ class MinCostFlow (PRM):
 
         # will take the sources and write them to files, and repeats with targets
         for node_type in ['sources', 'targets']:
-            nodes = data.request_node_columns([node_type])
+            nodes = data.get_node_columns([node_type])
             if nodes is None:
                 raise ValueError(f'No {node_type} found in the node files')
             # take nodes one column data frame, call sources/ target series
