@@ -13,13 +13,9 @@ algorithms:
         k:
           - 10
           - 20
-<<<<<<< param-tuning-ensembling-2.0
           - 70
   -
     name: omicsintegrator1
-=======
-  - name: omicsintegrator1
->>>>>>> main
     params:
       include: true
       run1:
@@ -61,7 +57,6 @@ algorithms:
           - 3
         rand_restarts:
           - 10
-<<<<<<< param-tuning-ensembling-2.0
       run2:
         local_search:
           - 'No'
@@ -74,9 +69,6 @@ algorithms:
       include: true
   -
     name: domino
-=======
-  - name: domino
->>>>>>> main
     params:
       include: true
       run1:
