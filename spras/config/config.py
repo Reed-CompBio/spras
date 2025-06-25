@@ -171,7 +171,7 @@ class Config:
                 warnings.warn("UPDATE: we no longer use the directed key in the config file", stacklevel=2)
 
             cur_params = cur_params.__pydantic_extra__
-            if not cur_params:
+            if cur_params is None:
                 raise RuntimeError("An internal error occured: ConfigDict extra should be set on AlgorithmParams.")
 
             # The algorithm has no named arguments so create a default placeholder

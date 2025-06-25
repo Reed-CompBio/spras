@@ -35,7 +35,7 @@ class ContainerRegistry(BaseModel):
 
 class AlgorithmParams(BaseModel):
     include: bool = False
-    directed: Annotated[Optional[bool], Field(deprecated=True)] = None
+    directed: Optional[bool] = None
 
     # TODO: use array of runs instead
     model_config = ConfigDict(extra='allow')
