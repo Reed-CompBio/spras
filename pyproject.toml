@@ -82,6 +82,6 @@ py-modules = ["spras"]
 # packages tells setuptools what the exported package is called (ie allows import spras)
 packages = ["spras", "spras.analysis"]
 
-[tool.pixi.workspace]
+[tool.pixi.project]
 channels = ["conda-forge", "bioconda"]
 platforms = ["linux-64", "osx-arm64", "osx-64", "win-64"]
