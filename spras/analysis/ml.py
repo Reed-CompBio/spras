@@ -217,8 +217,8 @@ def pca(dataframe: pd.DataFrame, output_png: str, output_var: str, output_coord:
     centroid_row = ['centroid'] + centroid.tolist()
     coordinates_df.loc[len(coordinates_df)] = centroid_row
     if kernel_density:
-        max_row = df_kde.loc[df_kde["density"].idxmax()] #TODO: what if there are > 1 maxes?
-        kde_row = ['kde_peak', max_row["x"], max_row["y"]]
+        max_row = df_kde.loc[df_kde["Density"].idxmax()] #TODO: what if there are > 1 maxes?
+        kde_row = ['kde_peak', max_row["X_coordinate"], max_row["Y_coordinate"]]
         coordinates_df.loc[len(coordinates_df)] = kde_row
     coordinates_df.to_csv(output_coord, sep='\t', index=False)
 
