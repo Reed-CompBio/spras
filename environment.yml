@@ -8,6 +8,7 @@ dependencies:
   - matplotlib=3.6
   - networkx=2.8
   - pandas=1.5
+  - pydantic=2.11.7
   - numpy=1.26.4
   - pre-commit=2.20 # Only required for development
   - pytest=8.0 # Only required for development

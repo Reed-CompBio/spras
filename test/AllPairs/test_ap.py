@@ -4,7 +4,7 @@ from pathlib import Path
 
 import pytest
 
-import spras.config as config
+import spras.config.config as config
 from spras.allpairs import AllPairs
 
 # Note that we don't directly use the config in the test, but we need the config
