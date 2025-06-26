@@ -23,7 +23,7 @@ from typing import Any
 import numpy as np
 import yaml
 
-from spras.config.raw_config import ContainerFramework, RawConfig, Analysis
+from spras.config.raw_config import Analysis, ContainerFramework, RawConfig
 from spras.util import NpHashEncoder, hash_params_sha1_base32
 
 config = None
