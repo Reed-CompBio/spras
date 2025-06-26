@@ -14,8 +14,7 @@ algorithms:
           - 10
           - 20
           - 70
-  -
-    name: omicsintegrator1
+  - name: omicsintegrator1
     params:
       include: true
       run1:
@@ -67,8 +66,7 @@ algorithms:
   - name: allpairs
     params:
       include: true
-  -
-    name: domino
+  - name: domino
     params:
       include: true
       run1:
@@ -76,8 +74,7 @@ algorithms:
           - 0.3
         module_threshold:
           - 0.05
-  - 
-    name: mincostflow
+  - name: mincostflow
     params:
       include: true
       run1:
