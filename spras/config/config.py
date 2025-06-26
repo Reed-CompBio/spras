@@ -233,9 +233,10 @@ class Config:
         if not raw_config.analysis:
             return
 
-        self.analysis_params = raw_config.analysis
-        self.ml_params = self.analysis_params.ml
-        self.evaluation_params = self.analysis_params.evaluation
+        # these params are classes - we need to turn them into var dicts
+        self.analysis_params = vars(raw_config.analysis)
+        self.ml_params = vars(self.analysis_params.ml)
+        self.evaluation_params = vars(self.analysis_params.evaluation)
 
         self.pca_params = self.ml_params
 
