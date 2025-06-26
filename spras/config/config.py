@@ -238,7 +238,7 @@ class Config:
         self.evaluation_params = self.analysis_params.evaluation
 
         # self.ml_params is a class, pca_params needs to be a dict.
-        self.pca_params = vars(self.ml_params)
+        self.pca_params = {k: v for k, v in vars(self.ml_params).items if k != 'include'}
 
         self.hac_params = {
             "linkage": self.ml_params.linkage,
