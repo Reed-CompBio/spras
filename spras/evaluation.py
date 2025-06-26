@@ -21,7 +21,6 @@ class Evaluation:
         self.label = None
         self.datasets = None
         self.node_table = None
-        # self.edge_table = None TODO: later iteration
         self.load_files_from_dict(gold_standard_dict)
         return
 

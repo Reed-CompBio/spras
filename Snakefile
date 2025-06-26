@@ -27,7 +27,6 @@ pca_params = _config.config.pca_params
 hac_params = _config.config.hac_params
 generate_kde = pca_params["kernel_density"]
 FRAMEWORK = _config.config.container_framework
-print(f"Running {FRAMEWORK} containers")
 
 # Return the dataset or gold_standard dictionary from the config file given the label
 def get_dataset(_datasets, label):
@@ -94,9 +93,12 @@ def make_final_input(wildcards):
         final_input.extend(expand('{out_dir}{sep}{dataset}-ml{sep}hac-horizontal.png',out_dir=out_dir,sep=SEP,dataset=dataset_labels,algorithm_params=algorithms_with_params))
         final_input.extend(expand('{out_dir}{sep}{dataset}-ml{sep}hac-clusters-horizontal.txt',out_dir=out_dir,sep=SEP,dataset=dataset_labels,algorithm_params=algorithms_with_params))
         final_input.extend(expand('{out_dir}{sep}{dataset}-ml{sep}ensemble-pathway.txt',out_dir=out_dir,sep=SEP,dataset=dataset_labels,algorithm_params=algorithms_with_params))
+        final_input.extend(expand('{out_dir}{sep}{dataset}-ml{sep}jaccard-matrix.txt',out_dir=out_dir,sep=SEP,dataset=dataset_labels,algorithm_params=algorithms_with_params))
+        final_input.extend(expand('{out_dir}{sep}{dataset}-ml{sep}jaccard-heatmap.png',out_dir=out_dir,sep=SEP,dataset=dataset_labels,algorithm_params=algorithms_with_params))
+    
         if generate_kde:
             final_input.extend(expand('{out_dir}{sep}{dataset}-ml{sep}pca-kde.txt',out_dir=out_dir,sep=SEP,dataset=dataset_labels,algorithm_params=algorithms_with_params))
-
+      
     if _config.config.analysis_include_ml_aggregate_algo:
         final_input.extend(expand('{out_dir}{sep}{dataset}-ml{sep}{algorithm}-pca.png',out_dir=out_dir,sep=SEP,dataset=dataset_labels,algorithm=algorithms_mult_param_combos))
         final_input.extend(expand('{out_dir}{sep}{dataset}-ml{sep}{algorithm}-pca-variance.txt',out_dir=out_dir,sep=SEP,dataset=dataset_labels,algorithm=algorithms_mult_param_combos))
@@ -106,6 +108,8 @@ def make_final_input(wildcards):
         final_input.extend(expand('{out_dir}{sep}{dataset}-ml{sep}{algorithm}-hac-horizontal.png',out_dir=out_dir,sep=SEP,dataset=dataset_labels,algorithm=algorithms_mult_param_combos))
         final_input.extend(expand('{out_dir}{sep}{dataset}-ml{sep}{algorithm}-hac-clusters-horizontal.txt',out_dir=out_dir,sep=SEP,dataset=dataset_labels,algorithm=algorithms_mult_param_combos))
         final_input.extend(expand('{out_dir}{sep}{dataset}-ml{sep}{algorithm}-ensemble-pathway.txt',out_dir=out_dir,sep=SEP,dataset=dataset_labels,algorithm=algorithms))
+        final_input.extend(expand('{out_dir}{sep}{dataset}-ml{sep}{algorithm}-jaccard-matrix.txt',out_dir=out_dir,sep=SEP,dataset=dataset_labels,algorithm=algorithms))
+        final_input.extend(expand('{out_dir}{sep}{dataset}-ml{sep}{algorithm}-jaccard-heatmap.png',out_dir=out_dir,sep=SEP,dataset=dataset_labels,algorithm=algorithms))
         if generate_kde:
             final_input.extend(expand('{out_dir}{sep}{dataset}-ml{sep}{algorithm}-pca-kde.txt',out_dir=out_dir,sep=SEP,dataset=dataset_labels,algorithm=algorithms_mult_param_combos))
     
@@ -304,7 +308,7 @@ rule summary_table:
     run:
         # Load the node table from the pickled dataset file
         node_table = Dataset.from_file(input.dataset_file).node_table
-        summary_df = summary.summarize_networks(input.pathways, node_table)
+        summary_df = summary.summarize_networks(input.pathways, node_table, algorithm_params, algorithms_with_params)
         summary_df.to_csv(output.summary_table, sep='\t', index=False)
 
 # Cluster the output pathways for each dataset
@@ -329,6 +333,19 @@ rule ml_analysis:
         else: #TODO try to find a different way that doesn't make a dummy file
             ml.pca(summary_df, output.pca_image, output.pca_variance, output.pca_coordinates, **pca_params)
             Path(output.pca_kde).touch()
+
+# Calculated Jaccard similarity between output pathways for each dataset
+rule jaccard_similarity:
+    input:
+        pathways = expand('{out_dir}{sep}{{dataset}}-{algorithm_params}{sep}pathway.txt',
+                          out_dir=out_dir, sep=SEP, algorithm_params=algorithms_with_params)
+    output:
+        jaccard_similarity_matrix = SEP.join([out_dir, '{dataset}-ml', 'jaccard-matrix.txt']),
+        jaccard_similarity_heatmap = SEP.join([out_dir, '{dataset}-ml', 'jaccard-heatmap.png'])
+    run:
+        summary_df = ml.summarize_networks(input.pathways)
+        ml.jaccard_similarity_eval(summary_df, output.jaccard_similarity_matrix, output.jaccard_similarity_heatmap)
+
 
 # Ensemble the output pathways for each dataset
 rule ensemble: 
@@ -377,6 +394,17 @@ rule ensemble_per_algo:
     run:
         summary_df = ml.summarize_networks(input.pathways)
         ml.ensemble_network(summary_df, output.ensemble_network_file)
+
+# Calculated Jaccard similarity between output pathways for each dataset per algorithm
+rule jaccard_similarity_per_algo:
+    input:
+         pathways = collect_pathways_per_algo
+    output:
+        jaccard_similarity_matrix = SEP.join([out_dir, '{dataset}-ml', '{algorithm}-jaccard-matrix.txt']),
+        jaccard_similarity_heatmap = SEP.join([out_dir, '{dataset}-ml', '{algorithm}-jaccard-heatmap.png'])
+    run:
+        summary_df = ml.summarize_networks(input.pathways)
+        ml.jaccard_similarity_eval(summary_df, output.jaccard_similarity_matrix, output.jaccard_similarity_heatmap)
 
 # Return the gold standard pickle file for a specific gold standard
 def get_gold_standard_pickle_file(wildcards):
