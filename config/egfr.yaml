@@ -79,12 +79,10 @@ analysis:
   graphspace:
     include: false
   cytoscape:
-    include: false
+    include: true
   summary:
     include: true
   ml:
-    include: true
-    kernel_density: true
-    aggregate_per_algorithm: true
+    include: false
   evaluation:
     include: false

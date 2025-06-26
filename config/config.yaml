@@ -139,53 +139,55 @@ reconstruction_settings:
 
   #set where everything is saved
   locations:
-    reconstruction_dir: "output"
+    #place the save path here
+    # TODO move to global
+    reconstruction_dir: "output/config"
 
   run: true
 
 analysis:
-      # Create one summary per pathway file and a single summary table for all pathways for each dataset
-      summary:
-        include: true
-      # Create output files for each pathway that can be visualized with GraphSpace
-      graphspace:
-        include: true
-      # Create Cytoscape session file with all pathway graphs for each dataset
-      cytoscape:
-        include: true
-      # Machine learning analysis (e.g. clustering) of the pathway output files for each dataset
-      ml:
-        # ml analysis per dataset
-        include: true
-        # adds ml analysis per algorithm output
-        # only runs for algorithms with multiple parameter combinations chosen
-        aggregate_per_algorithm: true
-        # specify how many principal components to calculate
-        components: 2
-        # boolean to show the labels on the pca graph
-        labels: true
-        # 'ward', 'complete', 'average', 'single'
-        # if linkage: ward, must use metric: euclidean
-        linkage: 'ward'
-        # 'euclidean', 'manhattan', 'cosine'
-        metric: 'euclidean'
-        # adds kernel density to pca plots
-        # default metric used is euclidean for kernel_density
-        kernel_density: true
-        # # hyperparameter to control the smoothness of estimated kernel density
-        # # float, 'scott', 'silverman'
-        # # can be a single value or list
-        # band_width: np.logspace(-1, 1, 20)
-        # # hyperparameter kernel to use for kernel_density
-        # # 'gaussian', 'tophat', 'epanechnikov', 'exponential', 'linear', 'cosine'
-        # # can be a single value or list
-        # kernel: 'gaussian'
-        # removes empty pathways from consideration in ml analysis (or just pca only?)
-        remove_empty_pathways: true
-      evaluation:
-        # evaluation per dataset-goldstandard pair
-        # evaluation will not run unless ml include is set to true
-        include: true
-        # adds evaluation per algorithm per dataset-goldstandard pair
-        # evaluation per algortihm will not run unless ml include and ml aggregate_per_algorithm are set to true
-        aggregate_per_algorithm: true
+    # Create one summary per pathway file and a single summary table for all pathways for each dataset
+    summary:
+      include: true
+    # Create output files for each pathway that can be visualized with GraphSpace
+    graphspace:
+      include: true
+    # Create Cytoscape session file with all pathway graphs for each dataset
+    cytoscape:
+      include: true
+    # Machine learning analysis (e.g. clustering) of the pathway output files for each dataset
+    ml:
+      # ml analysis per dataset
+      include: true
+      # adds ml analysis per algorithm output
+      # only runs for algorithms with multiple parameter combinations chosen
+      aggregate_per_algorithm: true
+      # specify how many principal components to calculate
+      components: 2
+      # boolean to show the labels on the pca graph
+      labels: true
+      # 'ward', 'complete', 'average', 'single'
+      # if linkage: ward, must use metric: euclidean
+      linkage: 'ward'
+      # 'euclidean', 'manhattan', 'cosine'
+      metric: 'euclidean'
+      # adds kernel density to pca plots
+      # default metric used is euclidean for kernel_density
+      kernel_density: true
+      # # hyperparameter to control the smoothness of estimated kernel density
+      # # float, 'scott', 'silverman'
+      # # can be a single value or list
+      # band_width: np.logspace(-1, 1, 20)
+      # # hyperparameter kernel to use for kernel_density
+      # # 'gaussian', 'tophat', 'epanechnikov', 'exponential', 'linear', 'cosine'
+      # # can be a single value or list
+      # kernel: 'gaussian'
+      # removes empty pathways from consideration in ml analysis (pca only)
+      remove_empty_pathways: false
+    evaluation:
+      # evaluation per dataset-goldstandard pair
+      # evaluation will not run unless ml include is set to true
+      include: true
+      # adds evaluation per algorithm per dataset-goldstandard pair
+      # evaluation per algortihm will not run unless ml include and ml aggregate_per_algorithm are set to true
+      aggregate_per_algorithm: true
