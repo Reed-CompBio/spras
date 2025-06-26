@@ -233,12 +233,12 @@ class Config:
         if not raw_config.analysis:
             return
 
-        # these params are classes - we need to turn them into var dicts
-        self.analysis_params = vars(raw_config.analysis)
-        self.ml_params = vars(self.analysis_params.ml)
-        self.evaluation_params = vars(self.analysis_params.evaluation)
+        self.analysis_params = raw_config.analysis
+        self.ml_params = self.analysis_params.ml
+        self.evaluation_params = self.analysis_params.evaluation
 
-        self.pca_params = self.ml_params
+        # self.ml_params is a class, pca_params needs to be a dict.
+        self.pca_params = vars(self.ml_params)
 
         self.hac_params = {
             "linkage": self.ml_params.linkage,
