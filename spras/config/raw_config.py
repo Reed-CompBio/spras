@@ -86,7 +86,7 @@ class RawConfig(BaseModel):
     algorithms: list[Algorithm]
     datasets: list[Dataset]
     gold_standards: list[GoldStandard] = []
-    analysis: Optional[Analysis] = None
+    analysis: Analysis = Analysis()
 
     reconstruction_settings: ReconstructionSettings
 

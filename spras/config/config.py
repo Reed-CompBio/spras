@@ -23,7 +23,7 @@ from typing import Any
 import numpy as np
 import yaml
 
-from spras.config.raw_config import ContainerFramework, RawConfig
+from spras.config.raw_config import ContainerFramework, RawConfig, Analysis
 from spras.util import NpHashEncoder, hash_params_sha1_base32
 
 config = None
@@ -86,9 +86,11 @@ class Config:
         # Deprecated. Previously a dict mapping algorithm names to a Boolean tracking whether they used directed graphs.
         self.algorithm_directed = None
         # A dict with the analysis settings
-        self.analysis_params = None
+        self.analysis_params = parsed_raw_config.analysis
+        # A dict with the evaluation settings
+        self.evaluation_params = self.analysis_params.evaluation
         # A dict with the ML settings
-        self.ml_params = None
+        self.ml_params = self.analysis_params.ml
         # A Boolean specifying whether to run ML analysis for individual algorithms
         self.analysis_include_ml_aggregate_algo = None
         # A dict with the PCA settings
@@ -233,12 +235,11 @@ class Config:
         if not raw_config.analysis:
             return
 
-        self.analysis_params = raw_config.analysis
-        self.ml_params = self.analysis_params.ml
-        self.evaluation_params = self.analysis_params.evaluation
-
         # self.ml_params is a class, pca_params needs to be a dict.
-        self.pca_params = {k: v for k, v in vars(self.ml_params).items() if k != 'include'}
+        self.pca_params = {
+            "components": self.ml_params.components,
+            "labels": self.ml_params.labels
+        }
 
         self.hac_params = {
             "linkage": self.ml_params.linkage,
