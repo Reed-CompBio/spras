@@ -81,6 +81,20 @@ class TestML:
 
         assert coord.equals(expected)
 
+    def test_pca_remove_empty_pathways(self):
+        dataframe = ml.summarize_networks([INPUT_DIR + 'test-data-s1/s1.txt', INPUT_DIR + 'test-data-s2/s2.txt', INPUT_DIR + 'test-data-s3/s3.txt', INPUT_DIR + 'test-data-empty/empty.txt'])
+        ml.pca(dataframe, OUT_DIR + 'pca.png', OUT_DIR + 'pca-variance.txt',
+               OUT_DIR + 'pca-coordinates.tsv', remove_empty_pathways=True)
+        coord = pd.read_table(OUT_DIR + 'pca-coordinates.tsv')
+        coord = coord.round(5)  # round values to 5 digits to account for numeric differences across machines
+        expected = pd.read_table(EXPECT_DIR + 'expected-pca-coordinates.tsv')
+        expected = expected.round(5)
+
+        assert coord.equals(expected)
+
+    # TODO add PCA KDE test
+    # waiting to see if I remove the kde file
+
     def test_pca_robustness(self):
         dataframe = ml.summarize_networks([INPUT_DIR + 'test-data-s1/s1.txt', INPUT_DIR + 'test-data-s2/s2.txt', INPUT_DIR + 'test-data-s3/s3.txt'])
         expected = pd.read_table(EXPECT_DIR + 'expected-pca-coordinates.tsv')

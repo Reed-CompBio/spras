@@ -1,2 +1,2 @@
 Pathway	Precision	Recall
-test/evaluate/input/data-test-params-empty/pathway.txt	0.0	0.0
+test/evaluate/input/data-test-params-789/pathway.txt	1.0	1.0
