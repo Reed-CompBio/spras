@@ -2,7 +2,7 @@ from pathlib import Path
 
 import pandas as pd
 
-from spras.containers import prepare_volume, run_container_and_log
+from spras.containers import ContainerError, prepare_volume, run_container_and_log
 from spras.dataset import Dataset
 from spras.interactome import reinsert_direction_col_undirected
 from spras.prm import PRM
@@ -119,12 +119,18 @@ class OmicsIntegrator2(PRM):
             command.extend(['--seed', str(seed)])
 
         container_suffix = "omics-integrator-2:v2"
+
+        # We use this later either if we encounter unrecoverable OI2 errors
+        # or as the main output file we want to post-process in parse_output.
+        output_tsv = Path(out_dir, 'oi2.tsv')
+
         run_container_and_log('Omics Integrator 2',
-                             container_framework,
-                             container_suffix,
-                             command,
-                             volumes,
-                             work_dir)
+                                container_framework,
+                                container_suffix,
+                                command,
+                                volumes,
+                                work_dir)
+
 
         # TODO do we want to retain other output files?
         # TODO if deleting other output files, write them all to a tmp directory and copy
