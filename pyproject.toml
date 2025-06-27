@@ -26,7 +26,7 @@ dependencies = [
     "networkx==2.8",
     "pandas==2.3.0",
     "numpy==2.3.0",
-    "pip==22.1",
+    "pip==25.1.1",
     "requests==2.28",
     "scikit-learn==1.7.0",
     "seaborn==0.12",
