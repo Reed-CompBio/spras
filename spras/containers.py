@@ -416,6 +416,11 @@ def run_container_singularity(container: str, command: List[str], volumes: List[
 
     expanded_image = None
     if config.config.unpack_singularity:
+        # The incoming image string is of the format <repository>/<owner>/<image name>:<tag> e.g.
+        # hub.docker.com/reedcompbio/spras:latest
+        # Here we first produce a .sif image using the image name and tag (base_cont)
+        # and then expand that image into a sandbox directory. For example,
+        # hub.docker.com/reedcompbio/spras:latest --> spras_latest.sif --> ./spras_latest/
         path_elements = container.split("/")
         base_cont = path_elements[-1]
         base_cont = base_cont.replace(":", "_").split(":")[0]
@@ -439,7 +444,7 @@ def run_container_singularity(container: str, command: List[str], volumes: List[
         expanded_image = base_cont_path  # This is the sandbox directory
 
     # If not using the expanded sandbox image, we still need to prepend the docker:// prefix
-    # so apptainer knows to pull the image.
+    # so apptainer knows to pull and convert the image format from docker to apptainer.
     image_to_run = expanded_image if expanded_image else "docker://" + container
     if config.config.enable_profiling:
         # We won't end up using the spython client if profiling is enabled because
