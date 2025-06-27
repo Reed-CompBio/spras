@@ -3,7 +3,11 @@ from pathlib import Path
 
 from spras.containers import prepare_volume, run_container_and_log
 from spras.dataset import Dataset
-from spras.interactome import reinsert_direction_col_undirected
+from spras.interactome import (
+    convert_undirected_to_directed,
+    has_direction,
+    reinsert_direction_col_undirected,
+)
 from spras.prm import PRM
 from spras.util import add_rank_column, duplicate_edges, raw_pathway_df
 
@@ -11,10 +15,10 @@ __all__ = ['AllPairs']
 
 
 class AllPairs(PRM):
-    required_inputs = ['nodetypes', 'network']
+    required_inputs = ['nodetypes', 'network', 'directed_flag']
 
     @staticmethod
-    def generate_inputs(data, filename_map):
+    def generate_inputs(data: Dataset, filename_map):
         """
         Access fields from the dataset and write the required input files
         @param data: dataset
@@ -46,9 +50,17 @@ class AllPairs(PRM):
         # Create network file
         edges_df = data.get_interactome()
 
-        # Format network file
-        # edges_df = convert_directed_to_undirected(edges_df)
-        # - technically this can be called but since we don't use the column and based on what the function does, it is not truly needed
+        if edges_df is None:
+            raise ValueError("Dataset does not have an interactome.")
+
+        # Since APSP doesn't use the directed/undirected column because of a lack of support for mixed graphs (in NetworkX),
+        # this function dynamically detects the usage of directed edges in user input
+        # and, if the graph has a directed edge, it switches the entire graph to use directed edges, with a dummy file used to
+        # signal to `run` that the graph is directed.
+        if has_direction(edges_df):
+            edges_df = convert_undirected_to_directed(edges_df)
+            # we also touch a 'directed_flag.txt' file to say that this is directed
+            Path(filename_map['directed_flag']).touch()
 
         # This is pretty memory intensive. We might want to keep the interactome centralized.
         edges_df.to_csv(filename_map["network"], sep="\t", index=False,
@@ -56,7 +68,7 @@ class AllPairs(PRM):
                                       header=["#Interactor1", "Interactor2", "Weight"])
 
     @staticmethod
-    def run(nodetypes=None, network=None, output_file=None, container_framework="docker"):
+    def run(nodetypes=None, network=None, directed_flag=None, output_file=None, container_framework="docker"):
         """
         Run All Pairs Shortest Paths with Docker
         @param nodetypes: input node types with sources and targets (required)
@@ -88,8 +100,10 @@ class AllPairs(PRM):
                    '--network', network_file,
                    '--nodes', node_file,
                    '--output', mapped_out_file]
+        if directed_flag and Path(directed_flag).exists():
+            command.append("--directed")
 
-        container_suffix = "allpairs:v2"
+        container_suffix = "allpairs:v3"
         run_container_and_log(
             'All Pairs Shortest Paths',
             container_framework,
