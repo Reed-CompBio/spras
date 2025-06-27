@@ -14,7 +14,8 @@ container_framework: docker
 # such as would be the case in an HTCondor/OSPool environment.
 # NOTE: This unpacks singularity containers to the local filesystem, which will take up space in a way
 # that persists after the workflow is complete. To clean up the unpacked containers, the user must
-# manually delete them.
+# manually delete them. For convenience, these unpacked files will exist in the current working directory
+# under `unpacked`.
 unpack_singularity: false
 
 # Allow the user to configure which container registry containers should be pulled from
