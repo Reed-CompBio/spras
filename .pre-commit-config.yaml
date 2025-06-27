@@ -1,12 +1,10 @@
 # See https://pre-commit.com for more information
 # See https://pre-commit.com/hooks.html for more hooks
 # See https://pre-commit.com/ for documentation
-default_language_version:
-  # Match this to the version specified in pixi.toml
-  python: python3.11
+exclude: (^.pixi/|.snap)
 repos:
   - repo: https://github.com/pre-commit/pre-commit-hooks
-    rev: v4.4.0 # Use the ref you want to point at
+    rev: v5.0.0 # Use the ref you want to point at
     hooks:
       # Attempts to load all yaml files to verify syntax.
       - id: check-yaml
