@@ -38,7 +38,7 @@ class PathLinker(PRM):
                 raise ValueError(f"{input_type} filename is missing")
 
         # Get sources and targets for node input file
-        sources_targets = data.request_node_columns(["sources", "targets"])
+        sources_targets = data.get_node_columns(["sources", "targets"])
         if sources_targets is None:
             return False
         both_series = sources_targets.sources & sources_targets.targets

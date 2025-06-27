@@ -1,3 +1,4 @@
+from enum import Enum
 import os
 import pickle as pkl
 import warnings
@@ -11,10 +12,42 @@ Author: Chris Magnano
 Methods and intermediate state for loading data and putting it into pandas tables for use by pathway reconstruction algorithms.
 """
 
+class Direction(str, Enum):
+    DIRECTED = 'directed'
+    UNDIRECTED = 'undirected'
+    MIXED = 'mixed'
+
+    def as_letter(self) -> str:
+        """
+        Converts the direction to a letter, unless it is
+        Direction.MIXED, in which an error is raised.
+        """
+        match self:
+            case Direction.DIRECTED:
+                return "D"
+            case Direction.UNDIRECTED:
+                return "U"
+            case Direction.MIXED:
+                raise ValueError("Direction.MIXED can not be converted to a letter.")
+
+class GraphType(str, Enum):
+    STANDARD = 'standard'
+    "A normal graph from graph theory: edges connect two vertices."
+
+    HYPER = 'hyper'
+    "A hypergraph: edges connect any set of vertices to another set of vertices."
+
+class GraphMultiplicity(str, Enum):
+    SIMPLE = 'simple'
+    MULTI = 'multi'
 
 class Dataset:
-
+    # Common column names
     NODE_ID = "NODEID"
+    SOURCES = "sources"
+    TARGETS = "targets"
+    PRIZE = "prize"
+
     warning_threshold = 0.05  # Threshold for scarcity of columns to warn user
 
     def __init__(self, dataset_dict):
@@ -127,11 +160,14 @@ class Dataset:
         self.node_table.insert(0, "NODEID", self.node_table.pop("NODEID"))
         self.other_files = dataset_dict["other_files"]
 
-    def request_node_columns(self, col_names):
+    def get_node_columns(self, col_names: list[str]) -> pd.DataFrame:
         """
         returns: A table containing the requested column names and node IDs
         for all nodes with at least 1 of the requested values being non-empty
         """
+        if self.node_table is None:
+            raise ValueError("node_table is None: can't request node columns of an empty dataset.")
+
         col_names.append(self.NODE_ID)
         filtered_table = self.node_table[col_names]
         filtered_table = filtered_table.dropna(
@@ -148,7 +184,9 @@ class Dataset:
             )
         return filtered_table
 
-    def contains_node_columns(self, col_names):
+    def contains_node_columns(self, col_names: list[str] | str):
+        if self.node_table is None:
+            raise ValueError("node_table is None: can't request node columns of an empty dataset.")
         """
         col_names: A list-like object of column names to check or a string of a single column name to check.
         returns: Whether or not all columns in col_names exist in the dataset.
@@ -161,11 +199,46 @@ class Dataset:
                     return False
                 return True
 
-    def request_edge_columns(self, col_names):
-        return None
-
     def get_other_files(self):
         return self.other_files.copy()
 
+    def check_direction(self, direction: Direction):
+        """
+        Checks that this dataset's interactome follows `direction`.
+        Throws an error if it doesn't.
+        """
+        if direction == Direction.MIXED:
+            return
+
+        letter = direction.as_letter()
+        if self.get_interactome()["Direction"].ne(letter).any():
+            raise RuntimeError(f"One of the rows in the interactome are not '{direction}'!")
+
+    def check_type(self, type: GraphType):
+        """
+        Checks that this dataset's interactome follows `type`.
+        Throws an error if it doesn't.
+        """
+
+        if type == GraphType.HYPER:
+            # All hypergraphs are 'standard' graphs.
+            pass
+
+        raise RuntimeError("unimplemented")
+    
+    def check_multiplicity(self, multiplicity: GraphMultiplicity):
+        """
+        Checks that this dataset's interactome follows `multiplicity`.
+        Throws an error if it doesn't.
+        """
+
+        if multiplicity == GraphMultiplicity.MULTI:
+            # All simple graphs are multigraphs.
+            pass
+
+        raise RuntimeError("unimplemented")
+
     def get_interactome(self):
+        if self.interactome is None:
+            raise ValueError("interactome is None: can't copy a non-existant interactome.")
         return self.interactome.copy(deep = True)

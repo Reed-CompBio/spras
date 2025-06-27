@@ -44,7 +44,7 @@ class DOMINO(PRM):
         # Get active genes for node input file
         if data.contains_node_columns('active'):
             # NODEID is always included in the node table
-            node_df = data.request_node_columns(['active'])
+            node_df = data.get_node_columns(['active'])
         else:
             raise ValueError('DOMINO requires active genes')
         node_df = node_df[node_df['active'] == True]

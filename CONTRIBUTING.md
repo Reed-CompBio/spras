@@ -129,7 +129,7 @@ In an interactive Python session, run the following commands to load the `data0`
 ```
 Also test the functions available in the `Dataset` class.
 ```python
-> data.request_node_columns(['sources'])
+> data.get_node_columns(['sources'])
   sources NODEID
 0    True      A
 ```
@@ -139,8 +139,8 @@ your interactive python session inside the SPRAS conda environment
 (your terminal should begin with `(spras)` instead of `(base)`, which can be done through `conda activate spras`),
 and your editor's interpreter is set to using the SPRAS environment over the base environment (on VSCode and IntelliJ editors, this should be in the bottom right.)
 
-Note the behaviors of the `request_node_columns` function when there are missing values in that column of the node table and when multiple columns are requested.
-`request_node_columns` always returns the `NODEID` column in addition to the requested columns.
+Note the behaviors of the `get_node_columns` function when there are missing values in that column of the node table and when multiple columns are requested.
+`get_node_columns` always returns the `NODEID` column in addition to the requested columns.
 
 Note: If you encounter a `'property' object is not iterable` error arising from inside the Snakefile, this means that `required_inputs` is not set. This is because when `required_inputs` is not set inside an algorithm wrapper, it falls back to the underlying unimplemented function inside the PRM base class, which, while it is marked as a property function, is non-static; therefore, when the runner utility class tries to dynamically fetch `required_inputs` with reflection, it ends up grabbing the `property` function instead of the underlying error, and tries to iterate over it (since `required_inputs` is usually a list.)
 
