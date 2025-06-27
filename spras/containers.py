@@ -1,4 +1,3 @@
-import csv
 import os
 import platform
 import re
@@ -11,6 +10,7 @@ import docker.errors
 
 import spras.config.config as config
 from spras.logging import indent
+from spras.profiling import create_apptainer_container_stats, create_peer_cgroup
 from spras.util import hash_filename
 
 
@@ -454,7 +454,7 @@ def run_container_singularity(container: str, command: List[str], volumes: List[
         singularity_cmd.append(image_to_run)
         singularity_cmd.extend(command)
 
-        my_cgroup = create_cgroup()
+        my_cgroup = create_peer_cgroup()
         # The wrapper script is packaged with spras, and should be located in the same directory
         # as `containers.py`.
         wrapper = os.path.join(os.path.dirname(__file__), "cgroup_wrapper.sh")
@@ -463,7 +463,7 @@ def run_container_singularity(container: str, command: List[str], volumes: List[
         print("Stdout from container execution:", proc.stdout)
 
         print("Reading memory and CPU stats from cgroup")
-        create_container_stats(my_cgroup, out_dir)
+        create_apptainer_container_stats(my_cgroup, out_dir)
 
         result = proc.stdout
     else:
