@@ -1,6 +1,7 @@
 from enum import Enum
 import os
 import pickle as pkl
+from typing import Optional
 import warnings
 
 import pandas as pd
@@ -29,6 +30,45 @@ class Direction(str, Enum):
                 return "U"
             case Direction.MIXED:
                 raise ValueError("Direction.MIXED can not be converted to a letter.")
+
+    @staticmethod
+    def from_letter(string: str) -> "Direction":
+        match string.upper():
+            case "U":
+                return Direction.UNDIRECTED
+            case "D":
+                return Direction.DIRECTED
+            case _:
+                raise ValueError(f"The value '{string}' is not one of 'U' or 'D' (case-insensitive)")
+
+class Coercion(str, Enum):
+    """
+    The enum of interactome coercions.
+    """
+
+    NONE = "none"
+    """
+    No coercions are performed: any non-superclass coercions immediately error.
+    For example, a coercion from an undirected graph to a mixed graph is okay,
+    but a coercion from an undirected graph to a directed graph errors.
+    """
+
+    WEAK = "weak"
+    """
+    Coercions that do not lose information are okay.
+    For example, coercions from an undirected graph to a directed graph are okay.
+
+    This is the default coercion used in algorithm implementations.
+    """
+
+    """
+    Coercions that may lose information.
+
+    For example, coercions from a mixed graph to an undirected graph are okay.
+
+    These coercions are used for pre-processing functions, exposed to users.
+    """
+    ALL = "all"
 
 class GraphType(str, Enum):
     STANDARD = 'standard'
@@ -202,16 +242,30 @@ class Dataset:
     def get_other_files(self):
         return self.other_files.copy()
 
+    def get_direction(self) -> Optional[Direction]:
+        """
+        Gets the directionality of the underlying interactome.
+        """
+        if self.interactome is None or self.interactome.empty:
+            return None
+        
+        direction_count = self.interactome["Direction"].nunique()
+        if direction_count > 1:
+            return Direction.MIXED
+        
+        first_direction = self.interactome["Direction"].iloc[0]
+        return Direction.from_letter(first_direction)
+
     def check_direction(self, direction: Direction):
         """
         Checks that this dataset's interactome follows `direction`.
         Throws an error if it doesn't.
         """
-        if direction == Direction.MIXED:
+        if direction == Direction.MIXED or self.interactome is None:
             return
 
         letter = direction.as_letter()
-        if self.get_interactome()["Direction"].ne(letter).any():
+        if self.interactome["Direction"].ne(letter).any():
             raise RuntimeError(f"One of the rows in the interactome are not '{direction}'!")
 
     def check_type(self, type: GraphType):
@@ -220,7 +274,7 @@ class Dataset:
         Throws an error if it doesn't.
         """
 
-        if type == GraphType.HYPER:
+        if type == GraphType.HYPER or self.interactome is None:
             # All hypergraphs are 'standard' graphs.
             pass
 
@@ -232,13 +286,19 @@ class Dataset:
         Throws an error if it doesn't.
         """
 
-        if multiplicity == GraphMultiplicity.MULTI:
+        if multiplicity == GraphMultiplicity.MULTI or self.interactome is None:
             # All simple graphs are multigraphs.
             pass
 
         raise RuntimeError("unimplemented")
 
-    def get_interactome(self):
+    def get_interactome(self, direction: Direction, type: GraphType, multiplicity: GraphMultiplicity, coercion = Coercion.WEAK):
+        """
+        Gets an interactome which is guaranteed to have the provided features. 
+        The specified coercion specifies the strength at which `get_interactome` will try to change the interactome
+        to meet the specified features.
+        """
+
         if self.interactome is None:
             raise ValueError("interactome is None: can't copy a non-existant interactome.")
         return self.interactome.copy(deep = True)
