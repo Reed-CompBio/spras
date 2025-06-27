@@ -16,7 +16,7 @@ jobs:
       - name: Install pixi
         uses: prefix-dev/setup-pixi@v0.8.8
         with:
-          pixi-version: v0.42.1
+          pixi-version: v0.40.3
           cache: false
           locked: false
       # Log conda environment contents
@@ -41,7 +41,7 @@ jobs:
           locked: false
       # Install spras in the environment using pip
       - name: Install spras in pixi
-        run: pixi run pip install .
+        run: pip install .
       # Log pixi environment contents
       - name: Log pixi environment
         run: pixi list
