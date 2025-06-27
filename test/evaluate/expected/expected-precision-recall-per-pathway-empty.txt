@@ -1,0 +1,2 @@
+Pathway	Precision	Recall
+test/evaluate/input/data-test-params-empty/pathway.txt	0.0	0.0
