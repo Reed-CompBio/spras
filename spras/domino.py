@@ -4,6 +4,7 @@ from pathlib import Path
 import pandas as pd
 
 from spras.containers import prepare_volume, run_container_and_log
+from spras.dataset import Direction, GraphMultiplicity, GraphType
 from spras.interactome import (
     add_constant,
     reinsert_direction_col_undirected,
@@ -55,12 +56,10 @@ class DOMINO(PRM):
         # Create active_genes file
         node_df.to_csv(filename_map['active_genes'], sep='\t', index=False, columns=['NODEID'], header=False)
 
-        # Create network file
-        edges_df = data.get_interactome()
+        # Create network file - while DOMINO doesn't care about the directionality column,
+        # it's nice to explicitly declare that it doesn't
+        edges_df = data.get_interactome(Direction.UNDIRECTED, GraphType.STANDARD, GraphMultiplicity.SIMPLE)
 
-        # Format network file
-        # edges_df = convert_directed_to_undirected(edges_df)
-        # - technically this can be called but since we don't use the column and based on what the function does, it is not truly needed
         edges_df = add_constant(edges_df, 'ppi', 'ppi')
 
         # Transform each node id with a prefix

@@ -55,20 +55,19 @@ class Coercion(str, Enum):
 
     WEAK = "weak"
     """
-    Coercions that do not lose information are okay.
-    For example, coercions from an undirected graph to a directed graph are okay.
-
-    This is the default coercion used in algorithm implementations.
+    Coercions that do not lose information.
+    For example, coercions from an undirected graph to a directed graph.
     """
 
+    ALL = "all"
     """
     Coercions that may lose information.
 
-    For example, coercions from a mixed graph to an undirected graph are okay.
+    For example, coercions from a mixed graph to an undirected graph.
 
-    These coercions are used for pre-processing functions, exposed to users.
+    This is currently the default coercion used in algorithm implementations.
     """
-    ALL = "all"
+    # TODO: ideally, these coercions should be made explicit to the user.
 
 class GraphType(str, Enum):
     STANDARD = 'standard'
@@ -171,6 +170,8 @@ class Dataset:
             raise ValueError(
                 f"Edge file {interactome_loc} must have three or four columns but found {num_cols}"
             )
+        
+        # TODO: Handle hypergraphs
 
         node_set = set(self.interactome.Interactor1.unique())
         node_set = node_set.union(set(self.interactome.Interactor2.unique()))
@@ -268,6 +269,10 @@ class Dataset:
         if self.interactome["Direction"].ne(letter).any():
             raise RuntimeError(f"One of the rows in the interactome are not '{direction}'!")
 
+    def get_type(self) -> Optional[GraphType]:
+        if self.interactome is None or self.interactome.empty:
+            return None
+
     def check_type(self, type: GraphType):
         """
         Checks that this dataset's interactome follows `type`.
@@ -280,6 +285,10 @@ class Dataset:
 
         raise RuntimeError("unimplemented")
     
+    def get_multiplicity(self) -> Optional[GraphMultiplicity]:
+        if self.interactome is None or self.interactome.empty:
+            return None
+
     def check_multiplicity(self, multiplicity: GraphMultiplicity):
         """
         Checks that this dataset's interactome follows `multiplicity`.
@@ -292,7 +301,7 @@ class Dataset:
 
         raise RuntimeError("unimplemented")
 
-    def get_interactome(self, direction: Direction, type: GraphType, multiplicity: GraphMultiplicity, coercion = Coercion.WEAK):
+    def get_interactome(self, direction: Direction, type: GraphType, multiplicity: GraphMultiplicity, coercion = Coercion.ALL):
         """
         Gets an interactome which is guaranteed to have the provided features. 
         The specified coercion specifies the strength at which `get_interactome` will try to change the interactome
