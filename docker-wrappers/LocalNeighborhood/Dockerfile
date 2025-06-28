@@ -6,7 +6,7 @@ FROM python:3.11-slim
 WORKDIR /app
 
 # Copy script into the image 
-COPY local_neighborhood.py . 
+COPY spras/local_neighborhood.py . 
 
 # Set the default command to print usage if run without args 
 # This line is optional and only runs if no command is provided
