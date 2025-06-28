@@ -96,9 +96,9 @@ algorithms:
               slice_threshold: [0.3]
               module_threshold: [0.05]
   - name: "localneighborhood"
-    params: 
-          include: true 
-              
+    params:
+          include: true
+
 
 
 # Here we specify which pathways to run and other file location information.

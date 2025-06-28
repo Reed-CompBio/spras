@@ -50,17 +50,17 @@ class TestLocalNeighborhood:
                                output_file=OUT_FILE)
 
     # Write tests for the Local Neighborhood run function here
-def test_localneighborhood_run(): 
+def test_localneighborhood_run():
     """
     Run Localneighborhood with the run function and check the output matches the expected output
     """
     # Remove the output file if it exists
     out_path = Path(OUT_FILE)
-    out_path.unlink(missing_ok=True) 
-    # Run the run function in LocalNeighborhood 
+    out_path.unlink(missing_ok=True)
+    # Run the run function in LocalNeighborhood
     local_neighborhood.run(
         nodes=TEST_DIR + 'input/ln-nodes.txt',
         network=TEST_DIR + 'input/ln-network.txt',
         output_file=OUT_FILE
     )
-    assert out_path.exists() 
+    assert out_path.exists()
