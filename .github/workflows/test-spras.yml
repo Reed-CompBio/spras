@@ -57,6 +57,10 @@ jobs:
       with:
         # Choose version from https://github.com/apptainer/apptainer/releases
         apptainer-version: 1.3.6
+    - name: Pull local-neighorhood Docker image 
+      run: docker pull gli527/local-neighborhood:latest
+    - name: Build local-neighborhood Docker image 
+      run: dokcer build - t gli527/local-neighborhood -f Dockerfile . 
     - name: Run tests
       shell: bash --login {0}
       # Verbose output and disable stdout and stderr capturing
