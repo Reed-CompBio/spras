@@ -39,17 +39,6 @@ A	B	0.98
 B	C	0.77 
 ```
 
-Edge files can also represent hypergraphs, where mulitple sources and multiple targets can point to one another. We
-separate these sources and targets via commas. If you want to escape commas (or tabs!) use quotes to wrap your gene name,
-just like in a regular `.tsv`.
-For implementation simplicity, we allow 'mixed' hypergraphs, or hypergraphs where hyperedges can be either directed
-or undirected:
-
-```
-A,B	C,D	0.98    U
-B,C	A,D	0.77    D
-```
-
 ### Gold Standard
 #### Nodes
 Gold standard node files are txt files and do not include a header row.
