@@ -1,15 +1,18 @@
-from abc import abstractmethod
 import copy
-from enum import Enum
 import os
 import pickle as pkl
-from typing import Optional, Self, Protocol
-from collections.abc import Iterable
 import warnings
+from abc import abstractmethod
+from collections.abc import Iterable
+from enum import Enum
+from typing import Optional, Protocol, Self
 
 import pandas as pd
 
-from spras.interactome import convert_undirected_to_directed, convert_directed_to_undirected
+from spras.interactome import (
+    convert_directed_to_undirected,
+    convert_undirected_to_directed,
+)
 
 """
 Author: Chris Magnano
@@ -58,7 +61,7 @@ class Interactome:
 
     def __copy__(self):
         return Interactome(self.df)
-    
+
     def __deepcopy__(self):
         return Interactome(self.df.copy(deep=True))
 
@@ -158,11 +161,11 @@ class Direction(str, Enum, InteractomeProperty):
     def from_interactome(cls, interactome: Interactome) -> Optional["Direction"]:
         if interactome.df.empty:
             return None
-        
+
         direction_count = interactome.df["Direction"].nunique()
         if direction_count > 1:
             return Direction.MIXED
-        
+
         first_direction = interactome.df["Direction"].iloc[0]
         return Direction.from_letter(first_direction)
 
@@ -173,7 +176,7 @@ class Direction(str, Enum, InteractomeProperty):
         letter = self.as_letter()
         if interactome.df["Direction"].ne(letter).any():
             raise RuntimeError(f"One of the rows in the provided interactome are not '{self}'!")
-        
+
     def guarantee_interactome(self, interactome: Interactome):
         match self:
             case Direction.UNDIRECTED:
@@ -187,15 +190,26 @@ class GraphMultiplicity(str, Enum, InteractomeProperty):
     SIMPLE = 'simple'
     MULTI = 'multi'
 
+    def guarantee_interactome(self, interactome: Interactome):
+        if self == GraphMultiplicity.MULTI:
+            return
+
+        # https://stackoverflow.com/a/25792812/7589775
+        interactome.df.loc[interactome.df["Interactor1"] < interactome.df["Interactor2"], interactome.df.columns] = interactome.df.loc[
+            interactome.df["Interactor1"] < interactome.df["Interactor2"], ["Interactor2", "Interactor1", "Weight", "Direction"]
+        ]
+
+        interactome.df.drop_duplicates(subset=["Interactor1", "Interactor2"], keep="last")
+
     @classmethod
     def from_interactome(cls, interactome: Interactome) -> Optional["GraphMultiplicity"]:
-        raise NotImplementedError
-    
-    def validate_interactome(self, interactome: Interactome):
-        raise NotImplementedError
-    
-    def guarantee_interactome(self, interactome: Interactome):
-        raise NotImplementedError
+        new_interactome = copy.deepcopy(interactome)
+        GraphMultiplicity.SIMPLE.guarantee_interactome(new_interactome)
+
+        if len(new_interactome.df.index) < len(interactome.df.index):
+            return GraphMultiplicity.MULTI
+        else:
+            return GraphMultiplicity.SIMPLE
 
 class GraphLoopiness(str, Enum, InteractomeProperty):
     LOOPY = 'loopy'
@@ -207,7 +221,7 @@ class GraphLoopiness(str, Enum, InteractomeProperty):
             return GraphLoopiness.LOOPY
         else:
             return GraphLoopiness.NO_LOOPS
-    
+
     def guarantee_interactome(self, interactome: Interactome):
         interactome.df = interactome.df[interactome.df["Interactor1"] != interactome.df["Interactor2"]]
 
