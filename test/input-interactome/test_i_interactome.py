@@ -1,5 +1,6 @@
 from pathlib import Path
-from spras.dataset import Direction, Interactome, GraphMultiplicity, GraphLoopiness
+
+from spras.dataset import Direction, GraphLoopiness, GraphMultiplicity, Interactome
 
 INPUT_DIR = Path('test', 'input-interactome', 'input')
 
