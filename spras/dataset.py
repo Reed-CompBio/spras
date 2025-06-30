@@ -61,9 +61,9 @@ class Interactome:
         return cls(pd.read_table(file, sep="\t", header=None))
 
     def __copy__(self):
-        return Interactome(self.df)
+        return Interactome(self.df.copy(deep=False))
 
-    def __deepcopy__(self):
+    def __deepcopy__(self, memo):
         return Interactome(self.df.copy(deep=True))
 
 
@@ -174,9 +174,9 @@ class Direction(InteractomeProperty):
     def guarantee_interactome(self, interactome: Interactome):
         match self:
             case Direction.UNDIRECTED:
-                interactome.df = convert_undirected_to_directed(interactome.df)
-            case Direction.DIRECTED:
                 interactome.df = convert_directed_to_undirected(interactome.df)
+            case Direction.DIRECTED:
+                interactome.df = convert_undirected_to_directed(interactome.df)
             case Direction.MIXED:
                 pass # no need to convert a mixed graph
 
