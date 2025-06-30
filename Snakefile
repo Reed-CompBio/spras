@@ -25,7 +25,7 @@ algorithm_params = _config.config.algorithm_params
 algorithm_directed = _config.config.algorithm_directed
 pca_params = _config.config.pca_params
 hac_params = _config.config.hac_params
-generate_kde = pca_params["kernel_density"]
+generate_kde = pca_params["kernel_density"] # TODO: decide if we need to save the kde file
 FRAMEWORK = _config.config.container_framework
 
 # Return the dataset or gold_standard dictionary from the config file given the label
@@ -95,7 +95,6 @@ def make_final_input(wildcards):
         final_input.extend(expand('{out_dir}{sep}{dataset}-ml{sep}ensemble-pathway.txt',out_dir=out_dir,sep=SEP,dataset=dataset_labels,algorithm_params=algorithms_with_params))
         final_input.extend(expand('{out_dir}{sep}{dataset}-ml{sep}jaccard-matrix.txt',out_dir=out_dir,sep=SEP,dataset=dataset_labels,algorithm_params=algorithms_with_params))
         final_input.extend(expand('{out_dir}{sep}{dataset}-ml{sep}jaccard-heatmap.png',out_dir=out_dir,sep=SEP,dataset=dataset_labels,algorithm_params=algorithms_with_params))
-    
         if generate_kde:
             final_input.extend(expand('{out_dir}{sep}{dataset}-ml{sep}pca-kde.txt',out_dir=out_dir,sep=SEP,dataset=dataset_labels,algorithm_params=algorithms_with_params))
       
