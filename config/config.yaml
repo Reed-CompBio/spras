@@ -141,7 +141,7 @@ reconstruction_settings:
   locations:
     #place the save path here
     # TODO move to global
-    reconstruction_dir: "output/config"
+    reconstruction_dir: "output"
 
   run: true
 
@@ -174,14 +174,12 @@ analysis:
     # adds kernel density to pca plots
     # default metric used is euclidean for kernel_density
     kernel_density: true
-    # # hyperparameter to control the smoothness of estimated kernel density
-    # # float, 'scott', 'silverman'
-    # # can be a single value or list
-    # band_width: np.logspace(-1, 1, 20)
-    # # hyperparameter kernel to use for kernel_density
-    # # 'gaussian', 'tophat', 'epanechnikov', 'exponential', 'linear', 'cosine'
-    # # can be a single value or list
-    # kernel: 'gaussian'
+    # hyperparameter to control the smoothness of estimated kernel density
+    # single float, 'scott', 'silverman'
+    bandwidth: 'scott'
+    # hyperparameter kernel to use for kernel_density
+    # 'gaussian', 'tophat', 'epanechnikov', 'exponential', 'linear', 'cosine'
+    kernel: 'gaussian'
     # removes empty pathways from consideration in ml analysis (pca only)
     remove_empty_pathways: false
   evaluation:

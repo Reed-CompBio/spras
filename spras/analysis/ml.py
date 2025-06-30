@@ -116,7 +116,7 @@ def create_palette(column_names):
     label_color_map = {label: color for label, color in zip(unique_column_names, custom_palette, strict=True)}
     return label_color_map
 
-def pca(dataframe: pd.DataFrame, output_png: str, output_var: str, output_coord: str, output_kde: str = None, components: int = 2, labels: bool = True, kernel_density: bool = False, kernel_density_parameters:dict = None, remove_empty_pathways: bool = False):
+def pca(dataframe: pd.DataFrame, output_png: str, output_var: str, output_coord: str, output_kde: str = None, components: int = 2, labels: bool = True, kernel_density: bool = False,  bandwidth:Union[float, str] = 1.0, kernel:str = "gaussian", remove_empty_pathways: bool = False):
     """
     Performs PCA on the data and creates a scatterplot of the top two principal components.
     It saves the plot, the variance explained by each component, and the
@@ -127,6 +127,7 @@ def pca(dataframe: pd.DataFrame, output_png: str, output_var: str, output_coord:
     @param output_coord: the filename to save the coordinates of each algorithm
     @param components: the number of principal components to calculate (Default is 2)
     @param labels: determines if labels will be included in the scatterplot (Default is True)
+    # TODO add the new parameters
     """
     df = dataframe.reset_index(drop=True)
 
@@ -172,14 +173,18 @@ def pca(dataframe: pd.DataFrame, output_png: str, output_var: str, output_coord:
 
     if kernel_density:
         # TODO: add the grid search part? or make people do it individually?
-        # grid = GridSearchCV(KernelDensity(), params)
+        # I'm for make people do it individually
+        # grid = GridSearchCV(KernelDensity(), params (a dict))
 
-        # TODO: figure out which parameters to allow a user to use (and if grid search is needed add that?)
-        kde_model = KernelDensity(kernel='gaussian', bandwidth=0.5, metric="euclidean") # Note that the normalization of the density output is correct only for the Euclidean distance metric.
+        #TODO add checks on the parameters
+
+        # Note: the normalization of the density output is correct only for the Euclidean distance metric.
+        kde_model = KernelDensity(kernel=kernel, bandwidth=bandwidth, metric="euclidean")
         kde_model.fit(X_pca)
 
         # Create a mesh grid over PCA space
         # TODO: add a comment on what and why is happening
+        # TODO: check that this is correct
         padding_x = 0.05 * (X_pca[:, 0].max() - X_pca[:, 0].min())
         padding_y = 0.05 * (X_pca[:, 1].max() - X_pca[:, 1].min())
         xmin = X_pca[:, 0].min() - padding_x
@@ -194,7 +199,7 @@ def pca(dataframe: pd.DataFrame, output_png: str, output_var: str, output_coord:
         log_density = kde_model.score_samples(grid_points)
         z = np.exp(log_density).reshape(xx.shape)
 
-        # plot on pca figure
+        # plot kde on pca figure
         plt.contourf(xx, yy, z, levels=100, cmap='Reds')
         plt.colorbar(label="Density")
 
