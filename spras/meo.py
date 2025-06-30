@@ -113,7 +113,7 @@ class MEO(PRM):
             nodes.to_csv(filename_map[node_type], index=False, columns=['NODEID'], header=False)
 
         # Create network file
-        edges = data.get_interactome(Direction.MIXED, GraphType.STANDARD, GraphMultiplicity.SIMPLE)
+        edges = data.get_interactome([Direction.MIXED, GraphType.STANDARD, GraphMultiplicity.SIMPLE]).df
 
         # Format network file
         edges = add_directionality_constant(edges, 'EdgeType', '(pd)', '(pp)')

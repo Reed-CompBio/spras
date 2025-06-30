@@ -55,7 +55,7 @@ class PathLinker(PRM):
         input_df.to_csv(filename_map["nodetypes"],sep="\t",index=False,columns=["#Node","Node type"])
 
         # Create network file
-        edges = data.get_interactome(Direction.DIRECTED, GraphType.STANDARD, GraphMultiplicity.SIMPLE)
+        edges = data.get_interactome([Direction.DIRECTED, GraphType.STANDARD, GraphMultiplicity.SIMPLE]).df
 
         # This is pretty memory intensive. We might want to keep the interactome centralized.
         edges.to_csv(filename_map["network"],sep="\t",index=False,columns=["Interactor1","Interactor2","Weight"],

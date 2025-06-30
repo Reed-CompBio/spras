@@ -58,7 +58,7 @@ class DOMINO(PRM):
 
         # Create network file - while DOMINO doesn't care about the directionality column,
         # it's nice to explicitly declare that it doesn't
-        edges_df = data.get_interactome(Direction.UNDIRECTED, GraphType.STANDARD, GraphMultiplicity.SIMPLE)
+        edges_df = data.get_interactome([Direction.UNDIRECTED, GraphType.STANDARD, GraphMultiplicity.SIMPLE]).df
 
         edges_df = add_constant(edges_df, 'ppi', 'ppi')
 

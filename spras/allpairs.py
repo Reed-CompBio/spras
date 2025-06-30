@@ -45,7 +45,7 @@ class AllPairs(PRM):
 
         # Create network file - while APSP doesn't care about the directionality column,
         # it's nice to explicitly declare that it doesn't
-        edges_df = data.get_interactome(Direction.UNDIRECTED, GraphType.STANDARD, GraphMultiplicity.SIMPLE)
+        edges_df = data.get_interactome([Direction.UNDIRECTED, GraphType.STANDARD, GraphMultiplicity.SIMPLE]).df
 
         # This is pretty memory intensive. We might want to keep the interactome centralized.
         edges_df.to_csv(filename_map["network"], sep="\t", index=False,

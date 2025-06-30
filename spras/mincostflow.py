@@ -50,7 +50,7 @@ class MinCostFlow (PRM):
             nodes.to_csv(filename_map[node_type], index=False, columns=['NODEID'], header=False)
 
         # create the network of edges
-        edges = data.get_interactome(Direction.DIRECTED, GraphType.STANDARD, GraphMultiplicity.SIMPLE)
+        edges = data.get_interactome([Direction.DIRECTED, GraphType.STANDARD, GraphMultiplicity.SIMPLE]).df
 
         # creates the edges files that contains the head and tail nodes and the weights after them
         edges.to_csv(filename_map['edges'], sep='\t', index=False, columns=["Interactor1", "Interactor2", "Weight"],

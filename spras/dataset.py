@@ -1,10 +1,15 @@
+from abc import abstractmethod
+import copy
 from enum import Enum
 import os
 import pickle as pkl
-from typing import Optional
+from typing import Optional, Self, Protocol
+from collections.abc import Iterable
 import warnings
 
 import pandas as pd
+
+from spras.interactome import convert_undirected_to_directed, convert_directed_to_undirected
 
 """
 Author: Chris Magnano
@@ -13,7 +18,107 @@ Author: Chris Magnano
 Methods and intermediate state for loading data and putting it into pandas tables for use by pathway reconstruction algorithms.
 """
 
-class Direction(str, Enum):
+class Interactome:
+    """
+    Newtype validator over pd.DataFrame for input interactomes.
+    """
+
+    def __init__(self, interactome: pd.DataFrame):
+        self.df = interactome
+        num_cols = self.df.shape[1]
+        if num_cols == 3:
+            self.df.columns = ["Interactor1", "Interactor2", "Weight"]
+            # When no direction is specified, default to undirected edges
+            self.df["Direction"] = "U"
+
+        elif num_cols == 4:
+            self.df.columns = [
+                "Interactor1",
+                "Interactor2",
+                "Weight",
+                "Direction",
+            ]
+
+            # Make directionality column case-insensitive
+            self.df["Direction"] = self.df["Direction"].str.upper()
+            if not self.df["Direction"].isin(["U", "D"]).all():
+                raise ValueError("The Direction column contains values other than U and D")
+
+        else:
+            raise ValueError("Interactome must have three or four columns but found {num_cols}")
+
+    def get_nodes(self) -> set[str]:
+        # TODO: handle hypergraphs
+        node_set = set(self.df.Interactor1.unique())
+        node_set = node_set.union(set(self.df.Interactor2.unique()))
+        return node_set
+
+    @classmethod
+    def from_file(cls, file: str):
+        return cls(pd.read_table(file, sep="\t", header=None))
+
+    def __copy__(self):
+        return Interactome(self.df)
+    
+    def __deepcopy__(self):
+        return Interactome(self.df.copy(deep=True))
+
+# NOTE: we use protocol to avoid the inheritance error as documented in
+# https://stackoverflow.com/questions/54893595/.
+class InteractomeProperty(Protocol):
+    """
+    If a class extends this, then that means it acts as a property of the interactome.
+    One could get, validate, or guarantee that an interactome has this property.
+    """
+
+    @staticmethod
+    def priority() -> int:
+        """
+        The priority of an interactome property, used in `guarantee_interactome`.
+        Interactome properties with higher priorities should be run first in any
+        function that uses these properties.
+
+        The default priority is 0. Priority collisions are okay.
+
+        This is a function to prevent collisions with the reflection-based derivation of enums.
+        """
+        return 0
+
+    @abstractmethod
+    @classmethod
+    def from_interactome(cls, interactome: Interactome) -> Optional[Self]:
+        """
+        Immutably gets a property from an interactome.
+
+        Returns None if the dataframe is empty or the information otherwise does not
+        matter.
+        """
+        raise NotImplementedError(f"The interactome property provider {cls.__name__} must provide a `from_interactome` implementation.")
+
+
+    def validate_interactome(self, interactome: Interactome):
+        """
+        Immutably checks that an interactome has this property, raising
+        an error otherwise.
+        """
+        checked_property = self.from_interactome(interactome)
+        if checked_property is not None and self != checked_property:
+            raise ValueError("The passed in interactome does not have the property {checked_property}; instead, it has {self}.")
+
+
+    @abstractmethod
+    def guarantee_interactome(self, interactome: Interactome):
+        """
+        Mutably checks that an interactome has this property,
+        changing the interactome to fit this property.
+        """
+        raise NotImplementedError(f"The interactome property provider {self.__class__.__name__} must provide a `guarantee_interactome` implementation.")
+
+class Direction(str, Enum, InteractomeProperty):
+    """
+    The directionality of an interactome.
+    """
+
     DIRECTED = 'directed'
     UNDIRECTED = 'undirected'
     MIXED = 'mixed'
@@ -31,8 +136,8 @@ class Direction(str, Enum):
             case Direction.MIXED:
                 raise ValueError("Direction.MIXED can not be converted to a letter.")
 
-    @staticmethod
-    def from_letter(string: str) -> "Direction":
+    @classmethod
+    def from_letter(cls, string: str) -> "Direction":
         match string.upper():
             case "U":
                 return Direction.UNDIRECTED
@@ -41,44 +146,83 @@ class Direction(str, Enum):
             case _:
                 raise ValueError(f"The value '{string}' is not one of 'U' or 'D' (case-insensitive)")
 
-class Coercion(str, Enum):
-    """
-    The enum of interactome coercions.
-    """
+    @classmethod
+    def from_interactome(cls, interactome: Interactome) -> Optional["Direction"]:
+        """
+        Gets the directionality of the underlying interactome.
+        """
+        if interactome.df.empty:
+            return None
+        
+        direction_count = interactome.df["Direction"].nunique()
+        if direction_count > 1:
+            return Direction.MIXED
+        
+        first_direction = interactome.df["Direction"].iloc[0]
+        return Direction.from_letter(first_direction)
 
-    NONE = "none"
-    """
-    No coercions are performed: any non-superclass coercions immediately error.
-    For example, a coercion from an undirected graph to a mixed graph is okay,
-    but a coercion from an undirected graph to a directed graph errors.
-    """
+    def validate_interactome(self, interactome: Interactome):
+        """
+        Checks that this dataset's interactome follows `direction`.
+        Throws an error if it doesn't.
+        """
+        if self == Direction.MIXED:
+            return
 
-    WEAK = "weak"
-    """
-    Coercions that do not lose information.
-    For example, coercions from an undirected graph to a directed graph.
-    """
+        letter = self.as_letter()
+        if interactome.df["Direction"].ne(letter).any():
+            raise RuntimeError(f"One of the rows in the provided interactome are not '{self}'!")
+        
+    def guarantee_interactome(self, interactome: Interactome):
+        """
+        Mutably checks that an interactome follows this directionality,
+        changing the interactome to fit this property.
+        """
+        match self:
+            case Direction.UNDIRECTED:
+                interactome.df = convert_undirected_to_directed(interactome.df)
+            case Direction.DIRECTED:
+                interactome.df = convert_directed_to_undirected(interactome.df)
+            case Direction.MIXED:
+                pass # no need to convert a mixed graph
 
-    ALL = "all"
-    """
-    Coercions that may lose information.
+class GraphMultiplicity(str, Enum, InteractomeProperty):
+    SIMPLE = 'simple'
+    MULTI = 'multi'
 
-    For example, coercions from a mixed graph to an undirected graph.
+    @classmethod
+    def from_interactome(cls, interactome: Interactome) -> Optional["GraphMultiplicity"]:
+        raise NotImplementedError
+    
+    def validate_interactome(self, interactome: Interactome):
+        raise NotImplementedError
+    
+    def guarantee_interactome(self, interactome: Interactome):
+        raise NotImplementedError
 
-    This is currently the default coercion used in algorithm implementations.
-    """
-    # TODO: ideally, these coercions should be made explicit to the user.
-
-class GraphType(str, Enum):
+class GraphType(str, Enum, InteractomeProperty):
     STANDARD = 'standard'
     "A normal graph from graph theory: edges connect two vertices."
 
     HYPER = 'hyper'
     "A hypergraph: edges connect any set of vertices to another set of vertices."
 
-class GraphMultiplicity(str, Enum):
-    SIMPLE = 'simple'
-    MULTI = 'multi'
+    @classmethod
+    def from_interactome(cls, interactome: Interactome) -> Optional["GraphType"]:
+        if interactome.df.empty:
+            return None
+        
+        raise NotImplementedError
+
+    def validate_interactome(self, interactome: Interactome):
+        if self == GraphType.HYPER:
+            # All hypergraphs are 'standard' graphs.
+            pass
+
+        raise NotImplementedError
+    
+    def guarantee_interactome(self, interactome: Interactome):
+        raise NotImplementedError
 
 class Dataset:
     # Common column names
@@ -91,7 +235,7 @@ class Dataset:
 
     def __init__(self, dataset_dict):
         self.label = None
-        self.interactome = None
+        self.interactome: Optional[Interactome] = None
         self.node_table = None
         self.node_set = set()
         self.other_files = []
@@ -143,38 +287,8 @@ class Dataset:
         data_loc = dataset_dict["data_dir"]
 
         # Load everything as pandas tables
-        self.interactome = pd.read_table(
-            os.path.join(data_loc, interactome_loc), sep="\t", header=None
-        )
-        num_cols = self.interactome.shape[1]
-        if num_cols == 3:
-            self.interactome.columns = ["Interactor1", "Interactor2", "Weight"]
-            # When no direction is specified, default to undirected edges
-            self.interactome["Direction"] = "U"
-
-        elif num_cols == 4:
-            self.interactome.columns = [
-                "Interactor1",
-                "Interactor2",
-                "Weight",
-                "Direction",
-            ]
-
-            # Make directionality column case-insensitive
-            self.interactome["Direction"] = self.interactome["Direction"].str.upper()
-            if not self.interactome["Direction"].isin(["U", "D"]).all():
-                raise ValueError(f"The Direction column for {self.label} edge file {interactome_loc} contains values "
-                                 f"other than U and D")
-
-        else:
-            raise ValueError(
-                f"Edge file {interactome_loc} must have three or four columns but found {num_cols}"
-            )
-        
-        # TODO: Handle hypergraphs
-
-        node_set = set(self.interactome.Interactor1.unique())
-        node_set = node_set.union(set(self.interactome.Interactor2.unique()))
+        self.interactome = Interactome.from_file(os.path.join(data_loc, interactome_loc))
+        node_set = self.interactome.get_nodes()
 
         # Load generic node tables
         self.node_table = pd.DataFrame(node_set, columns=[self.NODE_ID])
@@ -243,71 +357,18 @@ class Dataset:
     def get_other_files(self):
         return self.other_files.copy()
 
-    def get_direction(self) -> Optional[Direction]:
+    def get_interactome(self, guarantees: Iterable[InteractomeProperty]):
         """
-        Gets the directionality of the underlying interactome.
-        """
-        if self.interactome is None or self.interactome.empty:
-            return None
-        
-        direction_count = self.interactome["Direction"].nunique()
-        if direction_count > 1:
-            return Direction.MIXED
-        
-        first_direction = self.interactome["Direction"].iloc[0]
-        return Direction.from_letter(first_direction)
-
-    def check_direction(self, direction: Direction):
-        """
-        Checks that this dataset's interactome follows `direction`.
-        Throws an error if it doesn't.
-        """
-        if direction == Direction.MIXED or self.interactome is None:
-            return
-
-        letter = direction.as_letter()
-        if self.interactome["Direction"].ne(letter).any():
-            raise RuntimeError(f"One of the rows in the interactome are not '{direction}'!")
-
-    def get_type(self) -> Optional[GraphType]:
-        if self.interactome is None or self.interactome.empty:
-            return None
-
-    def check_type(self, type: GraphType):
-        """
-        Checks that this dataset's interactome follows `type`.
-        Throws an error if it doesn't.
-        """
-
-        if type == GraphType.HYPER or self.interactome is None:
-            # All hypergraphs are 'standard' graphs.
-            pass
-
-        raise RuntimeError("unimplemented")
-    
-    def get_multiplicity(self) -> Optional[GraphMultiplicity]:
-        if self.interactome is None or self.interactome.empty:
-            return None
-
-    def check_multiplicity(self, multiplicity: GraphMultiplicity):
-        """
-        Checks that this dataset's interactome follows `multiplicity`.
-        Throws an error if it doesn't.
-        """
-
-        if multiplicity == GraphMultiplicity.MULTI or self.interactome is None:
-            # All simple graphs are multigraphs.
-            pass
-
-        raise RuntimeError("unimplemented")
-
-    def get_interactome(self, direction: Direction, type: GraphType, multiplicity: GraphMultiplicity, coercion = Coercion.ALL):
-        """
-        Gets an interactome which is guaranteed to have the provided features. 
-        The specified coercion specifies the strength at which `get_interactome` will try to change the interactome
-        to meet the specified features.
+        Gets an interactome which is guaranteed to have the provided properties.
         """
 
         if self.interactome is None:
-            raise ValueError("interactome is None: can't copy a non-existant interactome.")
-        return self.interactome.copy(deep = True)
+            raise ValueError("interactome is None: can't copy a non-existent interactome.")
+        new_interactome = copy.deepcopy(self.interactome)
+
+        list_guarantees = list(guarantees)
+        list_guarantees.sort(key=lambda x: x.priority())
+        for guarantee in list_guarantees:
+            guarantee.guarantee_interactome(new_interactome)
+
+        return new_interactome

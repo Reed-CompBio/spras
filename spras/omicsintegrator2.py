@@ -49,7 +49,7 @@ class OmicsIntegrator2(PRM):
         node_df.to_csv(filename_map['prizes'], sep='\t', index=False, columns=['NODEID', 'prize'], header=['name','prize'])
 
         # Create network file
-        edges_df = data.get_interactome(Direction.UNDIRECTED, GraphType.STANDARD, GraphMultiplicity.SIMPLE)
+        edges_df = data.get_interactome([Direction.UNDIRECTED, GraphType.STANDARD, GraphMultiplicity.SIMPLE]).df
 
         # Format network file
         # edges_df = convert_directed_to_undirected(edges_df)
