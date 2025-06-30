@@ -2,9 +2,9 @@ import copy
 import os
 import pickle as pkl
 import warnings
-from abc import abstractmethod
+from abc import ABCMeta, abstractmethod
 from collections.abc import Iterable
-from enum import Enum
+from enum import EnumMeta, StrEnum
 from typing import Optional, Protocol, Self
 
 import pandas as pd
@@ -65,9 +65,12 @@ class Interactome:
     def __deepcopy__(self):
         return Interactome(self.df.copy(deep=True))
 
-# NOTE: we use protocol to avoid the inheritance error as documented in
-# https://stackoverflow.com/questions/54893595/.
-class InteractomeProperty(Protocol):
+
+# https://stackoverflow.com/a/63804868/7589775
+class ABCEnumMeta(EnumMeta, ABCMeta):
+    pass
+
+class InteractomeProperty(StrEnum, metaclass=ABCEnumMeta):
     """
     If a class extends this, then that means it acts as a property of the interactome.
     One could get, validate, or guarantee that an interactome has this property.
@@ -87,18 +90,12 @@ class InteractomeProperty(Protocol):
         """
         return 0
 
-    @abstractmethod
     @classmethod
     def from_interactome(cls, interactome: Interactome) -> Optional[Self]:
-        """
-        Immutably gets a property from an interactome.
-
-        Returns None if the dataframe is empty or the information otherwise does not
-        matter.
-        """
-        raise NotImplementedError(f"The interactome property provider {cls.__name__} must provide a `from_interactome` implementation.")
+        ...
 
 
+    @abstractmethod
     def validate_interactome(self, interactome: Interactome):
         """
         Immutably checks that an interactome has this property, raising
@@ -108,16 +105,12 @@ class InteractomeProperty(Protocol):
         if checked_property is not None and self != checked_property:
             raise ValueError("The passed in interactome does not have the property {checked_property}; instead, it has {self}.")
 
-
     @abstractmethod
     def guarantee_interactome(self, interactome: Interactome):
-        """
-        Mutably checks that an interactome has this property,
-        changing the interactome to fit this property.
-        """
-        raise NotImplementedError(f"The interactome property provider {self.__class__.__name__} must provide a `guarantee_interactome` implementation.")
+        ...
 
-class Direction(str, Enum, InteractomeProperty):
+# Note: We order derivations as so to avoid metaclass errors.
+class Direction(InteractomeProperty):
     """
     The directionality of an interactome.
     """
@@ -186,7 +179,7 @@ class Direction(str, Enum, InteractomeProperty):
             case Direction.MIXED:
                 pass # no need to convert a mixed graph
 
-class GraphMultiplicity(str, Enum, InteractomeProperty):
+class GraphMultiplicity(InteractomeProperty):
     SIMPLE = 'simple'
     MULTI = 'multi'
 
@@ -211,7 +204,7 @@ class GraphMultiplicity(str, Enum, InteractomeProperty):
         else:
             return GraphMultiplicity.SIMPLE
 
-class GraphLoopiness(str, Enum, InteractomeProperty):
+class GraphLoopiness(InteractomeProperty):
     LOOPY = 'loopy'
     NO_LOOPS = 'no_loops'
 
@@ -362,7 +355,7 @@ class Dataset:
         """
         Gets an interactome which is guaranteed to have the provided properties.
 
-        It is recommended to state the Direction, GraphType, and GraphMultiplicity,
+        It is recommended to state the Direction and GraphMultiplicity,
         even if their coercions do nothing.
         """
 
