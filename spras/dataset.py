@@ -5,7 +5,8 @@ import warnings
 from abc import ABCMeta, abstractmethod
 from collections.abc import Iterable
 from enum import EnumMeta, StrEnum
-from typing import Optional, Protocol, Self
+from os import PathLike
+from typing import Optional, Self
 
 import pandas as pd
 
@@ -56,7 +57,7 @@ class Interactome:
         return node_set
 
     @classmethod
-    def from_file(cls, file: str):
+    def from_file(cls, file: str | PathLike):
         return cls(pd.read_table(file, sep="\t", header=None))
 
     def __copy__(self):
