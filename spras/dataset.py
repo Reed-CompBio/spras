@@ -189,8 +189,12 @@ class GraphMultiplicity(InteractomeProperty):
             return
 
         # https://stackoverflow.com/a/25792812/7589775
-        interactome.df.loc[interactome.df["Interactor1"] < interactome.df["Interactor2"], interactome.df.columns] = interactome.df.loc[
-            interactome.df["Interactor1"] < interactome.df["Interactor2"], ["Interactor2", "Interactor1", "Weight", "Direction"]
+        interactome.df.loc[
+            interactome.df["Interactor1"] < interactome.df["Interactor2"] & interactome.df["Direction"] == "U",
+            interactome.df.columns
+        ] = interactome.df.loc[
+            interactome.df["Interactor1"] < interactome.df["Interactor2"],
+            ["Interactor2", "Interactor1", "Weight", "Direction"]
         ]
 
         # TODO: should we handle weight specially here?
@@ -219,6 +223,22 @@ class GraphLoopiness(InteractomeProperty):
 
     def guarantee_interactome(self, interactome: Interactome):
         interactome.df = interactome.df[interactome.df["Interactor1"] != interactome.df["Interactor2"]]
+
+class GraphDuals(InteractomeProperty):
+    """
+    Property of a graph if any two nodes are connected by two directed edges
+    going the other way. It's useful to specify NO_DUALS for edge orienting algorithms.
+    """
+
+    NO_DUALS = 'no_duals'
+    DUALS = 'duals'
+
+    @classmethod
+    def from_interactome(cls, interactome: Interactome) -> Optional["GraphDuals"]:
+        raise NotImplementedError
+
+    def guarantee_interactome(self, interactome: Interactome):
+        raise NotImplementedError
 
 class Dataset:
     # Common column names
