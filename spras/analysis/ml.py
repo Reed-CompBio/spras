@@ -20,6 +20,7 @@ plt.switch_backend('Agg')
 
 linkage_methods = ["ward", "complete", "average", "single"]
 distance_metrics = ["euclidean", "manhattan", "cosine"]
+kde_kernel = ['gaussian', 'tophat', 'epanechnikov', 'exponential', 'linear', 'cosine']
 
 UNDIR_CONST = '---'  # separator between nodes when forming undirected edges
 DIR_CONST = '-->'  # separator between nodes when forming directed edges
@@ -176,15 +177,20 @@ def pca(dataframe: pd.DataFrame, output_png: str, output_var: str, output_coord:
         # I'm for make people do it individually
         # grid = GridSearchCV(KernelDensity(), params (a dict))
 
-        #TODO add checks on the parameters
+        if kernel not in kde_kernel:
+            raise ValueError(f"kernel={kernel} must be one of {kde_kernel}")
+        if not isinstance(bandwidth, float) and bandwidth not in ("scott", "silverman"):
+            raise ValueError(f"bandwidth={bandwidth} must be a float or estimation method 'scott' or 'silverman'")
 
         # Note: the normalization of the density output is correct only for the Euclidean distance metric.
         kde_model = KernelDensity(kernel=kernel, bandwidth=bandwidth, metric="euclidean")
         kde_model.fit(X_pca)
 
-        # Create a mesh grid over PCA space
-        # TODO: add a comment on what and why is happening
-        # TODO: check that this is correct
+        # creates a mesh grid covering the 2D PCA plot space with slight padding.
+        # the grid will be used to evaluate and visualize the KDE
+        # over the continuous PCA space, rather than just at discrete sample points.
+        # padding ensures that points near the edges are also included and the plot does not get cut off visually.
+        # the grid_points array stacks the x and y coordinates into a 2D array of shape (num_grid_points, 2),
         padding_x = 0.05 * (X_pca[:, 0].max() - X_pca[:, 0].min())
         padding_y = 0.05 * (X_pca[:, 1].max() - X_pca[:, 1].min())
         xmin = X_pca[:, 0].min() - padding_x
@@ -228,6 +234,10 @@ def pca(dataframe: pd.DataFrame, output_png: str, output_var: str, output_coord:
     coordinates_df.loc[len(coordinates_df)] = centroid_row
     if kernel_density:
         # TODO: what if there are > 1 maxes? how do we deal with tiebreakers?
+        # max_density = df_kde["Density"].max()
+        # max_rows = df_kde[df_kde["Density"] == max_density]
+        # print(max_rows)
+
         max_row = df_kde.loc[df_kde["Density"].idxmax()]
         kde_row = ['kde_peak', max_row["X_coordinate"], max_row["Y_coordinate"]]
         coordinates_df.loc[len(coordinates_df)] = kde_row
