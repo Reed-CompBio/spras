@@ -193,7 +193,8 @@ class GraphMultiplicity(InteractomeProperty):
             interactome.df["Interactor1"] < interactome.df["Interactor2"], ["Interactor2", "Interactor1", "Weight", "Direction"]
         ]
 
-        interactome.df.drop_duplicates(subset=["Interactor1", "Interactor2"], keep="last")
+        # TODO: should we handle weight specially here?
+        interactome.df = interactome.df.drop_duplicates(subset=["Interactor1", "Interactor2", "Direction"], keep="last")
 
     @classmethod
     def from_interactome(cls, interactome: Interactome) -> Optional["GraphMultiplicity"]:
