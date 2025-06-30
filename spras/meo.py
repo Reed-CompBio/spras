@@ -2,7 +2,7 @@ import os
 from pathlib import Path
 
 from spras.containers import prepare_volume, run_container_and_log
-from spras.dataset import Direction, GraphMultiplicity, GraphType
+from spras.dataset import Direction, GraphMultiplicity
 from spras.interactome import (
     add_directionality_constant,
     reinsert_direction_col_directed,
@@ -113,7 +113,7 @@ class MEO(PRM):
             nodes.to_csv(filename_map[node_type], index=False, columns=['NODEID'], header=False)
 
         # Create network file
-        edges = data.get_interactome([Direction.MIXED, GraphType.STANDARD, GraphMultiplicity.SIMPLE]).df
+        edges = data.get_interactome([Direction.MIXED, GraphMultiplicity.SIMPLE]).df
 
         # Format network file
         edges = add_directionality_constant(edges, 'EdgeType', '(pd)', '(pp)')

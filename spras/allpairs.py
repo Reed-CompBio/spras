@@ -2,7 +2,7 @@ import warnings
 from pathlib import Path
 
 from spras.containers import prepare_volume, run_container_and_log
-from spras.dataset import Dataset, Direction, GraphMultiplicity, GraphType
+from spras.dataset import Dataset, Direction, GraphMultiplicity
 from spras.interactome import reinsert_direction_col_undirected
 from spras.prm import PRM
 from spras.util import add_rank_column, duplicate_edges, raw_pathway_df
@@ -45,7 +45,7 @@ class AllPairs(PRM):
 
         # Create network file - while APSP doesn't care about the directionality column,
         # it's nice to explicitly declare that it doesn't
-        edges_df = data.get_interactome([Direction.UNDIRECTED, GraphType.STANDARD, GraphMultiplicity.SIMPLE]).df
+        edges_df = data.get_interactome([Direction.UNDIRECTED, GraphMultiplicity.SIMPLE]).df
 
         # This is pretty memory intensive. We might want to keep the interactome centralized.
         edges_df.to_csv(filename_map["network"], sep="\t", index=False,

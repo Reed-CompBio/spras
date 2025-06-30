@@ -4,7 +4,7 @@ from pathlib import Path
 import pandas as pd
 
 from spras.containers import prepare_volume, run_container_and_log
-from spras.dataset import Direction, GraphMultiplicity, GraphType
+from spras.dataset import Direction, GraphMultiplicity
 from spras.interactome import (
     add_constant,
     reinsert_direction_col_undirected,
@@ -58,7 +58,7 @@ class DOMINO(PRM):
 
         # Create network file - while DOMINO doesn't care about the directionality column,
         # it's nice to explicitly declare that it doesn't
-        edges_df = data.get_interactome([Direction.UNDIRECTED, GraphType.STANDARD, GraphMultiplicity.SIMPLE]).df
+        edges_df = data.get_interactome([Direction.UNDIRECTED, GraphMultiplicity.SIMPLE]).df
 
         edges_df = add_constant(edges_df, 'ppi', 'ppi')
 

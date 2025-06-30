@@ -48,7 +48,6 @@ class Interactome:
             raise ValueError("Interactome must have three or four columns but found {num_cols}")
 
     def get_nodes(self) -> set[str]:
-        # TODO: handle hypergraphs
         node_set = set(self.df.Interactor1.unique())
         node_set = node_set.union(set(self.df.Interactor2.unique()))
         return node_set
@@ -78,7 +77,8 @@ class InteractomeProperty(Protocol):
         Interactome properties with higher priorities should be run first in any
         function that uses these properties.
 
-        The default priority is 0. Priority collisions are okay.
+        The default priority is 0. Priority collisions are okay. Since priority is defined throughout
+        the codebase, it's best to see usages of this function to gauge the current range of priority.
 
         This is a function to prevent collisions with the reflection-based derivation of enums.
         """
@@ -123,6 +123,14 @@ class Direction(str, Enum, InteractomeProperty):
     UNDIRECTED = 'undirected'
     MIXED = 'mixed'
 
+    @staticmethod
+    def priority() -> int:
+        # We give Direction a higher priority
+        # to ensure it gets run before GraphMultiplicity.
+        # For a motivating example, see the graph on nodes A, B
+        # of edges A->B and A<-B.
+        return 100
+
     def as_letter(self) -> str:
         """
         Converts the direction to a letter, unless it is
@@ -148,9 +156,6 @@ class Direction(str, Enum, InteractomeProperty):
 
     @classmethod
     def from_interactome(cls, interactome: Interactome) -> Optional["Direction"]:
-        """
-        Gets the directionality of the underlying interactome.
-        """
         if interactome.df.empty:
             return None
         
@@ -162,10 +167,6 @@ class Direction(str, Enum, InteractomeProperty):
         return Direction.from_letter(first_direction)
 
     def validate_interactome(self, interactome: Interactome):
-        """
-        Checks that this dataset's interactome follows `direction`.
-        Throws an error if it doesn't.
-        """
         if self == Direction.MIXED:
             return
 
@@ -174,10 +175,6 @@ class Direction(str, Enum, InteractomeProperty):
             raise RuntimeError(f"One of the rows in the provided interactome are not '{self}'!")
         
     def guarantee_interactome(self, interactome: Interactome):
-        """
-        Mutably checks that an interactome follows this directionality,
-        changing the interactome to fit this property.
-        """
         match self:
             case Direction.UNDIRECTED:
                 interactome.df = convert_undirected_to_directed(interactome.df)
@@ -200,29 +197,19 @@ class GraphMultiplicity(str, Enum, InteractomeProperty):
     def guarantee_interactome(self, interactome: Interactome):
         raise NotImplementedError
 
-class GraphType(str, Enum, InteractomeProperty):
-    STANDARD = 'standard'
-    "A normal graph from graph theory: edges connect two vertices."
-
-    HYPER = 'hyper'
-    "A hypergraph: edges connect any set of vertices to another set of vertices."
+class GraphLoopiness(str, Enum, InteractomeProperty):
+    LOOPY = 'loopy'
+    NO_LOOPS = 'no_loops'
 
     @classmethod
-    def from_interactome(cls, interactome: Interactome) -> Optional["GraphType"]:
-        if interactome.df.empty:
-            return None
-        
-        raise NotImplementedError
-
-    def validate_interactome(self, interactome: Interactome):
-        if self == GraphType.HYPER:
-            # All hypergraphs are 'standard' graphs.
-            pass
-
-        raise NotImplementedError
+    def from_interactome(cls, interactome: Interactome) -> Optional["GraphLoopiness"]:
+        if (interactome.df["Interactor1"] == interactome.df["Interactor2"]).any():
+            return GraphLoopiness.LOOPY
+        else:
+            return GraphLoopiness.NO_LOOPS
     
     def guarantee_interactome(self, interactome: Interactome):
-        raise NotImplementedError
+        interactome.df = interactome.df[interactome.df["Interactor1"] != interactome.df["Interactor2"]]
 
 class Dataset:
     # Common column names
@@ -360,6 +347,9 @@ class Dataset:
     def get_interactome(self, guarantees: Iterable[InteractomeProperty]):
         """
         Gets an interactome which is guaranteed to have the provided properties.
+
+        It is recommended to state the Direction, GraphType, and GraphMultiplicity,
+        even if their coercions do nothing.
         """
 
         if self.interactome is None:
