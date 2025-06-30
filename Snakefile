@@ -229,7 +229,7 @@ def collect_prepared_input(wildcards):
             # If any expected files were missing, ask to delete the entire directory so the call below triggers running prepare_input
             if len(missing_inputs) != 0:
                 raise RuntimeError(f"Not all input files were provided. (Missing {missing_inputs})\n" +
-                    "fTo prevent multithreading errors, please remove the {prepared_inputs} directory.")
+                    f"To prevent multithreading errors, please remove the {prepared_inputs} directory.")
 
     # Check whether prepare_input has been run for these wildcards (dataset-algorithm pair) and run if needed
     # The check is executed by checking whether the prepare_input output exists, which is a directory
