@@ -90,7 +90,8 @@ class BowTieBuilder(PRM):
 
         # Testing for btb index errors
         # TODO: This error will never actually occur if the inputs are passed through
-        # `generate_inputs`.
+        # `generate_inputs`. See the discussion about removing this or making this a habit at
+        # https://github.com/Reed-CompBio/spras/issues/306.
         with open(edges, 'r') as edge_file:
             try:
                 for line in edge_file:
