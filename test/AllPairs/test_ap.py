@@ -48,6 +48,7 @@ class TestAllPairs:
         AllPairs.run(
             nodetypes=str(TEST_DIR / 'input' / 'sample-in-nodetypes.txt'),
             network=str(TEST_DIR / 'input' / 'sample-in-net.txt'),
+            directed_flag=str(TEST_DIR / 'input' / 'directed-flag-false.txt'),
             output_file=str(out_path)
         )
         assert out_path.exists()
@@ -70,6 +71,7 @@ class TestAllPairs:
         AllPairs.run(
             nodetypes=str(TEST_DIR / 'input' / 'sample-in-nodetypes.txt'),
             network=str(TEST_DIR / 'input' / 'sample-in-net.txt'),
+            directed_flag=str(TEST_DIR / 'input' / 'directed-flag-false.txt'),
             output_file=str(out_path),
             container_framework="singularity")
         assert out_path.exists()
@@ -83,6 +85,7 @@ class TestAllPairs:
         AllPairs.run(
             nodetypes=str(TEST_DIR / 'input/sample-in-nodetypes.txt'),
             network=str(TEST_DIR / 'input/sample-in-net.txt'),
+            directed_flag=str(TEST_DIR / 'input' / 'directed-flag-false.txt'),
             output_file=str(out_path),
             container_framework="singularity")
         config.config.unpack_singularity = False
@@ -104,6 +107,7 @@ class TestAllPairs:
         AllPairs.run(
             nodetypes=str(TEST_DIR / 'input' / 'correctness-nodetypes.txt'),
             network=str(TEST_DIR / 'input' / 'correctness-network.txt'),
+            directed_flag=str(TEST_DIR / 'input' / 'directed-flag-false.txt'),
             output_file=str(OUT_DIR / 'correctness-out.txt')
         )
 
@@ -113,13 +117,11 @@ class TestAllPairs:
         out_path = OUT_DIR / 'directed-out.txt'
         out_path.unlink(missing_ok=True)
 
-        OUT_DIR.joinpath('directed-flag.txt').touch()
-
         AllPairs.run(
             nodetypes=str(TEST_DIR / 'input' / 'directed-nodetypes.txt'),
             network=str(TEST_DIR / 'input' / 'directed-network.txt'),
+            directed_flag=str(TEST_DIR / 'input' / 'directed-flag-true.txt'),
             output_file=str(OUT_DIR / 'directed-out.txt'),
-            directed_flag=str(OUT_DIR / 'directed-flag.txt')
         )
 
         edge_equality_test_util(out_path, EXPECTED_DIR.joinpath('directed-expected.txt'))
@@ -137,6 +139,7 @@ class TestAllPairs:
         AllPairs.run(
             nodetypes=TEST_DIR / 'input' / 'zero-length-nodetypes.txt',
             network=TEST_DIR / 'input' / 'zero-length-network.txt',
+            directed_flag=str(TEST_DIR / 'input' / 'directed-flag-false.txt'),
             output_file=OUT_DIR / 'zero-length-out.txt'
         )
 

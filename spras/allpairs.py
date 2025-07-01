@@ -59,8 +59,10 @@ class AllPairs(PRM):
         # signal to `run` that the graph is directed.
         if has_direction(edges_df):
             edges_df = convert_undirected_to_directed(edges_df)
-            # we also touch a 'directed_flag.txt' file to say that this is directed
-            Path(filename_map['directed_flag']).touch()
+            # we write to a 'directed_flag.txt' file to say that this is directed
+            Path(filename_map['directed_flag']).write_text("true")
+        else:
+            Path(filename_map['directed_flag']).write_text("false")
 
         # This is pretty memory intensive. We might want to keep the interactome centralized.
         edges_df.to_csv(filename_map["network"], sep="\t", index=False,
@@ -76,7 +78,7 @@ class AllPairs(PRM):
         @param container_framework: choose the container runtime framework, currently supports "docker" or "singularity" (optional)
         @param output_file: path to the output pathway file (required)
         """
-        if not nodetypes or not network or not output_file:
+        if not nodetypes or not network or not output_file or not directed_flag:
             raise ValueError('Required All Pairs Shortest Paths arguments are missing')
 
         work_dir = '/apsp'
@@ -100,7 +102,7 @@ class AllPairs(PRM):
                    '--network', network_file,
                    '--nodes', node_file,
                    '--output', mapped_out_file]
-        if directed_flag and Path(directed_flag).exists():
+        if Path(directed_flag).read_text().strip() == "true":
             command.append("--directed")
 
         container_suffix = "allpairs:v4"

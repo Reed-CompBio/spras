@@ -37,7 +37,7 @@ container_registry:
 # combinations. For instance if we have the following:
 # - name: "myAlg"
 #   params:
-#         include: true
+#         include: false
 #         a: [1,2]
 #         b: [0.5,0.75]
 #
@@ -47,13 +47,13 @@ container_registry:
 algorithms:
   - name: "pathlinker"
     params:
-      include: true
+      include: false
       run1:
         k: range(100,201,100)
 
   - name: "omicsintegrator1"
     params:
-      include: true
+      include: false
       run1:
         b: [5, 6]
         w: np.linspace(0,5,2)
@@ -62,7 +62,7 @@ algorithms:
 
   - name: "omicsintegrator2"
     params:
-      include: true
+      include: false
       run1:
         b: 4
         g: 0
@@ -72,7 +72,7 @@ algorithms:
 
   - name: "meo"
     params:
-      include: true
+      include: false
       run1:
         max_path_length: 3
         local_search: "Yes"
@@ -80,7 +80,7 @@ algorithms:
 
   - name: "mincostflow"
     params:
-      include: true
+      include: false
       run1:
         flow: 1 # The flow must be an int
         capacity: 1
@@ -91,7 +91,7 @@ algorithms:
 
   - name: "domino"
     params:
-      include: true
+      include: false
       run1:
         slice_threshold: 0.3
         module_threshold: 0.05
@@ -149,17 +149,17 @@ reconstruction_settings:
 analysis:
   # Create one summary per pathway file and a single summary table for all pathways for each dataset
   summary:
-    include: true
+    include: false
   # Create output files for each pathway that can be visualized with GraphSpace
   graphspace:
-    include: true
+    include: false
   # Create Cytoscape session file with all pathway graphs for each dataset
   cytoscape:
-    include: true
+    include: false
   # Machine learning analysis (e.g. clustering) of the pathway output files for each dataset
   ml:
     # ml analysis per dataset
-    include: true
+    include: false
     # adds ml analysis per algorithm output
     # only runs for algorithms with multiple parameter combinations chosen
     aggregate_per_algorithm: true
@@ -175,7 +175,7 @@ analysis:
   evaluation:
     # evaluation per dataset-goldstandard pair
     # evaluation will not run unless ml include is set to true
-    include: true
+    include: false
     # adds evaluation per algorithm per dataset-goldstandard pair
     # evaluation per algortihm will not run unless ml include and ml aggregate_per_algorithm are set to true
     aggregate_per_algorithm: true
