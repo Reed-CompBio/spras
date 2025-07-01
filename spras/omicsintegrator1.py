@@ -1,6 +1,7 @@
 from pathlib import Path
 
 from spras.containers import prepare_volume, run_container_and_log
+from spras.dataset import Direction, GraphMultiplicity
 from spras.interactome import reinsert_direction_col_mixed
 from spras.prm import PRM
 from spras.util import add_rank_column, duplicate_edges, raw_pathway_df
@@ -65,10 +66,10 @@ class OmicsIntegrator1(PRM):
 
         if data.contains_node_columns('prize'):
             # NODEID is always included in the node table
-            node_df = data.request_node_columns(['prize'])
+            node_df = data.get_node_columns(['prize'])
         elif data.contains_node_columns(['sources', 'targets']):
             # If there aren't prizes but are sources and targets, make prizes based on them
-            node_df = data.request_node_columns(['sources','targets'])
+            node_df = data.get_node_columns(['sources','targets'])
             node_df.loc[node_df['sources']==True, 'prize'] = 1.0
             node_df.loc[node_df['targets']==True, 'prize'] = 1.0
         else:
@@ -78,7 +79,7 @@ class OmicsIntegrator1(PRM):
         node_df.to_csv(filename_map['prizes'],sep='\t',index=False,columns=['NODEID','prize'],header=['name','prize'])
 
         # Get network file
-        edges_df = data.get_interactome()
+        edges_df = data.get_interactome([Direction.MIXED, GraphMultiplicity.SIMPLE]).df
 
         # Rename Direction column
         edges_df.to_csv(filename_map['edges'],sep='\t',index=False,
