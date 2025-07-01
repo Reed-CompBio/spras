@@ -248,9 +248,7 @@ class GraphDuals(InteractomeProperty):
         From an interactome, return all of the directed edges mapped to their indices.
         """
         directed_map: dict[tuple[str, str], Hashable] = dict()
-        for index, row in interactome.df.iterrows():
-            if row['Direction'] != 'D':
-                continue
+        for index, row in interactome.df[interactome.df["Direction"] == 'D'].iterrows():
             directed_map[(row["Interaction1"], row["Interaction2"])] = index
         return directed_map
     
