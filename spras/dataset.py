@@ -6,7 +6,7 @@ from abc import ABCMeta, abstractmethod
 from collections.abc import Iterable
 from enum import EnumMeta, StrEnum
 from os import PathLike
-from typing import Optional, Self
+from typing import Optional, Self, Hashable
 
 import pandas as pd
 
@@ -181,6 +181,15 @@ class Direction(InteractomeProperty):
                 pass # no need to convert a mixed graph
 
 class GraphMultiplicity(InteractomeProperty):
+    """
+    The multiplicity of a graph.
+
+    Note: Multiplicity isn't biologically relevant. However, some datasets do come with
+    duplicate edges as inputs. Some algorithms are tolerant to multiple edges, but others
+    may need additional preprocessing to get rid of multiplicity, which is why we provide
+    this interactome property.
+    """
+    
     SIMPLE = 'simple'
     MULTI = 'multi'
 
@@ -190,7 +199,7 @@ class GraphMultiplicity(InteractomeProperty):
 
         # https://stackoverflow.com/a/25792812/7589775
         interactome.df.loc[
-            interactome.df["Interactor1"] < interactome.df["Interactor2"] & interactome.df["Direction"] == "U",
+            (interactome.df["Interactor1"] < interactome.df["Interactor2"]) & interactome.df["Direction"] == "U",
             interactome.df.columns
         ] = interactome.df.loc[
             interactome.df["Interactor1"] < interactome.df["Interactor2"],
@@ -233,12 +242,49 @@ class GraphDuals(InteractomeProperty):
     NO_DUALS = 'no_duals'
     DUALS = 'duals'
 
+    @staticmethod
+    def construct_directed_map(interactome: Interactome) -> dict[tuple[str, str], Hashable]:
+        """
+        From an interactome, return all of the directed edges mapped to their indices.
+        """
+        directed_map: dict[tuple[str, str], Hashable] = dict()
+        for index, row in interactome.df.iterrows():
+            if row['Direction'] != 'D':
+                continue
+            directed_map[(row["Interaction1"], row["Interaction2"])] = index
+        return directed_map
+    
+    @staticmethod
+    def find_conflicts(interactome: Interactome) -> Iterable[tuple[Hashable, Hashable]]:
+        """
+        Returns an iterator of 2-tuples, with:
+        (row to delete, row to make undirected)
+        """
+
+        directed_map = GraphDuals.construct_directed_map(interactome)
+
+        for edge, index in directed_map.items():
+            flipped_edge = (edge[1], edge[0])
+            if flipped_edge in directed_map:
+                yield (index, directed_map[flipped_edge])
+
     @classmethod
     def from_interactome(cls, interactome: Interactome) -> Optional["GraphDuals"]:
-        raise NotImplementedError
+        # https://stackoverflow.com/a/3114640/7589775 iterator check for non-emptiness
+        if any(True for _ in GraphDuals.find_conflicts(interactome)):
+            return GraphDuals.DUALS
+        else:
+            return GraphDuals.NO_DUALS
 
     def guarantee_interactome(self, interactome: Interactome):
-        raise NotImplementedError
+        conflicts = GraphDuals.find_conflicts(interactome)
+        remove, undirect = [], []
+        for rm, ud in conflicts:
+            remove.append(rm)
+            undirect.append(ud)
+        
+        interactome.df.drop(remove)
+        interactome.df[interactome.df.index.isin(undirect)]["Direction"] = "U"
 
 class Dataset:
     # Common column names
