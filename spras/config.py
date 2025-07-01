@@ -274,15 +274,15 @@ class Config:
             self.pca_params["components"] = self.ml_params["components"]
         if "labels" in self.ml_params:
             self.pca_params["labels"] = self.ml_params["labels"]
-        if "kernel_density" in self.ml_params: # TODO: add a check to make sure this is turned to true if evaluation is true
+        if "kernel_density" in self.ml_params:
             self.pca_params["kernel_density"] = self.ml_params["kernel_density"]
             if "bandwidth" in self.ml_params:
                 self.pca_params["bandwidth"] = self.ml_params["bandwidth"]
             if "kernel" in self.ml_params:
                 self.pca_params["kernel"] = self.ml_params["kernel"]
         else:
-            # TODO: needed because this is used for making the pca kde file
-            self.pca_params["kernel_density"] = False # TODO remove this if I am getting rid of the kde file
+            # TODO: needed because this is used for making the pca kde file, but will also be needed for the eval kernel_density coupling
+            self.pca_params["kernel_density"] = False
 
         if "remove_empty_pathways" in self.ml_params:
             self.pca_params["remove_empty_pathways"] = self.ml_params["remove_empty_pathways"]
