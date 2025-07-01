@@ -117,7 +117,8 @@ def create_palette(column_names):
     label_color_map = {label: color for label, color in zip(unique_column_names, custom_palette, strict=True)}
     return label_color_map
 
-def pca(dataframe: pd.DataFrame, output_png: str, output_var: str, output_coord: str, output_kde: str = None, components: int = 2, labels: bool = True, kernel_density: bool = False,  bandwidth:Union[float, str] = 1.0, kernel:str = "gaussian", remove_empty_pathways: bool = False):
+def pca(dataframe: pd.DataFrame, output_png: str, output_var: str, output_coord: str, output_kde: str = None, components: int = 2, labels: bool = True,
+        kernel_density: bool = False,  bandwidth:Union[float, str] = 1.0, kernel:str = "gaussian", remove_empty_pathways: bool = False):
     """
     Performs PCA on the data and creates a scatterplot of the top two principal components.
     It saves the plot, the variance explained by each component, and the
@@ -128,7 +129,10 @@ def pca(dataframe: pd.DataFrame, output_png: str, output_var: str, output_coord:
     @param output_coord: the filename to save the coordinates of each algorithm
     @param components: the number of principal components to calculate (Default is 2)
     @param labels: determines if labels will be included in the scatterplot (Default is True)
-    # TODO add the new parameters
+    @param kernel_density: if True, overlays a kernel density estimate (KDE) on top of the PCA scatterplot (Default is False)
+    @param bandwidth: bandwidth parameter for KDE; controls the smoothness of the density estimate. Can be a float or string ('scott' or 'silverman') for automatic bandwidth estimation selection (Default is 1.0)
+    @param kernel: kernel type used for KDE (Default is 'gaussian')
+    @remove_empty_pathways: if True, removes pathways (columns) from the dataframe that contain no edges before performing PCA (Default is False)
     """
     df = dataframe.reset_index(drop=True)
 
@@ -187,8 +191,7 @@ def pca(dataframe: pd.DataFrame, output_png: str, output_var: str, output_coord:
         kde_model.fit(X_pca)
 
         # creates a mesh grid covering the 2D PCA plot space with slight padding.
-        # the grid will be used to evaluate and visualize the KDE
-        # over the continuous PCA space, rather than just at discrete sample points.
+        # the grid will be used to evaluate and visualize the KDE over the continuous PCA space
         # padding ensures that points near the edges are also included and the plot does not get cut off visually.
         # the grid_points array stacks the x and y coordinates into a 2D array of shape (num_grid_points, 2),
         padding_x = 0.05 * (X_pca[:, 0].max() - X_pca[:, 0].min())

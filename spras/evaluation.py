@@ -161,7 +161,7 @@ class Evaluation:
 
             kde_peak_row = coord_df[coord_df['datapoint_labels'] == 'kde_peak']
             kde_peak = kde_peak_row.iloc[0, 1:].tolist()
-            coord_df = coord_df[~coord_df['datapoint_labels'].isin(['kde_peak', 'centroid'])]
+            coord_df = coord_df[~coord_df['datapoint_labels'].isin(['kde_peak', 'centroid'])] #TODO remove if we get rid of the centroid
 
             pc_columns = [col for col in coord_df.columns if col.startswith('PC')]
             coord_df['Distance To KDE peak'] = np.sqrt(sum((coord_df[pc] - kde_peak[i]) ** 2 for i, pc in enumerate(pc_columns)))
