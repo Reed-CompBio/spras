@@ -137,7 +137,7 @@ class MinCostFlow (PRM):
             raise RuntimeError('MinCostFlow did not produce an output network')
 
     @staticmethod
-    def parse_output(raw_pathway_file, standardized_pathway_file):
+    def parse_output(raw_pathway_file, standardized_pathway_file, params):
         """
         Convert a predicted pathway into the universal format
 

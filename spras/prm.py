@@ -1,5 +1,6 @@
 import typing
 from abc import ABC, abstractmethod
+from typing import Any
 
 from spras.dataset import Dataset
 
@@ -38,5 +39,5 @@ class PRM(ABC):
 
     @staticmethod
     @abstractmethod
-    def parse_output(raw_pathway_file: str, standardized_pathway_file: str):
+    def parse_output(raw_pathway_file: str, standardized_pathway_file: str, params: dict[str, Any]):
         raise NotImplementedError

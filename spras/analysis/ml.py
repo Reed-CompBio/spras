@@ -10,6 +10,7 @@ from adjustText import adjust_text
 from scipy.cluster.hierarchy import dendrogram, fcluster
 from sklearn.cluster import AgglomerativeClustering
 from sklearn.decomposition import PCA
+from sklearn.metrics import jaccard_score
 from sklearn.preprocessing import StandardScaler
 
 from spras.util import make_required_dirs
@@ -347,3 +348,40 @@ def ensemble_network(dataframe: pd.DataFrame, output_file: str):
 
     make_required_dirs(output_file)
     row_means[['Node1', 'Node2', 'Frequency', "Direction"]].to_csv(output_file, sep='\t', index=False, header=True)
+
+
+def jaccard_similarity_eval(summary_df: pd.DataFrame, output_file: str, output_png: str):
+    """
+    Calculates the pairwise Jaccard similarity matrix from the binary representation of `summary_df`.
+    Save the resulting similarity matrix as a tab-delimited file and generates and save a heatmap
+    visualization of the similarities.
+    @param summary_df: pandas dataframe with algorithm-parameter summary information
+    @param output_file: the filename to save the ensemble network
+    @param output_png: the file name to save the heatmap image
+    """
+    algorithms = summary_df.columns
+    jaccard_matrix = pd.DataFrame(np.identity(len(algorithms)), index=algorithms, columns=algorithms)
+    for i, alg1 in enumerate(algorithms):
+        for alg2 in algorithms[i+1:]:
+            sim_value = jaccard_score(summary_df[alg1], summary_df[alg2])
+            jaccard_matrix.loc[alg1, alg2] = sim_value
+            jaccard_matrix.loc[alg2, alg1] = sim_value
+    # save the jaccard matrix as a csv
+    jaccard_matrix.to_csv(output_file, sep='\t', index=True, header=True)
+    # make a heatmap from the jaccard matrix
+    fig, ax = plt.subplots(figsize=(10, 7))
+    # TODO: could add a way for the user to customize the cmap?
+    cax = ax.imshow(jaccard_matrix.values, interpolation='nearest', cmap='copper', vmin=0, vmax=1)
+    ax.set_title("Jaccard Similarity Heatmap")
+    # set tick labels with algorithm names
+    ax.set_xticks(np.arange(len(algorithms)))
+    ax.set_yticks(np.arange(len(algorithms)))
+    ax.set_xticklabels(algorithms, rotation=90)
+    ax.set_yticklabels(algorithms)
+    plt.colorbar(cax, ax=ax)
+    # annotate each cell with the corresponding similarity value
+    for i in range(len(algorithms)):
+        for j in range(len(algorithms)):
+            ax.text(j, i, f'{jaccard_matrix.values[i, j]:.2f}', ha='center', va='center', color='white')
+    plt.savefig(output_png, bbox_inches="tight", dpi=DPI)
+    plt.close()
