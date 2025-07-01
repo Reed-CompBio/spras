@@ -133,9 +133,9 @@ class Evaluation:
                 plt.grid(True)
                 plt.savefig(output_png)
                 plt.close()
-        else: # TODO: I don't think this case will ever hit
-            # TODO Change to an error and that this pr_df shouldn't be empty?
-            # test with every algorithm having 1 parameter setting in the config, this should raise an error in ML?
+        else:
+            # SPRAS will hit this case if all the algorithms have 1 parameter combination
+            # TODO: The Snakefile to use algorithms_mult_param_combos idea, how do we deal with an empty []?
             pr_df.to_csv(output_file, sep="\t", index=False)
             if output_png is not None:
                 plt.figure(figsize=(10, 7))

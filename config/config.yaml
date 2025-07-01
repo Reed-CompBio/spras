@@ -176,7 +176,7 @@ analysis:
     kernel_density: true
     # hyperparameter to control the smoothness of estimated kernel density
     # single float, 'scott', 'silverman'
-    bandwidth: 'scott'
+    bandwidth: 1.0
     # hyperparameter kernel to use for kernel_density
     # 'gaussian', 'tophat', 'epanechnikov', 'exponential', 'linear', 'cosine'
     kernel: 'gaussian'

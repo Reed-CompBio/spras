@@ -169,6 +169,7 @@ def pca(dataframe: pd.DataFrame, output_png: str, output_var: str, output_coord:
     X_pca = pca_instance.transform(X_scaled)
     variance = pca_instance.explained_variance_ratio_ * 100
 
+    # TODO: should we keep the centroid?
     # calculating the centroid
     centroid = np.mean(X_pca, axis=0) # mean of each principal component across all samples
 
@@ -236,13 +237,22 @@ def pca(dataframe: pd.DataFrame, output_png: str, output_var: str, output_coord:
     centroid_row = ['centroid'] + centroid.tolist() # TODO: do we still need the centroid?
     coordinates_df.loc[len(coordinates_df)] = centroid_row
     if kernel_density:
-        # TODO: what if there are > 1 maxes? how do we deal with tiebreakers?
-        # max_density = df_kde["Density"].max()
-        # max_rows = df_kde[df_kde["Density"] == max_density]
-        # print(max_rows)
+        max_density = df_kde["Density"].max()
+        max_rows = df_kde[df_kde["Density"] == max_density]
 
-        max_row = df_kde.loc[df_kde["Density"].idxmax()]
-        kde_row = ['kde_peak', max_row["X_coordinate"], max_row["Y_coordinate"]]
+        if len(max_rows) > 1:
+             # TODO: what if there are > 1 maxes? how do we deal with tiebreakers?
+                # 1) choose the one closest to the centroid or the kde center of mass (weighted average of coordinates, where the weights come from the KDE density at each point)
+                # 2) keep all of the maxes?
+                # 3) taking the mean of median of the maxes coordinates
+
+            # TODO: TEMP; still choosing the one maximum for now
+            max_row = max_rows.iloc[0]
+            kde_row = ['kde_peak', max_row["X_coordinate"], max_row["Y_coordinate"]]
+        else:
+            # Only one maximum, keep as is
+            max_row = max_rows.iloc[0]
+            kde_row = ['kde_peak', max_row["X_coordinate"], max_row["Y_coordinate"]]
         coordinates_df.loc[len(coordinates_df)] = kde_row
     coordinates_df.to_csv(output_coord, sep='\t', index=False)
 
