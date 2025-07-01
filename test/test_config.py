@@ -82,7 +82,8 @@ def get_test_config():
             },
             "ml": {
                 "include": False,
-                "aggregate_per_algorithm": False
+                "aggregate_per_algorithm": False,
+                "kernel_density": True # TODO update the coupling of ml and eval tests
             },
             "graphspace": {
                 "include": False
