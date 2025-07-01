@@ -89,7 +89,8 @@ class BowTieBuilder(PRM):
             raise ValueError('Missing input file')
 
         # Testing for btb index errors
-        # It's a bit messy, but it works \_('_')_/
+        # TODO: This error will never actually occur if the inputs are passed through
+        # `generate_inputs`.
         with open(edges, 'r') as edge_file:
             try:
                 for line in edge_file:
