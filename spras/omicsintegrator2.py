@@ -22,7 +22,8 @@ Interactor1   Interactor2   Weight
 """
 class OmicsIntegrator2(PRM):
     required_inputs = ['prizes', 'edges']
-    dois = []
+    # OI2 does not have a specific paper. Instead, we link to the OI1 paper.
+    dois = ["10.1371/journal.pcbi.1004879"]
 
     def generate_inputs(data: Dataset, filename_map):
         """
