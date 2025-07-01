@@ -6,7 +6,7 @@ from abc import ABCMeta, abstractmethod
 from collections.abc import Iterable
 from enum import EnumMeta, StrEnum
 from os import PathLike
-from typing import Optional, Self, Hashable
+from typing import Hashable, Optional, Self
 
 import pandas as pd
 
@@ -189,7 +189,7 @@ class GraphMultiplicity(InteractomeProperty):
     may need additional preprocessing to get rid of multiplicity, which is why we provide
     this interactome property.
     """
-    
+
     SIMPLE = 'simple'
     MULTI = 'multi'
 
@@ -249,9 +249,9 @@ class GraphDuals(InteractomeProperty):
         """
         directed_map: dict[tuple[str, str], Hashable] = dict()
         for index, row in interactome.df[interactome.df["Direction"] == 'D'].iterrows():
-            directed_map[(row["Interaction1"], row["Interaction2"])] = index
+            directed_map[(row["Interactor1"], row["Interactor2"])] = index
         return directed_map
-    
+
     @staticmethod
     def find_conflicts(interactome: Interactome) -> Iterable[tuple[Hashable, Hashable]]:
         """
@@ -280,7 +280,7 @@ class GraphDuals(InteractomeProperty):
         for rm, ud in conflicts:
             remove.append(rm)
             undirect.append(ud)
-        
+
         interactome.df.drop(remove)
         interactome.df[interactome.df.index.isin(undirect)]["Direction"] = "U"
 
