@@ -21,6 +21,7 @@ algorithms = {
     'pathlinker': {},
     'allpairs': {},
     'domino': {},
+    'bowtiebuilder': {},
     'strwr': {
         'threshold': 3,
         'dataset': Dataset({
