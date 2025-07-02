@@ -20,7 +20,7 @@ dependencies:
   - jinja2=3.1.6
   - mock=5.2.0
   - recommonmark=0.7.1
-  - sphinx=8.2.3
+  - sphinx=7.4.7
   - sphinx-rtd-theme=2.0.0
   # graphspace_python is under pip
 
