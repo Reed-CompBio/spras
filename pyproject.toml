@@ -47,6 +47,7 @@ dev = [
    # Only required for development
     "pre-commit==2.20",
     "pytest==8.0",
+    "pytest-split==0.10.0",
 ]
 
 [project.urls]
