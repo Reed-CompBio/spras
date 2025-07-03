@@ -26,5 +26,5 @@ dependencies:
   - sphinx=6.0
   - sphinx-rtd-theme=2.0.0
   - pip:
-     - dsub==0.4.13
+      - dsub==0.4.13
 
