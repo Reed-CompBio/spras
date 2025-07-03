@@ -3,7 +3,7 @@ from pathlib import Path
 
 import pytest
 
-import spras.config as config
+import spras.config.config as config
 from spras.omicsintegrator1 import OmicsIntegrator1, write_conf
 
 config.init_from_file("config/config.yaml")
