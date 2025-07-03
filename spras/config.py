@@ -274,6 +274,18 @@ class Config:
             self.pca_params["components"] = self.ml_params["components"]
         if "labels" in self.ml_params:
             self.pca_params["labels"] = self.ml_params["labels"]
+        if "kernel_density" in self.ml_params:
+            self.pca_params["kernel_density"] = self.ml_params["kernel_density"]
+            if "bandwidth" in self.ml_params:
+                self.pca_params["bandwidth"] = self.ml_params["bandwidth"]
+            if "kernel" in self.ml_params:
+                self.pca_params["kernel"] = self.ml_params["kernel"]
+        else:
+            # TODO: needed because this is used for making the pca kde file, but will also be needed for the eval kernel_density coupling
+            self.pca_params["kernel_density"] = False
+
+        if "remove_empty_pathways" in self.ml_params:
+            self.pca_params["remove_empty_pathways"] = self.ml_params["remove_empty_pathways"]
 
         self.hac_params = {}
         if "linkage" in self.ml_params:
@@ -311,3 +323,8 @@ class Config:
         # Only run Evaluation per algorithm if ML per algorithm is set to True
         if not self.analysis_include_ml_aggregate_algo:
             self.analysis_include_evaluation_aggregate_algo = False
+
+        # Only run Evaluation if kernel_density is set to True (needed for PCA chosen Evaluation)
+        if self.analysis_include_evaluation and not self.pca_params["kernel_density"]:
+            raise ValueError("Evaluation analysis cannot run because kernel_density is set to false. "
+                                "Please set kernel_density to true or set evaluation include to false.")
