@@ -9,7 +9,7 @@ The random walk with restarts algorithm requires a directed input network. Howev
 To build a new docker image for ST_RWR navigate to the /docker-wrappers/ST_RWR directory and enter:
 
 ```
-docker build -t reedcompbio/str-wr -f Dockerfile .
+docker build -t reedcompbio/st-rwr -f Dockerfile .
 ```
 
 ## Testing
