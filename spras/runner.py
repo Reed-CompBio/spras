@@ -24,7 +24,7 @@ algorithms: dict[str, type[PRM]] = {
     "omicsintegrator2": OmicsIntegrator2,
     "pathlinker": PathLinker,
     "rwr": RWR,
-    "st_rwr": ST_RWR,
+    "strwr": ST_RWR,
 }
 
 def get_algorithm(algorithm: str) -> type[PRM]:
