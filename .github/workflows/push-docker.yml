@@ -24,4 +24,4 @@ jobs:
           username: ${{ github.actor }}
           password: ${{ secrets.GITHUB_TOKEN }}
       - name: Run push.py
-        run: python3 docker-wrappers/push.py --dir ${{ inputs.folder }} --version ${{ inputs.version }}
+        run: python3 docker-wrappers/push.py --dir ${{ inputs.folder }} --version ${{ inputs.version }} --yes
