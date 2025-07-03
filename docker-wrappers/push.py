@@ -12,12 +12,12 @@ COMMAND_BUILDER_INSTANCE = COMMAND_BUILDX + ["create", "--name", "container", "-
 # https://stackoverflow.com/a/5137509/7589775
 dir_path = os.path.dirname(os.path.realpath(__file__))
 
-def construct_push_command(tags: list[str], dir: str):
+def construct_push_command(tags: list[str], dir: str, architectures: list[str]):
     base_cmd = ["build"]
     for tag in tags:
         base_cmd.extend(["--tag", tag])
     base_cmd = base_cmd + ["--file", Path(dir_path, dir, "Dockerfile"), "--platform",
-                "linux/arm64,linux/amd64", "--builder", "container", "--push", "."]
+                ",".join(architectures), "--builder", "container", "--push", "."]
     return COMMAND_BUILDX + base_cmd
 
 def parse_arguments():
@@ -50,17 +50,24 @@ def main():
             raise ValueError("All versions start with v (v1, v2, ...)")
 
     metadata_path = Path(dir_path, args.dir, "metadata.json")
-    name = json.loads(metadata_path.read_text())['dockerName']
+    metadata = json.loads(metadata_path.read_text())
+    name = metadata['dockerName']
+    architectures = metadata['architectures']
+    cwd = str(Path(dir_path, args.dir, metadata['cwd']) if 'cwd' in metadata else Path(dir_path, args.dir))
     tag = args.org_name + name + ":" + args.version
     tag_latest = args.org_name + name + ":latest"
 
+    print(f"Building {name} over {architectures} with:")
+    print(f"- CWD: {cwd}")
+    print(f"- Specified tag: {tag}")
+    print(f"-    Latest tag: {tag_latest}")
     if not args.yes:
-        confirm = input(f"[y/n] Are you sure you want to push to {tag} (w/ latest {tag_latest})? ")
+        confirm = input("[y/n] Are you sure you want to push to these tags over these architectures? ")
         if confirm.strip().lower() not in ('y', 'yes'):
             raise RuntimeError("Did not confirm dialog.")
 
-    push_command = construct_push_command([tag, tag_latest], args.dir)
-    subprocess.run(push_command, capture_output=False, cwd=str(Path(dir_path, args.dir)))
+    push_command = construct_push_command([tag, tag_latest], args.dir, architectures)
+    subprocess.run(push_command, capture_output=False, cwd=cwd)
 
 if __name__ == '__main__':
     main()

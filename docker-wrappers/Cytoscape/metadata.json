@@ -1,3 +1,4 @@
 {
-    "dockerName": "py4cytoscape"
+    "dockerName": "py4cytoscape",
+    "architectures": ["linux/arm64", "linux/amd64"]
 }

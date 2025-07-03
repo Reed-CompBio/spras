@@ -1,3 +1,5 @@
 {
-    "dockerName": "spras"
+    "dockerName": "spras",
+    "architectures": ["linux/arm64", "linux/amd64"],
+    "cwd": "../../"
 }
