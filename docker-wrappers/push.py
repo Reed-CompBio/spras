@@ -1,7 +1,7 @@
 import argparse
-import subprocess
-import os
 import json
+import os
+import subprocess
 from pathlib import Path
 
 COMMAND_BUILDX = ["docker", "buildx"]
@@ -12,8 +12,11 @@ COMMAND_BUILDER_INSTANCE = COMMAND_BUILDX + ["create", "--name", "container", "-
 # https://stackoverflow.com/a/5137509/7589775
 dir_path = os.path.dirname(os.path.realpath(__file__))
 
-def construct_push_command(tag: str, dir: str):
-    base_cmd = ["build", "--tag", tag, "--file", Path(dir_path, dir, "Dockerfile"), "--platform",
+def construct_push_command(tags: list[str], dir: str):
+    base_cmd = ["build"]
+    for tag in tags:
+        base_cmd.extend(["--tag", tag])
+    base_cmd = base_cmd + ["--file", Path(dir_path, dir, "Dockerfile"), "--platform",
                 "linux/arm64,linux/amd64", "--builder", "container", "--push", "."]
     return COMMAND_BUILDX + base_cmd
 
@@ -32,16 +35,16 @@ def parse_arguments():
 def main():
     # We need a buildx environment
     # This is a terrible check. Yes, docker buildx has no API exposed on docker-py.
-    if not f"\ncontainer" in subprocess.check_output(COMMAND_BUILDER_LS).decode("utf-8"):
+    if f"\ncontainer" not in subprocess.check_output(COMMAND_BUILDER_LS).decode("utf-8"):
         out = subprocess.run(COMMAND_BUILDER_INSTANCE)
         if out.returncode != 0:
             raise RuntimeError(f"Command {COMMAND_BUILDER_INSTANCE} exited with non-zero exit code.")
-    
+
     args = parse_arguments()
 
     if not args.org_name.endswith("/"):
         args.org_name = f"{args.org_name}/"
-    
+
     if not args.version.startswith("v"):
         if not args.relax:
             raise ValueError("All versions start with v (v1, v2, ...)")
@@ -49,13 +52,14 @@ def main():
     metadata_path = Path(dir_path, args.dir, "metadata.json")
     name = json.loads(metadata_path.read_text())['dockerName']
     tag = args.org_name + name + ":" + args.version
-
-    push_command = construct_push_command(tag, args.dir)
+    tag_latest = args.org_name + name + ":latest"
 
     if not args.yes:
-        confirm = input(f"[y/n] Are you sure you want to push to {tag}? ")
+        confirm = input(f"[y/n] Are you sure you want to push to {tag} (w/ latest {tag_latest})? ")
         if confirm.strip().lower() not in ('y', 'yes'):
             raise RuntimeError("Did not confirm dialog.")
+
+    push_command = construct_push_command([tag, tag_latest], args.dir)
     subprocess.run(push_command, capture_output=False)
 
 if __name__ == '__main__':
