@@ -6,7 +6,8 @@ hash_length: 7
 # Specify the container framework used by each PRM wrapper. Valid options include:
 # - docker (default if not specified)
 # - singularity -- Also known as apptainer, useful in HPC/HTC environments where docker isn't allowed
-# - dsub -- experimental with limited support, used for running on Google Cloud
+# - dsub -- experimental with limited support, used for running on Google Cloud with the All of Us cloud environment.
+#   - There is no support for other environments at the moment.
 container_framework: docker
 
 # Only used if container_framework is set to singularity, this will unpack the singularity containers
