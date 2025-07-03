@@ -27,8 +27,8 @@ def parse_arguments():
     parser.add_argument("--dir", type=str, required=True, help="The directory of the docker wrapper to use")
     parser.add_argument("--version", type=str, required=True, help="The version (tag name) to use for the container")
     parser.add_argument("--org-name", type=str, help="The organization to push to", default="ghcr.io/reed-compbio/")
-    parser.add_argument("--yes", type=bool, help="Whether to automatically agree to pushing a container")
-    parser.add_argument("--relax", type=bool, help="Whether to not be strict on tag naming")
+    parser.add_argument("--yes", type=bool, help="Whether to automatically agree to pushing a container", action=argparse.BooleanOptionalAction)
+    parser.add_argument("--relax", type=bool, help="Whether to not be strict on tag naming", action=argparse.BooleanOptionalAction)
 
     return parser.parse_args()
 
@@ -60,7 +60,7 @@ def main():
             raise RuntimeError("Did not confirm dialog.")
 
     push_command = construct_push_command([tag, tag_latest], args.dir)
-    subprocess.run(push_command, capture_output=False)
+    subprocess.run(push_command, capture_output=False, cwd=str(Path(dir_path, args.dir)))
 
 if __name__ == '__main__':
     main()

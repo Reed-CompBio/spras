@@ -189,7 +189,7 @@ class OmicsIntegrator1(PRM):
         container_suffix = "omics-integrator-1:no-conda" # no-conda version is the default
         run_container_and_log('Omics Integrator 1',
                              container_framework,
-                             container_suffix,  # no-conda version is the default
+                             container_suffix,
                              command,
                              volumes,
                              work_dir,
