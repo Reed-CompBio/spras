@@ -60,7 +60,7 @@ git push agitter local-neighborhood
 The Local Neighborhood pathway reconstruction is implemented and described in the [`docker-wrappers/LocalNeighborhood`](docker-wrappers/LocalNeighborhood) directory.
 The readme in that directory describes the usage and the three required arguments.
 This algorithm does not require any third-party packages, only Python 3.x.
-Run `local_neighborhood.py` from the command line.
+Run `local_neighborhood_alg.py` from the command line.
 There are example input files `ln-network.txt` and `ln-nodes.txt` in [`test/LocalNeighborhood/input`](test/LocalNeighborhood/input).
 Copy them to the `LocalNeighborhood` directory for testing.
 Confirm that the output file matches expectations.
@@ -84,7 +84,7 @@ Docker must be running on your system before executing this command.
 Test the image by running it with the example input files
 ```
 docker run -w /data --mount type=bind,source=/${PWD},target=/data \
-  <username>/local-neighborhood python local_neighborhood.py \
+  <username>/local-neighborhood python local_neighborhood_alg.py \
   --network /data/ln-network.txt --nodes /data/ln-nodes.txt \
   --output /data/ln-output.txt
 ```
@@ -159,7 +159,7 @@ The functionality of `prepare_volume` is similar to how you had to manually spec
 It is not necessary to create the output directory in advance because the Local Neighborhood algorithm will create it if it does not exist.
 
 Prepare the command to run inside the container, which will resemble the command used when running Local Neighborhood in Step 1.
-Use the `run_container` utility function to run the command in the container `<username>/local-neighborhood` that was pushed to Docker Hub in Step 2.
+Use the `run_container_and_log` utility function to run the command in the container `<username>/local-neighborhood` that was pushed to Docker Hub in Step 2.
 
 Implement the `parse_output` function.
 The edges in the Local Neighborhood output have the same format as the input, `<vertex1>|<vertex2>`.
@@ -201,7 +201,7 @@ Use `test_pathlinker.py` as an example.
 There are input files for testing in the [`test/LocalNeighborhood/input`](test/LocalNeighborhood/input) directory.
 The new test functions will be automatically run as part of the pytest testing.
 
-Extend `.github/workflows/test-spras.yml` to pull and build the new Docker image.
+Extend `.github/workflows/build-containers.yml` to pull and build the new Docker image.
 Follow the example for any of the other pathway reconstruction algorithm.
 First pull the image `<username>/local-neighborhood` from Docker Hub.
 Then build the Docker image using the `Dockerfile` that was completed in Step 2.

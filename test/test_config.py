@@ -1,3 +1,6 @@
+import pickle
+
+import numpy as np
 import pytest
 
 import spras.config as config
@@ -21,7 +24,58 @@ def get_test_config():
         },
         "datasets": [{"label": "alg1"}, {"label": "alg2"}],
         "gold_standards": [{"label": "gs1", "dataset_labels": []}],
-        "algorithms": [{"params": ["param2", "param2"]}],
+        "algorithms": [
+            {"params": ["param2", "param2"]},
+            {
+                "name": "strings",
+                "params": {
+                    "include": True,
+                    "run1": {"test": "str1", "test2": ["str2", "str3"]}
+                }
+            },
+            {
+                "name": "numbersAndBools",
+                "params": {
+                    "include": True,
+                    "run1": {"a": 1, "b": [float(2.0), 3], "c": [4], "d": float(5.6), "f": False}
+                }
+            },
+            {
+                "name": "singleton_int64_with_array",
+                "params": {
+                    "include": True,
+                    "run1": {"test": np.int64(1), "test2": [2, 3]}
+                }
+            },
+            {
+                "name": "singleton_string_np_linspace",
+                "params": {
+                    "include": True,
+                    "run1": {"test": "str1", "test2": "np.linspace(0,5,2)"}
+                }
+            },
+            {
+                "name": "str_array_np_logspace",
+                "params": {
+                    "include": True,
+                    "run1": {"test": ["a", "b"], "test2": "np.logspace(1,1)"}
+                }
+            },
+            {
+                "name": "int64artifact",
+                "params": {
+                    "include": True,
+                    "run1": {"test": "np.arange(5,6)", "test2": [2, 3]}
+                }
+            },
+            {
+                "name": "boolArrTest",
+                "params": {
+                    "include": True,
+                    "run1": {"flags": [True, False], "range": "range(1, 3)"}
+                }
+            }
+        ],
         "analysis": {
             "summary": {
                 "include": False
@@ -42,6 +96,22 @@ def get_test_config():
 
     return test_raw_config
 
+def value_test_util(name: str, configurations: list):
+    assert name in config.config.algorithm_params, f"{name} isn't a present algorithm configuration!"
+
+    keys = config.config.algorithm_params[name]
+    values = [config.config.algorithm_params[name][key] for key in keys]
+
+    # https://stackoverflow.com/a/50486270/7589775
+    # Note: We use pickle as we also compare dictionaries in these two sets - some kind of consistent total ordering
+    # is required for the tests to consistently pass when comparing them to `configurations`.
+    set_values = set(tuple(sorted(d.items())) for d in sorted(values, key=lambda x: pickle.dumps(x, protocol=3)))
+    set_configurations = set(tuple(sorted(d.items())) for d in sorted(configurations, key=lambda x: pickle.dumps(x, protocol=3)))
+
+    if set_values != set_configurations:
+        print(f'Got: {set_values}')
+        print(f'Expected: {set_configurations}')
+        assert set_values == set_configurations
 
 class TestConfig:
     """
@@ -141,6 +211,22 @@ class TestConfig:
 
         with pytest.raises(ValueError):
             config.init_global(test_config)
+
+    def test_config_values(self):
+        test_config = get_test_config()
+        config.init_global(test_config)
+
+        value_test_util('strings', [{'test': "str1", 'test2': "str2"}, {'test': 'str1', 'test2': 'str3'}])
+        value_test_util('numbersAndBools', [{'a': 1, 'b': float(2.0), 'c': 4, 'd': 5.6, 'f': False}, {'a': 1, 'b': 3, 'c': 4, 'd': 5.6, 'f': False}])
+
+        value_test_util('singleton_int64_with_array', [{'test': 1, 'test2': 2}, {'test': 1, 'test2': 3}])
+        value_test_util('singleton_string_np_linspace', [{'test': "str1", 'test2': 5.0}, {'test': "str1", 'test2': 0.0}])
+        value_test_util('str_array_np_logspace', [{'test': "a", 'test2': 10}] * 10 + [{'test': "b", 'test2': 10}] * 10)
+
+        value_test_util('int64artifact', [{'test': 5, 'test2': 2}, {'test': 5, 'test2': 3}])
+
+        value_test_util('boolArrTest', [{'flags': True, 'range': 1}, {'flags': False, 'range': 2},
+                                     {'flags': False, 'range': 1}, {'flags': True, 'range': 2}])
 
     @pytest.mark.parametrize("ml_include, eval_include, expected_ml, expected_eval", [
         (True, True, True, True),

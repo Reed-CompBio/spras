@@ -1,6 +1,6 @@
 from pathlib import Path
 
-from spras.containers import prepare_volume, run_container
+from spras.containers import prepare_volume, run_container_and_log
 from spras.interactome import reinsert_direction_col_mixed
 from spras.prm import PRM
 from spras.util import add_rank_column, duplicate_edges, raw_pathway_df
@@ -186,16 +186,14 @@ class OmicsIntegrator1(PRM):
         if seed is not None:
             command.extend(['--seed', str(seed)])
 
-        print('Running Omics Integrator 1 with arguments: {}'.format(' '.join(command)), flush=True)
-
         container_suffix = "omics-integrator-1:no-conda" # no-conda version is the default
-        out = run_container(container_framework,
-                            container_suffix,  # no-conda version is the default
-                            command,
-                            volumes,
-                            work_dir,
-                            f'TMPDIR={mapped_out_dir}')
-        print(out)
+        run_container_and_log('Omics Integrator 1',
+                             container_framework,
+                             container_suffix,  # no-conda version is the default
+                             command,
+                             volumes,
+                             work_dir,
+                             f'TMPDIR={mapped_out_dir}')
 
         conf_file_local.unlink(missing_ok=True)
 
@@ -211,7 +209,7 @@ class OmicsIntegrator1(PRM):
             oi1_output.unlink(missing_ok=True)
 
     @staticmethod
-    def parse_output(raw_pathway_file, standardized_pathway_file):
+    def parse_output(raw_pathway_file, standardized_pathway_file, params):
         """
         Convert a predicted pathway into the universal format
         @param raw_pathway_file: pathway file produced by an algorithm's run function

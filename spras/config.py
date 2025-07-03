@@ -16,11 +16,12 @@ import copy as copy
 import itertools as it
 import os
 import re
+from collections.abc import Iterable
 
 import numpy as np
 import yaml
 
-from spras.util import hash_params_sha1_base32
+from spras.util import NpHashEncoder, hash_params_sha1_base32
 
 # The default length of the truncated hash used to identify parameter combinations
 DEFAULT_HASH_LENGTH = 7
@@ -220,16 +221,43 @@ class Config:
                 if cur_params[run_params]:
                     for p in cur_params[run_params]:
                         param_name_list.append(p)
-                        all_runs.append(eval(str(cur_params[run_params][p])))
+                        obj = str(cur_params[run_params][p])
+                        try:
+                            obj = [int(obj)]
+                        except ValueError:
+                            try:
+                                obj = [float(obj)]
+                            except ValueError:
+                                # Handles arrays and special evaluation types
+                                # TODO: do we want to explicitly bar `eval` if we may use untrusted user inputs later?
+                                if obj.startswith(("range", "np.linspace", "np.arange", "np.logspace", "[")):
+                                    obj = eval(obj)
+                                elif obj.lower() == "true":
+                                    obj = [True]
+                                elif obj.lower() == "false":
+                                    obj = [False]
+                                else:
+                                    # Catch-all for strings
+                                    obj = [obj]
+                            if not isinstance(obj, Iterable):
+                                raise ValueError(f"The object `{obj}` in algorithm {alg['name']} at key '{p}' in run '{run_params}' is not iterable!") from None
+                        all_runs.append(obj)
                 run_list_tuples = list(it.product(*all_runs))
                 param_name_tuple = tuple(param_name_list)
                 for r in run_list_tuples:
                     run_dict = dict(zip(param_name_tuple, r, strict=True))
-                    # TODO temporary workaround for yaml.safe_dump in Snakefile write_parameter_log
+                    # TODO: Workaround for yaml.safe_dump in Snakefile write_parameter_log.
+                    # We would like to preserve np info for larger floats and integers on the config,
+                    # but this isn't strictly necessary for the pretty yaml logging that's happening - if we
+                    # want to preserve the precision, we need to output this into yaml as strings.
                     for param, value in run_dict.copy().items():
-                        if isinstance(value, np.float64):
+                        if isinstance(value, np.integer):
+                            run_dict[param] = int(value)
+                        if isinstance(value, np.floating):
                             run_dict[param] = float(value)
-                    params_hash = hash_params_sha1_base32(run_dict, self.hash_length)
+                        if isinstance(value, np.ndarray):
+                            run_dict[param] = value.tolist()
+                    params_hash = hash_params_sha1_base32(run_dict, self.hash_length, cls=NpHashEncoder)
                     if params_hash in prior_params_hashes:
                         raise ValueError(f'Parameter hash collision detected. Increase the hash_length in the config file '
                                         f'(current length {self.hash_length}).')
