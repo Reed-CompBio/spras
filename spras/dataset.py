@@ -43,6 +43,11 @@ class Dataset:
         Loads dataset object from a pickle file.
         Usage: dataset = Dataset.from_file(pickle_file)
         """
+        if isinstance(file_name, Dataset):
+            # No work to be done
+            # (this use-case is useful for testing.)
+            return file_name
+
         with open(file_name, "rb") as f:
             return pkl.load(f)
 
@@ -173,7 +178,7 @@ class Dataset:
     def get_other_files(self):
         return self.other_files.copy()
 
-    def get_interactome(self):
+    def get_interactome(self) -> pd.DataFrame | None:
         if self.interactome is None:
             raise ValueError("interactome is None: can't copy a non-existant interactome.")
         return self.interactome.copy(deep = True)
