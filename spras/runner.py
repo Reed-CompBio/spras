@@ -1,5 +1,8 @@
+from typing import Any
+
 # supported algorithm imports
 from spras.allpairs import AllPairs
+from spras.btb import BowTieBuilder
 from spras.dataset import Dataset
 from spras.domino import DOMINO
 from spras.meo import MEO
@@ -8,15 +11,20 @@ from spras.omicsintegrator1 import OmicsIntegrator1
 from spras.omicsintegrator2 import OmicsIntegrator2
 from spras.pathlinker import PathLinker
 from spras.prm import PRM
+from spras.rwr import RWR
+from spras.strwr import ST_RWR
 
 algorithms: dict[str, type[PRM]] = {
     "allpairs": AllPairs,
+    "bowtiebuilder": BowTieBuilder,
     "domino": DOMINO,
     "meo": MEO,
     "mincostflow": MinCostFlow,
     "omicsintegrator1": OmicsIntegrator1,
     "omicsintegrator2": OmicsIntegrator2,
     "pathlinker": PathLinker,
+    "rwr": RWR,
+    "st_rwr": ST_RWR,
 }
 
 def get_algorithm(algorithm: str) -> type[PRM]:
@@ -66,12 +74,15 @@ def prepare_inputs(algorithm: str, data_file: str, filename_map: dict[str, str])
     return algorithm_runner.generate_inputs(dataset, filename_map)
 
 
-def parse_output(algorithm: str, raw_pathway_file: str, standardized_pathway_file: str):
+def parse_output(algorithm: str, raw_pathway_file: str, standardized_pathway_file: str, params: dict[str, Any]):
     """
     Convert a predicted pathway into the universal format
     @param algorithm: algorithm name
     @param raw_pathway_file: pathway file produced by an algorithm's run function
     @param standardized_pathway_file: the same pathway written in the universal format
     """
-    algorithm_runner = get_algorithm(algorithm)
-    return algorithm_runner.parse_output(raw_pathway_file, standardized_pathway_file)
+    try:
+        algorithm_runner = get_algorithm(algorithm)
+    except KeyError as exc:
+        raise NotImplementedError(f'{algorithm} is not currently supported') from exc
+    return algorithm_runner.parse_output(raw_pathway_file, standardized_pathway_file, params)

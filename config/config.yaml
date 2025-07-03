@@ -14,7 +14,8 @@ container_framework: docker
 # such as would be the case in an HTCondor/OSPool environment.
 # NOTE: This unpacks singularity containers to the local filesystem, which will take up space in a way
 # that persists after the workflow is complete. To clean up the unpacked containers, the user must
-# manually delete them.
+# manually delete them. For convenience, these unpacked files will exist in the current working directory
+# under `unpacked`.
 unpack_singularity: false
 
 # Allow the user to configure which container registry containers should be pulled from
@@ -95,6 +96,24 @@ algorithms:
       run1:
         slice_threshold: 0.3
         module_threshold: 0.05
+
+  - name: "strwr"
+    params:
+      include: true
+      run1:
+        alpha: [0.85]
+        threshold: [100, 200]
+
+  - name: "rwr"
+    params:
+      include: true
+      run1:
+        alpha: [0.85]
+        threshold: [100, 200]
+
+  - name: "bowtiebuilder"
+    params:
+      include: true
 
 # Here we specify which pathways to run and other file location information.
 # DataLoader.py can currently only load a single dataset
