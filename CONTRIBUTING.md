@@ -2,6 +2,15 @@
 The SPRAS maintainers welcome external contributions.
 Code contributions will be licensed using the project's [MIT license](LICENSE).
 
+If you are looking for the pathway reconstruction guide,
+go to the [Contributing a new pathway reconstruction guide](#contributing-a-new-pathway-reconstruction-guide) header.
+
+## On `.test_durations`
+
+To regenerate the `.test_durations` file, use `pytest --store-durations`. A clean docker cache
+is recommended to best split up the test runs. `.test_durations` should be regenerated
+for every few algorithms or analysis tools added, to make sure the CI works as fast as it can.
+
 ## Contributing a new pathway reconstruction guide
 This guide walks new contributors through the process of adding a new pathway reconstruction algorithm to SPRAS.
 It follows the checklist below step-by-step to add a simple algorithm called Local Neighborhood.
