@@ -1,0 +1,5 @@
+Node1	Node2	Frequency	Direction
+A	B	0.5	U
+B	A	0.5	U
+Q	R	0.01	U
+Z	X	0.66	U
