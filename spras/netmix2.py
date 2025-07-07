@@ -2,9 +2,10 @@ from pathlib import Path
 
 from spras.containers import prepare_volume, run_container_and_log
 from spras.dataset import Dataset
-from spras.interactome import convert_directed_to_undirected
+from spras.interactome import convert_directed_to_undirected, reinsert_direction_col_undirected
 from spras.prm import PRM
 from spras.secrets import gurobi
+from spras.util import add_rank_column, duplicate_edges
 
 __all__ = ['NetMix2']
 
@@ -70,7 +71,6 @@ class NetMix2(PRM):
 
         bind_path, mapped_out_dir = prepare_volume(str(out_dir), work_dir)
         volumes.append(bind_path)
-        mapped_out_prefix = mapped_out_dir + '/out.txt'
 
         command = ['python',
                    '/NetMix2/run_netmix2.py',
@@ -78,7 +78,7 @@ class NetMix2(PRM):
                    network_file,
                    '-gs',
                    scores_file,
-                   '-o', mapped_out_prefix]
+                   '-o', mapped_out_dir]
 
         # Add optional arguments
         if delta is not None:
@@ -99,10 +99,22 @@ class NetMix2(PRM):
                                            'GRB_LICENSE_FILE': license_file})
 
         # Rename the primary output file to match the desired output filename
-        output_vertices = out_dir / 'out.txt'
+        output_vertices = out_dir / 'netmix_subnetwork.tsv'
         output_vertices.rename(output_file)
 
     @staticmethod
     def parse_output(raw_pathway_file, standardized_pathway_file, params):
         with open(raw_pathway_file) as raw_pathway_file:
-            [line.rstrip('\n') for line in raw_pathway_file if not str.isspace(line)]
+            vertices = [line.rstrip('\n') for line in raw_pathway_file if not str.isspace(line)]
+
+        original_dataset = Dataset.from_file(params.get('dataset'))
+        interactome = original_dataset.get_interactome().get(['Interactor1','Interactor2'])
+        interactome = interactome[interactome['Interactor1'].isin(vertices)
+                                    & interactome['Interactor2'].isin(vertices)]
+        interactome = add_rank_column(interactome)
+        interactome = reinsert_direction_col_undirected(interactome)
+        interactome.columns = ['Node1', 'Node2', 'Rank', "Direction"]
+        interactome, has_duplicates = duplicate_edges(interactome)
+        if has_duplicates:
+            print(f"Duplicate edges were removed from {raw_pathway_file}")
+        interactome.to_csv(standardized_pathway_file, header = True, index=False, sep='\t')
