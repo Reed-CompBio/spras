@@ -10,15 +10,20 @@ import spras.config as config
 
 # Parses an environment variable (format A=B)
 # with optional comments
-def parse_env(file: Path | str, comment_prefixes = ['#']) -> dict[str, str]:
+def parse_env(file: Path | str) -> dict[str, str]:
     env_dict = dict()
     
     content = Path(file).read_text()
     for line in content.splitlines():
-        if any(line.startswith(prefix) for prefix in comment_prefixes):
+        # ignore comments
+        line_cmts = line.split("#")
+        line = line_cmts[0]
+
+        # ignore empty lines
+        if not line.strip():
             continue
 
-        # TODO: handle `=` escapes
+        # TODO: handle `=` escapes (e.g. in quotes)
         components = line.split("=")
         if len(components) != 2:
             raise RuntimeError(f"File {file} has malformed environment entries")
@@ -26,7 +31,7 @@ def parse_env(file: Path | str, comment_prefixes = ['#']) -> dict[str, str]:
         key, value = components
         value = value.strip()
         key = key.strip()
-        
+
         env_dict[key] = value
     
     return env_dict
