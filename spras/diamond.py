@@ -102,7 +102,7 @@ class DIAMOnD(PRM):
             interactome = interactome[interactome['Interactor1'].isin(df['Node'])
                                       & interactome['Interactor2'].isin(df['Node'])]
 
-            # ignore p_hyper for now
+            # ignore Rank for now
             interactome = add_rank_column(interactome)
             interactome = reinsert_direction_col_undirected(interactome)
             interactome.columns = ['Node1', 'Node2', 'Rank', "Direction"]
