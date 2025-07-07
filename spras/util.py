@@ -104,25 +104,6 @@ def raw_pathway_df(raw_pathway_file: str, sep: str = '\t', header: int = None) -
 
     return df
 
-def df_nodes_from_networkx_graph(graph: nx.Graph | nx.DiGraph) -> pd.DataFrame:
-    """
-    Converts a networkx graph/digraph into a pandas DataFrame in SPRAS output format.
-    Requires that each edge is only associated with a ranking.
-    """
-    df: pd.DataFrame = nx.to_pandas_edgelist(graph, edge_key=['Rank'])
-    if df.empty:
-        df = add_rank_column(df)
-    else:
-        df.columns = ['Node1', 'Node2', 'Rank']
-    if isinstance(graph, nx.Graph):
-        reinsert_direction_col_undirected(df)
-    elif isinstance(graph, nx.digraph):
-        reinsert_direction_col_directed(df)
-    else:
-        raise TypeError(f"Provided graph is not a nx.Graph or nx.DiGraph! It is of type {type(graph)}. Graph: {graph}")
-    return df
-
-
 def duplicate_edges(df: pd.DataFrame) -> (pd.DataFrame, bool):
     """
     Removes duplicate edges from the input DataFrame. Run within every pathway reconstruction algorithm's parse_output.

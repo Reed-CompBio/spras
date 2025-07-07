@@ -4,9 +4,9 @@ import networkx as nx
 
 from spras.containers import prepare_volume, run_container_and_log
 from spras.dataset import Dataset
-from spras.interactome import convert_directed_to_undirected
+from spras.interactome import convert_directed_to_undirected, reinsert_direction_col_undirected
 from spras.prm import PRM
-from spras.util import add_rank_column, df_nodes_from_networkx_graph, raw_pathway_df
+from spras.util import add_rank_column, duplicate_edges, raw_pathway_df
 
 __all__ = ['DIAMOnD']
 
@@ -90,26 +90,24 @@ class DIAMOnD(PRM):
                               work_dir)
 
     @staticmethod
-    def parse_output(raw_pathway_file, standardized_pathway_file, original_dataset: Dataset):
+    def parse_output(raw_pathway_file, standardized_pathway_file, params):
         df = raw_pathway_df(raw_pathway_file, sep='\t', header=0)
         if not df.empty:
             # preprocessing - drop [useful] p_hyper information, and rename columns to Rank and Node
             df = df.drop(columns=["p_hyper"])
             df.columns = ["Rank", "Node"]
 
-            # TODO: we throw away rank information - we want this.
-            # get induced subgraph of nodes, handling duplicates
-            nodes_unprocessed = list(set(df["Node"].tolist()))
-            nodes: list[str] = []
-            for node in nodes_unprocessed:
-                if node not in nodes:
-                    nodes.append(node)
-            G: nx.Graph | nx.DiGraph = original_dataset.interactome_to_networkx_undirected_graph().subgraph(nodes)
+            original_dataset: Dataset = params['dataset']
+            interactome = original_dataset.get_interactome().get(['Interactor1','Interactor2'])
+            interactome = interactome[interactome['Interactor1'].isin(df['Node'])
+                                      & interactome['Interactor2'].isin(df['Node'])]
 
-            # add default rank information
-            nx.set_edge_attributes(G, 1, "Rank")
-
-            # convert back into a dataframe
-            df = df_nodes_from_networkx_graph(G)
-            df = add_rank_column(df)
+            # ignore p_hyper for now
+            interactome = add_rank_column(interactome)
+            interactome = reinsert_direction_col_undirected(interactome)
+            interactome.columns = ['Node1', 'Node2', 'Rank', "Direction"]
+            interactome, has_duplicates = duplicate_edges(interactome)
+            if has_duplicates:
+                print(f"Duplicate edges were removed from {raw_pathway_file}")
+            df = interactome
         df.to_csv(standardized_pathway_file, header=True, index=False, sep='\t')
