@@ -47,8 +47,8 @@ class NetMix2(PRM):
         if not network or not scores or not output_file:
             raise ValueError('Required NetMix2 arguments are missing')
 
-        gurobi_env = gurobi()
-        if not gurobi_env:
+        gurobi_path = gurobi()
+        if not gurobi_path:
             raise RuntimeError("gurobi license path is not present.\n" + \
                                "Make sure to specify the path in secrets.gurobi in `config.yaml`.")
 
@@ -62,12 +62,15 @@ class NetMix2(PRM):
         bind_path, scores_file = prepare_volume(scores, work_dir)
         volumes.append(bind_path)
 
+        bind_path, license_file = prepare_volume(gurobi_path, work_dir)
+        volumes.append(bind_path)
+
         out_dir = Path(output_file).parent
         out_dir.mkdir(parents=True, exist_ok=True)
 
         bind_path, mapped_out_dir = prepare_volume(str(out_dir), work_dir)
         volumes.append(bind_path)
-        mapped_out_prefix = mapped_out_dir + '/out'  # Use posix path inside the container
+        mapped_out_prefix = mapped_out_dir + '/out.txt'
 
         command = ['python',
                    '/NetMix2/run_netmix2.py',
@@ -75,7 +78,7 @@ class NetMix2(PRM):
                    network_file,
                    '-gs',
                    scores_file,
-                   '-o', mapped_out_prefix + '/v-output.txt']
+                   '-o', mapped_out_prefix]
 
         # Add optional arguments
         if delta is not None:
@@ -85,18 +88,18 @@ class NetMix2(PRM):
         if density is not None:
             command.extend(['--density', str(density)])
 
-        container_suffix = "netmix2:v1"
+        container_suffix = "netmix2"
         run_container_and_log('NetMix2',
                               container_framework,
                               container_suffix,
                               command,
                               volumes,
                               work_dir,
-                              environment=gurobi_env)
+                              environment={'SPRAS': 'True',
+                                           'GRB_LICENSE_FILE': license_file})
 
         # Rename the primary output file to match the desired output filename
-        # Currently PathLinker only writes one output file so we do not need to delete others
-        output_vertices = out_dir / 'out' / 'v-output.txt'
+        output_vertices = out_dir / 'out.txt'
         output_vertices.rename(output_file)
 
     @staticmethod

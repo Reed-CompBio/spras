@@ -9,7 +9,7 @@ from spras.netmix2 import NetMix2
 config.init_from_file("config/config.yaml")
 
 TEST_DIR = Path('test', 'NetMix2/')
-OUT_FILE = Path(TEST_DIR, 'output', 'ln-output.txt')
+OUT_FILE = Path(TEST_DIR, 'output', 'nm2-output.txt')
 
 
 class TestNetMix2:
