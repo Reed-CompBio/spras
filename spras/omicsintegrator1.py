@@ -193,7 +193,7 @@ class OmicsIntegrator1(PRM):
                              command,
                              volumes,
                              work_dir,
-                             f'TMPDIR={mapped_out_dir}')
+                             {'TMPDIR': mapped_out_dir})
 
         conf_file_local.unlink(missing_ok=True)
 
@@ -209,7 +209,7 @@ class OmicsIntegrator1(PRM):
             oi1_output.unlink(missing_ok=True)
 
     @staticmethod
-    def parse_output(raw_pathway_file, standardized_pathway_file, original_dataset):
+    def parse_output(raw_pathway_file, standardized_pathway_file, params):
         """
         Convert a predicted pathway into the universal format
         @param raw_pathway_file: pathway file produced by an algorithm's run function

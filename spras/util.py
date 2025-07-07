@@ -8,7 +8,7 @@ import json
 from pathlib import Path, PurePath, PurePosixPath
 from typing import Any, Dict, List, Optional, Tuple, Union
 
-import networkx as nx
+import numpy as np
 import pandas as pd
 
 from spras.interactome import (
@@ -17,7 +17,28 @@ from spras.interactome import (
 )
 
 
-def hash_params_sha1_base32(params_dict: Dict[str, Any], length: Optional[int] = None) -> str:
+# https://stackoverflow.com/a/57915246/7589775
+# numpy variables are not, by default, encodable by python's JSONEncoder.
+# Thus, we need to wrap the encoder to reduce np-objects down to regular floats and ints.
+# To preserve precision, we stringify the objects instead,
+# which is okay, as this is specifically for hashing.
+# Note: this can still have a hashing conflict if someone uses `np.integer` for one parameter combination,
+# and lists the entire exact number out as a string for the other. Is this a problem?
+class NpHashEncoder(json.JSONEncoder):
+    """
+    A numpy compatible JSON encoder meant to be fed as a cls for hashing,
+    as this encoder does not decode the other way around.
+    """
+    def default(self, obj):
+        if isinstance(obj, np.integer):
+            return str(obj)
+        if isinstance(obj, np.floating):
+            return str(obj)
+        if isinstance(obj, np.ndarray):
+            return obj.tolist()
+        return super(NpHashEncoder, self).default(obj)
+
+def hash_params_sha1_base32(params_dict: Dict[str, Any], length: Optional[int] = None, cls=None) -> str:
     """
     Hash of a dictionary.
     Derived from https://www.doc.ic.ac.uk/~nuric/coding/how-to-hash-a-dictionary-in-python.html
@@ -28,7 +49,7 @@ def hash_params_sha1_base32(params_dict: Dict[str, Any], length: Optional[int] =
     @param length: the length of the returned hash, which is ignored if it is None, < 1, or > the full hash length
     """
     params_hash = hashlib.sha1()
-    params_encoded = json.dumps(params_dict, sort_keys=True).encode()
+    params_encoded = json.dumps(params_dict, sort_keys=True, cls=cls).encode()
     params_hash.update(params_encoded)
     # base32 includes capital letters and the numbers 2-7
     # https://en.wikipedia.org/wiki/Base32#RFC_4648_Base32_alphabet
