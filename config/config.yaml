@@ -115,7 +115,7 @@ algorithms:
   - name: "bowtiebuilder"
     params:
       include: true
-  
+
   - name: "netmix2"
     params:
       include: true

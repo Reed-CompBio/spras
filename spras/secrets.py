@@ -8,11 +8,12 @@ from typing import Optional
 
 import spras.config as config
 
+
 # Parses an environment variable (format A=B)
 # with optional comments
 def parse_env(file: Path | str) -> dict[str, str]:
     env_dict = dict()
-    
+
     content = Path(file).read_text()
     for line in content.splitlines():
         # ignore comments
@@ -27,13 +28,13 @@ def parse_env(file: Path | str) -> dict[str, str]:
         components = line.split("=")
         if len(components) != 2:
             raise RuntimeError(f"File {file} has malformed environment entries")
-        
+
         key, value = components
         value = value.strip()
         key = key.strip()
 
         env_dict[key] = value
-    
+
     return env_dict
 
 def gurobi() -> Optional[dict[str, str]]:
@@ -43,5 +44,5 @@ def gurobi() -> Optional[dict[str, str]]:
     gurobi_license = Path(config.config.secrets.gurobi)
     if not gurobi_license.exists():
         return None
-    
+
     return parse_env(gurobi_license)
