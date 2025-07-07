@@ -186,7 +186,7 @@ class OmicsIntegrator1(PRM):
         if seed is not None:
             command.extend(['--seed', str(seed)])
 
-        container_suffix = "omics-integrator-1:v1" # no-conda version is the default
+        container_suffix = "omics-integrator-1:v1"
         run_container_and_log('Omics Integrator 1',
                              container_framework,
                              container_suffix,
