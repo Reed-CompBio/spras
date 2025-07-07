@@ -57,8 +57,6 @@ class DIAMOnD(PRM):
         if not seeds or not network or not output_file:
             raise ValueError('DIAMOnD arguments are missing')
 
-        # TODO we should dynamically calculate n.
-
         work_dir = '/apsp'
 
         # Each volume is a tuple (src, dest)

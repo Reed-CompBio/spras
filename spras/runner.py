@@ -71,8 +71,6 @@ def parse_output(algorithm: str, raw_pathway_file: str, standardized_pathway_fil
     @param algorithm: algorithm name
     @param raw_pathway_file: pathway file produced by an algorithm's run function
     @param standardized_pathway_file: the same pathway written in the universal format
-    @param data_file: path to the original dataset file used in the prepare_inputs call preceeding this.
-    @param relaxed_data_file: allows data_file to be None - useful for testing.
     """
     try:
         algorithm_runner = globals()[algorithm.lower()]
