@@ -147,3 +147,5 @@ spras.sif
 
 # Secrets and Licenses
 licenses
+# Singularity cache
+unpacked
