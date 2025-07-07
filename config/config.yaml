@@ -120,6 +120,15 @@ algorithms:
     params:
       include: true
 
+# Secrets are used to specify credentials to proprietary services in use
+# by some algorithms. In SPRAS, we .gitignore the `licences` folder for this
+# use. All tools below are the ones in use by any SPRAS algorithm.
+secrets:
+  # Gurobi (https://www.gurobi.com/) is a proprietary SMT.
+  # It comes with free academic use:
+  # https://www.gurobi.com/academia/academic-program-and-licenses/
+  gurobi: "licenses/gurobi.lic"
+
 # Here we specify which pathways to run and other file location information.
 # DataLoader.py can currently only load a single dataset
 # Assume that if a dataset label does not change, the lists of associated input files do not change

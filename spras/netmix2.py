@@ -4,6 +4,7 @@ from spras.containers import prepare_volume, run_container
 from spras.dataset import Dataset
 from spras.prm import PRM
 from spras.secrets import gurobi
+from spras.interactome import convert_directed_to_undirected
 
 __all__ = ['NetMix2']
 
@@ -32,11 +33,11 @@ class NetMix2(PRM):
         node_df.to_csv(filename_map['scores'], index=False, columns=['prize', 'NODEID'], header=False, sep='\t')
 
         edges_df = data.get_interactome()
+        edges_df = convert_directed_to_undirected(edges_df)
         edges_df.to_csv(filename_map['network'], index=False, sep='\t', columns=['Interactor1', 'Interactor2'], header=False)
     
     @staticmethod
     def run(network=None, scores=None, output_file=None, delta=None, num_edges=None, density=None,
-            time_limit=None,
             container_framework="docker"):
         """
         Run NetMix2 with Docker
@@ -53,7 +54,8 @@ class NetMix2(PRM):
 
         gurobi_license = gurobi()
         if not gurobi_license:
-            raise RuntimeError("gurobi license path is not present (this should have errored earlier - have you moved files around?)\nMake sure to specify the path in secrets.gurobi in `config.yaml`.")
+            raise RuntimeError("gurobi license path is not present (this should have errored earlier - have you moved files around?)\n" + \
+                               "Make sure to specify the path in secrets.gurobi in `config.yaml`.")
 
         work_dir = '/spras'
 
@@ -87,8 +89,6 @@ class NetMix2(PRM):
             command.extend(['--num_edges', str(num_edges)])
         if density is not None:
             command.extend(['--density', str(density)])
-        if time_limit is not None:
-            command.extend(['--time_limit', str(time_limit)])
 
         print('Running NetMix2 with arguments: {}'.format(' '.join(command)), flush=True)
 
@@ -110,6 +110,6 @@ class NetMix2(PRM):
         output_vertices.rename(output_file)
 
     @staticmethod
-    def parse_output(raw_pathway_file, standardized_pathway_file):
+    def parse_output(raw_pathway_file, standardized_pathway_file, params):
         with open(raw_pathway_file) as raw_pathway_file:
             vertices = [line.rstrip('\n') for line in raw_pathway_file if not str.isspace(line)]

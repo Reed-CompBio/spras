@@ -145,9 +145,9 @@ class Config:
             self.container_prefix = raw_config["container_registry"]["base_url"] + "/" + raw_config["container_registry"]["owner"]
 
         # Parse secrets
+        self.secrets = {}
         if "secrets" in raw_config:
-            self.secrets = {}
-            if raw_config["secrets"]["gurobi"]:
+            if "gurobi" in raw_config["secrets"]:
                 self.secrets["gurobi"] = raw_config["secrets"]["gurobi"]
 
         # Parse dataset information
