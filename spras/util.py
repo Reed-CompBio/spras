@@ -115,8 +115,6 @@ def shrink_rank_column(df: pd.DataFrame) -> pd.DataFrame:
     df = df.drop(columns=['Rank'])
     df = df.rename(columns={'NewRank': 'Rank'})
 
-    print(df)
-
     return df
 
 def raw_pathway_df(raw_pathway_file: str, sep: str = '\t', header: int = None) -> pd.DataFrame:
