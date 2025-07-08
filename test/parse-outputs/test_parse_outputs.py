@@ -48,7 +48,7 @@ algorithms = {
             'node_files': ['diamond-dataset-prizes.txt', 'diamond-dataset-sources.txt', 'diamond-dataset-targets.txt'],
             'edge_files': ['diamond-dataset-network.txt'],
             'other_files': [],
-            'data_dir': INDIR / 'dataset'
+            'data_dir': INDIR / 'dataset' / 'diamond'
         }),
     }
 }
