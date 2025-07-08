@@ -119,6 +119,9 @@ algorithms:
   - name: "diamond"
     params:
       include: true
+      run1:
+        n: 2
+        alpha: 1
 
 # Here we specify which pathways to run and other file location information.
 # DataLoader.py can currently only load a single dataset
