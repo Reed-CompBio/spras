@@ -4,9 +4,12 @@ import networkx as nx
 
 from spras.containers import prepare_volume, run_container_and_log
 from spras.dataset import Dataset
-from spras.interactome import convert_directed_to_undirected, reinsert_direction_col_undirected
+from spras.interactome import (
+    convert_directed_to_undirected,
+    reinsert_direction_col_undirected,
+)
 from spras.prm import PRM
-from spras.util import shrink_rank_column, duplicate_edges, raw_pathway_df
+from spras.util import duplicate_edges, raw_pathway_df, shrink_rank_column
 
 __all__ = ['DIAMOnD']
 

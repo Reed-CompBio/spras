@@ -99,7 +99,7 @@ def shrink_rank_column(df: pd.DataFrame) -> pd.DataFrame:
     # We need at least one beginning value
     if df.empty:
         return df
-    
+
     df = df.sort_values(['Rank'], ascending=True)
     df = df.reset_index(drop=True)
     # https://stackoverflow.com/a/34856727/7589775
@@ -111,7 +111,7 @@ def shrink_rank_column(df: pd.DataFrame) -> pd.DataFrame:
 
         rank_inc = df.loc[i-1, 'NewRank']
         df.loc[i, 'NewRank'] = rank_inc if prev_rank == curr_rank else (int(rank_inc) + 1)
-    
+
     df = df.drop(columns=['Rank'])
     df = df.rename(columns={'NewRank': 'Rank'})
 
