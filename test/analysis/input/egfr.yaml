@@ -92,8 +92,6 @@ reconstruction_settings:
   locations:
     reconstruction_dir: output/egfr
 analysis:
-  graphspace:
-    include: true
   cytoscape:
     include: true
   summary:
