@@ -4,7 +4,7 @@ import numpy as np
 import pytest
 
 import spras.config.config as config
-from spras.config.raw_config import DEFAULT_HASH_LENGTH
+from spras.config.schema import DEFAULT_HASH_LENGTH
 
 filler_dataset_data: dict[str, str | list[str]] = {
     "data_dir": "fake",
