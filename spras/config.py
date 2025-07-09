@@ -13,13 +13,13 @@ will grab the top level registry configuration option as it appears in the confi
 """
 
 import copy as copy
+import functools
+import importlib.metadata
 import itertools as it
 import os
 import re
-import importlib.metadata
 import subprocess
 from collections.abc import Iterable
-import functools
 
 import numpy as np
 import yaml
