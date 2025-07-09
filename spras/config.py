@@ -16,7 +16,10 @@ import copy as copy
 import itertools as it
 import os
 import re
+import importlib.metadata
+import subprocess
 from collections.abc import Iterable
+import functools
 
 import numpy as np
 import yaml
@@ -28,6 +31,24 @@ DEFAULT_HASH_LENGTH = 7
 DEFAULT_CONTAINER_PREFIX = "docker.io/reedcompbio"
 
 config = None
+
+@functools.cache
+def spras_revision() -> str:
+    """
+    Gets the revision of the current SPRAS repository.
+    If this file is inside a `.git` repository, this uses the revision hash.
+    Otherwise, this uses the package version.
+    """
+    # Check if we're inside a git repository
+    try:
+        return subprocess.check_output(["git", "rev-parse", "--short", "HEAD"], encoding='utf-8').strip()
+    except subprocess.CalledProcessError:
+        # Use the current package version instead
+        # https://stackoverflow.com/a/75100875/7589775
+        return f"v{importlib.metadata.version('spras').replace('.', '_')}"
+
+def attach_spras_revision(label: str) -> str:
+    return f"{label}_{spras_revision()}"
 
 # This will get called in the Snakefile, instantiating the singleton with the raw config
 def init_global(config_dict):
@@ -150,7 +171,7 @@ class Config:
         # Currently assumes all datasets have a label and the labels are unique
         # When Snakemake parses the config file it loads the datasets as OrderedDicts not dicts
         # Convert to dicts to simplify the yaml logging
-        self.datasets = {dataset["label"]: dict(dataset) for dataset in raw_config["datasets"]}
+        self.datasets = {attach_spras_revision(dataset["label"]): dict(dataset) for dataset in raw_config["datasets"]}
 
         for key in self.datasets:
             pattern = r'^\w+$'
@@ -159,7 +180,10 @@ class Config:
 
         # parse gold standard information
         try:
-            self.gold_standards = {gold_standard["label"]: dict(gold_standard) for gold_standard in raw_config["gold_standards"]}
+            self.gold_standards = {attach_spras_revision(gold_standard["label"]): dict(gold_standard) for gold_standard in raw_config["gold_standards"]}
+            for gs in self.gold_standards.values():
+                gs["label"] = attach_spras_revision(gs["label"])
+                gs["dataset_labels"] = list(map(attach_spras_revision, gs["dataset_labels"]))
         except:
             self.gold_standards = {}
 
@@ -257,7 +281,10 @@ class Config:
                             run_dict[param] = float(value)
                         if isinstance(value, np.ndarray):
                             run_dict[param] = value.tolist()
-                    params_hash = hash_params_sha1_base32(run_dict, self.hash_length, cls=NpHashEncoder)
+                    # Incorporates the `spras_revision` into the hash
+                    hash_run_dict = copy.deepcopy(run_dict)
+                    hash_run_dict["_spras_rev"] = spras_revision()
+                    params_hash = hash_params_sha1_base32(hash_run_dict, self.hash_length, cls=NpHashEncoder)
                     if params_hash in prior_params_hashes:
                         raise ValueError(f'Parameter hash collision detected. Increase the hash_length in the config file '
                                         f'(current length {self.hash_length}).')
