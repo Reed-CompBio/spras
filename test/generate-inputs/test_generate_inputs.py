@@ -17,7 +17,10 @@ algo_exp_file: dict[str, str | list[str]] = {
     'domino': 'network',
     'pathlinker': 'network',
     'allpairs': 'network',
-    'robust': ['network', 'scores', 'seeds']
+    'bowtiebuilder': 'edges',
+    'robust': ['network', 'scores', 'seeds'],
+    'strwr': 'network',
+    'rwr': 'network'
 }
 
 
