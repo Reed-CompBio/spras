@@ -417,6 +417,11 @@ def get_dataset_label(wildcards):
     dataset = parts[0]
     return dataset
 
+# Return pathway summary file per dataset
+def collect_summary_statistics_per_dataset(wildcards):
+    dataset_label = get_dataset_label(wildcards)
+    return SEP.join([out_dir, f'{dataset_label}-pathway-summary.txt'])
+
 # Returns pca coordinate per dataset
 def collect_pca_coordinates_per_dataset(wildcards):
     dataset_label = get_dataset_label(wildcards)
@@ -428,13 +433,14 @@ def collect_pca_coordinates_per_dataset(wildcards):
 rule evaluation_pca_chosen:
     input: 
         gold_standard_file = get_gold_standard_pickle_file,
-        pca_coordinates_file = collect_pca_coordinates_per_dataset
+        pca_coordinates_file = collect_pca_coordinates_per_dataset,
+        pathway_summary_file = collect_summary_statistics_per_dataset
     output: 
         pca_chosen_pr_file = SEP.join([out_dir, '{dataset_gold_standard_pairs}-eval', "pr-pca-chosen-pathway.txt"]),
         pca_chosen_pr_png = SEP.join([out_dir, '{dataset_gold_standard_pairs}-eval', "pr-pca-chosen-pathway.png"]),
     run:
         node_table = Evaluation.from_file(input.gold_standard_file).node_table
-        pca_chosen_pathway = Evaluation.pca_chosen_pathway(input.pca_coordinates_file, out_dir)
+        pca_chosen_pathway = Evaluation.pca_chosen_pathway(input.pca_coordinates_file, input.pathway_summary_file, out_dir)
         Evaluation.precision_and_recall(pca_chosen_pathway, node_table, algorithms, output.pca_chosen_pr_file, output.pca_chosen_pr_png)
 
 # Returns pca coordinates for a specific algorithm and dataset
@@ -447,13 +453,14 @@ def collect_pca_coordinates_per_algo_per_dataset(wildcards):
 rule evaluation_per_algo_pca_chosen:
     input: 
         gold_standard_file = get_gold_standard_pickle_file,
-        pca_coordinates_file = collect_pca_coordinates_per_algo_per_dataset
+        pca_coordinates_file = collect_pca_coordinates_per_algo_per_dataset,
+        pathway_summary_file = collect_summary_statistics_per_dataset
     output: 
         pca_chosen_pr_file = SEP.join([out_dir, '{dataset_gold_standard_pairs}-eval', "pr-pca-chosen-pathway-per-algorithm.txt"]),
         pca_chosen_pr_png = SEP.join([out_dir, '{dataset_gold_standard_pairs}-eval', "pr-pca-chosen-pathway-per-algorithm.png"]),
     run:
         node_table = Evaluation.from_file(input.gold_standard_file).node_table
-        pca_chosen_pathways = Evaluation.pca_chosen_pathway(input.pca_coordinates_file, out_dir)
+        pca_chosen_pathways = Evaluation.pca_chosen_pathway(input.pca_coordinates_file, input.pathway_summary_file, out_dir)
         Evaluation.precision_and_recall(pca_chosen_pathways, node_table, algorithms, output.pca_chosen_pr_file, output.pca_chosen_pr_png)
 
 # Remove the output directory

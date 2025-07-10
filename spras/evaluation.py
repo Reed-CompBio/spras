@@ -146,12 +146,16 @@ class Evaluation:
                 plt.close()
 
     @staticmethod
-    def pca_chosen_pathway(coordinates_files: list, output_dir:str):
+    def pca_chosen_pathway(coordinates_files: list, pathway_summary_file:str, output_dir:str):
         """
         Identifies the pathway closest to a specified highest kernel density estimated (kde) peak based on PCA coordinates
-        Calculates the Euclidean distance from each data point to the KDE peak, then selects the closest pathway.
+        Calculates the Euclidean distance from each data point to the KDE peak, then selects the closest pathway as the representative pathway.
+        If there is more than one representative pathway, a tiebreaker will be used
+            1) choose smallest number of edges and smallest number of nodes
+            2) end all be all, choose the first one based on name
         Returns a list of file paths for the representative pathway associated with the closest data point to the centroid.
         @param coordinates_files: a list of pca coordinates files for a dataset or specific algorithm in a dataset
+        @param pathway_summary_file: a file for each file per dataset about its network statistics
         @param output_dir: the main reconstruction directory
         """
         rep_pathways = []
@@ -161,11 +165,35 @@ class Evaluation:
 
             kde_peak_row = coord_df[coord_df['datapoint_labels'] == 'kde_peak']
             kde_peak = kde_peak_row.iloc[0, 1:].tolist()
-            coord_df = coord_df[~coord_df['datapoint_labels'].isin(['kde_peak', 'centroid'])] #TODO remove if we get rid of the centroid
+            coord_df = coord_df[~coord_df['datapoint_labels'].isin(['kde_peak', 'centroid'])]
 
             pc_columns = [col for col in coord_df.columns if col.startswith('PC')]
             coord_df['Distance To KDE peak'] = np.sqrt(sum((coord_df[pc] - kde_peak[i]) ** 2 for i, pc in enumerate(pc_columns)))
-            closest_to_kde_peak = coord_df.sort_values(by='Distance To KDE peak').iloc[0] # TODO deal with >1 closest. Choose the pathway that is smallest using summary.txt? choose all of them?
+            # closest_to_kde_peak = coord_df.sort_values(by='Distance To KDE peak').iloc[0]
+
+            min_distance = coord_df["Distance To KDE peak"].min()
+            candidates = coord_df[coord_df["Distance To KDE peak"] == min_distance]
+
+            print(candidates)
+
+            if len(candidates) == 1:
+                closest_to_kde_peak = candidates.iloc[0]
+            else:
+                # add in summary stats file
+                summary_stats_df = pd.read_csv(pathway_summary_file, sep="\t", header=0)
+                summary_stats_df["Name"] = summary_stats_df["Name"].apply(lambda x: x.split("/")[-2])
+                print(summary_stats_df)
+
+                merged_df = candidates.merge(summary_stats_df, left_on="datapoint_labels", right_on="Name", how="inner")[["datapoint_labels", "PC1", "PC2", "Distance To KDE peak", "Number of edges", "Number of nodes"]]
+                print(merged_df)
+                merged_df = merged_df.sort_values(by=["Number of edges", "Number of nodes", "datapoint_labels"], ascending=[True, True, True])
+                print(merged_df)
+
+                # pick first one after full sorting
+                closest_to_kde_peak = merged_df.iloc[0]
+                print(closest_to_kde_peak)
+
+
             rep_pathway = os.path.join(output_dir, f"{closest_to_kde_peak['datapoint_labels']}", "pathway.txt")
             rep_pathways.append(rep_pathway)
 
