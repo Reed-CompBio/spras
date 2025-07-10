@@ -169,9 +169,8 @@ def pca(dataframe: pd.DataFrame, output_png: str, output_var: str, output_coord:
     X_pca = pca_instance.transform(X_scaled)
     variance = pca_instance.explained_variance_ratio_ * 100
 
-    # TODO: should we keep the centroid?
-    # calculating the centroid
-    centroid = np.mean(X_pca, axis=0) # mean of each principal component across all samples
+    # calculating the centroid by taking the mean of the top 2 principal components
+    centroid = np.mean(X_pca[:, :2], axis=0)
 
     # making the plot
     label_color_map = create_palette(column_names)
@@ -192,7 +191,6 @@ def pca(dataframe: pd.DataFrame, output_png: str, output_var: str, output_coord:
         # the grid will be used to evaluate and visualize the KDE over the continuous PCA space
         # padding ensures that points near the edges are also included and the plot does not get cut off visually.
         # the grid_points array stacks the x and y coordinates into a 2D array of shape (num_grid_points, 2)
-
         x = xy[:, 0]
         y = xy[:, 1]
         padding_x = 0.05 * (x.max() - x.min())
@@ -220,61 +218,8 @@ def pca(dataframe: pd.DataFrame, output_png: str, output_var: str, output_coord:
             "Density": np.exp(log_density)
         })
 
-        # TODO: decide if we need to save the kde file
+        # TODO: decide if we need to save the kde file REMOVE IT once I am done debugging
         df_kde.to_csv(output_kde, index=False, sep="\t")
-    
-    # using tricontour
-    # TODO: decide on contourf or tricountourf
-    # if kernel_density:
-    #     if kernel not in kde_kernel:
-    #         raise ValueError(f"kernel={kernel} must be one of {kde_kernel}")
-    #     if not isinstance(bandwidth, float) and bandwidth not in ("scott", "silverman"):
-    #         raise ValueError(f"bandwidth={bandwidth} must be a float or estimation method 'scott' or 'silverman'")
-
-    #     # first 2 components of X_pca
-    #     xy = X_pca[:, :2]
-    #     # Note: the normalization of the density output is correct only for the Euclidean distance metric.
-    #     kde_model = KernelDensity(kernel=kernel, bandwidth=bandwidth, metric="euclidean")
-    #     kde_model.fit(xy)
-
-    #     x = xy[:, 0]
-    #     y = xy[:, 1]
-    #     x_spread = x.max() - x.min()
-    #     y_spread = y.max() - y.min()
-
-    #     if x_spread < 1e-5 or y_spread < 1e-5:
-    #         raise ValueError("PCA points are nearly colinear or collapsed — cannot compute 2D KDE.")
-
-    #     if len(np.unique(x)) < 3 or len(np.unique(y)) < 3:
-    #         raise ValueError("Not enough unique points to build triangulation.")
-
-    #     padding_x = 0.05 * (x.max() - x.min())
-    #     padding_y = 0.05 * (y.max() - y.min())
-    #     xmin, xmax = x.min() - padding_x, x.max() + padding_x
-    #     ymin, ymax = y.min() - padding_y, y.max() + padding_y
-
-    #     num_points = 1000
-    #     x_eval = np.random.uniform(xmin, xmax, num_points)
-    #     y_eval = np.random.uniform(ymin, ymax, num_points)
-    #     points = np.vstack([x_eval, y_eval]).T
-
-    #     log_density = kde_model.score_samples(points)
-    #     density = np.exp(log_density)
-
-    #     max_index = density.argmax()
-    #     max_point = points[max_index]
-    #     max_density_value = density[max_index]
-
-    #     plt.tricontourf(x_eval, y_eval, density, levels=20, cmap='Reds')
-
-    #     df_kde = pd.DataFrame({
-    #         "X_coordinate": points[:, 0],
-    #         "Y_coordinate": points[:, 1],
-    #         "Density": density
-    #     })
-
-    #     df_kde.to_csv(output_kde, index=False, sep="\t")
-    
 
     sns.scatterplot(x=X_pca[:, 0], y=X_pca[:, 1], s=70, hue=column_names, palette=label_color_map)
     plt.scatter(centroid[0], centroid[1], color='red', marker='X', s=100, label='Centroid')
@@ -287,23 +232,30 @@ def pca(dataframe: pd.DataFrame, output_png: str, output_var: str, output_coord:
     make_required_dirs(output_coord)
     coordinates_df = pd.DataFrame(X_pca, columns=['PC' + str(i) for i in range(1, components+1)])
     coordinates_df.insert(0, 'datapoint_labels', columns.tolist())
-    centroid_row = ['centroid'] + centroid.tolist() # TODO: do we still need the centroid?
+    centroid_row = ['centroid'] + centroid.tolist()
     coordinates_df.loc[len(coordinates_df)] = centroid_row
     if kernel_density:
         max_density = df_kde["Density"].max()
-        max_rows = df_kde[df_kde["Density"] == max_density]
-
+        max_rows = df_kde[df_kde["Density"] == max_density].sort_index()
+        print(max_rows)
         if len(max_rows) > 1:
-             # TODO: what if there are > 1 maxes? how do we deal with tiebreakers?
-                # 1) choose the one closest to the centroid or the kde center of mass (weighted average of coordinates, where the weights come from the KDE density at each point)
-                # 2) keep all of the maxes?
-                # 3) taking the mean of median of the maxes coordinates
+            # mutliple kde maximums
 
-            # TODO: TEMP; still choosing the one maximum for now
-            max_row = max_rows.iloc[0]
-            kde_row = ['kde_peak', max_row["X_coordinate"], max_row["Y_coordinate"]]
+            #compute distances to origin (0,0)
+            distances = np.sqrt(
+                max_rows["X_coordinate"]**2 +
+                max_rows["Y_coordinate"]**2
+            )
+            print(distances)
+
+            # pick index of closest max to centroid
+            chosen_index = distances.idxmin()
+            print(chosen_index)
+            chosen_row = max_rows.iloc[chosen_index]
+
+            kde_row = ['kde_peak', chosen_row["X_coordinate"], chosen_row["Y_coordinate"]]
         else:
-            # Only one maximum, keep as is
+            # one kde maximum
             max_row = max_rows.iloc[0]
             kde_row = ['kde_peak', max_row["X_coordinate"], max_row["Y_coordinate"]]
         coordinates_df.loc[len(coordinates_df)] = kde_row
