@@ -265,7 +265,7 @@ rule reconstruct:
 # Original pathway reconstruction output to universal output
 # Use PRRunner as a wrapper to call the algorithm-specific parse_output
 rule parse_output:
-    input: 
+    input:
         raw_file = SEP.join([out_dir, '{dataset}-{algorithm}-{params}', 'raw-pathway.txt']),
         dataset_file = SEP.join([out_dir, '{dataset}-merged.pickle'])
     output: standardized_file = SEP.join([out_dir, '{dataset}-{algorithm}-{params}', 'pathway.txt'])

@@ -36,7 +36,7 @@ algorithms:
         b: [5, 6]
         w: np.linspace(0,5,2)
         d: [10]
-        dummy_mode: ["file"]
+        dummy_mode: ["terminals"]
 
   - name: "omicsintegrator2"
     params:
@@ -86,7 +86,7 @@ datasets:
     # Placeholder
     other_files: []
     # Relative path from the spras directory
-    data_dir: "input"
+    data_dir: "test/analysis/input"
 
 gold_standards:
   - # Labels can only contain letters, numbers, or underscores
@@ -101,16 +101,16 @@ reconstruction_settings:
   #set where everything is saved
   locations:
     #place the save path here
-    reconstruction_dir: "output"
+    reconstruction_dir: "test/analysis/input/run/example"
   run: true
 
 analysis:
   # Create one summary per pathway file and a single summary table for all pathways for each dataset
   summary:
-    include: true
+    include: false
   # Create Cytoscape session file with all pathway graphs for each dataset
   cytoscape:
-    include: true
+    include: false
   # Machine learning analysis (e.g. clustering) of the pathway output files for each dataset
   ml:
     # ml analysis per dataset

@@ -48,7 +48,7 @@ algorithms:
           - 0.1
         mu:
           - 0.008
-        dummy_mode: ["file"]
+        dummy_mode: ["terminals"]
   - name: omicsintegrator2
     params:
       include: true
@@ -81,7 +81,7 @@ algorithms:
         module_threshold:
           - 0.05
 datasets:
-  - data_dir: input
+  - data_dir: "test/analysis/input"
     edge_files:
       - phosphosite-irefindex13.0-uniprot.txt
     label: tps_egfr
@@ -90,13 +90,13 @@ datasets:
     other_files: []
 reconstruction_settings:
   locations:
-    reconstruction_dir: output/egfr
+    reconstruction_dir: "test/analysis/input/run/egfr"
   run: true
 analysis:
   cytoscape:
-    include: true
+    include: false
   summary:
-    include: true
+    include: false
   ml:
     include: false
   evaluation:
