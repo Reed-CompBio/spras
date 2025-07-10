@@ -81,7 +81,7 @@ algorithms:
         module_threshold:
           - 0.05
 datasets:
-  - data_dir: "test/analysis/input"
+  - data_dir: "input"
     edge_files:
       - phosphosite-irefindex13.0-uniprot.txt
     label: tps_egfr
