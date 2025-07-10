@@ -16,7 +16,7 @@ class RWR(PRM):
     @staticmethod
     def generate_inputs(data, filename_map):
         RWR.validate_required_inputs(filename_map)
-        
+
         # Get sources and targets for node input file
         if data.contains_node_columns(["sources","targets"]):
             sources = data.get_node_columns(["sources"])
