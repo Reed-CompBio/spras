@@ -20,6 +20,7 @@ class TestEvaluate:
         Path(OUT_DIR).mkdir(parents=True, exist_ok=True)
 
     def test_precision_recall_pca_chosen_pathway(self):
+        # TODO: figure out why the pathawys chosen are different for github actions vs locally
         output_file = OUT_DIR +"test-pr-per-pathway-pca-chosen.txt"
         output_png = Path(OUT_DIR + "test-pr-per-pathway-pca-chosen.png")
         output_png.unlink(missing_ok=True)
@@ -30,10 +31,15 @@ class TestEvaluate:
         algorithms = ["test"]
 
         dataframe = ml.summarize_networks(file_paths)
-        #TODO is KDE deterministic?
         ml.pca(dataframe, OUT_DIR + 'pca.png', OUT_DIR + 'pca-variance.txt', output_coordinates, OUT_DIR + 'pca-kde.txt', kernel_density=True, remove_empty_pathways=True)
 
         pathway = Evaluation.pca_chosen_pathway([output_coordinates], INPUT_DIR)
         Evaluation.precision_and_recall(pathway, GS_NODE_TABLE, algorithms, output_file, output_png)
         assert filecmp.cmp(output_file, EXPECT_DIR + 'expected-pr-per-pathway-pca-chosen.txt', shallow=False)
         assert output_png.exists()
+
+# TODO test cases
+# every coordinate/output is stacked on each other (no variance/kde)
+# the pathways are colinear
+# no unique points
+# tie breaker situation

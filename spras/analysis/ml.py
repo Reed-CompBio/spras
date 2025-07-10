@@ -178,10 +178,6 @@ def pca(dataframe: pd.DataFrame, output_png: str, output_var: str, output_coord:
     plt.figure(figsize=(10, 7))
 
     if kernel_density:
-        # TODO: add the grid search part? or make people do it individually?
-        # I'm for make people do it individually
-        # grid = GridSearchCV(KernelDensity(), params (a dict))
-
         if kernel not in kde_kernel:
             raise ValueError(f"kernel={kernel} must be one of {kde_kernel}")
         if not isinstance(bandwidth, float) and bandwidth not in ("scott", "silverman"):
@@ -189,18 +185,22 @@ def pca(dataframe: pd.DataFrame, output_png: str, output_var: str, output_coord:
 
         # Note: the normalization of the density output is correct only for the Euclidean distance metric.
         kde_model = KernelDensity(kernel=kernel, bandwidth=bandwidth, metric="euclidean")
-        kde_model.fit(X_pca)
+        xy = X_pca[:, :2]
+        kde_model.fit(xy)
 
         # creates a mesh grid covering the 2D PCA plot space with slight padding.
         # the grid will be used to evaluate and visualize the KDE over the continuous PCA space
         # padding ensures that points near the edges are also included and the plot does not get cut off visually.
-        # the grid_points array stacks the x and y coordinates into a 2D array of shape (num_grid_points, 2),
-        padding_x = 0.05 * (X_pca[:, 0].max() - X_pca[:, 0].min())
-        padding_y = 0.05 * (X_pca[:, 1].max() - X_pca[:, 1].min())
-        xmin = X_pca[:, 0].min() - padding_x
-        xmax = X_pca[:, 0].max() + padding_x
-        ymin = X_pca[:, 1].min() - padding_y
-        ymax = X_pca[:, 1].max() + padding_y
+        # the grid_points array stacks the x and y coordinates into a 2D array of shape (num_grid_points, 2)
+
+        x = xy[:, 0]
+        y = xy[:, 1]
+        padding_x = 0.05 * (x.max() - x.min())
+        padding_y = 0.05 * (y.max() - y.min())
+        xmin = x.min() - padding_x
+        xmax = x.max() + padding_x
+        ymin = y.min() - padding_y
+        ymax = y.max() + padding_y
         xx, yy = np.meshgrid(np.linspace(xmin, xmax, 100), np.linspace(ymin, ymax, 100))
         grid_points = np.vstack([xx.ravel(), yy.ravel()]).T
 
@@ -222,6 +222,59 @@ def pca(dataframe: pd.DataFrame, output_png: str, output_var: str, output_coord:
 
         # TODO: decide if we need to save the kde file
         df_kde.to_csv(output_kde, index=False, sep="\t")
+    
+    # using tricontour
+    # TODO: decide on contourf or tricountourf
+    # if kernel_density:
+    #     if kernel not in kde_kernel:
+    #         raise ValueError(f"kernel={kernel} must be one of {kde_kernel}")
+    #     if not isinstance(bandwidth, float) and bandwidth not in ("scott", "silverman"):
+    #         raise ValueError(f"bandwidth={bandwidth} must be a float or estimation method 'scott' or 'silverman'")
+
+    #     # first 2 components of X_pca
+    #     xy = X_pca[:, :2]
+    #     # Note: the normalization of the density output is correct only for the Euclidean distance metric.
+    #     kde_model = KernelDensity(kernel=kernel, bandwidth=bandwidth, metric="euclidean")
+    #     kde_model.fit(xy)
+
+    #     x = xy[:, 0]
+    #     y = xy[:, 1]
+    #     x_spread = x.max() - x.min()
+    #     y_spread = y.max() - y.min()
+
+    #     if x_spread < 1e-5 or y_spread < 1e-5:
+    #         raise ValueError("PCA points are nearly colinear or collapsed — cannot compute 2D KDE.")
+
+    #     if len(np.unique(x)) < 3 or len(np.unique(y)) < 3:
+    #         raise ValueError("Not enough unique points to build triangulation.")
+
+    #     padding_x = 0.05 * (x.max() - x.min())
+    #     padding_y = 0.05 * (y.max() - y.min())
+    #     xmin, xmax = x.min() - padding_x, x.max() + padding_x
+    #     ymin, ymax = y.min() - padding_y, y.max() + padding_y
+
+    #     num_points = 1000
+    #     x_eval = np.random.uniform(xmin, xmax, num_points)
+    #     y_eval = np.random.uniform(ymin, ymax, num_points)
+    #     points = np.vstack([x_eval, y_eval]).T
+
+    #     log_density = kde_model.score_samples(points)
+    #     density = np.exp(log_density)
+
+    #     max_index = density.argmax()
+    #     max_point = points[max_index]
+    #     max_density_value = density[max_index]
+
+    #     plt.tricontourf(x_eval, y_eval, density, levels=20, cmap='Reds')
+
+    #     df_kde = pd.DataFrame({
+    #         "X_coordinate": points[:, 0],
+    #         "Y_coordinate": points[:, 1],
+    #         "Density": density
+    #     })
+
+    #     df_kde.to_csv(output_kde, index=False, sep="\t")
+    
 
     sns.scatterplot(x=X_pca[:, 0], y=X_pca[:, 1], s=70, hue=column_names, palette=label_color_map)
     plt.scatter(centroid[0], centroid[1], color='red', marker='X', s=100, label='Centroid')
