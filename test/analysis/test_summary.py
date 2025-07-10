@@ -31,7 +31,7 @@ def snakemake_output(request):
     request = request.param
     subprocess.run(["snakemake", "--cores", "1", "--configfile", f"test/analysis/input/{request}.yaml"])
     yield request
-    # shutil.rmtree(f"test/analysis/input/run/{request}")
+    shutil.rmtree(f"test/analysis/input/run/{request}")
 
 class TestSummary:
     @classmethod
@@ -42,7 +42,11 @@ class TestSummary:
         Path(OUT_DIR).mkdir(parents=True, exist_ok=True)
 
     def test_example_networks(self, snakemake_output):
-        """Test data from provided workflow"""
+        """Test data from provided workflow.
+        
+        This also has the double purpose as serving as a light integration test
+        for Snakemake, using summary analysis as the correctness check.
+        """
 
         config.init_from_file(INPUT_DIR + f"{snakemake_output}.yaml")
         example_dataset = Dataset(list(config.config.datasets.values())[0])
