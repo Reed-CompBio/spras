@@ -22,6 +22,7 @@ algorithms = {
     'allpairs': {},
     'domino': {},
     'bowtiebuilder': {},
+    'robust': {},
     'strwr': {
         'threshold': 3,
         'dataset': Dataset({
