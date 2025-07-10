@@ -121,7 +121,7 @@ class LocalNeighborhood:
         edge_df = pd.DataFrame(edges_list, columns=['Node1', 'Node2'])
 
         # Add rank and direction columns
-        edge_df['Rank'] = 1 # Placeholder for rank, can be modified later
+        edge_df['Rank'] = "1" #default rank, can change later
         edge_df['Direction'] = "U"
 
         # Remove duplicates and undirected edges
