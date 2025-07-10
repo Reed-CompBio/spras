@@ -94,7 +94,6 @@ class TestML:
 
     # TODO add PCA KDE test
     # waiting to see if I remove the kde file
-    # Test the different kernels with different bandwidths?
 
     def test_pca_robustness(self):
         dataframe = ml.summarize_networks([INPUT_DIR + 'test-data-s1/s1.txt', INPUT_DIR + 'test-data-s2/s2.txt', INPUT_DIR + 'test-data-s3/s3.txt'])
