@@ -4,7 +4,7 @@ import shutil
 import yaml
 from spras.dataset import Dataset
 from spras.evaluation import Evaluation
-from spras.analysis import ml, summary, graphspace, cytoscape
+from spras.analysis import ml, summary, cytoscape
 import spras.config as _config
 
 # Snakemake updated the behavior in the 6.5.0 release https://github.com/snakemake/snakemake/pull/1037
@@ -75,11 +75,6 @@ def make_final_input(wildcards):
         # add table summarizing all pathways for each dataset
         final_input.extend(expand('{out_dir}{sep}{dataset}-pathway-summary.txt',out_dir=out_dir,sep=SEP,dataset=dataset_labels))
 
-    if _config.config.analysis_include_graphspace:
-        # add graph and style JSON files.
-        final_input.extend(expand('{out_dir}{sep}{dataset}-{algorithm_params}{sep}gs.json',out_dir=out_dir,sep=SEP,dataset=dataset_labels,algorithm_params=algorithms_with_params))
-        final_input.extend(expand('{out_dir}{sep}{dataset}-{algorithm_params}{sep}gsstyle.json',out_dir=out_dir,sep=SEP,dataset=dataset_labels,algorithm_params=algorithms_with_params))
-    
     if _config.config.analysis_include_cytoscape:
         final_input.extend(expand('{out_dir}{sep}{dataset}-cytoscape.cys',out_dir=out_dir,sep=SEP,dataset=dataset_labels))
 
@@ -214,14 +209,29 @@ def collect_prepared_input(wildcards):
     prepared_inputs = expand(f'{prepared_dir}{SEP}{{type}}.txt',type=runner.get_required_inputs(algorithm=wildcards.algorithm))
     # If the directory is missing, do nothing because the missing output triggers running prepare_input
     if os.path.isdir(prepared_dir):
-        # If the directory exists, confirm all prepared input files exist as well (as opposed to some or none)
-        missing_inputs = False
-        for input in prepared_inputs:
-            if not os.path.isfile(input):
-                missing_inputs = True
-        # If any expected files were missing, delete the entire directory so the call below triggers running prepare_input
-        if missing_inputs:
-            shutil.rmtree(prepared_dir)
+        # First, check if .snakemake_timestamp, the last written file in a directory rule,
+        # exists. This prevents multithreading errors if we accidentally read a directory
+        # before it finishes. A proper API for querying this is opened as an issue at
+        # https://github.com/snakemake/snakemake/issues/439.
+        if not os.path.isfile(os.path.join(prepared_dir, '.snakemake_timestamp')):
+            # Running this has two goals:
+            # - If there is another thread running this, in correspondence with
+            # https://snakemake.readthedocs.io/en/stable/snakefiles/rules.html#data-dependent-conditional-execution,
+            # this will raise a IncompleteCheckpointException and poll again until that checkpoint is ready.
+            # - If the prior Snakemake execution was forcefully terminated (and prepared_inputs didn't finish,
+            # which must be the case since .snakemake_timestamp is the last file to be added),
+            # we can reproduce the prepared_inputs file, allowing resilliency against unexpected crashes.
+            checkpoints.prepare_input.get(**wildcards)
+        else:
+            # If the directory exists, confirm all prepared input files exist as well (as opposed to some or none)
+            missing_inputs = []
+            for input in prepared_inputs:
+                if not os.path.isfile(input):
+                    missing_inputs.append(input)
+            # If any expected files were missing, ask to delete the entire directory so the call below triggers running prepare_input
+            if len(missing_inputs) != 0:
+                raise RuntimeError(f"Not all input files were provided. (Missing {missing_inputs})\n" +
+                    f"To prevent multithreading errors, please remove the {prepared_inputs} directory and rerun the workflow.")
 
     # Check whether prepare_input has been run for these wildcards (dataset-algorithm pair) and run if needed
     # The check is executed by checking whether the prepare_input output exists, which is a directory
@@ -273,15 +283,6 @@ rule parse_output:
 #         summary_file = SEP.join([out_dir, '{dataset}-{algorithm}-{params}', 'summary.txt'])
 #     run:
 #         summary.run(input.standardized_file,output.summary_file)
-
-# Write GraphSpace JSON graphs
-rule viz_graphspace:
-    input: standardized_file = SEP.join([out_dir, '{dataset}-{algorithm}-{params}', 'pathway.txt'])
-    output:
-        graph_json = SEP.join([out_dir, '{dataset}-{algorithm}-{params}', 'gs.json']),
-        style_json = SEP.join([out_dir, '{dataset}-{algorithm}-{params}', 'gsstyle.json'])
-    run:
-        graphspace.write_json(input.standardized_file,output.graph_json,output.style_json)
 
 
 # Write a Cytoscape session file with all pathways for each dataset
