@@ -1,7 +1,7 @@
 import os
 from pathlib import Path
 
-from spras.containers import prepare_volume, run_container
+from spras.containers import prepare_volume, run_container_and_log
 from spras.interactome import (
     add_directionality_constant,
     reinsert_direction_col_directed,
@@ -176,15 +176,13 @@ class MEO(PRM):
 
         command = ['java', '-jar', '/meo/EOMain.jar', properties_file]
 
-        print('Running Maximum Edge Orientation with arguments: {}'.format(' '.join(command)), flush=True)
-
         container_suffix = "meo"
-        out = run_container(container_framework,
-                            container_suffix,
-                            command,
-                            volumes,
-                            work_dir)
-        print(out)
+        run_container_and_log('Maximum Edge Orientation',
+                             container_framework,
+                             container_suffix,
+                             command,
+                             volumes,
+                             work_dir)
 
         properties_file_local.unlink(missing_ok=True)
 
@@ -194,7 +192,7 @@ class MEO(PRM):
         path_output_file.unlink(missing_ok=False)
 
     @staticmethod
-    def parse_output(raw_pathway_file, standardized_pathway_file):
+    def parse_output(raw_pathway_file, standardized_pathway_file, params):
         """
         Convert a predicted pathway into the universal format
         @param raw_pathway_file: pathway file produced by an algorithm's run function

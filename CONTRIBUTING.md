@@ -60,7 +60,7 @@ git push agitter local-neighborhood
 The Local Neighborhood pathway reconstruction is implemented and described in the [`docker-wrappers/LocalNeighborhood`](docker-wrappers/LocalNeighborhood) directory.
 The readme in that directory describes the usage and the three required arguments.
 This algorithm does not require any third-party packages, only Python 3.x.
-Run `local_neighborhood.py` from the command line.
+Run `local_neighborhood_alg.py` from the command line.
 There are example input files `ln-network.txt` and `ln-nodes.txt` in [`test/LocalNeighborhood/input`](test/LocalNeighborhood/input).
 Copy them to the `LocalNeighborhood` directory for testing.
 Confirm that the output file matches expectations.
@@ -84,7 +84,7 @@ Docker must be running on your system before executing this command.
 Test the image by running it with the example input files
 ```
 docker run -w /data --mount type=bind,source=/${PWD},target=/data \
-  <username>/local-neighborhood python local_neighborhood.py \
+  <username>/local-neighborhood python local_neighborhood_alg.py \
   --network /data/ln-network.txt --nodes /data/ln-nodes.txt \
   --output /data/ln-output.txt
 ```
@@ -133,8 +133,16 @@ Also test the functions available in the `Dataset` class.
   sources NODEID
 0    True      A
 ```
+
+Note: If you get a 'no module named' error, make sure that you are running
+your interactive python session inside the SPRAS conda environment
+(your terminal should begin with `(spras)` instead of `(base)`, which can be done through `conda activate spras`),
+and your editor's interpreter is set to using the SPRAS environment over the base environment (on VSCode and IntelliJ editors, this should be in the bottom right.)
+
 Note the behaviors of the `request_node_columns` function when there are missing values in that column of the node table and when multiple columns are requested.
 `request_node_columns` always returns the `NODEID` column in addition to the requested columns.
+
+Note: If you encounter a `'property' object is not iterable` error arising from inside the Snakefile, this means that `required_inputs` is not set. This is because when `required_inputs` is not set inside an algorithm wrapper, it falls back to the underlying unimplemented function inside the PRM base class, which, while it is marked as a property function, is non-static; therefore, when the runner utility class tries to dynamically fetch `required_inputs` with reflection, it ends up grabbing the `property` function instead of the underlying error, and tries to iterate over it (since `required_inputs` is usually a list.)
 
 Now implement the `generate_inputs` function.
 Start by inspecting the `omicsintegrator1.py` example, but note the differences in the expected file formats generated for the two algorithms with respect to the header rows and node prize column.
@@ -151,7 +159,7 @@ The functionality of `prepare_volume` is similar to how you had to manually spec
 It is not necessary to create the output directory in advance because the Local Neighborhood algorithm will create it if it does not exist.
 
 Prepare the command to run inside the container, which will resemble the command used when running Local Neighborhood in Step 1.
-Use the `run_container` utility function to run the command in the container `<username>/local-neighborhood` that was pushed to Docker Hub in Step 2.
+Use the `run_container_and_log` utility function to run the command in the container `<username>/local-neighborhood` that was pushed to Docker Hub in Step 2.
 
 Implement the `parse_output` function.
 The edges in the Local Neighborhood output have the same format as the input, `<vertex1>|<vertex2>`.
@@ -193,7 +201,7 @@ Use `test_pathlinker.py` as an example.
 There are input files for testing in the [`test/LocalNeighborhood/input`](test/LocalNeighborhood/input) directory.
 The new test functions will be automatically run as part of the pytest testing.
 
-Extend `.github/workflows/test-spras.yml` to pull and build the new Docker image.
+Extend `.github/workflows/build-containers.yml` to pull and build the new Docker image.
 Follow the example for any of the other pathway reconstruction algorithm.
 First pull the image `<username>/local-neighborhood` from Docker Hub.
 Then build the Docker image using the `Dockerfile` that was completed in Step 2.

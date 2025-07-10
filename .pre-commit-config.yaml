@@ -6,7 +6,7 @@ default_language_version:
   python: python3.11
 repos:
   - repo: https://github.com/pre-commit/pre-commit-hooks
-    rev: v4.4.0  # Use the ref you want to point at
+    rev: v4.4.0 # Use the ref you want to point at
     hooks:
       # Attempts to load all yaml files to verify syntax.
       - id: check-yaml
@@ -24,3 +24,7 @@ repos:
     rev: 'v0.0.269'
     hooks:
       - id: ruff
+  - repo: https://github.com/google/yamlfmt
+    rev: v0.17.0
+    hooks:
+      - id: yamlfmt
