@@ -1,10 +1,10 @@
 import filecmp
-from pathlib import Path
-import pytest
-import subprocess
 import shutil
+import subprocess
+from pathlib import Path
 
 import pandas as pd
+import pytest
 
 import spras.config as config
 from spras.analysis.summary import summarize_networks
@@ -57,6 +57,8 @@ class TestSummary:
         out_path.unlink(missing_ok=True)
         summarize_out = summarize_networks(example_network_files, example_node_table, algorithm_params,
                                                algorithms_with_params)
+        # We do some post-processing to ensure that we get a stable summarize_out, since the attached hash
+        # is subject to variation (especially in testing) whenever the SPRAS commit revision gets changed
         summarize_out["Parameter combination"] = summarize_out["Parameter combination"].astype(str)
         summarize_out = summarize_out.drop(columns=["Name"])
         summarize_out = summarize_out.sort_values(by=["Parameter combination"])
