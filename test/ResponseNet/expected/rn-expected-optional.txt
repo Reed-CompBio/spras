@@ -1,0 +1,4 @@
+Interactor 1	Interactor 2	FlowA	B	1.0
+B	E	1.0
+E	target	1.0
+source	A	1.0
