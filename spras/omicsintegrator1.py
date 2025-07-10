@@ -168,10 +168,10 @@ class OmicsIntegrator1(PRM):
         if dummy_mode is not None and dummy_mode:
             # for custom dummy modes, add the file
             if dummy_mode == 'file':
-                command.extend(['--dummy', dummy_file])
+                command.extend(['--dummyMode', dummy_file])
             # else pass in the dummy_mode and let oi1 handle it
             else:
-                command.extend(['--dummy', dummy_mode])
+                command.extend(['--dummyMode', dummy_mode])
 
         # Add optional arguments
         if mu_squared is not None and mu_squared:
@@ -194,7 +194,7 @@ class OmicsIntegrator1(PRM):
                              command,
                              volumes,
                              work_dir,
-                             f'TMPDIR={mapped_out_dir}')
+                             {'TMPDIR': mapped_out_dir})
 
         conf_file_local.unlink(missing_ok=True)
 
