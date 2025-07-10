@@ -12,6 +12,7 @@ dependencies:
   - pre-commit=2.20 # Only required for development
   - go=1.24 # Only required for development
   - pytest=8.0 # Only required for development
+  - pytest-split=0.10.0 # Only required for development
   - python=3.11
   - pip=22.1
   - requests=2.28
