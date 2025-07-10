@@ -92,7 +92,7 @@ gold_standards:
   - # Labels can only contain letters, numbers, or underscores
     label: gs0
     node_files: ["gs_nodes0.txt"]
-    data_dir: "input"
+    data_dir: "test/analysis/input"
     # List of dataset labels to compare with the specific gold standard dataset
     dataset_labels: ["data0"]
 
