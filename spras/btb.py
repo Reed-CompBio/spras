@@ -35,14 +35,12 @@ class BowTieBuilder(PRM):
         @param filename_map: a dict mapping file types in the required_inputs to the filename for that type
         @return:
         """
-        for input_type in BowTieBuilder.required_inputs:
-            if input_type not in filename_map:
-                raise ValueError(f"{input_type} filename is missing")
+        BowTieBuilder.validate_required_inputs(filename_map)
 
         # Get sources and write to file, repeat for targets
         # Does not check whether a node is a source and a target
         for node_type in ['sources', 'targets']:
-            nodes = data.request_node_columns([node_type])
+            nodes = data.get_node_columns([node_type])
             if nodes is None:
                 raise ValueError(f'No {node_type} found in the node files')
 

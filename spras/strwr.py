@@ -16,16 +16,14 @@ class ST_RWR(PRM):
 
     @staticmethod
     def generate_inputs(data, filename_map):
-        for input_type in ST_RWR.required_inputs:
-            if input_type not in filename_map:
-                raise ValueError(f"{input_type} filename is missing")
+        ST_RWR.validate_required_inputs(filename_map)
 
         # Get seperate source and target nodes for source and target files
         if data.contains_node_columns(["sources","targets"]):
-            sources = data.request_node_columns(["sources"])
+            sources = data.get_node_columns(["sources"])
             sources.to_csv(filename_map['sources'],sep='\t',index=False,columns=['NODEID'],header=False)
 
-            targets = data.request_node_columns(["targets"])
+            targets = data.get_node_columns(["targets"])
             targets.to_csv(filename_map['targets'],sep='\t',index=False,columns=['NODEID'],header=False)
         else:
             raise ValueError("Invalid node data")
