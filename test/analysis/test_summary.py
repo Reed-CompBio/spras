@@ -43,7 +43,7 @@ class TestSummary:
 
     def test_example_networks(self, snakemake_output):
         """Test data from provided workflow.
-        
+
         This also has the double purpose as serving as a light integration test
         for Snakemake, using summary analysis as the correctness check.
         """
