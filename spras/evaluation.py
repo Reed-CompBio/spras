@@ -156,12 +156,13 @@ class Evaluation:
         @param node_ensembles: dict of the pre-computed node_ensemble(s)
         @param node_table: gold standard nodes
         @param output_png: filename to save the precision and recall curves as a .png image
-        @param output_file: filename to save the precision, recall, threshold values, average precision, and baseline precision
+        @param output_file: filename to save the precision, recall, threshold values, average precision, and baseline
+        average precision
         """
         gold_standard_nodes = set(node_table[Evaluation.NODE_ID])
 
         # make color palette per ensemble label name
-        label_names = list(node_ensembles)
+        label_names = list(node_ensembles.keys())
         color_palette = create_palette(label_names)
 
         plt.figure(figsize=(10, 7))
@@ -214,7 +215,6 @@ class Evaluation:
                     "Cannot compute PR curve: the ensemble network is empty."
                     f"This should not happen unless the input network for pathway reconstruction is empty."
                 )
-
 
         if 'ensemble' not in label_names:
             plt.title('Precision-Recall Curve Per Algorithm Specific Ensemble')
