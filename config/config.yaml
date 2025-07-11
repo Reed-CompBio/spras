@@ -6,7 +6,8 @@ hash_length: 7
 # Specify the container framework used by each PRM wrapper. Valid options include:
 # - docker (default if not specified)
 # - singularity -- Also known as apptainer, useful in HPC/HTC environments where docker isn't allowed
-# - dsub -- experimental with limited support, used for running on Google Cloud
+# - dsub -- experimental with limited support, used for running on Google Cloud with the All of Us cloud environment.
+#   - There is no support for other environments at the moment.
 container_framework: docker
 
 # Only used if container_framework is set to singularity, this will unpack the singularity containers
@@ -14,7 +15,8 @@ container_framework: docker
 # such as would be the case in an HTCondor/OSPool environment.
 # NOTE: This unpacks singularity containers to the local filesystem, which will take up space in a way
 # that persists after the workflow is complete. To clean up the unpacked containers, the user must
-# manually delete them.
+# manually delete them. For convenience, these unpacked files will exist in the current working directory
+# under `unpacked`.
 unpack_singularity: false
 
 # Allow the user to configure which container registry containers should be pulled from
@@ -96,6 +98,24 @@ algorithms:
         slice_threshold: 0.3
         module_threshold: 0.05
 
+  - name: "strwr"
+    params:
+      include: true
+      run1:
+        alpha: [0.85]
+        threshold: [100, 200]
+
+  - name: "rwr"
+    params:
+      include: true
+      run1:
+        alpha: [0.85]
+        threshold: [100, 200]
+
+  - name: "bowtiebuilder"
+    params:
+      include: true
+
 # Here we specify which pathways to run and other file location information.
 # DataLoader.py can currently only load a single dataset
 # Assume that if a dataset label does not change, the lists of associated input files do not change
@@ -149,9 +169,6 @@ reconstruction_settings:
 analysis:
   # Create one summary per pathway file and a single summary table for all pathways for each dataset
   summary:
-    include: true
-  # Create output files for each pathway that can be visualized with GraphSpace
-  graphspace:
     include: true
   # Create Cytoscape session file with all pathway graphs for each dataset
   cytoscape:

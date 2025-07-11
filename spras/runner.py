@@ -1,5 +1,8 @@
+from typing import Any
+
 # supported algorithm imports
 from spras.allpairs import AllPairs as allpairs
+from spras.btb import BowTieBuilder as bowtiebuilder
 from spras.dataset import Dataset
 from spras.domino import DOMINO as domino
 from spras.meo import MEO as meo
@@ -7,6 +10,8 @@ from spras.mincostflow import MinCostFlow as mincostflow
 from spras.omicsintegrator1 import OmicsIntegrator1 as omicsintegrator1
 from spras.omicsintegrator2 import OmicsIntegrator2 as omicsintegrator2
 from spras.pathlinker import PathLinker as pathlinker
+from spras.rwr import RWR as rwr
+from spras.strwr import ST_RWR as strwr
 
 
 def run(algorithm: str, params):
@@ -59,7 +64,7 @@ def prepare_inputs(algorithm: str, data_file: str, filename_map: dict[str, str])
     return algorithm_runner.generate_inputs(dataset, filename_map)
 
 
-def parse_output(algorithm: str, raw_pathway_file: str, standardized_pathway_file: str):
+def parse_output(algorithm: str, raw_pathway_file: str, standardized_pathway_file: str, params: dict[str, Any]):
     """
     Convert a predicted pathway into the universal format
     @param algorithm: algorithm name
@@ -70,4 +75,4 @@ def parse_output(algorithm: str, raw_pathway_file: str, standardized_pathway_fil
         algorithm_runner = globals()[algorithm.lower()]
     except KeyError as exc:
         raise NotImplementedError(f'{algorithm} is not currently supported') from exc
-    return algorithm_runner.parse_output(raw_pathway_file, standardized_pathway_file)
+    return algorithm_runner.parse_output(raw_pathway_file, standardized_pathway_file, params)
