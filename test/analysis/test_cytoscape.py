@@ -1,20 +1,17 @@
 from pathlib import Path
 
 import pytest
+import subprocess
+import shutil
 
 import spras.config as config
 from spras.analysis.cytoscape import run_cytoscape
 
-config.init_from_file("test/analysis/input/config.yaml")
+config.init_from_file("test/analysis/input/example.yaml")
 
-OUT_DIR = 'test/analysis/output/'
-INPUT_DIR = 'test/analysis/input/example/'
-INPUT_PATHWAYS = [INPUT_DIR + 'data0-meo-params-GKEDDFZ_pathway.txt',
-                  INPUT_DIR + 'data0-omicsintegrator1-params-E3LSEZQ_pathway.txt',
-                  INPUT_DIR + 'data0-omicsintegrator1-params-NFIPHUX_pathway.txt',
-                  INPUT_DIR + 'data0-omicsintegrator2-params-IV3IPCJ_pathway.txt',
-                  INPUT_DIR + 'data0-pathlinker-params-6SWY7JS_pathway.txt',
-                  INPUT_DIR + 'data0-pathlinker-params-VQL7BDZ_pathway.txt']
+OUT_DIR = Path('test', 'analysis', 'output')
+INPUT_DIR = Path('test', 'analysis', 'input', 'run', 'example')
+INPUT_PATHWAYS = list(INPUT_DIR.rglob("pathway.txt"))
 OUT_FILE = 'test/analysis/output/cytoscape.cys'
 
 
@@ -30,10 +27,12 @@ class TestCytoscape:
         """
         Path(OUT_DIR).mkdir(parents=True, exist_ok=True)
 
+        subprocess.run(["snakemake", "--cores", "1", "--configfile", "test/analysis/input/example.yaml"])
+
     def test_cytoscape(self):
         out_path = Path(OUT_FILE)
         out_path.unlink(missing_ok=True)
-        run_cytoscape(INPUT_PATHWAYS, OUT_FILE)
+        run_cytoscape(list(map(str, INPUT_PATHWAYS)), OUT_FILE)
         assert out_path.exists()
 
     # Only run Singularity test if the binary is available on the system
@@ -46,5 +45,9 @@ class TestCytoscape:
     def test_cytoscape_singularity(self):
         out_path = Path(OUT_FILE)
         out_path.unlink(missing_ok=True)
-        run_cytoscape(INPUT_PATHWAYS, OUT_FILE, "singularity")
+        run_cytoscape(list(map(str, INPUT_PATHWAYS)), OUT_FILE, "singularity")
         assert out_path.exists()
+    
+    @classmethod
+    def teardown_class(cls):
+        shutil.rmtree(f"test/analysis/input/run/example")
