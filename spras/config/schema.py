@@ -34,10 +34,12 @@ class ContainerRegistry(BaseModel):
     model_config = ConfigDict(extra='forbid')
 
 class AlgorithmParams(BaseModel):
-    include: bool = False
+    include: bool
     directed: Optional[bool] = None
 
-    # TODO: use array of runs instead
+    # TODO: use array of runs instead. We currently rely on the
+    # extra parameters here to extract the algorithm parameter information,
+    # which is why this deviates from the usual ConfigDict(extra='forbid').
     model_config = ConfigDict(extra='allow')
 
 class Algorithm(BaseModel):
