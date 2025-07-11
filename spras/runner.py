@@ -4,6 +4,7 @@ from typing import Any
 from spras.allpairs import AllPairs as allpairs
 from spras.btb import BowTieBuilder as bowtiebuilder
 from spras.dataset import Dataset
+from spras.diamond import DIAMOnD as diamond
 from spras.domino import DOMINO as domino
 from spras.meo import MEO as meo
 from spras.mincostflow import MinCostFlow as mincostflow

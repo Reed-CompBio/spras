@@ -2,6 +2,7 @@ import os
 import pickle as pkl
 import warnings
 
+import networkx
 import pandas as pd
 
 """
@@ -125,9 +126,12 @@ class Dataset:
             # will be ignored
             # TODO may want to warn about duplicate before removing them, for instance, if a user loads two files that
             #  both have prizes
-            self.node_table = self.node_table.merge(
-                single_node_table, how="left", on=self.NODE_ID, suffixes=(None, "_DROP")
-            ).filter(regex="^(?!.*DROP)")
+            try:
+                self.node_table = self.node_table.merge(
+                    single_node_table, how="left", on=self.NODE_ID, suffixes=(None, "_DROP")
+                ).filter(regex="^(?!.*DROP)")
+            except ValueError as error:
+                raise ValueError(f"An error occured when trying to merge {node_file} with the rest of the node files.") from error
         # Ensure that the NODEID column always appears first, which is required for some downstream analyses
         self.node_table.insert(0, "NODEID", self.node_table.pop("NODEID"))
         self.other_files = dataset_dict["other_files"]
@@ -174,3 +178,4 @@ class Dataset:
 
     def get_interactome(self) -> pd.DataFrame | None:
         return self.interactome.copy(deep = True)
+
