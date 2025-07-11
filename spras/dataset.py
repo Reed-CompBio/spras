@@ -100,13 +100,6 @@ class Dataset:
                 "Direction",
             ]
 
-            weight_series = pd.Series(self.interactome.Weight)
-            weight_series_out_range = ~weight_series.between(0, 1)
-            if weight_series_out_range.any():
-                # Offset the index by 1 to match the file line numbers.
-                weight_true = (weight_series_out_range.index[weight_series_out_range == True] + 1).tolist()
-                raise ValueError(f"The following lines of the interactome: ({str(weight_true)}) have weights not between 0 and 1.")
-
             # Make directionality column case-insensitive
             self.interactome["Direction"] = self.interactome["Direction"].str.upper()
             if not self.interactome["Direction"].isin(["U", "D"]).all():

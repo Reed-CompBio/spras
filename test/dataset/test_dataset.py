@@ -48,23 +48,13 @@ class TestDataset:
                 'data_dir': FIXTURES_PATH / 'empty-network'
             })
 
-    def test_not_allow_edge_weights_oor(self):
-        with pytest.raises(ValueError):
-            Dataset({
-                'label': 'empty',
-                'edge_files': ['network.txt'],
-                'node_files': ['node-prizes.txt', 'sources.txt', 'targets.txt'],
-                'other_files': [],
-                'data_dir': FIXTURES_PATH / 'not-in-range'
-            })
-
-    def test_normal(self):
+    def test_standard(self):
         dataset = Dataset({
             'label': 'empty',
             'edge_files': ['network.txt'],
             'node_files': ['node-prizes.txt', 'sources.txt', 'targets.txt'],
             'other_files': [],
-            'data_dir': FIXTURES_PATH / 'in-range'
+            'data_dir': FIXTURES_PATH / 'standard'
         })
 
         assert len(dataset.get_interactome()) == 2

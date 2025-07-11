@@ -1,3 +1,0 @@
-NODEID	prize	active	dummy
-A	2	true	true
-C	5.7	true
