@@ -111,6 +111,8 @@ analysis:
   # Create Cytoscape session file with all pathway graphs for each dataset
   cytoscape:
     include: true
+  visjs:
+    include: false
   # Machine learning analysis (e.g. clustering) of the pathway output files for each dataset
   ml:
     # ml analysis per dataset
