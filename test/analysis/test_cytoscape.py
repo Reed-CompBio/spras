@@ -1,8 +1,8 @@
+import shutil
+import subprocess
 from pathlib import Path
 
 import pytest
-import subprocess
-import shutil
 
 import spras.config as config
 from spras.analysis.cytoscape import run_cytoscape
@@ -47,7 +47,7 @@ class TestCytoscape:
         out_path.unlink(missing_ok=True)
         run_cytoscape(list(map(str, INPUT_PATHWAYS)), OUT_FILE, "singularity")
         assert out_path.exists()
-    
+
     @classmethod
     def teardown_class(cls):
         shutil.rmtree(f"test/analysis/input/run/example")
