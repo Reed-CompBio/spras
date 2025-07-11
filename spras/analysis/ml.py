@@ -205,19 +205,21 @@ def pca(dataframe: pd.DataFrame, output_png: str, output_var: str, output_coord:
         # evaluate KDE
         # compute the log-likelihood of each sample under the model
         log_density = kde_model.score_samples(grid_points)
-        z = np.exp(log_density).reshape(xx.shape)
+        z = np.exp(log_density)
+        zz = z.reshape(xx.shape)
 
         # plot kde on pca figure
-        plt.contourf(xx, yy, z, levels=100, cmap='Reds')
-        plt.colorbar(label="Density")
+        min_density = np.min(z)
+        max_density = np.max(z)
+        plt.contourf(xx, yy, zz, cmap='Reds', vmin=min_density, vmax=max_density, levels=100)
+        plt.colorbar(label="Density", ticks = np.linspace(min_density, max_density, num=10))
 
         # save kde to df
         df_kde = pd.DataFrame({
-            "X_coordinate": grid_points[:, 0],
-            "Y_coordinate": grid_points[:, 1],
-            "Density": np.exp(log_density)
-        })
-        df_kde = df_kde.round(8)
+            "x_coordinate": grid_points[:, 0],
+            "y_coordinate": grid_points[:, 1],
+            "density": z
+        }).round(8)
 
         # TODO: decide if we need to save the kde file REMOVE IT once I am done debugging
         df_kde.to_csv(output_kde, index=False, sep="\t")
@@ -236,22 +238,19 @@ def pca(dataframe: pd.DataFrame, output_png: str, output_var: str, output_coord:
     centroid_row = ['centroid'] + centroid.tolist()
     coordinates_df.loc[len(coordinates_df)] = centroid_row
     if kernel_density:
-        max_density = df_kde["Density"].max()
-        max_rows = df_kde[df_kde["Density"] == max_density].sort_index()
+        max_density = df_kde["density"].max()
+        max_rows = df_kde[df_kde["density"] == max_density].sort_index()
         if len(max_rows) > 1: # mutliple kde maximums
             #compute distances to origin (0,0)
-            distances = np.sqrt(
-                max_rows["X_coordinate"]**2 +
-                max_rows["Y_coordinate"]**2
-            ).round(8)
+            distances = np.sqrt(max_rows["x_coordinate"]**2 + max_rows["y_coordinate"]**2).round(8)
             # pick index of closest max to centroid
             chosen_index = distances.idxmin()
             chosen_row = max_rows.loc[chosen_index]
 
-            kde_row = ['kde_peak', chosen_row["X_coordinate"], chosen_row["Y_coordinate"]]
+            kde_row = ['kde_peak', chosen_row["x_coordinate"], chosen_row["y_coordinate"]]
         else: # one kde maximum
             max_row = max_rows.iloc[0]
-            kde_row = ['kde_peak', max_row["X_coordinate"], max_row["Y_coordinate"]]
+            kde_row = ['kde_peak', max_row["x_coordinate"], max_row["y_coordinate"]]
         coordinates_df.loc[len(coordinates_df)] = kde_row
     coordinates_df = coordinates_df.round(8)
     coordinates_df.to_csv(output_coord, sep='\t', index=False)
