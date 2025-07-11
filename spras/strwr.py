@@ -13,6 +13,7 @@ __all__ = ['ST_RWR']
 # Note: This class is almost identical to the rwr.py file.
 class ST_RWR(PRM):
     required_inputs = ['network','sources','targets']
+    dois = []
 
     @staticmethod
     def generate_inputs(data, filename_map):
