@@ -42,7 +42,7 @@ class BowTieBuilder(PRM):
         # Get sources and write to file, repeat for targets
         # Does not check whether a node is a source and a target
         for node_type in ['sources', 'targets']:
-            nodes = data.request_node_columns([node_type])
+            nodes = data.get_node_columns([node_type])
             if nodes is None:
                 raise ValueError(f'No {node_type} found in the node files')
 

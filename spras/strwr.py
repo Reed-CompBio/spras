@@ -22,10 +22,10 @@ class ST_RWR(PRM):
 
         # Get seperate source and target nodes for source and target files
         if data.contains_node_columns(["sources","targets"]):
-            sources = data.request_node_columns(["sources"])
+            sources = data.get_node_columns(["sources"])
             sources.to_csv(filename_map['sources'],sep='\t',index=False,columns=['NODEID'],header=False)
 
-            targets = data.request_node_columns(["targets"])
+            targets = data.get_node_columns(["targets"])
             targets.to_csv(filename_map['targets'],sep='\t',index=False,columns=['NODEID'],header=False)
         else:
             raise ValueError("Invalid node data")
