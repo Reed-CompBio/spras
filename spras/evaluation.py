@@ -151,7 +151,7 @@ class Evaluation:
         Identifies the pathway closest to a specified highest kernel density estimated (kde) peak based on PCA coordinates
         Calculates the Euclidean distance from each data point to the KDE peak, then selects the closest pathway as the representative pathway.
         If there is more than one representative pathway, a tiebreaker will be used
-            1) choose smallest number of edges and smallest number of nodes
+            1) choose smallest pathway (smallest number of edges and nodes)
             2) end all be all, choose the first one based on name
         Returns a list of file paths for the representative pathway associated with the closest data point to the centroid.
         @param coordinates_files: a list of pca coordinates files for a dataset or specific algorithm in a dataset

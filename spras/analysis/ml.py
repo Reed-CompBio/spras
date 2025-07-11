@@ -241,9 +241,10 @@ def pca(dataframe: pd.DataFrame, output_png: str, output_var: str, output_coord:
         max_density = df_kde["density"].max()
         max_rows = df_kde[df_kde["density"] == max_density].sort_index()
         if len(max_rows) > 1: # mutliple kde maximums
-            #compute distances to origin (0,0)
+            # compute distances to origin (0,0)
             distances = np.sqrt(max_rows["x_coordinate"]**2 + max_rows["y_coordinate"]**2).round(8)
-            # pick index of closest max to centroid
+            # pick the coordinate closest to (0,0) as the kde peak to use.
+            # if all the coordinates are equal distance to (0,0) pick the smallest index to be the coordinate to be chosen.
             chosen_index = distances.idxmin()
             chosen_row = max_rows.loc[chosen_index]
 
