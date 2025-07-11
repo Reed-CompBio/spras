@@ -31,7 +31,7 @@ class TestGenerateInputs:
         """
         Path(OUTDIR).mkdir(parents=True, exist_ok=True)
 
-    def test_prepare_inputs_networks(self):
+    def test_generate_inputs_networks(self):
         config_loc = os.path.join("test", "generate-inputs", "inputs", "test_config.yaml")
 
         with open(config_loc) as config_file:
@@ -45,7 +45,7 @@ class TestGenerateInputs:
             inputs = runner.get_required_inputs(algo)
             filename_map = {input_str: os.path.join("test", "generate-inputs", "output", f"{algo}-{input_str}.txt")
                             for input_str in inputs}
-            runner.prepare_inputs(algo, test_file, filename_map)
+            runner.generate_inputs(algo, test_file, filename_map)
             exp_file_name = algo_exp_file[algo]
             assert filecmp.cmp(OUTDIR + f"{algo}-{exp_file_name}.txt", EXPDIR + f"{algo}-{exp_file_name}-expected.txt",
                                shallow=False)

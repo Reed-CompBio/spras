@@ -48,7 +48,7 @@ def merge_input(dataset_dict, dataset_file: str):
     dataset.to_file(dataset_file)
 
 
-def prepare_inputs(algorithm: str, data_file: str, filename_map: dict[str, str]):
+def generate_inputs(algorithm: str, data_file: str, filename_map: dict[str, str]):
     """
     Prepare general dataset files for this algorithm
     @param algorithm: algorithm name
