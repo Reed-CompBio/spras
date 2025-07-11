@@ -189,7 +189,7 @@ checkpoint prepare_input:
         # and write the output files specified by required_inputs
         # The filename_map provides the output file path for each required input file type
         filename_map = {input_type: SEP.join([out_dir, 'prepared', f'{wildcards.dataset}-{wildcards.algorithm}-inputs', f'{input_type}.txt']) for input_type in runner.get_required_inputs(wildcards.algorithm)}
-        runner.prepare_inputs(wildcards.algorithm, input.dataset_file, filename_map)
+        runner.generate_inputs(wildcards.algorithm, input.dataset_file, filename_map)
 
 # Collect the prepared input files from the specified directory
 # If the directory does not exist for this dataset-algorithm pair, the checkpoint will detect that
