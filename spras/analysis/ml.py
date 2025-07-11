@@ -11,6 +11,7 @@ from scipy.cluster.hierarchy import dendrogram, fcluster
 from sklearn.cluster import AgglomerativeClustering
 from sklearn.decomposition import PCA
 from sklearn.metrics import jaccard_score
+from sklearn.neighbors import KernelDensity
 from sklearn.preprocessing import StandardScaler
 
 from spras.util import make_required_dirs
@@ -19,6 +20,7 @@ plt.switch_backend('Agg')
 
 linkage_methods = ["ward", "complete", "average", "single"]
 distance_metrics = ["euclidean", "manhattan", "cosine"]
+kde_kernel = ['gaussian', 'tophat', 'epanechnikov', 'exponential', 'linear', 'cosine']
 
 UNDIR_CONST = '---'  # separator between nodes when forming undirected edges
 DIR_CONST = '-->'  # separator between nodes when forming directed edges
@@ -110,12 +112,13 @@ def create_palette(column_names):
     to a unique color from the specified palette.
     """
     # TODO: could add a way for the user to customize the color palette?
-    custom_palette = sns.color_palette("husl", len(column_names))
-    label_color_map = {label: color for label, color in zip(column_names, custom_palette, strict=True)}
+    unique_column_names = list(sorted(set(column_names)))
+    custom_palette = sns.color_palette(palette = "tab20b", n_colors = len(unique_column_names))
+    label_color_map = {label: color for label, color in zip(unique_column_names, custom_palette, strict=True)}
     return label_color_map
 
-
-def pca(dataframe: pd.DataFrame, output_png: str, output_var: str, output_coord: str, components: int = 2, labels: bool = True):
+def pca(dataframe: pd.DataFrame, output_png: str, output_var: str, output_coord: str, output_kde: str = None, components: int = 2, labels: bool = True,
+        kernel_density: bool = False,  bandwidth:Union[float, str] = 1.0, kernel:str = "gaussian", remove_empty_pathways: bool = False):
     """
     Performs PCA on the data and creates a scatterplot of the top two principal components.
     It saves the plot, the variance explained by each component, and the
@@ -126,11 +129,22 @@ def pca(dataframe: pd.DataFrame, output_png: str, output_var: str, output_coord:
     @param output_coord: the filename to save the coordinates of each algorithm
     @param components: the number of principal components to calculate (Default is 2)
     @param labels: determines if labels will be included in the scatterplot (Default is True)
+    @param kernel_density: if True, overlays a kernel density estimate (KDE) on top of the PCA scatterplot (Default is False)
+    @param bandwidth: bandwidth parameter for KDE; controls the smoothness of the density estimate. Can be a float or string ('scott' or 'silverman') for automatic bandwidth estimation selection (Default is 1.0)
+    @param kernel: kernel type used for KDE (Default is 'gaussian')
+    @remove_empty_pathways: if True, removes pathways (columns) from the dataframe that contain no edges before performing PCA (Default is False)
     """
-    validate_df(dataframe)
     df = dataframe.reset_index(drop=True)
-    columns = dataframe.columns
+
+    # remove empty pathways from dataframe
+    if remove_empty_pathways:
+        df = df.loc[:, df.any(axis=0)]
+
+    validate_df(df)
+
+    columns = df.columns
     column_names = [element.split('-')[-3] for element in columns]  # assume algorithm names do not contain '-'
+
     df = df.transpose()  # based on the algorithms rather than the edges
     X = df.values
 
@@ -143,8 +157,10 @@ def pca(dataframe: pd.DataFrame, output_png: str, output_var: str, output_coord:
     if not isinstance(labels, bool):
         raise ValueError(f"labels={labels} must be True or False")
 
-    scaler = StandardScaler()
-    scaler.fit(X)  # calc mean and standard deviation
+    # center binary data by subtracting the column-wise mean
+    # allows PCA to focus on edge inclusion patterns across runs rather than raw output volume.
+    scaler = StandardScaler(with_std=False)
+    scaler.fit(X)  # compute mean inclusion rate per edge
     X_scaled = scaler.transform(X)
 
     # choosing the PCA
@@ -153,25 +169,99 @@ def pca(dataframe: pd.DataFrame, output_png: str, output_var: str, output_coord:
     X_pca = pca_instance.transform(X_scaled)
     variance = pca_instance.explained_variance_ratio_ * 100
 
+    # calculating the centroid by taking the mean of the top 2 principal components
+    centroid = np.mean(X_pca[:, :2], axis=0)
+
     # making the plot
     label_color_map = create_palette(column_names)
     plt.figure(figsize=(10, 7))
-    sns.scatterplot(x=X_pca[:, 0], y=X_pca[:, 1], s=70, hue=column_names, legend=True, palette=label_color_map)
+
+    if kernel_density:
+        if kernel not in kde_kernel:
+            raise ValueError(f"kernel={kernel} must be one of {kde_kernel}")
+        if not isinstance(bandwidth, float) and bandwidth not in ("scott", "silverman"):
+            raise ValueError(f"bandwidth={bandwidth} must be a float or estimation method 'scott' or 'silverman'")
+
+        # Note: the normalization of the density output is correct only for the Euclidean distance metric.
+        kde_model = KernelDensity(kernel=kernel, bandwidth=bandwidth, metric="euclidean")
+        xy = X_pca[:, :2]
+        kde_model.fit(xy)
+
+        # creates a mesh grid covering the 2D PCA plot space with slight padding.
+        # the grid will be used to evaluate and visualize the KDE over the continuous PCA space
+        # padding ensures that points near the edges are also included and the plot does not get cut off visually.
+        # the grid_points array stacks the x and y coordinates into a 2D array of shape (num_grid_points, 2)
+        x = xy[:, 0]
+        y = xy[:, 1]
+        padding_x = 0.05 * (x.max() - x.min())
+        padding_y = 0.05 * (y.max() - y.min())
+        xmin = x.min() - padding_x
+        xmax = x.max() + padding_x
+        ymin = y.min() - padding_y
+        ymax = y.max() + padding_y
+        xx, yy = np.meshgrid(np.linspace(xmin, xmax, 100), np.linspace(ymin, ymax, 100))
+        grid_points = np.vstack([xx.ravel(), yy.ravel()]).T
+
+        # evaluate KDE
+        # compute the log-likelihood of each sample under the model
+        log_density = kde_model.score_samples(grid_points)
+        z = np.exp(log_density)
+        zz = z.reshape(xx.shape)
+
+        # plot kde on pca figure
+        min_density = np.min(z)
+        max_density = np.max(z)
+        plt.contourf(xx, yy, zz, cmap='Reds', vmin=min_density, vmax=max_density, levels=100)
+        plt.colorbar(label="Density", ticks = np.linspace(min_density, max_density, num=10))
+
+        # save kde to df
+        df_kde = pd.DataFrame({
+            "x_coordinate": grid_points[:, 0],
+            "y_coordinate": grid_points[:, 1],
+            "density": z
+        }).round(8)
+
+        # TODO: decide if we need to save the kde file REMOVE IT once I am done debugging
+        df_kde.to_csv(output_kde, index=False, sep="\t")
+
+    sns.scatterplot(x=X_pca[:, 0], y=X_pca[:, 1], s=70, hue=column_names, palette=label_color_map)
+    plt.scatter(centroid[0], centroid[1], color='red', marker='X', s=100, label='Centroid')
     plt.title("PCA")
+    plt.legend()
     plt.xlabel(f"PC1 ({variance[0]:.1f}% variance)")
     plt.ylabel(f"PC2 ({variance[1]:.1f}% variance)")
 
     # saving the coordinates of each algorithm
     make_required_dirs(output_coord)
     coordinates_df = pd.DataFrame(X_pca, columns=['PC' + str(i) for i in range(1, components+1)])
-    coordinates_df.insert(0, 'algorithm', columns.tolist())
+    coordinates_df.insert(0, 'datapoint_labels', columns.tolist())
+    centroid_row = ['centroid'] + centroid.tolist()
+    coordinates_df.loc[len(coordinates_df)] = centroid_row
+    if kernel_density:
+        max_density = df_kde["density"].max()
+        max_rows = df_kde[df_kde["density"] == max_density].sort_index()
+        if len(max_rows) > 1: # mutliple kde maximums
+            # compute distances to origin (0,0)
+            distances = np.sqrt(max_rows["x_coordinate"]**2 + max_rows["y_coordinate"]**2).round(8)
+            # pick the coordinate closest to (0,0) as the kde peak to use.
+            # if all the coordinates are equal distance to (0,0) pick the smallest index to be the coordinate to be chosen.
+            chosen_index = distances.idxmin()
+            chosen_row = max_rows.loc[chosen_index]
+
+            kde_row = ['kde_peak', chosen_row["x_coordinate"], chosen_row["y_coordinate"]]
+        else: # one kde maximum
+            max_row = max_rows.iloc[0]
+            kde_row = ['kde_peak', max_row["x_coordinate"], max_row["y_coordinate"]]
+        coordinates_df.loc[len(coordinates_df)] = kde_row
+    coordinates_df = coordinates_df.round(8)
     coordinates_df.to_csv(output_coord, sep='\t', index=False)
+
 
     # saving the principal components
     make_required_dirs(output_var)
     with open(output_var, "w") as f:
         for component in range(len(variance)):
-            f.write("PC%d: %s\n" % (component+1, variance[component]))
+            f.write("PC%d: %.8f\n" % (component+1, variance[component]))
 
     # labeling the graphs
     if labels:

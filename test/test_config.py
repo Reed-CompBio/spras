@@ -82,7 +82,8 @@ def get_test_config():
             },
             "ml": {
                 "include": False,
-                "aggregate_per_algorithm": False
+                "aggregate_per_algorithm": False,
+                "kernel_density": True # TODO update the coupling of ml and eval tests
             },
             "cytoscape": {
                 "include": False
@@ -301,3 +302,5 @@ class TestConfig:
         assert config.config.analysis_include_ml_aggregate_algo == expected_ml_agg
         assert config.config.analysis_include_evaluation == expected_eval
         assert config.config.analysis_include_evaluation_aggregate_algo == expected_eval_agg
+
+        # TODO: add the eval and kernel_density coupling test case
