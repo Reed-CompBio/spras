@@ -9,11 +9,14 @@ import os
 dir_path = os.path.dirname(os.path.realpath(__file__))
 visjs_html = Path(dir_path, "visjs.html").read_text()
 
-def visualize(network: pd.DataFrame) -> str:
+def visualize(network: pd.DataFrame | str | os.PathLike) -> str:
     """
     Visualizes an output interactome
     as a visjs .html file.
     """
+    if not isinstance(network, pd.DataFrame):
+        network = pd.read_csv(network, sep='\t', header=0)
+
     current_id = 0
     node_ids: dict[str, int] = dict()
 
