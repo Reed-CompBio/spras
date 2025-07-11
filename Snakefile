@@ -4,7 +4,7 @@ import shutil
 import yaml
 from spras.dataset import Dataset
 from spras.evaluation import Evaluation
-from spras.analysis import ml, summary, cytoscape
+from spras.analysis import ml, summary, cytoscape, visjs
 import spras.config as _config
 
 # Snakemake updated the behavior in the 6.5.0 release https://github.com/snakemake/snakemake/pull/1037
@@ -77,6 +77,9 @@ def make_final_input(wildcards):
 
     if _config.config.analysis_include_cytoscape:
         final_input.extend(expand('{out_dir}{sep}{dataset}-cytoscape.cys',out_dir=out_dir,sep=SEP,dataset=dataset_labels))
+    
+    if _config.config.analysis_include_visjs:
+        final_input.extend(expand('{out_dir}{sep}{dataset}-{algorithm_params}{sep}visjs.html',out_dir=out_dir,sep=SEP,dataset=dataset_labels,algorithm_params=algorithms_with_params))
 
     if _config.config.analysis_include_ml:
         final_input.extend(expand('{out_dir}{sep}{dataset}-ml{sep}pca.png',out_dir=out_dir,sep=SEP,dataset=dataset_labels,algorithm_params=algorithms_with_params))
@@ -293,6 +296,12 @@ rule viz_cytoscape:
     run:
         cytoscape.run_cytoscape(input.pathways, output.session, FRAMEWORK)
 
+rule viz_visjs:
+    input: pathway = SEP.join([out_dir, '{dataset}-{algorithm}-{params}', 'pathway.txt'])
+    output:
+        html = SEP.join([out_dir, '{dataset}-{algorithm}-{params}', 'visjs.html'])
+    run:
+        Path(output.html).write_text(visjs.visualize(input.pathway))
 
 # Write a single summary table for all pathways for each dataset
 rule summary_table:
