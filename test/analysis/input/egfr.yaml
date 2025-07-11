@@ -12,26 +12,6 @@ algorithms:
       include: true
       run1:
         k: [10, 20]
-  - name: omicsintegrator1
-    params:
-      include: true
-      run1:
-        b: [0.55, 2, 10]
-        d: 10
-        g: 1e-3
-        r: 0.01
-        w: 0.1
-        mu: 0.008
-        dummy_mode: "terminals"
-  - name: omicsintegrator2
-    params:
-      include: true
-      run1:
-        b: 4
-        g: 0
-      run2:
-        b: 2
-        g: 3
   - name: meo
     params:
       include: true
@@ -39,12 +19,6 @@ algorithms:
         local_search: "Yes"
         max_path_length: 3
         rand_restarts: 10
-  - name: domino
-    params:
-      include: true
-      run1:
-        slice_threshold: 0.3
-        module_threshold: 0.05
 datasets:
   - data_dir: "input"
     edge_files:
