@@ -87,7 +87,7 @@ class TestParseOutputs:
 
     def test_empty_raw_pathway(self):
         for algo, params in algorithms.items():
-            files = glob(str(INDIR / "empty" / f"{algo}-empty-pathway*"))
+            files = glob(str(INDIR / "empty" / f"{algo}-empty-raw-pathway*"))
             assert len(files) != 0, "can't test on no empty raw pathways!"
             for test_file in glob(str(INDIR / "empty" / f"{algo}-empty-raw-pathway*")):
                 out_file = OUTDIR / f"{algo}-empty-pathway-output.txt"
