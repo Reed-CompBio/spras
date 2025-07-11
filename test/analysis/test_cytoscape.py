@@ -11,7 +11,6 @@ config.init_from_file("test/analysis/input/example.yaml")
 
 OUT_DIR = Path('test', 'analysis', 'output')
 INPUT_DIR = Path('test', 'analysis', 'input', 'run', 'example')
-INPUT_PATHWAYS = list(INPUT_DIR.rglob("pathway.txt"))
 OUT_FILE = 'test/analysis/output/cytoscape.cys'
 
 
@@ -32,7 +31,8 @@ class TestCytoscape:
     def test_cytoscape(self):
         out_path = Path(OUT_FILE)
         out_path.unlink(missing_ok=True)
-        run_cytoscape(list(map(str, INPUT_PATHWAYS)), OUT_FILE)
+        input_pathways = list(INPUT_DIR.rglob("pathway.txt"))
+        run_cytoscape(list(map(str, input_pathways)), OUT_FILE)
         assert out_path.exists()
 
     # Only run Singularity test if the binary is available on the system
@@ -45,7 +45,8 @@ class TestCytoscape:
     def test_cytoscape_singularity(self):
         out_path = Path(OUT_FILE)
         out_path.unlink(missing_ok=True)
-        run_cytoscape(list(map(str, INPUT_PATHWAYS)), OUT_FILE, "singularity")
+        input_pathways = list(INPUT_DIR.rglob("pathway.txt"))
+        run_cytoscape(list(map(str, input_pathways)), OUT_FILE, "singularity")
         assert out_path.exists()
 
     @classmethod
