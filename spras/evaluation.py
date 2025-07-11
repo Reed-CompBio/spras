@@ -168,13 +168,9 @@ class Evaluation:
             coord_df = coord_df[~coord_df['datapoint_labels'].isin(['kde_peak', 'centroid'])]
 
             pc_columns = [col for col in coord_df.columns if col.startswith('PC')]
-            coord_df['Distance To KDE peak'] = np.sqrt(sum((coord_df[pc] - kde_peak[i]) ** 2 for i, pc in enumerate(pc_columns)))
-            # closest_to_kde_peak = coord_df.sort_values(by='Distance To KDE peak').iloc[0]
-
+            coord_df['Distance To KDE peak'] = np.sqrt(sum((coord_df[pc] - kde_peak[i]) ** 2 for i, pc in enumerate(pc_columns))).round(8)
             min_distance = coord_df["Distance To KDE peak"].min()
             candidates = coord_df[coord_df["Distance To KDE peak"] == min_distance]
-
-            print(candidates)
 
             if len(candidates) == 1:
                 closest_to_kde_peak = candidates.iloc[0]
@@ -182,17 +178,12 @@ class Evaluation:
                 # add in summary stats file
                 summary_stats_df = pd.read_csv(pathway_summary_file, sep="\t", header=0)
                 summary_stats_df["Name"] = summary_stats_df["Name"].apply(lambda x: x.split("/")[-2])
-                print(summary_stats_df)
 
                 merged_df = candidates.merge(summary_stats_df, left_on="datapoint_labels", right_on="Name", how="inner")[["datapoint_labels", "PC1", "PC2", "Distance To KDE peak", "Number of edges", "Number of nodes"]]
-                print(merged_df)
                 merged_df = merged_df.sort_values(by=["Number of edges", "Number of nodes", "datapoint_labels"], ascending=[True, True, True])
-                print(merged_df)
 
                 # pick first one after full sorting
                 closest_to_kde_peak = merged_df.iloc[0]
-                print(closest_to_kde_peak)
-
 
             rep_pathway = os.path.join(output_dir, f"{closest_to_kde_peak['datapoint_labels']}", "pathway.txt")
             rep_pathways.append(rep_pathway)

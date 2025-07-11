@@ -36,7 +36,11 @@ class TestEvaluate:
         # TODO: I think the reason this is failing in github actions is due to rounding issues being different causing different pathways to be chosen
         pathway = Evaluation.pca_chosen_pathway([output_coordinates], SUMMARY_FILE, INPUT_DIR)
         Evaluation.precision_and_recall(pathway, GS_NODE_TABLE, algorithms, output_file, output_png)
-        assert filecmp.cmp(output_file, EXPECT_DIR + 'expected-pr-per-pathway-pca-chosen.txt', shallow=False)
+
+        chosen = pd.read_csv(output_file, sep="\t", header=0).round(8)
+        expected = pd.read_csv(EXPECT_DIR + 'expected-pr-per-pathway-pca-chosen.txt', sep="\t",  header=0).round(8)
+
+        assert chosen.equals(expected)
         assert output_png.exists()
 
 # TODO test cases

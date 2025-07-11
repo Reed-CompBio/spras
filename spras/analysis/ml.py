@@ -217,6 +217,7 @@ def pca(dataframe: pd.DataFrame, output_png: str, output_var: str, output_coord:
             "Y_coordinate": grid_points[:, 1],
             "Density": np.exp(log_density)
         })
+        df_kde = df_kde.round(8)
 
         # TODO: decide if we need to save the kde file REMOVE IT once I am done debugging
         df_kde.to_csv(output_kde, index=False, sep="\t")
@@ -237,28 +238,22 @@ def pca(dataframe: pd.DataFrame, output_png: str, output_var: str, output_coord:
     if kernel_density:
         max_density = df_kde["Density"].max()
         max_rows = df_kde[df_kde["Density"] == max_density].sort_index()
-        print(max_rows)
-        if len(max_rows) > 1:
-            # mutliple kde maximums
-
+        if len(max_rows) > 1: # mutliple kde maximums
             #compute distances to origin (0,0)
             distances = np.sqrt(
                 max_rows["X_coordinate"]**2 +
                 max_rows["Y_coordinate"]**2
-            )
-            print(distances)
-
+            ).round(8)
             # pick index of closest max to centroid
             chosen_index = distances.idxmin()
-            print(chosen_index)
-            chosen_row = max_rows.iloc[chosen_index]
+            chosen_row = max_rows.loc[chosen_index]
 
             kde_row = ['kde_peak', chosen_row["X_coordinate"], chosen_row["Y_coordinate"]]
-        else:
-            # one kde maximum
+        else: # one kde maximum
             max_row = max_rows.iloc[0]
             kde_row = ['kde_peak', max_row["X_coordinate"], max_row["Y_coordinate"]]
         coordinates_df.loc[len(coordinates_df)] = kde_row
+    coordinates_df = coordinates_df.round(8)
     coordinates_df.to_csv(output_coord, sep='\t', index=False)
 
 
@@ -266,7 +261,7 @@ def pca(dataframe: pd.DataFrame, output_png: str, output_var: str, output_coord:
     make_required_dirs(output_var)
     with open(output_var, "w") as f:
         for component in range(len(variance)):
-            f.write("PC%d: %s\n" % (component+1, variance[component]))
+            f.write("PC%d: %.8f\n" % (component+1, variance[component]))
 
     # labeling the graphs
     if labels:
