@@ -56,7 +56,7 @@ class BowTieBuilder(PRM):
 
 
         # Create network file
-        edges = data.get_interactome(Direction.DIRECTED, GraphMultiplicity.SIMPLE)
+        edges = data.get_interactome([Direction.DIRECTED, GraphMultiplicity.SIMPLE])
 
         edges.to_csv(filename_map["edges"], sep="\t", index=False,
                                       columns=["Interactor1", "Interactor2", "Weight"],
