@@ -31,7 +31,7 @@ class ST_RWR(PRM):
             raise ValueError("Invalid node data")
 
         # Get edge data for network file
-        edges = data.get_interactome()
+        edges = data.get_interactome([Direction.DIRECTED, GraphMultiplicity.SIMPLE])
         edges.to_csv(filename_map['network'],sep='|',index=False,columns=['Interactor1','Interactor2'],header=False)
 
     @staticmethod
@@ -103,7 +103,7 @@ class ST_RWR(PRM):
             df = df.sort_values(by=['score'], ascending=False)
             df = df.head(int(threshold))
             raw_dataset = Dataset.from_file(params.get('dataset'))
-            interactome = raw_dataset.get_interactome().get(['Interactor1','Interactor2'])
+            interactome = raw_dataset.get_interactome([]).df.get(['Interactor1','Interactor2'])
             interactome = interactome[interactome['Interactor1'].isin(df['node'])
                                       & interactome['Interactor2'].isin(df['node'])]
             interactome = add_rank_column(interactome)

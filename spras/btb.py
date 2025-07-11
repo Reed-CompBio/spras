@@ -1,8 +1,8 @@
 from pathlib import Path
 
 from spras.containers import prepare_volume, run_container_and_log
+from spras.dataset import Direction, GraphMultiplicity
 from spras.interactome import (
-    convert_undirected_to_directed,
     reinsert_direction_col_directed,
 )
 from spras.prm import PRM
@@ -56,10 +56,7 @@ class BowTieBuilder(PRM):
 
 
         # Create network file
-        edges = data.get_interactome()
-
-        # Format into directed graph (BTB uses the nx.DiGraph constructor internally)
-        edges = convert_undirected_to_directed(edges)
+        edges = data.get_interactome(Direction.DIRECTED, GraphMultiplicity.SIMPLE)
 
         edges.to_csv(filename_map["edges"], sep="\t", index=False,
                                       columns=["Interactor1", "Interactor2", "Weight"],
