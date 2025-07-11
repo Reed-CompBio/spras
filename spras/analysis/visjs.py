@@ -27,7 +27,7 @@ def visualize(network: pd.DataFrame | str | os.PathLike) -> str:
     for _index, row in network.iterrows():
         source_node = row["Node1"]
         target_node = row["Node2"]
-        row["Direction"]
+        directed = row["Direction"] == "D"
 
         if source_node not in node_ids:
             node_ids[source_node] = current_id
@@ -39,7 +39,9 @@ def visualize(network: pd.DataFrame | str | os.PathLike) -> str:
             nodes_repr.append(f"{{id: {current_id}, label: '{target_node}'}}")
             current_id += 1
 
-        edges_repr.append(f"{{from: {node_ids[source_node]}, to: {node_ids[target_node]}}}")
+        # Note: directed will be python True or False. See visjs.html for its fix.
+        edge_repr = {"from": node_ids[source_node], "to": node_ids[target_node], "arrows": {"to": {"enabled": directed}, "type": "arrow"}}
+        edges_repr.append(str(edge_repr))
 
     output_html = visjs_html
     output_html = output_html.replace("// {{nodes}}", ','.join(nodes_repr))
