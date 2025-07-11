@@ -3,7 +3,7 @@ from pathlib import Path
 
 import pytest
 
-import spras.config as config
+import spras.config.config as config
 from spras.pathlinker import PathLinker
 
 config.init_from_file("config/config.yaml")

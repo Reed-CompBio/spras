@@ -25,6 +25,7 @@ dependencies = [
     "matplotlib==3.6",
     "networkx==2.8",
     "pandas==1.5",
+    "pydantic==2.11.7",
     "numpy==1.26.4",
     "pip==22.1",
     "requests==2.28",
