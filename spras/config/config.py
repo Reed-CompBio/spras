@@ -127,8 +127,8 @@ class Config:
         self.datasets = {}
         for dataset in raw_config.datasets:
             label = dataset.label
-            if label in self.datasets:
-                raise ValueError(f"Datasets must have unique labels, but the label {label} appears at least twice.")
+            if label.lower() in [key.lower() for key in self.datasets.keys()]:
+                raise ValueError(f"Datasets must have unique case-insensitive labels, but the label {label} appears at least twice.")
             self.datasets[label] = dict(dataset)
 
         # parse gold standard information
