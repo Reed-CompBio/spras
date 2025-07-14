@@ -11,12 +11,12 @@ We declare models using two classes here:
 """
 
 import re
-from typing import Annotated, Optional
+from typing import Annotated
 
 from pydantic import AfterValidator, BaseModel, ConfigDict, Field
 
+from spras.config.algorithms import AlgorithmUnion
 from spras.config.util import CaseInsensitiveEnum
-
 
 class SummaryAnalysis(BaseModel):
     include: bool
@@ -87,21 +87,6 @@ class ContainerRegistry(BaseModel):
 
     model_config = ConfigDict(extra='forbid')
 
-class AlgorithmParams(BaseModel):
-    include: bool
-    directed: Optional[bool] = None
-
-    # TODO: use array of runs instead. We currently rely on the
-    # extra parameters here to extract the algorithm parameter information,
-    # which is why this deviates from the usual ConfigDict(extra='forbid').
-    model_config = ConfigDict(extra='allow')
-
-class Algorithm(BaseModel):
-    name: str
-    params: AlgorithmParams
-
-    model_config = ConfigDict(extra='forbid')
-
 class Dataset(BaseModel):
     label: Annotated[str, AfterValidator(label_validator("Dataset"))]
     node_files: list[str]
@@ -139,7 +124,7 @@ class RawConfig(BaseModel):
         description="The length of the hash used to identify a parameter combination",
         default=DEFAULT_HASH_LENGTH)
 
-    algorithms: list[Algorithm]
+    algorithms: list[AlgorithmUnion] # type: ignore - pydantic allows this.
     datasets: list[Dataset]
     gold_standards: list[GoldStandard] = []
     analysis: Analysis = Analysis()

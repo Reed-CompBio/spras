@@ -81,8 +81,8 @@ algorithms:
         rand_restarts: 10
 
   - name: "mincostflow"
-    params:
-      include: true
+    include: true
+    runs:
       run1:
         flow: 1 # The flow must be an int
         capacity: 1

@@ -1,35 +1,38 @@
 from typing import Any
 
+from pydantic import BaseModel
+
 # supported algorithm imports
 from spras.allpairs import AllPairs
 from spras.btb import BowTieBuilder
 from spras.dataset import Dataset
-from spras.domino import DOMINO
-from spras.meo import MEO
-from spras.mincostflow import MinCostFlow
-from spras.omicsintegrator1 import OmicsIntegrator1
-from spras.omicsintegrator2 import OmicsIntegrator2
-from spras.pathlinker import PathLinker
+from spras.config.util import Empty
+from spras.domino import DOMINO, DominoParams
+from spras.meo import MEO, MEOParams
+from spras.mincostflow import MinCostFlow, MinCostFlowParams
+from spras.omicsintegrator1 import OmicsIntegrator1, OmicsIntegrator1Params
+from spras.omicsintegrator2 import OmicsIntegrator2, OmicsIntegrator2Params
+from spras.pathlinker import PathLinker, PathLinkerParams
 from spras.prm import PRM
-from spras.rwr import RWR
-from spras.strwr import ST_RWR
+from spras.rwr import RWR, RWRParams
+from spras.strwr import ST_RWR, ST_RWRParams
 
-algorithms: dict[str, type[PRM]] = {
-    "allpairs": AllPairs,
-    "bowtiebuilder": BowTieBuilder,
-    "domino": DOMINO,
-    "meo": MEO,
-    "mincostflow": MinCostFlow,
-    "omicsintegrator1": OmicsIntegrator1,
-    "omicsintegrator2": OmicsIntegrator2,
-    "pathlinker": PathLinker,
-    "rwr": RWR,
-    "strwr": ST_RWR,
+algorithms: dict[str, tuple[type[PRM], type[BaseModel]]] = {
+    "allpairs": (AllPairs, Empty),
+    "bowtiebuilder": (BowTieBuilder, Empty),
+    "domino": (DOMINO, DominoParams),
+    "meo": (MEO, MEOParams),
+    "mincostflow": (MinCostFlow, MinCostFlowParams),
+    "omicsintegrator1": (OmicsIntegrator1, OmicsIntegrator1Params),
+    "omicsintegrator2": (OmicsIntegrator2, OmicsIntegrator2Params),
+    "pathlinker": (PathLinker, PathLinkerParams),
+    "rwr": (RWR, RWRParams),
+    "strwr": (ST_RWR, ST_RWRParams),
 }
 
 def get_algorithm(algorithm: str) -> type[PRM]:
     try:
-        return algorithms[algorithm.lower()]
+        return algorithms[algorithm.lower()][0]
     except KeyError as exc:
         raise NotImplementedError(f'{algorithm} is not currently supported.') from exc
 
