@@ -274,10 +274,6 @@ class Config:
             self.pca_params["labels"] = self.ml_params["labels"]
         if "kernel_density" in self.ml_params:
             self.pca_params["kernel_density"] = self.ml_params["kernel_density"]
-            if "bandwidth" in self.ml_params:
-                self.pca_params["bandwidth"] = self.ml_params["bandwidth"]
-            if "kernel" in self.ml_params:
-                self.pca_params["kernel"] = self.ml_params["kernel"]
         else:
             # TODO: needed because this is used for making the pca kde file, but will also be needed for the eval kernel_density coupling
             self.pca_params["kernel_density"] = False

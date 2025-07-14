@@ -20,7 +20,6 @@ plt.switch_backend('Agg')
 
 linkage_methods = ["ward", "complete", "average", "single"]
 distance_metrics = ["euclidean", "manhattan", "cosine"]
-kde_kernel = ['gaussian', 'tophat', 'epanechnikov', 'exponential', 'linear', 'cosine']
 
 UNDIR_CONST = '---'  # separator between nodes when forming undirected edges
 DIR_CONST = '-->'  # separator between nodes when forming directed edges
@@ -118,7 +117,7 @@ def create_palette(column_names):
     return label_color_map
 
 def pca(dataframe: pd.DataFrame, output_png: str, output_var: str, output_coord: str, output_kde: str = None, components: int = 2, labels: bool = True,
-        kernel_density: bool = False,  bandwidth:Union[float, str] = 1.0, kernel:str = "gaussian", remove_empty_pathways: bool = False):
+        kernel_density: bool = False, remove_empty_pathways: bool = False):
     """
     Performs PCA on the data and creates a scatterplot of the top two principal components.
     It saves the plot, the variance explained by each component, and the
@@ -130,8 +129,6 @@ def pca(dataframe: pd.DataFrame, output_png: str, output_var: str, output_coord:
     @param components: the number of principal components to calculate (Default is 2)
     @param labels: determines if labels will be included in the scatterplot (Default is True)
     @param kernel_density: if True, overlays a kernel density estimate (KDE) on top of the PCA scatterplot (Default is False)
-    @param bandwidth: bandwidth parameter for KDE; controls the smoothness of the density estimate. Can be a float or string ('scott' or 'silverman') for automatic bandwidth estimation selection (Default is 1.0)
-    @param kernel: kernel type used for KDE (Default is 'gaussian')
     @remove_empty_pathways: if True, removes pathways (columns) from the dataframe that contain no edges before performing PCA (Default is False)
     """
     df = dataframe.reset_index(drop=True)
@@ -177,13 +174,7 @@ def pca(dataframe: pd.DataFrame, output_png: str, output_var: str, output_coord:
     plt.figure(figsize=(10, 7))
 
     if kernel_density:
-        if kernel not in kde_kernel:
-            raise ValueError(f"kernel={kernel} must be one of {kde_kernel}")
-        if not isinstance(bandwidth, float) and bandwidth not in ("scott", "silverman"):
-            raise ValueError(f"bandwidth={bandwidth} must be a float or estimation method 'scott' or 'silverman'")
-
-        # Note: the normalization of the density output is correct only for the Euclidean distance metric.
-        kde_model = KernelDensity(kernel=kernel, bandwidth=bandwidth, metric="euclidean")
+        kde_model = KernelDensity(kernel='gaussian', bandwidth=1.0, metric="euclidean") # default model
         xy = X_pca[:, :2]
         kde_model.fit(xy)
 
@@ -221,7 +212,7 @@ def pca(dataframe: pd.DataFrame, output_png: str, output_var: str, output_coord:
             "density": z
         }).round(8)
 
-        # TODO: decide if we need to save the kde file REMOVE IT once I am done debugging
+        # TODO: REMOVE IT once I am done debugging
         df_kde.to_csv(output_kde, index=False, sep="\t")
 
     sns.scatterplot(x=X_pca[:, 0], y=X_pca[:, 1], s=70, hue=column_names, palette=label_color_map)
