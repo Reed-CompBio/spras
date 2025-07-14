@@ -124,6 +124,7 @@ class RawConfig(BaseModel):
         description="The length of the hash used to identify a parameter combination",
         default=DEFAULT_HASH_LENGTH)
 
+    # See algorithms.py for more information about AlgorithmUnion
     algorithms: list[AlgorithmUnion] # type: ignore - pydantic allows this.
     datasets: list[Dataset]
     gold_standards: list[GoldStandard] = []
@@ -132,3 +133,6 @@ class RawConfig(BaseModel):
     reconstruction_settings: ReconstructionSettings
 
     model_config = ConfigDict(extra='forbid')
+
+# AlgorithmUnion is dynamically constructed.
+RawConfig.model_rebuild()

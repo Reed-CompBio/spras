@@ -1,7 +1,8 @@
 from pathlib import Path
+import time
 from typing import Optional
 
-from pydantic import BaseModel, ConfigDict
+from pydantic import BaseModel, ConfigDict, Field
 
 from spras.containers import prepare_volume, run_container_and_log
 from spras.interactome import reinsert_direction_col_mixed
@@ -52,8 +53,8 @@ class OmicsIntegrator1Params(BaseModel):
     random_terminals: int = 0
     "How many times to apply the given prizes to random nodes in the interactome"
 
-    seed: Optional[int] = None
-    "the randomness seed to use"
+    seed: int = Field(default_factory=lambda _: int(time.time() * 1000))
+    "The random seed to use for this run. Defaults to the current UNIX timestamp."
 
     w: int
     "the number of trees"

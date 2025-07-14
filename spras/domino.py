@@ -3,9 +3,10 @@ from pathlib import Path
 from typing import Optional
 
 import pandas as pd
-from pydantic import BaseModel, ConfigDict
+from pydantic import ConfigDict
 
 from spras.containers import prepare_volume, run_container_and_log
+from spras.config.util import NondeterministicModel
 from spras.interactome import (
     add_constant,
     reinsert_direction_col_undirected,
@@ -18,7 +19,7 @@ __all__ = ['DOMINO', 'DominoParams', 'pre_domino_id_transform', 'post_domino_id_
 ID_PREFIX = 'ENSG0'
 ID_PREFIX_LEN = len(ID_PREFIX)
 
-class DominoParams(BaseModel):
+class DominoParams(NondeterministicModel):
     module_threshold: Optional[float] = None
     "the p-value threshold for considering a slice as relevant (optional)"
 
