@@ -7,7 +7,7 @@ that parts of the config exist after parsing it through Pydantic.
 
 We declare models using two classes here:
 - `BaseModel` (docs: https://docs.pydantic.dev/latest/concepts/models/)
-- `CaseInsensitiveEnum` (see ./util_enum.py)
+- `CaseInsensitiveEnum` (see ./util.py)
 """
 
 import re
