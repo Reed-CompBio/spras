@@ -7,7 +7,7 @@ that parts of the config exist after parsing it through Pydantic.
 
 We declare models using two classes here:
 - `BaseModel` (docs: https://docs.pydantic.dev/latest/concepts/models/)
-- `CaseInsensitiveEnum` (see ./util_enum.py)
+- `CaseInsensitiveEnum` (see ./util.py)
 """
 
 import re
@@ -15,7 +15,7 @@ from typing import Annotated, Optional
 
 from pydantic import AfterValidator, BaseModel, ConfigDict, Field
 
-from spras.config.util_enum import CaseInsensitiveEnum
+from spras.config.util import CaseInsensitiveEnum
 
 
 class SummaryAnalysis(BaseModel):
