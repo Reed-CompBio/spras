@@ -77,14 +77,6 @@ class PathLinker(PRM[PathLinkerParams]):
 
     @staticmethod
     def run(inputs, output_file, args=None, container_framework="docker"):
-        """
-        Run PathLinker with Docker
-        @param nodetypes:  input node types with sources and targets (required)
-        @param network:  input network file (required)
-        @param output_file: path to the output pathway file (required)
-        @param k:
-        @param container_framework: choose the container runtime framework, currently supports "docker" or "singularity" (optional)
-        """
         if not args:
             args = PathLinkerParams()
 

@@ -43,13 +43,13 @@ class OmicsIntegrator1Params(BaseModel):
     mu_squared: bool = False
     exclude_terms: bool = False
 
-    noisy_edges: Optional[int] = None
+    noisy_edges: int = 0
     "How many times you would like to add noise to the given edge values and re-run the algorithm."
 
-    shuffled_prizes: Optional[int] = None
+    shuffled_prizes: int = 0
     "shuffled_prizes: How many times the algorithm should shuffle the prizes and re-run"
 
-    random_terminals: Optional[int] = None
+    random_terminals: int = 0
     "How many times to apply the given prizes to random nodes in the interactome"
 
     seed: Optional[int] = None
@@ -140,7 +140,6 @@ class OmicsIntegrator1(PRM[OmicsIntegrator1Params]):
 
     # TODO add support for knockout argument
     # TODO add reasonable default values
-    # TODO document required arguments
     @staticmethod
     def run(inputs, output_file, args, container_framework="docker"):
         if inputs["edges"] is None or inputs["prizes"] is None or output_file is None:
@@ -206,12 +205,9 @@ class OmicsIntegrator1(PRM[OmicsIntegrator1Params]):
             command.extend(['--musquared'])
         if args.exclude_terms:
             command.extend(['--excludeTerms'])
-        if args.noisy_edges is not None:
-            command.extend(['--noisyEdges', str(args.noisy_edges)])
-        if args.shuffled_prizes is not None:
-            command.extend(['--shuffledPrizes', str(args.shuffled_prizes)])
-        if args.random_terminals is not None:
-            command.extend(['--randomTerminals', str(args.random_terminals)])
+        command.extend(['--noisyEdges', str(args.noisy_edges)])
+        command.extend(['--shuffledPrizes', str(args.shuffled_prizes)])
+        command.extend(['--randomTerminals', str(args.random_terminals)])
         if args.seed is not None:
             command.extend(['--seed', str(args.seed)])
 

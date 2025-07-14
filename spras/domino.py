@@ -79,7 +79,7 @@ class DOMINO(PRM[DominoParams]):
     def run(inputs, output_file, args=None, container_framework="docker"):
         if not args:
             args = DominoParams()
-        
+
         # Let visualization be always true, parallelization be always 1 thread, and use_cache be always false.
         if not inputs["network"] or not inputs["active_genes"]:
             raise ValueError('Required DOMINO arguments are missing')
