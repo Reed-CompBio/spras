@@ -10,7 +10,7 @@ from spras.evaluation import Evaluation
 INPUT_DIR = 'test/evaluate/input/'
 OUT_DIR = 'test/evaluate/output/'
 EXPECT_DIR = 'test/evaluate/expected/'
-GS_NODE_TABLE = pd.read_csv(INPUT_DIR + "node_table.csv", header=0)
+GS_NODE_TABLE = pd.read_csv(INPUT_DIR + 'gs_node_table.csv', header=0)
 SUMMARY_FILE = INPUT_DIR + 'example_summary.txt'
 
 class TestEvaluate:
