@@ -24,6 +24,7 @@ Interactor1   Interactor2   Weight
 """
 class PathLinker(PRM):
     required_inputs = ['nodetypes', 'network']
+    dois = ["10.1038/npjsba.2016.2", "10.1089/cmb.2012.0274"]
 
     @staticmethod
     def generate_inputs(data, filename_map):
