@@ -16,6 +16,7 @@ from typing import Annotated
 from pydantic import AfterValidator, BaseModel, ConfigDict, Field
 
 from spras.config.algorithms import AlgorithmUnion
+from spras.config.container_schema import ContainerSettings
 from spras.config.util import CaseInsensitiveEnum
 
 class SummaryAnalysis(BaseModel):
@@ -115,10 +116,7 @@ class ReconstructionSettings(BaseModel):
     model_config = ConfigDict(extra='forbid')
 
 class RawConfig(BaseModel):
-    # TODO: move these container values to a nested container key
-    container_framework: ContainerFramework = ContainerFramework.docker
-    unpack_singularity: bool = False
-    container_registry: ContainerRegistry
+    containers: ContainerSettings
 
     hash_length: int = Field(
         description="The length of the hash used to identify a parameter combination",
