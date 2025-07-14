@@ -1,16 +1,16 @@
 import os
 import pickle as pkl
 from pathlib import Path
-from typing import Dict
+from typing import Dict, Iterable
 
 import matplotlib.pyplot as plt
 import numpy as np
 import pandas as pd
 from sklearn.metrics import (
-    precision_score,
-    recall_score,
     average_precision_score,
     precision_recall_curve,
+    precision_score,
+    recall_score,
 )
 
 from spras.analysis.ml import create_palette
@@ -191,7 +191,7 @@ class Evaluation:
             rep_pathways.append(rep_pathway)
 
         return rep_pathways
-      
+
     def edge_frequency_node_ensemble(node_table: pd.DataFrame, ensemble_files: list, dataset_file: str) -> dict:
         """
         Generates a dictionary of node ensembles using edge frequency data from a list of ensemble files.
