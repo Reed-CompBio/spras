@@ -74,4 +74,4 @@ select = [
 # py-modules tells setuptools which directory is our actual module
 py-modules = ["spras"]
 # packages tells setuptools what the exported package is called (ie allows import spras)
-packages = ["spras", "spras.analysis"]
+packages = ["spras", "spras.analysis", "spras.config"]
