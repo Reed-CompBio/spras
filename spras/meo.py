@@ -1,5 +1,7 @@
 import os
 from pathlib import Path
+from pydantic import BaseModel, ConfigDict
+from typing import Optional
 
 from spras.containers import prepare_volume, run_container_and_log
 from spras.interactome import (
@@ -65,6 +67,21 @@ def write_properties(filename=Path('properties.txt'), edges=None, sources=None, 
 
         # Do not need csp.phase, csp.gen.file, or csp.sol.file because MAXCSP is not supported
 
+class MEOParams(BaseModel):
+    max_path_length: Optional[str]
+    "the maximal length of a path from sources and targets to orient."
+
+    local_search: Optional[str]
+    """
+    a "Yes"/"No" parameter that enables MEO's local search functionality.
+    See "Improving approximations with local search" in the associated paper
+    for more information.
+    """
+    
+    rand_restarts: Optional[int]
+    "The number of random restarts to do."
+
+    model_config = ConfigDict(use_attribute_docstrings=True)
 
 """
 MEO can support partially directed graphs
@@ -82,7 +99,7 @@ Interactor1   pp/pd   Interactor2   Weight
 """
 
 
-class MEO(PRM):
+class MEO(PRM[MEOParams]):
     required_inputs = ['sources', 'targets', 'edges']
     dois = ["10.1093/nar/gkq1207"]
 
@@ -126,8 +143,7 @@ class MEO(PRM):
     # TODO add parameter validation
     # TODO document required arguments
     @staticmethod
-    def run(edges=None, sources=None, targets=None, output_file=None, max_path_length=None, local_search=None,
-            rand_restarts=None, container_framework="docker"):
+    def run(inputs, args, output_file=None, container_framework="docker"):
         """
         Run Maximum Edge Orientation in the Docker image with the provided parameters.
         The properties file is generated from the provided arguments.
@@ -138,7 +154,7 @@ class MEO(PRM):
         @param output_file: the name of the output edge file, which will overwrite any existing file with this name
         @param container_framework: choose the container runtime framework, currently supports "docker" or "singularity" (optional)
         """
-        if edges is None or sources is None or targets is None or output_file is None:
+        if inputs["edges"] is None or inputs["sources"] is None or inputs["targets"] is None:
             raise ValueError('Required Maximum Edge Orientation arguments are missing')
 
         work_dir = '/spras'
@@ -146,13 +162,13 @@ class MEO(PRM):
         # Each volume is a tuple (src, dest)
         volumes = list()
 
-        bind_path, edge_file = prepare_volume(edges, work_dir)
+        bind_path, edge_file = prepare_volume(inputs["edges"], work_dir)
         volumes.append(bind_path)
 
-        bind_path, source_file = prepare_volume(sources, work_dir)
+        bind_path, source_file = prepare_volume(inputs["sources"], work_dir)
         volumes.append(bind_path)
 
-        bind_path, target_file = prepare_volume(targets, work_dir)
+        bind_path, target_file = prepare_volume(inputs["targets"], work_dir)
         volumes.append(bind_path)
 
         out_dir = Path(output_file).parent
@@ -171,7 +187,7 @@ class MEO(PRM):
         properties_file_local = Path(out_dir, properties_file)
         write_properties(filename=properties_file_local, edges=edge_file, sources=source_file, targets=target_file,
                          edge_output=mapped_output_file, path_output=mapped_path_output,
-                         max_path_length=max_path_length, local_search=local_search, rand_restarts=rand_restarts, framework=container_framework)
+                         max_path_length=args.max_path_length, local_search=args.local_search, rand_restarts=args.rand_restarts, framework=container_framework)
         bind_path, properties_file = prepare_volume(str(properties_file_local), work_dir)
         volumes.append(bind_path)
 

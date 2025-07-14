@@ -1,5 +1,7 @@
 import warnings
 from pathlib import Path
+from pydantic import BaseModel, ConfigDict
+from typing import Optional
 
 from spras.containers import prepare_volume, run_container_and_log
 from spras.dataset import Dataset
@@ -12,6 +14,12 @@ from spras.util import duplicate_edges, raw_pathway_df
 
 __all__ = ['PathLinker']
 
+class PathLinkerParams(BaseModel):
+    k: Optional[int]
+    "path length (optional)"
+
+    model_config = ConfigDict(use_attribute_docstrings=True)
+
 """
 Pathlinker will construct a fully directed graph from the provided input file
 - an edge is represented with a head and tail node, which represents the direction of the interation between two nodes
@@ -22,7 +30,7 @@ Interactor1   Interactor2   Weight
 - the expected raw input file should have node pairs in the 1st and 2nd columns, with a weight in the 3rd column
 - it can include repeated and bidirectional edges
 """
-class PathLinker(PRM):
+class PathLinker(PRM[PathLinkerParams]):
     required_inputs = ['nodetypes', 'network']
     dois = ["10.1038/npjsba.2016.2", "10.1089/cmb.2012.0274"]
 
@@ -68,20 +76,20 @@ class PathLinker(PRM):
 
     # Skips parameter validation step
     @staticmethod
-    def run(nodetypes=None, network=None, output_file=None, k=None, container_framework="docker"):
+    def run(inputs, args, output_file, container_framework="docker"):
         """
         Run PathLinker with Docker
         @param nodetypes:  input node types with sources and targets (required)
         @param network:  input network file (required)
         @param output_file: path to the output pathway file (required)
-        @param k: path length (optional)
+        @param k:
         @param container_framework: choose the container runtime framework, currently supports "docker" or "singularity" (optional)
         """
         # Add additional parameter validation
         # Do not require k
         # Use the PathLinker default
         # Could consider setting the default here instead
-        if not nodetypes or not network or not output_file:
+        if not inputs["nodetypes"] or not inputs["network"]:
             raise ValueError('Required PathLinker arguments are missing')
 
         work_dir = '/spras'
@@ -89,10 +97,10 @@ class PathLinker(PRM):
         # Each volume is a tuple (src, dest)
         volumes = list()
 
-        bind_path, node_file = prepare_volume(nodetypes, work_dir)
+        bind_path, node_file = prepare_volume(inputs["nodetypes"], work_dir)
         volumes.append(bind_path)
 
-        bind_path, network_file = prepare_volume(network, work_dir)
+        bind_path, network_file = prepare_volume(inputs["network"], work_dir)
         volumes.append(bind_path)
 
         # PathLinker does not provide an argument to set the output directory
@@ -111,8 +119,8 @@ class PathLinker(PRM):
                    '--output', mapped_out_prefix]
 
         # Add optional argument
-        if k is not None:
-            command.extend(['-k', str(k)])
+        if args.k is not None:
+            command.extend(['-k', str(args.k)])
 
         container_suffix = "pathlinker:v2"
         run_container_and_log('PathLinker',

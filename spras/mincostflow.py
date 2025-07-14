@@ -1,4 +1,6 @@
 from pathlib import Path
+from pydantic import BaseModel, ConfigDict
+from typing import Optional
 
 from spras.containers import prepare_volume, run_container_and_log
 from spras.interactome import (
@@ -9,6 +11,15 @@ from spras.prm import PRM
 from spras.util import add_rank_column, duplicate_edges, raw_pathway_df
 
 __all__ = ['MinCostFlow']
+
+class MinCostFlowParams(BaseModel):
+    flow: Optional[float]
+    "amount of flow going through the graph"
+
+    capacity: Optional[float]
+    "amount of capacity allowed on each edge"
+
+    model_config = ConfigDict(use_attribute_docstrings=True)
 
 """
 MinCostFlow deals with fully directed graphs
@@ -22,7 +33,7 @@ Interactor1  Interactor2   Weight
 - the expected raw input file should have node pairs in the 1st and 2nd columns, with the weight in the 3rd column
 - it can include repeated and bidirectional edges
 """
-class MinCostFlow (PRM):
+class MinCostFlow(PRM[MinCostFlowParams]):
     required_inputs = ['sources', 'targets', 'edges']
     dois = ["10.1038/s41540-020-00167-1"]
 
@@ -60,20 +71,9 @@ class MinCostFlow (PRM):
                      header=False)
 
     @staticmethod
-    def run(sources=None, targets=None, edges=None, output_file=None, flow=None, capacity=None, container_framework="docker"):
-        """
-        Run min cost flow with Docker (or singularity)
-        @param sources: input sources (required)
-        @param targets: input targets (required)
-        @param edges: input network file (required)
-        @param output_file: output file name (required)
-        @param flow: amount of flow going through the graph (optional)
-        @param capacity: amount of capacity allowed on each edge (optional)
-        @param container_framework: choose the container runtime framework, currently supports "docker" or "singularity" (optional)
-        """
-
+    def run(inputs, args, output_file, container_framework="docker"):
         # ensures that these parameters are required
-        if not sources or not targets or not edges or not output_file:
+        if not inputs["sources"] or not inputs["targets"] or not inputs["edges"]:
             raise ValueError('Required MinCostFlow arguments are missing')
 
         # the data files will be mapped within this directory within the container
@@ -82,13 +82,13 @@ class MinCostFlow (PRM):
         # the tuple is for mapping the sources, targets, edges, and output
         volumes = list()
 
-        bind_path, sources_file = prepare_volume(sources, work_dir)
+        bind_path, sources_file = prepare_volume(inputs["sources"], work_dir)
         volumes.append(bind_path)
 
-        bind_path, targets_file = prepare_volume(targets, work_dir)
+        bind_path, targets_file = prepare_volume(inputs["targets"], work_dir)
         volumes.append(bind_path)
 
-        bind_path, edges_file = prepare_volume(edges, work_dir)
+        bind_path, edges_file = prepare_volume(inputs["edges"], work_dir)
         volumes.append(bind_path)
 
         # Create a prefix for the output filename and ensure the directory exists
@@ -107,10 +107,10 @@ class MinCostFlow (PRM):
                     '--output', mapped_out_prefix]
 
         # Optional arguments (extend the command if available)
-        if flow is not None:
-            command.extend(['--flow', str(flow)])
-        if capacity is not None:
-            command.extend(['--capacity', str(capacity)])
+        if args.flow is not None:
+            command.extend(['--flow', str(args.flow)])
+        if args.capacity is not None:
+            command.extend(['--capacity', str(args.capacity)])
 
         # choosing to run in docker or singularity container
         container_suffix = "mincostflow"
