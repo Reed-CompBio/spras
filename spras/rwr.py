@@ -1,8 +1,8 @@
 from pathlib import Path
-from pydantic import BaseModel, ConfigDict
 from typing import Optional
 
 import pandas as pd
+from pydantic import BaseModel, ConfigDict
 
 from spras.containers import prepare_volume, run_container
 from spras.dataset import Dataset
@@ -10,11 +10,14 @@ from spras.interactome import reinsert_direction_col_directed
 from spras.prm import PRM
 from spras.util import add_rank_column, duplicate_edges, raw_pathway_df
 
-__all__ = ['RWR']
+__all__ = ['RWR', 'RWRParams']
 
 class RWRParams(BaseModel):
-    threshold: Optional[int]
-    alpha: Optional[float]
+    threshold: int
+    "The number of nodes to return"
+
+    alpha: Optional[float] = None
+    "The chance of a restart during the random walk"
 
     model_config = ConfigDict(use_attribute_docstrings=True)
 

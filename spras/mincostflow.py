@@ -1,6 +1,7 @@
 from pathlib import Path
-from pydantic import BaseModel, ConfigDict
 from typing import Optional
+
+from pydantic import BaseModel, ConfigDict
 
 from spras.containers import prepare_volume, run_container_and_log
 from spras.interactome import (
@@ -10,7 +11,7 @@ from spras.interactome import (
 from spras.prm import PRM
 from spras.util import add_rank_column, duplicate_edges, raw_pathway_df
 
-__all__ = ['MinCostFlow']
+__all__ = ['MinCostFlow', 'MinCostFlowParams']
 
 class MinCostFlowParams(BaseModel):
     flow: Optional[float] = None

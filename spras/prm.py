@@ -1,7 +1,8 @@
-from abc import ABC, abstractmethod
-from pydantic import BaseModel
-from typing import Any, cast, TypeVar, Generic
 import os
+from abc import ABC, abstractmethod
+from typing import Any, Generic, TypeVar, cast
+
+from pydantic import BaseModel
 
 from spras.dataset import Dataset
 

@@ -1,7 +1,8 @@
 import warnings
 from pathlib import Path
-from pydantic import BaseModel, ConfigDict
 from typing import Optional
+
+from pydantic import BaseModel, ConfigDict
 
 from spras.containers import prepare_volume, run_container_and_log
 from spras.dataset import Dataset
@@ -12,10 +13,10 @@ from spras.interactome import (
 from spras.prm import PRM
 from spras.util import duplicate_edges, raw_pathway_df
 
-__all__ = ['PathLinker']
+__all__ = ['PathLinker', 'PathLinkerParams']
 
 class PathLinkerParams(BaseModel):
-    k: Optional[int]
+    k: Optional[int] = None
     "path length (optional)"
 
     model_config = ConfigDict(use_attribute_docstrings=True)
@@ -75,7 +76,7 @@ class PathLinker(PRM[PathLinkerParams]):
                      header=["#Interactor1","Interactor2","Weight"])
 
     @staticmethod
-    def run(inputs, output_file, args, container_framework="docker"):
+    def run(inputs, output_file, args=PathLinkerParams(), container_framework="docker"):
         """
         Run PathLinker with Docker
         @param nodetypes:  input node types with sources and targets (required)

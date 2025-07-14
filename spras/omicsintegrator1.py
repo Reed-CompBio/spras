@@ -1,6 +1,7 @@
 from pathlib import Path
-from pydantic import BaseModel, ConfigDict
 from typing import Optional
+
+from pydantic import BaseModel, ConfigDict
 
 from spras.containers import prepare_volume, run_container_and_log
 from spras.interactome import reinsert_direction_col_mixed

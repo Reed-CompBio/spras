@@ -5,7 +5,12 @@ from pathlib import Path
 import pytest
 
 import spras.config.config as config
-from spras.domino import DOMINO, DominoParams, post_domino_id_transform, pre_domino_id_transform
+from spras.domino import (
+    DOMINO,
+    DominoParams,
+    post_domino_id_transform,
+    pre_domino_id_transform,
+)
 
 config.init_from_file("config/config.yaml")
 

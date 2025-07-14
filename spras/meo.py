@@ -1,7 +1,8 @@
 import os
 from pathlib import Path
-from pydantic import BaseModel, ConfigDict
 from typing import Optional
+
+from pydantic import BaseModel, ConfigDict
 
 from spras.containers import prepare_volume, run_container_and_log
 from spras.interactome import (
@@ -78,7 +79,7 @@ class MEOParams(BaseModel):
     See "Improving approximations with local search" in the associated paper
     for more information.
     """
-    
+
     rand_restarts: Optional[int] = None
     "The number of random restarts to do."
 
