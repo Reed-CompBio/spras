@@ -317,7 +317,7 @@ class Config:
         if not self.analysis_include_ml_aggregate_algo:
             self.analysis_include_evaluation_aggregate_algo = False
 
-        # Only run Evaluation if kernel_density is set to True (needed for PCA chosen Evaluation)
+        # Set kernel_density to True if Evaluation is set to True
         if self.analysis_include_evaluation and not self.pca_params["kernel_density"]:
-            raise ValueError("Evaluation analysis cannot run because kernel_density is set to false. "
-                                "Please set kernel_density to true or set evaluation include to false.")
+            self.pca_params["kernel_density"] = True
+            print("Setting kernel_density to true; Evaluation analysis needs to run with kernel_density for pca chosen parameter selection.")
