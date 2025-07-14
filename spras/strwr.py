@@ -1,6 +1,7 @@
 from pathlib import Path
-
 import pandas as pd
+from pydantic import BaseModel, ConfigDict
+from typing import Optional
 
 from spras.containers import prepare_volume, run_container
 from spras.dataset import Dataset
@@ -10,8 +11,14 @@ from spras.util import add_rank_column, duplicate_edges, raw_pathway_df
 
 __all__ = ['ST_RWR']
 
+class ST_RWRParams(BaseModel):
+    threshold: Optional[int]
+    alpha: Optional[float]
+
+    model_config = ConfigDict(use_attribute_docstrings=True)
+
 # Note: This class is almost identical to the rwr.py file.
-class ST_RWR(PRM):
+class ST_RWR(PRM[ST_RWRParams]):
     required_inputs = ['network','sources','targets']
     dois = []
 
@@ -36,11 +43,11 @@ class ST_RWR(PRM):
         edges.to_csv(filename_map['network'],sep='|',index=False,columns=['Interactor1','Interactor2'],header=False)
 
     @staticmethod
-    def run(network=None, sources=None, targets=None, alpha=None, output_file=None, container_framework="docker", threshold=None):
-        if not sources or not targets or not network or not output_file:
+    def run(inputs, args, output_file, container_framework="docker"):
+        if not inputs["sources"] or not inputs["targets"] or not inputs["network"] or not output_file:
             raise ValueError('Required local_neighborhood arguments are missing')
 
-        with Path(network).open() as network_f:
+        with Path(inputs["network"]).open() as network_f:
             for line in network_f:
                 line = line.strip()
                 endpoints = line.split("|")
@@ -52,13 +59,13 @@ class ST_RWR(PRM):
         # Each volume is a tuple (src, dest)
         volumes = list()
 
-        bind_path, source_file = prepare_volume(sources, work_dir)
+        bind_path, source_file = prepare_volume(inputs["sources"], work_dir)
         volumes.append(bind_path)
 
-        bind_path, target_file = prepare_volume(targets, work_dir)
+        bind_path, target_file = prepare_volume(inputs["targets"], work_dir)
         volumes.append(bind_path)
 
-        bind_path, network_file = prepare_volume(network, work_dir)
+        bind_path, network_file = prepare_volume(inputs["network"], work_dir)
         volumes.append(bind_path)
 
         # ST_RWR does not provide an argument to set the output directory
@@ -77,8 +84,8 @@ class ST_RWR(PRM):
                    '--output', mapped_out_prefix]
 
         # Add alpha as an optional argument
-        if alpha is not None:
-            command.extend(['--alpha', str(alpha)])
+        if args.alpha is not None:
+            command.extend(['--alpha', str(args.alpha)])
 
         container_suffix = 'st-rwr:v1'
         out = run_container(container_framework,

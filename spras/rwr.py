@@ -1,4 +1,6 @@
 from pathlib import Path
+from pydantic import BaseModel, ConfigDict
+from typing import Optional
 
 import pandas as pd
 
@@ -10,7 +12,13 @@ from spras.util import add_rank_column, duplicate_edges, raw_pathway_df
 
 __all__ = ['RWR']
 
-class RWR(PRM):
+class RWRParams(BaseModel):
+    threshold: Optional[int]
+    alpha: Optional[float]
+
+    model_config = ConfigDict(use_attribute_docstrings=True)
+
+class RWR(PRM[RWRParams]):
     required_inputs = ['network','nodes']
     dois = []
 
@@ -34,11 +42,11 @@ class RWR(PRM):
         edges.to_csv(filename_map['network'],sep='|',index=False,columns=['Interactor1','Interactor2'],header=False)
 
     @staticmethod
-    def run(network=None, nodes=None, alpha=None, output_file=None, container_framework="docker", threshold=None):
-        if not nodes:
+    def run(inputs, args, output_file, container_framework="docker"):
+        if not inputs["nodes"] or not inputs["network"]:
             raise ValueError('Required RWR arguments are missing')
 
-        with Path(network).open() as network_f:
+        with Path(inputs["network"]).open() as network_f:
             for line in network_f:
                 line = line.strip()
                 endpoints = line.split("|")
@@ -49,10 +57,10 @@ class RWR(PRM):
         # Each volume is a tuple (src, dest)
         volumes = list()
 
-        bind_path, nodes_file = prepare_volume(nodes, work_dir)
+        bind_path, nodes_file = prepare_volume(inputs["nodes"], work_dir)
         volumes.append(bind_path)
 
-        bind_path, network_file = prepare_volume(network, work_dir)
+        bind_path, network_file = prepare_volume(inputs["network"], work_dir)
         volumes.append(bind_path)
 
         # RWR does not provide an argument to set the output directory
@@ -70,8 +78,8 @@ class RWR(PRM):
                    '--output', mapped_out_prefix]
 
         # Add alpha as an optional argument
-        if alpha is not None:
-            command.extend(['--alpha', str(alpha)])
+        if args.alpha is not None:
+            command.extend(['--alpha', str(args.alpha)])
 
         container_suffix = 'rwr:v1'
         out = run_container(container_framework,

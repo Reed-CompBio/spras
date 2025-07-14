@@ -1,4 +1,6 @@
 from pathlib import Path
+from pydantic import BaseModel, ConfigDict
+from typing import Optional
 
 from spras.containers import prepare_volume, run_container_and_log
 from spras.interactome import reinsert_direction_col_mixed
@@ -35,8 +37,47 @@ def write_conf(filename=Path('config.txt'), w=None, b=None, d=None, mu=None, noi
         f.write('processes = 1\n')
         f.write('threads = 1\n')
 
+class OmicsIntegrator1Params(BaseModel):
+    dummy_mode: Optional[str]
+    mu_squared: Optional[str]
+    exclude_terms: Optional[str]
 
-class OmicsIntegrator1(PRM):
+    noisy_edges: Optional[str]
+    "How many times you would like to add noise to the given edge values and re-run the algorithm."
+
+    shuffled_prizes: Optional[int]
+    "shuffled_prizes: How many times the algorithm should shuffle the prizes and re-run"
+
+    random_terminals: Optional[int]
+    "How many times to apply the given prizes to random nodes in the interactome"
+
+    seed: Optional[str]
+    "the randomness seed to use"
+
+    w: Optional[float]
+    "the number of trees"
+
+    b: Optional[str]
+    "the trade-off between including more terminals and using less reliable edges"
+
+    d: Optional[str]
+    "controls the maximum path-length from v0 to terminal nodes"
+
+    mu: Optional[float]
+    "controls the degree-based negative prizes (defualt 0.0)"
+
+    noise: Optional[str]
+    "Standard Deviation of the gaussian noise added to edges in Noisy Edges Randomizations"
+
+    g: Optional[str]
+    "(Gamma) multiplicative edge penalty from degree of endpoints"
+
+    r: Optional[str]
+    "msgsteiner parameter that adds random noise to edges, which is rarely needed because the Forest --noisyEdges option is recommended instead (default 0)"
+
+    model_config = ConfigDict(use_attribute_docstrings=True)
+
+class OmicsIntegrator1(PRM[OmicsIntegrator1Params]):
     """
     Omics Integrator 1 works with partially directed graphs
     - it takes in the universal input directly
@@ -96,27 +137,12 @@ class OmicsIntegrator1(PRM):
             with open(filename_map['dummy_nodes'], mode='w'):
                 pass
 
-    # TODO add parameter validation
     # TODO add support for knockout argument
     # TODO add reasonable default values
     # TODO document required arguments
     @staticmethod
-    def run(edges=None, prizes=None, dummy_nodes=None, dummy_mode=None, mu_squared=None, exclude_terms=None,
-            output_file=None, noisy_edges=None, shuffled_prizes=None, random_terminals=None,
-            seed=None, w=None, b=None, d=None, mu=None, noise=None, g=None, r=None, container_framework="docker"):
-        """
-        Run Omics Integrator 1 in the Docker image with the provided parameters.
-        Does not support the garnet, cyto30, knockout, cv, or cv-reps arguments.
-        The configuration file is generated from the provided arguments.
-        Does not support the garnetBeta, processes, or threads configuration file parameters.
-        The msgpath is not required because msgsteiner is available in the Docker image.
-        Only the optimal forest sif file is retained.
-        All other output files are deleted.
-        @param output_file: the name of the output sif file for the optimal forest, which will overwrite any
-        existing file with this name
-        @param container_framework: choose the container runtime framework, currently supports "docker" or "singularity" (optional)
-        """
-        if edges is None or prizes is None or output_file is None or w is None or b is None or d is None:
+    def run(inputs, args, output_file, container_framework="docker"):
+        if inputs["edges"] is None or inputs["prizes"] is None or output_file is None or w is None or b is None or d is None:
             raise ValueError('Required Omics Integrator 1 arguments are missing')
 
         work_dir = '/spras'
@@ -124,10 +150,10 @@ class OmicsIntegrator1(PRM):
         # Each volume is a tuple (src, dest)
         volumes = list()
 
-        bind_path, edge_file = prepare_volume(edges, work_dir)
+        bind_path, edge_file = prepare_volume(inputs["edges"], work_dir)
         volumes.append(bind_path)
 
-        bind_path, prize_file = prepare_volume(prizes, work_dir)
+        bind_path, prize_file = prepare_volume(inputs["prizes"], work_dir)
         volumes.append(bind_path)
 
         # 4 dummy mode possibilities:
@@ -137,10 +163,10 @@ class OmicsIntegrator1(PRM):
         #   4. file -> connect the dummy node to a specific list of nodes provided in a file
 
         # add dummy node file to the volume if dummy_mode is not None and it is 'file'
-        if dummy_mode == 'file':
-            if dummy_nodes is None:
+        if args.dummy_mode == 'file':
+            if inputs["dummy_nodes"] is None:
                 raise ValueError("dummy_nodes file is required when dummy_mode is set to 'file'")
-            bind_path, dummy_file = prepare_volume(dummy_nodes, work_dir)
+            bind_path, dummy_file = prepare_volume(inputs["dummy_nodes"], work_dir)
             volumes.append(bind_path)
 
         out_dir = Path(output_file).parent
@@ -152,7 +178,8 @@ class OmicsIntegrator1(PRM):
         conf_file = 'oi1-configuration.txt'
         conf_file_local = Path(out_dir, conf_file)
         # Temporary file that will be deleted after running Omics Integrator 1
-        write_conf(conf_file_local, w=w, b=b, d=d, mu=mu, noise=noise, g=g, r=r)
+        write_conf(conf_file_local, w=args.w, b=args.b, d=args.d, mu=args.mu,
+                   noise=args.noise, g=args.g, r=args.r)
         bind_path, conf_file = prepare_volume(str(conf_file_local), work_dir)
         volumes.append(bind_path)
 
@@ -165,27 +192,27 @@ class OmicsIntegrator1(PRM):
                    '--outlabel', 'oi1']
 
         # add the dummy mode argument
-        if dummy_mode is not None and dummy_mode:
+        if args.dummy_mode is not None and args.dummy_mode:
             # for custom dummy modes, add the file
-            if dummy_mode == 'file':
-                command.extend(['--dummyMode', dummy_file])
+            if args.dummy_mode == 'file':
+                command.extend(['--dummyMode', inputs["dummy_file"]])
             # else pass in the dummy_mode and let oi1 handle it
             else:
-                command.extend(['--dummyMode', dummy_mode])
+                command.extend(['--dummyMode', args.dummy_mode])
 
         # Add optional arguments
-        if mu_squared is not None and mu_squared:
+        if args.mu_squared is not None and args.mu_squared:
             command.extend(['--musquared'])
-        if exclude_terms is not None and exclude_terms:
+        if args.exclude_terms is not None and args.exclude_terms:
             command.extend(['--excludeTerms'])
-        if noisy_edges is not None:
-            command.extend(['--noisyEdges', str(noisy_edges)])
-        if shuffled_prizes is not None:
-            command.extend(['--shuffledPrizes', str(shuffled_prizes)])
-        if random_terminals is not None:
-            command.extend(['--randomTerminals', str(random_terminals)])
-        if seed is not None:
-            command.extend(['--seed', str(seed)])
+        if args.noisy_edges is not None:
+            command.extend(['--noisyEdges', str(args.noisy_edges)])
+        if args.shuffled_prizes is not None:
+            command.extend(['--shuffledPrizes', str(args.shuffled_prizes)])
+        if args.random_terminals is not None:
+            command.extend(['--randomTerminals', str(args.random_terminals)])
+        if args.seed is not None:
+            command.extend(['--seed', str(args.seed)])
 
         container_suffix = "omics-integrator-1:no-conda" # no-conda version is the default
         run_container_and_log('Omics Integrator 1',
