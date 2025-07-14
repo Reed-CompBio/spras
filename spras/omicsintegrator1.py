@@ -7,7 +7,7 @@ from spras.interactome import reinsert_direction_col_mixed
 from spras.prm import PRM
 from spras.util import add_rank_column, duplicate_edges, raw_pathway_df
 
-__all__ = ['OmicsIntegrator1', 'write_conf']
+__all__ = ['OmicsIntegrator1', 'OmicsIntegrator1Params', 'write_conf']
 
 
 # TODO decide on default number of processes and threads
@@ -38,41 +38,41 @@ def write_conf(filename=Path('config.txt'), w=None, b=None, d=None, mu=None, noi
         f.write('threads = 1\n')
 
 class OmicsIntegrator1Params(BaseModel):
-    dummy_mode: Optional[str]
-    mu_squared: Optional[str]
-    exclude_terms: Optional[str]
+    dummy_mode: Optional[str] = None
+    mu_squared: Optional[bool] = None
+    exclude_terms: Optional[bool] = None
 
-    noisy_edges: Optional[str]
+    noisy_edges: Optional[int] = None
     "How many times you would like to add noise to the given edge values and re-run the algorithm."
 
-    shuffled_prizes: Optional[int]
+    shuffled_prizes: Optional[int] = None
     "shuffled_prizes: How many times the algorithm should shuffle the prizes and re-run"
 
-    random_terminals: Optional[int]
+    random_terminals: Optional[int] = None
     "How many times to apply the given prizes to random nodes in the interactome"
 
-    seed: Optional[str]
+    seed: Optional[int] = None
     "the randomness seed to use"
 
-    w: Optional[float]
+    w: int
     "the number of trees"
 
-    b: Optional[str]
+    b: float
     "the trade-off between including more terminals and using less reliable edges"
 
-    d: Optional[str]
+    d: int
     "controls the maximum path-length from v0 to terminal nodes"
 
-    mu: Optional[float]
+    mu: Optional[float] = None
     "controls the degree-based negative prizes (defualt 0.0)"
 
-    noise: Optional[str]
+    noise: Optional[float] = None
     "Standard Deviation of the gaussian noise added to edges in Noisy Edges Randomizations"
 
-    g: Optional[str]
+    g: Optional[float] = None
     "(Gamma) multiplicative edge penalty from degree of endpoints"
 
-    r: Optional[str]
+    r: Optional[float] = None
     "msgsteiner parameter that adds random noise to edges, which is rarely needed because the Forest --noisyEdges option is recommended instead (default 0)"
 
     model_config = ConfigDict(use_attribute_docstrings=True)
@@ -142,7 +142,7 @@ class OmicsIntegrator1(PRM[OmicsIntegrator1Params]):
     # TODO document required arguments
     @staticmethod
     def run(inputs, output_file, args, container_framework="docker"):
-        if inputs["edges"] is None or inputs["prizes"] is None or output_file is None or w is None or b is None or d is None:
+        if inputs["edges"] is None or inputs["prizes"] is None or output_file is None:
             raise ValueError('Required Omics Integrator 1 arguments are missing')
 
         work_dir = '/spras'
@@ -195,7 +195,7 @@ class OmicsIntegrator1(PRM[OmicsIntegrator1Params]):
         if args.dummy_mode is not None and args.dummy_mode:
             # for custom dummy modes, add the file
             if args.dummy_mode == 'file':
-                command.extend(['--dummyMode', inputs["dummy_file"]])
+                command.extend(['--dummyMode', str(inputs["dummy_file"])])
             # else pass in the dummy_mode and let oi1 handle it
             else:
                 command.extend(['--dummyMode', args.dummy_mode])

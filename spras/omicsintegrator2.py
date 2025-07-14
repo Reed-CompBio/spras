@@ -10,7 +10,7 @@ from spras.interactome import reinsert_direction_col_undirected
 from spras.prm import PRM
 from spras.util import add_rank_column, duplicate_edges
 
-__all__ = ['OmicsIntegrator2']
+__all__ = ['OmicsIntegrator2', 'OmicsIntegrator2Params']
 
 class OmicsIntegrator2Params(BaseModel):
     w: float = 6
@@ -22,16 +22,16 @@ class OmicsIntegrator2Params(BaseModel):
     g: float = 20
     "Gamma: multiplicative edge penalty from degree of endpoints"
 
-    noise: Optional[str]
+    noise: Optional[float] = None
     "Standard Deviation of the gaussian noise added to edges in Noisy Edges Randomizations."
 
-    noisy_edges: Optional[int]
+    noisy_edges: Optional[int] = None
     "An integer specifying how many times to add noise to the given edge values and re-run."
 
-    random_terminals: Optional[str]
+    random_terminals: Optional[int] = None
     "An integer specifying how many times to apply your given prizes to random nodes in the interactome and re-run"
 
-    dummy_mode: Optional[str]
+    dummy_mode: Optional[str] = None
     """
     Tells the program which nodes in the interactome to connect the dummy node to. (default: terminals)
         "terminals" = connect to all terminals
@@ -39,8 +39,10 @@ class OmicsIntegrator2Params(BaseModel):
         "all" = connect to all nodes in the interactome.
     """
 
-    seed: Optional[str]
+    seed: Optional[int] = None
     "The random seed to use for this run."
+
+    model_config = ConfigDict(use_attribute_docstrings=True)
 
 """
 Omics Integrator 2 will construct a fully undirected graph from the provided input file
@@ -101,7 +103,7 @@ class OmicsIntegrator2(PRM[OmicsIntegrator2Params]):
     # TODO add reasonable default values
     # TODO document required arguments
     @staticmethod
-    def run(inputs, output_file, args, container_framework="docker"):
+    def run(inputs, output_file, args=OmicsIntegrator2Params(), container_framework="docker"):
         """
         Run Omics Integrator 2 in the Docker image with the provided parameters.
         Only the .tsv output file is retained and then renamed.
