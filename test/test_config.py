@@ -315,7 +315,7 @@ class TestConfig:
 
         test_config["analysis"]["ml"]["kernel_density"] = kernel_density
         test_config["analysis"]["evaluation"]["include"] = eval_include
-        
+
         config.init_global(test_config)
 
         assert config.config.analysis_include_evaluation == expected_eval
