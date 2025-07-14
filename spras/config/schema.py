@@ -15,7 +15,7 @@ from typing import Annotated, Optional
 
 from pydantic import AfterValidator, BaseModel, ConfigDict, Field
 
-from spras.config.util_enum import CaseInsensitiveEnum
+from spras.config.util import CaseInsensitiveEnum
 
 
 class SummaryAnalysis(BaseModel):
