@@ -130,19 +130,20 @@ class Evaluation:
                 plt.ylabel("Precision")
                 plt.xlim(-0.05, 1.05)
                 plt.ylim(-0.05, 1.05)
-                plt.title("Precision and Recall Plot")
+                # TODO make agg vs ensembled pca chosen title
+                plt.title("PCA Chosen Precision and Recall Plot")
                 plt.legend()
                 plt.grid(True)
                 plt.savefig(output_png)
                 plt.close()
         else:
-            # SPRAS will hit this case if all the algorithms have 1 parameter combination
-            # TODO: The Snakefile to use algorithms_mult_param_combos idea, how do we deal with an empty []?
-            pr_df.to_csv(output_file, sep="\t", index=False)
+            # Edge Case: if all algorithms chosen use only 1 parameter combination
+            pr_df = pd.DataFrame(columns=["Pathway", "Precision", "Recall"])
+            pr_df.to_csv(output_file, sep="\t", index=False, )
             if output_png is not None:
                 plt.figure(figsize=(10, 7))
                 plt.plot([], [], label="No Pathways Given")
-                plt.title("Precision and Recall Plot")
+                plt.title("Empty PCA Chosen Precision and Recall Plot")
                 plt.legend()
                 plt.savefig(output_png)
                 plt.close()
