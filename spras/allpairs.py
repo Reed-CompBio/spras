@@ -72,7 +72,7 @@ class AllPairs(PRM[Empty]):
                                       header=["#Interactor1", "Interactor2", "Weight"])
 
     @staticmethod
-    def run(inputs, output_file, args=Empty(), container_framework="docker"):
+    def run(inputs, output_file, args=None, container_framework="docker"):
         """
         Run All Pairs Shortest Paths with Docker
         @param nodetypes: input node types with sources and targets (required)

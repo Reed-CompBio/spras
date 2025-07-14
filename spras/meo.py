@@ -145,7 +145,7 @@ class MEO(PRM[MEOParams]):
     # TODO add parameter validation
     # TODO document required arguments
     @staticmethod
-    def run(inputs, args=MEOParams(), output_file=None, container_framework="docker"):
+    def run(inputs, output_file=None, args=None, container_framework="docker"):
         """
         Run Maximum Edge Orientation in the Docker image with the provided parameters.
         The properties file is generated from the provided arguments.
@@ -154,6 +154,9 @@ class MEO(PRM[MEOParams]):
         Only the edge output file is retained.
         All other output files are deleted.
         """
+        if not args:
+            args = MEOParams()
+
         if inputs["edges"] is None or inputs["sources"] is None or inputs["targets"] is None:
             raise ValueError('Required Maximum Edge Orientation arguments are missing')
 

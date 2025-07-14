@@ -16,8 +16,8 @@ from spras.util import duplicate_edges, raw_pathway_df
 __all__ = ['PathLinker', 'PathLinkerParams']
 
 class PathLinkerParams(BaseModel):
-    k: Optional[int] = None
-    "path length (optional)"
+    k: int = 100
+    "path length"
 
     model_config = ConfigDict(use_attribute_docstrings=True)
 
@@ -76,7 +76,7 @@ class PathLinker(PRM[PathLinkerParams]):
                      header=["#Interactor1","Interactor2","Weight"])
 
     @staticmethod
-    def run(inputs, output_file, args=PathLinkerParams(), container_framework="docker"):
+    def run(inputs, output_file, args=None, container_framework="docker"):
         """
         Run PathLinker with Docker
         @param nodetypes:  input node types with sources and targets (required)
@@ -85,10 +85,9 @@ class PathLinker(PRM[PathLinkerParams]):
         @param k:
         @param container_framework: choose the container runtime framework, currently supports "docker" or "singularity" (optional)
         """
-        # Add additional parameter validation
-        # Do not require k
-        # Use the PathLinker default
-        # Could consider setting the default here instead
+        if not args:
+            args = PathLinkerParams()
+
         if not inputs["nodetypes"] or not inputs["network"]:
             raise ValueError('Required PathLinker arguments are missing')
 
@@ -118,9 +117,7 @@ class PathLinker(PRM[PathLinkerParams]):
                    node_file,
                    '--output', mapped_out_prefix]
 
-        # Add optional argument
-        if args.k is not None:
-            command.extend(['-k', str(args.k)])
+        command.extend(['-k', str(args.k)])
 
         container_suffix = "pathlinker:v2"
         run_container_and_log('PathLinker',

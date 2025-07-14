@@ -103,7 +103,7 @@ class OmicsIntegrator2(PRM[OmicsIntegrator2Params]):
     # TODO add reasonable default values
     # TODO document required arguments
     @staticmethod
-    def run(inputs, output_file, args=OmicsIntegrator2Params(), container_framework="docker"):
+    def run(inputs, output_file, args=None, container_framework="docker"):
         """
         Run Omics Integrator 2 in the Docker image with the provided parameters.
         Only the .tsv output file is retained and then renamed.
@@ -111,6 +111,9 @@ class OmicsIntegrator2(PRM[OmicsIntegrator2Params]):
         @param output_file: the name of the output file, which will overwrite any existing file with this name
         @param container_framework: choose the container runtime framework, currently supports "docker" or "singularity" (optional)
         """
+        if not args:
+            args = OmicsIntegrator2Params()
+
         if inputs["edges"] is None or inputs["prizes"] is None:
             raise ValueError('Required Omics Integrator 2 arguments are missing')
 

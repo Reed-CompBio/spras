@@ -76,7 +76,10 @@ class DOMINO(PRM[DominoParams]):
                         header=['ID_interactor_A', 'ppi', 'ID_interactor_B'])
 
     @staticmethod
-    def run(inputs, output_file, args=DominoParams(), container_framework="docker"):
+    def run(inputs, output_file, args=None, container_framework="docker"):
+        if not args:
+            args = DominoParams()
+        
         # Let visualization be always true, parallelization be always 1 thread, and use_cache be always false.
         if not inputs["network"] or not inputs["active_genes"]:
             raise ValueError('Required DOMINO arguments are missing')
@@ -152,7 +155,7 @@ class DOMINO(PRM[DominoParams]):
         # Clean up DOMINO intermediate and pickle files
         slices_file.unlink(missing_ok=True)
         Path(out_dir, 'network.slices.pkl').unlink(missing_ok=True)
-        Path(network + '.pkl').unlink(missing_ok=True)
+        Path(f"{inputs['network']}.pkl").unlink(missing_ok=True)
 
     @staticmethod
     def parse_output(raw_pathway_file, standardized_pathway_file, params):

@@ -40,8 +40,8 @@ def write_conf(filename=Path('config.txt'), w=None, b=None, d=None, mu=None, noi
 
 class OmicsIntegrator1Params(BaseModel):
     dummy_mode: Optional[str] = None
-    mu_squared: Optional[bool] = None
-    exclude_terms: Optional[bool] = None
+    mu_squared: bool = False
+    exclude_terms: bool = False
 
     noisy_edges: Optional[int] = None
     "How many times you would like to add noise to the given edge values and re-run the algorithm."
@@ -202,9 +202,9 @@ class OmicsIntegrator1(PRM[OmicsIntegrator1Params]):
                 command.extend(['--dummyMode', args.dummy_mode])
 
         # Add optional arguments
-        if args.mu_squared is not None and args.mu_squared:
+        if args.mu_squared:
             command.extend(['--musquared'])
-        if args.exclude_terms is not None and args.exclude_terms:
+        if args.exclude_terms:
             command.extend(['--excludeTerms'])
         if args.noisy_edges is not None:
             command.extend(['--noisyEdges', str(args.noisy_edges)])

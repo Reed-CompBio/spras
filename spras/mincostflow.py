@@ -72,7 +72,10 @@ class MinCostFlow(PRM[MinCostFlowParams]):
                      header=False)
 
     @staticmethod
-    def run(inputs, output_file, args=MinCostFlowParams(), container_framework="docker"):
+    def run(inputs, output_file, args=None, container_framework="docker"):
+        if not args:
+            args = MinCostFlowParams()
+        
         # ensures that these parameters are required
         if not inputs["sources"] or not inputs["targets"] or not inputs["edges"]:
             raise ValueError('Required MinCostFlow arguments are missing')
