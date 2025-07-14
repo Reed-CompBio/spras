@@ -2,6 +2,8 @@ import json
 from pathlib import Path
 
 import pandas as pd
+from pydantic import BaseModel, ConfigDict
+from typing import Optional
 
 from spras.containers import prepare_volume, run_container_and_log
 from spras.interactome import (
@@ -16,6 +18,14 @@ __all__ = ['DOMINO', 'pre_domino_id_transform', 'post_domino_id_transform']
 ID_PREFIX = 'ENSG0'
 ID_PREFIX_LEN = len(ID_PREFIX)
 
+class DominoParams(BaseModel):
+    module_threshold: Optional[float]
+    "the p-value threshold for considering a slice as relevant (optional)"
+
+    slice_threshold: Optional[float]
+    "the p-value threshold for considering a putative module as final module (optional)"
+
+    model_config = ConfigDict(use_attribute_docstrings=True)
 
 """
 DOMINO will construct a fully undirected graph from the provided input file
@@ -26,18 +36,12 @@ Interactor1     ppi     Interactor2
 - the expected raw input file should have node pairs in the 1st and 3rd columns, with a 'ppi' in the 2nd column
 - it can include repeated and bidirectional edges
 """
-class DOMINO(PRM):
+class DOMINO(PRM[DominoParams]):
     required_inputs = ['network', 'active_genes']
     dois = ["10.15252/msb.20209593"]
 
     @staticmethod
     def generate_inputs(data, filename_map):
-        """
-        Access fields from the dataset and write the required input files
-        @param data: dataset
-        @param filename_map: a dict mapping file types in the required_inputs to the filename for that type
-        @return:
-        """
         for input_type in DOMINO.required_inputs:
             if input_type not in filename_map:
                 raise ValueError(f"{input_type} filename is missing")
@@ -72,20 +76,9 @@ class DOMINO(PRM):
                         header=['ID_interactor_A', 'ppi', 'ID_interactor_B'])
 
     @staticmethod
-    def run(network=None, active_genes=None, output_file=None, slice_threshold=None, module_threshold=None, container_framework="docker"):
-        """
-        Run DOMINO with Docker.
-        Let visualization be always true, parallelization be always 1 thread, and use_cache be always false.
-        DOMINO produces multiple output module files in an HTML format. SPRAS concatenates these files into one file.
-        @param network: input network file (required)
-        @param active_genes: input active genes (required)
-        @param output_file: path to the output pathway file (required)
-        @param slice_threshold: the p-value threshold for considering a slice as relevant (optional)
-        @param module_threshold: the p-value threshold for considering a putative module as final module (optional)
-        @param container_framework: choose the container runtime framework, currently supports "docker" or "singularity" (optional)
-        """
-
-        if not network or not active_genes or not output_file:
+    def run(inputs, args, output_file, container_framework="docker"):
+        # Let visualization be always true, parallelization be always 1 thread, and use_cache be always false.
+        if not inputs["network"] or not inputs["active_genes"]:
             raise ValueError('Required DOMINO arguments are missing')
 
         work_dir = '/spras'
@@ -93,10 +86,10 @@ class DOMINO(PRM):
         # Each volume is a tuple (source, destination)
         volumes = list()
 
-        bind_path, network_file = prepare_volume(network, work_dir)
+        bind_path, network_file = prepare_volume(inputs["network"], work_dir)
         volumes.append(bind_path)
 
-        bind_path, node_file = prepare_volume(active_genes, work_dir)
+        bind_path, node_file = prepare_volume(inputs["active_genes"], work_dir)
         volumes.append(bind_path)
 
         out_dir = Path(output_file).parent
@@ -132,11 +125,11 @@ class DOMINO(PRM):
                           '--visualization', 'true']
 
         # Add optional arguments
-        if slice_threshold is not None:
+        if args.slice_threshold is not None:
             # DOMINO readme has the wrong argument https://github.com/Shamir-Lab/DOMINO/issues/12
-            domino_command.extend(['--slice_threshold', str(slice_threshold)])
-        if module_threshold is not None:
-            domino_command.extend(['--module_threshold', str(module_threshold)])
+            domino_command.extend(['--slice_threshold', str(args.slice_threshold)])
+        if args.module_threshold is not None:
+            domino_command.extend(['--module_threshold', str(args.module_threshold)])
 
         run_container_and_log('DOMINO',
                              container_framework,

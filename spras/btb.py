@@ -1,5 +1,6 @@
 from pathlib import Path
 
+from spras.config.util import Empty
 from spras.containers import prepare_volume, run_container_and_log
 from spras.interactome import (
     convert_undirected_to_directed,
@@ -23,19 +24,13 @@ Expected raw edge file format:
 Interactor1     Interactor2     Weight
 """
 
-class BowTieBuilder(PRM):
+class BowTieBuilder(PRM[Empty]):
     required_inputs = ['sources', 'targets', 'edges']
     dois = ["10.1186/1752-0509-3-67"]
 
     #generate input taken from meo.py beacuse they have same input requirements
     @staticmethod
     def generate_inputs(data, filename_map):
-        """
-        Access fields from the dataset and write the required input files
-        @param data: dataset
-        @param filename_map: a dict mapping file types in the required_inputs to the filename for that type
-        @return:
-        """
         for input_type in BowTieBuilder.required_inputs:
             if input_type not in filename_map:
                 raise ValueError(f"{input_type} filename is missing")
@@ -70,30 +65,21 @@ class BowTieBuilder(PRM):
 
     # Skips parameter validation step
     @staticmethod
-    def run(sources=None, targets=None, edges=None, output_file=None, container_framework="docker"):
-        """
-        Run BTB with Docker
-        @param sources:  input source file (required)
-        @param targets:  input target file (required)
-        @param edges:    input edge file (required)
-        @param output_file: path to the output pathway file (required)
-        @param container_framework: choose the container runtime framework, currently supports "docker" or "singularity" (optional)
-        """
-
+    def run(inputs, args, output_file, container_framework="docker"):
         # Tests for pytest (docker container also runs this)
         # Testing out here avoids the trouble that container errors provide
 
-        if not sources or not targets or not edges or not output_file:
+        if not inputs["sources"] or not inputs["targets"] or not inputs["edges"]:
             raise ValueError('Required BowTieBuilder arguments are missing')
 
-        if not Path(sources).exists() or not Path(targets).exists() or not Path(edges).exists():
+        if not Path(inputs["sources"]).exists() or not Path(inputs["targets"]).exists() or not Path(inputs["edges"]).exists():
             raise ValueError('Missing input file')
 
         # Testing for btb index errors
         # TODO: This error will never actually occur if the inputs are passed through
         # `generate_inputs`. See the discussion about removing this or making this a habit at
         # https://github.com/Reed-CompBio/spras/issues/306.
-        with open(edges, 'r') as edge_file:
+        with open(inputs["edges"], 'r') as edge_file:
             try:
                 for line in edge_file:
                     line = line.strip().split('\t')[2]
@@ -107,13 +93,13 @@ class BowTieBuilder(PRM):
         # Each volume is a tuple (src, dest)
         volumes = list()
 
-        bind_path, source_file = prepare_volume(sources, work_dir)
+        bind_path, source_file = prepare_volume(inputs["sources"], work_dir)
         volumes.append(bind_path)
 
-        bind_path, target_file = prepare_volume(targets, work_dir)
+        bind_path, target_file = prepare_volume(inputs["targets"], work_dir)
         volumes.append(bind_path)
 
-        bind_path, edges_file = prepare_volume(edges, work_dir)
+        bind_path, edges_file = prepare_volume(inputs["edges"], work_dir)
         volumes.append(bind_path)
 
         # Use its --output argument to set the output file prefix to specify an absolute path and prefix

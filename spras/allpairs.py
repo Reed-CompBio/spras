@@ -1,6 +1,7 @@
 import warnings
 from pathlib import Path
 
+from spras.config.util import Empty
 from spras.containers import prepare_volume, run_container_and_log
 from spras.dataset import Dataset
 from spras.interactome import (
@@ -14,7 +15,7 @@ from spras.util import add_rank_column, duplicate_edges, raw_pathway_df
 __all__ = ['AllPairs']
 
 
-class AllPairs(PRM):
+class AllPairs(PRM[Empty]):
     required_inputs = ['nodetypes', 'network', 'directed_flag']
     dois = []
 
@@ -71,7 +72,7 @@ class AllPairs(PRM):
                                       header=["#Interactor1", "Interactor2", "Weight"])
 
     @staticmethod
-    def run(nodetypes=None, network=None, directed_flag=None, output_file=None, container_framework="docker"):
+    def run(inputs, args, output_file, container_framework="docker"):
         """
         Run All Pairs Shortest Paths with Docker
         @param nodetypes: input node types with sources and targets (required)
@@ -79,7 +80,7 @@ class AllPairs(PRM):
         @param container_framework: choose the container runtime framework, currently supports "docker" or "singularity" (optional)
         @param output_file: path to the output pathway file (required)
         """
-        if not nodetypes or not network or not output_file or not directed_flag:
+        if not inputs["nodetypes"] or not inputs["network"] or not inputs["directed_flag"]:
             raise ValueError('Required All Pairs Shortest Paths arguments are missing')
 
         work_dir = '/apsp'
@@ -87,10 +88,10 @@ class AllPairs(PRM):
         # Each volume is a tuple (src, dest)
         volumes = list()
 
-        bind_path, node_file = prepare_volume(nodetypes, work_dir)
+        bind_path, node_file = prepare_volume(inputs["nodetypes"], work_dir)
         volumes.append(bind_path)
 
-        bind_path, network_file = prepare_volume(network, work_dir)
+        bind_path, network_file = prepare_volume(inputs["network"], work_dir)
         volumes.append(bind_path)
 
         # Create the parent directories for the output file if needed
@@ -103,7 +104,7 @@ class AllPairs(PRM):
                    '--network', network_file,
                    '--nodes', node_file,
                    '--output', mapped_out_file]
-        if Path(directed_flag).read_text().strip() == "true":
+        if Path(inputs["directed_flag"]).read_text().strip() == "true":
             command.append("--directed")
 
         container_suffix = "allpairs:v4"

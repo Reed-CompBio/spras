@@ -1,4 +1,5 @@
 from enum import Enum
+from pydantic import BaseModel, ConfigDict
 from typing import Any
 
 
@@ -17,3 +18,10 @@ class CaseInsensitiveEnum(str, Enum):
                 if member.lower() == value:
                     return member
         return None
+
+
+class Empty(BaseModel):
+    """
+    The empty base model. Used for specifying that an algorithm takes no parameters.
+    """
+    model_config = ConfigDict(extra="forbid")
