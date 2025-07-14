@@ -73,8 +73,8 @@ algorithms:
         g: 3
 
   - name: "meo"
-    params:
-      include: true
+    include: true
+    runs:
       run1:
         max_path_length: 3
         local_search: "Yes"
