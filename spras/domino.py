@@ -13,16 +13,16 @@ from spras.interactome import (
 from spras.prm import PRM
 from spras.util import duplicate_edges
 
-__all__ = ['DOMINO', 'pre_domino_id_transform', 'post_domino_id_transform']
+__all__ = ['DOMINO', 'DominoParams', 'pre_domino_id_transform', 'post_domino_id_transform']
 
 ID_PREFIX = 'ENSG0'
 ID_PREFIX_LEN = len(ID_PREFIX)
 
 class DominoParams(BaseModel):
-    module_threshold: Optional[float]
+    module_threshold: Optional[float] = None
     "the p-value threshold for considering a slice as relevant (optional)"
 
-    slice_threshold: Optional[float]
+    slice_threshold: Optional[float] = None
     "the p-value threshold for considering a putative module as final module (optional)"
 
     model_config = ConfigDict(use_attribute_docstrings=True)
@@ -76,7 +76,7 @@ class DOMINO(PRM[DominoParams]):
                         header=['ID_interactor_A', 'ppi', 'ID_interactor_B'])
 
     @staticmethod
-    def run(inputs, args, output_file, container_framework="docker"):
+    def run(inputs, output_file, args=DominoParams(), container_framework="docker"):
         # Let visualization be always true, parallelization be always 1 thread, and use_cache be always false.
         if not inputs["network"] or not inputs["active_genes"]:
             raise ValueError('Required DOMINO arguments are missing')

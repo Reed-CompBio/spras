@@ -74,9 +74,8 @@ class PathLinker(PRM[PathLinkerParams]):
         edges.to_csv(filename_map["network"],sep="\t",index=False,columns=["Interactor1","Interactor2","Weight"],
                      header=["#Interactor1","Interactor2","Weight"])
 
-    # Skips parameter validation step
     @staticmethod
-    def run(inputs, args, output_file, container_framework="docker"):
+    def run(inputs, output_file, args, container_framework="docker"):
         """
         Run PathLinker with Docker
         @param nodetypes:  input node types with sources and targets (required)

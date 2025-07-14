@@ -11,7 +11,7 @@ from spras.interactome import (
 from spras.prm import PRM
 from spras.util import add_rank_column, duplicate_edges, raw_pathway_df
 
-__all__ = ['MEO', 'write_properties']
+__all__ = ['MEO', 'MEOParams', 'write_properties']
 
 # replaces all underscores in the node names with unicode seperator
 # MEO keeps only the substring up to the first underscore when parsing node names
@@ -58,7 +58,8 @@ def write_properties(filename=Path('properties.txt'), edges=None, sources=None, 
         if max_path_length is not None:
             f.write(f'max.path.length = {max_path_length}\n')
         if local_search is not None:
-            f.write(f'local.search = {local_search}\n')
+            # Yes/No for this parameter.
+            f.write(f'local.search = {"Yes" if local_search else "No"}\n')
         if rand_restarts is not None:
             f.write(f'rand.restarts = {rand_restarts}\n')
 
@@ -68,17 +69,17 @@ def write_properties(filename=Path('properties.txt'), edges=None, sources=None, 
         # Do not need csp.phase, csp.gen.file, or csp.sol.file because MAXCSP is not supported
 
 class MEOParams(BaseModel):
-    max_path_length: Optional[str]
+    max_path_length: Optional[int] = None
     "the maximal length of a path from sources and targets to orient."
 
-    local_search: Optional[str]
+    local_search: Optional[bool] = None
     """
-    a "Yes"/"No" parameter that enables MEO's local search functionality.
+    a boolean parameter that enables MEO's local search functionality.
     See "Improving approximations with local search" in the associated paper
     for more information.
     """
     
-    rand_restarts: Optional[int]
+    rand_restarts: Optional[int] = None
     "The number of random restarts to do."
 
     model_config = ConfigDict(use_attribute_docstrings=True)
@@ -143,7 +144,7 @@ class MEO(PRM[MEOParams]):
     # TODO add parameter validation
     # TODO document required arguments
     @staticmethod
-    def run(inputs, args, output_file=None, container_framework="docker"):
+    def run(inputs, args=MEOParams(), output_file=None, container_framework="docker"):
         """
         Run Maximum Edge Orientation in the Docker image with the provided parameters.
         The properties file is generated from the provided arguments.
@@ -151,8 +152,6 @@ class MEO(PRM[MEOParams]):
         Does not support MINSAT or MAXCSP.
         Only the edge output file is retained.
         All other output files are deleted.
-        @param output_file: the name of the output edge file, which will overwrite any existing file with this name
-        @param container_framework: choose the container runtime framework, currently supports "docker" or "singularity" (optional)
         """
         if inputs["edges"] is None or inputs["sources"] is None or inputs["targets"] is None:
             raise ValueError('Required Maximum Edge Orientation arguments are missing')

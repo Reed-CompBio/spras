@@ -13,10 +13,10 @@ from spras.util import add_rank_column, duplicate_edges, raw_pathway_df
 __all__ = ['MinCostFlow']
 
 class MinCostFlowParams(BaseModel):
-    flow: Optional[float]
+    flow: Optional[float] = None
     "amount of flow going through the graph"
 
-    capacity: Optional[float]
+    capacity: Optional[float] = None
     "amount of capacity allowed on each edge"
 
     model_config = ConfigDict(use_attribute_docstrings=True)
@@ -71,7 +71,7 @@ class MinCostFlow(PRM[MinCostFlowParams]):
                      header=False)
 
     @staticmethod
-    def run(inputs, args, output_file, container_framework="docker"):
+    def run(inputs, output_file, args=MinCostFlowParams(), container_framework="docker"):
         # ensures that these parameters are required
         if not inputs["sources"] or not inputs["targets"] or not inputs["edges"]:
             raise ValueError('Required MinCostFlow arguments are missing')

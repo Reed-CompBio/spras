@@ -98,11 +98,10 @@ class OmicsIntegrator2(PRM[OmicsIntegrator2Params]):
         edges_df.to_csv(filename_map['edges'], sep='\t', index=False, columns=['Interactor1', 'Interactor2', 'cost'],
                         header=['protein1', 'protein2', 'cost'])
 
-    # TODO add parameter validation
     # TODO add reasonable default values
     # TODO document required arguments
     @staticmethod
-    def run(inputs, args, output_file, container_framework="docker"):
+    def run(inputs, output_file, args, container_framework="docker"):
         """
         Run Omics Integrator 2 in the Docker image with the provided parameters.
         Only the .tsv output file is retained and then renamed.

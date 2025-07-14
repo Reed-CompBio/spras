@@ -42,7 +42,7 @@ class RWR(PRM[RWRParams]):
         edges.to_csv(filename_map['network'],sep='|',index=False,columns=['Interactor1','Interactor2'],header=False)
 
     @staticmethod
-    def run(inputs, args, output_file, container_framework="docker"):
+    def run(inputs, output_file, args, container_framework="docker"):
         if not inputs["nodes"] or not inputs["network"]:
             raise ValueError('Required RWR arguments are missing')
 

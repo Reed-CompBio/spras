@@ -141,7 +141,7 @@ class OmicsIntegrator1(PRM[OmicsIntegrator1Params]):
     # TODO add reasonable default values
     # TODO document required arguments
     @staticmethod
-    def run(inputs, args, output_file, container_framework="docker"):
+    def run(inputs, output_file, args, container_framework="docker"):
         if inputs["edges"] is None or inputs["prizes"] is None or output_file is None or w is None or b is None or d is None:
             raise ValueError('Required Omics Integrator 1 arguments are missing')
 

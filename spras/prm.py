@@ -1,6 +1,7 @@
 from abc import ABC, abstractmethod
 from pydantic import BaseModel
 from typing import Any, cast, TypeVar, Generic
+import os
 
 from spras.dataset import Dataset
 
@@ -40,7 +41,7 @@ class PRM(ABC, Generic[T]):
 
     @staticmethod
     @abstractmethod
-    def run(inputs: dict[str, str], args: T, output_file: str, container_framework="docker"):
+    def run(inputs: dict[str, str | os.PathLike], output_file: str | os.PathLike, args: T, container_framework="docker"):
         """
         Runs an algorithm with the specified inputs, algorithm params (T),
         the designated output_file, and the desired container_framework.
