@@ -6,7 +6,7 @@ type our config, giving us more robust user errors with guarantees
 that parts of the config exist after parsing it through Pydantic.
 
 We declare models using two classes here:
-- `BaseModel` (docs: https://docs.pydantic.dev/latest/api/base_model/)
+- `BaseModel` (docs: https://docs.pydantic.dev/latest/concepts/models/)
 - `CaseInsensitiveEnum` (see ./util_enum.py)
 """
 
