@@ -91,9 +91,17 @@ class TestML:
         expected = expected.round(5)
 
         assert coord.equals(expected)
+    
+    def test_pca_kernel_density(self):
+        dataframe = ml.summarize_networks([INPUT_DIR + 'test-data-s1/s1.txt', INPUT_DIR + 'test-data-s2/s2.txt', INPUT_DIR + 'test-data-s3/s3.txt', INPUT_DIR + 'test-data-empty/empty.txt'])
+        ml.pca(dataframe, OUT_DIR + 'pca.png', OUT_DIR + 'pca-variance.txt',
+               OUT_DIR + 'pca-coordinates-kde.tsv', kernel_density=True)
+        coord = pd.read_table(OUT_DIR + 'pca-coordinates-kde.tsv')
+        expected = pd.read_table(EXPECT_DIR + 'expected-pca-coordinates-kde.tsv')
+        coord_kde_peak = coord.loc[coord['datapoint_labels'] == 'kde_peak'].round(5)
+        expected_kde_peak = expected.loc[expected['datapoint_labels'] == 'kde_peak'].round(5)
 
-    # TODO add PCA KDE test
-    # waiting to see if I remove the kde file
+        assert coord_kde_peak.equals(expected_kde_peak)
 
     def test_pca_robustness(self):
         dataframe = ml.summarize_networks([INPUT_DIR + 'test-data-s1/s1.txt', INPUT_DIR + 'test-data-s2/s2.txt', INPUT_DIR + 'test-data-s3/s3.txt'])
