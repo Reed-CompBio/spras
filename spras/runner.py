@@ -81,8 +81,5 @@ def parse_output(algorithm: str, raw_pathway_file: str, standardized_pathway_fil
     @param raw_pathway_file: pathway file produced by an algorithm's run function
     @param standardized_pathway_file: the same pathway written in the universal format
     """
-    try:
-        algorithm_runner = get_algorithm(algorithm)
-    except KeyError as exc:
-        raise NotImplementedError(f'{algorithm} is not currently supported') from exc
+    algorithm_runner = get_algorithm(algorithm)
     return algorithm_runner.parse_output(raw_pathway_file, standardized_pathway_file, params)
