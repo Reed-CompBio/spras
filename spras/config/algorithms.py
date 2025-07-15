@@ -3,7 +3,7 @@ Dynamic construction of algoithm parameters with runtime type information for
 parameter combinations. This has been isolated from schema.py as it is not declarative,
 and rather mainly contains validators and lower-level pydantic code.
 """
-from typing import Annotated, Any, Callable, cast, Union, Literal
+from typing import Annotated, Any, Callable, cast, Optional, Union, Literal
 
 from spras.runner import algorithms
 from pydantic import BaseModel, BeforeValidator, create_model
@@ -37,7 +37,7 @@ def list_coerce(value: Any) -> Any:
         return [value]
     return value
 
-def construct_algorithm_model(name: str, model: type[BaseModel]) -> type[BaseModel]:
+def construct_algorithm_model(name: str, model: type[BaseModel], model_default: Optional[BaseModel]) -> type[BaseModel]:
     """
     Dynamically constructs a parameter-combination model based on the original args model.
     This is the most 'hacky' part of this code, but, thanks to pydantic, we avoid reflection
@@ -100,8 +100,14 @@ def construct_algorithm_model(name: str, model: type[BaseModel]) -> type[BaseMod
         f'{name}Model',
         name=Literal[name],
         include=bool,
-        runs=dict[str, run_model]
+        # For algorithms that have a default parameter config, we allow arbitrarily running an algorithm
+        # if no runs are specified. For example, the following config
+        #   name: pathlinker
+        #   include: true
+        # will run, despite there being no entries in `runs`.
+        # (create_model entries take in either a type or (type, default)).
+        runs=dict[str, run_model] if model_default is None else (dict[str, run_model], {"default": model_default})
     )
 
-algorithm_models: list[type[BaseModel]] = [construct_algorithm_model(name, model) for name, (_, model) in algorithms.items()]
+algorithm_models: list[type[BaseModel]] = [construct_algorithm_model(name, model, model_default) for name, (_, model, model_default) in algorithms.items()]
 AlgorithmUnion = Union[tuple(algorithm_models)]

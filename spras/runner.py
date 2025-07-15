@@ -1,4 +1,4 @@
-from typing import Any
+from typing import Any, Optional
 
 from pydantic import BaseModel
 
@@ -17,17 +17,19 @@ from spras.prm import PRM
 from spras.rwr import RWR, RWRParams
 from spras.strwr import ST_RWR, ST_RWRParams
 
-algorithms: dict[str, tuple[type[PRM], type[BaseModel]]] = {
-    "allpairs": (AllPairs, Empty),
-    "bowtiebuilder": (BowTieBuilder, Empty),
-    "domino": (DOMINO, DominoParams),
-    "meo": (MEO, MEOParams),
-    "mincostflow": (MinCostFlow, MinCostFlowParams),
-    "omicsintegrator1": (OmicsIntegrator1, OmicsIntegrator1Params),
-    "omicsintegrator2": (OmicsIntegrator2, OmicsIntegrator2Params),
-    "pathlinker": (PathLinker, PathLinkerParams),
-    "rwr": (RWR, RWRParams),
-    "strwr": (ST_RWR, ST_RWRParams),
+# Algorithm names to a three-tuple of (PRM, BaseModel, default BaseModel or None if there are no good defaults).
+# This is used for the configuration and to fetch algorithms during reconstruction
+algorithms: dict[str, tuple[type[PRM], type[BaseModel], Optional[BaseModel]]] = {
+    "allpairs": (AllPairs, Empty, Empty()),
+    "bowtiebuilder": (BowTieBuilder, Empty, Empty()),
+    "domino": (DOMINO, DominoParams, DominoParams()),
+    "meo": (MEO, MEOParams, MEOParams()),
+    "mincostflow": (MinCostFlow, MinCostFlowParams, MinCostFlowParams()),
+    "omicsintegrator1": (OmicsIntegrator1, OmicsIntegrator1Params, None),
+    "omicsintegrator2": (OmicsIntegrator2, OmicsIntegrator2Params, OmicsIntegrator2Params()),
+    "pathlinker": (PathLinker, PathLinkerParams, PathLinkerParams()),
+    "rwr": (RWR, RWRParams, None),
+    "strwr": (ST_RWR, ST_RWRParams, None),
 }
 
 def get_algorithm(algorithm: str) -> type[PRM]:

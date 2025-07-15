@@ -315,14 +315,16 @@
           "additionalProperties": {
             "$ref": "#/$defs/allpairsRunModel"
           },
+          "default": {
+            "default": {}
+          },
           "title": "Runs",
           "type": "object"
         }
       },
       "required": [
         "name",
-        "include",
-        "runs"
+        "include"
       ],
       "title": "allpairsModel",
       "type": "object"
@@ -347,14 +349,16 @@
           "additionalProperties": {
             "$ref": "#/$defs/bowtiebuilderRunModel"
           },
+          "default": {
+            "default": {}
+          },
           "title": "Runs",
           "type": "object"
         }
       },
       "required": [
         "name",
-        "include",
-        "runs"
+        "include"
       ],
       "title": "bowtiebuilderModel",
       "type": "object"
@@ -379,14 +383,20 @@
           "additionalProperties": {
             "$ref": "#/$defs/dominoRunModel"
           },
+          "default": {
+            "default": {
+              "_time": 1752594898.608572,
+              "module_threshold": null,
+              "slice_threshold": null
+            }
+          },
           "title": "Runs",
           "type": "object"
         }
       },
       "required": [
         "name",
-        "include",
-        "runs"
+        "include"
       ],
       "title": "dominoModel",
       "type": "object"
@@ -482,14 +492,20 @@
           "additionalProperties": {
             "$ref": "#/$defs/meoRunModel"
           },
+          "default": {
+            "default": {
+              "max_path_length": null,
+              "local_search": null,
+              "rand_restarts": null
+            }
+          },
           "title": "Runs",
           "type": "object"
         }
       },
       "required": [
         "name",
-        "include",
-        "runs"
+        "include"
       ],
       "title": "meoModel",
       "type": "object"
@@ -593,14 +609,19 @@
           "additionalProperties": {
             "$ref": "#/$defs/mincostflowRunModel"
           },
+          "default": {
+            "default": {
+              "flow": null,
+              "capacity": null
+            }
+          },
           "title": "Runs",
           "type": "object"
         }
       },
       "required": [
         "name",
-        "include",
-        "runs"
+        "include"
       ],
       "title": "mincostflowModel",
       "type": "object"
@@ -1004,14 +1025,25 @@
           "additionalProperties": {
             "$ref": "#/$defs/omicsintegrator2RunModel"
           },
+          "default": {
+            "default": {
+              "w": 6.0,
+              "b": 1.0,
+              "g": 20.0,
+              "noise": null,
+              "noisy_edges": null,
+              "random_terminals": null,
+              "dummy_mode": null,
+              "seed": 1752594898608
+            }
+          },
           "title": "Runs",
           "type": "object"
         }
       },
       "required": [
         "name",
-        "include",
-        "runs"
+        "include"
       ],
       "title": "omicsintegrator2Model",
       "type": "object"
@@ -1216,14 +1248,18 @@
           "additionalProperties": {
             "$ref": "#/$defs/pathlinkerRunModel"
           },
+          "default": {
+            "default": {
+              "k": 100
+            }
+          },
           "title": "Runs",
           "type": "object"
         }
       },
       "required": [
         "name",
-        "include",
-        "runs"
+        "include"
       ],
       "title": "pathlinkerModel",
       "type": "object"

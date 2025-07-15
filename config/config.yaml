@@ -95,6 +95,7 @@ algorithms:
     include: true
 
   - name: "domino"
+    include: true
     params:
       include: true
       run1:
