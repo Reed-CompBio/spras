@@ -46,6 +46,9 @@ dev = [
 "Homepage" = "https://github.com/Reed-CompBio/spras"
 "Issues" = "https://github.com/Reed-CompBio/spras/issues"
 
+[project.entry-points."pipx.run"]
+spras = "spras.cli:run"
+
 [build-system]
 requires = ["setuptools>=64.0"]
 build-backend = "setuptools.build_meta"
