@@ -275,7 +275,6 @@ class Config:
         if "kernel_density" in self.ml_params:
             self.pca_params["kernel_density"] = self.ml_params["kernel_density"]
         else:
-            # TODO: needed because this is used for making the pca kde file, but will also be needed for the eval kernel_density coupling
             self.pca_params["kernel_density"] = False
 
         if "remove_empty_pathways" in self.ml_params:

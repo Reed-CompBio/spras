@@ -116,7 +116,7 @@ def create_palette(column_names):
     label_color_map = {label: color for label, color in zip(unique_column_names, custom_palette, strict=True)}
     return label_color_map
 
-def pca(dataframe: pd.DataFrame, output_png: str, output_var: str, output_coord: str, output_kde: str = None, components: int = 2, labels: bool = True,
+def pca(dataframe: pd.DataFrame, output_png: str, output_var: str, output_coord: str, components: int = 2, labels: bool = True,
         kernel_density: bool = False, remove_empty_pathways: bool = False):
     """
     Performs PCA on the data and creates a scatterplot of the top two principal components.
@@ -212,8 +212,6 @@ def pca(dataframe: pd.DataFrame, output_png: str, output_var: str, output_coord:
             "density": z
         }).round(8)
 
-        # TODO: REMOVE IT once I am done debugging
-        df_kde.to_csv(output_kde, index=False, sep="\t")
 
     sns.scatterplot(x=X_pca[:, 0], y=X_pca[:, 1], s=70, hue=column_names, palette=label_color_map)
     plt.scatter(centroid[0], centroid[1], color='red', marker='X', s=100, label='Centroid')
