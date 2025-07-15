@@ -4,11 +4,12 @@ parameter combinations. This has been isolated from schema.py as it is not decla
 and rather mainly contains validators and lower-level pydantic code.
 """
 import ast
-from typing import Annotated, Any, Callable, cast, get_args, Optional, Union, Literal
+from typing import Annotated, Any, Callable, Literal, Optional, Union, cast, get_args
 
 import numpy as np
+from pydantic import BaseModel, BeforeValidator, ConfigDict, Field, create_model
+
 from spras.runner import algorithms
-from pydantic import BaseModel, BeforeValidator, create_model, ConfigDict, Field
 
 __all__ = ['AlgorithmUnion']
 
@@ -33,7 +34,7 @@ def python_evalish_coerce(value: Any) -> Any:
 
     if not isinstance(value, str):
         return value
-    
+
     # These strings are in the form of function calls `function.name(param1, param2, ...)`.
     # Since we want to avoid `eval` (since this might be running in the secret-sensitive HTCondor),
     # we need to parse these functions.
@@ -54,7 +55,7 @@ def python_evalish_coerce(value: Any) -> Any:
     # This should always be an Expression whose body is Call (a function).
     if not isinstance(value_ast.body, ast.Call):
         raise ValueError(f'The python code "{value}" should be calling a function directly. Is this meant to be python code?')
-    
+
     # We get the function name back as a string
     function_name = ast.unparse(value_ast.body.func)
 
@@ -63,7 +64,7 @@ def python_evalish_coerce(value: Any) -> Any:
 
     if function_name not in functions_dict:
         raise ValueError(f"{function_name} is not an allowed function to be run!")
-    
+
     return functions_dict[function_name](arguments)
 
 def list_coerce(value: Any) -> Any:
@@ -126,7 +127,7 @@ def construct_algorithm_model(name: str, model: type[BaseModel], model_default: 
         __config__=ConfigDict(extra='forbid'),
         **mapped_list_field
     )
-    
+
     # Here is an example of how this would look like inside config.yaml
     # name: pathlinker
     # include: true

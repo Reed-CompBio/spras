@@ -19,6 +19,7 @@ from spras.config.algorithms import AlgorithmUnion
 from spras.config.container_schema import ContainerSettings
 from spras.config.util import CaseInsensitiveEnum
 
+
 class SummaryAnalysis(BaseModel):
     include: bool
 

@@ -5,8 +5,8 @@ from pydantic import BaseModel
 # supported algorithm imports
 from spras.allpairs import AllPairs
 from spras.btb import BowTieBuilder
-from spras.dataset import Dataset
 from spras.config.util import Empty
+from spras.dataset import Dataset
 from spras.domino import DOMINO, DominoParams
 from spras.meo import MEO, MEOParams
 from spras.mincostflow import MinCostFlow, MinCostFlowParams

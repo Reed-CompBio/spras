@@ -4,8 +4,8 @@ that should be imported by algorithms, and algorithms should
 only import this config file.
 """
 
-from enum import Enum
 import time
+from enum import Enum
 from typing import Any
 
 from pydantic import BaseModel, ConfigDict, Field

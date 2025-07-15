@@ -5,8 +5,8 @@ from typing import Optional
 import pandas as pd
 from pydantic import ConfigDict
 
-from spras.containers import prepare_volume, run_container_and_log
 from spras.config.util import NondeterministicModel
+from spras.containers import prepare_volume, run_container_and_log
 from spras.interactome import (
     add_constant,
     reinsert_direction_col_undirected,

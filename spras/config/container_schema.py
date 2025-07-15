@@ -6,10 +6,11 @@ We move this to a separate file to allow `containers.py` to explicitly take in
 this subsection of the configuration.
 """
 
-from dataclasses import dataclass
-from pydantic import BaseModel, ConfigDict, Field
-from typing import Optional
 import warnings
+from dataclasses import dataclass
+from typing import Optional
+
+from pydantic import BaseModel, ConfigDict, Field
 
 from spras.config.util import CaseInsensitiveEnum
 
@@ -60,7 +61,7 @@ class ProcessedContainerSettings:
         container_prefix = DEFAULT_CONTAINER_PREFIX
         if settings.registry and settings.registry.base_url != "" and settings.registry.owner != "":
             container_prefix = settings.registry.base_url + "/" + settings.registry.owner
-        
+
         return ProcessedContainerSettings(
             framework=container_framework,
             unpack_singularity=unpack_singularity,
