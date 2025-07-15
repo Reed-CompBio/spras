@@ -80,7 +80,7 @@ class Evaluation:
         # TODO: later iteration - chose between node and edge file, or allow both
 
     @staticmethod
-    def precision_and_recall(file_paths: Iterable[Path], node_table: pd.DataFrame, algorithms: list, output_file: str, output_png:str=None):
+    def precision_and_recall(file_paths: Iterable[Path], node_table: pd.DataFrame, algorithms: list, output_file: str, output_png:str):
         """
         Takes in file paths for a specific dataset and an associated gold standard node table.
         Calculates precision and recall for each pathway file
@@ -89,7 +89,7 @@ class Evaluation:
         @param node_table: the gold standard nodes
         @param algorithms: list of algorithms used in current run of SPRAS
         @param output_file: the filename to save the precision and recall of each pathway
-        @param output_png (optional): the filename to plot the precision and recall of each pathway (not a PRC)
+        @param output_png: the filename to plot the precision and recall of each pathway (not a PRC)
         """
         y_true = set(node_table['NODEID'])
         results = []
