@@ -3,8 +3,10 @@ Dynamic construction of algoithm parameters with runtime type information for
 parameter combinations. This has been isolated from schema.py as it is not declarative,
 and rather mainly contains validators and lower-level pydantic code.
 """
+import ast
 from typing import Annotated, Any, Callable, cast, Optional, Union, Literal
 
+import numpy as np
 from spras.runner import algorithms
 from pydantic import BaseModel, BeforeValidator, create_model
 
@@ -17,16 +19,48 @@ def is_numpy_friendly(type: type[Any] | None) -> bool:
     """
     return type in (int, float)
 
-def python_evalish_coerce(type: type[Any] | None) -> Callable[[Any], Any]:
+def python_evalish_coerce(value: Any) -> Any:
     """
-    Allows for using numpy and python calls
+    Allows for using numpy and python calls.
+
+    **Safety Note**: This does not prevent availability attacks: this can still exhaust
+    resources if wanted. This only prevents secret leakage.
     """
+
+    if not isinstance(value, str):
+        return value
     
-    def numpy_coerce_validator(value: Any) -> Any:
-        raise NotImplementedError
+    # These strings are in the form of function calls `function.name(param1, param2, ...)`.
+    # Since we want to avoid `eval` (since this might be running in the secret-sensitive HTCondor),
+    # we need to parse these functions.
+    functions_dict: dict[str, Callable[[list[Any]], list[Union[int, float]]]] = {
+        'range': lambda params: list(range(*params)),
+        "np.linspace": lambda params: list(np.linspace(*params)),
+        "np.arange": lambda params: list(np.arange(*params)),
+        "np.logspace": lambda params: list(np.logspace(*params)),
+    }
 
-    return numpy_coerce_validator
+    # To do this, we get the AST of our string as an expression
+    value_ast = ast.parse(value, mode='eval')
 
+    # Then we do some light parsing - we're only looking to do some literal evaluation
+    # (e.g. allowing 1+1) and some basic function parsing. Full python programs
+    # should just generate a config.yaml.
+
+    # This should always be an Expression whose body is Call (a function).
+    if not isinstance(value_ast.body, ast.Call):
+        raise ValueError(f'The python code "{value}" should be calling a function directly. Is this meant to be python code?')
+    
+    # We get the function name back as a string
+    function_name = ast.unparse(value_ast.body.func)
+
+    # and we use the (non-availability) safe `ast.literal_eval` to support light expressions.
+    arguments = [ast.literal_eval(arg) for arg in value_ast.body.args]
+
+    if function_name not in functions_dict:
+        raise ValueError(f"{function_name} is not an allowed function to be run!")
+    
+    return functions_dict[function_name](arguments)
 
 def list_coerce(value: Any) -> Any:
     """
@@ -65,14 +99,13 @@ def construct_algorithm_model(name: str, model: type[BaseModel], model_default: 
             # This order isn't arbitrary.
             # https://docs.pydantic.dev/latest/concepts/validators/#ordering-of-validators
             # This runs second. This coerces any singletons to lists.
-            BeforeValidator(list_coerce),
+            BeforeValidator(list_coerce, json_schema_input_type=Union[field.annotation, list[field.annotation]]),
             # This runs first. This evaluates numpy utils for integer/float lists
             BeforeValidator(
-                python_evalish_coerce(field.annotation),
-                # json_schema_input_type (sensibly) overwrites, so we only specify it here.
-                json_schema_input_type=Union[field.annotation, list[field.annotation], str] if is_numpy_friendly(field.annotation) else \
-                                       Union[field.annotation, list[field.annotation]]
-            )
+                python_evalish_coerce,
+                # json_schema_input_type (sensibly) overwrites, so we have to specify the entire union again here.
+                json_schema_input_type=Union[field.annotation, list[field.annotation], str]
+            ) if is_numpy_friendly(field.annotation) else None
         ], field) for name, field in model.model_fields.items()
     }
 

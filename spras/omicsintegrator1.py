@@ -209,8 +209,7 @@ class OmicsIntegrator1(PRM[OmicsIntegrator1Params]):
         command.extend(['--noisyEdges', str(args.noisy_edges)])
         command.extend(['--shuffledPrizes', str(args.shuffled_prizes)])
         command.extend(['--randomTerminals', str(args.random_terminals)])
-        if args.seed is not None:
-            command.extend(['--seed', str(args.seed)])
+        command.extend(['--seed', str(args.seed)])
 
         container_suffix = "omics-integrator-1:no-conda" # no-conda version is the default
         run_container_and_log('Omics Integrator 1',
