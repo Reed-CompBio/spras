@@ -33,7 +33,7 @@ class TestEvaluate:
         algorithms = ["test"]
 
         dataframe = ml.summarize_networks(file_paths)
-        ml.pca(dataframe, OUT_DIR + 'pca.png', OUT_DIR + 'pca-variance.txt', output_coordinates, OUT_DIR + 'pca-kde.txt', kernel_density=True, remove_empty_pathways=True)
+        ml.pca(dataframe, OUT_DIR + 'pca.png', OUT_DIR + 'pca-variance.txt', output_coordinates, kernel_density=True, remove_empty_pathways=True)
 
         pathway = Evaluation.pca_chosen_pathway([output_coordinates], SUMMARY_FILE, INPUT_DIR)
         Evaluation.precision_and_recall(pathway, GS_NODE_TABLE, algorithms, str(output_file), str(output_png))
