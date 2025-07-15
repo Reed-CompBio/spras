@@ -3,6 +3,7 @@ from typing import Optional
 
 from pydantic import BaseModel, ConfigDict
 
+from spras.config.container_schema import ProcessedContainerSettings
 from spras.containers import prepare_volume, run_container_and_log
 from spras.interactome import (
     convert_undirected_to_directed,
@@ -72,9 +73,9 @@ class MinCostFlow(PRM[MinCostFlowParams]):
                      header=False)
 
     @staticmethod
-    def run(inputs, output_file, args=None, container_framework="docker"):
-        if not args:
-            args = MinCostFlowParams()
+    def run(inputs, output_file, args=None, container_settings=None):
+        if not container_settings: container_settings = ProcessedContainerSettings()
+        if not args: args = MinCostFlowParams()
 
         # ensures that these parameters are required
         if not inputs["sources"] or not inputs["targets"] or not inputs["edges"]:
@@ -86,19 +87,19 @@ class MinCostFlow(PRM[MinCostFlowParams]):
         # the tuple is for mapping the sources, targets, edges, and output
         volumes = list()
 
-        bind_path, sources_file = prepare_volume(inputs["sources"], work_dir)
+        bind_path, sources_file = prepare_volume(inputs["sources"], work_dir, container_settings)
         volumes.append(bind_path)
 
-        bind_path, targets_file = prepare_volume(inputs["targets"], work_dir)
+        bind_path, targets_file = prepare_volume(inputs["targets"], work_dir, container_settings)
         volumes.append(bind_path)
 
-        bind_path, edges_file = prepare_volume(inputs["edges"], work_dir)
+        bind_path, edges_file = prepare_volume(inputs["edges"], work_dir, container_settings)
         volumes.append(bind_path)
 
         # Create a prefix for the output filename and ensure the directory exists
         out_dir = Path(output_file).parent
         out_dir.mkdir(parents=True, exist_ok=True)
-        bind_path, mapped_out_dir = prepare_volume(str(out_dir), work_dir)
+        bind_path, mapped_out_dir = prepare_volume(str(out_dir), work_dir, container_settings)
         volumes.append(bind_path)
         mapped_out_prefix = mapped_out_dir + '/out'
 
@@ -121,11 +122,11 @@ class MinCostFlow(PRM[MinCostFlowParams]):
 
         # constructs a docker run call
         run_container_and_log('MinCostFlow',
-                             container_framework,
                              container_suffix,
                              command,
                              volumes,
-                             work_dir)
+                             work_dir,
+                             container_settings)
 
         # Check the output of the container
         out_dir_content = sorted(out_dir.glob('*.sif'))

@@ -66,7 +66,8 @@ class BowTieBuilder(PRM[Empty]):
 
     # Skips parameter validation step
     @staticmethod
-    def run(inputs, output_file, args=None, container_settings=ProcessedContainerSettings()):
+    def run(inputs, output_file, args=None, container_settings=None):
+        if not container_settings: container_settings = ProcessedContainerSettings()
         # Tests for pytest (docker container also runs this)
         # Testing out here avoids the trouble that container errors provide
 

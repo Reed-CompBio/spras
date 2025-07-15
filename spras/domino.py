@@ -5,6 +5,7 @@ from typing import Optional
 import pandas as pd
 from pydantic import ConfigDict
 
+from spras.config.container_schema import ProcessedContainerSettings
 from spras.config.util import NondeterministicModel
 from spras.containers import prepare_volume, run_container_and_log
 from spras.interactome import (
@@ -77,9 +78,9 @@ class DOMINO(PRM[DominoParams]):
                         header=['ID_interactor_A', 'ppi', 'ID_interactor_B'])
 
     @staticmethod
-    def run(inputs, output_file, args=None, container_framework="docker"):
-        if not args:
-            args = DominoParams()
+    def run(inputs, output_file, args=None, container_settings=None):
+        if not container_settings: container_settings = ProcessedContainerSettings()
+        if not args: args = DominoParams()
 
         # Let visualization be always true, parallelization be always 1 thread, and use_cache be always false.
         if not inputs["network"] or not inputs["active_genes"]:
@@ -90,19 +91,19 @@ class DOMINO(PRM[DominoParams]):
         # Each volume is a tuple (source, destination)
         volumes = list()
 
-        bind_path, network_file = prepare_volume(inputs["network"], work_dir)
+        bind_path, network_file = prepare_volume(inputs["network"], work_dir, container_settings)
         volumes.append(bind_path)
 
-        bind_path, node_file = prepare_volume(inputs["active_genes"], work_dir)
+        bind_path, node_file = prepare_volume(inputs["active_genes"], work_dir, container_settings)
         volumes.append(bind_path)
 
         out_dir = Path(output_file).parent
         out_dir.mkdir(parents=True, exist_ok=True)
-        bind_path, mapped_out_dir = prepare_volume(str(out_dir), work_dir)
+        bind_path, mapped_out_dir = prepare_volume(str(out_dir), work_dir, container_settings)
         volumes.append(bind_path)
 
         slices_file = Path(out_dir, 'slices.txt')
-        bind_path, mapped_slices_file = prepare_volume(str(slices_file), work_dir)
+        bind_path, mapped_slices_file = prepare_volume(str(slices_file), work_dir, container_settings)
         volumes.append(bind_path)
 
         # Make the Python command to run within the container
@@ -112,11 +113,11 @@ class DOMINO(PRM[DominoParams]):
 
         container_suffix = "domino"
         run_container_and_log('slicer',
-                             container_framework,
                              container_suffix,
                              slicer_command,
                              volumes,
-                             work_dir)
+                             work_dir,
+                             container_settings)
 
         # Make the Python command to run within the container
         domino_command = ['domino',
@@ -136,11 +137,11 @@ class DOMINO(PRM[DominoParams]):
             domino_command.extend(['--module_threshold', str(args.module_threshold)])
 
         run_container_and_log('DOMINO',
-                             container_framework,
                              container_suffix,
                              domino_command,
                              volumes,
-                             work_dir)
+                             work_dir,
+                             container_settings)
 
         # DOMINO creates a new folder in out_dir to output its modules HTML files into called active_genes
         # The filename is determined by the input active_genes and cannot be configured

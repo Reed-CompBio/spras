@@ -5,6 +5,7 @@ from typing import Optional
 import pandas as pd
 from pydantic import BaseModel, ConfigDict, Field
 
+from spras.config.container_schema import ProcessedContainerSettings
 from spras.config.util import CaseInsensitiveEnum
 from spras.containers import prepare_volume, run_container_and_log
 from spras.dataset import Dataset
@@ -110,7 +111,7 @@ class OmicsIntegrator2(PRM[OmicsIntegrator2Params]):
     # TODO add reasonable default values
     # TODO document required arguments
     @staticmethod
-    def run(inputs, output_file, args=None, container_framework="docker"):
+    def run(inputs, output_file, args=None, container_settings=None):
         """
         Run Omics Integrator 2 in the Docker image with the provided parameters.
         Only the .tsv output file is retained and then renamed.
@@ -118,8 +119,8 @@ class OmicsIntegrator2(PRM[OmicsIntegrator2Params]):
         @param output_file: the name of the output file, which will overwrite any existing file with this name
         @param container_framework: choose the container runtime framework, currently supports "docker" or "singularity" (optional)
         """
-        if not args:
-            args = OmicsIntegrator2Params()
+        if not container_settings: container_settings = ProcessedContainerSettings()
+        if not args: args = OmicsIntegrator2Params()
 
         if inputs["edges"] is None or inputs["prizes"] is None:
             raise ValueError('Required Omics Integrator 2 arguments are missing')
@@ -129,16 +130,16 @@ class OmicsIntegrator2(PRM[OmicsIntegrator2Params]):
         # Each volume is a tuple (src, dest)
         volumes = list()
 
-        bind_path, edge_file = prepare_volume(inputs["edges"], work_dir)
+        bind_path, edge_file = prepare_volume(inputs["edges"], work_dir, container_settings)
         volumes.append(bind_path)
 
-        bind_path, prize_file = prepare_volume(inputs["prizes"], work_dir)
+        bind_path, prize_file = prepare_volume(inputs["prizes"], work_dir, container_settings)
         volumes.append(bind_path)
 
         out_dir = Path(output_file).parent
         # Omics Integrator 2 requires that the output directory exist
         out_dir.mkdir(parents=True, exist_ok=True)
-        bind_path, mapped_out_dir = prepare_volume(out_dir, work_dir)
+        bind_path, mapped_out_dir = prepare_volume(out_dir, work_dir, container_settings)
         volumes.append(bind_path)
 
         command = ['OmicsIntegrator', '-e', edge_file, '-p', prize_file,
@@ -164,11 +165,11 @@ class OmicsIntegrator2(PRM[OmicsIntegrator2Params]):
 
         container_suffix = "omics-integrator-2:v2"
         run_container_and_log('Omics Integrator 2',
-                             container_framework,
                              container_suffix,
                              command,
                              volumes,
-                             work_dir)
+                             work_dir,
+                             container_settings)
 
         # TODO do we want to retain other output files?
         # TODO if deleting other output files, write them all to a tmp directory and copy

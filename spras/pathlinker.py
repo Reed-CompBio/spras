@@ -4,6 +4,7 @@ from typing import Optional
 
 from pydantic import BaseModel, ConfigDict
 
+from spras.config.container_schema import ProcessedContainerSettings
 from spras.containers import prepare_volume, run_container_and_log
 from spras.dataset import Dataset
 from spras.interactome import (
@@ -76,9 +77,9 @@ class PathLinker(PRM[PathLinkerParams]):
                      header=["#Interactor1","Interactor2","Weight"])
 
     @staticmethod
-    def run(inputs, output_file, args=None, container_framework="docker"):
-        if not args:
-            args = PathLinkerParams()
+    def run(inputs, output_file, args=None, container_settings=None):
+        if not container_settings: container_settings = ProcessedContainerSettings()
+        if not args: args = PathLinkerParams()
 
         if not inputs["nodetypes"] or not inputs["network"]:
             raise ValueError('Required PathLinker arguments are missing')
@@ -88,10 +89,10 @@ class PathLinker(PRM[PathLinkerParams]):
         # Each volume is a tuple (src, dest)
         volumes = list()
 
-        bind_path, node_file = prepare_volume(inputs["nodetypes"], work_dir)
+        bind_path, node_file = prepare_volume(inputs["nodetypes"], work_dir, container_settings)
         volumes.append(bind_path)
 
-        bind_path, network_file = prepare_volume(inputs["network"], work_dir)
+        bind_path, network_file = prepare_volume(inputs["network"], work_dir, container_settings)
         volumes.append(bind_path)
 
         # PathLinker does not provide an argument to set the output directory
@@ -99,7 +100,7 @@ class PathLinker(PRM[PathLinkerParams]):
         out_dir = Path(output_file).parent
         # PathLinker requires that the output directory exist
         out_dir.mkdir(parents=True, exist_ok=True)
-        bind_path, mapped_out_dir = prepare_volume(str(out_dir), work_dir)
+        bind_path, mapped_out_dir = prepare_volume(str(out_dir), work_dir, container_settings)
         volumes.append(bind_path)
         mapped_out_prefix = mapped_out_dir + '/out'  # Use posix path inside the container
 
@@ -113,11 +114,11 @@ class PathLinker(PRM[PathLinkerParams]):
 
         container_suffix = "pathlinker:v2"
         run_container_and_log('PathLinker',
-                             container_framework,
                              container_suffix,
                              command,
                              volumes,
-                             work_dir)
+                             work_dir,
+                             container_settings)
 
         # Rename the primary output file to match the desired output filename
         # Currently PathLinker only writes one output file so we do not need to delete others
