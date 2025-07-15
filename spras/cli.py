@@ -1,8 +1,8 @@
 import itertools
 import os
-from pathlib import Path
 import subprocess
 import sys
+from pathlib import Path
 
 # https://stackoverflow.com/a/5137509/7589775
 # The file we want, visjs.html, is also included in MANIFEST.in
