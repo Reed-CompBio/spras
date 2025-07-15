@@ -4,6 +4,7 @@ parameter combinations. This has been isolated from schema.py as it is not decla
 and rather mainly contains validators and lower-level pydantic code.
 """
 import ast
+import copy
 from typing import Annotated, Any, Callable, Literal, Optional, Union, cast, get_args
 
 import numpy as np
@@ -98,8 +99,14 @@ def construct_algorithm_model(name: str, model: type[BaseModel], model_default: 
 
     # Map our fields to a list (assuming we have no nested keys),
     # and specify our user convenience validators
-    mapped_list_field: dict[str, Annotated] = {
-        name: (Annotated[
+    mapped_list_field: dict[str, Annotated] = dict()
+    for field_name, field in model.model_fields.items():
+        # We need to create a copy of the field,
+        # as we need to make sure that it gets mapped to the list coerced version of the field.
+        new_field = copy.deepcopy(field)
+        new_field.validate_default = True
+
+        mapped_list_field[field_name] = (Annotated[
             list[field.annotation],
             # This order isn't arbitrary.
             # https://docs.pydantic.dev/latest/concepts/validators/#ordering-of-validators
@@ -111,9 +118,8 @@ def construct_algorithm_model(name: str, model: type[BaseModel], model_default: 
                 # json_schema_input_type (sensibly) overwrites, so we have to specify the entire union again here.
                 json_schema_input_type=Union[field.annotation, list[field.annotation], str]
             ) if is_numpy_friendly(field.annotation) else None
-        ], field) for name, field in model.model_fields.items()
-    }
-
+        ], new_field)
+    
     # Runtime assertion check: mapped_list_field does not contain any `__-prefixed` fields
     for key in mapped_list_field.keys():
         assert not key.startswith("__"), f"A private key has been passed from {name}'s argument schema. " + \

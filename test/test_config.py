@@ -61,10 +61,10 @@ def get_test_config():
                 "name": "omicsintegrator2",
                 "include": True,
                 "runs": {
-                    "strings": {"dummyMode": ["terminals", "others"], "b": 1},
+                    "strings": {"dummy_mode": ["terminals", "others"], "b": 1},
                     # spacing in np.linspace is on purpose
-                    "singleton_string_np_linspace": {"dummyMode": "terminals", "b": "np.linspace(0,    5,2)"},
-                    "str_array_np_logspace": {"test": ["others", "all"], "g": "np.logspace(1,1)"}
+                    "singleton_string_np_linspace": {"dummy_mode": "terminals", "b": "np.linspace(0,    5,2)"},
+                    "str_array_np_logspace": {"dummy_mode": ["others", "all"], "g": "np.logspace(1,1)"}
                 }
             },
             {
