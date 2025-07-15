@@ -8,7 +8,7 @@ from typing import Annotated, Any, Callable, cast, get_args, Optional, Union, Li
 
 import numpy as np
 from spras.runner import algorithms
-from pydantic import BaseModel, BeforeValidator, create_model, Field
+from pydantic import BaseModel, BeforeValidator, create_model, ConfigDict, Field
 
 __all__ = ['AlgorithmUnion']
 
@@ -123,6 +123,7 @@ def construct_algorithm_model(name: str, model: type[BaseModel], model_default: 
     # have had a key that starts with __ in mapped_list_fields. The above assertion prevents this.
     run_model = (cast(Any, create_model))(
         f'{name}RunModel',
+        __config__=ConfigDict(extra='forbid'),
         **mapped_list_field
     )
     
@@ -143,7 +144,8 @@ def construct_algorithm_model(name: str, model: type[BaseModel], model_default: 
         #   include: true
         # will run, despite there being no entries in `runs`.
         # (create_model entries take in either a type or (type, default)).
-        runs=dict[str, run_model] if model_default is None else (dict[str, run_model], {"default": model_default})
+        runs=dict[str, run_model] if model_default is None else (dict[str, run_model], {"default": model_default}),
+        __config__=ConfigDict(extra='forbid')
     )
 
 algorithm_models: list[type[BaseModel]] = [construct_algorithm_model(name, model, model_default) for name, (_, model, model_default) in algorithms.items()]

@@ -19,7 +19,7 @@ class RWRParams(BaseModel):
     alpha: Optional[float] = None
     "The chance of a restart during the random walk"
 
-    model_config = ConfigDict(use_attribute_docstrings=True)
+    model_config = ConfigDict(extra='forbid', use_attribute_docstrings=True)
 
 class RWR(PRM[RWRParams]):
     required_inputs = ['network','nodes']

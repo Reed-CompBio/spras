@@ -19,7 +19,7 @@ class ST_RWRParams(BaseModel):
     alpha: Optional[float] = None
     "The chance of a restart during the random walk"
 
-    model_config = ConfigDict(use_attribute_docstrings=True)
+    model_config = ConfigDict(extra='forbid', use_attribute_docstrings=True)
 
 # Note: This class is almost identical to the rwr.py file.
 class ST_RWR(PRM[ST_RWRParams]):

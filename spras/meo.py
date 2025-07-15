@@ -83,7 +83,7 @@ class MEOParams(BaseModel):
     rand_restarts: Optional[int] = None
     "The number of random restarts to do."
 
-    model_config = ConfigDict(use_attribute_docstrings=True)
+    model_config = ConfigDict(extra='forbid', use_attribute_docstrings=True)
 
 """
 MEO can support partially directed graphs

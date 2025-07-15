@@ -26,7 +26,7 @@ class DominoParams(NondeterministicModel):
     slice_threshold: Optional[float] = None
     "the p-value threshold for considering a putative module as final module (optional)"
 
-    model_config = ConfigDict(use_attribute_docstrings=True)
+    model_config = ConfigDict(extra='forbid', use_attribute_docstrings=True)
 
 """
 DOMINO will construct a fully undirected graph from the provided input file

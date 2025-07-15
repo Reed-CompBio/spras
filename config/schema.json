@@ -50,23 +50,23 @@
       "additionalProperties": false,
       "properties": {
         "base_url": {
+          "default": "docker.io",
+          "description": "The domain of the registry",
           "title": "Base Url",
           "type": "string"
         },
         "owner": {
+          "default": "reedcompbio",
           "description": "The owner or project of the registry",
           "title": "Owner",
           "type": "string"
         }
       },
-      "required": [
-        "base_url",
-        "owner"
-      ],
       "title": "ContainerRegistry",
       "type": "object"
     },
     "ContainerSettings": {
+      "additionalProperties": false,
       "properties": {
         "framework": {
           "$ref": "#/$defs/ContainerFramework",
@@ -148,6 +148,15 @@
       ],
       "title": "Dataset",
       "type": "object"
+    },
+    "DummyMode": {
+      "enum": [
+        "terminals",
+        "others",
+        "all"
+      ],
+      "title": "DummyMode",
+      "type": "string"
     },
     "EvaluationAnalysis": {
       "additionalProperties": false,
@@ -301,6 +310,7 @@
       "type": "object"
     },
     "allpairsModel": {
+      "additionalProperties": false,
       "properties": {
         "name": {
           "const": "allpairs",
@@ -330,11 +340,13 @@
       "type": "object"
     },
     "allpairsRunModel": {
+      "additionalProperties": false,
       "properties": {},
       "title": "allpairsRunModel",
       "type": "object"
     },
     "bowtiebuilderModel": {
+      "additionalProperties": false,
       "properties": {
         "name": {
           "const": "bowtiebuilder",
@@ -364,11 +376,13 @@
       "type": "object"
     },
     "bowtiebuilderRunModel": {
+      "additionalProperties": false,
       "properties": {},
       "title": "bowtiebuilderRunModel",
       "type": "object"
     },
     "dominoModel": {
+      "additionalProperties": false,
       "properties": {
         "name": {
           "const": "domino",
@@ -385,7 +399,7 @@
           },
           "default": {
             "default": {
-              "_time": 1752596079.9888437,
+              "_time": 1752606304.38952,
               "module_threshold": null,
               "slice_threshold": null
             }
@@ -402,6 +416,7 @@
       "type": "object"
     },
     "dominoRunModel": {
+      "additionalProperties": false,
       "properties": {
         "_time": {
           "anyOf": [
@@ -440,6 +455,9 @@
               "type": "array"
             },
             {
+              "type": "string"
+            },
+            {
               "type": "null"
             }
           ],
@@ -466,6 +484,9 @@
               "type": "array"
             },
             {
+              "type": "string"
+            },
+            {
               "type": "null"
             }
           ],
@@ -478,6 +499,7 @@
       "type": "object"
     },
     "meoModel": {
+      "additionalProperties": false,
       "properties": {
         "name": {
           "const": "meo",
@@ -511,6 +533,7 @@
       "type": "object"
     },
     "meoRunModel": {
+      "additionalProperties": false,
       "properties": {
         "max_path_length": {
           "anyOf": [
@@ -529,6 +552,9 @@
                 ]
               },
               "type": "array"
+            },
+            {
+              "type": "string"
             },
             {
               "type": "null"
@@ -583,6 +609,9 @@
               "type": "array"
             },
             {
+              "type": "string"
+            },
+            {
               "type": "null"
             }
           ],
@@ -595,6 +624,7 @@
       "type": "object"
     },
     "mincostflowModel": {
+      "additionalProperties": false,
       "properties": {
         "name": {
           "const": "mincostflow",
@@ -627,6 +657,7 @@
       "type": "object"
     },
     "mincostflowRunModel": {
+      "additionalProperties": false,
       "properties": {
         "flow": {
           "anyOf": [
@@ -645,6 +676,9 @@
                 ]
               },
               "type": "array"
+            },
+            {
+              "type": "string"
             },
             {
               "type": "null"
@@ -673,6 +707,9 @@
               "type": "array"
             },
             {
+              "type": "string"
+            },
+            {
               "type": "null"
             }
           ],
@@ -685,6 +722,7 @@
       "type": "object"
     },
     "omicsintegrator1Model": {
+      "additionalProperties": false,
       "properties": {
         "name": {
           "const": "omicsintegrator1",
@@ -712,6 +750,7 @@
       "type": "object"
     },
     "omicsintegrator1RunModel": {
+      "additionalProperties": false,
       "properties": {
         "dummy_mode": {
           "anyOf": [
@@ -916,6 +955,9 @@
               "type": "array"
             },
             {
+              "type": "string"
+            },
+            {
               "type": "null"
             }
           ],
@@ -940,6 +982,9 @@
                 ]
               },
               "type": "array"
+            },
+            {
+              "type": "string"
             },
             {
               "type": "null"
@@ -968,6 +1013,9 @@
               "type": "array"
             },
             {
+              "type": "string"
+            },
+            {
               "type": "null"
             }
           ],
@@ -994,6 +1042,9 @@
               "type": "array"
             },
             {
+              "type": "string"
+            },
+            {
               "type": "null"
             }
           ],
@@ -1011,6 +1062,7 @@
       "type": "object"
     },
     "omicsintegrator2Model": {
+      "additionalProperties": false,
       "properties": {
         "name": {
           "const": "omicsintegrator2",
@@ -1034,7 +1086,7 @@
               "noisy_edges": null,
               "random_terminals": null,
               "dummy_mode": null,
-              "seed": 1752596079988
+              "seed": 1752606304389
             }
           },
           "title": "Runs",
@@ -1049,6 +1101,7 @@
       "type": "object"
     },
     "omicsintegrator2RunModel": {
+      "additionalProperties": false,
       "properties": {
         "w": {
           "anyOf": [
@@ -1126,6 +1179,9 @@
               "type": "array"
             },
             {
+              "type": "string"
+            },
+            {
               "type": "null"
             }
           ],
@@ -1150,6 +1206,9 @@
                 ]
               },
               "type": "array"
+            },
+            {
+              "type": "string"
             },
             {
               "type": "null"
@@ -1178,6 +1237,9 @@
               "type": "array"
             },
             {
+              "type": "string"
+            },
+            {
               "type": "null"
             }
           ],
@@ -1188,13 +1250,13 @@
         "dummy_mode": {
           "anyOf": [
             {
-              "type": "string"
+              "$ref": "#/$defs/DummyMode"
             },
             {
               "items": {
                 "anyOf": [
                   {
-                    "type": "string"
+                    "$ref": "#/$defs/DummyMode"
                   },
                   {
                     "type": "null"
@@ -1234,6 +1296,7 @@
       "type": "object"
     },
     "pathlinkerModel": {
+      "additionalProperties": false,
       "properties": {
         "name": {
           "const": "pathlinker",
@@ -1265,6 +1328,7 @@
       "type": "object"
     },
     "pathlinkerRunModel": {
+      "additionalProperties": false,
       "properties": {
         "k": {
           "anyOf": [
@@ -1290,6 +1354,7 @@
       "type": "object"
     },
     "rwrModel": {
+      "additionalProperties": false,
       "properties": {
         "name": {
           "const": "rwr",
@@ -1317,6 +1382,7 @@
       "type": "object"
     },
     "rwrRunModel": {
+      "additionalProperties": false,
       "properties": {
         "threshold": {
           "anyOf": [
@@ -1355,6 +1421,9 @@
               "type": "array"
             },
             {
+              "type": "string"
+            },
+            {
               "type": "null"
             }
           ],
@@ -1370,6 +1439,7 @@
       "type": "object"
     },
     "strwrModel": {
+      "additionalProperties": false,
       "properties": {
         "name": {
           "const": "strwr",
@@ -1397,6 +1467,7 @@
       "type": "object"
     },
     "strwrRunModel": {
+      "additionalProperties": false,
       "properties": {
         "threshold": {
           "anyOf": [
@@ -1433,6 +1504,9 @@
                 ]
               },
               "type": "array"
+            },
+            {
+              "type": "string"
             },
             {
               "type": "null"
@@ -1463,7 +1537,22 @@
     },
     "algorithms": {
       "items": {
-        "anyOf": [
+        "discriminator": {
+          "mapping": {
+            "allpairs": "#/$defs/allpairsModel",
+            "bowtiebuilder": "#/$defs/bowtiebuilderModel",
+            "domino": "#/$defs/dominoModel",
+            "meo": "#/$defs/meoModel",
+            "mincostflow": "#/$defs/mincostflowModel",
+            "omicsintegrator1": "#/$defs/omicsintegrator1Model",
+            "omicsintegrator2": "#/$defs/omicsintegrator2Model",
+            "pathlinker": "#/$defs/pathlinkerModel",
+            "rwr": "#/$defs/rwrModel",
+            "strwr": "#/$defs/strwrModel"
+          },
+          "propertyName": "name"
+        },
+        "oneOf": [
           {
             "$ref": "#/$defs/allpairsModel"
           },

@@ -19,7 +19,7 @@ class PathLinkerParams(BaseModel):
     k: int = 100
     "path length"
 
-    model_config = ConfigDict(use_attribute_docstrings=True)
+    model_config = ConfigDict(extra='forbid', use_attribute_docstrings=True)
 
 """
 Pathlinker will construct a fully directed graph from the provided input file

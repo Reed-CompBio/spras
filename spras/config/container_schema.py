@@ -22,16 +22,21 @@ class ContainerFramework(CaseInsensitiveEnum):
     dsub = 'dsub'
 
 class ContainerRegistry(BaseModel):
-    base_url: str
-    owner: str = Field(description="The owner or project of the registry")
+    base_url: str = "docker.io"
+    "The domain of the registry"
 
-    model_config = ConfigDict(extra='forbid')
+    owner: str = "reedcompbio"
+    "The owner or project of the registry"
+
+    model_config = ConfigDict(extra='forbid', use_attribute_docstrings=True)
 
 class ContainerSettings(BaseModel):
     framework: ContainerFramework = ContainerFramework.docker
     unpack_singularity: bool = False
     registry: ContainerRegistry
     hash_length: int = 7
+
+    model_config = ConfigDict(extra='forbid')
 
 @dataclass
 class ProcessedContainerSettings:

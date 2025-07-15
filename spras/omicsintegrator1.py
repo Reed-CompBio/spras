@@ -77,7 +77,7 @@ class OmicsIntegrator1Params(BaseModel):
     r: Optional[float] = None
     "msgsteiner parameter that adds random noise to edges, which is rarely needed because the Forest --noisyEdges option is recommended instead (default 0)"
 
-    model_config = ConfigDict(use_attribute_docstrings=True)
+    model_config = ConfigDict(extra='forbid', use_attribute_docstrings=True)
 
 class OmicsIntegrator1(PRM[OmicsIntegrator1Params]):
     """

@@ -20,7 +20,7 @@ class MinCostFlowParams(BaseModel):
     capacity: Optional[float] = None
     "amount of capacity allowed on each edge"
 
-    model_config = ConfigDict(use_attribute_docstrings=True)
+    model_config = ConfigDict(extra='forbid', use_attribute_docstrings=True)
 
 """
 MinCostFlow deals with fully directed graphs

@@ -49,7 +49,7 @@ class OmicsIntegrator2Params(BaseModel):
     seed: int = Field(default_factory=lambda _: int(time.time() * 1000))
     "The random seed to use for this run. Defaults to the current UNIX timestamp."
 
-    model_config = ConfigDict(use_attribute_docstrings=True)
+    model_config = ConfigDict(extra='forbid', use_attribute_docstrings=True)
 
 """
 Omics Integrator 2 will construct a fully undirected graph from the provided input file
