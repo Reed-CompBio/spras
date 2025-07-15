@@ -96,8 +96,7 @@ algorithms:
 
   - name: "domino"
     include: true
-    params:
-      include: true
+    runs:
       run1:
         slice_threshold: 0.3
         module_threshold: 0.05

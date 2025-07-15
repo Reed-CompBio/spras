@@ -79,7 +79,7 @@ class Config:
         self.algorithms = None
         # A nested dict mapping algorithm names to dicts that map parameter hashes to parameter combinations.
         # Only includes algorithms that are set to be run with 'include: true'.
-        self.algorithm_params = None
+        self.algorithm_params: dict[str, dict[str, Any]] = dict()
         # Deprecated. Previously a dict mapping algorithm names to a Boolean tracking whether they used directed graphs.
         self.algorithm_directed = None
         # A dict with the analysis settings
@@ -196,6 +196,11 @@ class Config:
                     if params_hash in prior_params_hashes:
                         raise ValueError(f'Parameter hash collision detected. Increase the hash_length in the config file '
                                         f'(current length {self.hash_length}).')
+
+                    # We preserve the run name as it carries useful information for the parameter log,
+                    # and is useful for testing.
+                    run_dict["_spras_run_name"] = run_name
+
                     self.algorithm_params[alg.name][params_hash] = run_dict
 
     def process_analysis(self, raw_config: RawConfig):

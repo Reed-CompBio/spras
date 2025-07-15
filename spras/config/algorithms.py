@@ -47,7 +47,8 @@ def python_evalish_coerce(value: Any) -> Any:
     }
 
     # To do this, we get the AST of our string as an expression
-    value_ast = ast.parse(value, mode='eval', filename='config.yaml')
+    # (filename='<string>' is to make the error message more closely resemble that of eval.)
+    value_ast = ast.parse(value, mode='eval', filename='<string>')
 
     # Then we do some light parsing - we're only looking to do some literal evaluation
     # (allowing light python notation) and some basic function parsing. Full python programs
@@ -60,7 +61,7 @@ def python_evalish_coerce(value: Any) -> Any:
     # We get the function name back as a string
     function_name = ast.unparse(value_ast.body.func)
 
-    # and we use the (non-availability) safe `ast.literal_eval` to support light expressions.
+    # and we use the (non-availability) safe `ast.literal_eval` to support literals passed into functions.
     arguments = [ast.literal_eval(arg) for arg in value_ast.body.args]
 
     if function_name not in functions_dict:
@@ -119,7 +120,7 @@ def construct_algorithm_model(name: str, model: type[BaseModel], model_default: 
                 json_schema_input_type=Union[field.annotation, list[field.annotation], str]
             ) if is_numpy_friendly(field.annotation) else None
         ], new_field)
-    
+
     # Runtime assertion check: mapped_list_field does not contain any `__-prefixed` fields
     for key in mapped_list_field.keys():
         assert not key.startswith("__"), f"A private key has been passed from {name}'s argument schema. " + \
