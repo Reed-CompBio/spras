@@ -393,47 +393,77 @@
     },
     "dominoRunModel": {
       "properties": {
-        "time": {
-          "items": {
-            "type": "number"
-          },
-          "title": "Time",
-          "type": "array"
+        "_time": {
+          "anyOf": [
+            {
+              "type": "number"
+            },
+            {
+              "items": {
+                "type": "number"
+              },
+              "type": "array"
+            },
+            {
+              "type": "string"
+            }
+          ],
+          "description": "The internal _time parameter. This is a parameter only given to nondeterminsitic\nalgorithms that provide no randomness seed. While this should be unset,\nwe allow specifying `_time` for users that want to re-use outputs of runs,\nthough this explicitly breaks the 'immutability' promise of runs.",
+          "title": "Time"
         },
         "module_threshold": {
-          "items": {
-            "anyOf": [
-              {
-                "type": "number"
+          "anyOf": [
+            {
+              "type": "number"
+            },
+            {
+              "items": {
+                "anyOf": [
+                  {
+                    "type": "number"
+                  },
+                  {
+                    "type": "null"
+                  }
+                ]
               },
-              {
-                "type": "null"
-              }
-            ]
-          },
-          "title": "Module Threshold",
-          "type": "array"
+              "type": "array"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "description": "the p-value threshold for considering a slice as relevant (optional)",
+          "title": "Module Threshold"
         },
         "slice_threshold": {
-          "items": {
-            "anyOf": [
-              {
-                "type": "number"
+          "anyOf": [
+            {
+              "type": "number"
+            },
+            {
+              "items": {
+                "anyOf": [
+                  {
+                    "type": "number"
+                  },
+                  {
+                    "type": "null"
+                  }
+                ]
               },
-              {
-                "type": "null"
-              }
-            ]
-          },
-          "title": "Slice Threshold",
-          "type": "array"
+              "type": "array"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "description": "the p-value threshold for considering a putative module as final module (optional)",
+          "title": "Slice Threshold"
         }
       },
-      "required": [
-        "time",
-        "module_threshold",
-        "slice_threshold"
-      ],
       "title": "dominoRunModel",
       "type": "object"
     },
@@ -467,53 +497,84 @@
     "meoRunModel": {
       "properties": {
         "max_path_length": {
-          "items": {
-            "anyOf": [
-              {
-                "type": "integer"
+          "anyOf": [
+            {
+              "type": "integer"
+            },
+            {
+              "items": {
+                "anyOf": [
+                  {
+                    "type": "integer"
+                  },
+                  {
+                    "type": "null"
+                  }
+                ]
               },
-              {
-                "type": "null"
-              }
-            ]
-          },
-          "title": "Max Path Length",
-          "type": "array"
+              "type": "array"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "description": "the maximal length of a path from sources and targets to orient.",
+          "title": "Max Path Length"
         },
         "local_search": {
-          "items": {
-            "anyOf": [
-              {
-                "type": "boolean"
+          "anyOf": [
+            {
+              "type": "boolean"
+            },
+            {
+              "items": {
+                "anyOf": [
+                  {
+                    "type": "boolean"
+                  },
+                  {
+                    "type": "null"
+                  }
+                ]
               },
-              {
-                "type": "null"
-              }
-            ]
-          },
-          "title": "Local Search",
-          "type": "array"
+              "type": "array"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "description": "a boolean parameter that enables MEO's local search functionality.\nSee \"Improving approximations with local search\" in the associated paper\nfor more information.",
+          "title": "Local Search"
         },
         "rand_restarts": {
-          "items": {
-            "anyOf": [
-              {
-                "type": "integer"
+          "anyOf": [
+            {
+              "type": "integer"
+            },
+            {
+              "items": {
+                "anyOf": [
+                  {
+                    "type": "integer"
+                  },
+                  {
+                    "type": "null"
+                  }
+                ]
               },
-              {
-                "type": "null"
-              }
-            ]
-          },
-          "title": "Rand Restarts",
-          "type": "array"
+              "type": "array"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "description": "The number of random restarts to do.",
+          "title": "Rand Restarts"
         }
       },
-      "required": [
-        "max_path_length",
-        "local_search",
-        "rand_restarts"
-      ],
       "title": "meoRunModel",
       "type": "object"
     },
@@ -547,38 +608,58 @@
     "mincostflowRunModel": {
       "properties": {
         "flow": {
-          "items": {
-            "anyOf": [
-              {
-                "type": "number"
+          "anyOf": [
+            {
+              "type": "number"
+            },
+            {
+              "items": {
+                "anyOf": [
+                  {
+                    "type": "number"
+                  },
+                  {
+                    "type": "null"
+                  }
+                ]
               },
-              {
-                "type": "null"
-              }
-            ]
-          },
-          "title": "Flow",
-          "type": "array"
+              "type": "array"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "description": "amount of flow going through the graph",
+          "title": "Flow"
         },
         "capacity": {
-          "items": {
-            "anyOf": [
-              {
-                "type": "number"
+          "anyOf": [
+            {
+              "type": "number"
+            },
+            {
+              "items": {
+                "anyOf": [
+                  {
+                    "type": "number"
+                  },
+                  {
+                    "type": "null"
+                  }
+                ]
               },
-              {
-                "type": "null"
-              }
-            ]
-          },
-          "title": "Capacity",
-          "type": "array"
+              "type": "array"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "description": "amount of capacity allowed on each edge",
+          "title": "Capacity"
         }
       },
-      "required": [
-        "flow",
-        "capacity"
-      ],
       "title": "mincostflowRunModel",
       "type": "object"
     },
@@ -612,154 +693,298 @@
     "omicsintegrator1RunModel": {
       "properties": {
         "dummy_mode": {
-          "items": {
-            "anyOf": [
-              {
-                "type": "string"
+          "anyOf": [
+            {
+              "type": "string"
+            },
+            {
+              "items": {
+                "anyOf": [
+                  {
+                    "type": "string"
+                  },
+                  {
+                    "type": "null"
+                  }
+                ]
               },
-              {
-                "type": "null"
-              }
-            ]
-          },
-          "title": "Dummy Mode",
-          "type": "array"
+              "type": "array"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "title": "Dummy Mode"
         },
         "mu_squared": {
-          "items": {
-            "type": "boolean"
-          },
-          "title": "Mu Squared",
-          "type": "array"
+          "anyOf": [
+            {
+              "type": "boolean"
+            },
+            {
+              "items": {
+                "type": "boolean"
+              },
+              "type": "array"
+            }
+          ],
+          "default": false,
+          "title": "Mu Squared"
         },
         "exclude_terms": {
-          "items": {
-            "type": "boolean"
-          },
-          "title": "Exclude Terms",
-          "type": "array"
+          "anyOf": [
+            {
+              "type": "boolean"
+            },
+            {
+              "items": {
+                "type": "boolean"
+              },
+              "type": "array"
+            }
+          ],
+          "default": false,
+          "title": "Exclude Terms"
         },
         "noisy_edges": {
-          "items": {
-            "type": "integer"
-          },
-          "title": "Noisy Edges",
-          "type": "array"
+          "anyOf": [
+            {
+              "type": "integer"
+            },
+            {
+              "items": {
+                "type": "integer"
+              },
+              "type": "array"
+            },
+            {
+              "type": "string"
+            }
+          ],
+          "default": 0,
+          "description": "How many times you would like to add noise to the given edge values and re-run the algorithm.",
+          "title": "Noisy Edges"
         },
         "shuffled_prizes": {
-          "items": {
-            "type": "integer"
-          },
-          "title": "Shuffled Prizes",
-          "type": "array"
+          "anyOf": [
+            {
+              "type": "integer"
+            },
+            {
+              "items": {
+                "type": "integer"
+              },
+              "type": "array"
+            },
+            {
+              "type": "string"
+            }
+          ],
+          "default": 0,
+          "description": "shuffled_prizes: How many times the algorithm should shuffle the prizes and re-run",
+          "title": "Shuffled Prizes"
         },
         "random_terminals": {
-          "items": {
-            "type": "integer"
-          },
-          "title": "Random Terminals",
-          "type": "array"
+          "anyOf": [
+            {
+              "type": "integer"
+            },
+            {
+              "items": {
+                "type": "integer"
+              },
+              "type": "array"
+            },
+            {
+              "type": "string"
+            }
+          ],
+          "default": 0,
+          "description": "How many times to apply the given prizes to random nodes in the interactome",
+          "title": "Random Terminals"
         },
         "seed": {
-          "items": {
-            "type": "integer"
-          },
-          "title": "Seed",
-          "type": "array"
+          "anyOf": [
+            {
+              "type": "integer"
+            },
+            {
+              "items": {
+                "type": "integer"
+              },
+              "type": "array"
+            },
+            {
+              "type": "string"
+            }
+          ],
+          "description": "The random seed to use for this run. Defaults to the current UNIX timestamp.",
+          "title": "Seed"
         },
         "w": {
-          "items": {
-            "type": "integer"
-          },
-          "title": "W",
-          "type": "array"
+          "anyOf": [
+            {
+              "type": "integer"
+            },
+            {
+              "items": {
+                "type": "integer"
+              },
+              "type": "array"
+            },
+            {
+              "type": "string"
+            }
+          ],
+          "description": "the number of trees",
+          "title": "W"
         },
         "b": {
-          "items": {
-            "type": "number"
-          },
-          "title": "B",
-          "type": "array"
+          "anyOf": [
+            {
+              "type": "number"
+            },
+            {
+              "items": {
+                "type": "number"
+              },
+              "type": "array"
+            },
+            {
+              "type": "string"
+            }
+          ],
+          "description": "the trade-off between including more terminals and using less reliable edges",
+          "title": "B"
         },
         "d": {
-          "items": {
-            "type": "integer"
-          },
-          "title": "D",
-          "type": "array"
+          "anyOf": [
+            {
+              "type": "integer"
+            },
+            {
+              "items": {
+                "type": "integer"
+              },
+              "type": "array"
+            },
+            {
+              "type": "string"
+            }
+          ],
+          "description": "controls the maximum path-length from v0 to terminal nodes",
+          "title": "D"
         },
         "mu": {
-          "items": {
-            "anyOf": [
-              {
-                "type": "number"
+          "anyOf": [
+            {
+              "type": "number"
+            },
+            {
+              "items": {
+                "anyOf": [
+                  {
+                    "type": "number"
+                  },
+                  {
+                    "type": "null"
+                  }
+                ]
               },
-              {
-                "type": "null"
-              }
-            ]
-          },
-          "title": "Mu",
-          "type": "array"
+              "type": "array"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "description": "controls the degree-based negative prizes (defualt 0.0)",
+          "title": "Mu"
         },
         "noise": {
-          "items": {
-            "anyOf": [
-              {
-                "type": "number"
+          "anyOf": [
+            {
+              "type": "number"
+            },
+            {
+              "items": {
+                "anyOf": [
+                  {
+                    "type": "number"
+                  },
+                  {
+                    "type": "null"
+                  }
+                ]
               },
-              {
-                "type": "null"
-              }
-            ]
-          },
-          "title": "Noise",
-          "type": "array"
+              "type": "array"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "description": "Standard Deviation of the gaussian noise added to edges in Noisy Edges Randomizations",
+          "title": "Noise"
         },
         "g": {
-          "items": {
-            "anyOf": [
-              {
-                "type": "number"
+          "anyOf": [
+            {
+              "type": "number"
+            },
+            {
+              "items": {
+                "anyOf": [
+                  {
+                    "type": "number"
+                  },
+                  {
+                    "type": "null"
+                  }
+                ]
               },
-              {
-                "type": "null"
-              }
-            ]
-          },
-          "title": "G",
-          "type": "array"
+              "type": "array"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "description": "(Gamma) multiplicative edge penalty from degree of endpoints",
+          "title": "G"
         },
         "r": {
-          "items": {
-            "anyOf": [
-              {
-                "type": "number"
+          "anyOf": [
+            {
+              "type": "number"
+            },
+            {
+              "items": {
+                "anyOf": [
+                  {
+                    "type": "number"
+                  },
+                  {
+                    "type": "null"
+                  }
+                ]
               },
-              {
-                "type": "null"
-              }
-            ]
-          },
-          "title": "R",
-          "type": "array"
+              "type": "array"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "description": "msgsteiner parameter that adds random noise to edges, which is rarely needed because the Forest --noisyEdges option is recommended instead (default 0)",
+          "title": "R"
         }
       },
       "required": [
-        "dummy_mode",
-        "mu_squared",
-        "exclude_terms",
-        "noisy_edges",
-        "shuffled_prizes",
-        "random_terminals",
-        "seed",
         "w",
         "b",
-        "d",
-        "mu",
-        "noise",
-        "g",
-        "r"
+        "d"
       ],
       "title": "omicsintegrator1RunModel",
       "type": "object"
@@ -794,100 +1019,185 @@
     "omicsintegrator2RunModel": {
       "properties": {
         "w": {
-          "items": {
-            "type": "number"
-          },
-          "title": "W",
-          "type": "array"
-        },
-        "b": {
-          "items": {
-            "type": "number"
-          },
-          "title": "B",
-          "type": "array"
-        },
-        "g": {
-          "items": {
-            "type": "number"
-          },
-          "title": "G",
-          "type": "array"
-        },
-        "noise": {
-          "items": {
-            "anyOf": [
-              {
+          "anyOf": [
+            {
+              "type": "number"
+            },
+            {
+              "items": {
                 "type": "number"
               },
-              {
-                "type": "null"
-              }
-            ]
-          },
-          "title": "Noise",
-          "type": "array"
+              "type": "array"
+            },
+            {
+              "type": "string"
+            }
+          ],
+          "default": 6,
+          "description": "Omega: the weight of the edges connecting the dummy node to the nodes selected by dummyMode",
+          "title": "W"
+        },
+        "b": {
+          "anyOf": [
+            {
+              "type": "number"
+            },
+            {
+              "items": {
+                "type": "number"
+              },
+              "type": "array"
+            },
+            {
+              "type": "string"
+            }
+          ],
+          "default": 1,
+          "description": "Beta: scaling factor of prizes",
+          "title": "B"
+        },
+        "g": {
+          "anyOf": [
+            {
+              "type": "number"
+            },
+            {
+              "items": {
+                "type": "number"
+              },
+              "type": "array"
+            },
+            {
+              "type": "string"
+            }
+          ],
+          "default": 20,
+          "description": "Gamma: multiplicative edge penalty from degree of endpoints",
+          "title": "G"
+        },
+        "noise": {
+          "anyOf": [
+            {
+              "type": "number"
+            },
+            {
+              "items": {
+                "anyOf": [
+                  {
+                    "type": "number"
+                  },
+                  {
+                    "type": "null"
+                  }
+                ]
+              },
+              "type": "array"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "description": "Standard Deviation of the gaussian noise added to edges in Noisy Edges Randomizations.",
+          "title": "Noise"
         },
         "noisy_edges": {
-          "items": {
-            "anyOf": [
-              {
-                "type": "integer"
+          "anyOf": [
+            {
+              "type": "integer"
+            },
+            {
+              "items": {
+                "anyOf": [
+                  {
+                    "type": "integer"
+                  },
+                  {
+                    "type": "null"
+                  }
+                ]
               },
-              {
-                "type": "null"
-              }
-            ]
-          },
-          "title": "Noisy Edges",
-          "type": "array"
+              "type": "array"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "description": "An integer specifying how many times to add noise to the given edge values and re-run.",
+          "title": "Noisy Edges"
         },
         "random_terminals": {
-          "items": {
-            "anyOf": [
-              {
-                "type": "integer"
+          "anyOf": [
+            {
+              "type": "integer"
+            },
+            {
+              "items": {
+                "anyOf": [
+                  {
+                    "type": "integer"
+                  },
+                  {
+                    "type": "null"
+                  }
+                ]
               },
-              {
-                "type": "null"
-              }
-            ]
-          },
-          "title": "Random Terminals",
-          "type": "array"
+              "type": "array"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "description": "An integer specifying how many times to apply your given prizes to random nodes in the interactome and re-run",
+          "title": "Random Terminals"
         },
         "dummy_mode": {
-          "items": {
-            "anyOf": [
-              {
-                "type": "string"
+          "anyOf": [
+            {
+              "type": "string"
+            },
+            {
+              "items": {
+                "anyOf": [
+                  {
+                    "type": "string"
+                  },
+                  {
+                    "type": "null"
+                  }
+                ]
               },
-              {
-                "type": "null"
-              }
-            ]
-          },
-          "title": "Dummy Mode",
-          "type": "array"
+              "type": "array"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "description": "Tells the program which nodes in the interactome to connect the dummy node to. (default: terminals)\n    \"terminals\" = connect to all terminals\n    \"others\" = connect to all nodes except for terminals\n    \"all\" = connect to all nodes in the interactome.",
+          "title": "Dummy Mode"
         },
         "seed": {
-          "items": {
-            "type": "integer"
-          },
-          "title": "Seed",
-          "type": "array"
+          "anyOf": [
+            {
+              "type": "integer"
+            },
+            {
+              "items": {
+                "type": "integer"
+              },
+              "type": "array"
+            },
+            {
+              "type": "string"
+            }
+          ],
+          "description": "The random seed to use for this run. Defaults to the current UNIX timestamp.",
+          "title": "Seed"
         }
       },
-      "required": [
-        "w",
-        "b",
-        "g",
-        "noise",
-        "noisy_edges",
-        "random_terminals",
-        "dummy_mode",
-        "seed"
-      ],
       "title": "omicsintegrator2RunModel",
       "type": "object"
     },
@@ -921,16 +1231,25 @@
     "pathlinkerRunModel": {
       "properties": {
         "k": {
-          "items": {
-            "type": "integer"
-          },
-          "title": "K",
-          "type": "array"
+          "anyOf": [
+            {
+              "type": "integer"
+            },
+            {
+              "items": {
+                "type": "integer"
+              },
+              "type": "array"
+            },
+            {
+              "type": "string"
+            }
+          ],
+          "default": 100,
+          "description": "path length",
+          "title": "K"
         }
       },
-      "required": [
-        "k"
-      ],
       "title": "pathlinkerRunModel",
       "type": "object"
     },
@@ -964,30 +1283,52 @@
     "rwrRunModel": {
       "properties": {
         "threshold": {
-          "items": {
-            "type": "integer"
-          },
-          "title": "Threshold",
-          "type": "array"
+          "anyOf": [
+            {
+              "type": "integer"
+            },
+            {
+              "items": {
+                "type": "integer"
+              },
+              "type": "array"
+            },
+            {
+              "type": "string"
+            }
+          ],
+          "description": "The number of nodes to return",
+          "title": "Threshold"
         },
         "alpha": {
-          "items": {
-            "anyOf": [
-              {
-                "type": "number"
+          "anyOf": [
+            {
+              "type": "number"
+            },
+            {
+              "items": {
+                "anyOf": [
+                  {
+                    "type": "number"
+                  },
+                  {
+                    "type": "null"
+                  }
+                ]
               },
-              {
-                "type": "null"
-              }
-            ]
-          },
-          "title": "Alpha",
-          "type": "array"
+              "type": "array"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "description": "The chance of a restart during the random walk",
+          "title": "Alpha"
         }
       },
       "required": [
-        "threshold",
-        "alpha"
+        "threshold"
       ],
       "title": "rwrRunModel",
       "type": "object"
@@ -1022,30 +1363,52 @@
     "strwrRunModel": {
       "properties": {
         "threshold": {
-          "items": {
-            "type": "integer"
-          },
-          "title": "Threshold",
-          "type": "array"
+          "anyOf": [
+            {
+              "type": "integer"
+            },
+            {
+              "items": {
+                "type": "integer"
+              },
+              "type": "array"
+            },
+            {
+              "type": "string"
+            }
+          ],
+          "description": "The number of nodes to return",
+          "title": "Threshold"
         },
         "alpha": {
-          "items": {
-            "anyOf": [
-              {
-                "type": "number"
+          "anyOf": [
+            {
+              "type": "number"
+            },
+            {
+              "items": {
+                "anyOf": [
+                  {
+                    "type": "number"
+                  },
+                  {
+                    "type": "null"
+                  }
+                ]
               },
-              {
-                "type": "null"
-              }
-            ]
-          },
-          "title": "Alpha",
-          "type": "array"
+              "type": "array"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "description": "The chance of a restart during the random walk",
+          "title": "Alpha"
         }
       },
       "required": [
-        "threshold",
-        "alpha"
+        "threshold"
       ],
       "title": "strwrRunModel",
       "type": "object"
