@@ -4,11 +4,11 @@ parameter combinations. This has been isolated from schema.py as it is not decla
 and rather mainly contains validators and lower-level pydantic code.
 """
 import ast
-from typing import Annotated, Any, Callable, cast, Optional, Union, Literal
+from typing import Annotated, Any, Callable, cast, get_args, Optional, Union, Literal
 
 import numpy as np
 from spras.runner import algorithms
-from pydantic import BaseModel, BeforeValidator, create_model
+from pydantic import BaseModel, BeforeValidator, create_model, Field
 
 __all__ = ['AlgorithmUnion']
 
@@ -17,7 +17,11 @@ def is_numpy_friendly(type: type[Any] | None) -> bool:
     Whether the passed in type can have any numpy helpers.
     This is mainly used to provide hints in the JSON schema.
     """
-    return type in (int, float)
+    allowed_types = (int, float)
+
+    # check basic types, then check optional types
+    return type in allowed_types or \
+        any([arg for arg in get_args(type) if arg in allowed_types])
 
 def python_evalish_coerce(value: Any) -> Any:
     """
@@ -41,10 +45,10 @@ def python_evalish_coerce(value: Any) -> Any:
     }
 
     # To do this, we get the AST of our string as an expression
-    value_ast = ast.parse(value, mode='eval')
+    value_ast = ast.parse(value, mode='eval', filename='config.yaml')
 
     # Then we do some light parsing - we're only looking to do some literal evaluation
-    # (e.g. allowing 1+1) and some basic function parsing. Full python programs
+    # (allowing light python notation) and some basic function parsing. Full python programs
     # should just generate a config.yaml.
 
     # This should always be an Expression whose body is Call (a function).
@@ -143,4 +147,5 @@ def construct_algorithm_model(name: str, model: type[BaseModel], model_default: 
     )
 
 algorithm_models: list[type[BaseModel]] = [construct_algorithm_model(name, model, model_default) for name, (_, model, model_default) in algorithms.items()]
-AlgorithmUnion = Union[tuple(algorithm_models)]
+# name differentriates algorithms
+AlgorithmUnion = Annotated[Union[tuple(algorithm_models)], Field(discriminator='name')]

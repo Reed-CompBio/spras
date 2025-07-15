@@ -5,6 +5,7 @@ import pytest
 
 import spras.config.config as config
 from spras.config.schema import DEFAULT_HASH_LENGTH
+from spras.config.container_schema import DEFAULT_CONTAINER_PREFIX
 
 filler_dataset_data: dict[str, str | list[str]] = {
     "data_dir": "fake",
@@ -18,10 +19,12 @@ filler_dataset_data: dict[str, str | list[str]] = {
 # individual values of the dict can be changed and the whole initialization can be re-run.
 def get_test_config():
     test_raw_config = {
-        "container_framework": "singularity",
-        "container_registry": {
-            "base_url": "docker.io",
-            "owner": "reedcompbio",
+        "containers": {
+            "framework": "singularity",
+            "registry": {
+                "base_url": "docker.io",
+                "owner": "reedcompbio",
+            },
         },
         "hash_length": 7,
         "reconstruction_settings": {
@@ -49,55 +52,37 @@ def get_test_config():
             "data_dir": "gs-fake"
         }],
         "algorithms": [
+            # Since there is algorithm validation,
+            # we are (mostly) forced to use real algorithm parameters here.
+            # To make this more readable, we make the 'test names' the run names.
+            # TODO: we don't have a test for combinations of strings anymore. This seems to be fine,
+            # but it would be nice to have once we introduce an algorithm that takes more than 1 string parameter.
             {
-                "name": "strings",
-                "params": {
-                    "include": True,
-                    "run1": {"test": "str1", "test2": ["str2", "str3"]}
+                "name": "omicsintegrator2",
+                "include": True,
+                "runs": {
+                    "strings": {"dummyMode": ["terminals", "others"], "b": 1},
+                    # spacing in np.linspace is on purpose
+                    "singleton_string_np_linspace": {"dummyMode": "terminals", "b": "np.linspace(0,    5,2)"},
+                    "str_array_np_logspace": {"test": ["others", "all"], "g": "np.logspace(1,1)"}
                 }
             },
             {
-                "name": "numbersAndBools",
-                "params": {
-                    "include": True,
-                    "run1": {"a": 1, "b": [float(2.0), 3], "c": [4], "d": float(5.6), "f": False}
+                "name": "meo",
+                "include": True,
+                "runs": {
+                    "numbersAndBool": {"max_path_length": 1, "rand_restarts": [float(2.0), 3], "local_search": True},
+                    "numbersAndBools": {"max_path_length": 1, "rand_restarts": [float(2.0), 3], "local_search": [True, False]},
+                    "boolArrTest": {"local_search": [True, False], "max_path_length": "range(1, 3)"}
                 }
             },
             {
-                "name": "singleton_int64_with_array",
-                "params": {
-                    "include": True,
-                    "run1": {"test": np.int64(1), "test2": [2, 3]}
+                "name": "mincostflow",
+                "include": True,
+                "runs": {
+                    "int64artifact": {"flow": "np.arange(5,6)", "capacity": [2, 3]}
                 }
             },
-            {
-                "name": "singleton_string_np_linspace",
-                "params": {
-                    "include": True,
-                    "run1": {"test": "str1", "test2": "np.linspace(0,5,2)"}
-                }
-            },
-            {
-                "name": "str_array_np_logspace",
-                "params": {
-                    "include": True,
-                    "run1": {"test": ["a", "b"], "test2": "np.logspace(1,1)"}
-                }
-            },
-            {
-                "name": "int64artifact",
-                "params": {
-                    "include": True,
-                    "run1": {"test": "np.arange(5,6)", "test2": [2, 3]}
-                }
-            },
-            {
-                "name": "boolArrTest",
-                "params": {
-                    "include": True,
-                    "run1": {"flags": [True, False], "range": "range(1, 3)"}
-                }
-            }
         ],
         "analysis": {
             "summary": {
@@ -159,46 +144,46 @@ class TestConfig:
         # Test singularity
         test_config = get_test_config()
 
-        test_config["container_framework"] = "singularity"
+        test_config["containers"]["framework"] = "singularity"
         config.init_global(test_config)
-        assert (config.config.container_framework == "singularity")
+        assert (config.config.container_settings.framework == "singularity")
 
         # Test singularity with capitalization
-        test_config["container_framework"] = "Singularity"
+        test_config["containers"]["framework"] = "Singularity"
         config.init_global(test_config)
-        assert (config.config.container_framework == "singularity")
+        assert (config.config.container_settings.framework == "singularity")
 
         # Test docker
-        test_config["container_framework"] = "docker"
+        test_config["containers"]["framework"] = "docker"
         config.init_global(test_config)
-        assert (config.config.container_framework == "docker")
+        assert (config.config.container_settings.framework == "docker")
 
         # Test docker with capitalization
-        test_config["container_framework"] = "Docker"
+        test_config["containers"]["framework"] = "Docker"
         config.init_global(test_config)
-        assert (config.config.container_framework == "docker")
+        assert (config.config.container_settings.framework == "docker")
 
         # Test unknown framework
-        test_config["container_framework"] = "badFramework"
+        test_config["containers"]["framework"] = "badFramework"
         with pytest.raises(ValueError):
             config.init_global(test_config)
 
     def test_config_container_registry(self):
         test_config = get_test_config()
-        test_config["container_registry"]["base_url"] = "docker.io"
-        test_config["container_registry"]["owner"] = "reedcompbio"
+        test_config["containers"]["registry"]["base_url"] = "docker.io"
+        test_config["containers"]["registry"]["owner"] = "reedcompbio"
         config.init_global(test_config)
-        assert (config.config.container_prefix == "docker.io/reedcompbio")
+        assert (config.config.container_settings.prefix == "docker.io/reedcompbio")
 
-        test_config["container_registry"]["base_url"] = "another.repo"
-        test_config["container_registry"]["owner"] = "different-owner"
+        test_config["containers"]["registry"]["base_url"] = "another.repo"
+        test_config["containers"]["registry"]["owner"] = "different-owner"
         config.init_global(test_config)
-        assert (config.config.container_prefix == "another.repo/different-owner")
+        assert (config.config.container_settings.prefix == "another.repo/different-owner")
 
-        test_config["container_registry"]["base_url"] = ""
-        test_config["container_registry"]["owner"] = ""
+        test_config["containers"]["registry"]["base_url"] = ""
+        test_config["containers"]["registry"]["owner"] = ""
         config.init_global(test_config)
-        assert (config.config.container_prefix == config.DEFAULT_CONTAINER_PREFIX)
+        assert (config.config.container_settings.prefix == DEFAULT_CONTAINER_PREFIX)
 
     def test_error_dataset_label(self):
         test_config = get_test_config()

@@ -5,6 +5,7 @@ from typing import Optional
 import pandas as pd
 from pydantic import BaseModel, ConfigDict, Field
 
+from spras.config.util import CaseInsensitiveEnum
 from spras.containers import prepare_volume, run_container_and_log
 from spras.dataset import Dataset
 from spras.interactome import reinsert_direction_col_undirected
@@ -12,6 +13,11 @@ from spras.prm import PRM
 from spras.util import add_rank_column, duplicate_edges
 
 __all__ = ['OmicsIntegrator2', 'OmicsIntegrator2Params']
+
+class DummyMode(CaseInsensitiveEnum):
+    terminals = 'terminals'
+    others = 'others'
+    all = 'all'
 
 class OmicsIntegrator2Params(BaseModel):
     w: float = 6
@@ -32,7 +38,7 @@ class OmicsIntegrator2Params(BaseModel):
     random_terminals: Optional[int] = None
     "An integer specifying how many times to apply your given prizes to random nodes in the interactome and re-run"
 
-    dummy_mode: Optional[str] = None
+    dummy_mode: Optional[DummyMode] = None
     """
     Tells the program which nodes in the interactome to connect the dummy node to. (default: terminals)
         "terminals" = connect to all terminals

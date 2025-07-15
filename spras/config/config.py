@@ -156,15 +156,14 @@ class Config:
         self.algorithm_directed = dict()
         self.algorithms = raw_config.algorithms
         for alg in self.algorithms:
-            cur_params = alg.params
-            if cur_params.include:
+            if alg.include:
                 # This dict maps from parameter combinations hashes to parameter combination dictionaries
                 self.algorithm_params[alg.name] = dict()
             else:
                 # Do not parse the rest of the parameters for this algorithm if it is not included
                 continue
 
-            runs: dict[str, Any] = cur_params.runs
+            runs: dict[str, Any] = alg.runs
 
             # Each set of runs should be 1 level down in the config file
             for run_name in runs.keys():
@@ -172,10 +171,11 @@ class Config:
 
                 # We create the product of all param combinations for each run
                 param_name_list = []
-                for param in runs[run_name]:
+                run_subscriptable = vars(runs[run_name])
+                for param in run_subscriptable:
                     param_name_list.append(param)
                     # this is guaranteed to be list[Any] by algorithms.py
-                    param_values: list[Any] = runs[run_name][param]
+                    param_values: list[Any] = run_subscriptable[param]
                     all_runs.append(param_values)
                 run_list_tuples = list(it.product(*all_runs))
                 param_name_tuple = tuple(param_name_list)

@@ -131,6 +131,3 @@ class RawConfig(BaseModel):
     reconstruction_settings: ReconstructionSettings
 
     model_config = ConfigDict(extra='forbid')
-
-# AlgorithmUnion is dynamically constructed.
-RawConfig.model_rebuild()
