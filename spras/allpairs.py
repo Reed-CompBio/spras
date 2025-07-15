@@ -1,6 +1,7 @@
 import warnings
 from pathlib import Path
 
+from spras.config.container_schema import ProcessedContainerSettings
 from spras.config.util import Empty
 from spras.containers import prepare_volume, run_container_and_log
 from spras.dataset import Dataset
@@ -72,14 +73,7 @@ class AllPairs(PRM[Empty]):
                                       header=["#Interactor1", "Interactor2", "Weight"])
 
     @staticmethod
-    def run(inputs, output_file, args=None, container_framework="docker"):
-        """
-        Run All Pairs Shortest Paths with Docker
-        @param nodetypes: input node types with sources and targets (required)
-        @param network: input network file (required)
-        @param container_framework: choose the container runtime framework, currently supports "docker" or "singularity" (optional)
-        @param output_file: path to the output pathway file (required)
-        """
+    def run(inputs, output_file, args=None, container_settings=ProcessedContainerSettings()):
         if not inputs["nodetypes"] or not inputs["network"] or not inputs["directed_flag"]:
             raise ValueError('Required All Pairs Shortest Paths arguments are missing')
 
@@ -88,15 +82,15 @@ class AllPairs(PRM[Empty]):
         # Each volume is a tuple (src, dest)
         volumes = list()
 
-        bind_path, node_file = prepare_volume(inputs["nodetypes"], work_dir)
+        bind_path, node_file = prepare_volume(inputs["nodetypes"], work_dir, container_settings)
         volumes.append(bind_path)
 
-        bind_path, network_file = prepare_volume(inputs["network"], work_dir)
+        bind_path, network_file = prepare_volume(inputs["network"], work_dir, container_settings)
         volumes.append(bind_path)
 
         # Create the parent directories for the output file if needed
         Path(output_file).parent.mkdir(parents=True, exist_ok=True)
-        bind_path, mapped_out_file = prepare_volume(output_file, work_dir)
+        bind_path, mapped_out_file = prepare_volume(output_file, work_dir, container_settings)
         volumes.append(bind_path)
 
         command = ['python',
@@ -110,11 +104,11 @@ class AllPairs(PRM[Empty]):
         container_suffix = "allpairs:v4"
         run_container_and_log(
             'All Pairs Shortest Paths',
-            container_framework,
             container_suffix,
             command,
             volumes,
-            work_dir)
+            work_dir,
+            container_settings)
 
     @staticmethod
     def parse_output(raw_pathway_file, standardized_pathway_file, params):

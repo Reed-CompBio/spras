@@ -4,6 +4,7 @@ from typing import Any, Generic, TypeVar, cast
 
 from pydantic import BaseModel
 
+from spras.config.container_schema import ProcessedContainerSettings
 from spras.dataset import Dataset
 
 T = TypeVar('T', bound=BaseModel)
@@ -42,10 +43,10 @@ class PRM(ABC, Generic[T]):
 
     @staticmethod
     @abstractmethod
-    def run(inputs: dict[str, str | os.PathLike], output_file: str | os.PathLike, args: T, container_framework="docker"):
+    def run(inputs: dict[str, str | os.PathLike], output_file: str | os.PathLike, args: T, container_settings: ProcessedContainerSettings):
         """
         Runs an algorithm with the specified inputs, algorithm params (T),
-        the designated output_file, and the desired container_framework.
+        the designated output_file, and the desired container_settings.
         """
         raise NotImplementedError
 

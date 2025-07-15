@@ -1,5 +1,6 @@
 from pathlib import Path
 
+from spras.config.container_schema import ProcessedContainerSettings
 from spras.config.util import Empty
 from spras.containers import prepare_volume, run_container_and_log
 from spras.interactome import (
@@ -65,7 +66,7 @@ class BowTieBuilder(PRM[Empty]):
 
     # Skips parameter validation step
     @staticmethod
-    def run(inputs, output_file, args=None, container_framework="docker"):
+    def run(inputs, output_file, args=None, container_settings=ProcessedContainerSettings()):
         # Tests for pytest (docker container also runs this)
         # Testing out here avoids the trouble that container errors provide
 
@@ -93,19 +94,19 @@ class BowTieBuilder(PRM[Empty]):
         # Each volume is a tuple (src, dest)
         volumes = list()
 
-        bind_path, source_file = prepare_volume(inputs["sources"], work_dir)
+        bind_path, source_file = prepare_volume(inputs["sources"], work_dir, container_settings)
         volumes.append(bind_path)
 
-        bind_path, target_file = prepare_volume(inputs["targets"], work_dir)
+        bind_path, target_file = prepare_volume(inputs["targets"], work_dir, container_settings)
         volumes.append(bind_path)
 
-        bind_path, edges_file = prepare_volume(inputs["edges"], work_dir)
+        bind_path, edges_file = prepare_volume(inputs["edges"], work_dir, container_settings)
         volumes.append(bind_path)
 
         # Use its --output argument to set the output file prefix to specify an absolute path and prefix
         out_dir = Path(output_file).parent
         out_dir.mkdir(parents=True, exist_ok=True)
-        bind_path, mapped_out_dir = prepare_volume(str(out_dir), work_dir)
+        bind_path, mapped_out_dir = prepare_volume(str(out_dir), work_dir, container_settings)
         volumes.append(bind_path)
         mapped_out_prefix = mapped_out_dir + '/raw-pathway.txt'  # Use posix path inside the container
 
@@ -122,11 +123,11 @@ class BowTieBuilder(PRM[Empty]):
 
         container_suffix = "bowtiebuilder:v2"
         run_container_and_log('BowTieBuilder',
-                              container_framework,
                               container_suffix,
                               command,
                               volumes,
-                              work_dir)
+                              work_dir,
+                              container_settings)
         # Output is already written to raw-pathway.txt file
 
 

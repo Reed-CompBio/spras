@@ -1,0 +1,1153 @@
+{
+  "$defs": {
+    "Analysis": {
+      "additionalProperties": false,
+      "properties": {
+        "summary": {
+          "$ref": "#/$defs/SummaryAnalysis",
+          "default": {
+            "include": false
+          }
+        },
+        "cytoscape": {
+          "$ref": "#/$defs/CytoscapeAnalysis",
+          "default": {
+            "include": false
+          }
+        },
+        "ml": {
+          "$ref": "#/$defs/MlAnalysis",
+          "default": {
+            "include": false,
+            "aggregate_per_algorithm": false,
+            "components": 2,
+            "labels": true,
+            "linkage": "ward",
+            "metric": "euclidean"
+          }
+        },
+        "evaluation": {
+          "$ref": "#/$defs/EvaluationAnalysis",
+          "default": {
+            "include": false,
+            "aggregate_per_algorithm": false
+          }
+        }
+      },
+      "title": "Analysis",
+      "type": "object"
+    },
+    "ContainerFramework": {
+      "enum": [
+        "docker",
+        "singularity",
+        "dsub"
+      ],
+      "title": "ContainerFramework",
+      "type": "string"
+    },
+    "ContainerRegistry": {
+      "additionalProperties": false,
+      "properties": {
+        "base_url": {
+          "title": "Base Url",
+          "type": "string"
+        },
+        "owner": {
+          "description": "The owner or project of the registry",
+          "title": "Owner",
+          "type": "string"
+        }
+      },
+      "required": [
+        "base_url",
+        "owner"
+      ],
+      "title": "ContainerRegistry",
+      "type": "object"
+    },
+    "ContainerSettings": {
+      "properties": {
+        "framework": {
+          "$ref": "#/$defs/ContainerFramework",
+          "default": "docker"
+        },
+        "unpack_singularity": {
+          "default": false,
+          "title": "Unpack Singularity",
+          "type": "boolean"
+        },
+        "registry": {
+          "$ref": "#/$defs/ContainerRegistry"
+        },
+        "hash_length": {
+          "default": 7,
+          "title": "Hash Length",
+          "type": "integer"
+        }
+      },
+      "required": [
+        "registry"
+      ],
+      "title": "ContainerSettings",
+      "type": "object"
+    },
+    "CytoscapeAnalysis": {
+      "additionalProperties": false,
+      "properties": {
+        "include": {
+          "title": "Include",
+          "type": "boolean"
+        }
+      },
+      "required": [
+        "include"
+      ],
+      "title": "CytoscapeAnalysis",
+      "type": "object"
+    },
+    "Dataset": {
+      "additionalProperties": false,
+      "properties": {
+        "label": {
+          "title": "Label",
+          "type": "string"
+        },
+        "node_files": {
+          "items": {
+            "type": "string"
+          },
+          "title": "Node Files",
+          "type": "array"
+        },
+        "edge_files": {
+          "items": {
+            "type": "string"
+          },
+          "title": "Edge Files",
+          "type": "array"
+        },
+        "other_files": {
+          "items": {
+            "type": "string"
+          },
+          "title": "Other Files",
+          "type": "array"
+        },
+        "data_dir": {
+          "title": "Data Dir",
+          "type": "string"
+        }
+      },
+      "required": [
+        "label",
+        "node_files",
+        "edge_files",
+        "other_files",
+        "data_dir"
+      ],
+      "title": "Dataset",
+      "type": "object"
+    },
+    "EvaluationAnalysis": {
+      "additionalProperties": false,
+      "properties": {
+        "include": {
+          "title": "Include",
+          "type": "boolean"
+        },
+        "aggregate_per_algorithm": {
+          "default": false,
+          "title": "Aggregate Per Algorithm",
+          "type": "boolean"
+        }
+      },
+      "required": [
+        "include"
+      ],
+      "title": "EvaluationAnalysis",
+      "type": "object"
+    },
+    "GoldStandard": {
+      "additionalProperties": false,
+      "properties": {
+        "label": {
+          "title": "Label",
+          "type": "string"
+        },
+        "node_files": {
+          "items": {
+            "type": "string"
+          },
+          "title": "Node Files",
+          "type": "array"
+        },
+        "data_dir": {
+          "title": "Data Dir",
+          "type": "string"
+        },
+        "dataset_labels": {
+          "items": {
+            "type": "string"
+          },
+          "title": "Dataset Labels",
+          "type": "array"
+        }
+      },
+      "required": [
+        "label",
+        "node_files",
+        "data_dir",
+        "dataset_labels"
+      ],
+      "title": "GoldStandard",
+      "type": "object"
+    },
+    "Locations": {
+      "additionalProperties": false,
+      "properties": {
+        "reconstruction_dir": {
+          "title": "Reconstruction Dir",
+          "type": "string"
+        }
+      },
+      "required": [
+        "reconstruction_dir"
+      ],
+      "title": "Locations",
+      "type": "object"
+    },
+    "MlAnalysis": {
+      "additionalProperties": false,
+      "properties": {
+        "include": {
+          "title": "Include",
+          "type": "boolean"
+        },
+        "aggregate_per_algorithm": {
+          "default": false,
+          "title": "Aggregate Per Algorithm",
+          "type": "boolean"
+        },
+        "components": {
+          "default": 2,
+          "title": "Components",
+          "type": "integer"
+        },
+        "labels": {
+          "default": true,
+          "title": "Labels",
+          "type": "boolean"
+        },
+        "linkage": {
+          "$ref": "#/$defs/MlLinkage",
+          "default": "ward"
+        },
+        "metric": {
+          "$ref": "#/$defs/MlMetric",
+          "default": "euclidean"
+        }
+      },
+      "required": [
+        "include"
+      ],
+      "title": "MlAnalysis",
+      "type": "object"
+    },
+    "MlLinkage": {
+      "enum": [
+        "ward",
+        "complete",
+        "average",
+        "single"
+      ],
+      "title": "MlLinkage",
+      "type": "string"
+    },
+    "MlMetric": {
+      "enum": [
+        "euclidean",
+        "manhattan",
+        "cosine"
+      ],
+      "title": "MlMetric",
+      "type": "string"
+    },
+    "ReconstructionSettings": {
+      "additionalProperties": false,
+      "properties": {
+        "locations": {
+          "$ref": "#/$defs/Locations"
+        }
+      },
+      "required": [
+        "locations"
+      ],
+      "title": "ReconstructionSettings",
+      "type": "object"
+    },
+    "SummaryAnalysis": {
+      "additionalProperties": false,
+      "properties": {
+        "include": {
+          "title": "Include",
+          "type": "boolean"
+        }
+      },
+      "required": [
+        "include"
+      ],
+      "title": "SummaryAnalysis",
+      "type": "object"
+    },
+    "allpairsModel": {
+      "properties": {
+        "name": {
+          "const": "allpairs",
+          "title": "Name",
+          "type": "string"
+        },
+        "include": {
+          "title": "Include",
+          "type": "boolean"
+        },
+        "runs": {
+          "additionalProperties": {
+            "$ref": "#/$defs/allpairsRunModel"
+          },
+          "title": "Runs",
+          "type": "object"
+        }
+      },
+      "required": [
+        "name",
+        "include",
+        "runs"
+      ],
+      "title": "allpairsModel",
+      "type": "object"
+    },
+    "allpairsRunModel": {
+      "properties": {},
+      "title": "allpairsRunModel",
+      "type": "object"
+    },
+    "bowtiebuilderModel": {
+      "properties": {
+        "name": {
+          "const": "bowtiebuilder",
+          "title": "Name",
+          "type": "string"
+        },
+        "include": {
+          "title": "Include",
+          "type": "boolean"
+        },
+        "runs": {
+          "additionalProperties": {
+            "$ref": "#/$defs/bowtiebuilderRunModel"
+          },
+          "title": "Runs",
+          "type": "object"
+        }
+      },
+      "required": [
+        "name",
+        "include",
+        "runs"
+      ],
+      "title": "bowtiebuilderModel",
+      "type": "object"
+    },
+    "bowtiebuilderRunModel": {
+      "properties": {},
+      "title": "bowtiebuilderRunModel",
+      "type": "object"
+    },
+    "dominoModel": {
+      "properties": {
+        "name": {
+          "const": "domino",
+          "title": "Name",
+          "type": "string"
+        },
+        "include": {
+          "title": "Include",
+          "type": "boolean"
+        },
+        "runs": {
+          "additionalProperties": {
+            "$ref": "#/$defs/dominoRunModel"
+          },
+          "title": "Runs",
+          "type": "object"
+        }
+      },
+      "required": [
+        "name",
+        "include",
+        "runs"
+      ],
+      "title": "dominoModel",
+      "type": "object"
+    },
+    "dominoRunModel": {
+      "properties": {
+        "time": {
+          "items": {
+            "type": "number"
+          },
+          "title": "Time",
+          "type": "array"
+        },
+        "module_threshold": {
+          "items": {
+            "anyOf": [
+              {
+                "type": "number"
+              },
+              {
+                "type": "null"
+              }
+            ]
+          },
+          "title": "Module Threshold",
+          "type": "array"
+        },
+        "slice_threshold": {
+          "items": {
+            "anyOf": [
+              {
+                "type": "number"
+              },
+              {
+                "type": "null"
+              }
+            ]
+          },
+          "title": "Slice Threshold",
+          "type": "array"
+        }
+      },
+      "required": [
+        "time",
+        "module_threshold",
+        "slice_threshold"
+      ],
+      "title": "dominoRunModel",
+      "type": "object"
+    },
+    "meoModel": {
+      "properties": {
+        "name": {
+          "const": "meo",
+          "title": "Name",
+          "type": "string"
+        },
+        "include": {
+          "title": "Include",
+          "type": "boolean"
+        },
+        "runs": {
+          "additionalProperties": {
+            "$ref": "#/$defs/meoRunModel"
+          },
+          "title": "Runs",
+          "type": "object"
+        }
+      },
+      "required": [
+        "name",
+        "include",
+        "runs"
+      ],
+      "title": "meoModel",
+      "type": "object"
+    },
+    "meoRunModel": {
+      "properties": {
+        "max_path_length": {
+          "items": {
+            "anyOf": [
+              {
+                "type": "integer"
+              },
+              {
+                "type": "null"
+              }
+            ]
+          },
+          "title": "Max Path Length",
+          "type": "array"
+        },
+        "local_search": {
+          "items": {
+            "anyOf": [
+              {
+                "type": "boolean"
+              },
+              {
+                "type": "null"
+              }
+            ]
+          },
+          "title": "Local Search",
+          "type": "array"
+        },
+        "rand_restarts": {
+          "items": {
+            "anyOf": [
+              {
+                "type": "integer"
+              },
+              {
+                "type": "null"
+              }
+            ]
+          },
+          "title": "Rand Restarts",
+          "type": "array"
+        }
+      },
+      "required": [
+        "max_path_length",
+        "local_search",
+        "rand_restarts"
+      ],
+      "title": "meoRunModel",
+      "type": "object"
+    },
+    "mincostflowModel": {
+      "properties": {
+        "name": {
+          "const": "mincostflow",
+          "title": "Name",
+          "type": "string"
+        },
+        "include": {
+          "title": "Include",
+          "type": "boolean"
+        },
+        "runs": {
+          "additionalProperties": {
+            "$ref": "#/$defs/mincostflowRunModel"
+          },
+          "title": "Runs",
+          "type": "object"
+        }
+      },
+      "required": [
+        "name",
+        "include",
+        "runs"
+      ],
+      "title": "mincostflowModel",
+      "type": "object"
+    },
+    "mincostflowRunModel": {
+      "properties": {
+        "flow": {
+          "items": {
+            "anyOf": [
+              {
+                "type": "number"
+              },
+              {
+                "type": "null"
+              }
+            ]
+          },
+          "title": "Flow",
+          "type": "array"
+        },
+        "capacity": {
+          "items": {
+            "anyOf": [
+              {
+                "type": "number"
+              },
+              {
+                "type": "null"
+              }
+            ]
+          },
+          "title": "Capacity",
+          "type": "array"
+        }
+      },
+      "required": [
+        "flow",
+        "capacity"
+      ],
+      "title": "mincostflowRunModel",
+      "type": "object"
+    },
+    "omicsintegrator1Model": {
+      "properties": {
+        "name": {
+          "const": "omicsintegrator1",
+          "title": "Name",
+          "type": "string"
+        },
+        "include": {
+          "title": "Include",
+          "type": "boolean"
+        },
+        "runs": {
+          "additionalProperties": {
+            "$ref": "#/$defs/omicsintegrator1RunModel"
+          },
+          "title": "Runs",
+          "type": "object"
+        }
+      },
+      "required": [
+        "name",
+        "include",
+        "runs"
+      ],
+      "title": "omicsintegrator1Model",
+      "type": "object"
+    },
+    "omicsintegrator1RunModel": {
+      "properties": {
+        "dummy_mode": {
+          "items": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ]
+          },
+          "title": "Dummy Mode",
+          "type": "array"
+        },
+        "mu_squared": {
+          "items": {
+            "type": "boolean"
+          },
+          "title": "Mu Squared",
+          "type": "array"
+        },
+        "exclude_terms": {
+          "items": {
+            "type": "boolean"
+          },
+          "title": "Exclude Terms",
+          "type": "array"
+        },
+        "noisy_edges": {
+          "items": {
+            "type": "integer"
+          },
+          "title": "Noisy Edges",
+          "type": "array"
+        },
+        "shuffled_prizes": {
+          "items": {
+            "type": "integer"
+          },
+          "title": "Shuffled Prizes",
+          "type": "array"
+        },
+        "random_terminals": {
+          "items": {
+            "type": "integer"
+          },
+          "title": "Random Terminals",
+          "type": "array"
+        },
+        "seed": {
+          "items": {
+            "type": "integer"
+          },
+          "title": "Seed",
+          "type": "array"
+        },
+        "w": {
+          "items": {
+            "type": "integer"
+          },
+          "title": "W",
+          "type": "array"
+        },
+        "b": {
+          "items": {
+            "type": "number"
+          },
+          "title": "B",
+          "type": "array"
+        },
+        "d": {
+          "items": {
+            "type": "integer"
+          },
+          "title": "D",
+          "type": "array"
+        },
+        "mu": {
+          "items": {
+            "anyOf": [
+              {
+                "type": "number"
+              },
+              {
+                "type": "null"
+              }
+            ]
+          },
+          "title": "Mu",
+          "type": "array"
+        },
+        "noise": {
+          "items": {
+            "anyOf": [
+              {
+                "type": "number"
+              },
+              {
+                "type": "null"
+              }
+            ]
+          },
+          "title": "Noise",
+          "type": "array"
+        },
+        "g": {
+          "items": {
+            "anyOf": [
+              {
+                "type": "number"
+              },
+              {
+                "type": "null"
+              }
+            ]
+          },
+          "title": "G",
+          "type": "array"
+        },
+        "r": {
+          "items": {
+            "anyOf": [
+              {
+                "type": "number"
+              },
+              {
+                "type": "null"
+              }
+            ]
+          },
+          "title": "R",
+          "type": "array"
+        }
+      },
+      "required": [
+        "dummy_mode",
+        "mu_squared",
+        "exclude_terms",
+        "noisy_edges",
+        "shuffled_prizes",
+        "random_terminals",
+        "seed",
+        "w",
+        "b",
+        "d",
+        "mu",
+        "noise",
+        "g",
+        "r"
+      ],
+      "title": "omicsintegrator1RunModel",
+      "type": "object"
+    },
+    "omicsintegrator2Model": {
+      "properties": {
+        "name": {
+          "const": "omicsintegrator2",
+          "title": "Name",
+          "type": "string"
+        },
+        "include": {
+          "title": "Include",
+          "type": "boolean"
+        },
+        "runs": {
+          "additionalProperties": {
+            "$ref": "#/$defs/omicsintegrator2RunModel"
+          },
+          "title": "Runs",
+          "type": "object"
+        }
+      },
+      "required": [
+        "name",
+        "include",
+        "runs"
+      ],
+      "title": "omicsintegrator2Model",
+      "type": "object"
+    },
+    "omicsintegrator2RunModel": {
+      "properties": {
+        "w": {
+          "items": {
+            "type": "number"
+          },
+          "title": "W",
+          "type": "array"
+        },
+        "b": {
+          "items": {
+            "type": "number"
+          },
+          "title": "B",
+          "type": "array"
+        },
+        "g": {
+          "items": {
+            "type": "number"
+          },
+          "title": "G",
+          "type": "array"
+        },
+        "noise": {
+          "items": {
+            "anyOf": [
+              {
+                "type": "number"
+              },
+              {
+                "type": "null"
+              }
+            ]
+          },
+          "title": "Noise",
+          "type": "array"
+        },
+        "noisy_edges": {
+          "items": {
+            "anyOf": [
+              {
+                "type": "integer"
+              },
+              {
+                "type": "null"
+              }
+            ]
+          },
+          "title": "Noisy Edges",
+          "type": "array"
+        },
+        "random_terminals": {
+          "items": {
+            "anyOf": [
+              {
+                "type": "integer"
+              },
+              {
+                "type": "null"
+              }
+            ]
+          },
+          "title": "Random Terminals",
+          "type": "array"
+        },
+        "dummy_mode": {
+          "items": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ]
+          },
+          "title": "Dummy Mode",
+          "type": "array"
+        },
+        "seed": {
+          "items": {
+            "type": "integer"
+          },
+          "title": "Seed",
+          "type": "array"
+        }
+      },
+      "required": [
+        "w",
+        "b",
+        "g",
+        "noise",
+        "noisy_edges",
+        "random_terminals",
+        "dummy_mode",
+        "seed"
+      ],
+      "title": "omicsintegrator2RunModel",
+      "type": "object"
+    },
+    "pathlinkerModel": {
+      "properties": {
+        "name": {
+          "const": "pathlinker",
+          "title": "Name",
+          "type": "string"
+        },
+        "include": {
+          "title": "Include",
+          "type": "boolean"
+        },
+        "runs": {
+          "additionalProperties": {
+            "$ref": "#/$defs/pathlinkerRunModel"
+          },
+          "title": "Runs",
+          "type": "object"
+        }
+      },
+      "required": [
+        "name",
+        "include",
+        "runs"
+      ],
+      "title": "pathlinkerModel",
+      "type": "object"
+    },
+    "pathlinkerRunModel": {
+      "properties": {
+        "k": {
+          "items": {
+            "type": "integer"
+          },
+          "title": "K",
+          "type": "array"
+        }
+      },
+      "required": [
+        "k"
+      ],
+      "title": "pathlinkerRunModel",
+      "type": "object"
+    },
+    "rwrModel": {
+      "properties": {
+        "name": {
+          "const": "rwr",
+          "title": "Name",
+          "type": "string"
+        },
+        "include": {
+          "title": "Include",
+          "type": "boolean"
+        },
+        "runs": {
+          "additionalProperties": {
+            "$ref": "#/$defs/rwrRunModel"
+          },
+          "title": "Runs",
+          "type": "object"
+        }
+      },
+      "required": [
+        "name",
+        "include",
+        "runs"
+      ],
+      "title": "rwrModel",
+      "type": "object"
+    },
+    "rwrRunModel": {
+      "properties": {
+        "threshold": {
+          "items": {
+            "type": "integer"
+          },
+          "title": "Threshold",
+          "type": "array"
+        },
+        "alpha": {
+          "items": {
+            "anyOf": [
+              {
+                "type": "number"
+              },
+              {
+                "type": "null"
+              }
+            ]
+          },
+          "title": "Alpha",
+          "type": "array"
+        }
+      },
+      "required": [
+        "threshold",
+        "alpha"
+      ],
+      "title": "rwrRunModel",
+      "type": "object"
+    },
+    "strwrModel": {
+      "properties": {
+        "name": {
+          "const": "strwr",
+          "title": "Name",
+          "type": "string"
+        },
+        "include": {
+          "title": "Include",
+          "type": "boolean"
+        },
+        "runs": {
+          "additionalProperties": {
+            "$ref": "#/$defs/strwrRunModel"
+          },
+          "title": "Runs",
+          "type": "object"
+        }
+      },
+      "required": [
+        "name",
+        "include",
+        "runs"
+      ],
+      "title": "strwrModel",
+      "type": "object"
+    },
+    "strwrRunModel": {
+      "properties": {
+        "threshold": {
+          "items": {
+            "type": "integer"
+          },
+          "title": "Threshold",
+          "type": "array"
+        },
+        "alpha": {
+          "items": {
+            "anyOf": [
+              {
+                "type": "number"
+              },
+              {
+                "type": "null"
+              }
+            ]
+          },
+          "title": "Alpha",
+          "type": "array"
+        }
+      },
+      "required": [
+        "threshold",
+        "alpha"
+      ],
+      "title": "strwrRunModel",
+      "type": "object"
+    }
+  },
+  "additionalProperties": false,
+  "properties": {
+    "containers": {
+      "$ref": "#/$defs/ContainerSettings"
+    },
+    "hash_length": {
+      "default": 7,
+      "description": "The length of the hash used to identify a parameter combination",
+      "title": "Hash Length",
+      "type": "integer"
+    },
+    "algorithms": {
+      "items": {
+        "anyOf": [
+          {
+            "$ref": "#/$defs/allpairsModel"
+          },
+          {
+            "$ref": "#/$defs/bowtiebuilderModel"
+          },
+          {
+            "$ref": "#/$defs/dominoModel"
+          },
+          {
+            "$ref": "#/$defs/meoModel"
+          },
+          {
+            "$ref": "#/$defs/mincostflowModel"
+          },
+          {
+            "$ref": "#/$defs/omicsintegrator1Model"
+          },
+          {
+            "$ref": "#/$defs/omicsintegrator2Model"
+          },
+          {
+            "$ref": "#/$defs/pathlinkerModel"
+          },
+          {
+            "$ref": "#/$defs/rwrModel"
+          },
+          {
+            "$ref": "#/$defs/strwrModel"
+          }
+        ]
+      },
+      "title": "Algorithms",
+      "type": "array"
+    },
+    "datasets": {
+      "items": {
+        "$ref": "#/$defs/Dataset"
+      },
+      "title": "Datasets",
+      "type": "array"
+    },
+    "gold_standards": {
+      "default": [],
+      "items": {
+        "$ref": "#/$defs/GoldStandard"
+      },
+      "title": "Gold Standards",
+      "type": "array"
+    },
+    "analysis": {
+      "$ref": "#/$defs/Analysis",
+      "default": {
+        "summary": {
+          "include": false
+        },
+        "cytoscape": {
+          "include": false
+        },
+        "ml": {
+          "aggregate_per_algorithm": false,
+          "components": 2,
+          "include": false,
+          "labels": true,
+          "linkage": "ward",
+          "metric": "euclidean"
+        },
+        "evaluation": {
+          "aggregate_per_algorithm": false,
+          "include": false
+        }
+      }
+    },
+    "reconstruction_settings": {
+      "$ref": "#/$defs/ReconstructionSettings"
+    }
+  },
+  "required": [
+    "containers",
+    "algorithms",
+    "datasets",
+    "reconstruction_settings"
+  ],
+  "title": "RawConfig",
+  "type": "object"
+}

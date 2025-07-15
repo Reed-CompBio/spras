@@ -23,7 +23,7 @@ from typing import Any
 import numpy as np
 import yaml
 
-from spras.config.container_schema import ProcessedContainerOptions
+from spras.config.container_schema import ProcessedContainerSettings
 from spras.config.schema import Analysis, RawConfig
 from spras.util import NpHashEncoder, hash_params_sha1_base32
 
@@ -66,7 +66,7 @@ class Config:
         # Directory used for storing output
         self.out_dir = parsed_raw_config.reconstruction_settings.locations.reconstruction_dir
         # Container framework used by PRMs. Valid options are "docker", "dsub", and "singularity"
-        self.container_settings = ProcessedContainerOptions.from_container_settings(parsed_raw_config.containers, parsed_raw_config.hash_length)
+        self.container_settings = ProcessedContainerSettings.from_container_settings(parsed_raw_config.containers, parsed_raw_config.hash_length)
         # A Boolean specifying whether to unpack singularity containers. Default is False
         self.unpack_singularity = False
         # A dictionary to store configured datasets against which SPRAS will be run

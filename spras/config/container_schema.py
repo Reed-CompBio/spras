@@ -31,17 +31,17 @@ class ContainerSettings(BaseModel):
     framework: ContainerFramework = ContainerFramework.docker
     unpack_singularity: bool = False
     registry: ContainerRegistry
-    hash_length: Optional[int] = None
+    hash_length: int = 7
 
 @dataclass
-class ProcessedContainerOptions:
-    container_framework: ContainerFramework
-    unpack_singularity: bool
-    container_prefix: str
-    hash_length: int
+class ProcessedContainerSettings:
+    framework: ContainerFramework = ContainerFramework.docker
+    unpack_singularity: bool = False
+    prefix: str = DEFAULT_CONTAINER_PREFIX
+    hash_length: int = 7
 
     @staticmethod
-    def from_container_settings(settings: ContainerSettings, default_hash_length: int) -> "ProcessedContainerOptions":
+    def from_container_settings(settings: ContainerSettings, default_hash_length: int) -> "ProcessedContainerSettings":
         if settings.framework == ContainerFramework.dsub:
             warnings.warn("'dsub' framework integration is experimental and may not be fully supported.", stacklevel=2)
         container_framework = settings.framework
@@ -56,9 +56,9 @@ class ProcessedContainerOptions:
         if settings.registry and settings.registry.base_url != "" and settings.registry.owner != "":
             container_prefix = settings.registry.base_url + "/" + settings.registry.owner
         
-        return ProcessedContainerOptions(
-            container_framework=container_framework,
+        return ProcessedContainerSettings(
+            framework=container_framework,
             unpack_singularity=unpack_singularity,
-            container_prefix=container_prefix,
+            prefix=container_prefix,
             hash_length=settings.hash_length or default_hash_length
         )
