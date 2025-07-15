@@ -130,14 +130,17 @@ class Evaluation:
                 plt.ylabel("Precision")
                 plt.xlim(-0.05, 1.05)
                 plt.ylim(-0.05, 1.05)
-                # TODO make agg vs ensembled pca chosen title
-                plt.title("PCA Chosen Precision and Recall Plot")
+                if "per-algorithm" in output_png:
+                    plt.title("PCA Chosen Pathway Per Algorithm Precision and Recall Plot")
+                else:
+                    plt.title("PCA Chosen Pathway Precision and Recall Plot")
                 plt.legend()
                 plt.grid(True)
                 plt.savefig(output_png)
                 plt.close()
         else:
             # Edge Case: if all algorithms chosen use only 1 parameter combination
+            # TODO: once functions are seperated, update to be a warning
             pr_df = pd.DataFrame(columns=["Pathway", "Precision", "Recall"])
             pr_df.to_csv(output_file, sep="\t", index=False, )
             if output_png is not None:
