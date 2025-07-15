@@ -164,47 +164,19 @@ class Config:
                 # Do not parse the rest of the parameters for this algorithm if it is not included
                 continue
 
-            if cur_params.directed is not None:
-                warnings.warn("UPDATE: we no longer use the directed key in the config file", stacklevel=2)
-
-            cur_params = cur_params.__pydantic_extra__
-            if cur_params is None:
-                raise RuntimeError("An internal error occured: ConfigDict extra should be set on AlgorithmParams.")
-
-            # The algorithm has no named arguments so create a default placeholder
-            if len(cur_params.keys()) == 0:
-                cur_params["run1"] = {"spras_placeholder": ["no parameters"]}
+            runs: dict[str, Any] = cur_params.runs
 
             # Each set of runs should be 1 level down in the config file
-            for run_params in cur_params:
+            for run_name in runs.keys():
                 all_runs = []
 
                 # We create the product of all param combinations for each run
                 param_name_list = []
-                if cur_params[run_params]:
-                    for p in cur_params[run_params]:
-                        param_name_list.append(p)
-                        obj = str(cur_params[run_params][p])
-                        try:
-                            obj = [int(obj)]
-                        except ValueError:
-                            try:
-                                obj = [float(obj)]
-                            except ValueError:
-                                # Handles arrays and special evaluation types
-                                # TODO: do we want to explicitly bar `eval` if we may use untrusted user inputs later?
-                                if obj.startswith(("range", "np.linspace", "np.arange", "np.logspace", "[")):
-                                    obj = eval(obj)
-                                elif obj.lower() == "true":
-                                    obj = [True]
-                                elif obj.lower() == "false":
-                                    obj = [False]
-                                else:
-                                    # Catch-all for strings
-                                    obj = [obj]
-                            if not isinstance(obj, Iterable):
-                                raise ValueError(f"The object `{obj}` in algorithm {alg.name} at key '{p}' in run '{run_params}' is not iterable!") from None
-                        all_runs.append(obj)
+                for param in runs[run_name]:
+                    param_name_list.append(param)
+                    # this is guaranteed to be list[Any] by algorithms.py
+                    param_values: list[Any] = runs[run_name][param]
+                    all_runs.append(param_values)
                 run_list_tuples = list(it.product(*all_runs))
                 param_name_tuple = tuple(param_name_list)
                 for r in run_list_tuples:
