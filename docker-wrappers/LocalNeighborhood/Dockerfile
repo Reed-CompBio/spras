@@ -1,6 +1,6 @@
 # Create a Docker image for the Local Neighborhood algorithm here
 
-FROM python:3.9-slim
+FROM python:3.9-alpine
 
 # Set the working directory inside the container.
 # This is where your local_neighborhood.py script and any inputs will be placed.

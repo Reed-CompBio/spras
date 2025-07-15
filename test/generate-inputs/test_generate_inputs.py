@@ -6,8 +6,8 @@ import yaml
 
 from spras import runner
 
-OUTDIR = "test/generate-inputs/output/"
-EXPDIR = "test/generate-inputs/expected/"
+OUTDIR_RELATIVE = "output/"
+EXPDIR_RELATIVE = "expected/"
 
 algo_exp_file = {
     'mincostflow': 'edges',
@@ -22,28 +22,51 @@ algo_exp_file = {
 
 
 class TestGenerateInputs:
+    # Define class variables here, which will be populated in setup_class
+    PROJECT_ROOT = None
+    OUTDIR_ABS = None
+    EXPDIR_ABS = None
+
     @classmethod
     def setup_class(cls):
         """
-        Create the expected output directory
+        Create the expected output directory using absolute paths.
         """
-        Path(OUTDIR).mkdir(parents=True, exist_ok=True)
+        # Get the absolute path to the project root
+        cls.PROJECT_ROOT = Path(__file__).parent.parent.parent.resolve()
+        
+        # Construct absolute paths for OUTDIR and EXPDIR
+        cls.OUTDIR_ABS = cls.PROJECT_ROOT / "test" / "generate-inputs" / OUTDIR_RELATIVE
+        cls.EXPDIR_ABS = cls.PROJECT_ROOT / "test" / "generate-inputs" / EXPDIR_RELATIVE
+
+        try:
+            cls.OUTDIR_ABS.mkdir(parents=True, exist_ok=True)
+        except Exception as e:
+            print(f"Error during directory creation for {cls.OUTDIR_ABS}: {e}")
+            raise
 
     def test_prepare_inputs_networks(self):
-        config_loc = os.path.join("test", "generate-inputs", "inputs", "test_config.yaml")
+        # Access class variables using cls.
+        config_loc = self.PROJECT_ROOT / "test" / "generate-inputs" / "inputs" / "test_config.yaml"
+        test_file = self.OUTDIR_ABS / "test_pickled_dataset.pkl" # Use OUTDIR_ABS for output file path
 
         with open(config_loc) as config_file:
             config = yaml.load(config_file, Loader=yaml.FullLoader)
-        test_file = "test/generate-inputs/output/test_pickled_dataset.pkl"
-
+        
         test_dataset = next((ds for ds in config["datasets"] if ds["label"] == "test_data"), None)
         runner.merge_input(test_dataset, test_file)
 
         for algo in algo_exp_file.keys():
             inputs = runner.get_required_inputs(algo)
-            filename_map = {input_str: os.path.join("test", "generate-inputs", "output", f"{algo}-{input_str}.txt")
+            
+            # Construct filename_map with absolute paths for the output files
+            filename_map = {input_str: self.OUTDIR_ABS / f"{algo}-{input_str}.txt"
                             for input_str in inputs}
+
             runner.prepare_inputs(algo, test_file, filename_map)
             exp_file_name = algo_exp_file[algo]
-            assert filecmp.cmp(OUTDIR + f"{algo}-{exp_file_name}.txt", EXPDIR + f"{algo}-{exp_file_name}-expected.txt",
+            
+            # Compare using absolute paths
+            assert filecmp.cmp(self.OUTDIR_ABS / f"{algo}-{exp_file_name}.txt",
+                               self.EXPDIR_ABS / f"{algo}-{exp_file_name}-expected.txt",
                                shallow=False)

@@ -56,13 +56,7 @@ jobs:
       uses: eWaterCycle/setup-apptainer@v2
       with:
         # Choose version from https://github.com/apptainer/apptainer/releases
-        apptainer-version: 1.3.6
-      # --- NEW: Pull Local Neighborhood Image from Docker Hub ---
-    - name: Pull Local Neighborhood Image  
-      run: docker pull caneklm/local-neighborhood:latest 
-      # --- NEW: Build Local Neighborhood Image from Dockerfile ---
-    - name: Build Local Neighborhood Image
-      run: docker build -t caneklm/local-neighborhood:latest docker-wrappers/LocalNeighborhood
+        apptainer-version: 1.3.6      
     - name: Run tests
       shell: bash --login {0}
       # Verbose output and disable stdout and stderr capturing
