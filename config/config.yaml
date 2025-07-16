@@ -115,7 +115,7 @@ algorithms:
   - name: "bowtiebuilder"
     params:
       include: true
-  
+
   - name: "must"
     params:
       include: true
