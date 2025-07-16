@@ -7,6 +7,7 @@ from spras.dataset import Dataset
 from spras.domino import DOMINO as domino
 from spras.meo import MEO as meo
 from spras.mincostflow import MinCostFlow as mincostflow
+from spras.must import MuST as must
 from spras.omicsintegrator1 import OmicsIntegrator1 as omicsintegrator1
 from spras.omicsintegrator2 import OmicsIntegrator2 as omicsintegrator2
 from spras.pathlinker import PathLinker as pathlinker

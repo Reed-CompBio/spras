@@ -1,0 +1,5 @@
+srcNode	targetNode	participation_number
+A	B	1
+B	C	2
+A	B	1
+B	C	2
