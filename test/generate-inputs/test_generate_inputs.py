@@ -19,7 +19,8 @@ algo_exp_file = {
     'allpairs': 'network',
     'bowtiebuilder': 'edges',
     'strwr': 'network',
-    'rwr': 'network'
+    'rwr': 'network',
+    'must': 'network'
 }
 
 
