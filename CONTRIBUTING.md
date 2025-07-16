@@ -110,6 +110,9 @@ Use `pathlinker.py` as an example.
 Call the new class within `local_neighborhood.py` `LocalNeighborhood` and set `__all__` so the class can be [imported](https://docs.python.org/3/tutorial/modules.html#importing-from-a-package).
 Specify the list of `required_input` files to be `network` and `nodes`.
 These entries are used to tell Snakemake what input files should be present before running the Local Neighborhood algorithm.
+You also need to implement an `args` class with pydantic. Since `LocalNeighborhood`
+takes no additional arguments, use the `Empty` arguments class (see `AllPairs` for an example), and make sure to specify it as a generic when writing a PRM class. This means your
+class declaration should look something like `class LocalNeighborhood(PRM[Empty]):`
 
 Before implementing the `generate_inputs` function, explore the structure of the `Dataset` class interactively.
 In an interactive Python session, run the following commands to load the `data0` dataset and explore the nodes and interactome.
