@@ -46,9 +46,9 @@ class MuST(PRM):
         @param seeds: input seeds with concatenated sources and targets (required)
         @param network: input network file (required)
         @param output_file: path to the output pathway file (required)
-        @param hub_penalty: Specify hub penality between 0.0 and 1.0. If none is specified, there will be no hub penalty 
-        @param max_iterations: The maximum number of iterations is defined as nrOfTrees + x. This is x, an integer between 0 and 20. Default: 10 
-        @param no_largest_cc: Choose this option if you do not want to work with only the largest connected component 
+        @param hub_penalty: Specify hub penality between 0.0 and 1.0. If none is specified, there will be no hub penalty
+        @param max_iterations: The maximum number of iterations is defined as nrOfTrees + x. This is x, an integer between 0 and 20. Default: 10
+        @param no_largest_cc: Choose this option if you do not want to work with only the largest connected component
         @param container_framework: choose the container runtime framework, currently supports "docker" or "singularity" (optional)
         """
         # We don't use the flags multiple or trees, because we do not support multiple results yet.
@@ -79,7 +79,7 @@ class MuST(PRM):
                    '--network', network_file,
                    '--outedges', mapped_out_file,
                    # We can use the nodes file for visualization later,
-                   # but it's not useful to us as of now.    
+                   # but it's not useful to us as of now.
                    '--outnodes', '/MuST/nodes-artifact.txt']
 
         if hub_penalty is not None:
