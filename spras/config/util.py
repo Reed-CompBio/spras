@@ -34,21 +34,3 @@ class Empty(BaseModel):
     yet are deterministic.
     """
     model_config = ConfigDict(extra="forbid")
-
-class NondeterministicModel(BaseModel):
-    """
-    A nondeterministic model. Any seedless nondeterministic algorithm should extend this.
-    Internally, this inserts a _time parameter that can be serialized but not
-    deserialized, and will affect the hash.
-    """
-
-    # We don't make this a PrivateAttr for reasons explained in the doc comment.
-    time: float = Field(default_factory=time.time, alias="_time")
-    """
-    The internal _time parameter. This is a parameter only given to nondeterminsitic
-    algorithms that provide no randomness seed. While this should be unset,
-    we allow specifying `_time` for users that want to re-use outputs of runs,
-    though this explicitly breaks the 'immutability' promise of runs.
-    """
-
-    model_config = ConfigDict(use_attribute_docstrings=True)

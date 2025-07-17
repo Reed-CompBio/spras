@@ -54,8 +54,8 @@ class OmicsIntegrator1Params(BaseModel):
     random_terminals: int = 0
     "How many times to apply the given prizes to random nodes in the interactome"
 
-    seed: int = Field(default_factory=lambda _: int(time.time() * 1000))
-    "The random seed to use for this run. Defaults to the current UNIX timestamp."
+    seed: Optional[int] = None
+    "The random seed to use for this run."
 
     w: int
     "the number of trees"
@@ -198,7 +198,7 @@ class OmicsIntegrator1(PRM[OmicsIntegrator1Params]):
         if args.dummy_mode is not None and args.dummy_mode:
             # for custom dummy modes, add the file
             if args.dummy_mode == 'file':
-                command.extend(['--dummyMode', str(inputs["dummy_file"])])
+                command.extend(['--dummyMode', str(inputs["dummy_nodes"])])
             # else pass in the dummy_mode and let oi1 handle it
             else:
                 command.extend(['--dummyMode', args.dummy_mode])
@@ -211,7 +211,8 @@ class OmicsIntegrator1(PRM[OmicsIntegrator1Params]):
         command.extend(['--noisyEdges', str(args.noisy_edges)])
         command.extend(['--shuffledPrizes', str(args.shuffled_prizes)])
         command.extend(['--randomTerminals', str(args.random_terminals)])
-        command.extend(['--seed', str(args.seed)])
+        if args.seed is not None:
+            command.extend(['--seed', str(args.seed)])
 
         container_suffix = "omics-integrator-1:no-conda" # no-conda version is the default
         run_container_and_log('Omics Integrator 1',

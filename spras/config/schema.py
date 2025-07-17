@@ -117,23 +117,6 @@ class ReconstructionSettings(BaseModel):
     model_config = ConfigDict(extra='forbid')
 
 class RawConfig(BaseModel):
-    resume: bool = Field(alias="_resume", default=False)
-    """
-    Declares whether a config has resumability. This is meant to be used internally, as it
-    enforces some extra preconditions on the config (such that all defaults must be explicitly
-    declared within the config, and that it meets the specified hash).
-
-    Unlike their nonresumable counterparts, these resumable configurations will store all configuration
-    defaults (including, most importantly, _time from NondeterministicModel and any seeded values).
-
-    Resumable configurations are generated whenever a non-resumable configuration is run, inside
-    `{output}/resumables/{hash}.yaml`. The timestamp is present only for file ordering, and {hash} is a hash
-    of the configuration _excluding_ default values.
-
-    By default, SPRAS runs through Snakemake will generate a resumable configuration if none is present,
-    or reuse the configuration associated with its hash otherwise.
-    """
-
     containers: ContainerSettings
 
     hash_length: int = DEFAULT_HASH_LENGTH

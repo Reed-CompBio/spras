@@ -47,8 +47,8 @@ class OmicsIntegrator2Params(BaseModel):
         "all" = connect to all nodes in the interactome.
     """
 
-    seed: int = Field(default_factory=lambda _: int(time.time() * 1000))
-    "The random seed to use for this run. Defaults to the current UNIX timestamp."
+    seed: Optional[int] = None
+    "The random seed to use for this run."
 
     model_config = ConfigDict(extra='forbid', use_attribute_docstrings=True)
 
@@ -161,7 +161,8 @@ class OmicsIntegrator2(PRM[OmicsIntegrator2Params]):
         if args.dummy_mode is not None:
             # This argument does not follow the other naming conventions
             command.extend(['--dummyMode', str(args.dummy_mode)])
-        command.extend(['--seed', str(args.seed)])
+        if args.seed is not None:
+            command.extend(['--seed', str(args.seed)])
 
         container_suffix = "omics-integrator-2:v2"
         run_container_and_log('Omics Integrator 2',
