@@ -65,7 +65,6 @@ class OmicsIntegrator2(PRM):
 
     # TODO add parameter validation
     # TODO add reasonable default values
-    # TODO document required arguments
     @staticmethod
     def run(edges=None, prizes=None, output_file=None, w=None, b=None, g=None, noise=None, noisy_edges=None,
             random_terminals=None, dummy_mode=None, seed=None, container_framework="docker"):
@@ -74,6 +73,17 @@ class OmicsIntegrator2(PRM):
         Only the .tsv output file is retained and then renamed.
         All other output files are deleted.
         @param output_file: the name of the output file, which will overwrite any existing file with this name
+        @param w: Omega: the weight of the edges connecting the dummy node to the nodes selected by dummyMode (default: 6)
+        @param b: Beta: scaling factor of prizes (default: 1)
+        @param g: Gamma: multiplicative edge penalty from degree of endpoints (default: 20)
+        @param noise: Standard Deviation of the gaussian noise added to edges in Noisy Edges Randomizations.
+        @param noisy_edges: An integer specifying how many times to add noise to the given edge values and re-run.
+        @param random_terminals: An integer specifying how many times to apply your given prizes to random nodes in the interactome and re-run
+        @param dummy_mode: Tells the program which nodes in the interactome to connect the dummy node to. (default: terminals)
+            "terminals" = connect to all terminals
+            "others" = connect to all nodes except for terminals
+            "all" = connect to all nodes in the interactome.
+        @param seed: The random seed to use for this run.
         @param container_framework: choose the container runtime framework, currently supports "docker" or "singularity" (optional)
         """
         if edges is None or prizes is None or output_file is None:
