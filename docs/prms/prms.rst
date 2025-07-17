@@ -14,6 +14,12 @@ Pathway Reconstruction Methods
 
 .. toctree::
    :maxdepth: 1
+   :caption: BowTieBuilder
+
+   bowtiebuilder
+
+.. toctree::
+   :maxdepth: 1
    :caption: DOMINO
 
    domino
@@ -47,3 +53,15 @@ Pathway Reconstruction Methods
    :caption: PathLinker
 
    pathlinker
+
+.. toctree::
+   :maxdepth: 1
+   :caption: RWR
+
+   rwr
+
+.. toctree::
+   :maxdepth: 1
+   :caption: STRWR
+
+   strwr
