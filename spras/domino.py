@@ -161,7 +161,7 @@ class DOMINO(PRM):
         Path(network + '.pkl').unlink(missing_ok=True)
 
     @staticmethod
-    def parse_output(raw_pathway_file, standardized_pathway_file):
+    def parse_output(raw_pathway_file, standardized_pathway_file, params):
         """
         Convert the merged HTML modules into the universal pathway format
         @param raw_pathway_file: the merged HTML modules file
@@ -188,8 +188,10 @@ class DOMINO(PRM):
                     # columns that indicate edges
                     # Dropping the other rows eliminates the node information
                     module_df = pd.DataFrame(entries)
-                    module_df = module_df.loc[:, ['source', 'target']].dropna()
-
+                    try:
+                        module_df = module_df.loc[:, ['source', 'target']].dropna()
+                    except KeyError:
+                        module_df = pd.DataFrame()
                     # Add the edges from this module to the cumulative pathway edges
                     edges_df = pd.concat([edges_df, module_df], axis=0)
 

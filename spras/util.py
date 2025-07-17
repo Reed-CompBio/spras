@@ -94,6 +94,9 @@ def raw_pathway_df(raw_pathway_file: str, sep: str = '\t', header: int = None) -
     """
     try:
         df = pd.read_csv(raw_pathway_file, sep=sep, header=header)
+        if df.empty:
+            # Columns are present but there is no data to parse.
+            df = pd.DataFrame(columns=['Node1', 'Node2', 'Rank', 'Direction'])
     except pd.errors.EmptyDataError:  # read an empty file
         df = pd.DataFrame(columns=['Node1', 'Node2', 'Rank', 'Direction'])
 
