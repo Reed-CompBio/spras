@@ -1,27 +1,48 @@
-from typing import Any
+from typing import Any, Optional
+
+from pydantic import BaseModel
 
 # supported algorithm imports
-from spras.allpairs import AllPairs as allpairs
-from spras.btb import BowTieBuilder as bowtiebuilder
+from spras.allpairs import AllPairs
+from spras.btb import BowTieBuilder
+from spras.config.util import Empty
 from spras.dataset import Dataset
-from spras.domino import DOMINO as domino
-from spras.meo import MEO as meo
-from spras.mincostflow import MinCostFlow as mincostflow
-from spras.omicsintegrator1 import OmicsIntegrator1 as omicsintegrator1
-from spras.omicsintegrator2 import OmicsIntegrator2 as omicsintegrator2
-from spras.pathlinker import PathLinker as pathlinker
-from spras.rwr import RWR as rwr
-from spras.strwr import ST_RWR as strwr
+from spras.domino import DOMINO, DominoParams
+from spras.meo import MEO, MEOParams
+from spras.mincostflow import MinCostFlow, MinCostFlowParams
+from spras.omicsintegrator1 import OmicsIntegrator1, OmicsIntegrator1Params
+from spras.omicsintegrator2 import OmicsIntegrator2, OmicsIntegrator2Params
+from spras.pathlinker import PathLinker, PathLinkerParams
+from spras.prm import PRM
+from spras.rwr import RWR, RWRParams
+from spras.strwr import ST_RWR, ST_RWRParams
 
+# Algorithm names to a three-tuple of (PRM, BaseModel, default BaseModel or None if there are no good defaults).
+# This is used for the configuration and to fetch algorithms during reconstruction
+algorithms: dict[str, tuple[type[PRM], type[BaseModel], Optional[BaseModel]]] = {
+    "allpairs": (AllPairs, Empty, Empty()),
+    "bowtiebuilder": (BowTieBuilder, Empty, Empty()),
+    "domino": (DOMINO, DominoParams, DominoParams()),
+    "meo": (MEO, MEOParams, MEOParams()),
+    "mincostflow": (MinCostFlow, MinCostFlowParams, MinCostFlowParams()),
+    "omicsintegrator1": (OmicsIntegrator1, OmicsIntegrator1Params, None),
+    "omicsintegrator2": (OmicsIntegrator2, OmicsIntegrator2Params, OmicsIntegrator2Params()),
+    "pathlinker": (PathLinker, PathLinkerParams, PathLinkerParams()),
+    "rwr": (RWR, RWRParams, None),
+    "strwr": (ST_RWR, ST_RWRParams, None),
+}
+
+def get_algorithm(algorithm: str) -> type[PRM]:
+    try:
+        return algorithms[algorithm.lower()][0]
+    except KeyError as exc:
+        raise NotImplementedError(f'{algorithm} is not currently supported.') from exc
 
 def run(algorithm: str, params):
     """
     A generic interface to the algorithm-specific run functions
     """
-    try:
-        algorithm_runner = globals()[algorithm.lower()]
-    except KeyError as exc:
-        raise NotImplementedError(f'{algorithm} is not currently supported') from exc
+    algorithm_runner = get_algorithm(algorithm)
     algorithm_runner.run(**params)
 
 
@@ -31,10 +52,7 @@ def get_required_inputs(algorithm: str):
     @param algorithm: algorithm name
     @return: A list of strings of input files types
     """
-    try:
-        algorithm_runner = globals()[algorithm.lower()]
-    except KeyError as exc:
-        raise NotImplementedError(f'{algorithm} is not currently supported') from exc
+    algorithm_runner = get_algorithm(algorithm)
     return algorithm_runner.required_inputs
 
 
@@ -57,10 +75,7 @@ def prepare_inputs(algorithm: str, data_file: str, filename_map: dict[str, str])
     @return:
     """
     dataset = Dataset.from_file(data_file)
-    try:
-        algorithm_runner = globals()[algorithm.lower()]
-    except KeyError as exc:
-        raise NotImplementedError(f'{algorithm} is not currently supported') from exc
+    algorithm_runner = get_algorithm(algorithm)
     return algorithm_runner.generate_inputs(dataset, filename_map)
 
 
@@ -71,8 +86,5 @@ def parse_output(algorithm: str, raw_pathway_file: str, standardized_pathway_fil
     @param raw_pathway_file: pathway file produced by an algorithm's run function
     @param standardized_pathway_file: the same pathway written in the universal format
     """
-    try:
-        algorithm_runner = globals()[algorithm.lower()]
-    except KeyError as exc:
-        raise NotImplementedError(f'{algorithm} is not currently supported') from exc
+    algorithm_runner = get_algorithm(algorithm)
     return algorithm_runner.parse_output(raw_pathway_file, standardized_pathway_file, params)

@@ -2,7 +2,7 @@ from pathlib import Path
 
 import pytest
 
-import spras.config as config
+import spras.config.config as config
 from spras.analysis.cytoscape import run_cytoscape
 
 config.init_from_file("test/analysis/input/config.yaml")

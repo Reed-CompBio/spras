@@ -2,7 +2,7 @@ from pathlib import PurePosixPath, PureWindowsPath
 
 import pytest
 
-import spras.config as config
+import spras.config.config as config
 from spras.containers import convert_docker_path, prepare_path_docker, prepare_volume
 from spras.util import hash_params_sha1_base32
 
