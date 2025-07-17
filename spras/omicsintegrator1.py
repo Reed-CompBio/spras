@@ -166,6 +166,7 @@ class OmicsIntegrator1(PRM[OmicsIntegrator1Params]):
         #   4. file -> connect the dummy node to a specific list of nodes provided in a file
 
         # add dummy node file to the volume if dummy_mode is not None and it is 'file'
+        dummy_file = None
         if args.dummy_mode == 'file':
             if inputs["dummy_nodes"] is None:
                 raise ValueError("dummy_nodes file is required when dummy_mode is set to 'file'")
@@ -197,8 +198,8 @@ class OmicsIntegrator1(PRM[OmicsIntegrator1Params]):
         # add the dummy mode argument
         if args.dummy_mode is not None and args.dummy_mode:
             # for custom dummy modes, add the file
-            if args.dummy_mode == 'file':
-                command.extend(['--dummyMode', str(inputs["dummy_nodes"])])
+            if dummy_file:
+                command.extend(['--dummyMode', dummy_file])
             # else pass in the dummy_mode and let oi1 handle it
             else:
                 command.extend(['--dummyMode', args.dummy_mode])
