@@ -17,10 +17,15 @@ from pydantic import AfterValidator, BaseModel, ConfigDict, Field
 
 from spras.config.util import CaseInsensitiveEnum
 
+# Most options here have an `include` property,
+# which is meant to make disabling parts of the configuration easier.
+# When an option does not have a default, it means that it must be set by the user.
 
 class SummaryAnalysis(BaseModel):
     include: bool
 
+    # We prefer to never allow extra keys, to prevent
+    # any user mistypes.
     model_config = ConfigDict(extra='forbid')
 
 class CytoscapeAnalysis(BaseModel):
@@ -28,6 +33,9 @@ class CytoscapeAnalysis(BaseModel):
 
     model_config = ConfigDict(extra='forbid')
 
+# Note that CaseInsensitiveEnum is not pydantic: pydantic
+# has special support for enums, but we avoid the
+# pydantic-specific "model_config" key here for this reason.
 class MlLinkage(CaseInsensitiveEnum):
     ward = 'ward'
     complete = 'complete'
@@ -68,6 +76,10 @@ class Analysis(BaseModel):
 DEFAULT_HASH_LENGTH = 7
 
 def label_validator(name: str):
+    """
+    A validator takes in a label
+    and ensure that it's alphanumeric (with underscores).
+    """
     label_pattern = r'^\w+$'
     def validate(label: str):
         if not bool(re.match(label_pattern, label)):
@@ -103,6 +115,9 @@ class Algorithm(BaseModel):
     model_config = ConfigDict(extra='forbid')
 
 class Dataset(BaseModel):
+    # We prefer AfterValidator here to allow pydantic to run its own
+    # validation & coercion logic before we check it against our own
+    # requirements
     label: Annotated[str, AfterValidator(label_validator("Dataset"))]
     node_files: list[str]
     edge_files: list[str]
@@ -124,6 +139,7 @@ class Locations(BaseModel):
 
     model_config = ConfigDict(extra='forbid')
 
+# NOTE: This setting doesn't have any uses past setting the output_dir as of now.
 class ReconstructionSettings(BaseModel):
     locations: Locations
 
@@ -135,9 +151,8 @@ class RawConfig(BaseModel):
     unpack_singularity: bool = False
     container_registry: ContainerRegistry
 
-    hash_length: int = Field(
-        description="The length of the hash used to identify a parameter combination",
-        default=DEFAULT_HASH_LENGTH)
+    hash_length: int = DEFAULT_HASH_LENGTH
+    "The length of the hash used to identify a parameter combination"
 
     algorithms: list[Algorithm]
     datasets: list[Dataset]
@@ -146,4 +161,6 @@ class RawConfig(BaseModel):
 
     reconstruction_settings: ReconstructionSettings
 
-    model_config = ConfigDict(extra='forbid')
+    # We include use_attribute_docstrings here to preserve the docstrings
+    # after attributes at runtime (for future JSON schema generation)
+    model_config = ConfigDict(extra='forbid', use_attribute_docstrings=True)
