@@ -2,14 +2,15 @@ import os
 from pathlib import Path
 
 import pandas as pd
+import subprocess
 
 from spras.containers import prepare_volume, run_container
 from spras.util import (
     add_rank_column,
     duplicate_edges,
-    raw_columns_df,
-    reinsert_direction_col_undirected,
 )
+from spras.prm import PRM
+from spras.interactome import reinsert_direction_col_undirected
 
 # setting __all__ so SPRAS can automatically import this wrapper
 __all__ = ["LocalNeighborhood"]
@@ -108,8 +109,6 @@ class LocalNeighborhood:
         )
         print(out)
 
-
-
     @staticmethod
     def parse_output(raw_output_file, parsed_output_file):
         """
@@ -118,7 +117,7 @@ class LocalNeighborhood:
         Output: tab-separated file with columns node1, node2, rank, direction
         """
         # Read the raw output file
-        edge_df = raw_columns_df(raw_output_file, sep = '|', columns=['Node1', 'Node2'])
+        edge_df = raw_output_file(raw_output_file, sep = '|', columns=['Node1', 'Node2'])
 
 
         # Add rank and direction columns
