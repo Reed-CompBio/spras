@@ -105,7 +105,7 @@ class ResponseNet(PRM):
                     '--gamma', str(gamma)]
 
         # choosing to run in docker or singularity container
-        container_suffix = "responsenet:latest"
+        container_suffix = "responsenet:v2"
 
         # constructs a docker run call
         run_container_and_log('ResponseNet',
