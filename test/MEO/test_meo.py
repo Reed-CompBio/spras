@@ -3,7 +3,7 @@ from pathlib import Path
 
 import pytest
 
-import spras.config as config
+import spras.config.config as config
 from spras.meo import MEO, write_properties
 
 config.init_from_file("config/config.yaml")
