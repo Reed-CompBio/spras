@@ -1,5 +1,5 @@
 Name	Number of nodes	Number of edges	Number of connected components	Nodes in prize	Nodes in active	Nodes in dummy	Nodes in sources	Nodes in targets	Parameter combination
-test/analysis/input/example/data0-allpairs-params-BEH6YB2_pathway.txt	3	2	1	2	2	1	1	1	{'spras_placeholder': 'no parameters'}
+test/analysis/input/example/data0-allpairs-params-BEH6YB2_pathway.txt	3	2	1	2	2	1	1	1	{}
 test/analysis/input/example/data0-domino-params-V3X4RW7_pathway.txt	0	0	0	0	0	0	0	0	{'slice_threshold': 0.3, 'module_threshold': 0.05}
 test/analysis/input/example/data0-meo-params-GKEDDFZ_pathway.txt	3	2	1	2	2	1	1	1	{'max_path_length': 3, 'local_search': 'Yes', 'rand_restarts': 10}
 test/analysis/input/example/data0-mincostflow-params-SZPZVU6_pathway.txt	3	2	1	2	2	1	1	1	{'flow': 1, 'capacity': 1}

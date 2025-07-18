@@ -5,7 +5,7 @@ import yaml
 from spras.dataset import Dataset
 from spras.evaluation import Evaluation
 from spras.analysis import ml, summary, cytoscape
-import spras.config as _config
+import spras.config.config as _config
 
 # Snakemake updated the behavior in the 6.5.0 release https://github.com/snakemake/snakemake/pull/1037
 # and using the wrong separator prevents Snakemake from matching filenames to the rules that can produce them
@@ -25,7 +25,7 @@ algorithm_params = _config.config.algorithm_params
 algorithm_directed = _config.config.algorithm_directed
 pca_params = _config.config.pca_params
 hac_params = _config.config.hac_params
-FRAMEWORK = _config.config.container_framework
+FRAMEWORK = _config.config.container_settings.framework
 
 # Return the dataset or gold_standard dictionary from the config file given the label
 def get_dataset(_datasets, label):
@@ -254,16 +254,12 @@ rule reconstruct:
     run:
         # Create a copy so that the updates are not written to the parameters logfile
         params = reconstruction_params(wildcards.algorithm, wildcards.params).copy()
-        # Add the input files
-        params.update(dict(zip(runner.get_required_inputs(wildcards.algorithm), *{input}, strict=True)))
-        # Add the output file
-        # All run functions can accept a relative path to the output file that should be written that is called 'output_file'
-        params['output_file'] = output.pathway_file
-        # Remove the default placeholder parameter added for algorithms that have no parameters
-        if 'spras_placeholder' in params:
-            params.pop('spras_placeholder')
-        params['container_framework'] = FRAMEWORK
-        runner.run(wildcards.algorithm, params)
+        # Declare the input files as a dictionary.
+        inputs = dict(zip(runner.get_required_inputs(wildcards.algorithm), *{input}, strict=True))
+        # Remove the _spras_run_name parameter added for keeping track of the run name for parameters.yml
+        if '_spras_run_name' in params:
+            params.pop('_spras_run_name')
+        runner.run(wildcards.algorithm, inputs, output.pathway_file, params, _config.config.container_settings)
 
 # Original pathway reconstruction output to universal output
 # Use PRRunner as a wrapper to call the algorithm-specific parse_output
