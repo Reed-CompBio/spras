@@ -108,7 +108,7 @@ Add a new Python file `spras/local_neighborhood.py` to implement the wrapper fun
 Use `pathlinker.py` as an example.
 
 Call the new class within `local_neighborhood.py` `LocalNeighborhood` and set `__all__` so the class can be [imported](https://docs.python.org/3/tutorial/modules.html#importing-from-a-package).
-Specify the list of `required_input` files to be `network` and `nodes`.
+Specify the list of `required_input` files to be `network` and `nodes`, and set the `dois` property to be explicitly empty.
 These entries are used to tell Snakemake what input files should be present before running the Local Neighborhood algorithm.
 
 Before implementing the `generate_inputs` function, explore the structure of the `Dataset` class interactively.
