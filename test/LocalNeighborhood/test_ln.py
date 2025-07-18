@@ -1,17 +1,17 @@
+import platform
 import sys
+import warnings
 from filecmp import cmp
 from pathlib import Path
-import warnings 
 
 import pytest
-import platform
 
 import spras.config as config
 
 config.init_from_file("config/config.yaml")
 
-from spras.local_neighborhood import LocalNeighborhood
 from spras.containers import run_container_docker
+from spras.local_neighborhood import LocalNeighborhood
 
 TEST_DIR = Path('test', 'LocalNeighborhood/')
 OUT_FILE = Path(TEST_DIR, 'output', 'ln-output.txt')
@@ -28,7 +28,7 @@ class TestLocalNeighborhood:
         with pytest.raises(OSError):
            LocalNeighborhood.run(
             nodes=TEST_DIR/'input'/'missing-nodes.txt',
-            network=TEST_DIR/'input'/'ln-network.txt',  
+            network=TEST_DIR/'input'/'ln-network.txt',
             output_file=OUT_FILE
         )
 
@@ -41,10 +41,10 @@ class TestLocalNeighborhood:
         with pytest.raises(ValueError):
             LocalNeighborhood.run(
             nodes=TEST_DIR/'input'/'ln-nodes.txt',
-            network=TEST_DIR/'input'/'ln-bad-network.txt',  
+            network=TEST_DIR/'input'/'ln-bad-network.txt',
             output_file=OUT_FILE
         )
-        
+
 
     # Write tests for the Local Neighborhood run function here
     def test_localneighborhood_run(self):

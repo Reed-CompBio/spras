@@ -1,16 +1,16 @@
 import os
+import subprocess
 from pathlib import Path
 
 import pandas as pd
-import subprocess
 
 from spras.containers import prepare_volume, run_container
+from spras.interactome import reinsert_direction_col_undirected
+from spras.prm import PRM
 from spras.util import (
     add_rank_column,
     duplicate_edges,
 )
-from spras.prm import PRM
-from spras.interactome import reinsert_direction_col_undirected
 
 # setting __all__ so SPRAS can automatically import this wrapper
 __all__ = ["LocalNeighborhood"]
