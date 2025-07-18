@@ -35,7 +35,7 @@ class TestResponseNet:
                         targets=TEST_DIR / 'input' / 'rn-targets.txt',
                         edges=TEST_DIR / 'input' / 'rn-edges.txt',
                         output_file=OUT_FILE,
-                        gamma=10)
+                        gamma=1)
         assert OUT_FILE.exists()
 
         assert filecmp.cmp(OUT_FILE, EXPECTED_FILE_OPTIONAL, shallow=True)
