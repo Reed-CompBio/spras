@@ -4,7 +4,12 @@ from pathlib import Path
 import pandas as pd
 
 from spras.containers import prepare_volume, run_container
-from spras.util import duplicate_edges
+from spras.util import (
+    add_rank_column,
+    duplicate_edges,
+    raw_columns_df,
+    reinsert_direction_col_undirected,
+)
 
 # setting __all__ so SPRAS can automatically import this wrapper
 __all__ = ["LocalNeighborhood"]
@@ -32,7 +37,7 @@ class LocalNeighborhood:
             node_df = data.request_node_columns(['active', 'sources', 'targets'])
             node_df['prize'] = None
         else:
-            raise ValueError("Dataset must contain at least one of the following node columns: 'prize', 'active', 'sources', 'targets'")
+            raise ValueError("Dataset must contain at least one of the following node columns: 'active', 'sources', 'targets'")
 
         # Determine relevant nodes to include
         relevant_nodes = node_df[
@@ -113,16 +118,12 @@ class LocalNeighborhood:
         Output: tab-separated file with columns node1, node2, rank, direction
         """
         # Read the raw output file
-        with open(raw_output_file, 'r') as f:
-            lines = f.readlines()
+        edge_df = raw_columns_df(raw_output_file, sep = '|', columns=['Node1', 'Node2'])
 
-        # split "A|B" into two columns
-        edges_list = [line.strip().split('|') for line in lines if line.strip()]
-        edge_df = pd.DataFrame(edges_list, columns=['Node1', 'Node2'])
 
         # Add rank and direction columns
-        edge_df['Rank'] = "1" #default rank, can change later
-        edge_df['Direction'] = "U"
+        edge_df = add_rank_column(edge_df)
+        edge_df = reinsert_direction_col_undirected(edge_df)
 
         # Remove duplicates and undirected edges
         edge_df, _ = duplicate_edges(edge_df)

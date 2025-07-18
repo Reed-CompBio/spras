@@ -9,6 +9,7 @@ import spras.config as config
 config.init_from_file("config/config.yaml")
 
 from local_neighborhood import local_neighborhood
+from spras.local_neighborhood import LocalNeighborhood
 
 TEST_DIR = Path('test', 'LocalNeighborhood/')
 OUT_FILE = Path(TEST_DIR, 'output', 'ln-output.txt')
@@ -58,5 +59,41 @@ def test_localneighborhood_run():
         nodes=TEST_DIR + 'input/ln-nodes.txt',
         network=TEST_DIR + 'input/ln-network.txt',
         output_file=OUT_FILE
+    )
+    assert out_path.exists()
+def test_localneighborhood_run_missing_inputs():
+    """
+    Ensures Localneighborhood.run raises error when missing required inputs
+    """
+    with pytest.raises((ValueError, OSError)):
+        LocalNeighborhood.run(
+            nodes = None
+            network = TEST_DIR + 'input/ln-network.txt',
+            output_file = OUT_FILE
+        )
+    with pytest.raises((ValueError, OSError)):
+        LocalNeighborhood.run(
+            nodes = TEST_DIR + 'input/ln-nodes.txt',
+            network = None
+            output_file = OUT_FILE
+        )
+    with pytest.raises((ValueError, OSError)):
+        LocalNeighborhood.run(
+            nodes = TEST_DIR + 'input/ln-nodes.txt',
+            network = TEST_DIR + 'input/ln-network.txt',
+            output_file = None
+        )
+
+def test_localneighborhood_run_singularity():
+    """
+    Run LocalNeighborhppd with singularity container framework and check the output matches expected output
+    """
+    out_path = Path(OUT_FILE)
+    out_path.unlink(missing_ok=True)
+    LocalNeighborhood.run(
+        nodes = TEST_DIR + 'input/ln-nodes.txt',
+        network = TEST_DIR + 'input/ln-network.txt',
+        output_file = OUT_FILE,
+        container_framework = 'singularity'
     )
     assert out_path.exists()
