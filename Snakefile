@@ -278,9 +278,17 @@ rule viz_graphspace:
         graphspace.write_json(input.standardized_file,output.graph_json,output.style_json)
 
 
+# Returns all pathways for a specific algorithm
+def collect_pathways(per_algo=False):
+    def collect_pathways_inter(wildcards):
+        filtered_algo_params = [algo_param for algo_param in algorithms_with_params if wildcards.algorithm in algo_param] if per_algo else algorithms_with_params
+        return expand('{out_dir}{sep}{{dataset}}-{algorithm_params}{sep}pathway.txt', out_dir=out_dir, sep=SEP, algorithm_params=filtered_algo_params)
+    return collect_pathways_inter
+
+
 # Write a Cytoscape session file with all pathways for each dataset
 rule viz_cytoscape:
-    input: pathways = expand('{out_dir}{sep}{{dataset}}-{algorithm_params}{sep}pathway.txt', out_dir=out_dir, sep=SEP, algorithm_params=algorithms_with_params)
+    input: pathways = collect_pathways(per_algo=False)
     output: 
         session = SEP.join([out_dir, '{dataset}-cytoscape.cys'])
     run:
@@ -291,7 +299,7 @@ rule viz_cytoscape:
 rule summary_table:
     input:
         # Collect all pathways generated for the dataset
-        pathways = expand('{out_dir}{sep}{{dataset}}-{algorithm_params}{sep}pathway.txt', out_dir=out_dir, sep=SEP, algorithm_params=algorithms_with_params),
+        pathways = collect_pathways(per_algo=False),
         dataset_file = SEP.join([out_dir, '{dataset}-merged.pickle'])
     output: summary_table = SEP.join([out_dir, '{dataset}-pathway-summary.txt'])
     run:
@@ -299,13 +307,6 @@ rule summary_table:
         node_table = Dataset.from_file(input.dataset_file).node_table
         summary_df = summary.summarize_networks(input.pathways, node_table, algorithm_params, algorithms_with_params)
         summary_df.to_csv(output.summary_table, sep='\t', index=False)
-
-# Returns all pathways for a specific algorithm
-def collect_pathways(per_algo=False):
-    def collect_pathways_inter(wildcards):
-        filtered_algo_params = [algo_param for algo_param in algorithms_with_params if wildcards.algorithm in algo_param] if per_algo else algorithms_with_params
-        return expand('{out_dir}{sep}{{dataset}}-{algorithm_params}{sep}pathway.txt', out_dir=out_dir, sep=SEP, algorithm_params=filtered_algo_params)
-    return collect_pathways_inter
 
 # Store the expensive summarize_networks call per algorithm
 rule pickle_summarize_networks_per_algo:
