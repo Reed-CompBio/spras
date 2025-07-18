@@ -134,7 +134,7 @@ class ResponseNet(PRM):
         @param standardized_pathway_file: the same pathway written in the universal format
         """
 
-        df = raw_pathway_df(raw_pathway_file, sep='\t', header=None)
+        df = raw_pathway_df(raw_pathway_file, sep='\t', header=0)
         if not df.empty:
             df.columns = ['Node1', 'Node2', 'Flow']
             df = df.drop(columns=['Flow'], axis=1)

@@ -1,3 +1,4 @@
+Interactor 1	Interactor 2	Flow
 A	B	1.0
 B	E	1.0
 A	B	1.0
