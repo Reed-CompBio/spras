@@ -159,7 +159,6 @@ reconstruction_settings:
 
   #set where everything is saved
   locations:
-
     #place the save path here
     # TODO move to global
     reconstruction_dir: "output"
@@ -189,6 +188,10 @@ analysis:
     linkage: 'ward'
     # 'euclidean', 'manhattan', 'cosine'
     metric: 'euclidean'
+    # adds kernel density to PCA plots
+    kernel_density: true
+    # removes empty pathways from consideration in ml analysis (PCA only)
+    remove_empty_pathways: false
   evaluation:
     # evaluation per dataset-goldstandard pair
     # evaluation will not run unless ml include is set to true

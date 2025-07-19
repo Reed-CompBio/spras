@@ -1,0 +1,7 @@
+datapoint_labels	PC1	PC2
+test-data-s1	-1.01220906	0.05003395
+test-data-s2	-0.84372464	-0.59953316
+test-data-s3	1.56185985	-0.48650911
+test-data-empty	0.29407385	1.03600832
+centroid	0.0	0.0
+kde_peak	-0.65469949	-0.06343901
