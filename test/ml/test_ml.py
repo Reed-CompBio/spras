@@ -85,7 +85,7 @@ class TestML:
         # PCA signage now depends on the input data: we need two differently signed PCA coordinate files.
         # See https://scikit-learn.org/stable/whats_new/v1.5.html#changed-models for more info.
         expected = pd.read_table(EXPECT_DIR + 'expected-pca-coordinates.tsv')
-        expected_other = pd.read_table(EXPECT_DIR + 'expected-pca-coordinates-2.tsv')
+        expected_other = pd.read_table(EXPECT_DIR + 'expected-pca-coordinates-negated.tsv')
         expected = expected.round(5)
         expected_other = expected_other.round(5)
         for _ in range(5):
