@@ -82,8 +82,12 @@ class TestML:
 
     def test_pca_robustness(self):
         dataframe = ml.summarize_networks([INPUT_DIR + 'test-data-s1/s1.txt', INPUT_DIR + 'test-data-s2/s2.txt', INPUT_DIR + 'test-data-s3/s3.txt'])
+        # PCA signage now depends on the input data: we need two differently signed PCA coordinate files.
+        # See https://scikit-learn.org/stable/whats_new/v1.5.html#changed-models for more info.
         expected = pd.read_table(EXPECT_DIR + 'expected-pca-coordinates.tsv')
+        expected_other = pd.read_table(EXPECT_DIR + 'expected-pca-coordinates-2.tsv')
         expected = expected.round(5)
+        expected_other = expected_other.round(5)
         for _ in range(5):
             dataframe_shuffled = dataframe.sample(frac=1, axis=1)  # permute the columns
             ml.pca(dataframe_shuffled, OUT_DIR + 'pca-shuffled-columns.png', OUT_DIR + 'pca-shuffled-columns-variance.txt',
@@ -92,7 +96,7 @@ class TestML:
             coord = coord.round(5)  # round values to 5 digits to account for numeric differences across machines
             coord.sort_values(by='algorithm', ignore_index=True, inplace=True)
 
-            assert coord.equals(expected)
+            assert coord.equals(expected) or coord.equals(expected_other)
 
         for _ in range(5):
             dataframe_shuffled = dataframe.sample(frac=1, axis=0)  # permute the rows
@@ -102,7 +106,7 @@ class TestML:
             coord = coord.round(5)  # round values to 5 digits to account for numeric differences across machines
             coord.sort_values(by='algorithm', ignore_index=True, inplace=True)
 
-            assert coord.equals(expected)
+            assert coord.equals(expected) or coord.equals(expected_other)
 
     def test_hac_horizontal(self):
         dataframe = ml.summarize_networks([INPUT_DIR + 'test-data-s1/s1.txt', INPUT_DIR + 'test-data-s2/s2.txt', INPUT_DIR + 'test-data-s3/s3.txt'])
