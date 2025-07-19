@@ -144,9 +144,9 @@ class OmicsIntegrator2(PRM):
         @param raw_pathway_file: pathway file produced by an algorithm's run function
         @param standardized_pathway_file: the same pathway written in the universal format
         """
-        # Omicsintegrator2 returns a single line file if no network is found
+        # OmicsIntegrator2 returns a single line file if no network is found
         num_lines = sum(1 for line in open(raw_pathway_file))
-        # Omicsintegrator2 has corrupted output; list of correct column names
+        # OmicsIntegrator2 has corrupted output; list of correct column names
         sorted_correct_column_names = ['cost', 'in_solution', 'protein1', 'protein2'] # the order of edge attributes in the NetworkX graph is not guaranteed.
 
         if num_lines < 2:
