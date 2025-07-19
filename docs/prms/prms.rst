@@ -4,7 +4,7 @@ Pathway Reconstruction Methods
 .. note::
    While every algorithm here is broadly labelled as a pathway reconstruction method,
    there are other sub-types of algorithms that have more specialized capabilities than the rest.
-   Currently, SPRAS also supports edge orientation algorithms (e.g. MEO) and AMIs/DMMMs (e.g. DOMINO).
+   Currently, SPRAS also supports edge orientation algorithms (e.g. MEO) and active module identifiers/disease module mining methods (e.g. DOMINO).
 
 .. toctree::
    :maxdepth: 1

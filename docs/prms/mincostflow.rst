@@ -8,5 +8,5 @@ restricts flow while rewarding edges with higher weights.
 
 MinCostFlow takes two optional parameters:
 
-* flow: the amount of flow going through the graph
-* capacity: the (int) max capacity for edges
+* flow: (int) the amount of flow going through the graph
+* capacity: the (float) max capacity for edges

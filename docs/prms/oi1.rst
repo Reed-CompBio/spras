@@ -1,9 +1,9 @@
 Omics Integrator I
 ==================
 
-Omics Integrator I is a pathway reconstruction algorithm. See the source code:
+Omics Integrator 1 is a pathway reconstruction algorithm. See the source code:
 https://github.com/fraenkel-lab/OmicsIntegrator (licensed under BSD-2),
-or the associated paper: https://link.springer.com/protocol/10.1007/978-1-4939-7493-1_2.
+or the associated paper: http://doi.org/10.1371/journal.pcbi.1004879.
 
 OI1 takes some optional arguments:
 
@@ -12,9 +12,9 @@ OI1 takes some optional arguments:
 * random_terminals: How many times to apply the given prizes to random nodes in the interactome
 * seed: the randomness seed to use
 * w: float for the number of trees
-* b: the trade-off between including more terminals and using less reliable edges
-* d: controls the maximum path-length from v0 to terminal nodes
-* mu: controls the degree-based negative prizes (defualt 0.0)
+* b: the trade-off between including more prizes and using less reliable edges
+* d: controls the maximum path-length from root to terminal nodes
+* mu: controls the degree-based negative prizes (default 0.0)
 * noise: Standard Deviation of the gaussian noise added to edges in Noisy Edges Randomizations
 * g: (Gamma) multiplicative edge penalty from degree of endpoints
-* r: msgsteiner parameter that adds random noise to edges, which is rarely needed because the Forest --noisyEdges option is recommended instead (default 0)
+* r: msgsteiner parameter that adds random noise to edges, which is rarely needed. (default 0)

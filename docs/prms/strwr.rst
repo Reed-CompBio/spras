@@ -1,7 +1,7 @@
-RWR
+ST_RWR
 ==========
 
-RWR, or random walk with restarts, is a source and target dependent pathway reconstruction algorithm
+ST_RWR, or random walk with restarts, is a source and target dependent pathway reconstruction algorithm
 that performs PathRank on the input interactome, using its edge weights, prizes, sources, and targets.
 
 For a random walk with restarts implementation that does not use  sources and targets, see RWR.
