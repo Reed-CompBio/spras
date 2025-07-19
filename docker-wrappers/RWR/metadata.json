@@ -1,0 +1,4 @@
+{
+    "dockerName": "rwr",
+    "architectures": ["linux/arm64", "linux/amd64"]
+}
