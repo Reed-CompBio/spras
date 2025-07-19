@@ -170,7 +170,7 @@ Make sure header = True with column names: ['Node1', 'Node2', 'Rank', 'Direction
 The output should have the format `<vertex1> <vertex2> 1 U`.
 
 ### Step 4: Make the Local Neighborhood wrapper accessible through SPRAS
-Import the new class `LocalNeighborhood` in `spras/runner.py` so the wrapper functions can be accessed.
+Import the new class `LocalNeighborhood` in `spras/runner.py` and add it to the `algorithms` dictionary so the wrapper functions can be accessed.
 Add an entry for Local Neighborhood to the configuration file `config/config.yaml` and set `include: true`.
 As a convention, algorithm names are written in all lowercase without special characters.
 Local Neighborhood has no other parameters.
@@ -246,7 +246,7 @@ The pull request will be closed so that the `master` branch of the fork stays sy
 1. Add a new subdirectory to `docker-wrappers` with the name `<algorithm>`, write a `Dockerfile` to build an image for `<algorithm>`, and include any other files required to build that image in the subdirectory
 1. Build and push the Docker image to the [reedcompbio](https://hub.docker.com/orgs/reedcompbio) Docker organization (SPRAS maintainer required)
 1. Add a new Python file `spras/<algorithm>.py` to implement the wrapper functions for `<algorithm>`: specify the list of `required_input` files and the `generate_inputs`, `run`, and `parse_output` functions
-1. Import the new class in `spras/runner.py` so the wrapper functions can be accessed
+1. Import the new class in `spras/runner.py` and add it to the `algorithms` dictionary so the wrapper functions can be accessed
 1. Document the usage of the Docker wrapper and the assumptions made when implementing the wrapper
 1. Add example usage for the new algorithm and its parameters to the template config file
 1. Write test functions and provide example input data in a new test subdirectory `test/<algorithm>`. Provide example data and algorithm/expected files names to lists or dicts in `test/generate-inputs` and `test/parse-outputs`. Use the full path with the names of the test files.
