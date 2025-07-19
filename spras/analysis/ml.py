@@ -116,8 +116,9 @@ def create_palette(column_names):
     label_color_map = {label: color for label, color in zip(unique_column_names, custom_palette, strict=True)}
     return label_color_map
 
-def pca(dataframe: pd.DataFrame, output_png: str, output_var: str, output_coord: str, components: int = 2, labels: bool = True,
-        kernel_density: bool = False, remove_empty_pathways: bool = False):
+
+def pca(dataframe: pd.DataFrame, output_png: str, output_var: str, output_coord: str, components: int = 2,
+        labels: bool = True, kernel_density: bool = False, remove_empty_pathways: bool = False):
     """
     Performs PCA on the data and creates a scatterplot of the top two principal components.
     It saves the plot, the variance explained by each component, and the
@@ -128,8 +129,10 @@ def pca(dataframe: pd.DataFrame, output_png: str, output_var: str, output_coord:
     @param output_coord: the filename to save the coordinates of each algorithm
     @param components: the number of principal components to calculate (Default is 2)
     @param labels: determines if labels will be included in the scatterplot (Default is True)
-    @param kernel_density: if True, overlays a kernel density estimate (KDE) on top of the PCA scatterplot (Default is False)
-    @remove_empty_pathways: if True, removes pathways (columns) from the dataframe that contain no edges before performing PCA (Default is False)
+    @param kernel_density: if True, overlays a kernel density estimate (KDE) on top of the PCA scatterplot (Default is
+    False)
+    @param remove_empty_pathways: if True, removes pathways (columns) from the dataframe that contain no edges before
+    performing PCA (Default is False)
     """
     df = dataframe.reset_index(drop=True)
 
@@ -156,6 +159,7 @@ def pca(dataframe: pd.DataFrame, output_png: str, output_var: str, output_coord:
 
     # center binary data by subtracting the column-wise mean
     # allows PCA to focus on edge inclusion patterns across runs rather than raw output volume.
+    # TODO: replace PCA https://github.com/Reed-CompBio/spras/issues/271
     scaler = StandardScaler(with_std=False)
     scaler.fit(X)  # compute mean inclusion rate per edge
     X_scaled = scaler.transform(X)
@@ -173,6 +177,7 @@ def pca(dataframe: pd.DataFrame, output_png: str, output_var: str, output_coord:
     label_color_map = create_palette(column_names)
     plt.figure(figsize=(10, 7))
 
+    df_kde = None
     if kernel_density:
         kde_model = KernelDensity(kernel='gaussian', bandwidth=1.0, metric="euclidean") # default model
         xy = X_pca[:, :2]
@@ -203,22 +208,21 @@ def pca(dataframe: pd.DataFrame, output_png: str, output_var: str, output_coord:
         min_density = np.min(z)
         max_density = np.max(z)
         plt.contourf(xx, yy, zz, cmap='Reds', vmin=min_density, vmax=max_density, levels=100)
-        plt.colorbar(label="Density", ticks = np.linspace(min_density, max_density, num=10))
+        plt.colorbar(label='Density', ticks=np.linspace(min_density, max_density, num=10))
 
         # save kde to df
         df_kde = pd.DataFrame({
-            "x_coordinate": grid_points[:, 0],
-            "y_coordinate": grid_points[:, 1],
-            "density": z
+            'x_coordinate': grid_points[:, 0],
+            'y_coordinate': grid_points[:, 1],
+            'density': z
         }).round(8)
-
 
     sns.scatterplot(x=X_pca[:, 0], y=X_pca[:, 1], s=70, hue=column_names, palette=label_color_map)
     plt.scatter(centroid[0], centroid[1], color='red', marker='X', s=100, label='Centroid')
-    plt.title("PCA")
+    plt.title('PCA')
     plt.legend()
-    plt.xlabel(f"PC1 ({variance[0]:.1f}% variance)")
-    plt.ylabel(f"PC2 ({variance[1]:.1f}% variance)")
+    plt.xlabel(f'PC1 ({variance[0]:.1f}% variance)')
+    plt.ylabel(f'PC2 ({variance[1]:.1f}% variance)')
 
     # saving the coordinates of each algorithm
     make_required_dirs(output_coord)
@@ -227,30 +231,30 @@ def pca(dataframe: pd.DataFrame, output_png: str, output_var: str, output_coord:
     centroid_row = ['centroid'] + centroid.tolist()
     coordinates_df.loc[len(coordinates_df)] = centroid_row
     if kernel_density:
-        max_density = df_kde["density"].max()
-        max_rows = df_kde[df_kde["density"] == max_density].sort_index()
-        if len(max_rows) > 1: # mutliple kde maximums
-            # compute distances to origin (0,0)
-            distances = np.sqrt(max_rows["x_coordinate"]**2 + max_rows["y_coordinate"]**2).round(8)
+        max_density = df_kde['density'].max()
+        max_rows = df_kde[df_kde['density'] == max_density].sort_index()
+        if len(max_rows) > 1:  # multiple kde maxima
+            # compute distances to origin (0,0) as an arbitrary tiebreaker
+            distances = np.sqrt(max_rows['x_coordinate']**2 + max_rows['y_coordinate']**2).round(8)
             # pick the coordinate closest to (0,0) as the kde peak to use.
-            # if all the coordinates are equal distance to (0,0) pick the smallest index to be the coordinate to be chosen.
+            # if all the coordinates are equal distance to (0,0) pick the smallest index to be the coordinate to be
+            # chosen as a second tiebreaker
             chosen_index = distances.idxmin()
             chosen_row = max_rows.loc[chosen_index]
 
-            kde_row = ['kde_peak', chosen_row["x_coordinate"], chosen_row["y_coordinate"]]
-        else: # one kde maximum
+            kde_row = ['kde_peak', chosen_row['x_coordinate'], chosen_row['y_coordinate']]
+        else:  # one unique kde maximum
             max_row = max_rows.iloc[0]
-            kde_row = ['kde_peak', max_row["x_coordinate"], max_row["y_coordinate"]]
+            kde_row = ['kde_peak', max_row['x_coordinate'], max_row['y_coordinate']]
         coordinates_df.loc[len(coordinates_df)] = kde_row
     coordinates_df = coordinates_df.round(8)
     coordinates_df.to_csv(output_coord, sep='\t', index=False)
 
-
     # saving the principal components
     make_required_dirs(output_var)
-    with open(output_var, "w") as f:
+    with open(output_var, 'w') as f:
         for component in range(len(variance)):
-            f.write("PC%d: %.8f\n" % (component+1, variance[component]))
+            f.write('PC%d: %.8f\n' % (component+1, variance[component]))
 
     # labeling the graphs
     if labels:

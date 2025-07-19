@@ -83,14 +83,14 @@ def get_test_config():
             "ml": {
                 "include": False,
                 "aggregate_per_algorithm": False,
-                "kernel_density": True # TODO update the coupling of ml and eval tests
+                "kernel_density": True # TODO update the coupling of ml and eval tests (https://github.com/Reed-CompBio/spras/issues/331)
             },
             "cytoscape": {
                 "include": False
             },
             "evaluation": {
                 "include": False,
-                 "aggregate_per_algorithm": False
+                "aggregate_per_algorithm": False
             },
         },
     }

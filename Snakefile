@@ -89,7 +89,7 @@ def make_final_input(wildcards):
         final_input.extend(expand('{out_dir}{sep}{dataset}-ml{sep}ensemble-pathway.txt',out_dir=out_dir,sep=SEP,dataset=dataset_labels,algorithm_params=algorithms_with_params))
         final_input.extend(expand('{out_dir}{sep}{dataset}-ml{sep}jaccard-matrix.txt',out_dir=out_dir,sep=SEP,dataset=dataset_labels,algorithm_params=algorithms_with_params))
         final_input.extend(expand('{out_dir}{sep}{dataset}-ml{sep}jaccard-heatmap.png',out_dir=out_dir,sep=SEP,dataset=dataset_labels,algorithm_params=algorithms_with_params))
-        
+
     if _config.config.analysis_include_ml_aggregate_algo:
         final_input.extend(expand('{out_dir}{sep}{dataset}-ml{sep}{algorithm}-pca.png',out_dir=out_dir,sep=SEP,dataset=dataset_labels,algorithm=algorithms_mult_param_combos))
         final_input.extend(expand('{out_dir}{sep}{dataset}-ml{sep}{algorithm}-pca-variance.txt',out_dir=out_dir,sep=SEP,dataset=dataset_labels,algorithm=algorithms_mult_param_combos))
@@ -101,7 +101,7 @@ def make_final_input(wildcards):
         final_input.extend(expand('{out_dir}{sep}{dataset}-ml{sep}{algorithm}-ensemble-pathway.txt',out_dir=out_dir,sep=SEP,dataset=dataset_labels,algorithm=algorithms))
         final_input.extend(expand('{out_dir}{sep}{dataset}-ml{sep}{algorithm}-jaccard-matrix.txt',out_dir=out_dir,sep=SEP,dataset=dataset_labels,algorithm=algorithms))
         final_input.extend(expand('{out_dir}{sep}{dataset}-ml{sep}{algorithm}-jaccard-heatmap.png',out_dir=out_dir,sep=SEP,dataset=dataset_labels,algorithm=algorithms))
-        
+
     if _config.config.analysis_include_evaluation:
         final_input.extend(expand('{out_dir}{sep}{dataset_gold_standard_pair}-eval{sep}pr-pca-chosen-pathway.txt',out_dir=out_dir,sep=SEP,dataset_gold_standard_pair=dataset_gold_standard_pairs))
         final_input.extend(expand('{out_dir}{sep}{dataset_gold_standard_pair}-eval{sep}pr-pca-chosen-pathway.png',out_dir=out_dir,sep=SEP,dataset_gold_standard_pair=dataset_gold_standard_pairs))
@@ -431,8 +431,8 @@ rule evaluation_pca_chosen:
         pca_coordinates_file = collect_pca_coordinates_per_dataset,
         pathway_summary_file = collect_summary_statistics_per_dataset
     output: 
-        pca_chosen_pr_file = SEP.join([out_dir, '{dataset_gold_standard_pairs}-eval', "pr-pca-chosen-pathway.txt"]),
-        pca_chosen_pr_png = SEP.join([out_dir, '{dataset_gold_standard_pairs}-eval', "pr-pca-chosen-pathway.png"]),
+        pca_chosen_pr_file = SEP.join([out_dir, '{dataset_gold_standard_pairs}-eval', 'pr-pca-chosen-pathway.txt']),
+        pca_chosen_pr_png = SEP.join([out_dir, '{dataset_gold_standard_pairs}-eval', 'pr-pca-chosen-pathway.png']),
     run:
         node_table = Evaluation.from_file(input.gold_standard_file).node_table
         pca_chosen_pathway = Evaluation.pca_chosen_pathway(input.pca_coordinates_file, input.pathway_summary_file, out_dir)
@@ -451,8 +451,8 @@ rule evaluation_per_algo_pca_chosen:
         pca_coordinates_file = collect_pca_coordinates_per_algo_per_dataset,
         pathway_summary_file = collect_summary_statistics_per_dataset
     output: 
-        pca_chosen_pr_file = SEP.join([out_dir, '{dataset_gold_standard_pairs}-eval', "pr-pca-chosen-pathway-per-algorithm.txt"]),
-        pca_chosen_pr_png = SEP.join([out_dir, '{dataset_gold_standard_pairs}-eval', "pr-pca-chosen-pathway-per-algorithm.png"]),
+        pca_chosen_pr_file = SEP.join([out_dir, '{dataset_gold_standard_pairs}-eval', 'pr-pca-chosen-pathway-per-algorithm.txt']),
+        pca_chosen_pr_png = SEP.join([out_dir, '{dataset_gold_standard_pairs}-eval', 'pr-pca-chosen-pathway-per-algorithm.png']),
     run:
         node_table = Evaluation.from_file(input.gold_standard_file).node_table
         pca_chosen_pathways = Evaluation.pca_chosen_pathway(input.pca_coordinates_file, input.pathway_summary_file, out_dir)

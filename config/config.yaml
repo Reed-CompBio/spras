@@ -188,9 +188,9 @@ analysis:
     linkage: 'ward'
     # 'euclidean', 'manhattan', 'cosine'
     metric: 'euclidean'
-    # adds kernel density to pca plots
+    # adds kernel density to PCA plots
     kernel_density: true
-    # removes empty pathways from consideration in ml analysis (pca only)
+    # removes empty pathways from consideration in ml analysis (PCA only)
     remove_empty_pathways: false
   evaluation:
     # evaluation per dataset-goldstandard pair

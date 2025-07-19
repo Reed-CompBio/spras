@@ -319,4 +319,5 @@ class Config:
         # Set kernel_density to True if Evaluation is set to True
         if self.analysis_include_evaluation and not self.pca_params["kernel_density"]:
             self.pca_params["kernel_density"] = True
-            print("Setting kernel_density to true; Evaluation analysis needs to run with kernel_density for pca chosen parameter selection.")
+            print("Setting kernel_density to true; Evaluation analysis needs to run with kernel_density for PCA-chosen "
+                  "parameter selection.")
