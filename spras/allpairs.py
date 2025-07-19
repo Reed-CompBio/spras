@@ -2,7 +2,7 @@ import warnings
 from pathlib import Path
 
 from spras.containers import prepare_volume, run_container_and_log
-from spras.dataset import Dataset
+from spras.dataset import Dataset, Direction, GraphMultiplicity
 from spras.interactome import (
     convert_undirected_to_directed,
     has_direction,
@@ -31,7 +31,7 @@ class AllPairs(PRM):
 
         # Get sources and targets for node input file
         # Borrowed code from pathlinker.py
-        sources_targets = data.request_node_columns(["sources", "targets"])
+        sources_targets = data.get_node_columns(["sources", "targets"])
         if sources_targets is None:
             raise ValueError("All Pairs Shortest Paths requires sources and targets")
 
@@ -48,8 +48,9 @@ class AllPairs(PRM):
 
         input_df.to_csv(filename_map["nodetypes"], sep="\t", index=False, columns=["#Node", "Node type"])
 
-        # Create network file
-        edges_df = data.get_interactome()
+        # Create network file - while APSP doesn't care about the directionality column,
+        # it's nice to explicitly declare that it doesn't
+        edges_df = data.get_interactome([Direction.UNDIRECTED, GraphMultiplicity.SIMPLE]).df
 
         if edges_df is None:
             raise ValueError("Dataset does not have an interactome.")
