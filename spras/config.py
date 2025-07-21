@@ -276,7 +276,6 @@ class Config:
             self.pca_params["kernel_density"] = self.ml_params["kernel_density"]
         else:
             self.pca_params["kernel_density"] = False
-
         if "remove_empty_pathways" in self.ml_params:
             self.pca_params["remove_empty_pathways"] = self.ml_params["remove_empty_pathways"]
 
