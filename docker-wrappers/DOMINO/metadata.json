@@ -1,0 +1,4 @@
+{
+    "dockerName": "domino",
+    "architectures": ["linux/amd64"]
+}
