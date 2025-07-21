@@ -28,6 +28,22 @@ class TestSTRWR:
         assert OUT_FILE.exists(), 'Output file was not written'
         expected_file = Path(TEST_DIR, 'expected_output', 'strwr-output.txt')
         assert cmp(OUT_FILE, expected_file, shallow=False), 'Output file does not match expected output file'
+    
+    """
+    Run the RWR algorithm on the example input files and check the output matches the expected output,
+    specifying a higher max_iter and alpha than usual
+    """
+    def test_strwr_optional(self):
+        OUT_FILE.unlink(missing_ok=True)
+        ST_RWR.run(network=Path(TEST_DIR, 'input', 'strwr-network.txt'),
+                   sources=Path(TEST_DIR, 'input', 'strwr-sources.txt'),
+                   targets=Path(TEST_DIR, 'input','strwr-targets.txt'),
+                   alpha=0.95,
+                   max_iter=10000,
+                   output_file=OUT_FILE)
+        assert OUT_FILE.exists(), 'Output file was not written'
+        expected_file = Path(TEST_DIR, 'expected_output', 'strwr-output-high.txt')
+        assert cmp(OUT_FILE, expected_file, shallow=False), 'Output file does not match expected output file'
 
     """
     Run the ST_RWR algorithm with a missing input file
