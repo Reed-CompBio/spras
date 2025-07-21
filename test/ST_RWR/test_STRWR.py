@@ -28,7 +28,7 @@ class TestSTRWR:
         assert OUT_FILE.exists(), 'Output file was not written'
         expected_file = Path(TEST_DIR, 'expected_output', 'strwr-output.txt')
         assert cmp(OUT_FILE, expected_file, shallow=False), 'Output file does not match expected output file'
-    
+
     """
     Run the RWR algorithm on the example input files and check the output matches the expected output,
     specifying a higher max_iter and alpha than usual
