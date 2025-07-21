@@ -16,6 +16,7 @@ __all__ = ['AllPairs']
 
 class AllPairs(PRM):
     required_inputs = ['nodetypes', 'network', 'directed_flag']
+    dois = []
 
     @staticmethod
     def generate_inputs(data: Dataset, filename_map):

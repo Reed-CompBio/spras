@@ -25,6 +25,7 @@ Interactor1     Interactor2     Weight
 
 class BowTieBuilder(PRM):
     required_inputs = ['sources', 'targets', 'edges']
+    dois = ["10.1186/1752-0509-3-67"]
 
     #generate input taken from meo.py beacuse they have same input requirements
     @staticmethod
