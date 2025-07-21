@@ -116,6 +116,12 @@ algorithms:
     params:
       include: true
 
+  - name: "responsenet"
+    params:
+      include: true
+      run1:
+        gamma: [10]
+
 # Here we specify which pathways to run and other file location information.
 # DataLoader.py can currently only load a single dataset
 # Assume that if a dataset label does not change, the lists of associated input files do not change

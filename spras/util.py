@@ -103,7 +103,7 @@ def raw_pathway_df(raw_pathway_file: str, sep: str = '\t', header: int = None) -
     return df
 
 
-def duplicate_edges(df: pd.DataFrame) -> (pd.DataFrame, bool):
+def duplicate_edges(df: pd.DataFrame) -> tuple[pd.DataFrame, bool]:
     """
     Removes duplicate edges from the input DataFrame. Run within every pathway reconstruction algorithm's parse_output.
     - For duplicate edges (based on Node1, Node2, and Direction), the one with the smallest Rank is kept.
