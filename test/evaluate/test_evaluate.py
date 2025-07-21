@@ -2,7 +2,6 @@ import filecmp
 from pathlib import Path
 
 import pandas as pd
-import pytest
 
 import spras.analysis.ml as ml
 from spras.evaluation import Evaluation
@@ -13,6 +12,7 @@ EXPECT_DIR = 'test/evaluate/expected/'
 GS_NODE_TABLE = pd.read_csv(INPUT_DIR + 'gs_node_table.csv', header=0)
 SUMMARY_FILE = INPUT_DIR + 'example_summary.txt'
 
+
 class TestEvaluate:
     @classmethod
     def setup_class(cls):
@@ -22,14 +22,15 @@ class TestEvaluate:
         Path(OUT_DIR).mkdir(parents=True, exist_ok=True)
 
     def test_precision_recall_pca_chosen_pathway(self):
-        output_file = Path(OUT_DIR +"test-pr-per-pathway-pca-chosen.txt")
+        output_file = Path(OUT_DIR + "test-pr-per-pathway-pca-chosen.txt")
         output_file.unlink(missing_ok=True)
         output_png = Path(OUT_DIR + "test-pr-per-pathway-pca-chosen.png")
         output_png.unlink(missing_ok=True)
-        output_coordinates = Path(OUT_DIR + 'pca-coordinates.tsv')
+        output_coordinates = Path(OUT_DIR + "pca-coordinates.tsv")
         output_coordinates.unlink(missing_ok=True)
 
-        file_paths = [INPUT_DIR + "data-test-params-123/pathway.txt", INPUT_DIR + "data-test-params-456/pathway.txt",  INPUT_DIR + "data-test-params-789/pathway.txt",  INPUT_DIR + "data-test-params-empty/pathway.txt"]
+        file_paths = [INPUT_DIR + "data-test-params-123/pathway.txt", INPUT_DIR + "data-test-params-456/pathway.txt",
+                      INPUT_DIR + "data-test-params-789/pathway.txt",  INPUT_DIR + "data-test-params-empty/pathway.txt"]
         algorithms = ["test"]
 
         dataframe = ml.summarize_networks(file_paths)
@@ -39,7 +40,7 @@ class TestEvaluate:
         Evaluation.precision_and_recall(pathway, GS_NODE_TABLE, algorithms, str(output_file), str(output_png))
 
         chosen = pd.read_csv(output_file, sep="\t", header=0).round(8)
-        expected = pd.read_csv(EXPECT_DIR + 'expected-pr-per-pathway-pca-chosen.txt', sep="\t",  header=0).round(8)
+        expected = pd.read_csv(EXPECT_DIR + "expected-pr-per-pathway-pca-chosen.txt", sep="\t",  header=0).round(8)
 
         assert chosen.equals(expected)
         assert output_png.exists()
@@ -50,14 +51,13 @@ class TestEvaluate:
         output_png.unlink(missing_ok=True)
 
         algorithms = ["test"]
-        Evaluation.precision_and_recall([], GS_NODE_TABLE, algorithms, output_file, output_png)
+        Evaluation.precision_and_recall([], GS_NODE_TABLE, algorithms, str(output_file), str(output_png))
 
         chosen = pd.read_csv(output_file, sep="\t", header=0).round(8)
         expected = pd.read_csv(EXPECT_DIR + 'expected-pr-per-pathway-pca-chosen-not-provided.txt', sep="\t",  header=0).round(8)
 
         assert chosen.equals(expected)
         assert output_png.exists()
-
 
     def test_node_ensemble(self):
         out_path_file = Path(OUT_DIR + 'node-ensemble.csv')

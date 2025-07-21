@@ -89,7 +89,7 @@ def get_test_config():
             },
             "evaluation": {
                 "include": False,
-                 "aggregate_per_algorithm": False
+                "aggregate_per_algorithm": False
             },
         },
     }

@@ -1,5 +1,4 @@
 import filecmp
-import shutil
 from pathlib import Path
 
 import pandas as pd
@@ -82,7 +81,8 @@ class TestML:
         assert coord.equals(expected)
 
     def test_pca_remove_empty_pathways(self):
-        dataframe = ml.summarize_networks([INPUT_DIR + 'test-data-s1/s1.txt', INPUT_DIR + 'test-data-s2/s2.txt', INPUT_DIR + 'test-data-s3/s3.txt', INPUT_DIR + 'test-data-empty/empty.txt'])
+        dataframe = ml.summarize_networks([INPUT_DIR + 'test-data-s1/s1.txt', INPUT_DIR + 'test-data-s2/s2.txt',
+                                           INPUT_DIR + 'test-data-s3/s3.txt', INPUT_DIR + 'test-data-empty/empty.txt'])
         ml.pca(dataframe, OUT_DIR + 'pca.png', OUT_DIR + 'pca-variance.txt',
                OUT_DIR + 'pca-coordinates.tsv', remove_empty_pathways=True)
         coord = pd.read_table(OUT_DIR + 'pca-coordinates.tsv')
@@ -93,7 +93,8 @@ class TestML:
         assert coord.equals(expected)
 
     def test_pca_kernel_density(self):
-        dataframe = ml.summarize_networks([INPUT_DIR + 'test-data-s1/s1.txt', INPUT_DIR + 'test-data-s2/s2.txt', INPUT_DIR + 'test-data-s3/s3.txt', INPUT_DIR + 'test-data-empty/empty.txt'])
+        dataframe = ml.summarize_networks([INPUT_DIR + 'test-data-s1/s1.txt', INPUT_DIR + 'test-data-s2/s2.txt',
+                                           INPUT_DIR + 'test-data-s3/s3.txt', INPUT_DIR + 'test-data-empty/empty.txt'])
         ml.pca(dataframe, OUT_DIR + 'pca.png', OUT_DIR + 'pca-variance.txt',
                OUT_DIR + 'pca-coordinates-kde.tsv', kde=True)
         coord = pd.read_table(OUT_DIR + 'pca-coordinates-kde.tsv')
@@ -104,7 +105,8 @@ class TestML:
         assert coord_kde_peak.equals(expected_kde_peak)
 
     def test_pca_robustness(self):
-        dataframe = ml.summarize_networks([INPUT_DIR + 'test-data-s1/s1.txt', INPUT_DIR + 'test-data-s2/s2.txt', INPUT_DIR + 'test-data-s3/s3.txt'])
+        dataframe = ml.summarize_networks([INPUT_DIR + 'test-data-s1/s1.txt', INPUT_DIR + 'test-data-s2/s2.txt',
+                                           INPUT_DIR + 'test-data-s3/s3.txt'])
         expected = pd.read_table(EXPECT_DIR + 'expected-pca-coordinates.tsv')
         expected = expected.round(5)
         expected.sort_values(by='datapoint_labels', ignore_index=True, inplace=True)
