@@ -66,8 +66,8 @@ class MinCostFlow (PRM):
         @param targets: input targets (required)
         @param edges: input network file (required)
         @param output_file: output file name (required)
-        @param flow: amount of flow going through the graph (optional)
-        @param capacity: (int) amount of capacity allowed on each edge (optional)
+        @param flow: (int) amount of flow going through the graph (optional)
+        @param capacity: (float) amount of capacity allowed on each edge (optional)
         @param container_framework: choose the container runtime framework, currently supports "docker" or "singularity" (optional)
         """
 
