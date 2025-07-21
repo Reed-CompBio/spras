@@ -156,7 +156,7 @@ analysis:
     include: true
     aggregate_per_algorithm: true
     labels: true
-    kernel_density: true
+    kde: true
     remove_empty_pathways: true
   evaluation:
     include: true

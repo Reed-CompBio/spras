@@ -190,7 +190,7 @@ analysis:
     metric: 'euclidean'
     # controls whether kernel density estimation (KDE) is computed and visualized on top of PCA plots.
     # the coordinates of the KDE maximum (kde_peak) are also saved to the PCA coordinates output file.
-    kernel_density: true
+    kde: true
     # removes empty pathways from consideration in ml analysis (pca only)
     remove_empty_pathways: false
   evaluation:

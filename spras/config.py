@@ -272,10 +272,10 @@ class Config:
             self.pca_params["components"] = self.ml_params["components"]
         if "labels" in self.ml_params:
             self.pca_params["labels"] = self.ml_params["labels"]
-        if "kernel_density" in self.ml_params:
-            self.pca_params["kernel_density"] = self.ml_params["kernel_density"]
+        if "kde" in self.ml_params:
+            self.pca_params["kde"] = self.ml_params["kde"]
         else:
-            self.pca_params["kernel_density"] = False
+            self.pca_params["kde"] = False
         if "remove_empty_pathways" in self.ml_params:
             self.pca_params["remove_empty_pathways"] = self.ml_params["remove_empty_pathways"]
 
@@ -315,7 +315,7 @@ class Config:
         if not self.analysis_include_ml_aggregate_algo:
             self.analysis_include_evaluation_aggregate_algo = False
 
-        # Set kernel_density to True if Evaluation is set to True
-        if self.analysis_include_evaluation and not self.pca_params["kernel_density"]:
-            self.pca_params["kernel_density"] = True
-            print("Setting kernel_density to true; Evaluation analysis needs to run with kernel_density for pca chosen parameter selection.")
+        # Set kde to True if Evaluation is set to True
+        if self.analysis_include_evaluation and not self.pca_params["kde"]:
+            self.pca_params["kde"] = True
+            print("Setting kde to true; Evaluation analysis needs to run with kde for pca chosen parameter selection.")

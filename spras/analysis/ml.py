@@ -117,7 +117,7 @@ def create_palette(column_names):
     return label_color_map
 
 def pca(dataframe: pd.DataFrame, output_png: str, output_var: str, output_coord: str, components: int = 2, labels: bool = True,
-        kernel_density: bool = False, remove_empty_pathways: bool = False):
+        kde: bool = False, remove_empty_pathways: bool = False):
     """
     Performs PCA on the data and creates a scatterplot of the top two principal components.
     It saves the plot, the variance explained by each component, and the
@@ -128,7 +128,7 @@ def pca(dataframe: pd.DataFrame, output_png: str, output_var: str, output_coord:
     @param output_coord: the filename to save the coordinates of each algorithm
     @param components: the number of principal components to calculate (Default is 2)
     @param labels: determines if labels will be included in the scatterplot (Default is True)
-    @param kernel_density: if True, overlays a kernel density estimate (KDE) on top of the PCA scatterplot (Default is False)
+    @param kde: if True, overlays a kernel density estimate (KDE) on top of the PCA scatterplot (Default is False). Also saves coordinates to kde maximum (kde_peak) to output_coord file.
     @remove_empty_pathways: if True, removes pathways (columns) from the dataframe that contain no edges before performing PCA (Default is False)
     """
     df = dataframe.reset_index(drop=True)
@@ -173,7 +173,7 @@ def pca(dataframe: pd.DataFrame, output_png: str, output_var: str, output_coord:
     label_color_map = create_palette(column_names)
     plt.figure(figsize=(10, 7))
 
-    if kernel_density:
+    if kde:
         kde_model = KernelDensity(kernel='gaussian', bandwidth=1.0, metric="euclidean") # default model
         xy = X_pca[:, :2]
         kde_model.fit(xy)
@@ -226,7 +226,7 @@ def pca(dataframe: pd.DataFrame, output_png: str, output_var: str, output_coord:
     coordinates_df.insert(0, 'datapoint_labels', columns.tolist())
     centroid_row = ['centroid'] + centroid.tolist()
     coordinates_df.loc[len(coordinates_df)] = centroid_row
-    if kernel_density:
+    if kde:
         max_density = df_kde["density"].max()
         max_rows = df_kde[df_kde["density"] == max_density].sort_index()
         if len(max_rows) > 1: # mutliple kde maximums
