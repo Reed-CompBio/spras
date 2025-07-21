@@ -1,7 +1,8 @@
 import filecmp
-from pathlib import Path
-import pandas as pd
 import pickle
+from pathlib import Path
+
+import pandas as pd
 
 from spras.dataset import Dataset
 from spras.evaluation import Evaluation
@@ -27,10 +28,10 @@ class TestEvaluate:
             "data_dir": "test/evaluate/input",
             "other_files": []
         })
-        
+
         with open("test/evaluate/output/data.pickle", "wb") as handle:
             pickle.dump(dataset, handle)
-        
+
 
     def test_node_ensemble(self):
         out_path_file = Path(OUT_DIR + 'node-ensemble.csv')
