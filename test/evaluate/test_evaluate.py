@@ -1,8 +1,9 @@
 import filecmp
 from pathlib import Path
-
 import pandas as pd
+import pickle
 
+from spras.dataset import Dataset
 from spras.evaluation import Evaluation
 
 INPUT_DIR = 'test/evaluate/input/'
@@ -15,15 +16,27 @@ class TestEvaluate:
     @classmethod
     def setup_class(cls):
         """
-        Create the expected output directory
+        Create the expected output directory and pickled file
         """
         Path(OUT_DIR).mkdir(parents=True, exist_ok=True)
+
+        dataset = Dataset({
+            "label": 'data0',
+            "edge_files": ["input-interactome.txt"],
+            "node_files": ["input-nodes.txt"],
+            "data_dir": "test/evaluate/input",
+            "other_files": []
+        })
+        
+        with open("test/evaluate/output/data.pickle", "wb") as handle:
+            pickle.dump(dataset, handle)
+        
 
     def test_node_ensemble(self):
         out_path_file = Path(OUT_DIR + 'node-ensemble.csv')
         out_path_file.unlink(missing_ok=True)
         ensemble_network = [INPUT_DIR + 'ensemble-network.tsv']
-        input_network = INPUT_DIR + 'data.pickle'
+        input_network = OUT_DIR + 'data.pickle'
         node_ensemble_dict = Evaluation.edge_frequency_node_ensemble(GS_NODE_TABLE, ensemble_network, input_network)
         node_ensemble_dict['ensemble'].to_csv(out_path_file, sep='\t', index=False)
         assert filecmp.cmp(out_path_file, EXPECT_DIR + 'expected-node-ensemble.csv', shallow=False)
@@ -32,7 +45,7 @@ class TestEvaluate:
         out_path_file = Path(OUT_DIR + 'empty-node-ensemble.csv')
         out_path_file.unlink(missing_ok=True)
         empty_ensemble_network = [INPUT_DIR + 'empty-ensemble-network.tsv']
-        input_network = INPUT_DIR + 'data.pickle'
+        input_network = OUT_DIR + 'data.pickle'
         node_ensemble_dict = Evaluation.edge_frequency_node_ensemble(GS_NODE_TABLE, empty_ensemble_network,
                                                                      input_network)
         node_ensemble_dict['empty'].to_csv(out_path_file, sep='\t', index=False)
@@ -44,7 +57,7 @@ class TestEvaluate:
         out_path_empty_file = Path(OUT_DIR + 'empty-node-ensemble.csv')
         out_path_empty_file.unlink(missing_ok=True)
         ensemble_networks = [INPUT_DIR + 'ensemble-network.tsv', INPUT_DIR + 'empty-ensemble-network.tsv']
-        input_network = INPUT_DIR + 'data.pickle'
+        input_network = OUT_DIR + 'data.pickle'
         node_ensemble_dict = Evaluation.edge_frequency_node_ensemble(GS_NODE_TABLE, ensemble_networks, input_network)
         node_ensemble_dict['ensemble'].to_csv(out_path_file, sep='\t', index=False)
         assert filecmp.cmp(out_path_file, EXPECT_DIR + 'expected-node-ensemble.csv', shallow=False)
