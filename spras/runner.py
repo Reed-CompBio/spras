@@ -11,9 +11,9 @@ from spras.omicsintegrator1 import OmicsIntegrator1
 from spras.omicsintegrator2 import OmicsIntegrator2
 from spras.pathlinker import PathLinker
 from spras.prm import PRM
+from spras.responsenet import ResponseNet
 from spras.rwr import RWR
 from spras.strwr import ST_RWR
-from spras.responsenet import ResponseNet
 
 algorithms: dict[str, type[PRM]] = {
     "allpairs": AllPairs,
@@ -24,9 +24,9 @@ algorithms: dict[str, type[PRM]] = {
     "omicsintegrator1": OmicsIntegrator1,
     "omicsintegrator2": OmicsIntegrator2,
     "pathlinker": PathLinker,
+    "responsenet": ResponseNet,
     "rwr": RWR,
     "strwr": ST_RWR,
-    "responsenet": ResponseNet
 }
 
 def get_algorithm(algorithm: str) -> type[PRM]:
