@@ -10,3 +10,10 @@ MinCostFlow takes two optional parameters:
 
 * flow: (int) the amount of flow going through the graph
 * capacity: the (float) max capacity for edges
+
+External links
+++++++++++++++
+
+* Repository: https://github.com/gitter-lab/min-cost-flow/
+* MinCostFlow implementation paper: https://doi.org/10.1038/s41540-020-00167-1
+* Idea for MinCostFlow as a PRM: https://doi.org/10.1038/ng.337

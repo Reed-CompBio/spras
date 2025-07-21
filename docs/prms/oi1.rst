@@ -11,7 +11,7 @@ OI1 takes some optional arguments:
 * shuffled_prizes: How many times the algorithm should shuffle the prizes and re-run
 * random_terminals: How many times to apply the given prizes to random nodes in the interactome
 * seed: the randomness seed to use
-* w: float for the number of trees
+* w: float that affects the number of connected components, with higher values leading to more components
 * b: the trade-off between including more prizes and using less reliable edges
 * d: controls the maximum path-length from root to terminal nodes
 * mu: controls the degree-based negative prizes (default 0.0)
