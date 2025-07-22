@@ -90,6 +90,12 @@ algorithms:
   - name: "robust"
     params:
       include: true
+      run1:
+        alpha: [0.25, 0.45]
+        beta: [0.8, 0.9]
+        n: 30
+        tau: 0.15
+        gamma: 0.8
 
   - name: "allpairs"
     params:
