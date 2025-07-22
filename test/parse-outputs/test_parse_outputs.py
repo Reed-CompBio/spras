@@ -2,8 +2,6 @@ import filecmp
 from glob import glob
 from pathlib import Path
 
-import pytest
-
 from spras import runner
 from spras.dataset import Dataset
 
@@ -25,6 +23,7 @@ algorithms = {
     'allpairs': {},
     'domino': {},
     'bowtiebuilder': {},
+    'responsenet': {},
     'robust': {},
     'strwr': {
         'threshold': 3,

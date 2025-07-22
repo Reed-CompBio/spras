@@ -20,7 +20,8 @@ algo_exp_file: dict[str, str | list[str]] = {
     'bowtiebuilder': 'edges',
     'robust': ['network', 'study_bias', 'seeds'],
     'strwr': 'network',
-    'rwr': 'network'
+    'rwr': 'network',
+    'responsenet': 'edges'
 }
 
 
