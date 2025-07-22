@@ -28,6 +28,7 @@ Interactor1     ppi     Interactor2
 """
 class DOMINO(PRM):
     required_inputs = ['network', 'active_genes']
+    dois = ["10.15252/msb.20209593"]
 
     @staticmethod
     def generate_inputs(data, filename_map):
@@ -188,8 +189,10 @@ class DOMINO(PRM):
                     # columns that indicate edges
                     # Dropping the other rows eliminates the node information
                     module_df = pd.DataFrame(entries)
-                    module_df = module_df.loc[:, ['source', 'target']].dropna()
-
+                    try:
+                        module_df = module_df.loc[:, ['source', 'target']].dropna()
+                    except KeyError:
+                        module_df = pd.DataFrame()
                     # Add the edges from this module to the cumulative pathway edges
                     edges_df = pd.concat([edges_df, module_df], axis=0)
 

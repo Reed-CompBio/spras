@@ -58,3 +58,6 @@ class TestGenerateInputs:
                 output_file = OUTDIR / f"{algo}-{exp_file_name}.txt"
                 expected_file = EXPDIR / f"{algo}-{exp_file_name}-expected.txt"
                 assert filecmp.cmp(output_file, expected_file, shallow=False)
+
+            for file in filename_map.values():
+                assert Path(file).exists()
