@@ -1,27 +1,27 @@
 NODEID	prize	active	dummy	sources	targets
-N	NaN	NaN	NaN	NaN	NaN
-T	NaN	NaN	NaN	NaN	NaN
-I	NaN	NaN	NaN	NaN	NaN
-Z	NaN	NaN	NaN	NaN	NaN
-Q	NaN	NaN	NaN	NaN	NaN
-P	NaN	NaN	NaN	NaN	NaN
-C	5.7	True	NaN	NaN	True
-O	NaN	NaN	NaN	NaN	NaN
-W	NaN	NaN	NaN	NaN	NaN
-Y	NaN	NaN	NaN	NaN	NaN
-1S	NaN	NaN	NaN	NaN	NaN
-1L	NaN	NaN	NaN	NaN	NaN
-1B	NaN	NaN	NaN	NaN	NaN
-1D	NaN	NaN	NaN	NaN	NaN
-1V	NaN	NaN	NaN	NaN	NaN
-1K	NaN	NaN	NaN	NaN	NaN
-1M	NaN	NaN	NaN	NaN	NaN
-1H	NaN	NaN	NaN	NaN	NaN
-1U	NaN	NaN	NaN	NaN	NaN
-1R	NaN	NaN	NaN	NaN	NaN
-2X	NaN	NaN	NaN	NaN	NaN
-2J	NaN	NaN	NaN	NaN	NaN
-2E	NaN	NaN	NaN	NaN	NaN
-2F	NaN	NaN	NaN	NaN	NaN
-2G	NaN	NaN	NaN	NaN	NaN
-2A	2.0	True	True	True	NaN
+N					
+T					
+I					
+Z					
+Q					
+P					
+C	5.7	True			True
+O					
+W					
+Y					
+1S					
+1L					
+1B					
+1D					
+1V					
+1K					
+1M					
+1H					
+1U					
+1R					
+2X					
+2J					
+2E					
+2F					
+2G					
+2A	2.0	True	True	True	
