@@ -18,7 +18,7 @@ algo_exp_file: dict[str, str | list[str]] = {
     'pathlinker': 'network',
     'allpairs': 'network',
     'bowtiebuilder': 'edges',
-    'robust': ['network', 'scores', 'seeds'],
+    'robust': ['network', 'study_bias', 'seeds'],
     'strwr': 'network',
     'rwr': 'network'
 }

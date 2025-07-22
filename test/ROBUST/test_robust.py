@@ -26,7 +26,7 @@ class TestROBUST:
     def test_robust_scores(self):
         OUT_FILE.unlink(missing_ok=True)
         ROBUST.run(network=TEST_DIR / 'input' / 'robust-network.txt',
-                   scores=TEST_DIR / 'input' / 'robust-scores.txt',
+                   study_bias=TEST_DIR / 'input' / 'robust-study_bias.txt',
                    seeds=TEST_DIR / 'input' / 'robust-seeds.txt',
                    output_file=OUT_FILE)
         assert OUT_FILE.exists()
@@ -40,7 +40,7 @@ class TestROBUST:
         OUT_FILE.unlink(missing_ok=True)
         # specify all optional parameters
         ROBUST.run(network=TEST_DIR / 'input' / 'robust-network.txt',
-                   scores=TEST_DIR / 'input' / 'robust-scores.txt',
+                   study_bias=TEST_DIR / 'input' / 'robust-study_bias.txt',
                    seeds=TEST_DIR / 'input' / 'robust-seeds.txt',
                    alpha=0.5,
                    beta=0.25,
