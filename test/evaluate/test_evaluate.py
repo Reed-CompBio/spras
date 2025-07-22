@@ -32,7 +32,6 @@ class TestEvaluate:
         with open("test/evaluate/output/data.pickle", "wb") as handle:
             pickle.dump(dataset, handle)
 
-
     def test_node_ensemble(self):
         out_path_file = Path(OUT_DIR + 'node-ensemble.csv')
         out_path_file.unlink(missing_ok=True)
