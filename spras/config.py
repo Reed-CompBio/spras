@@ -100,6 +100,8 @@ class Config:
         self.analysis_include_ml = None
         # A Boolean specifying whether to run the Evaluation analysis
         self.analysis_include_evaluation = None
+        # A Boolean specifying whether to run the attribution postprocessing
+        self.analysis_include_attribution = None
         # A Boolean specifying whether to run the ML per algorithm analysis
         self.analysis_include_ml_aggregate_algo = None
         # A Boolean specifying whether to run the evaluation per algorithm analysis
@@ -283,6 +285,7 @@ class Config:
         self.analysis_include_cytoscape = raw_config["analysis"]["cytoscape"]["include"]
         self.analysis_include_ml = raw_config["analysis"]["ml"]["include"]
         self.analysis_include_evaluation = raw_config["analysis"]["evaluation"]["include"]
+        self.analysis_include_attribution = raw_config["analysis"]["attribution"]["include"]
 
         # Only run ML aggregate per algorithm if analysis include ML is set to True
         if 'aggregate_per_algorithm' in self.ml_params and self.analysis_include_ml:

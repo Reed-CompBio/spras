@@ -214,6 +214,8 @@ Modify parse outputs:
 3. Add an `{algorithm-name}-empty-raw-pathway.txt` file inside `test/parse-outputs/input/empty` containing all output files associated with an empty subnetwork for the algorithm.
 4. Add the new algorithm's name to the algorithms dict in `test/parse-outputs/test_parse_outputs.py`, with any parameters it needs.
 
+Finally, modify `test/attribution` to have an empty `localneighborhood.bib` file, indicating that localneighborhood cites nothing else.
+
 ### Step 6: Update documentation
 SPRAS uses `sphinx` and "Read The Docs" for building and hosting documentation.
 To include your new reconstruction algorithm in this documentation, create a new file at `docs/prms/{my-alg}.rst`, where you replace `{my-alg}` with a shorthand for your algorithm.
