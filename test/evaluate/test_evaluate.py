@@ -29,7 +29,7 @@ class TestEvaluate:
             "other_files": []
         })
 
-        with open("test/evaluate/output/data.pickle", "wb") as handle:
+        with open(out_dataset, "wb") as f:
             pickle.dump(dataset, handle)
 
     def test_node_ensemble(self):
