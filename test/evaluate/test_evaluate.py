@@ -25,21 +25,35 @@ class TestEvaluate:
     def test_precision_recall_per_pathway(self):
         file_paths = [INPUT_DIR + "data-test-params-123/pathway.txt", INPUT_DIR + "data-test-params-456/pathway.txt",  INPUT_DIR + "data-test-params-789/pathway.txt",  INPUT_DIR + "data-test-params-empty/pathway.txt"]
         algorithms = ["test"]
-        output_file = OUT_DIR + "test-pr-per-pathway.txt"
-        output_png = OUT_DIR + "test-pr-per-pathway.png"
+        output_file = Path(OUT_DIR + "pr-per-pathway.txt")
+        output_png = Path(OUT_DIR + "pr-per-pathway.png")
+        output_file.unlink(missing_ok=True)
+        output_png.unlink(missing_ok=True)
 
-        Evaluation.precision_and_recall(file_paths, GS_NODE_TABLE, algorithms, output_file, output_png)
-        assert filecmp.cmp(output_file, EXPECT_DIR + 'expected-pr-per-pathway.txt', shallow=False)
+        Evaluation.precision_and_recall(file_paths, GS_NODE_TABLE, algorithms, str(output_file), str(output_png))
+
+        output = pd.read_csv(output_file, sep="\t", header=0).round(8)
+        expected = pd.read_csv(EXPECT_DIR + 'expected-pr-per-pathway.txt', sep="\t",  header=0).round(8)
+
+        assert output.equals(expected)
+        assert output_png.exists()
 
     def test_precision_recall_per_pathway_empty(self):
 
         file_paths = [INPUT_DIR + "data-test-params-empty/pathway.txt"]
         algorithms = ["test"]
-        output_file = OUT_DIR +"pr-per-pathway-empty.txt"
-        output_png = OUT_DIR + "pr-per-pathway-empty.png"
+        output_file = Path(OUT_DIR +"pr-per-pathway-empty.txt")
+        output_png = Path(OUT_DIR + "pr-per-pathway-empty.png")
+        output_file.unlink(missing_ok=True)
+        output_png.unlink(missing_ok=True)
 
-        Evaluation.precision_and_recall(file_paths, GS_NODE_TABLE, algorithms, output_file, output_png)
-        assert filecmp.cmp(output_file, EXPECT_DIR + 'expected-pr-per-pathway-empty.txt', shallow=False)
+        Evaluation.precision_and_recall(file_paths, GS_NODE_TABLE, algorithms, str(output_file), str(output_png))
+
+        output = pd.read_csv(output_file, sep="\t", header=0).round(8)
+        expected = pd.read_csv(EXPECT_DIR + 'expected-pr-per-pathway-empty.txt', sep="\t",  header=0).round(8)
+
+        assert output.equals(expected)
+        assert output_png.exists()
 
     def test_precision_recall_not_provided(self):
         output_file = Path( OUT_DIR +"pr-per-pathway-not-provided.txt")
