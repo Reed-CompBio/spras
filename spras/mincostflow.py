@@ -1,6 +1,6 @@
 from pathlib import Path
 
-from spras.containers import prepare_volume, run_container
+from spras.containers import prepare_volume, run_container_and_log
 from spras.interactome import (
     convert_undirected_to_directed,
     reinsert_direction_col_undirected,
@@ -22,8 +22,12 @@ Interactor1  Interactor2   Weight
 - the expected raw input file should have node pairs in the 1st and 2nd columns, with the weight in the 3rd column
 - it can include repeated and bidirectional edges
 """
-class MinCostFlow (PRM):
+class MinCostFlow(PRM):
     required_inputs = ['sources', 'targets', 'edges']
+    # NOTE: This is the DOI for the ResponseNet paper.
+    # This version of MinCostFlow is inspired by the ResponseNet paper, but does not have
+    # its own referencable DOI.
+    dois = ["10.1038/ng.337"]
 
     @staticmethod
     def generate_inputs(data, filename_map):
@@ -115,12 +119,12 @@ class MinCostFlow (PRM):
         container_suffix = "mincostflow"
 
         # constructs a docker run call
-        out = run_container(container_framework,
-                            container_suffix,
-                            command,
-                            volumes,
-                            work_dir)
-        print(out)
+        run_container_and_log('MinCostFlow',
+                             container_framework,
+                             container_suffix,
+                             command,
+                             volumes,
+                             work_dir)
 
         # Check the output of the container
         out_dir_content = sorted(out_dir.glob('*.sif'))
@@ -136,7 +140,7 @@ class MinCostFlow (PRM):
             raise RuntimeError('MinCostFlow did not produce an output network')
 
     @staticmethod
-    def parse_output(raw_pathway_file, standardized_pathway_file):
+    def parse_output(raw_pathway_file, standardized_pathway_file, params):
         """
         Convert a predicted pathway into the universal format
 
