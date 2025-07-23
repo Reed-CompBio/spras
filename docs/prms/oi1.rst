@@ -1,4 +1,4 @@
-Omics Integrator I
+Omics Integrator 1
 ==================
 
 Omics Integrator 1 is a pathway reconstruction algorithm. See the source code:

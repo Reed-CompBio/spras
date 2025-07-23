@@ -1,4 +1,4 @@
-Omics Integrator II
+Omics Integrator 2
 ===================
 
 Omics Integrator 2 is a pathway reconstruction algorithm. See the source code:
