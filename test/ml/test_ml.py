@@ -88,7 +88,7 @@ class TestML:
         coord = pd.read_table(OUT_DIR + 'pca-coordinates.tsv')
         coord = coord.round(5)  # round values to 5 digits to account for numeric differences across machines
         expected = pd.read_table(EXPECT_DIR + 'expected-pca-coordinates.tsv')
-        expected_other = pd.read_table(EXPECT_DIR + 'expected-pca-coordinates-negated.tsv')
+        pd.read_table(EXPECT_DIR + 'expected-pca-coordinates-negated.tsv')
         expected = expected.round(5)
 
         assert coord.equals(expected)
