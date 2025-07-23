@@ -17,7 +17,7 @@ class TestEvaluate:
     @classmethod
     def setup_class(cls):
         """
-        Create the expected output directory and pickled file
+        Create the expected output directory and pickled toy dataset file
         """
         Path(OUT_DIR).mkdir(parents=True, exist_ok=True)
 
