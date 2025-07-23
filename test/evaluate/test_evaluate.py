@@ -50,7 +50,7 @@ class TestEvaluate:
 
         Evaluation.precision_and_recall(file_paths, GS_NODE_TABLE, algorithms, output_file, output_png)
         assert filecmp.cmp(output_file, EXPECT_DIR + 'expected-precision-recall-per-pathway-nothing.txt', shallow=False)
-        
+
     def test_precision_recall_pca_chosen_pathway(self):
         output_file = Path(OUT_DIR + "test-pr-per-pathway-pca-chosen.txt")
         output_file.unlink(missing_ok=True)
