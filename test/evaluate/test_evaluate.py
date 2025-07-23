@@ -29,7 +29,7 @@ class TestEvaluate:
         dataset = Dataset({
             "label": 'toy',
             "edge_files": ["input-interactome.txt"],
-            "node_files": [],
+            "node_files": ["input-nodes.txt"],
             "data_dir": INPUT_DIR,
             "other_files": []
         })
