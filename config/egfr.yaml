@@ -111,6 +111,23 @@ algorithms:
           - 5
         flow:
           - 60
+  - name: "strwr"
+    params:
+      include: true
+      run1:
+        alpha: [0.85]
+        threshold: [100, 200]
+
+  - name: "rwr"
+    params:
+      include: true
+      run1:
+        alpha: [0.85]
+        threshold: [100, 200]
+
+  - name: "bowtiebuilder"
+    params:
+      include: false
 datasets:
   - data_dir: input
     edge_files:
@@ -139,6 +156,8 @@ analysis:
     include: true
     aggregate_per_algorithm: true
     labels: true
+    kde: true
+    remove_empty_pathways: true
   evaluation:
     include: true
     aggregate_per_algorithm: true

@@ -272,6 +272,12 @@ class Config:
             self.pca_params["components"] = self.ml_params["components"]
         if "labels" in self.ml_params:
             self.pca_params["labels"] = self.ml_params["labels"]
+        if "kde" in self.ml_params:
+            self.pca_params["kde"] = self.ml_params["kde"]
+        else:
+            self.pca_params["kde"] = False
+        if "remove_empty_pathways" in self.ml_params:
+            self.pca_params["remove_empty_pathways"] = self.ml_params["remove_empty_pathways"]
 
         self.hac_params = {}
         if "linkage" in self.ml_params:
@@ -308,3 +314,10 @@ class Config:
         # Only run Evaluation per algorithm if ML per algorithm is set to True
         if not self.analysis_include_ml_aggregate_algo:
             self.analysis_include_evaluation_aggregate_algo = False
+
+        # Set kde to True if Evaluation is set to True
+        # When Evaluation is True, PCA is used to pick a single parameter combination for all algorithms with multiple
+        # parameter combinations and KDE is used to choose the parameter combination in the PC space
+        if self.analysis_include_evaluation and not self.pca_params["kde"]:
+            self.pca_params["kde"] = True
+            print("Setting kde to true; Evaluation analysis needs to run KDE for PCA-Chosen parameter selection.")

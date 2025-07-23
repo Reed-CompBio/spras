@@ -1,0 +1,3 @@
+Node1	Node2	Rank	Direction
+A	B	1	U
+B	Q	1	U

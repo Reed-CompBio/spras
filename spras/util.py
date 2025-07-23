@@ -5,8 +5,8 @@ Utility functions for pathway reconstruction
 import base64
 import hashlib
 import json
-from pathlib import Path, PurePath, PurePosixPath
-from typing import Any, Dict, List, Optional, Tuple, Union
+from pathlib import Path
+from typing import Any, Dict, Optional
 
 import numpy as np
 import pandas as pd

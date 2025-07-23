@@ -2,8 +2,6 @@ import filecmp
 from glob import glob
 from pathlib import Path
 
-import pytest
-
 from spras import runner
 from spras.dataset import Dataset
 
