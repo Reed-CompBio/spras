@@ -30,7 +30,7 @@ class TestEvaluate:
         })
 
         with open(out_dataset, "wb") as f:
-            pickle.dump(dataset, handle)
+            pickle.dump(dataset, f)
 
     def test_node_ensemble(self):
         out_path_file = Path(OUT_DIR + 'node-ensemble.csv')
