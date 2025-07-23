@@ -22,7 +22,7 @@ class TestEvaluate:
         Create the expected output directory and pickled toy dataset file
         """
         Path(OUT_DIR).mkdir(parents=True, exist_ok=True)
-        
+
         out_dataset = Path(OUT_DIR, 'data.pickle')
         out_dataset.unlink(missing_ok=True)
 
