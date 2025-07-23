@@ -61,6 +61,7 @@ select = [
     "E711", # none-comparison
     "E713", # not-in-test
     "E714" , # not-is-test
+    "F401", # unused imports
     "F821", # undefined-name
     "F823", # undefined-local
     "F841", # unused-variable
