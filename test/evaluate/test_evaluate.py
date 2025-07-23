@@ -25,7 +25,7 @@ class TestEvaluate:
             "label": 'toy',
             "edge_files": ["input-interactome.txt"],
             "node_files": ["input-nodes.txt"],
-            "data_dir": "test/evaluate/input",
+            "data_dir": INPUT_DIR,
             "other_files": []
         })
 
