@@ -1,5 +1,5 @@
 Pathway	Precision	Recall
 test/evaluate/input/data-test-params-456/pathway.txt	0.0	0.0
 test/evaluate/input/data-test-params-empty/pathway.txt	0.0	0.0
-test/evaluate/input/data-test-params-123/pathway.txt	0.6666666666666666	0.6666666666666666
-test/evaluate/input/data-test-params-789/pathway.txt	1.0	1.0
+test/evaluate/input/data-test-params-123/pathway.txt	0.6666666666666666	0.5
+test/evaluate/input/data-test-params-789/pathway.txt	1.0	0.75

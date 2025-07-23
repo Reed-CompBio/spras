@@ -41,6 +41,7 @@ class TestEvaluate:
         Evaluation.precision_and_recall(file_paths, GS_NODE_TABLE, algorithms, output_file, output_png)
         assert filecmp.cmp(output_file, EXPECT_DIR + 'expected-precision-recall-per-pathway-empty.txt', shallow=False)
 
+    # TODO: delete one of the nothing pytest tests
     def test_precision_recall_per_pathway_nothing(self):
 
         file_paths = []
@@ -75,6 +76,7 @@ class TestEvaluate:
         assert chosen.equals(expected)
         assert output_png.exists()
 
+    # TODO: probably delete this one
     def test_precision_recall_pca_chosen_pathway_not_provided(self):
         output_file = OUT_DIR +"test-pr-per-pathway-pca-chosen-not-provided.txt"
         output_png = Path(OUT_DIR + "test-pr-per-pathway-pca-chosen-not-provided.png")
