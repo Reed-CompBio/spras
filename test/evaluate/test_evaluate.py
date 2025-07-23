@@ -22,7 +22,7 @@ class TestEvaluate:
         Path(OUT_DIR).mkdir(parents=True, exist_ok=True)
 
         dataset = Dataset({
-            "label": 'data0',
+            "label": 'toy',
             "edge_files": ["input-interactome.txt"],
             "node_files": ["input-nodes.txt"],
             "data_dir": "test/evaluate/input",
