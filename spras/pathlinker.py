@@ -14,7 +14,7 @@ __all__ = ['PathLinker']
 
 """
 Pathlinker will construct a fully directed graph from the provided input file
-- an edge is represented with a head and tail node, which represents the direction of the interation between two nodes
+- an edge is represented with a head and tail node, which represents the direction of the interaction between two nodes
 - uses networkx Digraph() object
 
 Expected raw input format:
