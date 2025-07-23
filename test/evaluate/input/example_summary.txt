@@ -1,0 +1,5 @@
+Name	Number of nodes	Number of edges	Number of connected components	Nodes in prize	Nodes in active	Nodes in dummy	Nodes in sources	Nodes in targets	Parameter combination
+test/evaluate/input/data-test-params-123/pathway.txt	3	2	1	2	2	1	1	1	{'spras_placeholder': 'no parameters'}
+test/evaluate/input/data-test-params-456/pathway.txt	2	1	0	0	0	0	0	0	{'spras_placeholder': 'no parameters'}
+test/evaluate/input/data-test-params-789/pathway.txt	3	2	1	2	2	1	1	1	{'spras_placeholder': 'no parameters'}
+test/evaluate/input/data-test-params-empty/pathway.txt	0	0	0	0	0	0	0	0	{'spras_placeholder': 'no parameters'}
