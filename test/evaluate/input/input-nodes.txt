@@ -1,27 +1,3 @@
 NODEID	prize	active	dummy	sources	targets
-N					
-T					
-I					
-Z					
-Q					
-P					
+N							
 C	5.7	True			True
-O					
-W					
-Y					
-1S					
-1L					
-1B					
-1D					
-1V					
-1K					
-1M					
-1H					
-1U					
-1R					
-2X					
-2J					
-2E					
-2F					
-2G					
-2A	2.0	True	True	True	

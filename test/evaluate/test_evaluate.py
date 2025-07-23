@@ -21,10 +21,13 @@ class TestEvaluate:
         """
         Path(OUT_DIR).mkdir(parents=True, exist_ok=True)
 
+        out_dataset = Path(OUT_DIR, 'data.pickle')
+        out_dataset.unlink(missing_ok=True)
+
         dataset = Dataset({
             "label": 'toy',
             "edge_files": ["input-interactome.txt"],
-            "node_files": ["input-nodes.txt"],
+            "node_files": [],
             "data_dir": INPUT_DIR,
             "other_files": []
         })
