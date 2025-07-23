@@ -92,6 +92,7 @@ class Evaluation:
         @param output_file: the filename to save the precision and recall of each pathway
         @param output_png: the filename to plot the precision and recall of each pathway (not a PRC)
         """
+        # TODO: seperate into seperate functions to visulize pca-chosen vs per pathway
         y_true = set(node_table["NODEID"])
         results = []
         for f in file_paths:
@@ -133,7 +134,7 @@ class Evaluation:
                 plt.ylabel("Precision")
                 plt.xlim(-0.05, 1.05)
                 plt.ylim(-0.05, 1.05)
-                # TODO: update to work with all evaluation metods
+                # TODO: update to work with all evaluation methods
                 if "per-algorithm" in output_png:
                     plt.title("PCA-Chosen Pathway Per Algorithm Precision and Recall Plot")
                 else:

@@ -1,1 +1,0 @@
-Pathway	Precision	Recall
