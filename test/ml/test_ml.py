@@ -99,10 +99,12 @@ class TestML:
                OUT_DIR + 'pca-coordinates-kde.tsv', kde=True)
         coord = pd.read_table(OUT_DIR + 'pca-coordinates-kde.tsv')
         expected = pd.read_table(EXPECT_DIR + 'expected-pca-coordinates-kde.tsv')
+        expected_negated = pd.read_table(EXPECT_DIR + 'expected-pca-coordinates-kde-negated.tsv')
         coord_kde_peak = coord.loc[coord['datapoint_labels'] == 'kde_peak'].round(5)
         expected_kde_peak = expected.loc[expected['datapoint_labels'] == 'kde_peak'].round(5)
+        expected_kde_peak_negated = expected_negated.loc[expected_negated['datapoint_labels'] == 'kde_peak'].round(5)
 
-        assert coord_kde_peak.equals(expected_kde_peak)
+        assert coord_kde_peak.equals(expected_kde_peak) or coord_kde_peak.equals(expected_kde_peak_negated)
 
     def test_pca_robustness(self):
         dataframe = ml.summarize_networks([INPUT_DIR + 'test-data-s1/s1.txt', INPUT_DIR + 'test-data-s2/s2.txt',
