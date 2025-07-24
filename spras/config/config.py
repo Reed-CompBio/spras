@@ -15,7 +15,6 @@ will grab the top level registry configuration option as it appears in the confi
 import copy as copy
 import itertools as it
 import os
-import re
 import warnings
 from collections.abc import Iterable
 from typing import Any
@@ -23,7 +22,7 @@ from typing import Any
 import numpy as np
 import yaml
 
-from spras.config.schema import Analysis, ContainerFramework, RawConfig
+from spras.config.schema import ContainerFramework, RawConfig
 from spras.util import NpHashEncoder, hash_params_sha1_base32
 
 config = None
@@ -275,7 +274,7 @@ class Config:
         # Only run Evaluation per algorithm if ML per algorithm is set to True
         if not self.analysis_include_ml_aggregate_algo:
             self.analysis_include_evaluation_aggregate_algo = False
-        
+
         # Set kde to True if Evaluation is set to True
         # When Evaluation is True, PCA is used to pick a single parameter combination for all algorithms with multiple
         # parameter combinations and KDE is used to choose the parameter combination in the PC space
