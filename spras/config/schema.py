@@ -52,6 +52,8 @@ class MlAnalysis(BaseModel):
     aggregate_per_algorithm: bool = False
     components: int = 2
     labels: bool = True
+    kde: bool = False
+    remove_empty_pathways: bool = False
     linkage: MlLinkage = MlLinkage.ward
     metric: MlMetric = MlMetric.euclidean
 
