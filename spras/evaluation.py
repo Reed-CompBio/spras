@@ -80,7 +80,7 @@ class Evaluation:
         # TODO: later iteration - chose between node and edge file, or allow both
 
     @staticmethod
-    def node_precision_and_recall(file_paths: Iterable[Path], node_table: pd.DataFrame):
+    def node_precision_and_recall(file_paths: Iterable[Path], node_table: pd.DataFrame) -> pd.DataFrame:
         """
         Computes node-level precision and recall for each pathway reconstruction output file.
 
