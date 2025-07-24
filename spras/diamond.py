@@ -14,11 +14,12 @@ __all__ = ['DIAMOnD']
 
 class DIAMOnD(PRM):
     """
-    DIAMOnD (https://doi.org/10.1371/journal.pcbi.1004120) is a disease module detection algorithm,
+    DIAMOnD is a disease module detection algorithm,
     which has been modified here, using sources and targets as seeds, to act as a pathway reconstruction algorithm.
     It does not account for node scores, and takes in undirected graphs as input.
     """
     required_inputs = ['seeds', 'network']
+    dois = ["10.1371/journal.pcbi.1004120"]
 
     @staticmethod
     def generate_inputs(data, filename_map):
