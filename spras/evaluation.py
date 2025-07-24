@@ -80,7 +80,7 @@ class Evaluation:
         # TODO: later iteration - chose between node and edge file, or allow both
 
     @staticmethod
-    def precision_and_recall(file_paths: Iterable[Path], node_table: pd.DataFrame):
+    def node_precision_and_recall(file_paths: Iterable[Path], node_table: pd.DataFrame):
         """
         Takes in file paths for a specific dataset and an associated gold standard node table.
         Calculates precision and recall for each pathway file
@@ -108,9 +108,9 @@ class Evaluation:
         return pr_df
 
     @staticmethod
-    def visulize_precision_and_recall_per_pathway(pr_df: pd.DataFrame, output_file: str,
-                             output_png: str):
+    def visulize_precision_and_recall_per_pathway(pr_df: pd.DataFrame, output_file: str, output_png: str):
         """
+        #TODO make the comments better on explainining
         Visulizes precision and recall plot per pathway and saves dataframe of each precision and recall per pathway
         @param pr_df: Dataframe of calculated precision and recall for each pathway file
         @param output_file: the filename to save the precision and recall of each pathway
@@ -154,23 +154,14 @@ class Evaluation:
             pr_df.to_csv(output_file, sep="\t", index=False)
 
         else:
-            # I don't think this will ever hit
-            # TODO: add an error instead
-            # TODO: think through this test case
-            pr_df = pd.DataFrame(columns=["Pathway", "Precision", "Recall"])
-            pr_df.to_csv(output_file, sep="\t", index=False, )
-            if output_png is not None:
-                plt.figure(figsize=(10, 7))
-                plt.plot([], [], label="No Pathways Given")
-                plt.title("Empty Precision and Recall Plot Per Pathway")
-                plt.legend()
-                plt.savefig(output_png)
-                plt.close()
+            # this block should never be reached — having 0 pathways implies that no algorithms or parameter combinations were run,
+            # which indicates a deeper issue in the workflow setup.
+            raise ValueError("No pathways were provided to evaluate and visulize on. This likely means no algorithms or parameter combinations were run.")
 
     @staticmethod
-    def visulize_precision_and_recall_pca_chosen_pathway(pr_df: pd.DataFrame, output_file: str,
-                             output_png: str):
+    def visulize_precision_and_recall_pca_chosen_pathway(pr_df: pd.DataFrame, output_file: str, output_png: str):
         """
+        # TODO make the comments better on explainining
         Visulizes precision and recall plot for a pca chosen pathway and saves dataframe of precision and recall for a pca chosen pathway
         @param pr_df: Dataframe of calculated precision and recall for each pathway file
         @param output_file: the filename to save the precision and recall of each pathway

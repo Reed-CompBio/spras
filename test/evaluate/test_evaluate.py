@@ -3,6 +3,7 @@ import pickle
 from pathlib import Path
 
 import pandas as pd
+import pytest
 
 import spras.analysis.ml as ml
 from spras.dataset import Dataset
@@ -37,14 +38,14 @@ class TestEvaluate:
         with open(out_dataset, "wb") as f:
             pickle.dump(dataset, f)
 
-    def test_precision_recall_per_pathway(self):
+    def test_node_precision_recall_per_pathway(self):
         file_paths = [INPUT_DIR + "data-test-params-123/pathway.txt", INPUT_DIR + "data-test-params-456/pathway.txt",  INPUT_DIR + "data-test-params-789/pathway.txt",  INPUT_DIR + "data-test-params-empty/pathway.txt"]
         output_file = Path(OUT_DIR + "pr-per-pathway.txt")
         output_png = Path(OUT_DIR + "pr-per-pathway.png")
         output_file.unlink(missing_ok=True)
         output_png.unlink(missing_ok=True)
 
-        pr_df = Evaluation.precision_and_recall(file_paths, GS_NODE_TABLE)
+        pr_df = Evaluation.node_precision_and_recall(file_paths, GS_NODE_TABLE)
         Evaluation.visulize_precision_and_recall_per_pathway(pr_df, str(output_file), str(output_png))
 
         output = pd.read_csv(output_file, sep="\t", header=0).round(8)
@@ -53,7 +54,7 @@ class TestEvaluate:
         assert output.equals(expected)
         assert output_png.exists()
 
-    def test_precision_recall_per_pathway_empty(self):
+    def test_node_precision_recall_per_pathway_empty(self):
 
         file_paths = [INPUT_DIR + "data-test-params-empty/pathway.txt"]
         output_file = Path(OUT_DIR +"pr-per-pathway-empty.txt")
@@ -61,7 +62,7 @@ class TestEvaluate:
         output_file.unlink(missing_ok=True)
         output_png.unlink(missing_ok=True)
 
-        pr_df = Evaluation.precision_and_recall(file_paths, GS_NODE_TABLE)
+        pr_df = Evaluation.node_precision_and_recall(file_paths, GS_NODE_TABLE)
         Evaluation.visulize_precision_and_recall_per_pathway(pr_df, str(output_file), str(output_png))
 
         output = pd.read_csv(output_file, sep="\t", header=0).round(8)
@@ -70,23 +71,32 @@ class TestEvaluate:
         assert output.equals(expected)
         assert output_png.exists()
 
-    def test_precision_recall_not_provided(self): # TODO update for both pca-chosen and per pathway based on errors
-        output_file = Path( OUT_DIR +"pr-per-pathway-not-provided.txt")
+    def test_node_precision_recall_per_pathway_not_provided(self):
+        output_file = OUT_DIR +"pr-per-pathway-not-provided.txt"
+        output_png = OUT_DIR + "pr-per-pathway-not-provided.png"
+        file_paths = []
+
+        pr_df = Evaluation.node_precision_and_recall(file_paths, GS_NODE_TABLE)
+        with pytest.raises(ValueError):
+            Evaluation.visulize_precision_and_recall_per_pathway(pr_df, output_file, output_png)
+
+    def test_node_precision_recall_pca_chosen_pathway_not_provided(self):
+        output_file = Path( OUT_DIR +"pr-per-pathway-pca-chosen-not-provided.txt")
         output_file.unlink(missing_ok=True)
-        output_png = Path(OUT_DIR + "pr-per-pathway-not-provided.png")
+        output_png = Path(OUT_DIR + "pr-per-pathway-pca-chosen-not-provided.png")
         output_png.unlink(missing_ok=True)
         file_paths = []
 
-        pr_df = Evaluation.precision_and_recall(file_paths, GS_NODE_TABLE)
-        Evaluation.visulize_precision_and_recall_per_pathway(pr_df, str(output_file), str(output_png))
+        pr_df = Evaluation.node_precision_and_recall(file_paths, GS_NODE_TABLE)
+        Evaluation.visulize_precision_and_recall_pca_chosen_pathway(pr_df, str(output_file), str(output_png))
 
         output = pd.read_csv(output_file, sep="\t", header=0).round(8)
-        expected = pd.read_csv(EXPECT_DIR + 'expected-pr-not-provided.txt', sep="\t",  header=0).round(8)
+        expected = pd.read_csv(EXPECT_DIR + 'expected-pr-pca-chosen-not-provided.txt', sep="\t",  header=0).round(8)
 
         assert output.equals(expected)
         assert output_png.exists()
 
-    def test_precision_recall_pca_chosen_pathway(self):
+    def test_node_precision_recall_pca_chosen_pathway(self):
         output_file = Path(OUT_DIR + "pr-per-pathway-pca-chosen.txt")
         output_file.unlink(missing_ok=True)
         output_png = Path(OUT_DIR + "pr-per-pathway-pca-chosen.png")
@@ -102,7 +112,7 @@ class TestEvaluate:
 
         pathway = Evaluation.pca_chosen_pathway([output_coordinates], SUMMARY_FILE, INPUT_DIR)
 
-        pr_df = Evaluation.precision_and_recall(pathway, GS_NODE_TABLE)
+        pr_df = Evaluation.node_precision_and_recall(pathway, GS_NODE_TABLE)
         Evaluation.visulize_precision_and_recall_pca_chosen_pathway(pr_df, str(output_file), str(output_png))
 
 
