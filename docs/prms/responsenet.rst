@@ -8,4 +8,4 @@ https://github.com/Reed-CompBio/ResponseNet.
 
 ResponseNet takes one optional parameter:
 
-* gamma: (int) the size of the output graph: more gamma means more 'flow' needs to be passed through the sources.
+* gamma: (int) the size of the output graph: more gamma means more 'flow' gets passed along starting from the sources.
