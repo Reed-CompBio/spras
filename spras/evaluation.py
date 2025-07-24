@@ -82,13 +82,15 @@ class Evaluation:
     @staticmethod
     def node_precision_and_recall(file_paths: Iterable[Path], node_table: pd.DataFrame):
         """
-        Takes in file paths for a specific dataset and an associated gold standard node table.
-        Calculates precision and recall for each pathway file
-        Returns Dataframe of precision and recalls per pathway file
+        Computes node-level precision and recall for each pathway reconstruction output file.
+
+        This function takes the file paths corresponding to algorithm outputs and compares
+        them against a provided gold standard node table. It returns a DataFrame with
+        precision and recall values computed per pathway file.
+
         @param file_paths: file paths of pathway reconstruction algorithm outputs
         @param node_table: the gold standard nodes
         """
-        # TODO: seperate into seperate functions to visulize pca-chosen vs per pathway
         y_true = set(node_table["NODEID"])
         results = []
         for f in file_paths:
@@ -110,8 +112,13 @@ class Evaluation:
     @staticmethod
     def visulize_precision_and_recall_per_pathway(pr_df: pd.DataFrame, output_file: str, output_png: str):
         """
-        #TODO make the comments better on explainining
-        Visulizes precision and recall plot per pathway and saves dataframe of each precision and recall per pathway
+        Generates a scatter plot of precision and recall values for each pathway and saves both
+        the plot and the data.
+
+        This function is intended for visualizing how different pathway reconstructions perform
+        (not a precision-recall curve) showing the precision and recall of each parameter combination
+        for each algorithm.
+
         @param pr_df: Dataframe of calculated precision and recall for each pathway file
         @param output_file: the filename to save the precision and recall of each pathway
         @param output_png: the filename to plot the precision and recall of each pathway (not a PRC)
@@ -161,12 +168,18 @@ class Evaluation:
     @staticmethod
     def visulize_precision_and_recall_pca_chosen_pathway(pr_df: pd.DataFrame, output_file: str, output_png: str):
         """
-        # TODO make the comments better on explainining
-        Visulizes precision and recall plot for a pca chosen pathway and saves dataframe of precision and recall for a pca chosen pathway
+        Generates a scatter plot of precision and recall values for each PCA-chosen pathway and saves both
+        the plot and the data.
+
+        This function is intended for visualizing how different pathway reconstructions perform
+        (not a precision-recall curve) showing the precision and recall of the parameter combination
+        selected via PCA for each algorithm.
+
+        # TODO update to add in the pathways for the algortihms that do not provide a pca chosen pathway
+
         @param pr_df: Dataframe of calculated precision and recall for each pathway file
         @param output_file: the filename to save the precision and recall of each pathway
         @param output_png: the filename to plot the precision and recall of each pathway (not a PRC)
-        # TODO update to add in the pathways for the algortihms that do not provide a pca chosen pathway
         """
         if not pr_df.empty:
             pr_df["Algorithm"] = pr_df["Pathway"].str.split("/").str[-2].str.split("-").str[1]
@@ -229,10 +242,12 @@ class Evaluation:
             2) end all be all, choose the first one based on name
         Returns a list of file paths for the representative pathway associated with the closest data point to the
         centroid.
+
+        # TODO update to add in the pathways for the algortihms that do not provide a pca chosen pathway
+
         @param coordinates_files: a list of PCA coordinates files for a dataset or specific algorithm in a dataset
         @param pathway_summary_file: a file for each file per dataset about its network statistics
         @param output_dir: the main reconstruction directory
-        # TODO update to add in the pathways for the algortihms that do not provide a pca chosen pathway
         """
         rep_pathways = []
 
