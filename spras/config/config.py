@@ -15,7 +15,6 @@ will grab the top level registry configuration option as it appears in the confi
 import copy as copy
 import itertools as it
 import os
-import re
 import warnings
 from collections.abc import Iterable
 from typing import Any
@@ -24,7 +23,7 @@ import numpy as np
 import yaml
 
 from spras.config.container_schema import ProcessedContainerSettings
-from spras.config.schema import Analysis, RawConfig
+from spras.config.schema import RawConfig
 from spras.util import NpHashEncoder, hash_params_sha1_base32
 
 config = None
@@ -210,7 +209,9 @@ class Config:
         # self.ml_params is a class, pca_params needs to be a dict.
         self.pca_params = {
             "components": self.ml_params.components,
-            "labels": self.ml_params.labels
+            "labels": self.ml_params.labels,
+            "kde": self.ml_params.kde,
+            "remove_empty_pathways": self.ml_params.remove_empty_pathways
         }
 
         self.hac_params = {
@@ -247,6 +248,13 @@ class Config:
         # Only run Evaluation per algorithm if ML per algorithm is set to True
         if not self.analysis_include_ml_aggregate_algo:
             self.analysis_include_evaluation_aggregate_algo = False
+
+        # Set kde to True if Evaluation is set to True
+        # When Evaluation is True, PCA is used to pick a single parameter combination for all algorithms with multiple
+        # parameter combinations and KDE is used to choose the parameter combination in the PC space
+        if self.analysis_include_evaluation and not self.pca_params["kde"]:
+            self.pca_params["kde"] = True
+            print("Setting kde to true; Evaluation analysis needs to run KDE for PCA-Chosen parameter selection.")
 
     def process_config(self, raw_config: RawConfig):
         self.out_dir = raw_config.reconstruction_settings.locations.reconstruction_dir
