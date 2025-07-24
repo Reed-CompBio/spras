@@ -3,7 +3,7 @@ from pathlib import Path
 import pandas as pd
 
 from spras.containers import prepare_volume, run_container
-from spras.dataset import Dataset
+from spras.dataset import Dataset, Direction, GraphMultiplicity
 from spras.interactome import reinsert_direction_col_directed
 from spras.prm import PRM
 from spras.util import add_rank_column, duplicate_edges, raw_pathway_df
@@ -22,15 +22,15 @@ class RWR(PRM):
 
         # Get sources and targets for node input file
         if data.contains_node_columns(["sources","targets"]):
-            sources = data.request_node_columns(["sources"])
-            targets = data.request_node_columns(["targets"])
+            sources = data.get_node_columns(["sources"])
+            targets = data.get_node_columns(["targets"])
             nodes = pd.DataFrame({'NODEID':sources['NODEID'].tolist() + targets['NODEID'].tolist()})
             nodes.to_csv(filename_map['nodes'],sep='\t',index=False,columns=['NODEID'],header=False)
         else:
             raise ValueError("Invalid node data")
 
         # Get edge data for network file
-        edges = data.get_interactome()
+        edges = data.get_interactome([Direction.DIRECTED, GraphMultiplicity.SIMPLE]).df
         edges.to_csv(filename_map['network'],sep='|',index=False,columns=['Interactor1','Interactor2'],header=False)
 
     @staticmethod
@@ -97,7 +97,7 @@ class RWR(PRM):
             df = df.sort_values(by=['score'], ascending=False)
             df = df.head(int(threshold))
             raw_dataset = Dataset.from_file(params.get('dataset'))
-            interactome = raw_dataset.get_interactome().get(['Interactor1','Interactor2'])
+            interactome = raw_dataset.get_interactome([]).df.get(['Interactor1','Interactor2'])
             interactome = interactome[interactome['Interactor1'].isin(df['node'])
                                       & interactome['Interactor2'].isin(df['node'])]
             interactome = add_rank_column(interactome)
