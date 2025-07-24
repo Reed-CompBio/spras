@@ -80,17 +80,13 @@ class Evaluation:
         # TODO: later iteration - chose between node and edge file, or allow both
 
     @staticmethod
-    def precision_and_recall(file_paths: Iterable[Path], node_table: pd.DataFrame, algorithms: list, output_file: str,
-                             output_png: str):
+    def precision_and_recall(file_paths: Iterable[Path], node_table: pd.DataFrame):
         """
         Takes in file paths for a specific dataset and an associated gold standard node table.
         Calculates precision and recall for each pathway file
-        Returns output back to output_file
+        Returns Dataframe of precision and recalls per pathway file
         @param file_paths: file paths of pathway reconstruction algorithm outputs
         @param node_table: the gold standard nodes
-        @param algorithms: list of algorithms used in current run of SPRAS
-        @param output_file: the filename to save the precision and recall of each pathway
-        @param output_png: the filename to plot the precision and recall of each pathway (not a PRC)
         """
         # TODO: seperate into seperate functions to visulize pca-chosen vs per pathway
         y_true = set(node_table["NODEID"])
@@ -109,40 +105,113 @@ class Evaluation:
             results.append({"Pathway": f, "Precision": precision, "Recall": recall})
 
         pr_df = pd.DataFrame(results)
+        return pr_df
 
+    @staticmethod
+    def visulize_precision_and_recall_per_pathway(pr_df: pd.DataFrame, output_file: str,
+                             output_png: str):
+        """
+        Visulizes precision and recall plot per pathway and saves dataframe of each precision and recall per pathway
+        @param pr_df: Dataframe of calculated precision and recall for each pathway file
+        @param output_file: the filename to save the precision and recall of each pathway
+        @param output_png: the filename to plot the precision and recall of each pathway (not a PRC)
+        """
         if not pr_df.empty:
+            pr_df["Algorithm"] = pr_df["Pathway"].str.split("/").str[-2].str.split("-").str[1]
             pr_df.sort_values(by=["Recall", "Pathway"], axis=0, ascending=True, inplace=True)
+
+            # save figure
+            plt.figure(figsize=(10, 7))
+            color_palette = create_palette(pr_df["Algorithm"].tolist())
+
+            for algorithm, subset in pr_df.groupby("Algorithm"):
+                if not subset.empty:
+                    plt.plot(
+                        subset["Recall"],
+                        subset["Precision"],
+                        color=color_palette[algorithm],
+                        marker="o",
+                        linestyle="",
+                        label=algorithm
+                    )
+
+                if f"for-{algorithm}" in output_png:
+                    plt.title(f"Precision and Recall Plot Per Pathway For {algorithm.capitalize()}")
+                else:
+                    plt.title("Precision and Recall Plot Per Pathway Across All Algorithms")
+
+            plt.xlabel("Recall")
+            plt.ylabel("Precision")
+            plt.xlim(-0.05, 1.05)
+            plt.ylim(-0.05, 1.05)
+            plt.legend()
+            plt.grid(True)
+            plt.savefig(output_png)
+            plt.close()
+
+            # save dataframe
+            pr_df.drop(columns=["Algorithm"], inplace=True)
             pr_df.to_csv(output_file, sep="\t", index=False)
+
+        else:
+            # I don't think this will ever hit
+            # TODO: add an error instead
+            # TODO: think through this test case
+            pr_df = pd.DataFrame(columns=["Pathway", "Precision", "Recall"])
+            pr_df.to_csv(output_file, sep="\t", index=False, )
             if output_png is not None:
                 plt.figure(figsize=(10, 7))
-                color_palette = create_palette(algorithms)
-                # plot a line per algorithm
-                for algorithm in algorithms:
-                    subset = pr_df[pr_df["Pathway"].str.contains(algorithm)]
-                    if not subset.empty:
-                        plt.plot(
-                            subset["Recall"],
-                            subset["Precision"],
-                            color=color_palette[algorithm],
-                            marker="o",
-                            linestyle="",
-
-                            label=f"{algorithm}"
-                        )
-
-                plt.xlabel("Recall")
-                plt.ylabel("Precision")
-                plt.xlim(-0.05, 1.05)
-                plt.ylim(-0.05, 1.05)
-                # TODO: update to work with all evaluation methods
-                if "per-algorithm" in output_png:
-                    plt.title("PCA-Chosen Pathway Per Algorithm Precision and Recall Plot")
-                else:
-                    plt.title("PCA-Chosen Pathway Precision and Recall Plot")
+                plt.plot([], [], label="No Pathways Given")
+                plt.title("Empty Precision and Recall Plot Per Pathway")
                 plt.legend()
-                plt.grid(True)
                 plt.savefig(output_png)
                 plt.close()
+
+    @staticmethod
+    def visulize_precision_and_recall_pca_chosen_pathway(pr_df: pd.DataFrame, output_file: str,
+                             output_png: str):
+        """
+        Visulizes precision and recall plot for a pca chosen pathway and saves dataframe of precision and recall for a pca chosen pathway
+        @param pr_df: Dataframe of calculated precision and recall for each pathway file
+        @param output_file: the filename to save the precision and recall of each pathway
+        @param output_png: the filename to plot the precision and recall of each pathway (not a PRC)
+        # TODO update to add in the pathways for the algortihms that do not provide a pca chosen pathway
+        """
+        if not pr_df.empty:
+            pr_df["Algorithm"] = pr_df["Pathway"].str.split("/").str[-2].str.split("-").str[1]
+            pr_df.sort_values(by=["Recall", "Pathway"], axis=0, ascending=True, inplace=True)
+
+            # save figure
+            plt.figure(figsize=(10, 7))
+            color_palette = create_palette(pr_df["Algorithm"].tolist())
+            # plot a line per algorithm
+            for algorithm, subset in pr_df.groupby("Algorithm"):
+                if not subset.empty:
+                    plt.plot(
+                        subset["Recall"],
+                        subset["Precision"],
+                        color=color_palette[algorithm],
+                        marker="o",
+                        linestyle="",
+                        label=algorithm
+                    )
+
+            plt.xlabel("Recall")
+            plt.ylabel("Precision")
+            plt.xlim(-0.05, 1.05)
+            plt.ylim(-0.05, 1.05)
+            if "per-algorithm" in output_png:
+                plt.title("PCA-Chosen Pathway Per Algorithm Precision and Recall Plot")
+            else:
+                plt.title("PCA-Chosen Pathway Across All Algorithms Precision and Recall Plot")
+            plt.legend()
+            plt.grid(True)
+            plt.savefig(output_png)
+            plt.close()
+
+            # save dataframe
+            pr_df.drop(columns=["Algorithm"], inplace=True)
+            pr_df.to_csv(output_file, sep="\t", index=False)
         else:
             # Edge case: if all algorithms chosen use only 1 parameter combination
             # TODO: once functions are separated, update to be a warning
@@ -172,6 +241,7 @@ class Evaluation:
         @param coordinates_files: a list of PCA coordinates files for a dataset or specific algorithm in a dataset
         @param pathway_summary_file: a file for each file per dataset about its network statistics
         @param output_dir: the main reconstruction directory
+        # TODO update to add in the pathways for the algortihms that do not provide a pca chosen pathway
         """
         rep_pathways = []
 

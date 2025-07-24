@@ -363,7 +363,7 @@ rule ensemble:
 
 # Returns all pathways for a specific algorithm
 def collect_pathways_per_algo(wildcards):
-    filtered_algo_params = [algo_param for algo_param in algorithms_with_params if wildcards.algorithm in algo_param]
+    filtered_algo_params = [algo_param for algo_param in algorithms_with_params if algo_param.split("-")[0] == wildcards.algorithm]
     return expand('{out_dir}{sep}{{dataset}}-{algorithm_params}{sep}pathway.txt', out_dir=out_dir, sep=SEP, algorithm_params=filtered_algo_params)
 
 # Cluster the output pathways for each dataset per algorithm
@@ -433,12 +433,13 @@ rule evaluation_pr_per_pathways:
         pr_png = SEP.join([out_dir, '{dataset_gold_standard_pairs}-eval', 'pr-per-pathway.png']),
     run:
         node_table = Evaluation.from_file(input.gold_standard_file).node_table
-        Evaluation.precision_and_recall(input.pathways, node_table, algorithms, output.pr_file, output.pr_png)
+        pr_df = Evaluation.precision_and_recall(input.pathways, node_table)
+        Evaluation.visulize_precision_and_recall_per_pathway(pr_df, output.pr_file, output.pr_png)
         
 # Returns all pathways for a specific algorithm and dataset
 def collect_pathways_per_algo_per_dataset(wildcards):
     dataset_label = get_dataset_label(wildcards)
-    filtered_algo_params = [algo_param for algo_param in algorithms_with_params if wildcards.algorithm in algo_param]
+    filtered_algo_params = [algo_param for algo_param in algorithms_with_params if algo_param.split("-")[0] == wildcards.algorithm]
     return expand('{out_dir}{sep}{dataset_label}-{algorithm_params}{sep}pathway.txt', out_dir=out_dir, sep=SEP, algorithm_params=filtered_algo_params, dataset_label= dataset_label)
 
 # Run precision and recall per algorithm for all pathway outputs for a dataset against its paired gold standard
@@ -451,7 +452,8 @@ rule evaluation_per_algo_pr_per_pathways:
         pr_png = SEP.join([out_dir, '{dataset_gold_standard_pairs}-eval', 'pr-per-pathway-for-{algorithm}.png']),
     run:
         node_table = Evaluation.from_file(input.gold_standard_file).node_table
-        Evaluation.precision_and_recall(input.pathways, node_table, algorithms, output.pr_file, output.pr_png)
+        pr_df = Evaluation.precision_and_recall(input.pathways, node_table)
+        Evaluation.visulize_precision_and_recall_per_pathway(pr_df, output.pr_file, output.pr_png)
 
 # Return pathway summary file per dataset
 def collect_summary_statistics_per_dataset(wildcards):
@@ -477,7 +479,8 @@ rule evaluation_pca_chosen:
     run:
         node_table = Evaluation.from_file(input.gold_standard_file).node_table
         pca_chosen_pathway = Evaluation.pca_chosen_pathway(input.pca_coordinates_file, input.pathway_summary_file, out_dir)
-        Evaluation.precision_and_recall(pca_chosen_pathway, node_table, algorithms, output.pca_chosen_pr_file, output.pca_chosen_pr_png)
+        pr_df = Evaluation.precision_and_recall(pca_chosen_pathway, node_table)
+        Evaluation.visulize_precision_and_recall_pca_chosen_pathway(pr_df, output.pca_chosen_pr_file, output.pca_chosen_pr_png)
 
 # Returns pca coordinates for a specific algorithm and dataset
 def collect_pca_coordinates_per_algo_per_dataset(wildcards):
@@ -497,7 +500,8 @@ rule evaluation_per_algo_pca_chosen:
     run:
         node_table = Evaluation.from_file(input.gold_standard_file).node_table
         pca_chosen_pathways = Evaluation.pca_chosen_pathway(input.pca_coordinates_file, input.pathway_summary_file, out_dir)
-        Evaluation.precision_and_recall(pca_chosen_pathways, node_table, algorithms, output.pca_chosen_pr_file, output.pca_chosen_pr_png)
+        pr_df = Evaluation.precision_and_recall(pca_chosen_pathways, node_table)
+        Evaluation.visulize_precision_and_recall_pca_chosen_pathway(pr_df, output.pca_chosen_pr_file, output.pca_chosen_pr_png)
 
 # Return the dataset pickle file for a specific dataset
 def get_dataset_pickle_file(wildcards):
