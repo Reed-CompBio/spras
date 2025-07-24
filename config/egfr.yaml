@@ -71,6 +71,22 @@ algorithms:
       run3:
         capacity: 5
         flow: 60
+  - name: "strwr"
+    include: true
+    runs:
+      run1:
+        alpha: [0.85]
+        threshold: [100, 200]
+
+  - name: "rwr"
+    include: true
+    runs:
+      run1:
+        alpha: [0.85]
+        threshold: [100, 200]
+
+  - name: "bowtiebuilder"
+    include: false
 datasets:
   - data_dir: input
     edge_files:
@@ -98,6 +114,8 @@ analysis:
     include: true
     aggregate_per_algorithm: true
     labels: true
+    kde: true
+    remove_empty_pathways: true
   evaluation:
     include: true
     aggregate_per_algorithm: true

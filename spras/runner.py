@@ -14,6 +14,7 @@ from spras.omicsintegrator1 import OmicsIntegrator1, OmicsIntegrator1Params
 from spras.omicsintegrator2 import OmicsIntegrator2, OmicsIntegrator2Params
 from spras.pathlinker import PathLinker, PathLinkerParams
 from spras.prm import PRM
+from spras.responsenet import ResponseNet, ResponseNetParams
 from spras.rwr import RWR, RWRParams
 from spras.strwr import ST_RWR, ST_RWRParams
 
@@ -28,6 +29,7 @@ algorithms: dict[str, tuple[type[PRM], type[BaseModel], Optional[BaseModel]]] = 
     "omicsintegrator1": (OmicsIntegrator1, OmicsIntegrator1Params, None),
     "omicsintegrator2": (OmicsIntegrator2, OmicsIntegrator2Params, OmicsIntegrator2Params()),
     "pathlinker": (PathLinker, PathLinkerParams, PathLinkerParams()),
+    "responsenet": (ResponseNet, ResponseNetParams, ResponseNetParams()),
     "rwr": (RWR, RWRParams, None),
     "strwr": (ST_RWR, ST_RWRParams, None),
 }

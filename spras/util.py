@@ -5,8 +5,8 @@ Utility functions for pathway reconstruction
 import base64
 import hashlib
 import json
-from pathlib import Path, PurePath, PurePosixPath
-from typing import Any, Dict, List, Optional, Tuple, Union
+from pathlib import Path
+from typing import Any, Dict, Optional
 
 import numpy as np
 import pandas as pd
@@ -103,7 +103,7 @@ def raw_pathway_df(raw_pathway_file: str, sep: str = '\t', header: int = None) -
     return df
 
 
-def duplicate_edges(df: pd.DataFrame) -> (pd.DataFrame, bool):
+def duplicate_edges(df: pd.DataFrame) -> tuple[pd.DataFrame, bool]:
     """
     Removes duplicate edges from the input DataFrame. Run within every pathway reconstruction algorithm's parse_output.
     - For duplicate edges (based on Node1, Node2, and Direction), the one with the smallest Rank is kept.

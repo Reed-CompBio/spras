@@ -1,7 +1,6 @@
 from pathlib import Path
 from typing import Optional
 
-import pandas as pd
 from pydantic import BaseModel, ConfigDict
 
 from spras.config.container_schema import ProcessedContainerSettings
