@@ -111,8 +111,8 @@ class TestML:
                                            INPUT_DIR + 'test-data-s3/s3.txt'])
         # PCA signage now depends on the input data: we need two differently signed PCA coordinate files.
         # See https://scikit-learn.org/stable/whats_new/v1.5.html#changed-models for more info.
-        expected = pd.read_table(EXPECT_DIR + 'expected-pca-coordinates.tsv')
-        expected_other = pd.read_table(EXPECT_DIR + 'expected-pca-coordinates-negated.tsv')
+        expected = pd.read_table(EXPECT_DIR + 'expected-pca-coordinates-sorted.tsv')
+        expected_other = pd.read_table(EXPECT_DIR + 'expected-pca-coordinates-sorted-negated.tsv')
         expected = expected.round(5)
         expected_other = expected_other.round(5)
         expected.sort_values(by='datapoint_labels', ignore_index=True, inplace=True)
