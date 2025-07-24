@@ -14,13 +14,14 @@ algo_exp_file = {
     'meo': 'edges',
     'omicsintegrator1': 'edges',
     'omicsintegrator2': 'edges',
+    'diamond': 'network',
     'domino': 'network',
     'pathlinker': 'network',
     'allpairs': 'network',
     'bowtiebuilder': 'edges',
     'strwr': 'network',
     'rwr': 'network',
-    'diamond': 'network'
+    'responsenet': 'edges'
 }
 
 
@@ -50,3 +51,6 @@ class TestGenerateInputs:
             exp_file_name = algo_exp_file[algo]
             assert filecmp.cmp(OUTDIR + f"{algo}-{exp_file_name}.txt", EXPDIR + f"{algo}-{exp_file_name}-expected.txt",
                                shallow=False)
+
+            for file in filename_map.values():
+                assert Path(file).exists()

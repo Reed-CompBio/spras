@@ -1,4 +1,5 @@
 import filecmp
+from glob import glob
 from pathlib import Path
 
 from spras import runner
@@ -22,6 +23,7 @@ algorithms = {
     'allpairs': {},
     'domino': {},
     'bowtiebuilder': {},
+    'responsenet': {},
     'strwr': {
         'threshold': 3,
         'dataset': Dataset({
@@ -69,14 +71,6 @@ class TestParseOutputs:
             runner.parse_output(algo, test_file, out_file, params)
             assert filecmp.cmp(OUTDIR / f"{algo}-pathway.txt", EXPDIR / f"{algo}-pathway-expected.txt", shallow=False)
 
-    def test_empty_file(self):
-        for algo, params in algorithms.items():
-            test_file = INDIR / f"empty-raw-pathway.txt"
-            out_file = OUTDIR / f"{algo}-empty-pathway.txt"
-
-            runner.parse_output(algo, test_file, out_file, params)
-            assert filecmp.cmp(OUTDIR / f"{algo}-empty-pathway.txt", EXPDIR / f"empty-pathway-expected.txt", shallow=False)
-
     def test_oi2_miss_insolution(self):
         test_file = OI2_EDGE_CASES_INDIR / f"omicsintegrator2-miss-insolution-raw-pathway.txt"
         out_file = OUTDIR / f"omicsintegrator2-miss-insolution-pathway.txt"
@@ -98,3 +92,12 @@ class TestParseOutputs:
 
             runner.parse_output(algo, test_file, out_file, params)
             assert filecmp.cmp(OUTDIR / f"{algo}-duplicate-pathway.txt", EXPDIR / f"{algo}-pathway-expected.txt", shallow=False)
+
+    def test_empty_raw_pathway(self):
+        for algo, params in algorithms.items():
+            files = glob(str(INDIR / "empty" / f"{algo}-empty-raw-pathway*"))
+            assert len(files) != 0, "can't test on no empty raw pathways!"
+            for test_file in glob(str(INDIR / "empty" / f"{algo}-empty-raw-pathway*")):
+                out_file = OUTDIR / f"{algo}-empty-pathway-output.txt"
+                runner.parse_output(algo, test_file, out_file, params)
+                assert filecmp.cmp(out_file, EXPDIR / f"empty-pathway-expected.txt", shallow=False)
