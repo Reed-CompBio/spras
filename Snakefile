@@ -26,6 +26,7 @@ algorithm_directed = _config.config.algorithm_directed
 pca_params = _config.config.pca_params
 hac_params = _config.config.hac_params
 FRAMEWORK = _config.config.container_framework
+include_aggregate_algo_eval = _config.config.analysis_include_evaluation_aggregate_algo
 
 # Return the dataset or gold_standard dictionary from the config file given the label
 def get_dataset(_datasets, label):
@@ -109,6 +110,7 @@ def make_final_input(wildcards):
         final_input.extend(expand('{out_dir}{sep}{dataset_gold_standard_pair}-eval{sep}pr-pca-chosen-pathway.png',out_dir=out_dir,sep=SEP,dataset_gold_standard_pair=dataset_gold_standard_pairs))
         final_input.extend(expand('{out_dir}{sep}{dataset_gold_standard_pair}-eval{sep}pr-curve-ensemble-nodes.png',out_dir=out_dir,sep=SEP,dataset_gold_standard_pair=dataset_gold_standard_pairs))
         final_input.extend(expand('{out_dir}{sep}{dataset_gold_standard_pair}-eval{sep}pr-curve-ensemble-nodes.txt',out_dir=out_dir,sep=SEP,dataset_gold_standard_pair=dataset_gold_standard_pairs))
+    
     if _config.config.analysis_include_evaluation_aggregate_algo:
         final_input.extend(expand('{out_dir}{sep}{dataset_gold_standard_pair}-eval{sep}pr-per-pathway-for-{algorithm}.txt',out_dir=out_dir,sep=SEP,dataset_gold_standard_pair=dataset_gold_standard_pairs,algorithm=algorithms))
         final_input.extend(expand('{out_dir}{sep}{dataset_gold_standard_pair}-eval{sep}pr-per-pathway-for-{algorithm}.png',out_dir=out_dir,sep=SEP,dataset_gold_standard_pair=dataset_gold_standard_pairs,algorithm=algorithms))
@@ -453,7 +455,7 @@ rule evaluation_per_algo_pr_per_pathways:
     run:
         node_table = Evaluation.from_file(input.gold_standard_file).node_table
         pr_df = Evaluation.node_precision_and_recall(input.pathways, node_table)
-        Evaluation.visulize_precision_and_recall_per_pathway(pr_df, output.pr_file, output.pr_png)
+        Evaluation.visulize_precision_and_recall_per_pathway(pr_df, output.pr_file, output.pr_png, include_aggregate_algo_eval)
 
 # Return pathway summary file per dataset
 def collect_summary_statistics_per_dataset(wildcards):
@@ -501,7 +503,7 @@ rule evaluation_per_algo_pca_chosen:
         node_table = Evaluation.from_file(input.gold_standard_file).node_table
         pca_chosen_pathways = Evaluation.pca_chosen_pathway(input.pca_coordinates_file, input.pathway_summary_file, out_dir)
         pr_df = Evaluation.node_precision_and_recall(pca_chosen_pathways, node_table)
-        Evaluation.visulize_precision_and_recall_pca_chosen_pathway(pr_df, output.pca_chosen_pr_file, output.pca_chosen_pr_png)
+        Evaluation.visulize_precision_and_recall_pca_chosen_pathway(pr_df, output.pca_chosen_pr_file, output.pca_chosen_pr_png, include_aggregate_algo_eval)
 
 # Return the dataset pickle file for a specific dataset
 def get_dataset_pickle_file(wildcards):
@@ -544,7 +546,7 @@ rule evaluation_per_algo_ensemble_pr_curve:
     run:
         node_table = Evaluation.from_file(input.gold_standard_file).node_table
         node_ensembles_dict = Evaluation.edge_frequency_node_ensemble(node_table, input.ensemble_files, input.dataset_file)
-        Evaluation.precision_recall_curve_node_ensemble(node_ensembles_dict, node_table, output.pr_curve_png, output.pr_curve_file)
+        Evaluation.precision_recall_curve_node_ensemble(node_ensembles_dict, node_table, output.pr_curve_png, output.pr_curve_file, include_aggregate_algo_eval)
 
 
 # Remove the output directory
