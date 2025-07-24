@@ -86,10 +86,11 @@ def add_rank_column(df: pd.DataFrame) -> pd.DataFrame:
 def shrink_rank_column(df: pd.DataFrame) -> pd.DataFrame:
     """
     Takes a Rank column (e.g. [11, 2, 4, 2, 9]),
+    sorts it ([2, 2, 4, 9, 11])
     and removes the numeric gaps from it
-    (example to [4, 1, 2, 1, 3]).
+    [1, 1, 2, 3, 4].
 
-    This will sort the original pandas frame as well by rank.
+    This will sort the entire original pandas by rank.
     """
     # We need at least one beginning value
     if df.empty:
