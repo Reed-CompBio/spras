@@ -11,11 +11,6 @@ from typing import Any, Dict, Optional
 import numpy as np
 import pandas as pd
 
-from spras.interactome import (
-    reinsert_direction_col_directed,
-    reinsert_direction_col_undirected,
-)
-
 
 # https://stackoverflow.com/a/57915246/7589775
 # numpy variables are not, by default, encodable by python's JSONEncoder.

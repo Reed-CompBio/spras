@@ -1,7 +1,5 @@
 from pathlib import Path
 
-import networkx as nx
-
 from spras.containers import prepare_volume, run_container_and_log
 from spras.dataset import Dataset
 from spras.interactome import (

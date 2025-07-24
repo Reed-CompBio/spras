@@ -2,7 +2,6 @@ import os
 import pickle as pkl
 import warnings
 
-import networkx
 import pandas as pd
 
 """
