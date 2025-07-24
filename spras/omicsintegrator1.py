@@ -1,8 +1,7 @@
-import time
 from pathlib import Path
 from typing import Optional
 
-from pydantic import BaseModel, ConfigDict, Field
+from pydantic import BaseModel, ConfigDict
 
 from spras.config.container_schema import ProcessedContainerSettings
 from spras.containers import prepare_volume, run_container_and_log

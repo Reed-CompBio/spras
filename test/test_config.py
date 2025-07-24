@@ -2,7 +2,6 @@ import copy
 import pickle
 from typing import Iterable
 
-import numpy as np
 import pytest
 from pydantic import BaseModel
 

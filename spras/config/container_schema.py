@@ -8,9 +8,8 @@ this subsection of the configuration.
 
 import warnings
 from dataclasses import dataclass
-from typing import Optional
 
-from pydantic import BaseModel, ConfigDict, Field
+from pydantic import BaseModel, ConfigDict
 
 from spras.config.util import CaseInsensitiveEnum
 
