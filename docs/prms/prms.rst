@@ -1,11 +1,22 @@
 Pathway Reconstruction Methods
 =====================================
 
+.. note::
+   While every algorithm here is broadly labelled as a pathway reconstruction method,
+   there are other sub-types of algorithms that have more specialized capabilities than the rest.
+   Currently, SPRAS also supports edge orientation algorithms (e.g. MEO) and active module identifiers/disease module mining methods (e.g. DOMINO).
+
 .. toctree::
    :maxdepth: 1
    :caption: All Pairs
 
    allpairs
+
+.. toctree::
+   :maxdepth: 1
+   :caption: BowTieBuilder
+
+   bowtiebuilder
 
 .. toctree::
    :maxdepth: 1
@@ -42,3 +53,15 @@ Pathway Reconstruction Methods
    :caption: PathLinker
 
    pathlinker
+
+.. toctree::
+   :maxdepth: 1
+   :caption: RWR
+
+   rwr
+
+.. toctree::
+   :maxdepth: 1
+   :caption: STRWR
+
+   strwr

@@ -2,7 +2,7 @@ from pathlib import Path
 
 import pandas as pd
 
-from spras.containers import prepare_volume, run_container
+from spras.containers import prepare_volume, run_container_and_log
 from spras.dataset import Dataset
 from spras.interactome import reinsert_direction_col_undirected
 from spras.prm import PRM
@@ -22,6 +22,8 @@ Interactor1   Interactor2   Weight
 """
 class OmicsIntegrator2(PRM):
     required_inputs = ['prizes', 'edges']
+    # OI2 does not have a specific paper. Instead, we link to the OI1 paper.
+    dois = ["10.1371/journal.pcbi.1004879"]
 
     def generate_inputs(data: Dataset, filename_map):
         """
@@ -65,7 +67,6 @@ class OmicsIntegrator2(PRM):
 
     # TODO add parameter validation
     # TODO add reasonable default values
-    # TODO document required arguments
     @staticmethod
     def run(edges=None, prizes=None, output_file=None, w=None, b=None, g=None, noise=None, noisy_edges=None,
             random_terminals=None, dummy_mode=None, seed=None, container_framework="docker"):
@@ -74,6 +75,17 @@ class OmicsIntegrator2(PRM):
         Only the .tsv output file is retained and then renamed.
         All other output files are deleted.
         @param output_file: the name of the output file, which will overwrite any existing file with this name
+        @param w: Omega: the weight of the edges connecting the dummy node to the nodes selected by dummyMode (default: 5)
+        @param b: Beta: scaling factor of prizes (default: 1)
+        @param g: Gamma: multiplicative edge penalty from degree of endpoints (default: 3)
+        @param noise: Standard Deviation of the gaussian noise added to edges in Noisy Edges Randomizations.
+        @param noisy_edges: An integer specifying how many times to add noise to the given edge values and re-run.
+        @param random_terminals: An integer specifying how many times to apply your given prizes to random nodes in the interactome and re-run
+        @param dummy_mode: Tells the program which nodes in the interactome to connect the dummy node to. (default: terminals)
+            "terminals" = connect to all terminals
+            "others" = connect to all nodes except for terminals
+            "all" = connect to all nodes in the interactome.
+        @param seed: The random seed to use for this run.
         @param container_framework: choose the container runtime framework, currently supports "docker" or "singularity" (optional)
         """
         if edges is None or prizes is None or output_file is None:
@@ -118,15 +130,13 @@ class OmicsIntegrator2(PRM):
         if seed is not None:
             command.extend(['--seed', str(seed)])
 
-        print('Running Omics Integrator 2 with arguments: {}'.format(' '.join(command)), flush=True)
-
         container_suffix = "omics-integrator-2:v2"
-        out = run_container(container_framework,
-                            container_suffix,
-                            command,
-                            volumes,
-                            work_dir)
-        print(out)
+        run_container_and_log('Omics Integrator 2',
+                             container_framework,
+                             container_suffix,
+                             command,
+                             volumes,
+                             work_dir)
 
         # TODO do we want to retain other output files?
         # TODO if deleting other output files, write them all to a tmp directory and copy
@@ -140,15 +150,15 @@ class OmicsIntegrator2(PRM):
             oi2_output.unlink(missing_ok=True)
 
     @staticmethod
-    def parse_output(raw_pathway_file, standardized_pathway_file):
+    def parse_output(raw_pathway_file, standardized_pathway_file, params):
         """
         Convert a predicted pathway into the universal format
         @param raw_pathway_file: pathway file produced by an algorithm's run function
         @param standardized_pathway_file: the same pathway written in the universal format
         """
-        # Omicsintegrator2 returns a single line file if no network is found
+        # OmicsIntegrator2 returns a single line file if no network is found
         num_lines = sum(1 for line in open(raw_pathway_file))
-        # Omicsintegrator2 has corrupted output; list of correct column names
+        # OmicsIntegrator2 has corrupted output; list of correct column names
         sorted_correct_column_names = ['cost', 'in_solution', 'protein1', 'protein2'] # the order of edge attributes in the NetworkX graph is not guaranteed.
 
         if num_lines < 2:
