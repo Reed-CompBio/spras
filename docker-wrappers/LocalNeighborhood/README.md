@@ -4,12 +4,12 @@ A simple pathway reconstruction algorithm used to welcome new contributors.
 The algorithm takes a network and a list of nodes as input.
 It outputs all edges in the network that have a node from the list as an endpoint.
 
-New contributors complete the `Dockerfile` to wrap the implementation in `local_neighborhood.py`.
+New contributors complete the `Dockerfile` to wrap the implementation in `local_neighborhood_alg.py`.
 
 ## Usage
 ```
-$ python local_neighborhood.py -h
-usage: local_neighborhood.py [-h] --network NETWORK --nodes NODES --output OUTPUT  
+$ python local_neighborhood_alg.py -h
+usage: local_neighborhood_alg.py [-h] --network NETWORK --nodes NODES --output OUTPUT  
 
 Local neighborhood pathway reconstruction
 

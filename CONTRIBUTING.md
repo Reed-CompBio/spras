@@ -60,7 +60,7 @@ git push agitter local-neighborhood
 The Local Neighborhood pathway reconstruction is implemented and described in the [`docker-wrappers/LocalNeighborhood`](docker-wrappers/LocalNeighborhood) directory.
 The readme in that directory describes the usage and the three required arguments.
 This algorithm does not require any third-party packages, only Python 3.x.
-Run `local_neighborhood.py` from the command line.
+Run `local_neighborhood_alg.py` from the command line.
 There are example input files `ln-network.txt` and `ln-nodes.txt` in [`test/LocalNeighborhood/input`](test/LocalNeighborhood/input).
 Copy them to the `LocalNeighborhood` directory for testing.
 Confirm that the output file matches expectations.
@@ -84,7 +84,7 @@ Docker must be running on your system before executing this command.
 Test the image by running it with the example input files
 ```
 docker run -w /data --mount type=bind,source=/${PWD},target=/data \
-  <username>/local-neighborhood python local_neighborhood.py \
+  <username>/local-neighborhood python local_neighborhood_alg.py \
   --network /data/ln-network.txt --nodes /data/ln-nodes.txt \
   --output /data/ln-output.txt
 ```
@@ -108,7 +108,7 @@ Add a new Python file `spras/local_neighborhood.py` to implement the wrapper fun
 Use `pathlinker.py` as an example.
 
 Call the new class within `local_neighborhood.py` `LocalNeighborhood` and set `__all__` so the class can be [imported](https://docs.python.org/3/tutorial/modules.html#importing-from-a-package).
-Specify the list of `required_input` files to be `network` and `nodes`.
+Specify the list of `required_input` files to be `network` and `nodes`, and set the `dois` property to be an empty list.
 These entries are used to tell Snakemake what input files should be present before running the Local Neighborhood algorithm.
 
 Before implementing the `generate_inputs` function, explore the structure of the `Dataset` class interactively.
@@ -142,8 +142,6 @@ and your editor's interpreter is set to using the SPRAS environment over the bas
 Note the behaviors of the `request_node_columns` function when there are missing values in that column of the node table and when multiple columns are requested.
 `request_node_columns` always returns the `NODEID` column in addition to the requested columns.
 
-Note: If you encounter a `'property' object is not iterable` error arising from inside the Snakefile, this means that `required_inputs` is not set. This is because when `required_inputs` is not set inside an algorithm wrapper, it falls back to the underlying unimplemented function inside the PRM base class, which, while it is marked as a property function, is non-static; therefore, when the runner utility class tries to dynamically fetch `required_inputs` with reflection, it ends up grabbing the `property` function instead of the underlying error, and tries to iterate over it (since `required_inputs` is usually a list.)
-
 Now implement the `generate_inputs` function.
 Start by inspecting the `omicsintegrator1.py` example, but note the differences in the expected file formats generated for the two algorithms with respect to the header rows and node prize column.
 The selected nodes should be any node in the dataset that has a prize set, any node that is active, any node that is a source, or any node that is a target.
@@ -159,7 +157,7 @@ The functionality of `prepare_volume` is similar to how you had to manually spec
 It is not necessary to create the output directory in advance because the Local Neighborhood algorithm will create it if it does not exist.
 
 Prepare the command to run inside the container, which will resemble the command used when running Local Neighborhood in Step 1.
-Use the `run_container` utility function to run the command in the container `<username>/local-neighborhood` that was pushed to Docker Hub in Step 2.
+Use the `run_container_and_log` utility function to run the command in the container `<username>/local-neighborhood` that was pushed to Docker Hub in Step 2.
 
 Implement the `parse_output` function.
 The edges in the Local Neighborhood output have the same format as the input, `<vertex1>|<vertex2>`.
@@ -170,7 +168,7 @@ Make sure header = True with column names: ['Node1', 'Node2', 'Rank', 'Direction
 The output should have the format `<vertex1> <vertex2> 1 U`.
 
 ### Step 4: Make the Local Neighborhood wrapper accessible through SPRAS
-Import the new class `LocalNeighborhood` in `spras/runner.py` so the wrapper functions can be accessed.
+Import the new class `LocalNeighborhood` in `spras/runner.py` and add it to the `algorithms` dictionary so the wrapper functions can be accessed.
 Add an entry for Local Neighborhood to the configuration file `config/config.yaml` and set `include: true`.
 As a convention, algorithm names are written in all lowercase without special characters.
 Local Neighborhood has no other parameters.
@@ -201,7 +199,7 @@ Use `test_pathlinker.py` as an example.
 There are input files for testing in the [`test/LocalNeighborhood/input`](test/LocalNeighborhood/input) directory.
 The new test functions will be automatically run as part of the pytest testing.
 
-Extend `.github/workflows/test-spras.yml` to pull and build the new Docker image.
+Extend `.github/workflows/build-containers.yml` to pull and build the new Docker image.
 Follow the example for any of the other pathway reconstruction algorithm.
 First pull the image `<username>/local-neighborhood` from Docker Hub.
 Then build the Docker image using the `Dockerfile` that was completed in Step 2.
@@ -213,7 +211,8 @@ Modify generate inputs:
 Modify parse outputs:
 1. Obtain the raw-pathway output (e.g. from the run function in your wrapper by running the Snakemake workflow) and save it to `test/parse-outputs/input`. Name it as `{algorithm_name}-raw-pathway.txt`.
 2. Obtain the expected universal output from the workflow, manually confirm it is correct, and save it to `test/parse-outputs/expected` directory. Name it as `{algorithm_name}-pathway-expected.txt`.
-3. Add the new algorithm's name to the algorithms list in `test/parse-outputs/test_parse_outputs.py`.
+3. Add an `{algorithm-name}-empty-raw-pathway.txt` file inside `test/parse-outputs/input/empty` containing all output files associated with an empty subnetwork for the algorithm.
+4. Add the new algorithm's name to the algorithms dict in `test/parse-outputs/test_parse_outputs.py`, with any parameters it needs.
 
 ### Step 6: Update documentation
 SPRAS uses `sphinx` and "Read The Docs" for building and hosting documentation.
@@ -246,7 +245,7 @@ The pull request will be closed so that the `master` branch of the fork stays sy
 1. Add a new subdirectory to `docker-wrappers` with the name `<algorithm>`, write a `Dockerfile` to build an image for `<algorithm>`, and include any other files required to build that image in the subdirectory
 1. Build and push the Docker image to the [reedcompbio](https://hub.docker.com/orgs/reedcompbio) Docker organization (SPRAS maintainer required)
 1. Add a new Python file `spras/<algorithm>.py` to implement the wrapper functions for `<algorithm>`: specify the list of `required_input` files and the `generate_inputs`, `run`, and `parse_output` functions
-1. Import the new class in `spras/runner.py` so the wrapper functions can be accessed
+1. Import the new class in `spras/runner.py` and add it to the `algorithms` dictionary so the wrapper functions can be accessed
 1. Document the usage of the Docker wrapper and the assumptions made when implementing the wrapper
 1. Add example usage for the new algorithm and its parameters to the template config file
 1. Write test functions and provide example input data in a new test subdirectory `test/<algorithm>`. Provide example data and algorithm/expected files names to lists or dicts in `test/generate-inputs` and `test/parse-outputs`. Use the full path with the names of the test files.

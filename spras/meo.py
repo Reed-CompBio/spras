@@ -1,7 +1,7 @@
 import os
 from pathlib import Path
 
-from spras.containers import prepare_volume, run_container
+from spras.containers import prepare_volume, run_container_and_log
 from spras.interactome import (
     add_directionality_constant,
     reinsert_direction_col_directed,
@@ -84,6 +84,7 @@ Interactor1   pp/pd   Interactor2   Weight
 
 class MEO(PRM):
     required_inputs = ['sources', 'targets', 'edges']
+    dois = ["10.1093/nar/gkq1207"]
 
     @staticmethod
     def generate_inputs(data, filename_map):
@@ -135,6 +136,9 @@ class MEO(PRM):
         Only the edge output file is retained.
         All other output files are deleted.
         @param output_file: the name of the output edge file, which will overwrite any existing file with this name
+        @param max_path_length: the maximal length of a path from sources and targets to orient.
+        @param local_search: a "Yes"/"No" parameter that enables MEO's local search functionality. See "Improving approximations with local search" in the associated paper for more information.
+        @param rand_restarts: The (int) of random restarts to use.
         @param container_framework: choose the container runtime framework, currently supports "docker" or "singularity" (optional)
         """
         if edges is None or sources is None or targets is None or output_file is None:
@@ -176,15 +180,13 @@ class MEO(PRM):
 
         command = ['java', '-jar', '/meo/EOMain.jar', properties_file]
 
-        print('Running Maximum Edge Orientation with arguments: {}'.format(' '.join(command)), flush=True)
-
         container_suffix = "meo"
-        out = run_container(container_framework,
-                            container_suffix,
-                            command,
-                            volumes,
-                            work_dir)
-        print(out)
+        run_container_and_log('Maximum Edge Orientation',
+                             container_framework,
+                             container_suffix,
+                             command,
+                             volumes,
+                             work_dir)
 
         properties_file_local.unlink(missing_ok=True)
 
@@ -194,7 +196,7 @@ class MEO(PRM):
         path_output_file.unlink(missing_ok=False)
 
     @staticmethod
-    def parse_output(raw_pathway_file, standardized_pathway_file):
+    def parse_output(raw_pathway_file, standardized_pathway_file, params):
         """
         Convert a predicted pathway into the universal format
         @param raw_pathway_file: pathway file produced by an algorithm's run function
