@@ -105,14 +105,14 @@ def get_test_config():
             },
             "ml": {
                 "include": False,
-                "aggregate_per_algorithm": False
+                "aggregate_per_algorithm": False,
             },
             "cytoscape": {
                 "include": False
             },
             "evaluation": {
                 "include": False,
-                 "aggregate_per_algorithm": False
+                "aggregate_per_algorithm": False
             },
         },
     }
@@ -325,3 +325,21 @@ class TestConfig:
         assert config.config.analysis_include_ml_aggregate_algo == expected_ml_agg
         assert config.config.analysis_include_evaluation == expected_eval
         assert config.config.analysis_include_evaluation_aggregate_algo == expected_eval_agg
+
+    @pytest.mark.parametrize("eval_include, kde, expected_eval, expected_kde", [
+        (True, True, True, True),
+        (True, False, True, True),
+        (False, True, False, True),
+        (False, False, False, False),
+    ])
+    def test_eval_kde_coupling(self, eval_include, kde, expected_eval, expected_kde):
+        test_config = get_test_config()
+        test_config["analysis"]["ml"]["include"] = True
+
+        test_config["analysis"]["ml"]["kde"] = kde
+        test_config["analysis"]["evaluation"]["include"] = eval_include
+
+        config.init_global(test_config)
+
+        assert config.config.analysis_include_evaluation == expected_eval
+        assert config.config.pca_params["kde"] == expected_kde

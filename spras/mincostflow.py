@@ -22,8 +22,12 @@ Interactor1  Interactor2   Weight
 - the expected raw input file should have node pairs in the 1st and 2nd columns, with the weight in the 3rd column
 - it can include repeated and bidirectional edges
 """
-class MinCostFlow (PRM):
+class MinCostFlow(PRM):
     required_inputs = ['sources', 'targets', 'edges']
+    # NOTE: This is the DOI for the ResponseNet paper.
+    # This version of MinCostFlow is inspired by the ResponseNet paper, but does not have
+    # its own referencable DOI.
+    dois = ["10.1038/ng.337"]
 
     @staticmethod
     def generate_inputs(data, filename_map):
@@ -66,8 +70,8 @@ class MinCostFlow (PRM):
         @param targets: input targets (required)
         @param edges: input network file (required)
         @param output_file: output file name (required)
-        @param flow: amount of flow going through the graph (optional)
-        @param capacity: amount of capacity allowed on each edge (optional)
+        @param flow: (int) amount of flow going through the graph (optional)
+        @param capacity: (float) amount of capacity allowed on each edge (optional)
         @param container_framework: choose the container runtime framework, currently supports "docker" or "singularity" (optional)
         """
 

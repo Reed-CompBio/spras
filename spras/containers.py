@@ -3,7 +3,7 @@ import platform
 import re
 import subprocess
 from pathlib import Path, PurePath, PurePosixPath
-from typing import Any, Dict, Iterator, List, Optional, Tuple, Union
+from typing import Iterator, List, Optional, Tuple, Union
 
 import docker
 import docker.errors

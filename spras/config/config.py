@@ -236,7 +236,9 @@ class Config:
         # self.ml_params is a class, pca_params needs to be a dict.
         self.pca_params = {
             "components": self.ml_params.components,
-            "labels": self.ml_params.labels
+            "labels": self.ml_params.labels,
+            "kde": self.ml_params.kde,
+            "remove_empty_pathways": self.ml_params.remove_empty_pathways
         }
 
         self.hac_params = {
@@ -273,6 +275,13 @@ class Config:
         # Only run Evaluation per algorithm if ML per algorithm is set to True
         if not self.analysis_include_ml_aggregate_algo:
             self.analysis_include_evaluation_aggregate_algo = False
+        
+        # Set kde to True if Evaluation is set to True
+        # When Evaluation is True, PCA is used to pick a single parameter combination for all algorithms with multiple
+        # parameter combinations and KDE is used to choose the parameter combination in the PC space
+        if self.analysis_include_evaluation and not self.pca_params["kde"]:
+            self.pca_params["kde"] = True
+            print("Setting kde to true; Evaluation analysis needs to run KDE for PCA-Chosen parameter selection.")
 
     def process_config(self, raw_config: RawConfig):
         # Set up a few top-level config variables
