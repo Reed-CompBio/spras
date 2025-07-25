@@ -12,7 +12,7 @@ __all__ = ['ResponseNet']
 
 """
 ResponseNet will construct a fully directed graph from the provided input file
-- an edge is represented with a head and tail node, which represents the direction of the interation between two nodes
+- an edge is represented with a head and tail node, which represents the direction of the interaction between two nodes
 - uses networkx Digraph() object
 
 Expected raw input format:
@@ -48,7 +48,7 @@ class ResponseNet(PRM):
             nodes.to_csv(filename_map[node_type], index=False, columns=['NODEID'], header=False)
 
         # create the network of edges
-        # responsenet should be recieving a directed graph
+        # responsenet should be receiving a directed graph
         edges = data.get_interactome()
         edges = convert_undirected_to_directed(edges)
 

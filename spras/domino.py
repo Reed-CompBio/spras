@@ -151,10 +151,10 @@ class DOMINO(PRM):
         out_modules_dir = Path(out_dir, 'active_genes')
 
         # Concatenate each produced module HTML file into one file
-        with open(output_file, 'w') as fo:
+        with open(output_file, 'w') as f:
             for html_file in out_modules_dir.glob('module_*.html'):
                 with open(html_file, 'r') as fi:
-                    fo.write(fi.read())
+                    f.write(fi.read())
 
         # Clean up DOMINO intermediate and pickle files
         slices_file.unlink(missing_ok=True)
