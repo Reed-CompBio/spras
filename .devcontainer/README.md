@@ -14,7 +14,7 @@ Since this takes a good while, I leave building singularity as an external scrip
 but `go` and the associated `apt` dependencies are already present in the Dockerfile.
 
 Below is a shell script which will do the entire installation for you (but it will change your
-shells CWD):
+shell's CWD):
 
 ```sh
 cd /
