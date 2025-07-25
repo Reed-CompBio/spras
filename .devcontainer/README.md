@@ -10,8 +10,9 @@ or with [GitPod](https://www.gitpod.io/docs/gitpod/configuration/devcontainer/ov
 
 ## Building Singularity
 
-Since this takes a good while, I leave building singularity as an external script one can run,
-but `go` and the associated `apt` dependencies are already present in the Dockerfile.
+Since this takes a good while, building singularity is an external script one can run
+inside the devcontainer, but `go` and the associated `apt` dependencies are already present in
+the Dockerfile, and, consequently, the container.
 
 Below is a shell script which will do the entire installation for you (but it will change your
 shell's CWD):
