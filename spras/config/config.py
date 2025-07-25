@@ -171,7 +171,7 @@ class Config:
 
             cur_params = cur_params.__pydantic_extra__
             if cur_params is None:
-                raise RuntimeError("An internal error occured: ConfigDict extra should be set on AlgorithmParams.")
+                raise RuntimeError("An internal error occurred: ConfigDict extra should be set on AlgorithmParams.")
 
             # The algorithm has no named arguments so create a default placeholder
             if len(cur_params.keys()) == 0:
