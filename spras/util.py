@@ -83,6 +83,35 @@ def add_rank_column(df: pd.DataFrame) -> pd.DataFrame:
     df['Rank'] = 1
     return df
 
+def shrink_rank_column(df: pd.DataFrame) -> pd.DataFrame:
+    """
+    Takes a Rank column (e.g. [11, 2, 4, 2, 9]),
+    sorts it ([2, 2, 4, 9, 11])
+    and removes the numeric gaps from it
+    [1, 1, 2, 3, 4].
+
+    This will sort the entire original pandas by rank.
+    """
+    # We need at least one beginning value
+    if df.empty:
+        return df
+
+    df = df.sort_values(['Rank'], ascending=True)
+    df = df.reset_index(drop=True)
+    # https://stackoverflow.com/a/34856727/7589775
+    df['NewRank'] = int(1)
+    df['NewRank'] = df['NewRank'].astype('Int64')
+    for i in range(1, len(df)):
+        prev_rank = df.loc[i-1, 'Rank']
+        curr_rank = df.loc[i, 'Rank']
+
+        rank_inc = df.loc[i-1, 'NewRank']
+        df.loc[i, 'NewRank'] = rank_inc if prev_rank == curr_rank else (int(rank_inc) + 1)
+
+    df = df.drop(columns=['Rank'])
+    df = df.rename(columns={'NewRank': 'Rank'})
+
+    return df
 
 def raw_pathway_df(raw_pathway_file: str, sep: str = '\t', header: int = None) -> pd.DataFrame:
     """
