@@ -10,9 +10,9 @@ repos:
     hooks:
       # Attempts to load all yaml files to verify syntax.
       - id: check-yaml
-      # Attempts to load all TOML files to verify syntax.
+        # Attempts to load all TOML files to verify syntax.
       - id: check-toml
-      # Trims trailing whitespace.
+        # Trims trailing whitespace.
       - id: trailing-whitespace
         # Preserves Markdown hard linebreaks.
         args: [--markdown-linebreak-ext=md]
