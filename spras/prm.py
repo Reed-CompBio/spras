@@ -23,7 +23,7 @@ class PRM(ABC):
         for prop in props:
             if getattr(PRM, prop) is getattr(cls, prop):
                 raise NotImplementedError(
-                    "Attribute '{}' has not been overriden in class '{}'" \
+                    "Attribute '{}' has not been overridden in class '{}'" \
                     .format(prop, cls.__name__)
                 )
 
