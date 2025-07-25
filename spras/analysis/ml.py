@@ -382,7 +382,7 @@ def hac_horizontal(dataframe: pd.DataFrame, output_png: str, output_file: str, l
 
     # plotting figure
     plt.figure(figsize=(10, 7))
-    model = AgglomerativeClustering(linkage=linkage, affinity=metric,distance_threshold=0.5, n_clusters=None)
+    model = AgglomerativeClustering(linkage=linkage, metric=metric,distance_threshold=0.5, n_clusters=None)
     model = model.fit(df)
     plt.figure(figsize=(10, 7))
     plt.title("Hierarchical Agglomerative Clustering Dendrogram")
