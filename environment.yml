@@ -2,31 +2,37 @@ name: spras
 channels:
   - conda-forge
 dependencies:
-  - adjusttext=0.7.3.1
-  - bioconda::snakemake-minimal=8.17.0
-  - docker-py=5.0
-  - matplotlib=3.6
-  - networkx=2.8
-  - pandas=1.5
+  - adjusttext=1.3.0
+  - bioconda::snakemake-minimal=9.6.2
+  # Conda refers to pypi/docker as docker-py.
+  - docker-py=7.1.0
+  - matplotlib=3.10.3
+  - networkx=3.5
+  - pandas=2.3.0
   - pydantic=2.11.7
-  - numpy=1.26.4
-  - pre-commit=2.20 # Only required for development
-  - go=1.24 # Only required for development
-  - pytest=8.0 # Only required for development
-  - python=3.11
+  - numpy=2.3.1
+  - requests=2.32.4
+  - scikit-learn=1.7.0
+  - seaborn=0.13.2
+  - spython=0.3.14
+
+  # conda-specific for dsub
+  - python-dateutil=2.9.0
+  - pytz=2025.2
+  - pyyaml=6.0.2
+  - tenacity=9.1.2
+  - tabulate=0.9.0
+
+  # toolchain deps
   - pip=22.1
-  - requests=2.28
-  - scikit-learn=1.2
-  - seaborn=0.12
-  - spython=0.2
-  # for dsub
-  - python-dateutil<=2.9.0
-  - pytz<=2024.1
-  - pyyaml<=6.0.1
-  - tenacity<=8.2.3
-  - tabulate<=0.9.0
-  - sphinx=6.0
-  - sphinx-rtd-theme=2.0.0
+  # This should be the same as requires-python minus the >=.
+  - python=3.11
+
+  # development dependencies
+  - pre-commit=4.2.0
+  - pytest=8.4.1
+  # development dependencies - conda-specific
+  - go=1.24
+
   - pip:
       - dsub==0.4.13
-

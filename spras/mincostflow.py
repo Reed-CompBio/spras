@@ -26,7 +26,7 @@ class MinCostFlow(PRM):
     required_inputs = ['sources', 'targets', 'edges']
     # NOTE: This is the DOI for the ResponseNet paper.
     # This version of MinCostFlow is inspired by the ResponseNet paper, but does not have
-    # its own referencable DOI.
+    # its own referenceable DOI.
     dois = ["10.1038/ng.337"]
 
     @staticmethod

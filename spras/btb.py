@@ -27,7 +27,7 @@ class BowTieBuilder(PRM):
     required_inputs = ['sources', 'targets', 'edges']
     dois = ["10.1186/1752-0509-3-67"]
 
-    #generate input taken from meo.py beacuse they have same input requirements
+    #generate input taken from meo.py because they have same input requirements
     @staticmethod
     def generate_inputs(data, filename_map):
         """

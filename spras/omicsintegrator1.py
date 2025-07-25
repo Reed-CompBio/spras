@@ -120,7 +120,7 @@ class OmicsIntegrator1(PRM):
         @param w: float that affects the number of connected components, with higher values leading to more components
         @param b: the trade-off between including more prizes and using less reliable edges
         @param d: controls the maximum path-length from root to terminal nodes
-        @param mu: controls the degree-based negative prizes (defualt 0.0)
+        @param mu: controls the degree-based negative prizes (default 0.0)
         @param noise: Standard Deviation of the gaussian noise added to edges in Noisy Edges Randomizations
         @param g: Gamma: multiplicative edge penalty from degree of endpoints
         @param r: msgsteiner parameter that adds random noise to edges, which is rarely needed (default 0)

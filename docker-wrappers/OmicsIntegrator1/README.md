@@ -36,7 +36,7 @@ python setup.py test -a "--msgpath=$MSGSTEINER_PATH"
 ## No conda alternative
 An alternative version of the Omics Integrator image does not use conda.
 This simplifies using the same image for Docker and Singularity.
-This version uses `requirements.txt` instead of `enviornment.yml` to specify required Python packages.
+This version uses `requirements.txt` instead of `environment.yml` to specify required Python packages.
 It can be built and tested in a manner similar to the conda-based image.
 ```
 docker build -t reedcompbio/omics-integrator-1:no-conda -f Dockerfile_no_conda .
