@@ -47,6 +47,11 @@ jobs:
       - name: Install spras in conda env
         shell: bash --login {0}
         run: pip install .
+      - name: Get pipx
+        shell: bash --login {0}
+        run: pip install pipx
+      - shell: bash --login {0}
+        run: pipx install .
       # Log conda environment contents
       - name: Log conda environment
         shell: bash --login {0}
@@ -63,7 +68,7 @@ jobs:
         run: pytest -vs
       - name: Run Snakemake workflow
         shell: bash --login {0}
-        run: snakemake --cores 2 --configfile config/config.yaml --show-failed-logs
+        run: spras --cores 2 --configfile config/config.yaml --show-failed-logs
 
   # Run pre-commit checks on source files
   pre-commit:
