@@ -10,11 +10,11 @@ repos:
     hooks:
       # Attempts to load all yaml files to verify syntax.
       - id: check-yaml
-      # Attempts to load all TOML files to verify syntax.
       - id: check-toml
-      # Trims trailing whitespace.
+        # Attempts to load all TOML files to verify syntax.
       - id: trailing-whitespace
         # Preserves Markdown hard linebreaks.
+        # Trims trailing whitespace.
         args: [--markdown-linebreak-ext=md]
         # Do not trim whitespace from all files, input files may need trailing whitespace for empty values in columns.
         types_or: [markdown, python, yaml]
@@ -29,6 +29,6 @@ repos:
     hooks:
       - id: yamlfmt
   - repo: https://github.com/crate-ci/typos
-    rev: v1.34.0
+    rev: v1.25.0
     hooks:
       - id: typos
