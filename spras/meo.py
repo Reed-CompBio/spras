@@ -136,6 +136,9 @@ class MEO(PRM):
         Only the edge output file is retained.
         All other output files are deleted.
         @param output_file: the name of the output edge file, which will overwrite any existing file with this name
+        @param max_path_length: the maximal length of a path from sources and targets to orient.
+        @param local_search: a "Yes"/"No" parameter that enables MEO's local search functionality. See "Improving approximations with local search" in the associated paper for more information.
+        @param rand_restarts: The (int) of random restarts to use.
         @param container_framework: choose the container runtime framework, currently supports "docker" or "singularity" (optional)
         """
         if edges is None or sources is None or targets is None or output_file is None:
