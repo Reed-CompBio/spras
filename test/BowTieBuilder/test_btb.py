@@ -3,7 +3,7 @@ from pathlib import Path
 
 import pytest
 
-import spras.config as config
+import spras.config.config as config
 
 config.init_from_file("config/config.yaml")
 
@@ -24,22 +24,19 @@ class TestBowTieBuilder:
     def test_btb_missing(self):
         with pytest.raises(ValueError):
             # No edges
-            BTB.run(
-                           targets=Path(TEST_DIR, 'input', 'target.txt'),
-                           sources=Path(TEST_DIR, 'input', 'source.txt'),
-                           output_file=OUT_FILE_DEFAULT)
+            BTB.run({"targets": Path(TEST_DIR, 'input', 'target.txt'),
+                     "sources": Path(TEST_DIR, 'input', 'source.txt')},
+                    output_file=OUT_FILE_DEFAULT)
         with pytest.raises(ValueError):
             # No source
-            BTB.run(
-                           targets=Path(TEST_DIR, 'input', 'target.txt'),
-                           edges=Path(TEST_DIR, 'input', 'edges.txt'),
-                           output_file=OUT_FILE_DEFAULT)
+            BTB.run({"targets": Path(TEST_DIR, 'input', 'target.txt'),
+                     "edges": Path(TEST_DIR, 'input', 'edges.txt')},
+                    output_file=OUT_FILE_DEFAULT)
         with pytest.raises(ValueError):
             # No target
-            BTB.run(
-                           sources=Path(TEST_DIR, 'input', 'source.txt'),
-                           edges=Path(TEST_DIR, 'input', 'edges.txt'),
-                           output_file=OUT_FILE_DEFAULT)
+            BTB.run({"sources": Path(TEST_DIR, 'input', 'source.txt'),
+                     "edges": Path(TEST_DIR, 'input', 'edges.txt')},
+                    output_file=OUT_FILE_DEFAULT)
 
 
     """
@@ -47,30 +44,30 @@ class TestBowTieBuilder:
     """
     def test_btb_file(self):
         with pytest.raises(ValueError):
-            BTB.run(sources=Path(TEST_DIR, 'input', 'unknown.txt'),
-                           targets=Path(TEST_DIR, 'input', 'target.txt'),
-                           edges=Path(TEST_DIR, 'input', 'edges.txt'),
-                           output_file=OUT_FILE_DEFAULT)
+            BTB.run({"sources": Path(TEST_DIR, 'input', 'unknown.txt'),
+                     "targets": Path(TEST_DIR, 'input', 'target.txt'),
+                     "edges": Path(TEST_DIR, 'input', 'edges.txt')},
+                    output_file=OUT_FILE_DEFAULT)
 
     """
     Run the BowTieBuilder algorithm with bad input data
     """
     def test_format_error(self):
         with pytest.raises(IndexError):
-            BTB.run(sources=Path(TEST_DIR, 'input', 'btb-sources.txt'),
-                           targets=Path(TEST_DIR, 'input', 'btb-targets.txt'),
-                           edges=Path(TEST_DIR, 'input', 'bad-edges.txt'),
-                           output_file=OUT_FILE_DEFAULT)
+            BTB.run({"sources": Path(TEST_DIR, 'input', 'btb-sources.txt'),
+                     "targets": Path(TEST_DIR, 'input', 'btb-targets.txt'),
+                     "edges": Path(TEST_DIR, 'input', 'bad-edges.txt')},
+                    output_file=OUT_FILE_DEFAULT)
 
     """
     Run the BowTieBuilder algorithm on the example input files and check the output matches the expected output
     """
     def test_btb(self):
             OUT_FILE_DEFAULT.unlink(missing_ok=True)
-            BTB.run(edges=Path(TEST_DIR, 'input', 'btb-edges.txt'),
-                            sources=Path(TEST_DIR, 'input', 'btb-sources.txt'),
-                            targets=Path(TEST_DIR, 'input', 'btb-targets.txt'),
-                            output_file=OUT_FILE_DEFAULT)
+            BTB.run({"edges": Path(TEST_DIR, 'input', 'btb-edges.txt'),
+                     "sources": Path(TEST_DIR, 'input', 'btb-sources.txt'),
+                     "targets": Path(TEST_DIR, 'input', 'btb-targets.txt')},
+                    output_file=OUT_FILE_DEFAULT)
             assert OUT_FILE_DEFAULT.exists(), 'Output file was not written'
             expected_file = Path(TEST_DIR, 'expected', 'btb-output.txt')
 
@@ -88,10 +85,10 @@ class TestBowTieBuilder:
     """
     def test_disjoint(self):
         OUT_FILE_DEFAULT.unlink(missing_ok=True)
-        BTB.run(edges=Path(TEST_DIR, 'input', 'disjoint-edges.txt'),
-                           sources=Path(TEST_DIR, 'input', 'disjoint-sources.txt'),
-                           targets=Path(TEST_DIR, 'input', 'disjoint-targets.txt'),
-                           output_file=OUT_FILE_DEFAULT)
+        BTB.run({"edges": Path(TEST_DIR, 'input', 'disjoint-edges.txt'),
+                 "sources": Path(TEST_DIR, 'input', 'disjoint-sources.txt'),
+                 "targets": Path(TEST_DIR, 'input', 'disjoint-targets.txt')},
+                output_file=OUT_FILE_DEFAULT)
         assert OUT_FILE_DEFAULT.exists(), 'Output file was not written'
         expected_file = Path(TEST_DIR, 'expected', 'disjoint-output.txt')
 
@@ -109,10 +106,10 @@ class TestBowTieBuilder:
     """
     def test_disjoint2(self):
         OUT_FILE_DEFAULT.unlink(missing_ok=True)
-        BTB.run(edges=Path(TEST_DIR, 'input', 'disjoint2-edges.txt'),
-                           sources=Path(TEST_DIR, 'input', 'disjoint-sources.txt'),
-                           targets=Path(TEST_DIR, 'input', 'disjoint-targets.txt'),
-                           output_file=OUT_FILE_DEFAULT)
+        BTB.run({"edges": Path(TEST_DIR, 'input', 'disjoint2-edges.txt'),
+                 "sources": Path(TEST_DIR, 'input', 'disjoint-sources.txt'),
+                 "targets": Path(TEST_DIR, 'input', 'disjoint-targets.txt')},
+                output_file=OUT_FILE_DEFAULT)
         assert OUT_FILE_DEFAULT.exists(), 'Output file was not written'
         expected_file = Path(TEST_DIR, 'expected', 'disjoint-output.txt')
 
@@ -131,10 +128,10 @@ class TestBowTieBuilder:
     def test_missing_file(self):
         with pytest.raises(ValueError):
             with pytest.raises(OSError):
-                BTB.run(edges=Path(TEST_DIR, 'input', 'missing.txt'),
-                            sources=Path(TEST_DIR, 'input', 'btb-sources.txt'),
-                            targets=Path(TEST_DIR, 'input', 'btb-targets.txt'),
-                            output_file=OUT_FILE_DEFAULT)
+                BTB.run({"edges": Path(TEST_DIR, 'input', 'missing.txt'),
+                         "sources": Path(TEST_DIR, 'input', 'btb-sources.txt'),
+                         "targets": Path(TEST_DIR, 'input', 'btb-targets.txt')},
+                        output_file=OUT_FILE_DEFAULT)
 
 
     """
@@ -142,10 +139,10 @@ class TestBowTieBuilder:
     """
     def test_source_to_source(self):
         OUT_FILE_DEFAULT.unlink(missing_ok=True)
-        BTB.run(edges=Path(TEST_DIR, 'input', 'source-to-source-edges.txt'),
-                           sources=Path(TEST_DIR, 'input', 'btb-sources.txt'),
-                           targets=Path(TEST_DIR, 'input', 'btb-targets.txt'),
-                           output_file=OUT_FILE_DEFAULT)
+        BTB.run({"edges": Path(TEST_DIR, 'input', 'source-to-source-edges.txt'),
+                 "sources": Path(TEST_DIR, 'input', 'btb-sources.txt'),
+                 "targets": Path(TEST_DIR, 'input', 'btb-targets.txt')},
+                output_file=OUT_FILE_DEFAULT)
         assert OUT_FILE_DEFAULT.exists(), 'Output file was not written'
         expected_file = Path(TEST_DIR, 'expected', 'source-to-source-output.txt')
 
@@ -163,10 +160,10 @@ class TestBowTieBuilder:
     """
     def test_source_to_source2(self):
         OUT_FILE_DEFAULT.unlink(missing_ok=True)
-        BTB.run(edges=Path(TEST_DIR, 'input', 'source-to-source2-edges.txt'),
-                           sources=Path(TEST_DIR, 'input', 'btb-sources.txt'),
-                           targets=Path(TEST_DIR, 'input', 'btb-targets.txt'),
-                           output_file=OUT_FILE_DEFAULT)
+        BTB.run({"edges": Path(TEST_DIR, 'input', 'source-to-source2-edges.txt'),
+                 "sources": Path(TEST_DIR, 'input', 'btb-sources.txt'),
+                 "targets": Path(TEST_DIR, 'input', 'btb-targets.txt')},
+                output_file=OUT_FILE_DEFAULT)
         assert OUT_FILE_DEFAULT.exists(), 'Output file was not written'
         expected_file = Path(TEST_DIR, 'expected', 'source-to-source2-output.txt')
 
@@ -185,10 +182,10 @@ class TestBowTieBuilder:
 
     def test_source_to_source_disjoint(self):
         OUT_FILE_DEFAULT.unlink(missing_ok=True)
-        BTB.run(edges=Path(TEST_DIR, 'input', 'source-to-source-disjoint-edges.txt'),
-                           sources=Path(TEST_DIR, 'input', 'btb-sources.txt'),
-                           targets=Path(TEST_DIR, 'input', 'btb-targets.txt'),
-                           output_file=OUT_FILE_DEFAULT)
+        BTB.run({"edges": Path(TEST_DIR, 'input', 'source-to-source-disjoint-edges.txt'),
+                 "sources": Path(TEST_DIR, 'input', 'btb-sources.txt'),
+                 "targets": Path(TEST_DIR, 'input', 'btb-targets.txt')},
+                 output_file=OUT_FILE_DEFAULT)
         assert OUT_FILE_DEFAULT.exists(), 'Output file was not written'
         expected_file = Path(TEST_DIR, 'expected', 'source-to-source-disjoint-output.txt')
 
@@ -207,10 +204,10 @@ class TestBowTieBuilder:
 
     def test_bidirectional(self):
         OUT_FILE_DEFAULT.unlink(missing_ok=True)
-        BTB.run(edges=Path(TEST_DIR, 'input', 'bidirectional-edges.txt'),
-                           sources=Path(TEST_DIR, 'input', 'btb-sources.txt'),
-                           targets=Path(TEST_DIR, 'input', 'btb-targets.txt'),
-                           output_file=OUT_FILE_DEFAULT)
+        BTB.run({"edges": Path(TEST_DIR, 'input', 'bidirectional-edges.txt'),
+                 "sources": Path(TEST_DIR, 'input', 'btb-sources.txt'),
+                 "targets": Path(TEST_DIR, 'input', 'btb-targets.txt')},
+                output_file=OUT_FILE_DEFAULT)
         assert OUT_FILE_DEFAULT.exists(), 'Output file was not written'
         expected_file = Path(TEST_DIR, 'expected', 'bidirectional-output.txt')
 
@@ -229,10 +226,10 @@ class TestBowTieBuilder:
 
     def test_target_to_source(self):
         OUT_FILE_DEFAULT.unlink(missing_ok=True)
-        BTB.run(edges=Path(TEST_DIR, 'input', 'target-to-source-edges.txt'),
-                           sources=Path(TEST_DIR, 'input', 'btb-sources.txt'),
-                           targets=Path(TEST_DIR, 'input', 'btb-targets.txt'),
-                           output_file=OUT_FILE_DEFAULT)
+        BTB.run({"edges": Path(TEST_DIR, 'input', 'target-to-source-edges.txt'),
+                 "sources": Path(TEST_DIR, 'input', 'btb-sources.txt'),
+                 "targets": Path(TEST_DIR, 'input', 'btb-targets.txt')},
+                output_file=OUT_FILE_DEFAULT)
         assert OUT_FILE_DEFAULT.exists(), 'Output file was not written'
         expected_file = Path(TEST_DIR, 'expected', 'empty-output.txt')
 
@@ -251,10 +248,10 @@ class TestBowTieBuilder:
 
     def test_loop(self):
         OUT_FILE_DEFAULT.unlink(missing_ok=True)
-        BTB.run(edges=Path(TEST_DIR, 'input', 'loop-edges.txt'),
-                           sources=Path(TEST_DIR, 'input', 'btb-sources.txt'),
-                           targets=Path(TEST_DIR, 'input', 'btb-targets.txt'),
-                           output_file=OUT_FILE_DEFAULT)
+        BTB.run({"edges": Path(TEST_DIR, 'input', 'loop-edges.txt'),
+                 "sources": Path(TEST_DIR, 'input', 'btb-sources.txt'),
+                 "targets": Path(TEST_DIR, 'input', 'btb-targets.txt')},
+                output_file=OUT_FILE_DEFAULT)
         assert OUT_FILE_DEFAULT.exists(), 'Output file was not written'
         expected_file = Path(TEST_DIR, 'expected', 'loop-output.txt')
 
@@ -273,10 +270,10 @@ class TestBowTieBuilder:
 
     def test_weighted(self):
         OUT_FILE_DEFAULT.unlink(missing_ok=True)
-        BTB.run(edges=Path(TEST_DIR, 'input', 'weighted-edges.txt'),
-                           sources=Path(TEST_DIR, 'input', 'btb-sources.txt'),
-                           targets=Path(TEST_DIR, 'input', 'btb-targets.txt'),
-                           output_file=OUT_FILE_DEFAULT)
+        BTB.run({"edges": Path(TEST_DIR, 'input', 'weighted-edges.txt'),
+                 "sources": Path(TEST_DIR, 'input', 'btb-sources.txt'),
+                 "targets": Path(TEST_DIR, 'input', 'btb-targets.txt')},
+                output_file=OUT_FILE_DEFAULT)
         assert OUT_FILE_DEFAULT.exists(), 'Output file was not written'
         expected_file = Path(TEST_DIR, 'expected', 'weighted-output.txt')
 
@@ -291,10 +288,10 @@ class TestBowTieBuilder:
 
     def test_weight_one(self):
         OUT_FILE_DEFAULT.unlink(missing_ok=True)
-        BTB.run(edges=Path(TEST_DIR, 'input', 'weight-one-edges.txt'),
-                           sources=Path(TEST_DIR, 'input', 'btb-sources.txt'),
-                           targets=Path(TEST_DIR, 'input', 'btb-targets.txt'),
-                           output_file=OUT_FILE_DEFAULT)
+        BTB.run({"edges": Path(TEST_DIR, 'input', 'weight-one-edges.txt'),
+                 "sources": Path(TEST_DIR, 'input', 'btb-sources.txt'),
+                 "targets": Path(TEST_DIR, 'input', 'btb-targets.txt')},
+                output_file=OUT_FILE_DEFAULT)
         assert OUT_FILE_DEFAULT.exists(), 'Output file was not written'
         expected_file = Path(TEST_DIR, 'expected', 'weighted-output.txt')
 
