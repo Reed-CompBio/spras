@@ -80,7 +80,7 @@ DEFAULT_HASH_LENGTH = 7
 def label_validator(name: str):
     """
     A validator takes in a label
-    and ensure that it's alphanumeric (with underscores).
+    and ensures that it's alphanumeric (with underscores).
     """
     label_pattern = r'^\w+$'
     def validate(label: str):
