@@ -24,6 +24,7 @@ dependencies = [
     "matplotlib==3.10.3",
     "networkx==3.5",
     "pandas==2.3.0",
+    "pydantic==2.11.7",
     "numpy==2.3.1",
     "requests==2.32.4",
     "scikit-learn==1.7.0",
@@ -73,4 +74,4 @@ select = [
 # py-modules tells setuptools which directory is our actual module
 py-modules = ["spras"]
 # packages tells setuptools what the exported package is called (ie allows import spras)
-packages = ["spras", "spras.analysis"]
+packages = ["spras", "spras.analysis", "spras.config"]
