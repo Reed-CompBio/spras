@@ -72,10 +72,6 @@ jobs:
     steps:
       - name: Checkout repository
         uses: actions/checkout@v3
-      - name: Setup Python
-        uses: actions/setup-python@v4
-        with:
-          python-version: '3.11' # Match this to the version specified in environment.yml
       - name: Install conda environment
         uses: conda-incubator/setup-miniconda@v2
         with:
