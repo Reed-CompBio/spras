@@ -1,3 +1,5 @@
+# yaml-language-server: $schema=./schema.json
+
 # Global workflow control
 
 # The length of the hash used to identify a parameter combination

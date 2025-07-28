@@ -1,0 +1,413 @@
+{
+  "$defs": {
+    "Algorithm": {
+      "additionalProperties": false,
+      "properties": {
+        "name": {
+          "title": "Name",
+          "type": "string"
+        },
+        "params": {
+          "$ref": "#/$defs/AlgorithmParams"
+        }
+      },
+      "required": [
+        "name",
+        "params"
+      ],
+      "title": "Algorithm",
+      "type": "object"
+    },
+    "AlgorithmParams": {
+      "additionalProperties": true,
+      "properties": {
+        "include": {
+          "title": "Include",
+          "type": "boolean"
+        },
+        "directed": {
+          "anyOf": [
+            {
+              "type": "boolean"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "title": "Directed"
+        }
+      },
+      "required": [
+        "include"
+      ],
+      "title": "AlgorithmParams",
+      "type": "object"
+    },
+    "Analysis": {
+      "additionalProperties": false,
+      "properties": {
+        "summary": {
+          "$ref": "#/$defs/SummaryAnalysis",
+          "default": {
+            "include": false
+          }
+        },
+        "cytoscape": {
+          "$ref": "#/$defs/CytoscapeAnalysis",
+          "default": {
+            "include": false
+          }
+        },
+        "ml": {
+          "$ref": "#/$defs/MlAnalysis",
+          "default": {
+            "include": false,
+            "aggregate_per_algorithm": false,
+            "components": 2,
+            "labels": true,
+            "kde": false,
+            "remove_empty_pathways": false,
+            "linkage": "ward",
+            "metric": "euclidean"
+          }
+        },
+        "evaluation": {
+          "$ref": "#/$defs/EvaluationAnalysis",
+          "default": {
+            "include": false,
+            "aggregate_per_algorithm": false
+          }
+        }
+      },
+      "title": "Analysis",
+      "type": "object"
+    },
+    "ContainerFramework": {
+      "enum": [
+        "docker",
+        "singularity",
+        "dsub"
+      ],
+      "title": "ContainerFramework",
+      "type": "string"
+    },
+    "ContainerRegistry": {
+      "additionalProperties": false,
+      "properties": {
+        "base_url": {
+          "title": "Base Url",
+          "type": "string"
+        },
+        "owner": {
+          "description": "The owner or project of the registry",
+          "title": "Owner",
+          "type": "string"
+        }
+      },
+      "required": [
+        "base_url",
+        "owner"
+      ],
+      "title": "ContainerRegistry",
+      "type": "object"
+    },
+    "CytoscapeAnalysis": {
+      "additionalProperties": false,
+      "properties": {
+        "include": {
+          "title": "Include",
+          "type": "boolean"
+        }
+      },
+      "required": [
+        "include"
+      ],
+      "title": "CytoscapeAnalysis",
+      "type": "object"
+    },
+    "Dataset": {
+      "additionalProperties": false,
+      "properties": {
+        "label": {
+          "title": "Label",
+          "type": "string"
+        },
+        "node_files": {
+          "items": {
+            "type": "string"
+          },
+          "title": "Node Files",
+          "type": "array"
+        },
+        "edge_files": {
+          "items": {
+            "type": "string"
+          },
+          "title": "Edge Files",
+          "type": "array"
+        },
+        "other_files": {
+          "items": {
+            "type": "string"
+          },
+          "title": "Other Files",
+          "type": "array"
+        },
+        "data_dir": {
+          "title": "Data Dir",
+          "type": "string"
+        }
+      },
+      "required": [
+        "label",
+        "node_files",
+        "edge_files",
+        "other_files",
+        "data_dir"
+      ],
+      "title": "Dataset",
+      "type": "object"
+    },
+    "EvaluationAnalysis": {
+      "additionalProperties": false,
+      "properties": {
+        "include": {
+          "title": "Include",
+          "type": "boolean"
+        },
+        "aggregate_per_algorithm": {
+          "default": false,
+          "title": "Aggregate Per Algorithm",
+          "type": "boolean"
+        }
+      },
+      "required": [
+        "include"
+      ],
+      "title": "EvaluationAnalysis",
+      "type": "object"
+    },
+    "GoldStandard": {
+      "additionalProperties": false,
+      "properties": {
+        "label": {
+          "title": "Label",
+          "type": "string"
+        },
+        "node_files": {
+          "items": {
+            "type": "string"
+          },
+          "title": "Node Files",
+          "type": "array"
+        },
+        "data_dir": {
+          "title": "Data Dir",
+          "type": "string"
+        },
+        "dataset_labels": {
+          "items": {
+            "type": "string"
+          },
+          "title": "Dataset Labels",
+          "type": "array"
+        }
+      },
+      "required": [
+        "label",
+        "node_files",
+        "data_dir",
+        "dataset_labels"
+      ],
+      "title": "GoldStandard",
+      "type": "object"
+    },
+    "Locations": {
+      "additionalProperties": false,
+      "properties": {
+        "reconstruction_dir": {
+          "title": "Reconstruction Dir",
+          "type": "string"
+        }
+      },
+      "required": [
+        "reconstruction_dir"
+      ],
+      "title": "Locations",
+      "type": "object"
+    },
+    "MlAnalysis": {
+      "additionalProperties": false,
+      "properties": {
+        "include": {
+          "title": "Include",
+          "type": "boolean"
+        },
+        "aggregate_per_algorithm": {
+          "default": false,
+          "title": "Aggregate Per Algorithm",
+          "type": "boolean"
+        },
+        "components": {
+          "default": 2,
+          "title": "Components",
+          "type": "integer"
+        },
+        "labels": {
+          "default": true,
+          "title": "Labels",
+          "type": "boolean"
+        },
+        "kde": {
+          "default": false,
+          "title": "Kde",
+          "type": "boolean"
+        },
+        "remove_empty_pathways": {
+          "default": false,
+          "title": "Remove Empty Pathways",
+          "type": "boolean"
+        },
+        "linkage": {
+          "$ref": "#/$defs/MlLinkage",
+          "default": "ward"
+        },
+        "metric": {
+          "$ref": "#/$defs/MlMetric",
+          "default": "euclidean"
+        }
+      },
+      "required": [
+        "include"
+      ],
+      "title": "MlAnalysis",
+      "type": "object"
+    },
+    "MlLinkage": {
+      "enum": [
+        "ward",
+        "complete",
+        "average",
+        "single"
+      ],
+      "title": "MlLinkage",
+      "type": "string"
+    },
+    "MlMetric": {
+      "enum": [
+        "euclidean",
+        "manhattan",
+        "cosine"
+      ],
+      "title": "MlMetric",
+      "type": "string"
+    },
+    "ReconstructionSettings": {
+      "additionalProperties": false,
+      "properties": {
+        "locations": {
+          "$ref": "#/$defs/Locations"
+        }
+      },
+      "required": [
+        "locations"
+      ],
+      "title": "ReconstructionSettings",
+      "type": "object"
+    },
+    "SummaryAnalysis": {
+      "additionalProperties": false,
+      "properties": {
+        "include": {
+          "title": "Include",
+          "type": "boolean"
+        }
+      },
+      "required": [
+        "include"
+      ],
+      "title": "SummaryAnalysis",
+      "type": "object"
+    }
+  },
+  "additionalProperties": false,
+  "properties": {
+    "container_framework": {
+      "$ref": "#/$defs/ContainerFramework",
+      "default": "docker"
+    },
+    "unpack_singularity": {
+      "default": false,
+      "title": "Unpack Singularity",
+      "type": "boolean"
+    },
+    "container_registry": {
+      "$ref": "#/$defs/ContainerRegistry"
+    },
+    "hash_length": {
+      "default": 7,
+      "description": "The length of the hash used to identify a parameter combination",
+      "title": "Hash Length",
+      "type": "integer"
+    },
+    "algorithms": {
+      "items": {
+        "$ref": "#/$defs/Algorithm"
+      },
+      "title": "Algorithms",
+      "type": "array"
+    },
+    "datasets": {
+      "items": {
+        "$ref": "#/$defs/Dataset"
+      },
+      "title": "Datasets",
+      "type": "array"
+    },
+    "gold_standards": {
+      "default": [],
+      "items": {
+        "$ref": "#/$defs/GoldStandard"
+      },
+      "title": "Gold Standards",
+      "type": "array"
+    },
+    "analysis": {
+      "$ref": "#/$defs/Analysis",
+      "default": {
+        "summary": {
+          "include": false
+        },
+        "cytoscape": {
+          "include": false
+        },
+        "ml": {
+          "aggregate_per_algorithm": false,
+          "components": 2,
+          "include": false,
+          "kde": false,
+          "labels": true,
+          "linkage": "ward",
+          "metric": "euclidean",
+          "remove_empty_pathways": false
+        },
+        "evaluation": {
+          "aggregate_per_algorithm": false,
+          "include": false
+        }
+      }
+    },
+    "reconstruction_settings": {
+      "$ref": "#/$defs/ReconstructionSettings"
+    }
+  },
+  "required": [
+    "container_registry",
+    "algorithms",
+    "datasets",
+    "reconstruction_settings"
+  ],
+  "title": "RawConfig",
+  "type": "object"
+}
