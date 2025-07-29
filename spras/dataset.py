@@ -104,7 +104,8 @@ class Dataset:
                 f"Edge file {interactome_loc} must have three or four columns but found {num_cols}"
             )
 
-        # We get uniqueness afterwards to make `load_files_from_dict` have a well-defined node ordering
+        # We get uniqueness afterwards to make `load_files_from_dict` have a well-defined node ordering,
+        # since algorithms may depend on the order of nodes passed.
         nodes = list(pd.concat([self.interactome.Interactor1, self.interactome.Interactor2]).unique())
 
         # Load generic node tables
