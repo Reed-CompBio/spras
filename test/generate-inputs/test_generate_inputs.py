@@ -36,7 +36,7 @@ class TestGenerateInputs:
             filename_map = {input_str: str(OUTDIR / algo / f"{algo}-{input_str}.txt") for input_str in inputs}
             prepare_inputs(algo, test_file, filename_map)
             required_inputs = algorithms[algo].required_inputs
-            # for exp_file_name in required_inputs:
-            #     assert filecmp.cmp(OUTDIR / algo / f"{algo}-{exp_file_name}.txt", EXPDIR / algo / f"{algo}-{exp_file_name}-expected.txt",
-            #                        shallow=False)
+            for exp_file_name in required_inputs:
+                assert filecmp.cmp(OUTDIR / algo / f"{algo}-{exp_file_name}.txt", EXPDIR / algo / f"{algo}-{exp_file_name}-expected.txt",
+                                   shallow=False), f"{algo} for {exp_file_name}.txt does not match up!"
 
