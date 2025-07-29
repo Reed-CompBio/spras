@@ -1,0 +1,3 @@
+NODEID	prize	active	dummy	sources	targets
+N							
+C	5.7	True			True
