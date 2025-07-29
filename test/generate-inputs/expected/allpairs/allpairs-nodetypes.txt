@@ -1,0 +1,3 @@
+#Node	Node type
+test_A	source
+C	target
