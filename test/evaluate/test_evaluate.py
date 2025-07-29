@@ -60,6 +60,10 @@ class TestEvaluate:
         # For windows support
         expected.insert(loc=0, column='Pathway', value=[str(Path("test", "evaluate", "input", "data-test-params-123", "pathway.txt"))])
 
+        pd.set_option('display.max_colwidth', None)
+        print()
+        print(chosen)
+        print(expected)
         assert chosen.equals(expected)
         assert output_png.exists()
 
