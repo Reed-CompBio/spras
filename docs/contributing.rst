@@ -2,7 +2,7 @@ SPRAS contribution guide
 ========================
 
 The SPRAS maintainers welcome external contributions. Code contributions
-will be licensed using the project’s `MIT license <LICENSE>`__.
+will be licensed using the project’s MIT license.
 
 Contributing a new pathway reconstruction guide
 -----------------------------------------------
