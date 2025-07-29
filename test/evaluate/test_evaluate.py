@@ -56,7 +56,9 @@ class TestEvaluate:
         Evaluation.precision_and_recall(pathway, GS_NODE_TABLE, algorithms, str(output_file), str(output_png))
 
         chosen = pd.read_csv(output_file, sep="\t", header=0).round(8)
-        expected = pd.read_csv(EXPECT_DIR + "expected-pr-per-pathway-pca-chosen.txt", sep="\t",  header=0).round(8)
+        expected = pd.read_csv(EXPECT_DIR + "expected-pr-per-pathway-pca-chosen.txt", sep="\t", header=0).round(8)
+        # For windows support
+        expected.insert(loc=0, column='Pathway', value=[Path("test", "evaluate", "input", "data-test-params-123", "pathway.txt")])
 
         assert chosen.equals(expected)
         assert output_png.exists()

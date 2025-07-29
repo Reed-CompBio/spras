@@ -41,7 +41,7 @@ jobs:
       - name: Run tests
         shell: bash --login {0}
         # Verbose output and disable stdout and stderr capturing
-        run: pytest -vs --ignore=test/AllPairs --ignore=test/BowTieBuilder --ignore=test/DOMINO --ignore=test/MEO --ignore=test/MinCostFlow --ignore=test/OmicsIntegrator1 --ignore=test/OmicsIntegrator2 --ignore=test/PathLinker --ignore=test/ResponseNet --ignore=test/RWR --ignore=test/ST_RWR
+        run: pytest -vs --ignore=test/AllPairs --ignore=test/BowTieBuilder --ignore=test/DOMINO --ignore=test/analysis/test_cytoscape.py --ignore=test/MEO --ignore=test/MinCostFlow --ignore=test/OmicsIntegrator1 --ignore=test/OmicsIntegrator2 --ignore=test/PathLinker --ignore=test/ResponseNet --ignore=test/RWR --ignore=test/ST_RWR
 
   # Runs the test code and Snakemake workflow in the conda environment
   test:
