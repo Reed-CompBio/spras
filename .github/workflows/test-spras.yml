@@ -63,7 +63,8 @@ jobs:
         run: pytest -vs
       - name: Run Snakemake workflow
         shell: bash --login {0}
-        run: snakemake --cores 2 --configfile config/config.yaml --show-failed-logs
+        # We enforce strict DAG evaluation to catch DAG problems before they appear as user errors.
+        run: snakemake --cores 2 --configfile config/config.yaml --show-failed-logs --strict-dag-evaluation cyclic-graph --strict-dag-evaluation functions --strict-dag-evaluation periodic-wildcards
 
   # Run pre-commit checks on source files
   pre-commit:
