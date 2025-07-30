@@ -85,7 +85,7 @@ class Evaluation:
         Computes node-level precision and recall for each pathway reconstruction output file.
 
         This function takes a list of file paths corresponding to pathway reconstruction algorithm outputs,
-        each formatted as a tab-separated file with columnns 'Node1', 'Node2', 'Rank', and 'Direction'.
+        each formatted as a tab-separated file with columns 'Node1', 'Node2', 'Rank', and 'Direction'.
         It compares the set of predicted nodes (from both columns Node1 and Node2) to a provided gold standard node table
         and computes precision and recall per file.
 
@@ -176,7 +176,7 @@ class Evaluation:
             pr_df.sort_values(by=["Recall", "Pathway"], axis=0, ascending=True, inplace=True)
 
             if aggregate_per_algorithm:
-                # Gaurenteed to only have one algorithm in Algorithm column
+                # Guaranteed to only have one algorithm in Algorithm column
                 title = f"Precision and Recall Plot Per Pathway for {pr_df['Algorithm'].unique()[0].capitalize()}"
             else:
                 title = "Precision and Recall Plot Per Pathway Per Algorithm"
@@ -202,7 +202,7 @@ class Evaluation:
         @param output_png: the filename to plot the precision and recall of each pathway (not a PRC)
         @param aggregate_per_algorithm: Boolean indicating if function is used per algorithm (Default False)
         """
-        # TODO update to add in the pathways for the algortihms that do not provide a pca chosen pathway
+        # TODO update to add in the pathways for the algorithms that do not provide a pca chosen pathway
 
         if not pr_df.empty:
             pr_df["Algorithm"] = pr_df["Pathway"].apply(lambda p: Path(p).parent.name.split("-")[1])
@@ -246,7 +246,7 @@ class Evaluation:
         @param pathway_summary_file: a file for each file per dataset about its network statistics
         @param output_dir: the main reconstruction directory
         """
-         # TODO update to add in the pathways for the algortihms that do not provide a pca chosen pathway
+         # TODO update to add in the pathways for the algorithms that do not provide a pca chosen pathway
 
         rep_pathways = []
 
