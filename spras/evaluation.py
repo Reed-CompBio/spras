@@ -115,7 +115,7 @@ class Evaluation:
         return pr_df
 
     @staticmethod
-    def visulize_precision_and_recall_per_pathway(pr_df: pd.DataFrame, output_file: str, output_png: str, aggregate_per_algorithm: bool = False):
+    def visulize_precision_and_recall_plot(pr_df: pd.DataFrame, output_file: str, output_png: str, title: str):
         """
         Generates a scatter plot of precision and recall values for each pathway and saves both
         the plot and the data.
@@ -123,6 +123,48 @@ class Evaluation:
         This function is intended for visualizing how different pathway reconstructions perform
         (not a precision-recall curve) showing the precision and recall of each parameter combination
         for each algorithm.
+
+        @param pr_df: Dataframe of calculated precision and recall for each pathway file.
+                      Must include a preprocessed 'Algorithm' column.
+        @param output_file: the filename to save the precision and recall of each pathway
+        @param output_png: the filename to plot the precision and recall of each pathway (not a PRC)
+        @param title: The title to use for the plot
+        """
+        # save figure
+        plt.figure(figsize=(10, 7))
+        color_palette = create_palette(pr_df["Algorithm"].tolist())
+
+        for algorithm, subset in pr_df.groupby("Algorithm"):
+            if not subset.empty:
+                plt.plot(
+                    subset["Recall"],
+                    subset["Precision"],
+                    color=color_palette[algorithm],
+                    marker="o",
+                    linestyle="",
+                    label=algorithm.capitalize()
+                )
+
+        plt.title(title)
+        plt.xlabel("Recall")
+        plt.ylabel("Precision")
+        plt.xlim(-0.05, 1.05)
+        plt.ylim(-0.05, 1.05)
+        plt.legend()
+        plt.grid(True)
+        plt.savefig(output_png)
+        plt.close()
+
+        # save dataframe
+        pr_df.drop(columns=["Algorithm"], inplace=True)
+        pr_df.to_csv(output_file, sep="\t", index=False)
+
+    @staticmethod
+    def precision_and_recall_per_pathway(pr_df: pd.DataFrame, output_file: str, output_png: str, aggregate_per_algorithm: bool = False):
+        """
+        Function for visualizing per pathway precision and recall across all algorithms. Each point in the plot represents
+        a single pathway reconstruction. If `aggregate_per_algorithm` is set to True, the plot is restricted to a single
+        algorithm and titled accordingly.
 
         @param pr_df: Dataframe of calculated precision and recall for each pathway file
         @param output_file: the filename to save the precision and recall of each pathway
@@ -133,38 +175,13 @@ class Evaluation:
             pr_df["Algorithm"] = pr_df["Pathway"].apply(lambda p: Path(p).parent.name.split("-")[1])
             pr_df.sort_values(by=["Recall", "Pathway"], axis=0, ascending=True, inplace=True)
 
-            # save figure
-            plt.figure(figsize=(10, 7))
-            color_palette = create_palette(pr_df["Algorithm"].tolist())
+            if aggregate_per_algorithm:
+                # Gaurenteed to only have one algorithm in Algorithm column
+                title = f"Precision and Recall Plot Per Pathway for {pr_df['Algorithm'].unique()[0].capitalize()}"
+            else:
+                title = "Precision and Recall Plot Per Pathway Per Algorithm"
 
-            for algorithm, subset in pr_df.groupby("Algorithm"):
-                if not subset.empty:
-                    plt.plot(
-                        subset["Recall"],
-                        subset["Precision"],
-                        color=color_palette[algorithm],
-                        marker="o",
-                        linestyle="",
-                        label=algorithm.capitalize()
-                    )
-
-                if aggregate_per_algorithm:
-                    plt.title(f"Precision and Recall Plot Per Pathway For {algorithm.capitalize()}")
-                else:
-                    plt.title("Precision and Recall Plot Per Pathway Across All Algorithms")
-
-            plt.xlabel("Recall")
-            plt.ylabel("Precision")
-            plt.xlim(-0.05, 1.05)
-            plt.ylim(-0.05, 1.05)
-            plt.legend()
-            plt.grid(True)
-            plt.savefig(output_png)
-            plt.close()
-
-            # save dataframe
-            pr_df.drop(columns=["Algorithm"], inplace=True)
-            pr_df.to_csv(output_file, sep="\t", index=False)
+            Evaluation.visulize_precision_and_recall_plot(pr_df, output_file, output_png, title)
 
         else:
             # this block should never be reached — having 0 pathways implies that no algorithms or parameter combinations were run,
@@ -172,14 +189,13 @@ class Evaluation:
             raise ValueError("No pathways were provided to evaluate and visulize on. This likely means no algorithms or parameter combinations were run.")
 
     @staticmethod
-    def visulize_precision_and_recall_pca_chosen_pathway(pr_df: pd.DataFrame, output_file: str, output_png: str, aggregate_per_algorithm: bool = False):
+    def precision_and_recall_pca_chosen_pathway(pr_df: pd.DataFrame, output_file: str, output_png: str, aggregate_per_algorithm: bool = False):
         """
-        Generates a scatter plot of precision and recall values for each PCA-chosen pathway and saves both
-        the plot and the data.
 
-        This function is intended for visualizing how different pathway reconstructions perform
-        (not a precision-recall curve) showing the precision and recall of the parameter combination
-        selected via PCA for each algorithm.
+        Function for visualizing the precision and recall of the single parameter combination selected via PCA,
+        either for each algorithm individually or one combination shared across all algorithms. Each point represents
+        a pathway reconstruction corresponding to the PCA-selected parameter combination. If `aggregate_per_algorithm`
+        is True, the plot includes a pca chosen pathway per algorithm and titled accordingly.
 
         @param pr_df: Dataframe of calculated precision and recall for each pathway file
         @param output_file: the filename to save the precision and recall of each pathway
@@ -192,37 +208,13 @@ class Evaluation:
             pr_df["Algorithm"] = pr_df["Pathway"].apply(lambda p: Path(p).parent.name.split("-")[1])
             pr_df.sort_values(by=["Recall", "Pathway"], axis=0, ascending=True, inplace=True)
 
-            # save figure
-            plt.figure(figsize=(10, 7))
-            color_palette = create_palette(pr_df["Algorithm"].tolist())
-            # plot a line per algorithm
-            for algorithm, subset in pr_df.groupby("Algorithm"):
-                if not subset.empty:
-                    plt.plot(
-                        subset["Recall"],
-                        subset["Precision"],
-                        color=color_palette[algorithm],
-                        marker="o",
-                        linestyle="",
-                        label=algorithm.capitalize()
-                    )
-
-            plt.xlabel("Recall")
-            plt.ylabel("Precision")
-            plt.xlim(-0.05, 1.05)
-            plt.ylim(-0.05, 1.05)
             if aggregate_per_algorithm:
-                plt.title("PCA-Chosen Pathway Per Algorithm Precision and Recall Plot")
+                title = "PCA-Chosen Pathway Per Algorithm Precision and Recall Plot"
             else:
-                plt.title("PCA-Chosen Pathway Across All Algorithms Precision and Recall Plot")
-            plt.legend()
-            plt.grid(True)
-            plt.savefig(output_png)
-            plt.close()
+                title = "PCA-Chosen Pathway Across All Algorithms Precision and Recall Plot"
 
-            # save dataframe
-            pr_df.drop(columns=["Algorithm"], inplace=True)
-            pr_df.to_csv(output_file, sep="\t", index=False)
+            Evaluation.visulize_precision_and_recall_plot(pr_df, output_file, output_png, title)
+
         else:
             # Edge case: if all algorithms chosen use only 1 parameter combination
             # TODO: once functions are separated, update to be a warning

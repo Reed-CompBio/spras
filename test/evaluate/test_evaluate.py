@@ -46,7 +46,7 @@ class TestEvaluate:
         output_png.unlink(missing_ok=True)
 
         pr_df = Evaluation.node_precision_and_recall(file_paths, GS_NODE_TABLE)
-        Evaluation.visulize_precision_and_recall_per_pathway(pr_df, str(output_file), str(output_png), True)
+        Evaluation.precision_and_recall_per_pathway(pr_df, str(output_file), str(output_png), True)
 
         output = pd.read_csv(output_file, sep="\t", header=0).round(8)
         expected = pd.read_csv(EXPECT_DIR + 'expected-pr-per-pathway.txt', sep="\t",  header=0).round(8)
@@ -63,7 +63,7 @@ class TestEvaluate:
         output_png.unlink(missing_ok=True)
 
         pr_df = Evaluation.node_precision_and_recall(file_paths, GS_NODE_TABLE)
-        Evaluation.visulize_precision_and_recall_per_pathway(pr_df, str(output_file), str(output_png), True)
+        Evaluation.precision_and_recall_per_pathway(pr_df, str(output_file), str(output_png), True)
 
         output = pd.read_csv(output_file, sep="\t", header=0).round(8)
         expected = pd.read_csv(EXPECT_DIR + 'expected-pr-per-pathway-empty.txt', sep="\t",  header=0).round(8)
@@ -78,7 +78,7 @@ class TestEvaluate:
 
         pr_df = Evaluation.node_precision_and_recall(file_paths, GS_NODE_TABLE)
         with pytest.raises(ValueError):
-            Evaluation.visulize_precision_and_recall_per_pathway(pr_df, output_file, output_png)
+            Evaluation.precision_and_recall_per_pathway(pr_df, output_file, output_png)
 
     def test_node_precision_recall_pca_chosen_pathway_not_provided(self):
         output_file = Path( OUT_DIR +"pr-per-pathway-pca-chosen-not-provided.txt")
@@ -88,7 +88,7 @@ class TestEvaluate:
         file_paths = []
 
         pr_df = Evaluation.node_precision_and_recall(file_paths, GS_NODE_TABLE)
-        Evaluation.visulize_precision_and_recall_pca_chosen_pathway(pr_df, str(output_file), str(output_png))
+        Evaluation.precision_and_recall_pca_chosen_pathway(pr_df, str(output_file), str(output_png))
 
         output = pd.read_csv(output_file, sep="\t", header=0).round(8)
         expected = pd.read_csv(EXPECT_DIR + 'expected-pr-pca-chosen-not-provided.txt', sep="\t",  header=0).round(8)
@@ -113,7 +113,7 @@ class TestEvaluate:
         pathway = Evaluation.pca_chosen_pathway([output_coordinates], SUMMARY_FILE, INPUT_DIR)
 
         pr_df = Evaluation.node_precision_and_recall(pathway, GS_NODE_TABLE)
-        Evaluation.visulize_precision_and_recall_pca_chosen_pathway(pr_df, str(output_file), str(output_png), True)
+        Evaluation.precision_and_recall_pca_chosen_pathway(pr_df, str(output_file), str(output_png), True)
 
 
         chosen = pd.read_csv(output_file, sep="\t", header=0).round(8)

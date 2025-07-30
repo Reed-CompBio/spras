@@ -436,7 +436,7 @@ rule evaluation_pr_per_pathways:
     run:
         node_table = Evaluation.from_file(input.gold_standard_file).node_table
         pr_df = Evaluation.node_precision_and_recall(input.pathways, node_table)
-        Evaluation.visulize_precision_and_recall_per_pathway(pr_df, output.pr_file, output.pr_png)
+        Evaluation.precision_and_recall_per_pathway(pr_df, output.pr_file, output.pr_png)
         
 # Returns all pathways for a specific algorithm and dataset
 def collect_pathways_per_algo_per_dataset(wildcards):
@@ -455,7 +455,7 @@ rule evaluation_per_algo_pr_per_pathways:
     run:
         node_table = Evaluation.from_file(input.gold_standard_file).node_table
         pr_df = Evaluation.node_precision_and_recall(input.pathways, node_table)
-        Evaluation.visulize_precision_and_recall_per_pathway(pr_df, output.pr_file, output.pr_png, include_aggregate_algo_eval)
+        Evaluation.precision_and_recall_per_pathway(pr_df, output.pr_file, output.pr_png, include_aggregate_algo_eval)
 
 # Return pathway summary file per dataset
 def collect_summary_statistics_per_dataset(wildcards):
@@ -482,7 +482,7 @@ rule evaluation_pca_chosen:
         node_table = Evaluation.from_file(input.gold_standard_file).node_table
         pca_chosen_pathway = Evaluation.pca_chosen_pathway(input.pca_coordinates_file, input.pathway_summary_file, out_dir)
         pr_df = Evaluation.node_precision_and_recall(pca_chosen_pathway, node_table)
-        Evaluation.visulize_precision_and_recall_pca_chosen_pathway(pr_df, output.pca_chosen_pr_file, output.pca_chosen_pr_png)
+        Evaluation.precision_and_recall_pca_chosen_pathway(pr_df, output.pca_chosen_pr_file, output.pca_chosen_pr_png)
 
 # Returns pca coordinates for a specific algorithm and dataset
 def collect_pca_coordinates_per_algo_per_dataset(wildcards):
@@ -503,7 +503,7 @@ rule evaluation_per_algo_pca_chosen:
         node_table = Evaluation.from_file(input.gold_standard_file).node_table
         pca_chosen_pathways = Evaluation.pca_chosen_pathway(input.pca_coordinates_file, input.pathway_summary_file, out_dir)
         pr_df = Evaluation.node_precision_and_recall(pca_chosen_pathways, node_table)
-        Evaluation.visulize_precision_and_recall_pca_chosen_pathway(pr_df, output.pca_chosen_pr_file, output.pca_chosen_pr_png, include_aggregate_algo_eval)
+        Evaluation.precision_and_recall_pca_chosen_pathway(pr_df, output.pca_chosen_pr_file, output.pca_chosen_pr_png, include_aggregate_algo_eval)
 
 # Return the dataset pickle file for a specific dataset
 def get_dataset_pickle_file(wildcards):
