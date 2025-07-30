@@ -229,7 +229,7 @@ def pca(dataframe: pd.DataFrame, output_png: str, output_var: str, output_coord:
     if kde:
         max_density = df_kde["density"].max()
         max_rows = df_kde[df_kde["density"] == max_density].sort_index()
-        if len(max_rows) > 1: # mutliple kde maximums
+        if len(max_rows) > 1: # multiple kde maximums
             # compute distances to origin (0,0)
             distances = np.sqrt(max_rows["x_coordinate"]**2 + max_rows["y_coordinate"]**2).round(8)
             # pick the coordinate closest to (0,0) as the kde peak to use.
@@ -343,7 +343,7 @@ def hac_vertical(dataframe: pd.DataFrame, output_png: str, output_file: str, lin
     plt.legend(legend_labels, label_color_map.keys(), bbox_to_anchor=(1.02, 1), loc='upper left')
 
     # Use linkage matrix from seaborn clustergrid to generate cluster assignments
-    # then using fcluster with a distance thershold(t) to make the clusters
+    # then using fcluster with a distance threshold(t) to make the clusters
     linkage_matrix = clustergrid.dendrogram_row.linkage
     clusters = fcluster(linkage_matrix, t=0.5, criterion='distance')
     cluster_data = {'algorithm': columns.tolist(), 'labels': clusters}
@@ -382,7 +382,7 @@ def hac_horizontal(dataframe: pd.DataFrame, output_png: str, output_file: str, l
 
     # plotting figure
     plt.figure(figsize=(10, 7))
-    model = AgglomerativeClustering(linkage=linkage, affinity=metric,distance_threshold=0.5, n_clusters=None)
+    model = AgglomerativeClustering(linkage=linkage, metric=metric,distance_threshold=0.5, n_clusters=None)
     model = model.fit(df)
     plt.figure(figsize=(10, 7))
     plt.title("Hierarchical Agglomerative Clustering Dendrogram")
