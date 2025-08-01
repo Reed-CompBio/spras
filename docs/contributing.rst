@@ -105,13 +105,13 @@ Step 1: Practice with the Local Neighborhood algorithm
 
 The Local Neighborhood pathway reconstruction is implemented and
 described in the
-```docker-wrappers/LocalNeighborhood`` <docker-wrappers/LocalNeighborhood>`__
+``docker-wrappers/LocalNeighborhood``
 directory. The readme in that directory describes the usage and the
 three required arguments. This algorithm does not require any
 third-party packages, only Python 3.x. Run ``local_neighborhood_alg.py``
 from the command line. There are example input files ``ln-network.txt``
 and ``ln-nodes.txt`` in
-```test/LocalNeighborhood/input`` <test/LocalNeighborhood/input>`__.
+``test/LocalNeighborhood/input`.
 Copy them to the ``LocalNeighborhood`` directory for testing. Confirm
 that the output file matches expectations.
 
@@ -119,7 +119,7 @@ Step 2: Create a Local Neighborhood Docker image
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
 Complete the ``Dockerfile`` in the
-```docker-wrappers/LocalNeighborhood`` <docker-wrappers/LocalNeighborhood>`__
+``docker-wrappers/LocalNeighborhood``
 directory to create a Docker image. The PathLinker ``Dockerfile``
 demonstrates how to begin with a Python image and copy files into the
 image with ``COPY``. Browse the official `Python
@@ -329,7 +329,7 @@ Neighborhood implementation that was added to the Docker image. The new
 tests will test that the ``run`` function of the ``LocalNeighborhood``
 class works correctly. Use ``test_pathlinker.py`` as an example. There
 are input files for testing in the
-```test/LocalNeighborhood/input`` <test/LocalNeighborhood/input>`__
+``test/LocalNeighborhood/input``
 directory. The new test functions will be automatically run as part of
 the pytest testing.
 
@@ -490,7 +490,7 @@ Currently, SPRAS only enforces a small number of Python formatting
 conventions and runs a small number of tests. Additional hooks are
 `available <https://github.com/pre-commit/pre-commit-hooks#hooks-available>`__.
 These are configured in ``.pre-commit-config.yaml``. SPRAS also runs
-```ruff`` <https://github.com/charliermarsh/ruff>`__ as part of the
+`ruff <https://github.com/charliermarsh/ruff>`__ as part of the
 pre-commit hooks to perform the Python code analysis, which supports
 many more `rules <https://beta.ruff.rs/docs/rules/>`__. These are
 configured in ``pyproject.toml``.
