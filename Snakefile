@@ -5,7 +5,7 @@ import yaml
 from spras.dataset import Dataset
 from spras.evaluation import Evaluation
 from spras.analysis import ml, summary, cytoscape
-import spras.config as _config
+import spras.config.config as _config
 
 # Snakemake updated the behavior in the 6.5.0 release https://github.com/snakemake/snakemake/pull/1037
 # and using the wrong separator prevents Snakemake from matching filenames to the rules that can produce them
