@@ -2,7 +2,7 @@ SPRAS contribution guide
 ========================
 
 The SPRAS maintainers welcome external contributions. Code contributions
-will be licensed using the project’s MIT license.
+will be licensed using the project's MIT license.
 
 Contributing a new pathway reconstruction guide
 -----------------------------------------------
@@ -16,35 +16,38 @@ Prerequisites
 
 SPRAS builds on multiple technologies to run pathway reconstruction in a
 Snakemake workflow. Before following this guide, a contributor will need
+
 - Familiarity with Python (`Carpentries
-introduction <https://swcarpentry.github.io/python-novice-inflammation/>`__)
+  introduction <https://swcarpentry.github.io/python-novice-inflammation/>`__)
 - Familiarity with Git and GitHub (`Carpentries
-introduction <https://swcarpentry.github.io/git-novice/>`__) -
-Familiarity with Docker and Dockerfiles to create images (`Carpentries
-introduction <https://carpentries-incubator.github.io/docker-introduction/>`__)
+  introduction <https://swcarpentry.github.io/git-novice/>`__)
+- Familiarity with Docker and Dockerfiles to create images (`Carpentries
+  introduction <https://carpentries-incubator.github.io/docker-introduction/>`__)
 - A `Docker Hub <https://hub.docker.com/>`__ account
 
 It is not necessary to have experience with Snakemake, Python testing,
 or pandas before getting started, but it may help with more complex
-SPRAS contributions: - Snakemake `Carpentries
-introduction <https://carpentries-incubator.github.io/workflows-snakemake/>`__
-or `beginner’s
-guide <http://ivory.idyll.org/blog/2023-snakemake-slithering-section-1.html>`__
+SPRAS contributions:
+
+- Snakemake `Carpentries
+  introduction <https://carpentries-incubator.github.io/workflows-snakemake/>`__
+  or `beginner's
+  guide <http://ivory.idyll.org/blog/2023-snakemake-slithering-section-1.html>`__
 - pytest `getting
-started <https://docs.pytest.org/en/7.1.x/getting-started.html>`__ and
-`how-to guides <https://docs.pytest.org/en/7.1.x/how-to/index.html>`__ -
-pandas `Carpentries
-introduction <https://datacarpentry.org/python-ecology-lesson/02-starting-with-data.html>`__
-or `10 minutes to
-pandas <https://pandas.pydata.org/pandas-docs/stable/user_guide/10min.html>`__
+  started <https://docs.pytest.org/en/7.1.x/getting-started.html>`__ and
+  `how-to guides <https://docs.pytest.org/en/7.1.x/how-to/index.html>`__
+- pandas `Carpentries
+  introduction <https://datacarpentry.org/python-ecology-lesson/02-starting-with-data.html>`__
+  or `10 minutes to
+  pandas <https://pandas.pydata.org/pandas-docs/stable/user_guide/10min.html>`__
 
 Step 0: Fork the repository and create a branch
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
 From the `SPRAS repository <https://github.com/Reed-CompBio/spras>`__,
-click the “Fork” button in the upper right corner to create a copy of
-the repository in your own GitHub account. Do not change the “Repository
-name”. Then click the green “Create fork” button.
+click the "Fork" button in the upper right corner to create a copy of
+the repository in your own GitHub account. Do not change the "Repository
+name". Then click the green "Create fork" button.
 
 The simplest way to set up SPRAS for local development is to clone your
 fork of the repository to your local machine. You can do that with a
@@ -69,7 +72,7 @@ on the ``local-neighborhood`` branch
 For this local neighborhood example only, you will not merge the changes
 back to the original SPRAS repository. Instead, you can open a pull
 request to your fork so that the SPRAS maintainers can still provide
-feedback. For example, use the “New pull request” button from
+feedback. For example, use the "New pull request" button from
 https://github.com/agitter/spras/pulls and set ``agitter/spras`` as both
 the base repository and the head repository with ``local-neighborhood``
 as the compare branch.
@@ -156,7 +159,7 @@ which container to run the command in.
 
 The parts of the command starting with ``python`` are the command run
 inside the container, which is why the file paths like
-``/data/ln-network.txt`` are relative to the container’s file system
+``/data/ln-network.txt`` are relative to the container's file system
 instead of your local file system. The command assumes the test files
 have already been copied into the current working directory. Windows
 users may need to escape the absolute paths so that ``/data`` becomes
@@ -214,11 +217,11 @@ Also test the functions available in the ``Dataset`` class.
      sources NODEID
    0    True      A
 
-Note: If you get a ‘no module named’ error, make sure that you are
+Note: If you get a 'no module named' error, make sure that you are
 running your interactive python session inside the SPRAS conda
 environment (your terminal should begin with ``(spras)`` instead of
 ``(base)``, which can be done through ``conda activate spras``), and
-your editor’s interpreter is set to using the SPRAS environment over the
+your editor's interpreter is set to using the SPRAS environment over the
 base environment (on VSCode and IntelliJ editors, this should be in the
 bottom right.)
 
@@ -233,8 +236,8 @@ expected file formats generated for the two algorithms with respect to
 the header rows and node prize column. The selected nodes should be any
 node in the dataset that has a prize set, any node that is active, any
 node that is a source, or any node that is a target. As shown in the
-example dataset above, “active”, “sources”, and “targets” are Boolean
-attributes. A “prize” is a term for a numeric score on a node in a
+example dataset above, "active", "sources", and "targets" are Boolean
+attributes. A "prize" is a term for a numeric score on a node in a
 network, so nodes that have non-empty prizes are considered relevant
 nodes for the Local Neighborhood algorithm along with active nodes,
 sources, and targets. The network should be all of the edges written in
@@ -248,7 +251,7 @@ nodes input files to be mounted and used inside the container. It is
 also used to prepare the path for the output file, which is different
 from how the output is prepared in the PathLinker example. The
 functionality of ``prepare_volume`` is similar to how you had to
-manually specify paths relative to the container’s file system when you
+manually specify paths relative to the container's file system when you
 interactive tested the container in Step 2. It is not necessary to
 create the output directory in advance because the Local Neighborhood
 algorithm will create it if it does not exist.
@@ -269,7 +272,7 @@ and ``reinsert_direction_col_undirected`` function in
 ``spras.interactome.py``. The ``parse_output`` function also ensures
 that there are no duplicate edges in the output pathway using the
 ``spras.util.py`` function ``duplicate_edges``. Make sure header = True
-with column names: [‘Node1’, ‘Node2’, ‘Rank’, ‘Direction’] when the file
+with column names: ['Node1', 'Node2', 'Rank', 'Direction'] when the file
 is created. The output should have the format
 ``<vertex1> <vertex2> 1 U``.
 
@@ -336,42 +339,46 @@ reconstruction algorithm. First pull the image
 ``<username>/local-neighborhood`` from Docker Hub. Then build the Docker
 image using the ``Dockerfile`` that was completed in Step 2.
 
-Modify generate inputs: 1. Include a key-value pair in the algo_exp_file
-dictionary that links the specific algorithm to its expected network
-file. 2. Obtain the expected network file from the workflow, manually
-confirm it is correct, and save it to ``test/generate-inputs/expected``.
-Name it as ``{algorithm_name}-{network_file_name}-expected.txt``.
+Modify generate inputs:
 
-Modify parse outputs: 1. Obtain the raw-pathway output (e.g. from the
-run function in your wrapper by running the Snakemake workflow) and save
-it to ``test/parse-outputs/input``. Name it as
-``{algorithm_name}-raw-pathway.txt``. 2. Obtain the expected universal
-output from the workflow, manually confirm it is correct, and save it to
-``test/parse-outputs/expected`` directory. Name it as
-``{algorithm_name}-pathway-expected.txt``. 3. Add an
-``{algorithm-name}-empty-raw-pathway.txt`` file inside
-``test/parse-outputs/input/empty`` containing all output files
-associated with an empty subnetwork for the algorithm. 4. Add the new
-algorithm’s name to the algorithms dict in
-``test/parse-outputs/test_parse_outputs.py``, with any parameters it
-needs.
+1. Include a key-value pair in the algo_exp_file dictionary that links
+   the specific algorithm to its expected network file.
+2. Obtain the expected network file from the workflow, manually confirm
+   it is correct, and save it to ``test/generate-inputs/expected``. Name
+   it as ``{algorithm_name}-{network_file_name}-expected.txt``.
+
+Modify parse outputs:
+
+1. Obtain the raw-pathway output (e.g. from the run function in your
+   wrapper by running the Snakemake workflow) and save it to
+   ``test/parse-outputs/input``. Name it as
+   ``{algorithm_name}-raw-pathway.txt``.
+2. Obtain the expected universal output from the workflow, manually
+   confirm it is correct, and save it to ``test/parse-outputs/expected``
+   directory. Name it as ``{algorithm_name}-pathway-expected.txt``.
+3. Add an ``{algorithm-name}-empty-raw-pathway.txt`` file inside
+   ``test/parse-outputs/input/empty`` containing all output files
+   associated with an empty subnetwork for the algorithm.
+4. Add the new algorithm's name to the algorithms dict in
+   ``test/parse-outputs/test_parse_outputs.py``, with any parameters it
+   needs.
 
 Step 6: Update documentation
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
-SPRAS uses ``sphinx`` and “Read The Docs” for building and hosting
+SPRAS uses ``sphinx`` and "Read The Docs" for building and hosting
 documentation. To include your new reconstruction algorithm in this
 documentation, create a new file at ``docs/prms/{my-alg}.rst``, where
 you replace ``{my-alg}`` with a shorthand for your algorithm. Once this
 file exists, you can edit it to document the algorithm in a
-human-readable way that provides any information that’s relevant to
+human-readable way that provides any information that's relevant to
 users who might wish to use SPRAS with the algorithm. For more
 information about working with ``.rst`` files in SPRAS documentation,
 see ``docs/README.md``.
 
-Once you’ve created the docs file, you’ll need to create a new reference
+Once you've created the docs file, you'll need to create a new reference
 to it in ``docs/prms/prms.rst``, which adds the new page to a table of
-contents. For example, if you created ``docs/prms/my-alg.rst``, you’d
+contents. For example, if you created ``docs/prms/my-alg.rst``, you'd
 add something like the following to ``docs/prms/prms.rst``:
 
 .. code:: rst
@@ -384,8 +391,8 @@ add something like the following to ``docs/prms/prms.rst``:
 
 ..
 
-   Note: The “caption” field should be a short title for the docs page
-   you’re adding, and the ``my-alg`` section after it must be the name
+   Note: The "caption" field should be a short title for the docs page
+   you're adding, and the ``my-alg`` section after it must be the name
    of your new file without the ``.rst`` extension.
 
 Step 7: Work with SPRAS maintainers to revise the pull request
@@ -436,7 +443,7 @@ General steps for contributing a new pathway reconstruction algorithm
     path with the names of the test files.
 9.  Extend ``.github/workflows/build-containers.yml`` to pull and build
     the new Docker image
-10. Update SPRAS’s online “Read The Docs” documentation by adding a new
+10. Update SPRAS's online "Read The Docs" documentation by adding a new
     restructured text page at ``docs/prms/{new-alg}.rst`` (replacing
     ``{new-alg}`` with a sensible name for the algorithm) and linking to
     it in ``docs/prms/prms.rst``
@@ -471,11 +478,13 @@ The ``pre-commit`` package is installed as part of the conda environment
 in ``environment.yml``, or when installing SPRAS with
 ``python -m pip install -e .[dev]``. From there, the pre-commit `quick
 start <https://pre-commit.com/#quick-start>`__ guide explains two
-primary ways to use it locally: - run against all source files with
-``pre-commit run --all-files`` to identify errors and automatically fix
-them when possible - configure ``git`` to run the hooks before every
-``git commit`` so that a commit will only succeed if the tests pass,
-ensuring new errors are not introduced
+primary ways to use it locally:
+
+- run against all source files with ``pre-commit run --all-files`` to
+  identify errors and automatically fix them when possible
+- configure ``git`` to run the hooks before every ``git commit`` so that
+  a commit will only succeed if the tests pass, ensuring new errors are
+  not introduced
 
 Currently, SPRAS only enforces a small number of Python formatting
 conventions and runs a small number of tests. Additional hooks are
@@ -491,9 +500,9 @@ Reviewing pull requests
 
 Contributors may help review pull requests from other contributors. Part
 of the review process includes running the updated code locally. This
-requires checking out a branch from the other contributor’s fork.
+requires checking out a branch from the other contributor's fork.
 
-We’ll use pull request
+We'll use pull request
 `170 <https://github.com/Reed-CompBio/spras/pull/170>`__ as an example
 from the ``ntalluri`` fork with branch ``implement-eval``. First, you
 need to add the ``ntalluri`` fork as a git remote from the command line
@@ -503,7 +512,7 @@ so that you can pull branches from it.
 
    git remote add ntalluri https://github.com/ntalluri/spras.git
 
-The first ``ntalluri`` is the name we give to the new remote. It doesn’t
+The first ``ntalluri`` is the name we give to the new remote. It doesn't
 have to match the GitHub user name, but that is a convenient convention.
 
 Then, confirm the new remote was added
