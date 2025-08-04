@@ -131,9 +131,14 @@ class Evaluation:
         @param output_png: the filename to plot the precision and recall of each pathway (not a PRC)
         @param title: The title to use for the plot
         """
+        if 'Algorithm' not in pr_df.columns:
+            raise ValueError(
+                "Column 'Algorithm' not found in DataFrame. "
+                "The input DataFrame must include a preprocessed 'Algorithm' column to calculate precision and recall per pathway file."
+            )
+
         # save figure
         plt.figure(figsize=(10, 7))
-        # TODO: add a check that Algorithm column exists
         color_palette = create_palette(pr_df['Algorithm'].tolist())
 
         for algorithm, subset in pr_df.groupby('Algorithm'):
