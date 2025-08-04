@@ -181,7 +181,7 @@ class Evaluation:
             else:
                 title = "Precision and Recall Plot Per Pathway Per Algorithm"
 
-            Evaluation.visulize_precision_and_recall_plot(pr_df, output_file, output_png, title)
+            Evaluation.visualize_precision_and_recall_plot(pr_df, output_file, output_png, title)
 
         else:
             # this block should never be reached — having 0 pathways implies that no algorithms or parameter combinations were run,
@@ -202,7 +202,7 @@ class Evaluation:
         @param output_png: the filename to plot the precision and recall of each pathway (not a PRC)
         @param aggregate_per_algorithm: Boolean indicating if function is used per algorithm (Default False)
         """
-        # TODO update to add in the pathways for the algorithms that do not provide a pca chosen pathway
+        # TODO update to add in the pathways for the algorithms that do not provide a pca chosen pathway https://github.com/Reed-CompBio/spras/issues/341
 
         if not pr_df.empty:
             pr_df["Algorithm"] = pr_df["Pathway"].apply(lambda p: Path(p).parent.name.split("-")[1])
@@ -213,7 +213,7 @@ class Evaluation:
             else:
                 title = "PCA-Chosen Pathway Across All Algorithms Precision and Recall Plot"
 
-            Evaluation.visulize_precision_and_recall_plot(pr_df, output_file, output_png, title)
+            Evaluation.visualize_precision_and_recall_plot(pr_df, output_file, output_png, title)
 
         else:
             # Edge case: if all algorithms chosen use only 1 parameter combination
@@ -246,7 +246,7 @@ class Evaluation:
         @param pathway_summary_file: a file for each file per dataset about its network statistics
         @param output_dir: the main reconstruction directory
         """
-         # TODO update to add in the pathways for the algorithms that do not provide a pca chosen pathway
+         # TODO update to add in the pathways for the algorithms that do not provide a pca chosen pathway https://github.com/Reed-CompBio/spras/issues/341
 
         rep_pathways = []
 
