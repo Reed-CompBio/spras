@@ -30,7 +30,6 @@ datasets:
 reconstruction_settings:
   locations:
     reconstruction_dir: "test/analysis/input/run/egfr"
-  run: true
 analysis:
   cytoscape:
     include: false

@@ -6,7 +6,7 @@ from pathlib import Path
 import pandas as pd
 import pytest
 
-import spras.config as config
+import spras.config.config as config
 from spras.analysis.summary import summarize_networks
 from spras.dataset import Dataset
 
