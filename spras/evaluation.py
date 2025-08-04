@@ -1,7 +1,8 @@
 import os
 import pickle as pkl
+from os import PathLike
 from pathlib import Path
-from typing import Dict, Iterable
+from typing import Dict, Iterable, Union
 
 import matplotlib.pyplot as plt
 import numpy as np
@@ -80,7 +81,7 @@ class Evaluation:
         # TODO: later iteration - chose between node and edge file, or allow both
 
     @staticmethod
-    def node_precision_and_recall(file_paths: Iterable[Path], node_table: pd.DataFrame) -> pd.DataFrame:
+    def node_precision_and_recall(file_paths: Iterable[Union[str, PathLike]], node_table: pd.DataFrame) -> pd.DataFrame:
         """
         Computes node-level precision and recall for each pathway reconstruction output file.
 
@@ -115,7 +116,7 @@ class Evaluation:
         return pr_df
 
     @staticmethod
-    def visualize_precision_and_recall_plot(pr_df: pd.DataFrame, output_file: str, output_png: str, title: str):
+    def visualize_precision_and_recall_plot(pr_df: pd.DataFrame, output_file: str | PathLike, output_png: str | PathLike, title: str):
         """
         Generates a scatter plot of precision and recall values for each pathway and saves both
         the plot and the data.
@@ -160,7 +161,7 @@ class Evaluation:
         pr_df.to_csv(output_file, sep="\t", index=False)
 
     @staticmethod
-    def precision_and_recall_per_pathway(pr_df: pd.DataFrame, output_file: str, output_png: str, aggregate_per_algorithm: bool = False):
+    def precision_and_recall_per_pathway(pr_df: pd.DataFrame, output_file: str | PathLike, output_png: str | PathLike, aggregate_per_algorithm: bool = False):
         """
         Function for visualizing per pathway precision and recall across all algorithms. Each point in the plot represents
         a single pathway reconstruction. If `aggregate_per_algorithm` is set to True, the plot is restricted to a single
@@ -189,7 +190,7 @@ class Evaluation:
             raise ValueError("No pathways were provided to evaluate and visulize on. This likely means no algorithms or parameter combinations were run.")
 
     @staticmethod
-    def precision_and_recall_pca_chosen_pathway(pr_df: pd.DataFrame, output_file: str, output_png: str, aggregate_per_algorithm: bool = False):
+    def precision_and_recall_pca_chosen_pathway(pr_df: pd.DataFrame, output_file: str | PathLike, output_png: str | PathLike, aggregate_per_algorithm: bool = False):
         """
 
         Function for visualizing the precision and recall of the single parameter combination selected via PCA,
@@ -230,7 +231,7 @@ class Evaluation:
                 plt.close()
 
     @staticmethod
-    def pca_chosen_pathway(coordinates_files: list, pathway_summary_file: str, output_dir: str):
+    def pca_chosen_pathway(coordinates_files: list[Union[str, PathLike]], pathway_summary_file: str, output_dir: str):
         """
         Identifies the pathway closest to a specified highest kernel density estimated (KDE) peak based on PCA
         coordinates
@@ -281,7 +282,7 @@ class Evaluation:
         return rep_pathways
 
     @staticmethod
-    def edge_frequency_node_ensemble(node_table: pd.DataFrame, ensemble_files: list, dataset_file: str) -> dict:
+    def edge_frequency_node_ensemble(node_table: pd.DataFrame, ensemble_files: list[Union[str, PathLike]], dataset_file: str) -> dict:
         """
         Generates a dictionary of node ensembles using edge frequency data from a list of ensemble files.
         A list of ensemble files can contain an aggregated ensemble or algorithm-specific ensembles per dataset
@@ -347,8 +348,8 @@ class Evaluation:
         return node_ensembles_dict
 
     @staticmethod
-    def precision_recall_curve_node_ensemble(node_ensembles: dict, node_table: pd.DataFrame, output_png: str,
-                                             output_file: str, aggregate_per_algorithm: bool = False):
+    def precision_recall_curve_node_ensemble(node_ensembles: dict, node_table: pd.DataFrame, output_png: str | PathLike,
+                                             output_file: str | PathLike, aggregate_per_algorithm: bool = False):
         """
         Plots precision-recall (PR) curves for a set of node ensembles evaluated against a gold standard.
 
