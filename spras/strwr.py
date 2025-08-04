@@ -1,7 +1,5 @@
 from pathlib import Path
 
-import pandas as pd
-
 from spras.containers import prepare_volume, run_container
 from spras.dataset import Dataset
 from spras.interactome import reinsert_direction_col_directed
@@ -13,12 +11,13 @@ __all__ = ['ST_RWR']
 # Note: This class is almost identical to the rwr.py file.
 class ST_RWR(PRM):
     required_inputs = ['network','sources','targets']
+    dois = []
 
     @staticmethod
     def generate_inputs(data, filename_map):
         ST_RWR.validate_required_inputs(filename_map)
 
-        # Get seperate source and target nodes for source and target files
+        # Get separate source and target nodes for source and target files
         if data.contains_node_columns(["sources","targets"]):
             sources = data.get_node_columns(["sources"])
             sources.to_csv(filename_map['sources'],sep='\t',index=False,columns=['NODEID'],header=False)

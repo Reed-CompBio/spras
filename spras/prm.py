@@ -1,3 +1,4 @@
+import typing
 from abc import ABC, abstractmethod
 from typing import Any
 
@@ -11,13 +12,20 @@ class PRM(ABC):
     algorithms.
     """
 
-    @property
-    @staticmethod
-    @abstractmethod
-    def required_inputs(self):
-        # Note: This NotImplementedError will never trigger.
-        # See CONTRIBUTING.md for more information.
-        raise NotImplementedError
+    required_inputs: list[str] = []
+    # DOIs aren't strictly required (e.g. local neighborhood),
+    # but it should be explicitly declared that there are no DOIs by defining an empty list.
+    dois: list[str] = typing.cast(list[str], None)
+
+    def __init_subclass__(cls):
+        # modified from https://stackoverflow.com/a/58206480/7589775
+        props = ["required_inputs", "dois"]
+        for prop in props:
+            if getattr(PRM, prop) is getattr(cls, prop):
+                raise NotImplementedError(
+                    "Attribute '{}' has not been overridden in class '{}'" \
+                    .format(prop, cls.__name__)
+                )
 
     @staticmethod
     @abstractmethod

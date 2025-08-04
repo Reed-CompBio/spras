@@ -12,6 +12,7 @@ __all__ = ['RWR']
 
 class RWR(PRM):
     required_inputs = ['network','nodes']
+    dois = []
 
     @staticmethod
     def generate_inputs(data, filename_map):
