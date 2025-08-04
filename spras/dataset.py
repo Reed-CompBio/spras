@@ -18,6 +18,8 @@ class Dataset:
     SOURCES = "sources"
     TARGETS = "targets"
     PRIZE = "prize"
+    DUMMY = "dummy"
+    ACTIVE = "active"
 
     warning_threshold = 0.05  # Threshold for scarcity of columns to warn user
 
