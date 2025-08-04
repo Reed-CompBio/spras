@@ -213,7 +213,7 @@ Also test the functions available in the ``Dataset`` class.
 
 .. code:: python
 
-   > data.request_node_columns(['sources'])
+   > data.get_node_columns(['sources'])
      sources NODEID
    0    True      A
 
@@ -225,9 +225,9 @@ your editor's interpreter is set to using the SPRAS environment over the
 base environment (on VSCode and IntelliJ editors, this should be in the
 bottom right.)
 
-Note the behaviors of the ``request_node_columns`` function when there
+Note the behaviors of the ``get_node_columns`` function when there
 are missing values in that column of the node table and when multiple
-columns are requested. ``request_node_columns`` always returns the
+columns are requested. ``get_node_columns`` always returns the
 ``NODEID`` column in addition to the requested columns.
 
 Now implement the ``generate_inputs`` function. Start by inspecting the
