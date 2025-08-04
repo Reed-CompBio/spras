@@ -57,7 +57,7 @@ class TestEvaluate:
     def test_node_precision_recall_per_pathway_empty(self):
 
         file_paths = [INPUT_DIR + "data-test-params-empty/pathway.txt"]
-        output_file = Path(OUT_DIR +"pr-per-pathway-empty.txt")
+        output_file = Path(OUT_DIR + "pr-per-pathway-empty.txt")
         output_png = Path(OUT_DIR + "pr-per-pathway-empty.png")
         output_file.unlink(missing_ok=True)
         output_png.unlink(missing_ok=True)
@@ -72,7 +72,7 @@ class TestEvaluate:
         assert output_png.exists()
 
     def test_node_precision_recall_per_pathway_not_provided(self):
-        output_file = OUT_DIR +"pr-per-pathway-not-provided.txt"
+        output_file = OUT_DIR + "pr-per-pathway-not-provided.txt"
         output_png = OUT_DIR + "pr-per-pathway-not-provided.png"
         file_paths = []
 
@@ -81,7 +81,7 @@ class TestEvaluate:
             Evaluation.precision_and_recall_per_pathway(pr_df, output_file, output_png)
 
     def test_node_precision_recall_pca_chosen_pathway_not_provided(self):
-        output_file = Path( OUT_DIR +"pr-per-pathway-pca-chosen-not-provided.txt")
+        output_file = Path( OUT_DIR + "pr-per-pathway-pca-chosen-not-provided.txt")
         output_file.unlink(missing_ok=True)
         output_png = Path(OUT_DIR + "pr-per-pathway-pca-chosen-not-provided.png")
         output_png.unlink(missing_ok=True)

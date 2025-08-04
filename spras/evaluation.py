@@ -115,7 +115,7 @@ class Evaluation:
         return pr_df
 
     @staticmethod
-    def visulize_precision_and_recall_plot(pr_df: pd.DataFrame, output_file: str, output_png: str, title: str):
+    def visualize_precision_and_recall_plot(pr_df: pd.DataFrame, output_file: str, output_png: str, title: str):
         """
         Generates a scatter plot of precision and recall values for each pathway and saves both
         the plot and the data.
