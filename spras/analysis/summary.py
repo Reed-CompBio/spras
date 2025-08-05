@@ -49,9 +49,15 @@ def summarize_networks(file_paths: Iterable[Path], node_table: pd.DataFrame, alg
         number_nodes = nw.number_of_nodes()
         number_edges = nw.number_of_edges()
         ncc = nx.number_connected_components(nw)
+        # TODO: add more stats
+        density = nx.density(nw)
+        if number_nodes == 0:
+            max_degree = 0
+        else:
+            max_degree = max(deg for _, deg in nw.degree())
 
         # Initialize list to store current network information
-        cur_nw_info = [nw_name, number_nodes, number_edges, ncc]
+        cur_nw_info = [nw_name, number_nodes, number_edges, ncc, density, max_degree]
 
         # Iterate through each node property and save the intersection with the current network
         for node_list in nodes_by_col:
@@ -71,7 +77,7 @@ def summarize_networks(file_paths: Iterable[Path], node_table: pd.DataFrame, alg
         nw_info.append(cur_nw_info)
 
     # Prepare column names
-    col_names = ['Name', 'Number of nodes', 'Number of edges', 'Number of connected components']
+    col_names = ['Name', 'Number of nodes', 'Number of edges', 'Number of connected components', 'Density', 'Max Degree']
     col_names.extend(nodes_by_col_labs)
     col_names.append('Parameter combination')
 
