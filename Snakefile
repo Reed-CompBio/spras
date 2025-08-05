@@ -362,6 +362,7 @@ rule ensemble:
 
 # Returns all pathways for a specific algorithm
 def collect_pathways_per_algo(wildcards):
+    # filters parameters to be those where the algorithm name (prefix before the first dash) matches wildcards.algorithm
     filtered_algo_params = [algo_param for algo_param in algorithms_with_params if algo_param.split("-")[0] == wildcards.algorithm]
     return expand('{out_dir}{sep}{{dataset}}-{algorithm_params}{sep}pathway.txt', out_dir=out_dir, sep=SEP, algorithm_params=filtered_algo_params)
 
