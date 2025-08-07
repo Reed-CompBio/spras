@@ -1,4 +1,5 @@
 from pathlib import Path
+from statistics import median
 from typing import Iterable
 
 import networkx as nx
@@ -49,20 +50,29 @@ def summarize_networks(file_paths: Iterable[Path], node_table: pd.DataFrame, alg
         number_nodes = nw.number_of_nodes()
         number_edges = nw.number_of_edges()
         ncc = nx.number_connected_components(nw)
-        # TODO: add more stats
-        density = nx.density(nw)
-        if number_nodes == 0:
+
+        # Save the max/median degree, average clustering coeffienct, and density
+        if number_nodes <= 1 or number_edges == 0:
             max_degree = 0
+            median_degree = 0.0
+            # acc = 0.0
+            density = 0.0
         else:
-            max_degree = max(deg for _, deg in nw.degree())
+            degrees = [deg for _, deg in nw.degree()]
+            max_degree = max(degrees)
+            median_degree = median(degrees)
+            # acc = nx.average_clustering(nw) update to do average for all component?
+            density = nx.density(nw)
 
-        # add the max diameter between all connected components
-        # add avg path lengths
-        # add clustering coffiecnt or modulatiry
-
+        # Save the max diameter
+        diameters = [
+            nx.diameter(nw.subgraph(c).copy()) if len(c) > 1 else 0
+            for c in nx.connected_components(nw)
+        ]
+        max_diameter = max(diameters, default=0)
 
         # Initialize list to store current network information
-        cur_nw_info = [nw_name, number_nodes, number_edges, ncc, density, max_degree]
+        cur_nw_info = [nw_name, number_nodes, number_edges, ncc, density, max_degree, median_degree, max_diameter]
 
         # Iterate through each node property and save the intersection with the current network
         for node_list in nodes_by_col:
@@ -82,7 +92,7 @@ def summarize_networks(file_paths: Iterable[Path], node_table: pd.DataFrame, alg
         nw_info.append(cur_nw_info)
 
     # Prepare column names
-    col_names = ['Name', 'Number of nodes', 'Number of edges', 'Number of connected components', 'Density', 'Max Degree']
+    col_names = ['Name', 'Number of nodes', 'Number of edges', 'Number of connected components', 'Density', 'Max degree', 'Median degree', 'Max diameter']
     col_names.extend(nodes_by_col_labs)
     col_names.append('Parameter combination')
 
