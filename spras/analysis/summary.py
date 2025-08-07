@@ -56,6 +56,11 @@ def summarize_networks(file_paths: Iterable[Path], node_table: pd.DataFrame, alg
         else:
             max_degree = max(deg for _, deg in nw.degree())
 
+        # add the max diameter between all connected components
+        # add avg path lengths
+        # add clustering coffiecnt or modulatiry
+
+
         # Initialize list to store current network information
         cur_nw_info = [nw_name, number_nodes, number_edges, ncc, density, max_degree]
 
