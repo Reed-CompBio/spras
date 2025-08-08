@@ -182,5 +182,5 @@ class Dataset:
 
     def get_interactome(self) -> pd.DataFrame | None:
         if self.interactome is None:
-            raise ValueError("interactome is None: can't copy a non-existant interactome.")
+            raise ValueError("interactome is None: can't copy a non-existent interactome.")
         return self.interactome.copy(deep = True)
