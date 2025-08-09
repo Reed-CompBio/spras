@@ -1,4 +1,4 @@
-Contributing a new pathway reconstruction
+Contributing a new pathway reconstruction algorithm
 =========================================
 
 The SPRAS maintainers welcome external contributions. Code contributions
