@@ -94,9 +94,7 @@ class MEO(PRM):
         @param filename_map: a dict mapping file types in the required_inputs to the filename for that type
         @return:
         """
-        for input_type in MEO.required_inputs:
-            if input_type not in filename_map:
-                raise ValueError(f"{input_type} filename is missing")
+        MEO.validate_required_inputs(filename_map)
 
         # Get sources and write to file, repeat for targets
         # Does not check whether a node is a source and a target
