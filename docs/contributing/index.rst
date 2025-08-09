@@ -1,18 +1,15 @@
-SPRAS contribution guide
-========================
+Contributing a new pathway reconstruction algorithm
+=========================================
 
 The SPRAS maintainers welcome external contributions. Code contributions
 will be licensed using the project's MIT license.
-
-Contributing a new pathway reconstruction guide
------------------------------------------------
 
 This guide walks new contributors through the process of adding a new
 pathway reconstruction algorithm to SPRAS. It follows the checklist
 below step-by-step to add a simple algorithm called Local Neighborhood.
 
 Prerequisites
-~~~~~~~~~~~~~
+-------------
 
 SPRAS builds on multiple technologies to run pathway reconstruction in a
 Snakemake workflow. Before following this guide, a contributor will need
@@ -42,7 +39,7 @@ SPRAS contributions:
   pandas <https://pandas.pydata.org/pandas-docs/stable/user_guide/10min.html>`__
 
 Step 0: Fork the repository and create a branch
-~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+-----------------------------------------------
 
 From the `SPRAS repository <https://github.com/Reed-CompBio/spras>`__,
 click the "Fork" button in the upper right corner to create a copy of
@@ -101,7 +98,7 @@ different name.
    git push agitter local-neighborhood
 
 Step 1: Practice with the Local Neighborhood algorithm
-~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+------------------------------------------------------
 
 The Local Neighborhood pathway reconstruction is implemented and
 described in the
@@ -116,7 +113,7 @@ Copy them to the ``LocalNeighborhood`` directory for testing. Confirm
 that the output file matches expectations.
 
 Step 2: Create a Local Neighborhood Docker image
-~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+------------------------------------------------
 
 Complete the ``Dockerfile`` in the
 ``docker-wrappers/LocalNeighborhood``
@@ -175,7 +172,7 @@ Pushing an image requires being logged in, so run ``docker login`` first
 if needed using your Docker Hub username and password.
 
 Step 3: Write the Local Neighborhood wrapper functions
-~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+------------------------------------------------------
 
 Add a new Python file ``spras/local_neighborhood.py`` to implement the
 wrapper functions for the Local Neighborhood algorithm. Use
@@ -277,7 +274,7 @@ is created. The output should have the format
 ``<vertex1> <vertex2> 1 U``.
 
 Step 4: Make the Local Neighborhood wrapper accessible through SPRAS
-~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+--------------------------------------------------------------------
 
 Import the new class ``LocalNeighborhood`` in ``spras/runner.py`` and
 add it to the ``algorithms`` dictionary so the wrapper functions can be
@@ -321,7 +318,7 @@ workflow, you typically have to remove the output directory or all of
 its contents before rerunning the Snakemake command.
 
 Step 5: Add Local Neighborhood to the tests
-~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+-------------------------------------------
 
 Add test functions to the test file ``test/test_ln.py``. This file
 already has existing tests to test the correctness of the Local
@@ -364,7 +361,7 @@ Modify parse outputs:
    needs.
 
 Step 6: Update documentation
-~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+----------------------------
 
 SPRAS uses ``sphinx`` and "Read The Docs" for building and hosting
 documentation. To include your new reconstruction algorithm in this
@@ -396,7 +393,7 @@ add something like the following to ``docs/prms/prms.rst``:
    of your new file without the ``.rst`` extension.
 
 Step 7: Work with SPRAS maintainers to revise the pull request
-~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+--------------------------------------------------------------
 
 Step 0 previously described how to create a ``local-neighborhood``
 branch and create a pull request. Make sure to commit all of the new and
@@ -494,51 +491,3 @@ These are configured in ``.pre-commit-config.yaml``. SPRAS also runs
 pre-commit hooks to perform the Python code analysis, which supports
 many more `rules <https://beta.ruff.rs/docs/rules/>`__. These are
 configured in ``pyproject.toml``.
-
-Reviewing pull requests
------------------------
-
-Contributors may help review pull requests from other contributors. Part
-of the review process includes running the updated code locally. This
-requires checking out a branch from the other contributor's fork.
-
-We'll use pull request
-`170 <https://github.com/Reed-CompBio/spras/pull/170>`__ as an example
-from the ``ntalluri`` fork with branch ``implement-eval``. First, you
-need to add the ``ntalluri`` fork as a git remote from the command line
-so that you can pull branches from it.
-
-::
-
-   git remote add ntalluri https://github.com/ntalluri/spras.git
-
-The first ``ntalluri`` is the name we give to the new remote. It doesn't
-have to match the GitHub user name, but that is a convenient convention.
-
-Then, confirm the new remote was added
-
-::
-
-   git remote -v
-
-You should see the new remote along with your ``origin`` remote and any
-others you added previously. Now you can pull and fetch branches from
-any of these remotes and push to any remotes where you have permissions.
-
-To checkout the branch in the pull request locally run
-
-::
-
-   git fetch ntalluri
-   git checkout implement-eval
-
-Optionally run
-
-::
-
-   git log
-
-To confirm that the most recent commit matches the most recent commit in
-the pull request. Now your local version of SPRAS matches the code in
-the pull request and you can test the code to confirm it runs as
-expected.
