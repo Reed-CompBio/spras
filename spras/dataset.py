@@ -13,13 +13,6 @@ Methods and intermediate state for loading data and putting it into pandas table
 
 
 class Dataset:
-    # Common column names
-    NODE_ID = "NODEID"
-    SOURCES = "sources"
-    TARGETS = "targets"
-    PRIZE = "prize"
-    DUMMY = "dummy"
-    ACTIVE = "active"
 
     warning_threshold = 0.05  # Threshold for scarcity of columns to warn user
 
