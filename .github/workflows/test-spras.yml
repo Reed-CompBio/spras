@@ -32,6 +32,8 @@ jobs:
     runs-on: ${{ matrix.os }}
     strategy:
       matrix:
+        # We later use this with `pytest-split` to split our test CI into two
+        # (with the max specified by `--splits 2`), to save CI time by parallelization
         test_group: [1, 2]
         os: [ubuntu-latest]
     steps:
