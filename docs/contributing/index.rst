@@ -338,11 +338,9 @@ image using the ``Dockerfile`` that was completed in Step 2.
 
 Modify generate inputs:
 
-1. Include a key-value pair in the algo_exp_file dictionary that links
-   the specific algorithm to its expected network file.
-2. Obtain the expected network file from the workflow, manually confirm
-   it is correct, and save it to ``test/generate-inputs/expected``. Name
-   it as ``{algorithm_name}-{network_file_name}-expected.txt``.
+1. Obtain the expected network and nodes file from the workflow,
+   manually confirm it is correct, and save it to ``test/generate-inputs/expected``.
+   Name it as ``{algorithm_name}-{network_file_name}-expected.txt``.
 
 Modify parse outputs:
 
