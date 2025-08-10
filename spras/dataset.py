@@ -14,6 +14,7 @@ Methods and intermediate state for loading data and putting it into pandas table
 
 class Dataset:
 
+    NODE_ID = "NODEID"
     warning_threshold = 0.05  # Threshold for scarcity of columns to warn user
 
     def __init__(self, dataset_dict):
