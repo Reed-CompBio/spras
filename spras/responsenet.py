@@ -102,7 +102,7 @@ class ResponseNet(PRM):
                     '--edges_file', edges_file,
                     '--sources_file', sources_file,
                     '--targets_file', targets_file,
-                    '--output', str(mapped_out_prefix / 'output'),
+                    '--output', str(Path(mapped_out_prefix, 'output').as_posix()),
                     '--gamma', str(gamma)]
 
         # choosing to run in docker or singularity container

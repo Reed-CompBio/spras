@@ -53,7 +53,8 @@ methods (PRMs) to omics data.
    :maxdepth: 1
    :caption: Contributing
 
-   contributing
+   contributing/index
+   contributing/maintain
 
 Indices and tables
 ==================
