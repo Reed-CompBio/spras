@@ -52,6 +52,7 @@ def summarize_networks(file_paths: Iterable[Path], node_table: pd.DataFrame, alg
         ncc = nx.number_connected_components(nw)
 
         # Save the max/median degree, average clustering coefficient, and density
+        # TODO: what about self loops?
         if number_nodes <= 1 or number_edges == 0:
             max_degree = 0
             median_degree = 0.0
@@ -62,21 +63,18 @@ def summarize_networks(file_paths: Iterable[Path], node_table: pd.DataFrame, alg
             median_degree = median(degrees)
             density = nx.density(nw)
 
-        # Save the max diameter
         cc = list(nx.connected_components(nw))
+        # Save the max diameter
+        # Use diameter only for components with ≥2 nodes (singleton components have diameter 0)
         diameters = [
             nx.diameter(nw.subgraph(c).copy()) if len(c) > 1 else 0
             for c in cc
         ]
         max_diameter = max(diameters, default=0)
 
-        # # Save the max average clustering coefficient
-        # component_accs = [
-        #     nx.average_clustering(nw.subgraph(c).copy()) for c in cc if len(c) > 2
-        # ]
-        # acc_max = max(component_accs, default=0.0)
 
         # Save the average path lengths
+        # Compute average shortest path length only for components with ≥2 nodes (undefined for singletons, set to 0.0)
         avg_path_lengths = [
             nx.average_shortest_path_length(nw.subgraph(c).copy()) if len(c) > 1 else 0.0
             for c in nx.connected_components(nw)
