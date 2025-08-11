@@ -82,7 +82,7 @@ def summarize_networks(file_paths: Iterable[Path], node_table: pd.DataFrame, alg
             for c in nx.connected_components(nw)
         ]
 
-        if avg_path_lengths:
+        if len(avg_path_lengths) != 0:
             avg_path_len = sum(avg_path_lengths) / len(avg_path_lengths)
         else:
             avg_path_len = 0.0
