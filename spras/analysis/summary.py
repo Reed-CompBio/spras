@@ -52,8 +52,7 @@ def summarize_networks(file_paths: Iterable[Path], node_table: pd.DataFrame, alg
         ncc = nx.number_connected_components(nw)
 
         # Save the max/median degree, average clustering coefficient, and density
-        # TODO: what about self loops?
-        if number_nodes <= 1 or number_edges == 0:
+        if number_nodes == 0:
             max_degree = 0
             median_degree = 0.0
             density = 0.0
