@@ -56,6 +56,14 @@ methods (PRMs) to omics data.
    contributing/index
    contributing/maintain
 
+.. toctree::
+   :maxdepth: 1
+   :caption: Tutorials
+
+   tutorial/basic
+   tutorial/medium
+   tutorial/hard
+
 Indices and tables
 ==================
 
