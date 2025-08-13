@@ -18,7 +18,6 @@ SPRAS directory structure for a user & configuration files
 - input folder
 - output folder
     - can control the creation of subfolders of outputs in the config file
-- docs folder(?) might need to make the html for a user to click on 
     - might need to be in a seperate step/slide
 Running SPRAS on a provided example dataset 
 - set up one algortihm and run
