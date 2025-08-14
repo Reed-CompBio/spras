@@ -354,7 +354,7 @@ class Evaluation:
         return node_ensembles_dict
 
     @staticmethod
-    def precision_recall_curve_node_ensemble(node_ensembles: dict, node_table: pd.DataFrame, output_png: str | PathLike,
+    def precision_recall_curve_node_ensemble(node_ensembles: dict, node_table: pd.DataFrame, dataset_file: str, output_png: str | PathLike,
                                              output_file: str | PathLike, aggregate_per_algorithm: bool = False):
         """
         Plots precision-recall (PR) curves for a set of node ensembles evaluated against a gold standard.
@@ -387,6 +387,34 @@ class Evaluation:
             if not node_ensemble.empty:
                 y_true = [1 if node in gold_standard_nodes else 0 for node in node_ensemble['Node']]
                 y_scores = node_ensemble['Frequency'].tolist()
+
+                # TODO: add a new one here for y_scores_baseline where the sources and targets frequency are set to 1
+                # set the scores for nodes in node_ensemble that are in both the gold_standard_nodes and sources/targets/prizes to 1.0
+                # then make that into a new node_ensemble with altered values that are then plotted.
+
+                pickle = Evaluation.from_file(dataset_file)
+                prizes_df = pickle.get_node_columns(["sources", "targets", "prize"])
+                prizes = set(prizes_df['NODEID'])
+                prize_gold_intersection = prizes & gold_standard_nodes
+                prize_node_ensemble_df = node_ensemble.copy()
+
+                # TODO what if the node_ensemble is all frequency = 0.0, that will be the new source/target/prize/ baseline?
+
+                # Set frequency to 1.0 for matching nodes
+                prize_node_ensemble_df.loc[
+                    prize_node_ensemble_df['Node'].isin(prize_gold_intersection),
+                    'Frequency'
+                ] = 1.0
+                print(prize_node_ensemble_df)
+
+                y_scores_prizes = prize_node_ensemble_df['Frequency'].tolist()
+
+                precision_prizes, recall_prizes, thresholds_prizes = precision_recall_curve(y_true, y_scores_prizes)
+                plt.plot(recall_prizes, precision_prizes, color=color_palette[label], marker='o', linestyle=':',
+                         label=f'{label.capitalize()} with prizes')
+
+
+
                 precision, recall, thresholds = precision_recall_curve(y_true, y_scores)
                 # avg precision summarizes a precision-recall curve as the weighted mean of precisions achieved at each threshold
                 avg_precision = average_precision_score(y_true, y_scores)
