@@ -17,4 +17,10 @@ OI1 takes some optional arguments:
 * mu: controls the degree-based negative prizes (default 0.0)
 * noise: Standard Deviation of the gaussian noise added to edges in Noisy Edges Randomizations
 * g: (Gamma) multiplicative edge penalty from degree of endpoints
-* r: msgsteiner parameter that adds random noise to edges, which is rarely needed. (default 0)
+* r: msgsteiner parameter that adds random noise to edges, which is rarely needed because the ``noisy_edges`` option is recommended instead. (default 0)
+* dummy_mode: one of ``terminals``, ``all``, ``others``, or ``file``.
+
+  * ``terminals``: connect the dummy node to all nodes that have been assigned prizes 
+  * ``all``: connect the dummy node to all nodes in the interactome (i.e. full set of nodes in graph)
+  * ``others``: connect the dummy node to all nodes that are not terminal nodes (i.e. nodes without prizes)
+  * ``file``: connect the dummy node to a specific list of nodes provided in a file
