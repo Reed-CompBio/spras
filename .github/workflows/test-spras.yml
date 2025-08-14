@@ -63,7 +63,8 @@ jobs:
         run: pytest -vs
       - name: Run Snakemake workflow
         shell: bash --login {0}
-        run: snakemake --cores 2 --configfile config/config.yaml --show-failed-logs
+        # We enforce strict DAG evaluation to catch DAG problems before they appear as user errors.
+        run: snakemake --cores 2 --configfile config/config.yaml --show-failed-logs --strict-dag-evaluation cyclic-graph --strict-dag-evaluation functions --strict-dag-evaluation periodic-wildcards
 
   # Run pre-commit checks on source files
   pre-commit:
@@ -72,9 +73,14 @@ jobs:
     steps:
       - name: Checkout repository
         uses: actions/checkout@v3
-      - name: Setup Python
-        uses: actions/setup-python@v4
+      - name: Install conda environment
+        uses: conda-incubator/setup-miniconda@v2
         with:
-          python-version: '3.11' # Match this to the version specified in environment.yml
-      - name: Run pre-commit checks
-        uses: pre-commit/action@v3.0.0
+          activate-environment: spras
+          environment-file: environment.yml
+          auto-activate-base: false
+          miniconda-version: 'latest'
+      - name: Run pre-commit
+        shell: bash --login {0}
+        # https://github.com/pre-commit/action/blob/576ff52938d158a24ac7e009dfa94b1455e7df99/action.yml#L19
+        run: pre-commit run --show-diff-on-failure --color=always
