@@ -150,7 +150,7 @@ class Config:
             label = dataset.label
             if label.lower() in [key.lower() for key in self.datasets.keys()]:
                 raise ValueError(f"Datasets must have unique case-insensitive labels, but the label {label} appears at least twice.")
-            self.datasets[attach_spras_revision(dataset["label"])] = dict(dataset)
+            self.datasets[attach_spras_revision(label)] = dict(dataset)
 
         # parse gold standard information
         self.gold_standards = {attach_spras_revision(gold_standard.label): dict(gold_standard) for gold_standard in raw_config.gold_standards}
@@ -159,7 +159,7 @@ class Config:
         dataset_labels = set(self.datasets.keys())
         gold_standard_dataset_labels = {dataset_label for value in self.gold_standards.values() for dataset_label in value['dataset_labels']}
         for label in gold_standard_dataset_labels:
-            if label not in dataset_labels:
+            if attach_spras_revision(label) not in dataset_labels:
                 raise ValueError(f"Dataset label '{label}' provided in gold standards does not exist in the existing dataset labels.")
 
         # Code snipped from Snakefile that may be useful for assigning default labels
