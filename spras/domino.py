@@ -44,14 +44,12 @@ class DOMINO(PRM[DominoParams]):
 
     @staticmethod
     def generate_inputs(data, filename_map):
-        for input_type in DOMINO.required_inputs:
-            if input_type not in filename_map:
-                raise ValueError(f"{input_type} filename is missing")
+        DOMINO.validate_required_inputs(filename_map)
 
         # Get active genes for node input file
         if data.contains_node_columns('active'):
             # NODEID is always included in the node table
-            node_df = data.request_node_columns(['active'])
+            node_df = data.get_node_columns(['active'])
         else:
             raise ValueError('DOMINO requires active genes')
         node_df = node_df[node_df['active'] == True]
@@ -149,10 +147,10 @@ class DOMINO(PRM[DominoParams]):
         out_modules_dir = Path(out_dir, 'active_genes')
 
         # Concatenate each produced module HTML file into one file
-        with open(output_file, 'w') as fo:
+        with open(output_file, 'w') as f:
             for html_file in out_modules_dir.glob('module_*.html'):
                 with open(html_file, 'r') as fi:
-                    fo.write(fi.read())
+                    f.write(fi.read())
 
         # Clean up DOMINO intermediate and pickle files
         slices_file.unlink(missing_ok=True)

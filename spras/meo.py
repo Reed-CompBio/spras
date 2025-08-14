@@ -15,7 +15,7 @@ from spras.util import add_rank_column, duplicate_edges, raw_pathway_df
 
 __all__ = ['MEO', 'MEOParams', 'write_properties']
 
-# replaces all underscores in the node names with unicode seperator
+# replaces all underscores in the node names with unicode separator
 # MEO keeps only the substring up to the first underscore when parsing node names
 # https://github.com/agitter/meo/blob/1fe57e8ff3952c494e2b14dfdc563a84596e2fcd/src/alg/Vertex.java#L56-L71
 underscore_replacement = '꧁SEP꧂'
@@ -114,14 +114,12 @@ class MEO(PRM[MEOParams]):
         @param filename_map: a dict mapping file types in the required_inputs to the filename for that type
         @return:
         """
-        for input_type in MEO.required_inputs:
-            if input_type not in filename_map:
-                raise ValueError(f"{input_type} filename is missing")
+        MEO.validate_required_inputs(filename_map)
 
         # Get sources and write to file, repeat for targets
         # Does not check whether a node is a source and a target
         for node_type in ['sources', 'targets']:
-            nodes = data.request_node_columns([node_type])
+            nodes = data.get_node_columns([node_type])
             if nodes is None:
                 raise ValueError(f'No {node_type} found in the node files')
 

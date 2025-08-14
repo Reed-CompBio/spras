@@ -27,7 +27,7 @@ class PRM(ABC, Generic[T]):
         for prop in props:
             if getattr(PRM, prop) is getattr(cls, prop):
                 raise NotImplementedError(
-                    "Attribute '{}' has not been overriden in class '{}'" \
+                    "Attribute '{}' has not been overridden in class '{}'" \
                     .format(prop, cls.__name__)
                 )
 
@@ -76,3 +76,9 @@ class PRM(ABC, Generic[T]):
     @abstractmethod
     def parse_output(raw_pathway_file: str, standardized_pathway_file: str, params: dict[str, Any]):
         raise NotImplementedError
+
+    @classmethod
+    def validate_required_inputs(cls, filename_map: dict[str, str]):
+        for input_type in cls.required_inputs:
+            if input_type not in filename_map:
+                raise ValueError("{input_type} filename is missing")

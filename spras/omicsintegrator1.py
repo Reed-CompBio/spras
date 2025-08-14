@@ -48,25 +48,25 @@ class OmicsIntegrator1Params(BaseModel):
     "How many times you would like to add noise to the given edge values and re-run the algorithm."
 
     shuffled_prizes: int = 0
-    "shuffled_prizes: How many times the algorithm should shuffle the prizes and re-run"
+    "How many times the algorithm should shuffle the prizes and re-run"
 
     random_terminals: int = 0
     "How many times to apply the given prizes to random nodes in the interactome"
 
     seed: Optional[int] = None
-    "The random seed to use for this run."
+    "The randomness seed to use."
 
     w: int
-    "the number of trees"
+    "Float that affects the number of connected components, with higher values leading to more components"
 
     b: float
-    "the trade-off between including more terminals and using less reliable edges"
+    "The trade-off between including more prizes and using less reliable edgess"
 
     d: int
-    "controls the maximum path-length from v0 to terminal nodes"
+    "Controls the maximum path-length from root to terminal nodes"
 
-    mu: Optional[float] = None
-    "controls the degree-based negative prizes (defualt 0.0)"
+    mu: float = 0.0
+    "Controls the degree-based negative prizes (defualt 0.0)"
 
     noise: Optional[float] = None
     "Standard Deviation of the gaussian noise added to edges in Noisy Edges Randomizations"
@@ -75,7 +75,7 @@ class OmicsIntegrator1Params(BaseModel):
     "(Gamma) multiplicative edge penalty from degree of endpoints"
 
     r: Optional[float] = None
-    "msgsteiner parameter that adds random noise to edges, which is rarely needed because the Forest --noisyEdges option is recommended instead (default 0)"
+    "msgsteiner parameter that adds random noise to edges, which is rarely needed because the --noisyEdges option is recommended instead (default 0)"
 
     model_config = ConfigDict(extra='forbid', use_attribute_docstrings=True)
 
@@ -103,16 +103,14 @@ class OmicsIntegrator1(PRM[OmicsIntegrator1Params]):
         @param filename_map: a dict mapping file types in the required_inputs to the filename for that type
         @return:
         """
-        for input_type in OmicsIntegrator1.required_inputs:
-            if input_type not in filename_map:
-                raise ValueError(f"{input_type} filename is missing")
+        OmicsIntegrator1.validate_required_inputs(filename_map)
 
         if data.contains_node_columns('prize'):
             # NODEID is always included in the node table
-            node_df = data.request_node_columns(['prize'])
+            node_df = data.get_node_columns(['prize'])
         elif data.contains_node_columns(['sources', 'targets']):
             # If there aren't prizes but are sources and targets, make prizes based on them
-            node_df = data.request_node_columns(['sources','targets'])
+            node_df = data.get_node_columns(['sources','targets'])
             node_df.loc[node_df['sources']==True, 'prize'] = 1.0
             node_df.loc[node_df['targets']==True, 'prize'] = 1.0
         else:
