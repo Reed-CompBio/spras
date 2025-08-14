@@ -17,7 +17,6 @@ import functools
 import importlib.metadata
 import itertools as it
 import os
-import re
 import subprocess
 import warnings
 from collections.abc import Iterable
