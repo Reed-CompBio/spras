@@ -119,8 +119,8 @@ algorithms:
     include: true
 
   - name: "responsenet"
-    params:
-      include: true
+    include: true
+    runs:
       run1:
         gamma: [10]
 

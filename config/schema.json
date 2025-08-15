@@ -22,6 +22,8 @@
             "aggregate_per_algorithm": false,
             "components": 2,
             "labels": true,
+            "kde": false,
+            "remove_empty_pathways": false,
             "linkage": "ward",
             "metric": "euclidean"
           }
@@ -248,6 +250,16 @@
           "title": "Labels",
           "type": "boolean"
         },
+        "kde": {
+          "default": false,
+          "title": "Kde",
+          "type": "boolean"
+        },
+        "remove_empty_pathways": {
+          "default": false,
+          "title": "Remove Empty Pathways",
+          "type": "boolean"
+        },
         "linkage": {
           "$ref": "#/$defs/MlLinkage",
           "default": "ward"
@@ -399,7 +411,6 @@
           },
           "default": {
             "default": {
-              "_time": 1752611437.804319,
               "module_threshold": null,
               "slice_threshold": null
             }
@@ -418,24 +429,6 @@
     "dominoRunModel": {
       "additionalProperties": false,
       "properties": {
-        "_time": {
-          "anyOf": [
-            {
-              "type": "number"
-            },
-            {
-              "items": {
-                "type": "number"
-              },
-              "type": "array"
-            },
-            {
-              "type": "string"
-            }
-          ],
-          "description": "The internal _time parameter. This is a parameter only given to nondeterminsitic\nalgorithms that provide no randomness seed. While this should be unset,\nwe allow specifying `_time` for users that want to re-use outputs of runs,\nthough this explicitly breaks the 'immutability' promise of runs.",
-          "title": "Time"
-        },
         "module_threshold": {
           "anyOf": [
             {
@@ -842,7 +835,7 @@
             }
           ],
           "default": 0,
-          "description": "shuffled_prizes: How many times the algorithm should shuffle the prizes and re-run",
+          "description": "How many times the algorithm should shuffle the prizes and re-run",
           "title": "Shuffled Prizes"
         },
         "random_terminals": {
@@ -871,15 +864,26 @@
             },
             {
               "items": {
-                "type": "integer"
+                "anyOf": [
+                  {
+                    "type": "integer"
+                  },
+                  {
+                    "type": "null"
+                  }
+                ]
               },
               "type": "array"
             },
             {
               "type": "string"
+            },
+            {
+              "type": "null"
             }
           ],
-          "description": "The random seed to use for this run. Defaults to the current UNIX timestamp.",
+          "default": null,
+          "description": "The randomness seed to use.",
           "title": "Seed"
         },
         "w": {
@@ -897,7 +901,7 @@
               "type": "string"
             }
           ],
-          "description": "the number of trees",
+          "description": "Float that affects the number of connected components, with higher values leading to more components",
           "title": "W"
         },
         "b": {
@@ -915,7 +919,7 @@
               "type": "string"
             }
           ],
-          "description": "the trade-off between including more terminals and using less reliable edges",
+          "description": "The trade-off between including more prizes and using less reliable edgess",
           "title": "B"
         },
         "d": {
@@ -933,7 +937,7 @@
               "type": "string"
             }
           ],
-          "description": "controls the maximum path-length from v0 to terminal nodes",
+          "description": "Controls the maximum path-length from root to terminal nodes",
           "title": "D"
         },
         "mu": {
@@ -943,26 +947,16 @@
             },
             {
               "items": {
-                "anyOf": [
-                  {
-                    "type": "number"
-                  },
-                  {
-                    "type": "null"
-                  }
-                ]
+                "type": "number"
               },
               "type": "array"
             },
             {
               "type": "string"
-            },
-            {
-              "type": "null"
             }
           ],
-          "default": null,
-          "description": "controls the degree-based negative prizes (defualt 0.0)",
+          "default": 0.0,
+          "description": "Controls the degree-based negative prizes (defualt 0.0)",
           "title": "Mu"
         },
         "noise": {
@@ -1049,7 +1043,7 @@
             }
           ],
           "default": null,
-          "description": "msgsteiner parameter that adds random noise to edges, which is rarely needed because the Forest --noisyEdges option is recommended instead (default 0)",
+          "description": "msgsteiner parameter that adds random noise to edges, which is rarely needed because the --noisyEdges option is recommended instead (default 0)",
           "title": "R"
         }
       },
@@ -1086,7 +1080,7 @@
               "noisy_edges": null,
               "random_terminals": null,
               "dummy_mode": null,
-              "seed": 1752611437804
+              "seed": null
             }
           },
           "title": "Runs",
@@ -1280,15 +1274,26 @@
             },
             {
               "items": {
-                "type": "integer"
+                "anyOf": [
+                  {
+                    "type": "integer"
+                  },
+                  {
+                    "type": "null"
+                  }
+                ]
               },
               "type": "array"
             },
             {
               "type": "string"
+            },
+            {
+              "type": "null"
             }
           ],
-          "description": "The random seed to use for this run. Defaults to the current UNIX timestamp.",
+          "default": null,
+          "description": "The random seed to use for this run.",
           "title": "Seed"
         }
       },
@@ -1351,6 +1356,64 @@
         }
       },
       "title": "pathlinkerRunModel",
+      "type": "object"
+    },
+    "responsenetModel": {
+      "additionalProperties": false,
+      "properties": {
+        "name": {
+          "const": "responsenet",
+          "title": "Name",
+          "type": "string"
+        },
+        "include": {
+          "title": "Include",
+          "type": "boolean"
+        },
+        "runs": {
+          "additionalProperties": {
+            "$ref": "#/$defs/responsenetRunModel"
+          },
+          "default": {
+            "default": {
+              "gamma": 10
+            }
+          },
+          "title": "Runs",
+          "type": "object"
+        }
+      },
+      "required": [
+        "name",
+        "include"
+      ],
+      "title": "responsenetModel",
+      "type": "object"
+    },
+    "responsenetRunModel": {
+      "additionalProperties": false,
+      "properties": {
+        "gamma": {
+          "anyOf": [
+            {
+              "type": "integer"
+            },
+            {
+              "items": {
+                "type": "integer"
+              },
+              "type": "array"
+            },
+            {
+              "type": "string"
+            }
+          ],
+          "default": 10,
+          "description": "The 'size' of the graph. The higher gamma is, the more flow\nis encouraged to start from the source nodes.",
+          "title": "Gamma"
+        }
+      },
+      "title": "responsenetRunModel",
       "type": "object"
     },
     "rwrModel": {
@@ -1547,6 +1610,7 @@
             "omicsintegrator1": "#/$defs/omicsintegrator1Model",
             "omicsintegrator2": "#/$defs/omicsintegrator2Model",
             "pathlinker": "#/$defs/pathlinkerModel",
+            "responsenet": "#/$defs/responsenetModel",
             "rwr": "#/$defs/rwrModel",
             "strwr": "#/$defs/strwrModel"
           },
@@ -1576,6 +1640,9 @@
           },
           {
             "$ref": "#/$defs/pathlinkerModel"
+          },
+          {
+            "$ref": "#/$defs/responsenetModel"
           },
           {
             "$ref": "#/$defs/rwrModel"
@@ -1616,9 +1683,11 @@
           "aggregate_per_algorithm": false,
           "components": 2,
           "include": false,
+          "kde": false,
           "labels": true,
           "linkage": "ward",
-          "metric": "euclidean"
+          "metric": "euclidean",
+          "remove_empty_pathways": false
         },
         "evaluation": {
           "aggregate_per_algorithm": false,

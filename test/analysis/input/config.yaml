@@ -1,37 +1,24 @@
-# The length of the hash used to identify a parameter combination
+# yaml-language-server: $schema=./schema.json
 hash_length: 7
 
-# Specify the container framework. Current supported versions include 'docker' and
-# 'singularity'. If container_framework is not specified, SPRAS will default to docker.
-container_framework: docker
-
-# Only used if container_framework is set to singularity, this will unpack the singularity containers
-# to the local filesystem. This is useful when PRM containers need to run inside another container,
-# such as would be the case in an HTCondor/OSPool environment.
-# NOTE: This unpacks singularity containers to the local filesystem, which will take up space in a way
-# that persists after the workflow is complete. To clean up the unpacked containers, the user must
-# manually delete them.
-unpack_singularity: false
-
-# Allow the user to configure which container registry containers should be pulled from
-# Note that this assumes container names are consistent across registries, and that the
-# registry being passed doesn't require authentication for pull actions
-container_registry:
-  base_url: docker.io
-  # The owner or project of the registry
-  # For example, "reedcompbio" if the image is available as docker.io/reedcompbio/allpairs
-  owner: reedcompbio
+containers:
+  framework: docker
+  unpack_singularity: false
+  registry:
+    base_url: docker.io
+    owner: reedcompbio
+  hash_length: 7
 
 algorithms:
   - name: "pathlinker"
-    params:
-      include: true
+    include: true
+    runs:
       run1:
         k: range(100,201,100)
 
   - name: "omicsintegrator1"
-    params:
-      include: true
+    include: true
+    runs:
       run1:
         b: [5, 6]
         w: np.linspace(0,5,2)
@@ -39,8 +26,8 @@ algorithms:
         dummy_mode: ["file"]
 
   - name: "omicsintegrator2"
-    params:
-      include: true
+    include: true
+    runs:
       run1:
         b: [4]
         g: [0]
@@ -49,27 +36,26 @@ algorithms:
         g: [3]
 
   - name: "meo"
-    params:
-      include: true
+    include: true
+    runs:
       run1:
         max_path_length: [3]
-        local_search: ["Yes"]
+        local_search: [true]
         rand_restarts: [10]
 
   - name: "mincostflow"
-    params:
-      include: true
+    include: true
+    runs:
       run1:
         flow: [1] # The flow must be an int
         capacity: [1]
 
   - name: "allpairs"
-    params:
-      include: true
+    include: true
 
   - name: "domino"
-    params:
-      include: true
+    include: true
+    runs:
       run1:
         slice_threshold: [0.3]
         module_threshold: [0.05]
