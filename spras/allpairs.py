@@ -73,8 +73,7 @@ class AllPairs(PRM[Empty]):
     @staticmethod
     def run(inputs, output_file, args=None, container_settings=None):
         if not container_settings: container_settings = ProcessedContainerSettings()
-        if not inputs["nodetypes"] or not inputs["network"] or not inputs["directed_flag"]:
-            raise ValueError('Required All Pairs Shortest Paths arguments are missing')
+        AllPairs.validate_required_run_args(inputs)
 
         work_dir = '/apsp'
 

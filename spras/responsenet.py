@@ -65,9 +65,7 @@ class ResponseNet(PRM[ResponseNetParams]):
 
     @staticmethod
     def run(inputs, output_file, args, container_settings):
-        # ensures that these parameters are required
-        if not inputs["sources"] or not inputs["targets"] or not inputs["edges"]:
-            raise ValueError('Required ResponseNet arguments are missing')
+        ResponseNet.validate_required_run_args(inputs)
 
         # the data files will be mapped within this directory within the container
         work_dir = '/ResponseNet'

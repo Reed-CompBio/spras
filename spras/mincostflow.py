@@ -76,10 +76,7 @@ class MinCostFlow(PRM[MinCostFlowParams]):
     def run(inputs, output_file, args=None, container_settings=None):
         if not container_settings: container_settings = ProcessedContainerSettings()
         if not args: args = MinCostFlowParams()
-
-        # ensures that these parameters are required
-        if not inputs["sources"] or not inputs["targets"] or not inputs["edges"]:
-            raise ValueError('Required MinCostFlow arguments are missing')
+        MinCostFlow.validate_required_run_args(inputs)
 
         # the data files will be mapped within this directory within the container
         work_dir = '/mincostflow'

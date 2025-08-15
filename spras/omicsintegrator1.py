@@ -142,8 +142,7 @@ class OmicsIntegrator1(PRM[OmicsIntegrator1Params]):
     @staticmethod
     def run(inputs, output_file, args, container_settings=None):
         if not container_settings: container_settings = ProcessedContainerSettings()
-        if inputs["edges"] is None or inputs["prizes"] is None or output_file is None:
-            raise ValueError('Required Omics Integrator 1 arguments are missing')
+        OmicsIntegrator1.validate_required_run_args(inputs, ["dummy_nodes"])
 
         work_dir = '/spras'
 

@@ -46,8 +46,7 @@ class RWR(PRM[RWRParams]):
     @staticmethod
     def run(inputs, output_file, args, container_settings=None):
         if not container_settings: container_settings = ProcessedContainerSettings()
-        if not inputs["nodes"] or not inputs["network"]:
-            raise ValueError('Required RWR arguments are missing')
+        RWR.validate_required_run_args(inputs)
 
         with Path(inputs["network"]).open() as network_f:
             for line in network_f:

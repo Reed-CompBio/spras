@@ -1,7 +1,7 @@
 import os
 from abc import ABC, abstractmethod
 from typing import Any, Generic, TypeVar, cast, get_args
-
+from pathlib import Path
 from pydantic import BaseModel
 
 from spras.config.container_schema import ProcessedContainerSettings
@@ -82,3 +82,29 @@ class PRM(ABC, Generic[T]):
         for input_type in cls.required_inputs:
             if input_type not in filename_map:
                 raise ValueError("{input_type} filename is missing")
+    
+    @classmethod
+    def validate_required_run_args(cls, inputs: dict[str, str | os.PathLike], relax: list[str] = []):
+        """
+        Validates the `inputs` parameter for `PRM#run`.
+
+        @param inputs: See `PRM#run`.
+        @param relax: List of inputs that aren't required: if they are specified, they should be valid path
+        """
+
+        # Check that `relax` is a valid list
+        for entry in relax:
+            if entry not in cls.required_inputs:
+                raise RuntimeError(f"{relax} is not contained in this PRM's required inputs ({cls.required_inputs}). This should have been caught in testing.")
+
+        for input_type in cls.required_inputs:
+            if input_type not in inputs or not inputs[input_type]:
+                # Ignore relaxed inputs
+                if input_type in relax:
+                    continue
+                raise ValueError(f'Required input "{input_type}" is not set')
+            
+            path = Path(inputs[input_type])
+            if not path.exists():
+                raise OSError(f'Required input "{input_type}" is pointing to a missing file "{path}".')
+

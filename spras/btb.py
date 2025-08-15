@@ -66,15 +66,10 @@ class BowTieBuilder(PRM[Empty]):
     @staticmethod
     def run(inputs, output_file, args=None, container_settings=None):
         if not container_settings: container_settings = ProcessedContainerSettings()
+        BowTieBuilder.validate_required_run_args(inputs)
+
         # Tests for pytest (docker container also runs this)
         # Testing out here avoids the trouble that container errors provide
-
-        if not inputs["sources"] or not inputs["targets"] or not inputs["edges"]:
-            raise ValueError('Required BowTieBuilder arguments are missing')
-
-        if not Path(inputs["sources"]).exists() or not Path(inputs["targets"]).exists() or not Path(inputs["edges"]).exists():
-            raise ValueError('Missing input file')
-
         # Testing for btb index errors
         # TODO: This error will never actually occur if the inputs are passed through
         # `generate_inputs`. See the discussion about removing this or making this a habit at

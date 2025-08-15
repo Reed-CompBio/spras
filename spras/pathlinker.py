@@ -77,9 +77,7 @@ class PathLinker(PRM[PathLinkerParams]):
     def run(inputs, output_file, args=None, container_settings=None):
         if not container_settings: container_settings = ProcessedContainerSettings()
         if not args: args = PathLinkerParams()
-
-        if not inputs["nodetypes"] or not inputs["network"]:
-            raise ValueError('Required PathLinker arguments are missing')
+        PathLinker.validate_required_run_args(inputs)
 
         work_dir = '/spras'
 

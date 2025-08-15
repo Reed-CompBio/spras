@@ -79,10 +79,9 @@ class DOMINO(PRM[DominoParams]):
     def run(inputs, output_file, args=None, container_settings=None):
         if not container_settings: container_settings = ProcessedContainerSettings()
         if not args: args = DominoParams()
+        DOMINO.validate_required_run_args(inputs)
 
         # Let visualization be always true, parallelization be always 1 thread, and use_cache be always false.
-        if not inputs["network"] or not inputs["active_genes"]:
-            raise ValueError('Required DOMINO arguments are missing')
 
         work_dir = '/spras'
 

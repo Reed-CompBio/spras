@@ -155,9 +155,7 @@ class MEO(PRM[MEOParams]):
         """
         if not container_settings: container_settings = ProcessedContainerSettings()
         if not args: args = MEOParams()
-
-        if inputs["edges"] is None or inputs["sources"] is None or inputs["targets"] is None:
-            raise ValueError('Required Maximum Edge Orientation arguments are missing')
+        MEO.validate_required_run_args(inputs)
 
         work_dir = '/spras'
 

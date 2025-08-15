@@ -43,7 +43,7 @@ class TestBowTieBuilder:
     Run the BowTieBuilder algorithm with missing files
     """
     def test_btb_file(self):
-        with pytest.raises(ValueError):
+        with pytest.raises(OSError):
             BTB.run({"sources": Path(TEST_DIR, 'input', 'unknown.txt'),
                      "targets": Path(TEST_DIR, 'input', 'target.txt'),
                      "edges": Path(TEST_DIR, 'input', 'edges.txt')},

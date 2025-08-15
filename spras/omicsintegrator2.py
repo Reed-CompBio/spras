@@ -128,9 +128,7 @@ class OmicsIntegrator2(PRM[OmicsIntegrator2Params]):
         """
         if not container_settings: container_settings = ProcessedContainerSettings()
         if not args: args = OmicsIntegrator2Params()
-
-        if inputs["edges"] is None or inputs["prizes"] is None:
-            raise ValueError('Required Omics Integrator 2 arguments are missing')
+        OmicsIntegrator2.validate_required_run_args(inputs)
 
         work_dir = '/spras'
 

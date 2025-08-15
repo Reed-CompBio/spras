@@ -47,8 +47,7 @@ class ST_RWR(PRM[ST_RWRParams]):
     @staticmethod
     def run(inputs, output_file, args, container_settings=None):
         if not container_settings: container_settings = ProcessedContainerSettings()
-        if not inputs["sources"] or not inputs["targets"] or not inputs["network"] or not output_file:
-            raise ValueError('Required local_neighborhood arguments are missing')
+        ST_RWR.validate_required_run_args(inputs)
 
         with Path(inputs["network"]).open() as network_f:
             for line in network_f:
