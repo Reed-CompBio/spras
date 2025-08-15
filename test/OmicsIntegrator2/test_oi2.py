@@ -13,6 +13,8 @@ EDGE_FILE = TEST_DIR / 'input' / 'oi2-edges.txt'
 PRIZE_FILE = TEST_DIR / 'input' / 'oi2-prizes.txt'
 OUT_FILE = TEST_DIR / 'output' / 'test.tsv'
 
+EDGE_FILE = TEST_DIR / 'input' / 'simple' / 'oi2-edges.txt'
+PRIZE_FILE = TEST_DIR / 'input' / 'simple' / 'oi2-prizes.txt'
 
 class TestOmicsIntegrator2:
     """
