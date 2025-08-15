@@ -5,13 +5,35 @@ Utility functions for pathway reconstruction
 import base64
 import hashlib
 import json
-from pathlib import Path, PurePath, PurePosixPath
-from typing import Any, Dict, List, Optional, Tuple, Union
+from pathlib import Path
+from typing import Any, Dict, Optional
 
+import numpy as np
 import pandas as pd
 
 
-def hash_params_sha1_base32(params_dict: Dict[str, Any], length: Optional[int] = None) -> str:
+# https://stackoverflow.com/a/57915246/7589775
+# numpy variables are not, by default, encodable by python's JSONEncoder.
+# Thus, we need to wrap the encoder to reduce np-objects down to regular floats and ints.
+# To preserve precision, we stringify the objects instead,
+# which is okay, as this is specifically for hashing.
+# Note: this can still have a hashing conflict if someone uses `np.integer` for one parameter combination,
+# and lists the entire exact number out as a string for the other. Is this a problem?
+class NpHashEncoder(json.JSONEncoder):
+    """
+    A numpy compatible JSON encoder meant to be fed as a cls for hashing,
+    as this encoder does not decode the other way around.
+    """
+    def default(self, obj):
+        if isinstance(obj, np.integer):
+            return str(obj)
+        if isinstance(obj, np.floating):
+            return str(obj)
+        if isinstance(obj, np.ndarray):
+            return obj.tolist()
+        return super(NpHashEncoder, self).default(obj)
+
+def hash_params_sha1_base32(params_dict: Dict[str, Any], length: Optional[int] = None, cls=None) -> str:
     """
     Hash of a dictionary.
     Derived from https://www.doc.ic.ac.uk/~nuric/coding/how-to-hash-a-dictionary-in-python.html
@@ -22,7 +44,7 @@ def hash_params_sha1_base32(params_dict: Dict[str, Any], length: Optional[int] =
     @param length: the length of the returned hash, which is ignored if it is None, < 1, or > the full hash length
     """
     params_hash = hashlib.sha1()
-    params_encoded = json.dumps(params_dict, sort_keys=True).encode()
+    params_encoded = json.dumps(params_dict, sort_keys=True, cls=cls).encode()
     params_hash.update(params_encoded)
     # base32 includes capital letters and the numbers 2-7
     # https://en.wikipedia.org/wiki/Base32#RFC_4648_Base32_alphabet
@@ -72,13 +94,16 @@ def raw_pathway_df(raw_pathway_file: str, sep: str = '\t', header: int = None) -
     """
     try:
         df = pd.read_csv(raw_pathway_file, sep=sep, header=header)
+        if df.empty:
+            # Columns are present but there is no data to parse.
+            df = pd.DataFrame(columns=['Node1', 'Node2', 'Rank', 'Direction'])
     except pd.errors.EmptyDataError:  # read an empty file
         df = pd.DataFrame(columns=['Node1', 'Node2', 'Rank', 'Direction'])
 
     return df
 
 
-def duplicate_edges(df: pd.DataFrame) -> (pd.DataFrame, bool):
+def duplicate_edges(df: pd.DataFrame) -> tuple[pd.DataFrame, bool]:
     """
     Removes duplicate edges from the input DataFrame. Run within every pathway reconstruction algorithm's parse_output.
     - For duplicate edges (based on Node1, Node2, and Direction), the one with the smallest Rank is kept.

@@ -1,0 +1,5 @@
+#Node	Node type
+A	source
+B	source
+C	target
+E	target
