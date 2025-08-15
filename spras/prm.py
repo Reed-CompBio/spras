@@ -97,6 +97,7 @@ class PRM(ABC, Generic[T]):
             if entry not in cls.required_inputs:
                 raise RuntimeError(f"{relax} is not contained in this PRM's required inputs ({cls.required_inputs}). This should have been caught in testing.")
 
+        # Check that all non-relaxed required inputs are present
         for input_type in cls.required_inputs:
             if input_type not in inputs or not inputs[input_type]:
                 # Ignore relaxed inputs
@@ -107,4 +108,8 @@ class PRM(ABC, Generic[T]):
             path = Path(inputs[input_type])
             if not path.exists():
                 raise OSError(f'Required input "{input_type}" is pointing to a missing file "{path}".')
-
+        
+        # Then, check that all inputs are required inputs (to prevent typos / catch errors when inputs are updated)
+        for input_type in inputs.keys():
+            if input_type not in cls.required_inputs:
+                raise ValueError(f'Extra input "{input_type}" was provided but is not present in required inputs ({cls.required_inputs})')
