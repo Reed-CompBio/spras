@@ -18,6 +18,6 @@ To use ``.patch`` files in ``Dockerfiles``, we create a fake user for ``git`` an
 
 .. code:: shell
 
-    git config user.email "email@example.com" && \
-    git config user.name "Non-existent User" && \
+    git config user.email "email@example.com"
+    git config user.name "Non-existent User"
     git am /0001-my-patch.patch
