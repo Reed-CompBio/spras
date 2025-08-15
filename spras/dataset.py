@@ -21,7 +21,6 @@ class Dataset:
         self.label = None
         self.interactome = None
         self.node_table = None
-        self.edge_table = None
         self.node_set = set()
         self.other_files = []
         self.load_files_from_dict(dataset_dict)
@@ -40,6 +39,11 @@ class Dataset:
         Loads dataset object from a pickle file.
         Usage: dataset = Dataset.from_file(pickle_file)
         """
+        if isinstance(file_name, Dataset):
+            # No work to be done
+            # (this use-case is useful for testing.)
+            return file_name
+
         with open(file_name, "rb") as f:
             return pkl.load(f)
 
@@ -47,7 +51,7 @@ class Dataset:
         """
         Loads data files from dataset_dict, which is one dataset dictionary from the list
         in the config file with the fields in the config file.
-        Populates node_table, edge_table, and interactome.
+        Populates node_table and interactome.
 
         node_table is a single merged pandas table.
 
@@ -128,11 +132,14 @@ class Dataset:
         self.node_table.insert(0, "NODEID", self.node_table.pop("NODEID"))
         self.other_files = dataset_dict["other_files"]
 
-    def request_node_columns(self, col_names):
+    def get_node_columns(self, col_names: list[str]) -> pd.DataFrame:
         """
         returns: A table containing the requested column names and node IDs
         for all nodes with at least 1 of the requested values being non-empty
         """
+        if self.node_table is None:
+            raise ValueError("node_table is None: can't request node columns of an empty dataset.")
+
         col_names.append(self.NODE_ID)
         filtered_table = self.node_table[col_names]
         filtered_table = filtered_table.dropna(
@@ -149,7 +156,9 @@ class Dataset:
             )
         return filtered_table
 
-    def contains_node_columns(self, col_names):
+    def contains_node_columns(self, col_names: list[str] | str):
+        if self.node_table is None:
+            raise ValueError("node_table is None: can't request node columns of an empty dataset.")
         """
         col_names: A list-like object of column names to check or a string of a single column name to check.
         returns: Whether or not all columns in col_names exist in the dataset.
@@ -162,11 +171,10 @@ class Dataset:
                     return False
                 return True
 
-    def request_edge_columns(self, col_names):
-        return None
-
     def get_other_files(self):
         return self.other_files.copy()
 
-    def get_interactome(self):
+    def get_interactome(self) -> pd.DataFrame | None:
+        if self.interactome is None:
+            raise ValueError("interactome is None: can't copy a non-existent interactome.")
         return self.interactome.copy(deep = True)

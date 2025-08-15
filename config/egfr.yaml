@@ -1,21 +1,39 @@
 # The length of the hash used to identify a parameter combination
 hash_length: 7
 
-# If true, use Singularity instead of Docker
-# Singularity support is only available on Unix
-singularity: false
+# Specify the container framework used by each PRM wrapper. Valid options include:
+# - docker (default if not specified)
+# - singularity -- Also known as apptainer, useful in HPC/HTC environments where docker isn't allowed
+# - dsub -- experimental with limited support, used for running on Google Cloud
+container_framework: docker
+
+# Only used if container_framework is set to singularity, this will unpack the singularity containers
+# to the local filesystem. This is useful when PRM containers need to run inside another container,
+# such as would be the case in an HTCondor/OSPool environment.
+# NOTE: This unpacks singularity containers to the local filesystem, which will take up space in a way
+# that persists after the workflow is complete. To clean up the unpacked containers, the user must
+# manually delete them.
+unpack_singularity: false
+
+# Allow the user to configure which container registry containers should be pulled from
+# Note that this assumes container names are consistent across registries, and that the
+# registry being passed doesn't require authentication for pull actions
+container_registry:
+  base_url: docker.io
+  # The owner or project of the registry
+  # For example, "reedcompbio" if the image is available as docker.io/reedcompbio/allpairs
+  owner: reedcompbio
 
 algorithms:
-  -
-    name: pathlinker
+  - name: pathlinker
     params:
       include: true
       run1:
         k:
           - 10
           - 20
-  -
-    name: omicsintegrator1
+          - 70
+  - name: omicsintegrator1
     params:
       include: true
       run1:
@@ -34,8 +52,7 @@ algorithms:
         mu:
           - 0.008
         dummy_mode: ["file"]
-  -
-    name: omicsintegrator2
+  - name: omicsintegrator2
     params:
       include: true
       run1:
@@ -48,8 +65,7 @@ algorithms:
           - 2
         g:
           - 3
-  -
-    name: meo
+  - name: meo
     params:
       include: true
       run1:
@@ -59,8 +75,17 @@ algorithms:
           - 3
         rand_restarts:
           - 10
-  -
-    name: domino
+      run2:
+        local_search:
+          - "No"
+        max_path_length:
+          - 2
+        rand_restarts:
+          - 10
+  - name: allpairs
+    params:
+      include: true
+  - name: domino
     params:
       include: true
       run1:
@@ -68,27 +93,70 @@ algorithms:
           - 0.3
         module_threshold:
           - 0.05
+  - name: mincostflow
+    params:
+      include: true
+      run1:
+        capacity:
+          - 15
+        flow:
+          - 80
+      run2:
+        capacity:
+          - 1
+        flow:
+          - 6
+      run3:
+        capacity:
+          - 5
+        flow:
+          - 60
+  - name: "strwr"
+    params:
+      include: true
+      run1:
+        alpha: [0.85]
+        threshold: [100, 200]
+
+  - name: "rwr"
+    params:
+      include: true
+      run1:
+        alpha: [0.85]
+        threshold: [100, 200]
+
+  - name: "bowtiebuilder"
+    params:
+      include: false
 datasets:
-  -
-    data_dir: input
+  - data_dir: input
     edge_files:
       - phosphosite-irefindex13.0-uniprot.txt
     label: tps_egfr
     node_files:
       - tps-egfr-prizes.txt
     other_files: []
+gold_standards:
+  - label: gs_egfr
+    node_files:
+      - gs-egfr.txt
+    data_dir: input
+    dataset_labels:
+      - tps_egfr
 reconstruction_settings:
   locations:
     reconstruction_dir: output/egfr
-  run: true
 analysis:
-  graphspace:
-    include: false
   cytoscape:
     include: true
   summary:
     include: true
   ml:
-    include: false
+    include: true
+    aggregate_per_algorithm: true
+    labels: true
+    kde: true
+    remove_empty_pathways: true
   evaluation:
-    include: false
+    include: true
+    aggregate_per_algorithm: true

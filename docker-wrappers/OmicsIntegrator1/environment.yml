@@ -1,12 +1,12 @@
 name: oi1
 dependencies:
-- matplotlib=2.2
-- networkx=1.11
-- numpy=1.13
-- pip=19.3
-- python=2.7
-- scipy=0.19
-- setuptools=44.0
-- wheel=0.36
-- pip:
-  - pytest==2.9
+  - matplotlib=2.2
+  - networkx=1.11
+  - numpy=1.13
+  - pip=19.3
+  - python=2.7
+  - scipy=0.19
+  - setuptools=44.0
+  - wheel=0.36
+  - pip:
+      - pytest==2.9
