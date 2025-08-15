@@ -48,3 +48,13 @@ To confirm that the most recent commit matches the most recent commit in
 the pull request. Now your local version of SPRAS matches the code in
 the pull request and you can test the code to confirm it runs as
 expected.
+
+
+``.test_durations``
+-------------------
+
+To regenerate the ``.test_durations`` file, use ``pytest --store-durations``. A clean docker cache
+is recommended to best split up the test runs. ``.test_durations`` is used to split the testing CI
+(with pytest-splti) into several evenly-sized groups for parallelization. Because of this,
+``.test_durations`` should be regenerated for every few algorithms or analysis tools added,
+to make sure the CI works as fast as it can.
