@@ -4,7 +4,7 @@ from pathlib import Path
 import pytest
 
 import spras.config.config as config
-from spras.pathlinker import PathLinker
+from spras.pathlinker import PathLinker, PathLinkerParams
 
 config.init_from_file("config/config.yaml")
 
@@ -21,33 +21,28 @@ class TestPathLinker:
         out_path = Path(OUT_FILE_DEFAULT)
         out_path.unlink(missing_ok=True)
         # Only include required arguments
-        PathLinker.run(
-            nodetypes=TEST_DIR+'input/sample-in-nodetypes.txt',
-            network=TEST_DIR+'input/sample-in-net.txt',
-            output_file=OUT_FILE_DEFAULT
-        )
+        PathLinker.run({"nodetypes": TEST_DIR+'input/sample-in-nodetypes.txt',
+                        "network": TEST_DIR+'input/sample-in-net.txt'},
+                       output_file=OUT_FILE_DEFAULT)
         assert out_path.exists()
 
     def test_pathlinker_optional(self):
         out_path = Path(OUT_FILE_100)
         out_path.unlink(missing_ok=True)
         # Include optional argument
-        PathLinker.run(
-            nodetypes=TEST_DIR+'input/sample-in-nodetypes.txt',
-            network=TEST_DIR+'input/sample-in-net.txt',
-            output_file=OUT_FILE_100,
-            k=100
-        )
+        PathLinker.run({"nodetypes": TEST_DIR+'input/sample-in-nodetypes.txt',
+                        "network": TEST_DIR+'input/sample-in-net.txt'},
+                       output_file=OUT_FILE_100,
+                       args=PathLinkerParams(k=100))
         assert out_path.exists()
 
     def test_pathlinker_missing(self):
         # Test the expected error is raised when required arguments are missing
         with pytest.raises(ValueError):
             # No nodetypes
-            PathLinker.run(
-                network=TEST_DIR + 'input/sample-in-net.txt',
-                output_file=OUT_FILE_100,
-                k=100)
+            PathLinker.run({"network": TEST_DIR + 'input/sample-in-net.txt'},
+                           output_file=OUT_FILE_100,
+                           args=PathLinkerParams(k=100))
 
     # Only run Singularity test if the binary is available on the system
     # spython is only available on Unix, but do not explicitly skip non-Unix platforms
@@ -56,9 +51,8 @@ class TestPathLinker:
         out_path = Path(OUT_FILE_DEFAULT)
         out_path.unlink(missing_ok=True)
         # Only include required arguments and run with Singularity
-        PathLinker.run(
-            nodetypes=TEST_DIR+'input/sample-in-nodetypes.txt',
-            network=TEST_DIR+'input/sample-in-net.txt',
-            output_file=OUT_FILE_DEFAULT,
-            container_framework="singularity")
+        PathLinker.run({"nodetypes": TEST_DIR+'input/sample-in-nodetypes.txt',
+                        "network": TEST_DIR+'input/sample-in-net.txt'},
+                       output_file=OUT_FILE_DEFAULT,
+                       container_framework="singularity")
         assert out_path.exists()
