@@ -41,6 +41,7 @@ print(_config.config.gold_standards.values())
 # dataset_gold_standard_pairs = [f"{dataset}-{gs_values['label']}" for gs_values in _config.config.gold_standards.values() for dataset in gs_values['dataset_labels']]
 # print(dataset_gold_standard_pairs)
 
+# TODO: update this to be if gs['node_file'] and not gs['edge_file'] (make sure that this isn't in the list)?
 dataset_gold_standard_node_pairs = [
     f"{dataset}-{gs['label']}"
     for gs in _config.config.gold_standards.values()
