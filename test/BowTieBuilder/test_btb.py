@@ -22,17 +22,17 @@ class TestBowTieBuilder:
     Run the BowTieBuilder algorithm with missing arguments
     """
     def test_btb_missing(self):
-        with pytest.raises(ValueError):
+        with pytest.raises(OSError):
             # No edges
             BTB.run({"targets": Path(TEST_DIR, 'input', 'target.txt'),
                      "sources": Path(TEST_DIR, 'input', 'source.txt')},
                     output_file=OUT_FILE_DEFAULT)
-        with pytest.raises(ValueError):
+        with pytest.raises(OSError):
             # No source
             BTB.run({"targets": Path(TEST_DIR, 'input', 'target.txt'),
                      "edges": Path(TEST_DIR, 'input', 'edges.txt')},
                     output_file=OUT_FILE_DEFAULT)
-        with pytest.raises(ValueError):
+        with pytest.raises(OSError):
             # No target
             BTB.run({"sources": Path(TEST_DIR, 'input', 'source.txt'),
                      "edges": Path(TEST_DIR, 'input', 'edges.txt')},
@@ -126,12 +126,11 @@ class TestBowTieBuilder:
     Run the BowTieBuilder algorithm with a missing input file
     """
     def test_missing_file(self):
-        with pytest.raises(ValueError):
-            with pytest.raises(OSError):
-                BTB.run({"edges": Path(TEST_DIR, 'input', 'missing.txt'),
-                         "sources": Path(TEST_DIR, 'input', 'btb-sources.txt'),
-                         "targets": Path(TEST_DIR, 'input', 'btb-targets.txt')},
-                        output_file=OUT_FILE_DEFAULT)
+        with pytest.raises(OSError):
+            BTB.run({"edges": Path(TEST_DIR, 'input', 'missing.txt'),
+                        "sources": Path(TEST_DIR, 'input', 'btb-sources.txt'),
+                        "targets": Path(TEST_DIR, 'input', 'btb-targets.txt')},
+                    output_file=OUT_FILE_DEFAULT)
 
 
     """

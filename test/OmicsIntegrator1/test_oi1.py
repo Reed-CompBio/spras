@@ -121,5 +121,5 @@ class TestOmicsIntegrator1:
                                 w=5,
                                 b=1,
                                 d=10),
-                             container_framework="singularity")
+                             container_settings="singularity")
         assert out_path.exists()
