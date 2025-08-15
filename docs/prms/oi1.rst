@@ -16,7 +16,7 @@ OI1 takes some optional arguments:
 * d: controls the maximum path-length from root to terminal nodes
 * mu: controls the degree-based negative prizes (default 0.0)
 * noise: Standard Deviation of the gaussian noise added to edges in Noisy Edges Randomizations
-* g: (Gamma) multiplicative edge penalty from degree of endpoints
+* g: msgsteiner reinforcement parameter that affects the convergence of the solution and runtime, with larger values leading to faster convergence but suboptimal results (default 0.001)
 * r: msgsteiner parameter that adds random noise to edges, which is rarely needed because the ``noisy_edges`` option is recommended instead. (default 0)
 * dummy_mode: one of ``terminals``, ``all``, ``others``, or ``file``.
 
