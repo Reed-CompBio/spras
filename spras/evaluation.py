@@ -24,6 +24,7 @@ class Evaluation:
         self.label = None
         self.datasets = None
         self.node_table = None
+        self.edge_table = None
         self.load_files_from_dict(gold_standard_dict)
         return
 
@@ -34,6 +35,7 @@ class Evaluation:
         @param gs_dict: gold standard dataset to process
         @param gs_file: output filename
         """
+        print(gs_dict)
         gs_dataset = Evaluation(gs_dict)
         gs_dataset.to_file(gs_file)
 
@@ -67,18 +69,45 @@ class Evaluation:
         self.datasets = gold_standard_dict['dataset_labels']  # can be empty, snakemake will not run evaluation due to dataset_gold_standard_pairs in snakemake file
 
         # cannot be empty, snakemake will run evaluation even if empty
-        node_data_files = gold_standard_dict['node_files'][0]  # TODO: single file for now
+        # TODO update to load the node or the edge file (can only have one of the other in a gs dataset)
+        # - error if both exist
+        # - error if neither exist
+        # TODO: chose between node_files or edge_files
+         # TODO update to check that if a node file, only have 1 column. If an edge file, only have 3 columns
+        # node_data_files = gold_standard_dict['node_file'][0]
+        node_file = gold_standard_dict.get('node_file') or []
+        print(node_file)
+        edge_file = gold_standard_dict.get('edge_file') or []
+        print(edge_file)
+
+        # exactly one kind must be present
+        has_node_file = len(node_file) > 0
+        print(has_node_file)
+        has_edge_file = len(edge_file) > 0
+        print(has_edge_file)
+        if has_node_file and has_edge_file:
+            raise ValueError(
+                f"Gold standard '{self.label}': both node_file and edge_file provided. "
+                "Exactly one is allowed."
+            )
+        if not has_node_file and not has_edge_file:
+            raise ValueError(
+                f"Gold standard '{self.label}': neither node_file nor edge_file provided."
+            )
 
         data_loc = gold_standard_dict['data_dir']
 
-        single_node_table = pd.read_table(os.path.join(data_loc, node_data_files), header=None)
-        single_node_table.columns = [self.NODE_ID]
-        self.node_table = single_node_table
+        if has_node_file:
+            single_node_table = pd.read_table(os.path.join(data_loc, node_file[0]), header=None)
+            single_node_table.columns = [self.NODE_ID]
+            self.node_table = single_node_table
 
-        # TODO: are we allowing multiple node files or single in node_files for gs
-        # if yes, a for loop is needed
+        if has_edge_file:
+            print(edge_file)
+            single_edge_table = pd.read_table(os.path.join(data_loc, edge_file[0]), header=None)
+            single_edge_table.columns = ['Node1', 'Node2', 'Direction']
+            self.edge_table = single_edge_table
 
-        # TODO: later iteration - chose between node and edge file, or allow both
 
     @staticmethod
     def node_precision_and_recall(file_paths: Iterable[Union[str, PathLike]], node_table: pd.DataFrame) -> pd.DataFrame:

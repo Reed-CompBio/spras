@@ -130,7 +130,8 @@ class Dataset(BaseModel):
 
 class GoldStandard(BaseModel):
     label: Annotated[str, AfterValidator(label_validator("Gold Standard"))]
-    node_files: list[str]
+    node_file: list[str] = []
+    edge_file: list[str] = []
     data_dir: str
     dataset_labels: list[str]
 
