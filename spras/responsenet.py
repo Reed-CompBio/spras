@@ -1,10 +1,8 @@
 from pathlib import Path
 
 from spras.containers import prepare_volume, run_container_and_log
-from spras.interactome import (
-    convert_undirected_to_directed,
-    reinsert_direction_col_undirected,
-)
+from spras.dataset import Direction, GraphMultiplicity
+from spras.interactome import reinsert_direction_col_undirected
 from spras.prm import PRM
 from spras.util import add_rank_column, duplicate_edges, raw_pathway_df
 
@@ -23,6 +21,7 @@ Interactor1   Interactor2   Weight
 class ResponseNet(PRM):
     required_inputs = ['sources', 'targets', 'edges']
     dois = ["10.1038/ng.337"]
+    interactome_properties = [Direction.DIRECTED, GraphMultiplicity.SIMPLE]
 
     @staticmethod
     def generate_inputs(data, filename_map):
@@ -45,8 +44,7 @@ class ResponseNet(PRM):
 
         # create the network of edges
         # responsenet should be receiving a directed graph
-        edges = data.get_interactome()
-        edges = convert_undirected_to_directed(edges)
+        edges = data.get_interactome(ResponseNet.interactome_properties)
 
         # creates the edges files that contains the head and tail nodes and the weights after them
         edges.to_csv(filename_map['edges'], sep='\t', index=False, columns=["Interactor1", "Interactor2", "Weight"],

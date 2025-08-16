@@ -17,6 +17,9 @@ __all__ = ['AllPairs']
 class AllPairs(PRM):
     required_inputs = ['nodetypes', 'network', 'directed_flag']
     dois = []
+    # while APSP doesn't care about the directionality column,
+    # it's nice to explicitly declare that it doesn't
+    interactome_properties = [Direction.MIXED, GraphMultiplicity.SIMPLE]
 
     @staticmethod
     def generate_inputs(data: Dataset, filename_map):
@@ -46,9 +49,7 @@ class AllPairs(PRM):
 
         input_df.to_csv(filename_map["nodetypes"], sep="\t", index=False, columns=["#Node", "Node type"])
 
-        # Create network file - while APSP doesn't care about the directionality column,
-        # it's nice to explicitly declare that it doesn't
-        edges_df = data.get_interactome([Direction.UNDIRECTED, GraphMultiplicity.SIMPLE]).df
+        edges_df = data.get_interactome(AllPairs.interactome_properties).df
 
         if edges_df is None:
             raise ValueError("Dataset does not have an interactome.")

@@ -2,9 +2,7 @@ from pathlib import Path
 
 from spras.containers import prepare_volume, run_container_and_log
 from spras.dataset import Direction, GraphMultiplicity
-from spras.interactome import (
-    reinsert_direction_col_directed,
-)
+from spras.interactome import reinsert_direction_col_directed
 from spras.prm import PRM
 from spras.util import (
     add_rank_column,
@@ -26,6 +24,7 @@ Interactor1     Interactor2     Weight
 class BowTieBuilder(PRM):
     required_inputs = ['sources', 'targets', 'edges']
     dois = ["10.1186/1752-0509-3-67"]
+    interactome_properties = [Direction.DIRECTED, GraphMultiplicity.SIMPLE]
 
     #generate input taken from meo.py because they have same input requirements
     @staticmethod
@@ -55,7 +54,7 @@ class BowTieBuilder(PRM):
 
 
         # Create network file
-        edges = data.get_interactome([Direction.DIRECTED, GraphMultiplicity.SIMPLE]).df
+        edges = data.get_interactome(BowTieBuilder.interactome_properties).df
 
         edges.to_csv(filename_map["edges"], sep="\t", index=False,
                                       columns=["Interactor1", "Interactor2", "Weight"],

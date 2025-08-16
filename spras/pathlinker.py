@@ -3,9 +3,7 @@ from pathlib import Path
 
 from spras.containers import prepare_volume, run_container_and_log
 from spras.dataset import Dataset, Direction, GraphMultiplicity
-from spras.interactome import (
-    reinsert_direction_col_directed,
-)
+from spras.interactome import reinsert_direction_col_directed
 from spras.prm import PRM
 from spras.util import duplicate_edges, raw_pathway_df
 
@@ -24,6 +22,7 @@ Interactor1   Interactor2   Weight
 class PathLinker(PRM):
     required_inputs = ['nodetypes', 'network']
     dois = ["10.1038/npjsba.2016.2", "10.1089/cmb.2012.0274"]
+    interactome_properties = [Direction.DIRECTED, GraphMultiplicity.SIMPLE]
 
     @staticmethod
     def generate_inputs(data, filename_map):
@@ -54,7 +53,7 @@ class PathLinker(PRM):
         input_df.to_csv(filename_map["nodetypes"],sep="\t",index=False,columns=["#Node","Node type"])
 
         # Create network file
-        edges = data.get_interactome([Direction.DIRECTED, GraphMultiplicity.SIMPLE]).df
+        edges = data.get_interactome(PathLinker.interactome_properties).df
 
         # This is pretty memory intensive. We might want to keep the interactome centralized.
         edges.to_csv(filename_map["network"],sep="\t",index=False,columns=["Interactor1","Interactor2","Weight"],

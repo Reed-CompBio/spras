@@ -30,6 +30,7 @@ Interactor1     ppi     Interactor2
 class DOMINO(PRM):
     required_inputs = ['network', 'active_genes']
     dois = ["10.15252/msb.20209593"]
+    interactome_properties = [Direction.UNDIRECTED, GraphMultiplicity.SIMPLE]
 
     @staticmethod
     def generate_inputs(data, filename_map):
@@ -57,7 +58,7 @@ class DOMINO(PRM):
 
         # Create network file - while DOMINO doesn't care about the directionality column,
         # it's nice to explicitly declare that it doesn't
-        edges_df = data.get_interactome([Direction.UNDIRECTED, GraphMultiplicity.SIMPLE]).df
+        edges_df = data.get_interactome(DOMINO.interactome_properties).df
 
         edges_df = add_constant(edges_df, 'ppi', 'ppi')
 

@@ -29,6 +29,7 @@ class MinCostFlow(PRM):
     # This version of MinCostFlow is inspired by the ResponseNet paper, but does not have
     # its own referenceable DOI.
     dois = ["10.1038/ng.337"]
+    interactome_properties = [Direction.DIRECTED, GraphMultiplicity.SIMPLE]
 
     @staticmethod
     def generate_inputs(data, filename_map):
@@ -51,7 +52,7 @@ class MinCostFlow(PRM):
             nodes.to_csv(filename_map[node_type], index=False, columns=['NODEID'], header=False)
 
         # create the network of edges
-        edges = data.get_interactome([Direction.DIRECTED, GraphMultiplicity.SIMPLE]).df
+        edges = data.get_interactome(MinCostFlow.interactome_properties).df
 
         # creates the edges files that contains the head and tail nodes and the weights after them
         edges.to_csv(filename_map['edges'], sep='\t', index=False, columns=["Interactor1", "Interactor2", "Weight"],

@@ -12,6 +12,7 @@ __all__ = ['ST_RWR']
 class ST_RWR(PRM):
     required_inputs = ['network','sources','targets']
     dois = []
+    interactome_properties = [Direction.DIRECTED, GraphMultiplicity.SIMPLE]
 
     @staticmethod
     def generate_inputs(data, filename_map):
@@ -28,7 +29,7 @@ class ST_RWR(PRM):
             raise ValueError("Invalid node data")
 
         # Get edge data for network file
-        edges = data.get_interactome([Direction.DIRECTED, GraphMultiplicity.SIMPLE]).df
+        edges = data.get_interactome(ST_RWR.interactome_properties).df
         edges.to_csv(filename_map['network'],sep='|',index=False,columns=['Interactor1','Interactor2'],header=False)
 
     @staticmethod

@@ -2,7 +2,7 @@ import typing
 from abc import ABC, abstractmethod
 from typing import Any
 
-from spras.dataset import Dataset
+from spras.dataset import Dataset, InteractomeProperty
 
 
 class PRM(ABC):
@@ -13,13 +13,19 @@ class PRM(ABC):
     """
 
     required_inputs: list[str] = []
+    
     # DOIs aren't strictly required (e.g. local neighborhood),
     # but it should be explicitly declared that there are no DOIs by defining an empty list.
     dois: list[str] = typing.cast(list[str], None)
 
+    # TODO: do we want to check that interactome_properties specifies some specific properties we
+    # always want to know about?
+    interactome_properties: list[InteractomeProperty] = []
+    "The list of interactome properties that this PRM allows."
+
     def __init_subclass__(cls):
         # modified from https://stackoverflow.com/a/58206480/7589775
-        props = ["required_inputs", "dois"]
+        props = ["required_inputs", "dois", "interactome_properties"]
         for prop in props:
             if getattr(PRM, prop) is getattr(cls, prop):
                 raise NotImplementedError(
