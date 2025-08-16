@@ -29,6 +29,7 @@ Interactor1     ppi     Interactor2
 """
 class DOMINO(PRM):
     required_inputs = ['network', 'active_genes']
+    dois = ["10.15252/msb.20209593"]
 
     @staticmethod
     def generate_inputs(data, filename_map):
@@ -38,9 +39,7 @@ class DOMINO(PRM):
         @param filename_map: a dict mapping file types in the required_inputs to the filename for that type
         @return:
         """
-        for input_type in DOMINO.required_inputs:
-            if input_type not in filename_map:
-                raise ValueError(f"{input_type} filename is missing")
+        DOMINO.validate_required_inputs(filename_map)
 
         # Get active genes for node input file
         if data.contains_node_columns('active'):
@@ -149,10 +148,10 @@ class DOMINO(PRM):
         out_modules_dir = Path(out_dir, 'active_genes')
 
         # Concatenate each produced module HTML file into one file
-        with open(output_file, 'w') as fo:
+        with open(output_file, 'w') as f:
             for html_file in out_modules_dir.glob('module_*.html'):
                 with open(html_file, 'r') as fi:
-                    fo.write(fi.read())
+                    f.write(fi.read())
 
         # Clean up DOMINO intermediate and pickle files
         slices_file.unlink(missing_ok=True)

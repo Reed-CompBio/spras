@@ -16,6 +16,7 @@ __all__ = ['AllPairs']
 
 class AllPairs(PRM):
     required_inputs = ['nodetypes', 'network', 'directed_flag']
+    dois = []
 
     @staticmethod
     def generate_inputs(data: Dataset, filename_map):
@@ -24,9 +25,7 @@ class AllPairs(PRM):
         @param data: dataset
         @param filename_map: a dict mapping file types in the required_inputs to the filename for that type
         """
-        for input_type in AllPairs.required_inputs:
-            if input_type not in filename_map:
-                raise ValueError("{input_type} filename is missing")
+        AllPairs.validate_required_inputs(filename_map)
 
         # Get sources and targets for node input file
         # Borrowed code from pathlinker.py

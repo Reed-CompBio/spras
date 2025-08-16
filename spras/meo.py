@@ -12,7 +12,7 @@ from spras.util import add_rank_column, duplicate_edges, raw_pathway_df
 
 __all__ = ['MEO', 'write_properties']
 
-# replaces all underscores in the node names with unicode seperator
+# replaces all underscores in the node names with unicode separator
 # MEO keeps only the substring up to the first underscore when parsing node names
 # https://github.com/agitter/meo/blob/1fe57e8ff3952c494e2b14dfdc563a84596e2fcd/src/alg/Vertex.java#L56-L71
 underscore_replacement = '꧁SEP꧂'
@@ -85,6 +85,7 @@ Interactor1   pp/pd   Interactor2   Weight
 
 class MEO(PRM):
     required_inputs = ['sources', 'targets', 'edges']
+    dois = ["10.1093/nar/gkq1207"]
 
     @staticmethod
     def generate_inputs(data, filename_map):
@@ -94,9 +95,7 @@ class MEO(PRM):
         @param filename_map: a dict mapping file types in the required_inputs to the filename for that type
         @return:
         """
-        for input_type in MEO.required_inputs:
-            if input_type not in filename_map:
-                raise ValueError(f"{input_type} filename is missing")
+        MEO.validate_required_inputs(filename_map)
 
         # Get sources and write to file, repeat for targets
         # Does not check whether a node is a source and a target
@@ -136,6 +135,9 @@ class MEO(PRM):
         Only the edge output file is retained.
         All other output files are deleted.
         @param output_file: the name of the output edge file, which will overwrite any existing file with this name
+        @param max_path_length: the maximal length of a path from sources and targets to orient.
+        @param local_search: a "Yes"/"No" parameter that enables MEO's local search functionality. See "Improving approximations with local search" in the associated paper for more information.
+        @param rand_restarts: The (int) of random restarts to use.
         @param container_framework: choose the container runtime framework, currently supports "docker" or "singularity" (optional)
         """
         if edges is None or sources is None or targets is None or output_file is None:

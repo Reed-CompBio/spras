@@ -12,12 +12,11 @@ __all__ = ['RWR']
 
 class RWR(PRM):
     required_inputs = ['network','nodes']
+    dois = []
 
     @staticmethod
     def generate_inputs(data, filename_map):
-        for input_type in RWR.required_inputs:
-            if input_type not in filename_map:
-                raise ValueError(f"{input_type} filename is missing")
+        RWR.validate_required_inputs(filename_map)
 
         # Get sources and targets for node input file
         if data.contains_node_columns(["sources","targets"]):

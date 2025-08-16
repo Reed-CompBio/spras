@@ -51,6 +51,7 @@ class OmicsIntegrator1(PRM):
 
     """
     required_inputs = ['prizes', 'edges', 'dummy_nodes']
+    dois = ["10.1371/journal.pcbi.1004879"]
 
     @staticmethod
     def generate_inputs(data, filename_map):
@@ -60,9 +61,7 @@ class OmicsIntegrator1(PRM):
         @param filename_map: a dict mapping file types in the required_inputs to the filename for that type
         @return:
         """
-        for input_type in OmicsIntegrator1.required_inputs:
-            if input_type not in filename_map:
-                raise ValueError(f"{input_type} filename is missing")
+        OmicsIntegrator1.validate_required_inputs(filename_map)
 
         if data.contains_node_columns('prize'):
             # NODEID is always included in the node table
@@ -99,7 +98,6 @@ class OmicsIntegrator1(PRM):
     # TODO add parameter validation
     # TODO add support for knockout argument
     # TODO add reasonable default values
-    # TODO document required arguments
     @staticmethod
     def run(edges=None, prizes=None, dummy_nodes=None, dummy_mode=None, mu_squared=None, exclude_terms=None,
             output_file=None, noisy_edges=None, shuffled_prizes=None, random_terminals=None,
@@ -114,6 +112,17 @@ class OmicsIntegrator1(PRM):
         All other output files are deleted.
         @param output_file: the name of the output sif file for the optimal forest, which will overwrite any
         existing file with this name
+        @param noisy_edges: How many times you would like to add noise to the given edge values and re-run the algorithm.
+        @param shuffled_prizes: How many times the algorithm should shuffle the prizes and re-run
+        @param random_terminals: How many times to apply the given prizes to random nodes in the interactome
+        @param seed: the randomness seed to use
+        @param w: float that affects the number of connected components, with higher values leading to more components
+        @param b: the trade-off between including more prizes and using less reliable edges
+        @param d: controls the maximum path-length from root to terminal nodes
+        @param mu: controls the degree-based negative prizes (default 0.0)
+        @param noise: Standard Deviation of the gaussian noise added to edges in Noisy Edges Randomizations
+        @param g: Gamma: multiplicative edge penalty from degree of endpoints
+        @param r: msgsteiner parameter that adds random noise to edges, which is rarely needed (default 0)
         @param container_framework: choose the container runtime framework, currently supports "docker" or "singularity" (optional)
         """
         if edges is None or prizes is None or output_file is None or w is None or b is None or d is None:
