@@ -71,7 +71,6 @@ def summarize_networks(file_paths: Iterable[Path], node_table: pd.DataFrame, alg
         ]
         max_diameter = max(diameters, default=0)
 
-
         # Save the average path lengths
         # Compute average shortest path length only for components with ≥2 nodes (undefined for singletons, set to 0.0)
         avg_path_lengths = [
