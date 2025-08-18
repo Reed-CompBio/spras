@@ -75,7 +75,7 @@ def summarize_networks(file_paths: Iterable[Path], node_table: pd.DataFrame, alg
         # Compute average shortest path length only for components with ≥2 nodes (undefined for singletons, set to 0.0)
         avg_path_lengths = [
             nx.average_shortest_path_length(nw.subgraph(c).copy()) if len(c) > 1 else 0.0
-            for c in nx.connected_components(nw)
+            for c in cc
         ]
 
         if len(avg_path_lengths) != 0:
