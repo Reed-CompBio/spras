@@ -170,7 +170,7 @@ reconstruction_settings:
   locations:
     #place the save path here
     # TODO move to global
-    reconstruction_dir: "output/config"
+    reconstruction_dir: "output"
 
 analysis:
   # Create one summary per pathway file and a single summary table for all pathways for each dataset
@@ -178,7 +178,7 @@ analysis:
     include: true
   # Create Cytoscape session file with all pathway graphs for each dataset
   cytoscape:
-    include: false
+    include: true
   # Machine learning analysis (e.g. clustering) of the pathway output files for each dataset
   ml:
     # ml analysis per dataset
