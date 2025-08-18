@@ -173,12 +173,11 @@ rule merge_input:
         runner.merge_input(dataset_dict, output.dataset_file)
 
 # Return all files used in the gold standard
-# TODO: figure out what to do here. can I do this logic if one of them is missing?
 def get_gold_standard_dependencies(wildcards):
     gs = _config.config.gold_standards[wildcards.gold_standard]
-    node_file = gs.get("node_file")
-    edge_file = gs.get("edge_file")
-    all_files = node_file + edge_file
+    node_file = gs.get("node_file") or ""
+    edge_file = gs.get("edge_file") or ""
+    all_files = [node_file] + [edge_file]
     all_files = [gs["data_dir"] + SEP + data_file for data_file in all_files]
     return all_files
 
