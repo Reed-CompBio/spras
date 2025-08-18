@@ -282,6 +282,8 @@ class Config:
             self.pca_params["kde"] = True
             print("Setting kde to true; Evaluation analysis needs to run KDE for PCA-Chosen parameter selection.")
 
+        # TODO: check that summary is set to True if evaluation is set to True, if not, set to true. Needed for pca chosen.
+
     def process_config(self, raw_config: RawConfig):
         # Set up a few top-level config variables
         self.out_dir = raw_config.reconstruction_settings.locations.reconstruction_dir
