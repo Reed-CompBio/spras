@@ -41,7 +41,6 @@ class Evaluation:
         @param gs_dict: gold standard dataset to process
         @param gs_file: output filename
         """
-        print(gs_dict)
         gs_dataset = Evaluation(gs_dict)
         gs_dataset.to_file(gs_file)
 
@@ -120,9 +119,9 @@ class Evaluation:
                 )
             single_edge_table.columns = ['Interactor1', 'Interactor2', 'Direction']
 
-            self.mixed_edge_table = single_edge_table
-            self.undirected_edge_table = convert_directed_to_undirected(single_edge_table)
-            self.directed_edge_table = convert_undirected_to_directed(single_edge_table)
+            self.mixed_edge_table = single_edge_table.copy()
+            self.undirected_edge_table = convert_directed_to_undirected(single_edge_table.copy())
+            self.directed_edge_table = convert_undirected_to_directed(single_edge_table.copy())
 
             # later iteration - update to make a self.node_table from the edge table
             # the node and edge files will go under the same dataset-gs pair folder
@@ -498,3 +497,13 @@ class Evaluation:
         not_last_rows = complete_df.duplicated(subset='Ensemble_Source', keep='first')
         complete_df.loc[not_last_rows, ['Average_Precision', 'Baseline']] = None
         complete_df.to_csv(output_file, index=False, sep='\t')
+
+    @staticmethod
+    def edge_dummy_function(mixed_edge_table: pd.DataFrame, undirected_edge_table: pd.DataFrame, directed_edge_table: pd.DataFrame, dummy_file: str):
+        with open(dummy_file, "w") as f:
+            f.write("===Mixed Edge Table===\n")
+            mixed_edge_table.to_csv(f, index=False)
+            f.write("\n\n===Undirected Edge Table===\n")
+            undirected_edge_table.to_csv(f, index=False)
+            f.write("\n\n===Directed Edge Table===\n")
+            directed_edge_table.to_csv(f, index=False)

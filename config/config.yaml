@@ -157,7 +157,7 @@ gold_standards:
     data_dir: "input"
     dataset_labels: ["data1", "data0"]
   - label: gs2
-    edge_file: ["gs_edges1.txt"]
+    edge_file: ["gs_edges0.txt"]
     data_dir: "input"
     dataset_labels: ["data0", "data1"]
 
