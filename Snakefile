@@ -115,6 +115,7 @@ def make_final_input(wildcards):
         final_input.extend(expand('{out_dir}{sep}{dataset_gold_standard_node_pair}-eval{sep}pr-pca-chosen-pathway-nodes.png',out_dir=out_dir,sep=SEP,dataset_gold_standard_node_pair=dataset_gold_standard_node_pairs))
         final_input.extend(expand('{out_dir}{sep}{dataset_gold_standard_node_pair}-eval{sep}pr-curve-ensemble-nodes.png',out_dir=out_dir,sep=SEP,dataset_gold_standard_node_pair=dataset_gold_standard_node_pairs))
         final_input.extend(expand('{out_dir}{sep}{dataset_gold_standard_node_pair}-eval{sep}pr-curve-ensemble-nodes.txt',out_dir=out_dir,sep=SEP,dataset_gold_standard_node_pair=dataset_gold_standard_node_pairs))
+        
     
     if _config.config.analysis_include_evaluation_aggregate_algo:
         final_input.extend(expand('{out_dir}{sep}{dataset_gold_standard_node_pair}-eval{sep}pr-per-pathway-for-{algorithm}-nodes.txt',out_dir=out_dir,sep=SEP,dataset_gold_standard_node_pair=dataset_gold_standard_node_pairs,algorithm=algorithms))
