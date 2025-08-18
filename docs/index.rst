@@ -60,6 +60,7 @@ methods (PRMs) to omics data.
    :maxdepth: 1
    :caption: Tutorials
 
+   tutorial/introduction
    tutorial/basic
    tutorial/medium
    tutorial/hard

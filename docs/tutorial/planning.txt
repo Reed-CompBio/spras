@@ -3,15 +3,19 @@ My current plan for my COMBINE 25 tutorial (that will then be used for the spras
 
 *Tony will be giving a presentation on PRAs and SPRAS prior (hopefully) to this tutorial
 
+0) 
+- need to preinstall conda, docker, vscode(?) (or run on terminal), git, and cytoscape prior
+    - a few minimum dependencies like Docker and conda and git installed already, the rest are optional but recommended
+- Basic Python knowledge (running scripts, installing packages)
+- Some basic biology knowledge: what is a protein, a protein interaction etc
+Overview of PRAs (Pathway Reconstruction Algorithms) in plain language
+What SPRAS is and what problems it solves
+
 1) basic
 Goal: Get new users comfortable installing SPRAS
-- don't need to preinstall conda, docker, vscode(?) (or run on terminal), and cytoscape prior, but it is recommended to to make it easier/faster
-- Basic Python knowledge (running scripts, installing packages)
 Goal: Run SPRAS with one algorthm on a small example dataset, then re-run it with three different parameter settings to see how network structure changes.
 
 Slides and/or Information to add to docs directly:
-Overview of PRAs (Pathway Reconstruction Algorithms) in plain language
-What SPRAS is and what problems it solves
 Installation & environment setup (Docker Anaconda and Cytoscpare locally)
 SPRAS directory structure for a user & configuration files
 - config folder
@@ -29,6 +33,7 @@ Viewing logs and monitoring runs
 
 Things to make:
 - need one small dataset to run on (either make a dummy one or just use egfr)
+    - Building around EGFR will be the least amount of work, and that pathway may be a good fit for the COMBINE audience
 - basic-config
 
 2) medium
@@ -66,6 +71,10 @@ Teach parameter tuning
 - Define fine parameter spaces after and hueristics
 - repeat
 - show how to use past post analysis tools help with finding parameters
+
+(maybe I show an example of this rather than doing it in a way the tutorial people do it)
+(then people can copy and paste it in and experience it?)
+
 Explain parameter selection
 Use the evaluation code and understanding the outputs
 - Per-pathway precision and recall plots / pca chosen and pr curves for ensemble
@@ -78,5 +87,4 @@ Things to make:
 
 
 Stuff I need to figure out:
-# figure out how to keep the tutorials part on the left side of the screen permantly when switching
 # test these tutorials for mac and windows user
