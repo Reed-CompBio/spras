@@ -1,6 +1,6 @@
 # Source-Targets Random Walk with Restarts
 
-A Docker image for [ST-RWR](https://github.com/Reed-CompBio/rwr) that is available on [DockerHub](https://hub.docker.com/repository/docker/reedcompbio/st_rwr).
+A Docker image for [ST-RWR](https://github.com/Reed-CompBio/rwr) that is available on [DockerHub](https://hub.docker.com/repository/docker/reedcompbio/st-rwr).
 
 ## Notes
 The random walk with restarts algorithm requires a directed input network. However, the algorithm in its current form will accept an undirected input network and interpret it as a directed network. The resulting output from an undirected network does not accurately represent directionality.
