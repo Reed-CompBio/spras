@@ -76,10 +76,10 @@ class Evaluation:
         data_loc = gold_standard_dict['data_dir']
 
         # cannot be empty, snakemake will run evaluation even if empty
-        node_file = gold_standard_dict.get('node_file') or [] # TODO: see if I can update this to just be a String
-        edge_file = gold_standard_dict.get('edge_file') or [] # TODO: see if I can update this to just be a String
+        node_file = gold_standard_dict.get('node_file') or []
+        edge_file = gold_standard_dict.get('edge_file') or []
 
-        # exactly one gold standard file kind can be present
+        # exactly one gold standard file kind can be present in a gold standard dataset
         has_node_file = len(node_file) > 0
         has_edge_file = len(edge_file) > 0
 
@@ -93,6 +93,8 @@ class Evaluation:
                 f"Gold standard '{self.label}': neither node_file nor edge_file provided."
             )
 
+        # TODO: later iteration - allow for multiple node or edge files in the list
+        # The files will be merged together to make one large node or edge table
         if has_node_file and len(node_file) != 1:
             raise ValueError(
                 f"Gold standard '{self.label}': node_file must contain exactly one file."
@@ -123,7 +125,7 @@ class Evaluation:
             self.undirected_edge_table = convert_directed_to_undirected(single_edge_table.copy())
             self.directed_edge_table = convert_undirected_to_directed(single_edge_table.copy())
 
-            # later iteration - update to make a self.node_table from the edge table
+            # TODO: later iteration - update to make a self.node_table from the edge table
             # the node and edge files will go under the same dataset-gs pair folder
 
 
@@ -501,9 +503,9 @@ class Evaluation:
     @staticmethod
     def edge_dummy_function(mixed_edge_table: pd.DataFrame, undirected_edge_table: pd.DataFrame, directed_edge_table: pd.DataFrame, dummy_file: str):
         with open(dummy_file, "w") as f:
-            f.write("===Mixed Edge Table===\n")
+            f.write("Mixed Edge Table\n")
             mixed_edge_table.to_csv(f, index=False)
-            f.write("\n\n===Undirected Edge Table===\n")
+            f.write("\n\nUndirected Edge Table\n")
             undirected_edge_table.to_csv(f, index=False)
-            f.write("\n\n===Directed Edge Table===\n")
+            f.write("\n\nDirected Edge Table\n")
             directed_edge_table.to_csv(f, index=False)
