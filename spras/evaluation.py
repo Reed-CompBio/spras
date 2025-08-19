@@ -394,16 +394,16 @@ class Evaluation:
                     pickle = Evaluation.from_file(dataset_file)
                     input_nodes_df = pickle.get_node_columns(["sources", "targets", "prize", "active"])
                     input_nodes = set(input_nodes_df['NODEID'])
-                    input_nodes_gold_intersection = input_nodes & gold_standard_nodes # TODO should this be all inputs or the intersection with the gold standard for this baseline?
+                    # input_nodes_gold_intersection = input_nodes & gold_standard_nodes # TODO should this be all inputs or the intersection with the gold standard for this baseline?
                     input_nodes_ensemble_df = node_ensemble.copy()
 
                     input_nodes_ensemble_df.loc[
-                        input_nodes_ensemble_df['Node'].isin(input_nodes_gold_intersection),
+                        input_nodes_ensemble_df['Node'].isin(input_nodes),
                         'Frequency'
                     ] = 1.0
 
                     input_nodes_ensemble_df.loc[
-                        ~input_nodes_ensemble_df['Node'].isin(input_nodes_gold_intersection),
+                        ~input_nodes_ensemble_df['Node'].isin(input_nodes),
                         'Frequency'
                     ] = 0.0
 
