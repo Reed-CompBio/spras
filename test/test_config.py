@@ -45,7 +45,7 @@ def get_test_config():
         "gold_standards": [{
             "label": "gs1",
             "dataset_labels": [],
-            "node_file": "fake",
+            "node_file": [],
             "data_dir": "gs-fake"
         }],
         "algorithms": [

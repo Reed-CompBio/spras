@@ -70,30 +70,40 @@ class Evaluation:
 
         returns: none
         """
-
         self.label = gold_standard_dict['label']  # cannot be empty, will break with a NoneType exception
         self.datasets = gold_standard_dict['dataset_labels']  # can be empty, snakemake will not run evaluation due to dataset_gold_standard_pairs in snakemake file
 
         data_loc = gold_standard_dict['data_dir']
 
-        node_file = gold_standard_dict.get('node_file') or None
-        edge_file = gold_standard_dict.get('edge_file') or None
+        # cannot be empty, snakemake will run evaluation even if empty
+        node_file = gold_standard_dict.get('node_file') or [] # TODO: see if I can update this to just be a String
+        edge_file = gold_standard_dict.get('edge_file') or [] # TODO: see if I can update this to just be a String
 
-        has_node_file = node_file is not None and node_file != ""
-        has_edge_file = edge_file is not None and edge_file != ""
+        # exactly one gold standard file kind can be present
+        has_node_file = len(node_file) > 0
+        has_edge_file = len(edge_file) > 0
 
         if has_node_file and has_edge_file:
             raise ValueError(
                 f"Gold standard '{self.label}': both node_file and edge_file provided. "
-                "Exactly one is allowed in a gold standard dataset."
+                "Exactly one is allowed."
             )
         if not has_node_file and not has_edge_file:
             raise ValueError(
                 f"Gold standard '{self.label}': neither node_file nor edge_file provided."
             )
 
+        if has_node_file and len(node_file) != 1:
+            raise ValueError(
+                f"Gold standard '{self.label}': node_file must contain exactly one file."
+            )
+        if has_edge_file and len(edge_file) != 1:
+            raise ValueError(
+                f"Gold standard '{self.label}': edge_file must contain exactly one file."
+            )
+
         if has_node_file:
-            single_node_table = pd.read_table(os.path.join(data_loc, node_file), header=None)
+            single_node_table = pd.read_table(os.path.join(data_loc, node_file[0]), header=None)
             if single_node_table.shape[1] != 1:
                 raise ValueError(
                     f"Gold standard '{self.label}': the provided node_file must have exactly 1 column of nodes."
@@ -102,7 +112,7 @@ class Evaluation:
             self.node_table = single_node_table
 
         if has_edge_file:
-            single_edge_table = pd.read_table(os.path.join(data_loc, edge_file), header=None)
+            single_edge_table = pd.read_table(os.path.join(data_loc, edge_file[0]), header=None)
             if single_edge_table.shape[1] != 3:
                 raise ValueError(
                     f"Gold standard '{self.label}': the provided edge_file must have exactly 3 columns (Interactor1, Interactor2, Direction)."

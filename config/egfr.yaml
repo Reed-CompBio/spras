@@ -138,7 +138,8 @@ datasets:
     other_files: []
 gold_standards:
   - label: gs_egfr
-    node_file: "gs-egfr.txt"
+    node_files:
+      - gs-egfr.txt
     data_dir: input
     dataset_labels:
       - tps_egfr
