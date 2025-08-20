@@ -380,9 +380,12 @@ class Evaluation:
 
         prc_dfs = []
         metric_dfs = []
+        prc_input_nodes_baseline_df = None
 
         baseline = None
-        y_scores_input_nodes = None
+        precision_input_nodes = None
+        recall_input_nodes = None
+        thresholds_input_nodes = None
 
 
         for label, node_ensemble in node_ensembles.items():
@@ -390,20 +393,20 @@ class Evaluation:
                 y_true = [1 if node in gold_standard_nodes else 0 for node in node_ensemble['Node']]
                 y_scores = node_ensemble['Frequency'].tolist()
 
-                if y_scores_input_nodes is None:
+                if precision_input_nodes is None and recall_input_nodes is None and thresholds_input_nodes is None:
                     pickle = Evaluation.from_file(dataset_file)
                     input_nodes_df = pickle.get_node_columns(["sources", "targets", "prize", "active"])
                     input_nodes = set(input_nodes_df['NODEID'])
-                    # input_nodes_gold_intersection = input_nodes & gold_standard_nodes # TODO should this be all inputs or the intersection with the gold standard for this baseline?
+                    input_nodes_gold_intersection = input_nodes & gold_standard_nodes # TODO should this be all inputs nodes or the intersection with the gold standard for this baseline?
                     input_nodes_ensemble_df = node_ensemble.copy()
 
                     input_nodes_ensemble_df.loc[
-                        input_nodes_ensemble_df['Node'].isin(input_nodes),
+                        input_nodes_ensemble_df['Node'].isin(input_nodes_gold_intersection),
                         'Frequency'
                     ] = 1.0
 
                     input_nodes_ensemble_df.loc[
-                        ~input_nodes_ensemble_df['Node'].isin(input_nodes),
+                        ~input_nodes_ensemble_df['Node'].isin(input_nodes_gold_intersection),
                         'Frequency'
                     ] = 0.0
 
@@ -412,6 +415,17 @@ class Evaluation:
                     precision_input_nodes, recall_input_nodes, thresholds_input_nodes = precision_recall_curve(y_true, y_scores_input_nodes)
                     plt.plot(recall_input_nodes, precision_input_nodes, color='black', marker='o', linestyle='--',
                             label=f'Input Nodes Baseline')
+
+                    prc_input_nodes_baseline_data = {
+                        'Threshold': thresholds_input_nodes,
+                        'Precision': precision_input_nodes[:-1],
+                        'Recall': recall_input_nodes[:-1],
+                    }
+
+                    prc_input_nodes_baseline_data = {'Ensemble_Source': ["input_nodes_baseline"] * len(thresholds_input_nodes), **prc_input_nodes_baseline_data}
+
+                    prc_input_nodes_baseline_df = pd.DataFrame.from_dict(prc_input_nodes_baseline_data)
+
 
 
                 precision, recall, thresholds = precision_recall_curve(y_true, y_scores)
@@ -471,10 +485,9 @@ class Evaluation:
         combined_prc_df = pd.concat(prc_dfs, ignore_index=True)
         combined_metrics_df = pd.concat(metric_dfs, ignore_index=True)
         combined_metrics_df['Baseline'] = baseline
-        # TODO add new input_node baseline to the txt
 
         # merge dfs and NaN out metric values except for first row of each Ensemble_Source
-        complete_df = combined_prc_df.merge(combined_metrics_df, on='Ensemble_Source', how='left')
+        complete_df = combined_prc_df.merge(combined_metrics_df, on='Ensemble_Source', how='left').merge(prc_input_nodes_baseline_df, on=['Ensemble_Source', 'Threshold', 'Precision', 'Recall'], how='outer')
         not_last_rows = complete_df.duplicated(subset='Ensemble_Source', keep='first')
         complete_df.loc[not_last_rows, ['Average_Precision', 'Baseline']] = None
         complete_df.to_csv(output_file, index=False, sep='\t')
