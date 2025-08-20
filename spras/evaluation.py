@@ -410,12 +410,16 @@ class Evaluation:
                         'Frequency'
                     ] = 0.0
 
+                    print(input_nodes_ensemble_df)
+
                     y_scores_input_nodes = input_nodes_ensemble_df['Frequency'].tolist()
 
                     precision_input_nodes, recall_input_nodes, thresholds_input_nodes = precision_recall_curve(y_true, y_scores_input_nodes)
                     plt.plot(recall_input_nodes, precision_input_nodes, color='black', marker='o', linestyle='--',
                             label=f'Input Nodes Baseline')
 
+                    print(precision_input_nodes)
+                    print(recall_input_nodes)
                     prc_input_nodes_baseline_data = {
                         'Threshold': thresholds_input_nodes,
                         'Precision': precision_input_nodes[:-1],
