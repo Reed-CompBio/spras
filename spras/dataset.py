@@ -1,6 +1,7 @@
 import os
 import pickle as pkl
 import warnings
+from typing import TypedDict
 
 import pandas as pd
 
@@ -11,13 +12,23 @@ Author: Chris Magnano
 Methods and intermediate state for loading data and putting it into pandas tables for use by pathway reconstruction algorithms.
 """
 
+class DatasetDict(TypedDict):
+    """
+    Type class containing a collection of information pertaining to creating a Dataset
+    object. This layout is replicated directly in SPRAS configuration files.
+    """
+    label: str
+    node_files: list[str | os.PathLike]
+    edge_files: list[str | os.PathLike]
+    other_files: list[str | os.PathLike]
+    data_dir: str | os.PathLike
 
 class Dataset:
 
     NODE_ID = "NODEID"
     warning_threshold = 0.05  # Threshold for scarcity of columns to warn user
 
-    def __init__(self, dataset_dict):
+    def __init__(self, dataset_dict: DatasetDict):
         self.label = None
         self.interactome = None
         self.node_table = None
@@ -47,7 +58,7 @@ class Dataset:
         with open(file_name, "rb") as f:
             return pkl.load(f)
 
-    def load_files_from_dict(self, dataset_dict):
+    def load_files_from_dict(self, dataset_dict: DatasetDict):
         """
         Loads data files from dataset_dict, which is one dataset dictionary from the list
         in the config file with the fields in the config file.
@@ -117,7 +128,7 @@ class Dataset:
                     os.path.join(data_loc, node_file), header=None
                 )
                 single_node_table.columns = [self.NODE_ID]
-                new_col_name = node_file.split(".")[0]
+                new_col_name = str(node_file).split(".")[0]
                 single_node_table[new_col_name] = True
 
             # Use only keys from the existing node table so that nodes that are not in the interactome are ignored
