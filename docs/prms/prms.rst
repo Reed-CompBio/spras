@@ -56,6 +56,12 @@ Pathway Reconstruction Methods
 
 .. toctree::
    :maxdepth: 1
+   :caption: ResponseNet
+
+   responsenet
+
+.. toctree::
+   :maxdepth: 1
    :caption: RWR
 
    rwr

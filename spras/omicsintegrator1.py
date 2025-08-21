@@ -60,16 +60,14 @@ class OmicsIntegrator1(PRM):
         @param filename_map: a dict mapping file types in the required_inputs to the filename for that type
         @return:
         """
-        for input_type in OmicsIntegrator1.required_inputs:
-            if input_type not in filename_map:
-                raise ValueError(f"{input_type} filename is missing")
+        OmicsIntegrator1.validate_required_inputs(filename_map)
 
         if data.contains_node_columns('prize'):
             # NODEID is always included in the node table
-            node_df = data.request_node_columns(['prize'])
+            node_df = data.get_node_columns(['prize'])
         elif data.contains_node_columns(['sources', 'targets']):
             # If there aren't prizes but are sources and targets, make prizes based on them
-            node_df = data.request_node_columns(['sources','targets'])
+            node_df = data.get_node_columns(['sources','targets'])
             node_df.loc[node_df['sources']==True, 'prize'] = 1.0
             node_df.loc[node_df['targets']==True, 'prize'] = 1.0
         else:
@@ -120,7 +118,7 @@ class OmicsIntegrator1(PRM):
         @param w: float that affects the number of connected components, with higher values leading to more components
         @param b: the trade-off between including more prizes and using less reliable edges
         @param d: controls the maximum path-length from root to terminal nodes
-        @param mu: controls the degree-based negative prizes (defualt 0.0)
+        @param mu: controls the degree-based negative prizes (default 0.0)
         @param noise: Standard Deviation of the gaussian noise added to edges in Noisy Edges Randomizations
         @param g: Gamma: multiplicative edge penalty from degree of endpoints
         @param r: msgsteiner parameter that adds random noise to edges, which is rarely needed (default 0)
