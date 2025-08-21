@@ -15,7 +15,7 @@ Methods and intermediate state for loading data and putting it into pandas table
 class DatasetDict(TypedDict):
     """
     Type class containing a collection of information pertaining to creating a Dataset
-    object. This layout is replicated directly in SPRAS configuration files.
+    object. See spras/config/schema.py's `Dataset` class for the pydantic formation of `DatasetDict`.
     """
     label: str
     node_files: list[str | os.PathLike]
