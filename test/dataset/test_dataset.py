@@ -2,6 +2,7 @@ from pathlib import Path
 
 import pandas
 import pytest
+import numpy as np
 
 from spras.dataset import Dataset
 
@@ -58,3 +59,24 @@ class TestDataset:
         })
 
         assert len(dataset.get_interactome()) == 2
+    
+    # 372 is a PR, but for the relevant comment, see
+    # https://github.com/Reed-CompBio/spras/pull/372/files#r2291953612.
+    # Note that the input-nodes file has more tabs than the original fixture.
+    def test_372(self):
+        dataset = Dataset({
+            'label': 'toy-372',
+            'edge_files': ['input-interactome.txt'],
+            'node_files': ['input-nodes.txt'],
+            'data_dir': FIXTURES_PATH / 'toy-372',
+            'other_files': []
+        })
+
+        node_table = dataset.node_table
+        assert node_table is not None
+
+        assert node_table[node_table[Dataset.NODE_ID] == 'C'].iloc[0]['prize'] == 5.7
+        assert node_table[node_table[Dataset.NODE_ID] == 'C'].iloc[0]['active'] == True
+
+        assert np.isnan(node_table[node_table[Dataset.NODE_ID] == 'C'].iloc[0]['sources'])
+        assert node_table[node_table[Dataset.NODE_ID] == 'C'].iloc[0]['targets'] == True
