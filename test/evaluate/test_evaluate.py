@@ -35,8 +35,6 @@ class TestEvaluate:
             'other_files': []
         })
 
-        # TODO figure out why the input-nodes file is not being included in the data.pickle file
-        # it keeps coming up empty
         with open(out_dataset, 'wb') as f:
             pickle.dump(dataset, f)
 
@@ -162,16 +160,7 @@ class TestEvaluate:
         out_path_file = Path(OUT_DIR + 'pr-curve-ensemble-nodes.txt')
         out_path_file.unlink(missing_ok=True)
         input_data = OUT_DIR + 'data.pickle'
-
-        pickle = Evaluation.from_file(input_data)
-        input_nodes_df = pickle.get_node_columns(["prize", "active"])
-
-        print(input_nodes_df)
-
         ensemble_file = pd.read_csv(INPUT_DIR + 'node-ensemble.csv', sep='\t', header=0)
-
-        print(ensemble_file)
-
         node_ensembles_dict = {'ensemble': ensemble_file}
         Evaluation.precision_recall_curve_node_ensemble(node_ensembles_dict, GS_NODE_TABLE, input_data, out_path_png,
                                                         out_path_file)
