@@ -481,13 +481,13 @@ rule evaluation_pca_chosen:
         pca_coordinates_file = collect_pca_coordinates_per_dataset,
         pathway_summary_file = collect_summary_statistics_per_dataset
     output: 
-        pca_chosen_pr_file = SEP.join([out_dir, '{dataset_gold_standard_pair}-eval', 'pr-pca-chosen-pathway-nodes.txt']),
-        pca_chosen_pr_png = SEP.join([out_dir, '{dataset_gold_standard_pair}-eval', 'pr-pca-chosen-pathway-nodes.png']),
+        node_pca_chosen_pr_file = SEP.join([out_dir, '{dataset_gold_standard_pair}-eval', 'pr-pca-chosen-pathway-nodes.txt']),
+        node_pca_chosen_pr_png = SEP.join([out_dir, '{dataset_gold_standard_pair}-eval', 'pr-pca-chosen-pathway-nodes.png']),
     run:
         node_table = Evaluation.from_file(input.node_gold_standard_file).node_table
         pca_chosen_pathway = Evaluation.pca_chosen_pathway(input.pca_coordinates_file, input.pathway_summary_file, out_dir)
         pr_df = Evaluation.node_precision_and_recall(pca_chosen_pathway, node_table)
-        Evaluation.precision_and_recall_pca_chosen_pathway(pr_df, output.pca_chosen_pr_file, output.pca_chosen_pr_png)
+        Evaluation.precision_and_recall_pca_chosen_pathway(pr_df, output.node_pca_chosen_pr_file, output.node_pca_chosen_pr_png)
 
 # Returns pca coordinates for a specific algorithm and dataset
 def collect_pca_coordinates_per_algo_per_dataset(wildcards):
@@ -502,13 +502,13 @@ rule evaluation_per_algo_pca_chosen:
         pca_coordinates_file = collect_pca_coordinates_per_algo_per_dataset,
         pathway_summary_file = collect_summary_statistics_per_dataset
     output: 
-        pca_chosen_pr_file = SEP.join([out_dir, '{dataset_gold_standard_pair}-eval', 'pr-pca-chosen-pathway-per-algorithm-nodes.txt']),
-        pca_chosen_pr_png = SEP.join([out_dir, '{dataset_gold_standard_pair}-eval', 'pr-pca-chosen-pathway-per-algorithm-nodes.png']),
+        node_pca_chosen_pr_file = SEP.join([out_dir, '{dataset_gold_standard_pair}-eval', 'pr-pca-chosen-pathway-per-algorithm-nodes.txt']),
+        node_pca_chosen_pr_png = SEP.join([out_dir, '{dataset_gold_standard_pair}-eval', 'pr-pca-chosen-pathway-per-algorithm-nodes.png']),
     run:
         node_table = Evaluation.from_file(input.node_gold_standard_file).node_table
         pca_chosen_pathways = Evaluation.pca_chosen_pathway(input.pca_coordinates_file, input.pathway_summary_file, out_dir)
         pr_df = Evaluation.node_precision_and_recall(pca_chosen_pathways, node_table)
-        Evaluation.precision_and_recall_pca_chosen_pathway(pr_df, output.pca_chosen_pr_file, output.pca_chosen_pr_png, include_aggregate_algo_eval)
+        Evaluation.precision_and_recall_pca_chosen_pathway(pr_df, output.node_pca_chosen_pr_file, output.node_pca_chosen_pr_png, include_aggregate_algo_eval)
 
 # Return the dataset pickle file for a specific dataset
 def get_dataset_pickle_file(wildcards):
@@ -527,12 +527,12 @@ rule evaluation_ensemble_pr_curve:
         dataset_file = get_dataset_pickle_file,
         ensemble_file = collect_ensemble_per_dataset
     output: 
-        pr_curve_png = SEP.join([out_dir, '{dataset_gold_standard_pair}-eval', 'pr-curve-ensemble-nodes.png']),
-        pr_curve_file = SEP.join([out_dir, '{dataset_gold_standard_pair}-eval', 'pr-curve-ensemble-nodes.txt']),
+        node_pr_curve_png = SEP.join([out_dir, '{dataset_gold_standard_pair}-eval', 'pr-curve-ensemble-nodes.png']),
+        node_pr_curve_file = SEP.join([out_dir, '{dataset_gold_standard_pair}-eval', 'pr-curve-ensemble-nodes.txt']),
     run:
         node_table = Evaluation.from_file(input.node_gold_standard_file).node_table
         node_ensemble_dict = Evaluation.edge_frequency_node_ensemble(node_table, input.ensemble_file, input.dataset_file)
-        Evaluation.precision_recall_curve_node_ensemble(node_ensemble_dict, node_table, output.pr_curve_png, output.pr_curve_file)
+        Evaluation.precision_recall_curve_node_ensemble(node_ensemble_dict, node_table, output.node_pr_curve_png, output.node_pr_curve_file)
 
 # Returns list of algorithm specific ensemble files per dataset
 def collect_ensemble_per_algo_per_dataset(wildcards):
@@ -546,12 +546,12 @@ rule evaluation_per_algo_ensemble_pr_curve:
         dataset_file = get_dataset_pickle_file,
         ensemble_files = collect_ensemble_per_algo_per_dataset
     output: 
-        pr_curve_png = SEP.join([out_dir, '{dataset_gold_standard_pair}-eval', 'pr-curve-ensemble-nodes-per-algorithm-nodes.png']),
-        pr_curve_file = SEP.join([out_dir, '{dataset_gold_standard_pair}-eval', 'pr-curve-ensemble-nodes-per-algorithm-nodes.txt']),
+        node_pr_curve_png = SEP.join([out_dir, '{dataset_gold_standard_pair}-eval', 'pr-curve-ensemble-nodes-per-algorithm-nodes.png']),
+        node_pr_curve_file = SEP.join([out_dir, '{dataset_gold_standard_pair}-eval', 'pr-curve-ensemble-nodes-per-algorithm-nodes.txt']),
     run:
         node_table = Evaluation.from_file(input.node_gold_standard_file).node_table
         node_ensembles_dict = Evaluation.edge_frequency_node_ensemble(node_table, input.ensemble_files, input.dataset_file)
-        Evaluation.precision_recall_curve_node_ensemble(node_ensembles_dict, node_table, output.pr_curve_png, output.pr_curve_file, include_aggregate_algo_eval)
+        Evaluation.precision_recall_curve_node_ensemble(node_ensembles_dict, node_table, output.node_pr_curve_png, output.node_pr_curve_file, include_aggregate_algo_eval)
 
 rule evaluation_edge_dummy:
     input: 
