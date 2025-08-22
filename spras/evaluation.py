@@ -288,7 +288,7 @@ class Evaluation:
         return rep_pathways
 
     @staticmethod
-    def edge_frequency_node_ensemble(node_table: pd.DataFrame, ensemble_files: list[Union[str, PathLike]], dataset_file: str) -> dict:
+    def edge_frequency_node_ensemble(node_table: pd.DataFrame, ensemble_files: list[Union[str, PathLike]], input_interactome: pd.DataFrame) -> dict:
         """
         Generates a dictionary of node ensembles using edge frequency data from a list of ensemble files.
         A list of ensemble files can contain an aggregated ensemble or algorithm-specific ensembles per dataset
@@ -308,28 +308,25 @@ class Evaluation:
 
         @param node_table: dataFrame of gold standard nodes (column: NODEID)
         @param ensemble_files: list of file paths containing edge ensemble outputs
-        @param dataset_file: path to the dataset file used to load the interactome
+        @param input_interactome: the input interactome used for a specific dataset
         @return: dictionary mapping each ensemble source to its node ensemble DataFrame
         """
 
         node_ensembles_dict = dict()
 
-        pickle = Evaluation.from_file(dataset_file)
-        interactome = pickle.get_interactome()
-
-        if interactome.empty:
+        if input_interactome.empty:
             raise ValueError(
-                f"Cannot compute PR curve or generate node ensemble. Input network for dataset \"{dataset_file.split('-')[0]}\" is empty."
+                f"Cannot compute PR curve or generate node ensemble. The input network is empty."
             )
         if node_table.empty:
             raise ValueError(
-                f"Cannot compute PR curve or generate node ensemble. Gold standard associated with dataset \"{dataset_file.split('-')[0]}\" is empty."
+                f"Cannot compute PR curve or generate node ensemble. The gold standard is empty."
             )
 
         # set the initial default frequencies to 0 for all interactome and gold standard nodes
-        node1_interactome = interactome[['Interactor1']].rename(columns={'Interactor1': 'Node'})
+        node1_interactome = input_interactome[['Interactor1']].rename(columns={'Interactor1': 'Node'})
         node1_interactome['Frequency'] = 0.0
-        node2_interactome = interactome[['Interactor2']].rename(columns={'Interactor2': 'Node'})
+        node2_interactome = input_interactome[['Interactor2']].rename(columns={'Interactor2': 'Node'})
         node2_interactome['Frequency'] = 0.0
         gs_nodes = node_table[[Evaluation.NODE_ID]].rename(columns={Evaluation.NODE_ID: 'Node'})
         gs_nodes['Frequency'] = 0.0
@@ -397,8 +394,6 @@ class Evaluation:
                 # input nodes (sources, targets, prizes, actives) may be easier to recover but are still valid gold standard nodes;
                 # the Input_Nodes_Baseline PR curve highlights their overlap with the gold standard.
                 if prc_input_nodes_baseline_df is None:
-                    # pickle = Evaluation.from_file(dataset_file)
-                    # input_nodes_df = pickle.get_node_columns(["sources", "targets", "prize", "active"])
                     input_nodes_set = set(input_nodes['NODEID'])
                     input_nodes_gold_intersection = input_nodes_set & gold_standard_nodes # TODO should this be all inputs nodes or the intersection with the gold standard for this baseline? I think it should be the intersection
                     input_nodes_ensemble_df = node_ensemble.copy()

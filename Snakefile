@@ -524,8 +524,10 @@ rule evaluation_ensemble_pr_curve:
         pr_curve_file = SEP.join([out_dir, '{dataset_gold_standard_pairs}-eval', 'pr-curve-ensemble-nodes.txt']),
     run:
         node_table = Evaluation.from_file(input.gold_standard_file).node_table
-        node_ensemble_dict = Evaluation.edge_frequency_node_ensemble(node_table, input.ensemble_file, input.dataset_file)
-        Evaluation.precision_recall_curve_node_ensemble(node_ensemble_dict, node_table, input.dataset_file,output.pr_curve_png, output.pr_curve_file)
+        input_interactome = Evaluation.from_file(input.dataset_file).get_interactome()
+        node_ensemble_dict = Evaluation.edge_frequency_node_ensemble(node_table, input.ensemble_file, input_interactome)
+        input_nodes = Evaluation.from_file(input.dataset_file).get_node_columns(["sources", "targets", "prize", "active"])
+        Evaluation.precision_recall_curve_node_ensemble(node_ensemble_dict, node_table, input_nodes,output.pr_curve_png, output.pr_curve_file)
 
 # Returns list of algorithm specific ensemble files per dataset
 def collect_ensemble_per_algo_per_dataset(wildcards):
@@ -543,8 +545,10 @@ rule evaluation_per_algo_ensemble_pr_curve:
         pr_curve_file = SEP.join([out_dir, '{dataset_gold_standard_pairs}-eval', 'pr-curve-ensemble-nodes-per-algorithm.txt']),
     run:
         node_table = Evaluation.from_file(input.gold_standard_file).node_table
-        node_ensembles_dict = Evaluation.edge_frequency_node_ensemble(node_table, input.ensemble_files, input.dataset_file)
-        Evaluation.precision_recall_curve_node_ensemble(node_ensembles_dict, node_table, input.dataset_file,output.pr_curve_png, output.pr_curve_file, include_aggregate_algo_eval)
+        input_interactome = Evaluation.from_file(input.dataset_file).get_interactome()
+        node_ensembles_dict = Evaluation.edge_frequency_node_ensemble(node_table, input.ensemble_files, input_interactome)
+        input_nodes = Evaluation.from_file(input.dataset_file).get_node_columns(["sources", "targets", "prize", "active"])
+        Evaluation.precision_recall_curve_node_ensemble(node_ensembles_dict, node_table, input_nodes,output.pr_curve_png, output.pr_curve_file, include_aggregate_algo_eval)
 
 
 # Remove the output directory
