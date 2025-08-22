@@ -379,12 +379,7 @@ class Evaluation:
         prc_dfs = []
         metric_dfs = []
         prc_input_nodes_baseline_df = None
-
         baseline = None
-        precision_input_nodes = None
-        recall_input_nodes = None
-        thresholds_input_nodes = None
-
 
         for label, node_ensemble in node_ensembles.items():
             if not node_ensemble.empty:
@@ -405,8 +400,7 @@ class Evaluation:
                     y_scores_input_nodes = input_nodes_ensemble_df['Frequency'].tolist()
 
                     precision_input_nodes, recall_input_nodes, thresholds_input_nodes = precision_recall_curve(y_true, y_scores_input_nodes)
-                    plt.plot(recall_input_nodes, precision_input_nodes, color='black', marker='o', linestyle='--',
-                            label=f'Input Nodes Baseline')
+                    plt.plot(recall_input_nodes, precision_input_nodes, color='black', marker='o', linestyle='--', label=f'Input Nodes Baseline')
 
                     # Dropping last elements because scikit-learn adds (1, 0) to precision/recall for plotting, not tied to real thresholds
                     prc_input_nodes_baseline_data = {
