@@ -127,7 +127,8 @@ class TestEvaluate:
         out_path_file.unlink(missing_ok=True)
         ensemble_network = [INPUT_DIR + 'ensemble-network.tsv']
         input_data = OUT_DIR + 'data.pickle'
-        node_ensemble_dict = Evaluation.edge_frequency_node_ensemble(GS_NODE_TABLE, ensemble_network, input_data)
+        input_interactome = Evaluation.from_file(input_data).get_interactome()
+        node_ensemble_dict = Evaluation.edge_frequency_node_ensemble(GS_NODE_TABLE, ensemble_network, input_interactome)
         node_ensemble_dict['ensemble'].to_csv(out_path_file, sep='\t', index=False)
         assert filecmp.cmp(out_path_file, EXPECT_DIR + 'expected-node-ensemble.csv', shallow=False)
 
@@ -136,8 +137,8 @@ class TestEvaluate:
         out_path_file.unlink(missing_ok=True)
         empty_ensemble_network = [INPUT_DIR + 'empty-ensemble-network.tsv']
         input_data = OUT_DIR + 'data.pickle'
-        node_ensemble_dict = Evaluation.edge_frequency_node_ensemble(GS_NODE_TABLE, empty_ensemble_network,
-                                                                     input_data)
+        input_interactome = Evaluation.from_file(input_data).get_interactome()
+        node_ensemble_dict = Evaluation.edge_frequency_node_ensemble(GS_NODE_TABLE, empty_ensemble_network, input_interactome)
         node_ensemble_dict['empty'].to_csv(out_path_file, sep='\t', index=False)
         assert filecmp.cmp(out_path_file, EXPECT_DIR + 'expected-empty-node-ensemble.csv', shallow=False)
 
@@ -148,7 +149,8 @@ class TestEvaluate:
         out_path_empty_file.unlink(missing_ok=True)
         ensemble_networks = [INPUT_DIR + 'ensemble-network.tsv', INPUT_DIR + 'empty-ensemble-network.tsv']
         input_data = OUT_DIR + 'data.pickle'
-        node_ensemble_dict = Evaluation.edge_frequency_node_ensemble(GS_NODE_TABLE, ensemble_networks, input_data)
+        input_interactome = Evaluation.from_file(input_data).get_interactome()
+        node_ensemble_dict = Evaluation.edge_frequency_node_ensemble(GS_NODE_TABLE, ensemble_networks, input_interactome)
         node_ensemble_dict['ensemble'].to_csv(out_path_file, sep='\t', index=False)
         assert filecmp.cmp(out_path_file, EXPECT_DIR + 'expected-node-ensemble.csv', shallow=False)
         node_ensemble_dict['empty'].to_csv(out_path_empty_file, sep='\t', index=False)
@@ -160,9 +162,10 @@ class TestEvaluate:
         out_path_file = Path(OUT_DIR + 'pr-curve-ensemble-nodes.txt')
         out_path_file.unlink(missing_ok=True)
         input_data = OUT_DIR + 'data.pickle'
+        input_nodes = Evaluation.from_file(input_data).get_node_columns(["sources", "targets", "prize", "active"])
         ensemble_file = pd.read_csv(INPUT_DIR + 'node-ensemble.csv', sep='\t', header=0)
         node_ensembles_dict = {'ensemble': ensemble_file}
-        Evaluation.precision_recall_curve_node_ensemble(node_ensembles_dict, GS_NODE_TABLE, input_data, out_path_png,
+        Evaluation.precision_recall_curve_node_ensemble(node_ensembles_dict, GS_NODE_TABLE, input_nodes, out_path_png,
                                                         out_path_file)
         assert out_path_png.exists()
         assert filecmp.cmp(out_path_file, EXPECT_DIR + 'expected-pr-curve-ensemble-nodes.txt', shallow=False)
@@ -173,9 +176,10 @@ class TestEvaluate:
         out_path_file = Path(OUT_DIR + 'pr-curve-ensemble-nodes-empty.txt')
         out_path_file.unlink(missing_ok=True)
         input_data = OUT_DIR + 'data.pickle'
+        input_nodes = Evaluation.from_file(input_data).get_node_columns(["sources", "targets", "prize", "active"])
         empty_ensemble_file = pd.read_csv(INPUT_DIR + 'node-ensemble-empty.csv', sep='\t', header=0)
         node_ensembles_dict = {'ensemble': empty_ensemble_file}
-        Evaluation.precision_recall_curve_node_ensemble(node_ensembles_dict, GS_NODE_TABLE, input_data, out_path_png,
+        Evaluation.precision_recall_curve_node_ensemble(node_ensembles_dict, GS_NODE_TABLE, input_nodes, out_path_png,
                                                         out_path_file)
         assert out_path_png.exists()
         assert filecmp.cmp(out_path_file, EXPECT_DIR + 'expected-pr-curve-ensemble-nodes-empty.txt', shallow=False)
@@ -186,10 +190,11 @@ class TestEvaluate:
         out_path_file = Path(OUT_DIR + 'pr-curve-multiple-ensemble-nodes.txt')
         out_path_file.unlink(missing_ok=True)
         input_data = OUT_DIR + 'data.pickle'
+        input_nodes = Evaluation.from_file(input_data).get_node_columns(["sources", "targets", "prize", "active"])
         ensemble_file = pd.read_csv(INPUT_DIR + 'node-ensemble.csv', sep='\t', header=0)
         empty_ensemble_file = pd.read_csv(INPUT_DIR + 'node-ensemble-empty.csv', sep='\t', header=0)
         node_ensembles_dict = {'ensemble1': ensemble_file, 'ensemble2': ensemble_file, 'ensemble3': empty_ensemble_file}
-        Evaluation.precision_recall_curve_node_ensemble(node_ensembles_dict, GS_NODE_TABLE, input_data, out_path_png,
+        Evaluation.precision_recall_curve_node_ensemble(node_ensembles_dict, GS_NODE_TABLE, input_nodes, out_path_png,
                                                         out_path_file, True)
         assert out_path_png.exists()
         assert filecmp.cmp(out_path_file, EXPECT_DIR + 'expected-pr-curve-multiple-ensemble-nodes.txt', shallow=False)
