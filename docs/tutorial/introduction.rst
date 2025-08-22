@@ -51,6 +51,7 @@ Required software:
 - Docker: for containerized runs
 - Cytoscape: for visualizing networks
 - A terminal or code editor (VS Code is recommended, but any terminal will work)
+- Git: for cloning the SPRAS repository
 
 Required knowledge:
 
