@@ -154,7 +154,7 @@ class DOMINO(PRM):
             # Occurs when DOMINO gets passed some empty dataframe.
             if err.streams_contain("pandas.errors.EmptyDataError: No columns to parse from file"):
                 pass
-            # TODO: should we let DOMINO output an empty file here? Here, DOMINO
+            # Here, DOMINO
             # still outputs to our output folder with a still viable HTML output.
             # https://github.com/Reed-CompBio/spras/pull/103#issuecomment-1681526958
             elif err.streams_contain("ValueError: cannot apply union_all to an empty list"):
