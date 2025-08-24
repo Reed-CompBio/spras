@@ -27,15 +27,18 @@ jobs:
 
   # Runs the test code and Snakemake workflow in the conda environment
   test:
-    name: Run test cases and workflow
+    name: Run tests
     # The Docker images will be pulled in both the docker job and this test job
     runs-on: ${{ matrix.os }}
     strategy:
       matrix:
+        # We later use this with `pytest-split` to split our test CI into two
+        # (with the max specified by `--splits 2`), to save CI time by parallelization
+        test_group: [1, 2]
         os: [ubuntu-latest]
     steps:
       - name: Checkout repository
-        uses: actions/checkout@v2
+        uses: actions/checkout@v4
       - name: Install conda environment
         uses: conda-incubator/setup-miniconda@v2
         with:
@@ -60,11 +63,35 @@ jobs:
       - name: Run tests
         shell: bash --login {0}
         # Verbose output and disable stdout and stderr capturing
-        run: pytest -vs
+        # [this pytest-split workflow was borrowed from Snakemake CI]
+        run: pytest -vs --splits 2 --group ${{ matrix.test_group }}
+  workflow:
+    name: Run workflow
+    runs-on: ${{ matrix.os }}
+    strategy:
+      matrix:
+        os: [ubuntu-latest]
+    steps:
+      # TODO: is it worth it to make this setup into a composite action?
+      - name: Checkout repository
+        uses: actions/checkout@v4
+      - name: Install conda environment
+        uses: conda-incubator/setup-miniconda@v2
+        with:
+          activate-environment: spras
+          environment-file: environment.yml
+          auto-activate-base: false
+          miniconda-version: 'latest'
+      # Install spras in the environment using pip
+      - name: Install spras in conda env
+        shell: bash --login {0}
+        run: pip install .
       - name: Run Snakemake workflow
         shell: bash --login {0}
-        # We enforce strict DAG evaluation to catch DAG problems before they appear as user errors.
-        run: snakemake --cores 2 --configfile config/config.yaml --show-failed-logs --strict-dag-evaluation cyclic-graph --strict-dag-evaluation functions --strict-dag-evaluation periodic-wildcards
+        # We enable high parallelization (cores 4) to test our way out of the experienced
+        # race conditions from #268 and #279
+        # We also enforce strict DAG evaluation to catch DAG problems before they appear as user errors. (#359)
+        run: snakemake --cores 4 --configfile config/config.yaml --show-failed-logs --strict-dag-evaluation cyclic-graph --strict-dag-evaluation functions --strict-dag-evaluation periodic-wildcards
 
   # Run pre-commit checks on source files
   pre-commit:
