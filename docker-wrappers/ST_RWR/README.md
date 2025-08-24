@@ -3,7 +3,7 @@
 A Docker image for [ST-RWR](https://github.com/Reed-CompBio/rwr) that is available on [DockerHub](https://hub.docker.com/repository/docker/reedcompbio/st_rwr).
 
 ## Notes
-The random walk with restarts algorithm requires a directed input network. However, the algorithm in its current form will accept an undirected input network and interpret it as a directed network. The resulting output from an undirected network does not accuratly represent directionality.
+The random walk with restarts algorithm requires a directed input network. However, the algorithm in its current form will accept an undirected input network and interpret it as a directed network. The resulting output from an undirected network does not accurately represent directionality.
 
 ## Building Docker File
 To build a new docker image for ST_RWR navigate to the /docker-wrappers/ST_RWR directory and enter:
