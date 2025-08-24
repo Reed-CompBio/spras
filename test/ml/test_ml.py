@@ -1,5 +1,4 @@
 import filecmp
-import shutil
 from pathlib import Path
 
 import pandas as pd
@@ -30,6 +29,7 @@ class TestML:
                                            INPUT_DIR + 'test-data-spaces/spaces.txt',
                                            INPUT_DIR + 'test-data-mixed-direction/mixed-direction.txt',
                                            INPUT_DIR + 'test-data-repeat-edges-directed/repeat-edges-directed.txt'])
+
         dataframe.to_csv(OUT_DIR + 'dataframe.csv')
         assert filecmp.cmp(OUT_DIR + 'dataframe.csv', EXPECT_DIR + 'expected-dataframe.csv', shallow=False)
 
@@ -51,7 +51,7 @@ class TestML:
 
     def test_empty(self):
         dataframe = ml.summarize_networks([INPUT_DIR + 'test-data-empty/empty.txt'])
-        with pytest.raises(ValueError):  # raises error if empty dataframe is used for post-processing
+        with pytest.raises(ValueError):  # raises error if empty dataframe is used for post processing
             ml.pca(dataframe, OUT_DIR + 'pca-empty.png', OUT_DIR + 'pca-empty-variance.txt',
                OUT_DIR + 'pca-empty-coordinates.tsv')
         with pytest.raises(ValueError):
@@ -80,19 +80,51 @@ class TestML:
 
         assert coord.equals(expected)
 
-    def test_pca_robustness(self):
-        dataframe = ml.summarize_networks([INPUT_DIR + 'test-data-s1/s1.txt', INPUT_DIR + 'test-data-s2/s2.txt', INPUT_DIR + 'test-data-s3/s3.txt'])
+    def test_pca_remove_empty_pathways(self):
+        dataframe = ml.summarize_networks([INPUT_DIR + 'test-data-s1/s1.txt', INPUT_DIR + 'test-data-s2/s2.txt',
+                                           INPUT_DIR + 'test-data-s3/s3.txt', INPUT_DIR + 'test-data-empty/empty.txt'])
+        ml.pca(dataframe, OUT_DIR + 'pca.png', OUT_DIR + 'pca-variance.txt',
+               OUT_DIR + 'pca-coordinates.tsv', remove_empty_pathways=True)
+        coord = pd.read_table(OUT_DIR + 'pca-coordinates.tsv')
+        coord = coord.round(5)  # round values to 5 digits to account for numeric differences across machines
         expected = pd.read_table(EXPECT_DIR + 'expected-pca-coordinates.tsv')
         expected = expected.round(5)
+
+        assert coord.equals(expected)
+
+    def test_pca_kernel_density(self):
+        dataframe = ml.summarize_networks([INPUT_DIR + 'test-data-s1/s1.txt', INPUT_DIR + 'test-data-s2/s2.txt',
+                                           INPUT_DIR + 'test-data-s3/s3.txt', INPUT_DIR + 'test-data-empty/empty.txt'])
+        ml.pca(dataframe, OUT_DIR + 'pca.png', OUT_DIR + 'pca-variance.txt',
+               OUT_DIR + 'pca-coordinates-kde.tsv', kde=True)
+        coord = pd.read_table(OUT_DIR + 'pca-coordinates-kde.tsv')
+        expected = pd.read_table(EXPECT_DIR + 'expected-pca-coordinates-kde.tsv')
+        expected_negated = pd.read_table(EXPECT_DIR + 'expected-pca-coordinates-kde-negated.tsv')
+        coord_kde_peak = coord.loc[coord['datapoint_labels'] == 'kde_peak'].round(5)
+        expected_kde_peak = expected.loc[expected['datapoint_labels'] == 'kde_peak'].round(5)
+        expected_kde_peak_negated = expected_negated.loc[expected_negated['datapoint_labels'] == 'kde_peak'].round(5)
+
+        assert coord_kde_peak.equals(expected_kde_peak) or coord_kde_peak.equals(expected_kde_peak_negated)
+
+    def test_pca_robustness(self):
+        dataframe = ml.summarize_networks([INPUT_DIR + 'test-data-s1/s1.txt', INPUT_DIR + 'test-data-s2/s2.txt',
+                                           INPUT_DIR + 'test-data-s3/s3.txt'])
+        # PCA signage now depends on the input data: we need two differently signed PCA coordinate files.
+        # See https://scikit-learn.org/stable/whats_new/v1.5.html#changed-models for more info.
+        expected = pd.read_table(EXPECT_DIR + 'expected-pca-coordinates-sorted.tsv')
+        expected_other = pd.read_table(EXPECT_DIR + 'expected-pca-coordinates-sorted-negated.tsv')
+        expected = expected.round(5)
+        expected_other = expected_other.round(5)
+        expected.sort_values(by='datapoint_labels', ignore_index=True, inplace=True)
+
         for _ in range(5):
             dataframe_shuffled = dataframe.sample(frac=1, axis=1)  # permute the columns
             ml.pca(dataframe_shuffled, OUT_DIR + 'pca-shuffled-columns.png', OUT_DIR + 'pca-shuffled-columns-variance.txt',
                 OUT_DIR + 'pca-shuffled-columns-coordinates.tsv')
             coord = pd.read_table(OUT_DIR + 'pca-shuffled-columns-coordinates.tsv')
             coord = coord.round(5)  # round values to 5 digits to account for numeric differences across machines
-            coord.sort_values(by='algorithm', ignore_index=True, inplace=True)
-
-            assert coord.equals(expected)
+            coord.sort_values(by='datapoint_labels', ignore_index=True, inplace=True)
+            assert coord.equals(expected) or coord.equals(expected_other)
 
         for _ in range(5):
             dataframe_shuffled = dataframe.sample(frac=1, axis=0)  # permute the rows
@@ -100,9 +132,9 @@ class TestML:
                     OUT_DIR + 'pca-shuffled-rows-coordinates.tsv')
             coord = pd.read_table(OUT_DIR + 'pca-shuffled-rows-coordinates.tsv')
             coord = coord.round(5)  # round values to 5 digits to account for numeric differences across machines
-            coord.sort_values(by='algorithm', ignore_index=True, inplace=True)
+            coord.sort_values(by='datapoint_labels', ignore_index=True, inplace=True)
 
-            assert coord.equals(expected)
+            assert coord.equals(expected) or coord.equals(expected_other)
 
     def test_hac_horizontal(self):
         dataframe = ml.summarize_networks([INPUT_DIR + 'test-data-s1/s1.txt', INPUT_DIR + 'test-data-s2/s2.txt', INPUT_DIR + 'test-data-s3/s3.txt'])
