@@ -32,7 +32,7 @@ dependencies = [
     "spython==0.3.14",
 
     # toolchain deps
-    "pip==22.1",
+    "pip==25.2",
 ]
 
 [project.optional-dependencies]
@@ -40,6 +40,7 @@ dev = [
    # Only required for development
     "pre-commit==4.2.0",
     "pytest==8.4.1",
+    "pytest-split==0.10.0",
 ]
 
 [project.urls]

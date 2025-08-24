@@ -120,7 +120,7 @@ class OmicsIntegrator1(PRM):
         @param d: controls the maximum path-length from root to terminal nodes
         @param mu: controls the degree-based negative prizes (default 0.0)
         @param noise: Standard Deviation of the gaussian noise added to edges in Noisy Edges Randomizations
-        @param g: Gamma: multiplicative edge penalty from degree of endpoints
+        @param g: (gamma) msgsteiner reinforcement parameter that affects the convergence of the solution and runtime, with larger values leading to faster convergence but suboptimal results (default 0.001)
         @param r: msgsteiner parameter that adds random noise to edges, which is rarely needed (default 0)
         @param container_framework: choose the container runtime framework, currently supports "docker" or "singularity" (optional)
         """
