@@ -55,6 +55,7 @@ methods (PRMs) to omics data.
 
    contributing/index
    contributing/maintain
+   contributing/patching
 
 Indices and tables
 ==================
