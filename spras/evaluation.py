@@ -393,7 +393,7 @@ class Evaluation:
                     input_nodes_gold_intersection = input_nodes_set & gold_standard_nodes # TODO should this be all inputs nodes or the intersection with the gold standard for this baseline? I think it should be the intersection
                     input_nodes_ensemble_df = node_ensemble.copy()
 
-                    # TODO: make a comment on what this is doing for future use
+                    # set 'Frequency' to 1.0 if the input node is also in the gold standard intersection, else set to 0.0
                     input_nodes_ensemble_df["Frequency"] = (
                         input_nodes_ensemble_df["Node"].isin(input_nodes_gold_intersection).astype(float)
                     )
