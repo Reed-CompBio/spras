@@ -31,6 +31,7 @@ dependencies:
   # development dependencies
   - pre-commit=4.2.0
   - pytest=8.4.1
+  - pytest-split=0.10.0
   # development dependencies - conda-specific
   - go=1.24
 
