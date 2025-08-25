@@ -171,6 +171,15 @@ class Dataset:
                     return False
                 return True
 
+    def get_interesting_input_nodes(self) -> pd.DataFrame:
+        """
+        Returns: a table listing the input nodes considered as starting points for pathway reconstruction algorithms,
+        restricted to nodes that have at least one of the specified attributes.
+        """
+        interesting_input_node_columns = ["sources", "targets", "prize", "active"]
+        interesting_input_nodes = Dataset.get_node_columns(self, col_names = interesting_input_node_columns)
+        return interesting_input_nodes
+
     def get_other_files(self):
         return self.other_files.copy()
 
