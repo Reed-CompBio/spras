@@ -162,7 +162,7 @@ class TestEvaluate:
         out_path_file = Path(OUT_DIR + 'pr-curve-ensemble-nodes.txt')
         out_path_file.unlink(missing_ok=True)
         input_data = OUT_DIR + 'data.pickle'
-        input_nodes = Evaluation.from_file(input_data).get_node_columns(["sources", "targets", "prize", "active"])
+        input_nodes = Evaluation.from_file(input_data).get_interesting_input_nodes()
         ensemble_file = pd.read_csv(INPUT_DIR + 'node-ensemble.csv', sep='\t', header=0)
         node_ensembles_dict = {'ensemble': ensemble_file}
         Evaluation.precision_recall_curve_node_ensemble(node_ensembles_dict, GS_NODE_TABLE, input_nodes, out_path_png,
@@ -176,7 +176,7 @@ class TestEvaluate:
         out_path_file = Path(OUT_DIR + 'pr-curve-ensemble-nodes-empty.txt')
         out_path_file.unlink(missing_ok=True)
         input_data = OUT_DIR + 'data.pickle'
-        input_nodes = Evaluation.from_file(input_data).get_node_columns(["sources", "targets", "prize", "active"])
+        input_nodes = Evaluation.from_file(input_data).get_interesting_input_nodes()
         empty_ensemble_file = pd.read_csv(INPUT_DIR + 'node-ensemble-empty.csv', sep='\t', header=0)
         node_ensembles_dict = {'ensemble': empty_ensemble_file}
         Evaluation.precision_recall_curve_node_ensemble(node_ensembles_dict, GS_NODE_TABLE, input_nodes, out_path_png,
@@ -190,7 +190,7 @@ class TestEvaluate:
         out_path_file = Path(OUT_DIR + 'pr-curve-multiple-ensemble-nodes.txt')
         out_path_file.unlink(missing_ok=True)
         input_data = OUT_DIR + 'data.pickle'
-        input_nodes = Evaluation.from_file(input_data).get_node_columns(["sources", "targets", "prize", "active"])
+        input_nodes = Evaluation.from_file(input_data).get_interesting_input_nodes()
         ensemble_file = pd.read_csv(INPUT_DIR + 'node-ensemble.csv', sep='\t', header=0)
         empty_ensemble_file = pd.read_csv(INPUT_DIR + 'node-ensemble-empty.csv', sep='\t', header=0)
         node_ensembles_dict = {'ensemble1': ensemble_file, 'ensemble2': ensemble_file, 'ensemble3': empty_ensemble_file}
