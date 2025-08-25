@@ -76,8 +76,8 @@ class Evaluation:
         data_loc = gold_standard_dict['data_dir']
 
         # cannot be empty, snakemake will run evaluation even if empty
-        node_file = gold_standard_dict.get('node_file') or []
-        edge_file = gold_standard_dict.get('edge_file') or []
+        node_file = gold_standard_dict["node_file"]
+        edge_file = gold_standard_dict["edge_file"]
 
         # exactly one gold standard file kind can be present in a gold standard dataset
         has_node_file = len(node_file) > 0
@@ -86,7 +86,7 @@ class Evaluation:
         if has_node_file and has_edge_file:
             raise ValueError(
                 f"Gold standard '{self.label}': both node_file and edge_file provided. "
-                "Exactly one is allowed."
+                "Exactly one is allowed in a gold standard dataset."
             )
         if not has_node_file and not has_edge_file:
             raise ValueError(

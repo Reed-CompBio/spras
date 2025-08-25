@@ -176,8 +176,8 @@ rule merge_input:
 # TODO: Can we delete this function?
 def get_gold_standard_dependencies(wildcards):
     gs = _config.config.gold_standards[wildcards.gold_standard]
-    node_file = gs.get("node_file")
-    edge_file = gs.get("edge_file")
+    node_file = gs["node_file"]
+    edge_file = gs["edge_file"]
     all_files = node_file + edge_file
     all_files = [gs["data_dir"] + SEP + data_file for data_file in all_files]
     return all_files
