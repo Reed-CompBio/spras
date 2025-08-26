@@ -528,7 +528,7 @@ rule evaluation_ensemble_pr_curve:
         input_nodes = input_dataset.get_interesting_input_nodes()
         node_table = Evaluation.from_file(input.gold_standard_file).node_table
         node_ensemble_dict = Evaluation.edge_frequency_node_ensemble(node_table, input.ensemble_file, input_interactome)
-        Evaluation.precision_recall_curve_node_ensemble(node_ensemble_dict, node_table, input_nodes,output.pr_curve_png, output.pr_curve_file)
+        Evaluation.precision_recall_curve_node_ensemble(node_ensemble_dict, node_table, input_nodes, output.pr_curve_png, output.pr_curve_file)
 
 # Returns list of algorithm specific ensemble files per dataset
 def collect_ensemble_per_algo_per_dataset(wildcards):
@@ -550,7 +550,7 @@ rule evaluation_per_algo_ensemble_pr_curve:
         input_nodes = input_dataset.get_interesting_input_nodes()
         node_table = Evaluation.from_file(input.gold_standard_file).node_table
         node_ensembles_dict = Evaluation.edge_frequency_node_ensemble(node_table, input.ensemble_files, input_interactome)
-        Evaluation.precision_recall_curve_node_ensemble(node_ensembles_dict, node_table, input_nodes,output.pr_curve_png, output.pr_curve_file, include_aggregate_algo_eval)
+        Evaluation.precision_recall_curve_node_ensemble(node_ensembles_dict, node_table, input_nodes, output.pr_curve_png, output.pr_curve_file, include_aggregate_algo_eval)
 
 
 # Remove the output directory
