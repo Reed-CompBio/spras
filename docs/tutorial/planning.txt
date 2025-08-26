@@ -11,6 +11,11 @@ My current plan for my COMBINE 25 tutorial (that will then be used for the spras
 Overview of PRAs (Pathway Reconstruction Algorithms) in plain language
 What SPRAS is and what problems it solves
 
+My plan is to create subfolders within the output directory so that results are separated by configuration or tutorial section (right now just "basic" and "medium"). 
+I rely on subfolders when I’m running many different SPRAS tests across datasets or testing different things with different configs, since it helps keep everything organized which is what will be used here. 
+In the basic case, we will be doing caching for the egfr dataset in its own subfolder. In the medium case, we will be building a new dataset and then running on that in its own subfolder. 
+
+
 1) basic
 Goal: Get new users comfortable installing SPRAS
 Goal: Run SPRAS with one algorthm on a small example dataset, then re-run it with three different parameter settings to see how network structure changes.

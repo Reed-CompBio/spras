@@ -1,4 +1,4 @@
-COMBINE25 SPRAS Tutorial Introduction
+SPRAS Tutorial
 ======================================
 
 What is pathway reconstruction?
@@ -33,6 +33,7 @@ Purpose of this workshop
 -------------------------------------------------
 This workshop will introduce participants to SPRAS and demonstrate how it can be used to explore biological pathways from omics data. Together, we will cover:
 
+.. TODO: update this once I have the tutorial up
 1. How to set up and run SPRAS
 2. Running multiple algorithms with different parameters across multiple datasets
 3. Using the post-analysis tools to evaluate and compare results
@@ -48,10 +49,15 @@ Prerequisites for this tutorial
 Required software:
 
 - Conda: for managing environments
+.. add the link to how to download the correct conda env 
 - Docker: for containerized runs
+.. add the  the link to download docker
 - Cytoscape: for visualizing networks
-- A terminal or code editor (VS Code is recommended, but any terminal will work)
+.. add the link to download cytoscacpe
 - Git: for cloning the SPRAS repository
+.. add the link to download github
+- A terminal or code editor (VS Code is recommended, but any terminal will work)
+.. add the link to download VS Code 
 
 Required knowledge:
 

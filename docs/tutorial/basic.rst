@@ -26,18 +26,26 @@ From the root directory of the SPRAS repository, create and activate the Conda e
 
 4. Test the installation
 
-Run the example Snakemake workflow to confirm everything is working:
+Run the following command to confirm that SPRAS has been set up successfully from the command line:
 
 .. code:: bash
 
-    snakemake --cores 1 --configfile config/config.yaml
+   python -c "import spras; print('SPRAS import successful')"
 
-This will run SPRAS using the example config file (config/config.yaml) and input files. 
-SPRAS will automatically pull any missing Docker images as long as Docker is running.
-Results will be written to the output directory.
+.. This will run SPRAS using the example config file (config/config.yaml) and input files. 
+.. SPRAS will automatically pull any missing Docker images as long as Docker is running.
+.. Results will be written to the output directory.
 
 Step 1: Explanation of Configuration File
 ------------------------------------------
+
+# Instead of explaining the whole configuration file, 1st make the basic config then once that is done, explain the parts that are in that that are important
+- 1 algorithm with 1 parameter setting
+- the egfr dataset
+- one analysis
+- Reconstruction Settings area
+
+# explain the rest that is used in medium. Anything unused like the global workflow control (explain that other containerization can be used etc) and any post analysis not used can be added to the hard tutorial (which is now more like the other things that can be done tutorial but won't be shown here)
 
 A configuration file controls how SPRAS runs.  It defines which algorithms to run, the parameters to use, the datasets and gold standards to include, the analyses to perform after reconstruction, and the container settings for execution. Think of it as the control center for the workflow.
 
@@ -137,7 +145,9 @@ Step : Running SPRAS on a provided example dataset
 - one algorithm
 - three different preset combos
 - have them make the configuration file?
-- provide a template to use?
+    - no preset it and provide it
+- provide a config template to use? YES but mostly prefilled out. leave one or two combos commented out that a user can rerun or provide examples in the tutorial itself that a user can copy and paste
+    - provide different ways parameters can be updated? list vs single int or str for now (show the other ways in the hard/in future stuff)
 
 
 Step : Understanding the Outputs / Visulizing the Outputs
