@@ -70,7 +70,7 @@ class TestSummary:
 
         # Comparing the dataframes directly with equals does not match because of how the parameter
         # combinations column is loaded from disk. Therefore, write both to disk and compare the files.
-        assert filecmp.cmp(out_path, EXPECT_DIR + f"test_{snakemake_output}_summary.txt", shallow=False)
+        assert filecmp.cmp(out_path, EXPECT_DIR + f"expected_{snakemake_output}_summary.txt", shallow=False)
 
     def test_load_dataset_dict(self):
         """Test loading files from dataset_dict"""
