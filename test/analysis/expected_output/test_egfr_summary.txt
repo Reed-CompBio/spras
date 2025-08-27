@@ -1,4 +1,0 @@
-Number of nodes	Number of edges	Number of connected components	Nodes in prize	Nodes in sources	Nodes in targets	Nodes in active	Nodes in dummy	Parameter combination
-14	17	1	6	1	5	6	1	{'k': 10}
-25	32	1	11	1	10	11	1	{'k': 20}
-1874	12845	1	621	1	620	621	1	{'local_search': 'Yes', 'max_path_length': 3, 'rand_restarts': 10}

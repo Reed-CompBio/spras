@@ -1,6 +1,0 @@
-Number of nodes	Number of edges	Number of connected components	Nodes in prize	Nodes in active	Nodes in dummy	Nodes in sources	Nodes in targets	Parameter combination
-3	2	1	2	2	0	1	1	{'flow': 1, 'capacity': 1}
-3	2	1	2	2	0	1	1	{'k': 100}
-3	2	1	2	2	0	1	1	{'k': 200}
-3	2	1	2	2	0	1	1	{'max_path_length': 3, 'local_search': 'Yes', 'rand_restarts': 10}
-3	2	1	2	2	0	1	1	{'spras_placeholder': 'no parameters'}
