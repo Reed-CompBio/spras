@@ -116,6 +116,12 @@ algorithms:
     params:
       include: true
 
+  - name: "responsenet"
+    params:
+      include: true
+      run1:
+        gamma: [10]
+
 # Here we specify which pathways to run and other file location information.
 # DataLoader.py can currently only load a single dataset
 # Assume that if a dataset label does not change, the lists of associated input files do not change
@@ -159,12 +165,9 @@ reconstruction_settings:
 
   #set where everything is saved
   locations:
-
     #place the save path here
     # TODO move to global
     reconstruction_dir: "output"
-
-  run: true
 
 analysis:
   # Create one summary per pathway file and a single summary table for all pathways for each dataset
@@ -192,10 +195,17 @@ analysis:
     linkage: 'ward'
     # 'euclidean', 'manhattan', 'cosine'
     metric: 'euclidean'
+    # controls whether kernel density estimation (KDE) is computed and visualized on top of PCA plots.
+    # the coordinates of the KDE maximum (kde_peak) are also saved to the PCA coordinates output file.
+    # KDE needs to be run in order to select a parameter combination with PCA because the maximum kernel density is used
+    # to pick the 'best' parameter combination.
+    kde: true
+    # removes empty pathways from consideration in ml analysis (pca only)
+    remove_empty_pathways: false
   evaluation:
     # evaluation per dataset-goldstandard pair
     # evaluation will not run unless ml include is set to true
     include: true
     # adds evaluation per algorithm per dataset-goldstandard pair
-    # evaluation per algortihm will not run unless ml include and ml aggregate_per_algorithm are set to true
+    # evaluation per algorithm will not run unless ml include and ml aggregate_per_algorithm are set to true
     aggregate_per_algorithm: true

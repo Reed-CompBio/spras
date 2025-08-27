@@ -3,7 +3,7 @@ from pathlib import Path
 
 import pandas as pd
 
-import spras.config as config
+import spras.config.config as config
 from spras.analysis.summary import summarize_networks
 from spras.dataset import Dataset
 
@@ -51,7 +51,7 @@ class TestSummary:
 
         # Comparing the dataframes directly with equals does not match because of how the parameter
         # combinations column is loaded from disk. Therefore, write both to disk and compare the files.
-        assert filecmp.cmp(out_path, EXPECT_DIR + "test_example_summary.txt", shallow=False)
+        assert filecmp.cmp(out_path, EXPECT_DIR + "expected_example_summary.txt", shallow=False)
 
     def test_egfr_networks(self):
         """Test data from EGFR workflow"""
@@ -80,7 +80,7 @@ class TestSummary:
 
         # Comparing the dataframes directly with equals does not match because of how the parameter
         # combinations column is loaded from disk. Therefore, write both to disk and compare the files.
-        assert filecmp.cmp(out_path, EXPECT_DIR + "test_egfr_summary.txt", shallow=False)
+        assert filecmp.cmp(out_path, EXPECT_DIR + "expected_egfr_summary.txt", shallow=False)
 
     def test_load_dataset_dict(self):
         """Test loading files from dataset_dict"""

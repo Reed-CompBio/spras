@@ -3,12 +3,12 @@ import platform
 import re
 import subprocess
 from pathlib import Path, PurePath, PurePosixPath
-from typing import Any, Dict, Iterator, List, Optional, Tuple, Union
+from typing import Iterator, List, Optional, Tuple, Union
 
 import docker
 import docker.errors
 
-import spras.config as config
+import spras.config.config as config
 from spras.logging import indent
 from spras.util import hash_filename
 
