@@ -210,7 +210,7 @@ checkpoint prepare_input:
 # run prepare_input
 # It only checks for the output of prepare_input, which is a directory
 # Therefore, manually remove the entire directory if any of the expected prepared input file are missing so that
-# prepare_inputs is run, the directory and prepared input files are re-generated, and the reconstruct rule is run again
+# generate_inputs is run, the directory and prepared input files are re-generated, and the reconstruct rule is run again
 # Modeled after https://evodify.com/snakemake-checkpoint-tutorial/
 def collect_prepared_input(wildcards):
     # Need to construct the path in advance because it is needed before it can be obtained from the output
