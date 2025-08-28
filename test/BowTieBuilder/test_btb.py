@@ -306,3 +306,14 @@ class TestBowTieBuilder:
 
         # Check if the sets are equal, regardless of the order of lines
         assert output_content == expected_content, 'Output file does not match expected output file'
+    
+    # Only run Singularity test if the binary is available on the system
+    # spython is only available on Unix, but do not explicitly skip non-Unix platforms
+    @pytest.mark.skipif(not shutil.which('singularity'), reason='Singularity not found on system')
+    def test_btb_singularity(self):
+        OUT_FILE_DEFAULT.unlink(missing_ok=True)
+        BTB.run(edges=Path(TEST_DIR, 'input', 'source-to-source-edges.txt'),
+                           sources=Path(TEST_DIR, 'input', 'btb-sources.txt'),
+                           targets=Path(TEST_DIR, 'input', 'btb-targets.txt'),
+                           output_file=OUT_FILE_DEFAULT,
+                           container_framework="singularity")
