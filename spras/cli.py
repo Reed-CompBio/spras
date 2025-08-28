@@ -8,7 +8,8 @@ from pathlib import Path
 # https://stackoverflow.com/a/5137509/7589775
 # The file we want, Snakefile, is also included in MANIFEST.in
 dir_path = os.path.dirname(os.path.realpath(__file__))
-snakefile_path = Path(dir_path, "..", "Snakefile")
+# we resolve to simplify the path name in errors
+snakefile_path = Path(dir_path, "..", "Snakefile").resolve()
 
 # Removes the very awkwardly phrased "{subcommand1, subcommand2}" from the subcommand help
 # from https://stackoverflow.com/a/13429281/7589775
