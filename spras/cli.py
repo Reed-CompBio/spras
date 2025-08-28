@@ -1,3 +1,4 @@
+import argparse
 import itertools
 import os
 import subprocess
@@ -9,11 +10,41 @@ from pathlib import Path
 dir_path = os.path.dirname(os.path.realpath(__file__))
 snakefile_path = Path(dir_path, "..", "Snakefile")
 
+# Removes the very awkwardly phrased "{subcommand1, subcommand2}" from the subcommand help
+# from https://stackoverflow.com/a/13429281/7589775
+class SubcommandHelpFormatter(argparse.RawDescriptionHelpFormatter):
+    def _format_action(self, action):
+        parts = super(argparse.RawDescriptionHelpFormatter, self)._format_action(action)
+        if action.nargs == argparse.PARSER:
+            parts = "\n".join(parts.split("\n")[1:])
+        return parts
+
+def get_parser():
+    parser = argparse.ArgumentParser(
+                    prog='SPRAS',
+                    description='The wrapping tool for SPRAS (signaling pathway reconstruction analysis streamliner)',
+                    epilog='SPRAS is in alpha. Report issues or suggest features on GitHub: https://github.com/Reed-CompBio/spras',
+                    formatter_class=SubcommandHelpFormatter)
+    
+    subparsers = parser.add_subparsers(title='subcommands',
+                                       help='subcommand help',
+                                       dest='subcommand')
+    subparsers = subparsers.add_parser('run', help='Run the SPRAS Snakemake workflow')
+
+    return parser
+
 def run():
-    subprocess.run(list(itertools.chain(
-        ["snakemake", "-s", snakefile_path],
-        sys.argv[1:]
-    )))
+    parser = get_parser()
+    args = parser.parse_args()
+
+    if args.subcommand == "run":
+        subprocess.run(list(itertools.chain(
+            ["snakemake", "-s", snakefile_path],
+            sys.argv[1:]
+        )))
+        return
+    
+    parser.print_help()
 
 if __name__ == '__main__':
     run()
