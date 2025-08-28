@@ -95,7 +95,7 @@ jobs:
         # We enable high parallelization (cores 4) to test our way out of the experienced
         # race conditions from #268 and #279
         # We also enforce strict DAG evaluation to catch DAG problems before they appear as user errors. (#359)
-        run: spras --cores 4 --configfile config/config.yaml --show-failed-logs --strict-dag-evaluation cyclic-graph --strict-dag-evaluation functions --strict-dag-evaluation periodic-wildcards
+        run: spras run --cores 4 --configfile config/config.yaml --show-failed-logs --strict-dag-evaluation cyclic-graph --strict-dag-evaluation functions --strict-dag-evaluation periodic-wildcards
 
   # Run pre-commit checks on source files
   pre-commit:

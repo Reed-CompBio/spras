@@ -29,18 +29,21 @@ def get_parser():
     subparsers = parser.add_subparsers(title='subcommands',
                                        help='subcommand help',
                                        dest='subcommand')
-    subparsers = subparsers.add_parser('run', help='Run the SPRAS Snakemake workflow')
+    subparsers = subparsers.add_parser('run',
+                                       help='Run the SPRAS Snakemake workflow',
+                                       # We let snakemake handle help
+                                       add_help=False)
 
     return parser
 
 def run():
     parser = get_parser()
-    args = parser.parse_args()
+    (args, unknown_args) = parser.parse_known_args()
 
     if args.subcommand == "run":
         subprocess.run(list(itertools.chain(
             ["snakemake", "-s", snakefile_path],
-            sys.argv[1:]
+            unknown_args
         )))
         return
 
