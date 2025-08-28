@@ -1,12 +1,13 @@
+from collections import OrderedDict
 from pathlib import Path
 from statistics import median
-from typing import Iterable
+from typing import Any, Iterable
 
 import networkx as nx
 import pandas as pd
 
 
-def summarize_networks(file_paths: Iterable[Path], node_table: pd.DataFrame, algo_params: dict[str, dict],
+def summarize_networks(file_paths: Iterable[Path], node_table: pd.DataFrame, algo_params: dict[str, dict[str, dict]],
                        algo_with_params: list) -> pd.DataFrame:
     """
     Generate a table that aggregates summary information about networks in file_paths, including which nodes are present
@@ -33,34 +34,38 @@ def summarize_networks(file_paths: Iterable[Path], node_table: pd.DataFrame, alg
         nodes_by_col.append(set(node_table.loc[node_table[col] > 0, 'NODEID']))
 
     # Initialize list to store network summary data
-    nw_info = []
+    nw_info: list[list[Any]] = []
 
     algo_with_params = sorted(algo_with_params)
 
     # Iterate through each network file path
     for index, file_path in enumerate(sorted(file_paths)):
         with open(file_path, 'r') as f:
-            lines = f.readlines()[1:]  # skip the header line
+            lines = f.readlines()[1:] # as this is an output edge file, we skip the header line
 
         # directed or mixed graphs are parsed and summarized as an undirected graph
         nw = nx.read_edgelist(lines, data=(('weight', float), ('Direction', str)))
 
-        # Save the network name, number of nodes, number edges, and number of connected components
-        nw_name = str(file_path)
-        number_nodes = nw.number_of_nodes()
-        number_edges = nw.number_of_edges()
-        ncc = nx.number_connected_components(nw)
+        # Begin collecting data into a dictionary.
+        # (We use dictionaries over list to make )
+        data: OrderedDict[str, Any] = OrderedDict()
+
+        data.update([
+            ('Name', str(file_path)),
+            ('Number of nodes', nw.number_of_nodes()),
+            ('Number of edges', nw.number_of_edges()),
+            ('Number of connected components', nx.number_connected_components(nw)),
+        ])
 
         # Save the max/median degree, average clustering coefficient, and density
-        if number_nodes == 0:
-            max_degree = 0
-            median_degree = 0.0
-            density = 0.0
-        else:
-            degrees = [deg for _, deg in nw.degree()]
-            max_degree = max(degrees)
-            median_degree = median(degrees)
-            density = nx.density(nw)
+        degrees = [deg for _, deg in nw.degree()]
+        data.update([
+            # If the number of nodes are 0, degrees will equal [],
+            # making the following statistics all be zero.
+            ('Density', nx.density(nw)),
+            ('Max degree', max(degrees, default=0)),
+            ('Median degree', int(median(degrees or [0]))),
+        ])
 
         cc = list(nx.connected_components(nw))
         # Save the max diameter
@@ -69,7 +74,7 @@ def summarize_networks(file_paths: Iterable[Path], node_table: pd.DataFrame, alg
             nx.diameter(nw.subgraph(c).copy()) if len(c) > 1 else 0
             for c in cc
         ]
-        max_diameter = max(diameters, default=0)
+        data['Max diameter'] = max(diameters, default=0)
 
         # Save the average path lengths
         # Compute average shortest path length only for components with ≥2 nodes (undefined for singletons, set to 0.0)
@@ -77,19 +82,18 @@ def summarize_networks(file_paths: Iterable[Path], node_table: pd.DataFrame, alg
             nx.average_shortest_path_length(nw.subgraph(c).copy()) if len(c) > 1 else 0.0
             for c in cc
         ]
-
         if len(avg_path_lengths) != 0:
-            avg_path_len = sum(avg_path_lengths) / len(avg_path_lengths)
+            data['Average path length'] = sum(avg_path_lengths) / len(avg_path_lengths)
         else:
-            avg_path_len = 0.0
+            data['Average path length'] = 0.0
 
         # Initialize list to store current network information
-        cur_nw_info = [nw_name, number_nodes, number_edges, ncc, density, max_degree, median_degree, max_diameter, avg_path_len]
+        current_network_info = list(data.values())
 
         # Iterate through each node property and save the intersection with the current network
         for node_list in nodes_by_col:
             num_nodes = len(set(nw).intersection(node_list))
-            cur_nw_info.append(num_nodes)
+            current_network_info.append(num_nodes)
 
         # String split to access algorithm and hashcode: <algorithm>-params-<params_hash>
         parts = algo_with_params[index].split('-')
@@ -98,10 +102,10 @@ def summarize_networks(file_paths: Iterable[Path], node_table: pd.DataFrame, alg
 
         # Algorithm parameters have format { algo : { hashcode : { parameter combos } } }
         param_combo = algo_params[algo][hashcode]
-        cur_nw_info.append(param_combo)
+        current_network_info.append(param_combo)
 
         # Save the current network information to the network summary list
-        nw_info.append(cur_nw_info)
+        nw_info.append(current_network_info)
 
     # Prepare column names
     col_names = ['Name', 'Number of nodes', 'Number of edges', 'Number of connected components', 'Density', 'Max degree', 'Median degree', 'Max diameter', 'Average path length']
@@ -109,13 +113,12 @@ def summarize_networks(file_paths: Iterable[Path], node_table: pd.DataFrame, alg
     col_names.append('Parameter combination')
 
     # Convert the network summary data to pandas dataframe
-    # Could refactor to create the dataframe line by line instead of storing data as lists and then converting
-    nw_info = pd.DataFrame(
+    nw_df = pd.DataFrame(
         nw_info,
         columns=col_names
     )
 
-    return nw_info
+    return nw_df
 
 
 def degree(g):
