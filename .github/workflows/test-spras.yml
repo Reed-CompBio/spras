@@ -42,8 +42,6 @@ jobs:
           pixi-version: v0.53.0
           cache: false
           locked: false
-      - name: Install spras in pixi
-        run: pip install .
       - name: Log pixi environment contents
         run: pixi list
       - name: Install Apptainer
@@ -72,8 +70,6 @@ jobs:
           pixi-version: v0.53.0
           cache: false
           locked: false
-      - name: Install spras in pixi
-        run: pip install .
       - name: Log pixi environment contents
         run: pixi list
       - name: Run Snakemake workflow
