@@ -1,6 +1,5 @@
 # See https://pre-commit.com for more information
 # See https://pre-commit.com/hooks.html for more hooks
-# See https://pre-commit.com/ for documentation
 exclude: (^.pixi/|.snap)
 default_language_version:
   # Match this to the version specified in environment.yml
