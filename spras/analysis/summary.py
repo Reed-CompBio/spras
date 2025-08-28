@@ -64,7 +64,7 @@ def summarize_networks(file_paths: Iterable[Path], node_table: pd.DataFrame, alg
             # making the following statistics all be zero.
             ('Density', nx.density(nw)),
             ('Max degree', max(degrees, default=0)),
-            ('Median degree', median(degrees or [0])),
+            ('Median degree', float(median(degrees or [0]))), # float to have output stay consistent
         ])
 
         cc = list(nx.connected_components(nw))
