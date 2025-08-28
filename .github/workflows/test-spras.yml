@@ -3,9 +3,9 @@ name: Test SPRAS
 on: [push, pull_request]
 
 jobs:
-  # Installs the conda environment but does not run tests because the tests require Linux Docker images
-  conda-only:
-    name: Test conda environment
+  # Installs the pixi environment but does not run tests because the tests require Linux Docker images
+  pixi-only:
+    name: Test pixi environment
     runs-on: ${{ matrix.os }}
     strategy:
       matrix:
@@ -22,7 +22,7 @@ jobs:
       - name: Log pixi environment contents
         run: pixi list
 
-  # Runs the test code and Snakemake workflow in the conda environment
+  # Runs the test code and Snakemake workflow in the pixi environment
   test:
     name: Run tests
     # The Docker images will be pulled in both the docker job and this test job
