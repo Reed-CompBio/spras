@@ -288,7 +288,7 @@ class Evaluation:
         return rep_pathways
 
     @staticmethod
-    def edge_frequency_node_ensemble(node_table: pd.DataFrame, ensemble_files: list[Union[str, PathLike]], dataset_file: str) -> dict:
+    def edge_frequency_node_ensemble(node_table: pd.DataFrame, ensemble_files: list[Union[str, PathLike]], input_interactome: pd.DataFrame) -> dict:
         """
         Generates a dictionary of node ensembles using edge frequency data from a list of ensemble files.
         A list of ensemble files can contain an aggregated ensemble or algorithm-specific ensembles per dataset
@@ -308,28 +308,25 @@ class Evaluation:
 
         @param node_table: dataFrame of gold standard nodes (column: NODEID)
         @param ensemble_files: list of file paths containing edge ensemble outputs
-        @param dataset_file: path to the dataset file used to load the interactome
+        @param input_interactome: the input interactome used for a specific dataset
         @return: dictionary mapping each ensemble source to its node ensemble DataFrame
         """
 
         node_ensembles_dict = dict()
 
-        pickle = Evaluation.from_file(dataset_file)
-        interactome = pickle.get_interactome()
-
-        if interactome.empty:
+        if input_interactome.empty:
             raise ValueError(
-                f"Cannot compute PR curve or generate node ensemble. Input network for dataset \"{dataset_file.split('-')[0]}\" is empty."
+                f"Cannot compute PR curve or generate node ensemble. The input network is empty."
             )
         if node_table.empty:
             raise ValueError(
-                f"Cannot compute PR curve or generate node ensemble. Gold standard associated with dataset \"{dataset_file.split('-')[0]}\" is empty."
+                f"Cannot compute PR curve or generate node ensemble. The gold standard is empty."
             )
 
         # set the initial default frequencies to 0 for all interactome and gold standard nodes
-        node1_interactome = interactome[['Interactor1']].rename(columns={'Interactor1': 'Node'})
+        node1_interactome = input_interactome[['Interactor1']].rename(columns={'Interactor1': 'Node'})
         node1_interactome['Frequency'] = 0.0
-        node2_interactome = interactome[['Interactor2']].rename(columns={'Interactor2': 'Node'})
+        node2_interactome = input_interactome[['Interactor2']].rename(columns={'Interactor2': 'Node'})
         node2_interactome['Frequency'] = 0.0
         gs_nodes = node_table[[Evaluation.NODE_ID]].rename(columns={Evaluation.NODE_ID: 'Node'})
         gs_nodes['Frequency'] = 0.0
@@ -354,7 +351,7 @@ class Evaluation:
         return node_ensembles_dict
 
     @staticmethod
-    def precision_recall_curve_node_ensemble(node_ensembles: dict, node_table: pd.DataFrame, output_png: str | PathLike,
+    def precision_recall_curve_node_ensemble(node_ensembles: dict, node_table: pd.DataFrame, input_nodes: pd.DataFrame, output_png: str | PathLike,
                                              output_file: str | PathLike, aggregate_per_algorithm: bool = False):
         """
         Plots precision-recall (PR) curves for a set of node ensembles evaluated against a gold standard.
@@ -365,6 +362,7 @@ class Evaluation:
 
         @param node_ensembles: dict of the pre-computed node_ensemble(s)
         @param node_table: gold standard nodes
+        @param input_nodes: the input nodes (sources, targets, prizes, actives) used for a specific dataset
         @param output_png: filename to save the precision and recall curves as a .png image
         @param output_file: filename to save the precision, recall, threshold values, average precision, and baseline
         average precision
@@ -380,13 +378,41 @@ class Evaluation:
 
         prc_dfs = []
         metric_dfs = []
-
+        prc_input_nodes_baseline_df = None
         baseline = None
 
         for label, node_ensemble in node_ensembles.items():
             if not node_ensemble.empty:
                 y_true = [1 if node in gold_standard_nodes else 0 for node in node_ensemble['Node']]
                 y_scores = node_ensemble['Frequency'].tolist()
+
+                # input nodes (sources, targets, prizes, actives) may be easier to recover but are still valid gold standard nodes;
+                # the Input_Nodes_Baseline PR curve highlights their overlap with the gold standard.
+                if prc_input_nodes_baseline_df is None:
+                    input_nodes_set = set(input_nodes['NODEID'])
+                    input_nodes_gold_intersection = input_nodes_set & gold_standard_nodes # TODO should this be all inputs nodes or the intersection with the gold standard for this baseline? I think it should be the intersection
+                    input_nodes_ensemble_df = node_ensemble.copy()
+
+                    # set 'Frequency' to 1.0 if the input node is also in the gold standard intersection, else set to 0.0
+                    input_nodes_ensemble_df["Frequency"] = (
+                        input_nodes_ensemble_df["Node"].isin(input_nodes_gold_intersection).astype(float)
+                    )
+
+                    y_scores_input_nodes = input_nodes_ensemble_df['Frequency'].tolist()
+
+                    precision_input_nodes, recall_input_nodes, thresholds_input_nodes = precision_recall_curve(y_true, y_scores_input_nodes)
+                    plt.plot(recall_input_nodes, precision_input_nodes, color='black', marker='o', linestyle='--', label=f'Input Nodes Baseline')
+
+                    # Dropping last elements because scikit-learn adds (1, 0) to precision/recall for plotting, not tied to real thresholds
+                    prc_input_nodes_baseline_data = {
+                        'Threshold': thresholds_input_nodes,
+                        'Precision': precision_input_nodes[:-1],
+                        'Recall': recall_input_nodes[:-1],
+                    }
+
+                    prc_input_nodes_baseline_data = {'Ensemble_Source': ["Input_Nodes_Baseline"] * len(thresholds_input_nodes), **prc_input_nodes_baseline_data}
+                    prc_input_nodes_baseline_df = pd.DataFrame.from_dict(prc_input_nodes_baseline_data)
+
                 precision, recall, thresholds = precision_recall_curve(y_true, y_scores)
                 # avg precision summarizes a precision-recall curve as the weighted mean of precisions achieved at each threshold
                 avg_precision = average_precision_score(y_true, y_scores)
@@ -446,7 +472,19 @@ class Evaluation:
         combined_metrics_df['Baseline'] = baseline
 
         # merge dfs and NaN out metric values except for first row of each Ensemble_Source
-        complete_df = combined_prc_df.merge(combined_metrics_df, on='Ensemble_Source', how='left')
+        complete_df = combined_prc_df.merge(combined_metrics_df, on='Ensemble_Source', how='left').merge(prc_input_nodes_baseline_df, on=['Ensemble_Source', 'Threshold', 'Precision', 'Recall'], how='outer')
+
+        # for each Ensemble_Source, remove Average_Precision and Baseline in all but the first row
         not_last_rows = complete_df.duplicated(subset='Ensemble_Source', keep='first')
         complete_df.loc[not_last_rows, ['Average_Precision', 'Baseline']] = None
+
+        # move Input_Nodes_Baseline to the top of the df
+        complete_df.sort_values(
+            by='Ensemble_Source',
+            # x.ne('Input_Nodes_Baseline'): returns a Series of booleans; True for all rows except Input_Nodes_Baseline.
+            # Since False < True, baseline rows sort to the top.
+            key=lambda x: x.ne('Input_Nodes_Baseline'),
+            inplace=True
+        )
+
         complete_df.to_csv(output_file, index=False, sep='\t')
