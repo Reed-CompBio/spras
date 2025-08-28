@@ -25,31 +25,20 @@ SPRAS requires
 
 First, download or clone this repository so that you have the Snakefile, example config file, and example data.
 
-The easiest way to install Python and the required packages is with [Anaconda](https://www.anaconda.com/download/).
-The Carpentries [Anaconda installation instructions](https://carpentries.github.io/workshop-template/#python) provide guides and videos on how to install Anaconda for your operating system.
-After installing Anaconda, you can run the following commands from the root directory of the `spras` repository
+The easiest way to install Python and the required packages is with [Pixi](https://pixi.sh/latest/installation/).
+Optionally, after installing Pixi, you can run the following commands from the root directory of the `spras` repository
 ```
-conda env create -f environment.yml
-conda activate spras
+pixi shell
 ```
-to create a conda environment with the required packages and activate that environment.
-If you have a different version of Python already, you can install the specified versions of the required packages in your preferred manner instead of using Anaconda.
+to create a pixi environment that contains all of the packages you need to use SPRAS without having to prefix them with `pixi run`.
+If you have a different version of Python already, you can install the specified versions of the required packages, as well as `go`, in your preferred manner instead of using Pixi.
 
-While the `spras` conda environment comes bundled with all of Python dependencies needed for `spras` to run, it does not yet have a working installation of `spras` itself.
-To install `spras` in the environment, finish by running the following from the root directory of the repository:
-```bash
-python -m pip install .
-```
-Use caution when pip installing directly to your computer without using some form of virtual/conda environment as this can alter your system's underlying Python modules, which could lead to unexpected behavior.
-In most cases, you should only `pip install` spras if you're already working in the `spras` conda environment!
-
-For developers, SPRAS can be installed via `pip` with the `-e` flag, as in `python -m pip install -e .`. This points Python back to the SPRAS repo so that any changes made to the source
-code are reflected in the installed module.
+The `spras` pixi environment comes bundled with all of Python dependencies needed for `spras` to run, including an installation of `spras` itself.
 
 You also need to install [Docker](https://docs.docker.com/get-docker/).
 After installing Docker, start Docker before running SPRAS.
 
-Once you have activated the conda environment and started Docker, you can run SPRAS with the example Snakemake workflow.
+Once you have activated the pixi environment and started Docker, you can run SPRAS with the example Snakemake workflow.
 From the root directory of the `spras` repository, run the command
 ```
 snakemake --cores 1 --configfile config/config.yaml
@@ -77,7 +66,7 @@ The Docker images are available on [DockerHub](https://hub.docker.com/orgs/reedc
 These wrappers are in the `spras/` subdirectory.
 
 **Test code**: Tests for the Docker wrappers and SPRAS code.
-The tests require the conda environment in `environment.yml` and Docker.
+The tests require the pixi environment via `pixi shell` and Docker.
 Run the tests with `pytest -s`.
 
 ## Singularity
