@@ -35,7 +35,10 @@ def get_dataset(_datasets, label):
 algorithms = list(algorithm_params)
 algorithms_with_params = [f'{algorithm}-params-{params_hash}' for algorithm, param_combos in algorithm_params.items() for params_hash in param_combos.keys()]
 dataset_labels = list(_config.config.datasets.keys())
-dataset_gold_standard_pairs = [f"{dataset}-{gs_values['label']}" for gs_values in _config.config.gold_standards.values() for dataset in gs_values['dataset_labels']]
+dataset_gold_standard_pairs = [
+    f"{_config.attach_spras_revision(dataset)}-{_config.attach_spras_revision(gs_values['label'])}"
+    for gs_values in _config.config.gold_standards.values() for dataset in gs_values['dataset_labels']
+]
 
 # Get algorithms that are running multiple parameter combinations
 def algo_has_mult_param_combos(algo):
@@ -277,7 +280,7 @@ rule reconstruct:
 # Original pathway reconstruction output to universal output
 # Use PRRunner as a wrapper to call the algorithm-specific parse_output
 rule parse_output:
-    input: 
+    input:
         raw_file = SEP.join([out_dir, '{dataset}-{algorithm}-{params}', 'raw-pathway.txt']),
         dataset_file = SEP.join([out_dir, 'dataset-{dataset}-merged.pickle'])
     output: standardized_file = SEP.join([out_dir, '{dataset}-{algorithm}-{params}', 'pathway.txt'])
