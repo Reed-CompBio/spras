@@ -25,7 +25,7 @@ def get_parser():
                     description='The wrapping tool for SPRAS (signaling pathway reconstruction analysis streamliner)',
                     epilog='SPRAS is in alpha. Report issues or suggest features on GitHub: https://github.com/Reed-CompBio/spras',
                     formatter_class=SubcommandHelpFormatter)
-    
+
     subparsers = parser.add_subparsers(title='subcommands',
                                        help='subcommand help',
                                        dest='subcommand')
@@ -43,7 +43,7 @@ def run():
             sys.argv[1:]
         )))
         return
-    
+
     parser.print_help()
 
 if __name__ == '__main__':
