@@ -2,7 +2,7 @@
 
 ## Building Images
 
-A Docker image for SPRAS that is available on [DockerHub](https://hub.docker.com/repository/docker/reedcompbio/spras)
+A Docker image for SPRAS that is available on [DockerHub](https://hub.docker.com/repository/docker/reed-compbio/spras)
 This image comes bundled with all of the necessary software packages to run SPRAS, and can be used for execution in distributed environments (like HTCondor).
 
 To create the Docker image locally, make sure you are in this repository's root directory, and from your terminal run:
@@ -11,9 +11,9 @@ To create the Docker image locally, make sure you are in this repository's root 
 docker build -t <project name>/<image name>:<tag name> -f docker-wrappers/SPRAS/Dockerfile .
 ```
 
-For example, to build this image with the intent of pushing it to DockerHub as reedcompbio/spras:v0.2.0, you'd run:
+For example, to build this image with the intent of pushing it to DockerHub as reed-compbio/spras:v0.2.0, you'd run:
 ```bash
-docker build -t reedcompbio/spras:v0.2.0 -f docker-wrappers/SPRAS/Dockerfile .
+docker build -t reed-compbio/spras:v0.2.0 -f docker-wrappers/SPRAS/Dockerfile .
 ```
 
 This will copy the entire SPRAS repository into the container and install SPRAS with `pip`. As such, any changes you've made to the current SPRAS repository will be reflected in version of SPRAS installed in the container. Since SPRAS
@@ -38,9 +38,9 @@ Or to temporarily override your system's default during the build, prepend your 
 DOCKER_DEFAULT_PLATFORM=linux/amd64
 ```
 
-For example, to build reedcompbio/spras:v0.2.0 on Apple Silicon as a linux/amd64 container, you'd run:
+For example, to build reed-compbio/spras:v0.2.0 on Apple Silicon as a linux/amd64 container, you'd run:
 ```
-DOCKER_DEFAULT_PLATFORM=linux/amd64 docker build -t reedcompbio/spras:v0.2.0 -f docker-wrappers/SPRAS/Dockerfile .
+DOCKER_DEFAULT_PLATFORM=linux/amd64 docker build -t reed-compbio/spras:v0.2.0 -f docker-wrappers/SPRAS/Dockerfile .
 ```
 
 ### Converting Docker Images to Apptainer/Singularity Images
@@ -52,7 +52,7 @@ apptainer build <new image name>.sif docker://<name of container on DockerHub>
 
 For example, creating an Apptainer image for the `v0.2.0` SPRAS image might look like:
 ```bash
-apptainer build spras-v0.2.0.sif docker://reedcompbio/spras:v0.2.0
+apptainer build spras-v0.2.0.sif docker://reed-compbio/spras:v0.2.0
 ```
 
 After running this command, a new file called `spras-v0.2.0.sif` will exist in the directory where the command was run.

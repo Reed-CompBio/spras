@@ -1,10 +1,10 @@
 # BowTieBuilder Docker image
 
-A Docker image for [BowTieBuilder](https://github.com/Reed-CompBio/BowTieBuilder-Algorithm) that is available on [DockerHub](https://hub.docker.com/repository/docker/reedcompbio/bowtiebuilder).
+A Docker image for [BowTieBuilder](https://github.com/Reed-CompBio/BowTieBuilder-Algorithm) that is available on the [GitHub Container Registry](https://github.com/orgs/Reed-CompBio/packages/container/package/bowtiebuilder).
 
 To create the Docker image run:
 ```
-docker build -t reedcompbio/bowtiebuilder:v2 -f Dockerfile .
+docker build -t reed-compbio/bowtiebuilder:v1 -f Dockerfile .
 ```
 from this directory.
 

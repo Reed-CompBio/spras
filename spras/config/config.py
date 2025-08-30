@@ -27,7 +27,7 @@ from spras.util import NpHashEncoder, hash_params_sha1_base32
 
 config = None
 
-DEFAULT_CONTAINER_PREFIX = "docker.io/reedcompbio"
+DEFAULT_CONTAINER_PREFIX = "ghcr.io/reed-compbio"
 
 # This will get called in the Snakefile, instantiating the singleton with the raw config
 def init_global(config_dict):
@@ -67,7 +67,7 @@ class Config:
         self.out_dir = parsed_raw_config.reconstruction_settings.locations.reconstruction_dir
         # Container framework used by PRMs. Valid options are "docker", "dsub", and "singularity"
         self.container_framework = None
-        # The container prefix (host and organization) to use for images. Default is "docker.io/reedcompbio"
+        # The container prefix (host and organization) to use for images. Default is "ghcr.io/reed-compbio"
         self.container_prefix: str = DEFAULT_CONTAINER_PREFIX
         # A Boolean specifying whether to unpack singularity containers. Default is False
         self.unpack_singularity = False

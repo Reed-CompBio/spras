@@ -1,6 +1,7 @@
 # Maximum Edge Orientation wrapper
 # https://github.com/agitter/meo/
 FROM openjdk:8
+LABEL org.opencontainers.image.source=https://github.com/Reed-CompBio/spras
 
 WORKDIR /meo
 RUN export MEO_TAG=v1.1.0 && \

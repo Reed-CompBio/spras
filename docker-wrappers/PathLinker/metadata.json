@@ -1,0 +1,4 @@
+{
+    "imageName": "pathlinker",
+    "architectures": ["linux/arm64", "linux/amd64"]
+}
