@@ -2,7 +2,7 @@
 # https://github.com/fraenkel-lab/OmicsIntegrator
 # This version does not use conda
 FROM python:2.7.18
-LABEL org.opencontainers.image.source https://github.com/Reed-CompBio/spras
+LABEL org.opencontainers.image.source=https://github.com/Reed-CompBio/spras
 
 # Need to install msgsteiner-1.3 and dependencies
 RUN apt-get -qq update && \

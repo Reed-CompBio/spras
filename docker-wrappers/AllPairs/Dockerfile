@@ -1,6 +1,6 @@
 # AllPairs wrapper
 FROM python:3.12-alpine3.21
-LABEL org.opencontainers.image.source https://github.com/Reed-CompBio/spras
+LABEL org.opencontainers.image.source=https://github.com/Reed-CompBio/spras
 
 # bash is required for dsub in the All of Us cloud environment
 RUN apk add --no-cache bash
