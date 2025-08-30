@@ -28,8 +28,8 @@ This will run PathLinker on the test input files and write the output files to t
 Windows users may need to escape the absolute paths so that `/data` becomes `//data`, etc.
 
 ## Versions:
-- v1: Initial version. Copies PathLinker source files from GitHub and pip installs packages from requirements file.
-- v2: Add bash, which is not available in Alpine Linux.
+- (docker hub) v1: Initial version. Copies PathLinker source files from GitHub and pip installs packages from requirements file.
+- v1: Add bash, which is not available in Alpine Linux.
 
 ## TODO
 - Attribute https://github.com/Murali-group/PathLinker

@@ -23,8 +23,8 @@ The `input` subdirectory contains test files `oi2-edges.txt` and `oi2-prizes.txt
 The Docker wrapper can be tested with `pytest`.
 
 ## Versions:
-- v1: Created a named conda environment in the container and used `ENTRYPOINT` to execute commands inside that environment. Not compatible with Singularity.
-- v2: Used the environment file to update the base conda environment so the `ENTRYPOINT` command was no longer needed. Compatible with Singularity.
+- (docker hub) v1: Created a named conda environment in the container and used `ENTRYPOINT` to execute commands inside that environment. Not compatible with Singularity.
+- v1: Used the environment file to update the base conda environment so the `ENTRYPOINT` command was no longer needed. Compatible with Singularity.
 
 ## TODO
 - Attribute https://github.com/fraenkel-lab/OmicsIntegrator2
