@@ -4,7 +4,6 @@ Author: Neha Talluri
 
 Methods for converting from the universal network input format and to the universal network output format
 """
-
 import pandas as pd
 
 
