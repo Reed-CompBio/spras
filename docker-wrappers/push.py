@@ -67,7 +67,9 @@ def main():
             raise RuntimeError("Did not confirm dialog.")
 
     push_command = construct_push_command([tag, tag_latest], args.dir, architectures)
-    subprocess.run(push_command, capture_output=False, cwd=cwd)
+    result = subprocess.run(push_command, capture_output=False, cwd=cwd)
+
+    exit(result.returncode)
 
 if __name__ == '__main__':
     main()

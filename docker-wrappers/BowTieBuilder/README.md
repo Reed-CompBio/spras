@@ -4,7 +4,7 @@ A Docker image for [BowTieBuilder](https://github.com/Reed-CompBio/BowTieBuilder
 
 To create the Docker image run:
 ```
-docker build -t reed-compbio/bowtiebuilder:v2 -f Dockerfile .
+docker build -t reed-compbio/bowtiebuilder:v1 -f Dockerfile .
 ```
 from this directory.
 
