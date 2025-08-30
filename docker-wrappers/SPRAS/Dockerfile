@@ -1,4 +1,5 @@
 FROM almalinux:9
+LABEL org.opencontainers.image.source https://github.com/Reed-CompBio/spras
 
 # gcc/g++ are required for building several of the packages if you're using apple silicon
 RUN dnf update -y && \

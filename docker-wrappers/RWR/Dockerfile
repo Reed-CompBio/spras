@@ -1,4 +1,5 @@
 FROM python:3.11.5
+LABEL org.opencontainers.image.source https://github.com/Reed-CompBio/spras
 
 # Required for PageRank to run
 RUN pip install networkx==2.8.8 numpy==1.26.4 scipy==1.15.2

@@ -1,6 +1,7 @@
 # PathLinker wrapper
 # https://github.com/Murali-group/PathLinker
 FROM python:3.5.10-alpine
+LABEL org.opencontainers.image.source https://github.com/Reed-CompBio/spras
 
 # gettext is required for the envsubst command
 # See https://github.com/haskell/cabal/issues/6126 regarding wget
