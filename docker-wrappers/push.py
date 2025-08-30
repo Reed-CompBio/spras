@@ -28,7 +28,7 @@ def parse_arguments():
     parser.add_argument("--version", type=str, required=True, help="The version (tag name) to use for the container")
     parser.add_argument("--org-name", type=str, help="The organization to push to", default="ghcr.io/reed-compbio/")
     parser.add_argument("--yes", type=bool, help="Whether to automatically agree to pushing a container", action=argparse.BooleanOptionalAction)
-    parser.add_argument("--relax", type=bool, help="Whether to not be strict on tag naming", action=argparse.BooleanOptionalAction)
+    parser.add_argument("--relax", type=bool, help="Whether to not be strict on tag naming (this requires all versions start with `v`.)", action=argparse.BooleanOptionalAction)
 
     return parser.parse_args()
 

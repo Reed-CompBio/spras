@@ -8,8 +8,8 @@ For convenience, we provide a `push.py` python file which pushes a docker image 
 that we want to support.
 
 ```
-usage: push.py [-h] --tag TAG --dir DIR
-push.py: error: the following arguments are required: --tag, --dir
+usage: push.py [-h] --version VERSION --dir DIR
+push.py: error: the following arguments are required: --version, --dir
 ```
 
 For example, using the default supported `ghcr.io` registry that SPRAS uses, we can push RWR v1:
