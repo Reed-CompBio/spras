@@ -26,7 +26,7 @@ You can also install SPRAS as a package using `pip` directly from the github rep
 Getting the SPRAS Docker Image
 ------------------------------
 SPRAS also publishes a Docker image that already holds all the necessary dependencies. Assuming you have Docker installed, you can pull
-the image from Docker Hub:
+the image from the GitHub Container Registry:
 
 .. code-block:: bash
 

@@ -71,7 +71,7 @@ Large SPRAS workflows may benefit from execution with HTCondor, a scheduler/mana
 **Dockerized pathway reconstruction algorithms**: Pathway reconstruction algorithms are run via Docker images using the docker-py Python package.
 [PathLinker](https://github.com/Murali-group/PathLinker), [Omics Integrator](https://github.com/fraenkel-lab/OmicsIntegrator), [Omics Integrator 2](https://github.com/fraenkel-lab/OmicsIntegrator2), and [Maximum Edge Orientation](https://github.com/agitter/meo/) are the first supported algorithms.
 The files to create these Docker images are in the `docker-wrappers` subdirectory along with links to algorithms' original repositories.
-The Docker images are available on [DockerHub](https://hub.docker.com/orgs/reed-compbio).
+The Docker images are available on the [GitHub Container Registry](https://github.com/orgs/Reed-CompBio/packages).
 
 **Python wrapper for calling algorithms**: Wrapper functions provide an interface between the common file formats for input and output data and the algorithm-specific file formats and reconstruction commands.
 These wrappers are in the `spras/` subdirectory.
