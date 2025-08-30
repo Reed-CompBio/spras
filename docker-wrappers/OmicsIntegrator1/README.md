@@ -1,6 +1,6 @@
 # Omics Integrator 1 Docker image
 
-A Docker image for [Omics Integrator](https://github.com/fraenkel-lab/OmicsIntegrator) that is available on [DockerHub](https://hub.docker.com/repository/docker/reed-compbio/omics-integrator-1).
+A Docker image for [Omics Integrator](https://github.com/fraenkel-lab/OmicsIntegrator) that is available on the [GitHub Container Registry](https://github.com/orgs/Reed-CompBio/packages/container/package/omics-integrator-1).
 
 ## Activating conda inside a Docker container
 

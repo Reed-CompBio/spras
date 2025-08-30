@@ -1,6 +1,6 @@
 # DOMINO Docker image
 
-A Docker image for [DOMINO](https://github.com/Shamir-Lab/DOMINO) that is available on [DockerHub](https://hub.docker.com/repository/docker/reed-compbio/domino).
+A Docker image for [DOMINO](https://github.com/Shamir-Lab/DOMINO) that is available on the [GitHub Container Registry](https://github.com/orgs/Reed-CompBio/packages/container/package/domino).
 
 DOMINO outputs multiple active modules, which SPRAS combines into a single pathway.
 It is [non-deterministic](https://github.com/Shamir-Lab/DOMINO/issues/5) and cannot be made deterministic with a seed.

@@ -1,6 +1,6 @@
 # MinCostFlow Docker image
 
-A Docker image for [MinCostFlow](https://github.com/gitter-lab/min-cost-flow) that is available on [DockerHub](https://hub.docker.com/repository/docker/reed-compbio/mincostflow).
+A Docker image for [MinCostFlow](https://github.com/gitter-lab/min-cost-flow) that is available on the [GitHub Container Registry](https://github.com/orgs/Reed-CompBio/packages/container/package/mincostflow).
 
 To create the Docker image run:
 ```

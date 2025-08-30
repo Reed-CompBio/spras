@@ -1,6 +1,6 @@
 # All Pairs Shortest Paths Docker image
 
-A Docker image for All Pairs Shortest Paths that is available on [DockerHub](https://hub.docker.com/repository/docker/reed-compbio/allpairs).
+A Docker image for All Pairs Shortest Paths that is available on the [GitHub Container Registry](https://github.com/orgs/Reed-CompBio/packages/container/package/allpairs).
 This algorithm was implemented by the SPRAS team and relies on the NetworkX [`shortest_path`](https://networkx.org/documentation/stable/reference/algorithms/generated/networkx.algorithms.shortest_paths.generic.shortest_path.html) function.
 
 To create the Docker image run:

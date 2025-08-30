@@ -1,6 +1,6 @@
 # Omics Integrator 2 Docker image
 
-A Docker image for [Omics Integrator 2](https://github.com/fraenkel-lab/OmicsIntegrator2) that is available on [DockerHub](https://hub.docker.com/repository/docker/reed-compbio/omics-integrator-2).
+A Docker image for [Omics Integrator 2](https://github.com/fraenkel-lab/OmicsIntegrator2) that is available on the [GitHub Container Registry](https://github.com/orgs/Reed-CompBio/packages/container/package/omics-integrator-2).
 
 ## Building the Docker image
 
