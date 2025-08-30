@@ -421,7 +421,7 @@ General steps for contributing a new pathway reconstruction algorithm
     ``<algorithm>``, and include any other files required to build that
     image in the subdirectory
 3.  Build and push the Docker image to the
-    `reedcompbio <https://hub.docker.com/orgs/reedcompbio>`__ Docker
+    `reed-compbio <https://hub.docker.com/orgs/reed-compbio>`__ Docker
     organization (SPRAS maintainer required)
 4.  Add a new Python file ``spras/<algorithm>.py`` to implement the
     wrapper functions for ``<algorithm>``: specify the list of

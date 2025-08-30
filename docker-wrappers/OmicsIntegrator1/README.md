@@ -1,6 +1,6 @@
 # Omics Integrator 1 Docker image
 
-A Docker image for [Omics Integrator](https://github.com/fraenkel-lab/OmicsIntegrator) that is available on [DockerHub](https://hub.docker.com/repository/docker/reedcompbio/omics-integrator-1).
+A Docker image for [Omics Integrator](https://github.com/fraenkel-lab/OmicsIntegrator) that is available on [DockerHub](https://hub.docker.com/repository/docker/reed-compbio/omics-integrator-1).
 
 ## Activating conda inside a Docker container
 
@@ -11,13 +11,13 @@ It defines a custom ENTRYPOINT that uses `conda run` to run the command inside t
 
 To create the Docker image run:
 ```
-docker build -t reedcompbio/omics-integrator-1 -f Dockerfile .
+docker build -t reed-compbio/omics-integrator-1 -f Dockerfile .
 ```
 from this directory.
 
 To confirm that commands are run inside the conda environment run:
 ```
-winpty docker run reedcompbio/omics-integrator-1 conda list
+winpty docker run reed-compbio/omics-integrator-1 conda list
 ```
 The `winpty` prefix is only needed on Windows.
 
@@ -28,7 +28,7 @@ The Docker wrapper can be tested with `pytest`.
 
 The Docker wrapper also can be tested by running the Omics Integrator tests interactively:
 ```
-winpty docker run -it reedcompbio/omics-integrator-1 bash
+winpty docker run -it reed-compbio/omics-integrator-1 bash
 conda activate oi1
 python setup.py test -a "--msgpath=$MSGSTEINER_PATH"
 ```
@@ -39,9 +39,9 @@ This simplifies using the same image for Docker and Singularity.
 This version uses `requirements.txt` instead of `environment.yml` to specify required Python packages.
 It can be built and tested in a manner similar to the conda-based image.
 ```
-docker build -t reedcompbio/omics-integrator-1:no-conda -f Dockerfile_no_conda .
+docker build -t reed-compbio/omics-integrator-1:no-conda -f Dockerfile_no_conda .
 
-winpty docker run -it reedcompbio/omics-integrator-1:no-conda bash
+winpty docker run -it reed-compbio/omics-integrator-1:no-conda bash
 python setup.py test -a "--msgpath=$MSGSTEINER_PATH"
 ```
 

@@ -35,9 +35,9 @@ jobs:
           context: ./
           file: docker-wrappers/SPRAS/Dockerfile
           tags: |
-            reedcompbio/spras:${{ github.ref_name }}
-            reedcompbio/spras:latest
+            reed-compbio/spras:${{ github.ref_name }}
+            reed-compbio/spras:latest
           # Use the previous latest for the build cache, assuming they're probably
           # relatively similar
-          cache-from: type=registry,ref=reedcompbio/spras:latest
+          cache-from: type=registry,ref=reed-compbio/spras:latest
           push: true

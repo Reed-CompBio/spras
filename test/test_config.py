@@ -20,8 +20,8 @@ def get_test_config():
     test_raw_config = {
         "container_framework": "singularity",
         "container_registry": {
-            "base_url": "docker.io",
-            "owner": "reedcompbio",
+            "base_url": "ghcr.io",
+            "owner": "reed-compbio",
         },
         "hash_length": 7,
         "reconstruction_settings": {
@@ -185,10 +185,10 @@ class TestConfig:
 
     def test_config_container_registry(self):
         test_config = get_test_config()
-        test_config["container_registry"]["base_url"] = "docker.io"
-        test_config["container_registry"]["owner"] = "reedcompbio"
+        test_config["container_registry"]["base_url"] = "ghcr.io"
+        test_config["container_registry"]["owner"] = "reed-compbio"
         config.init_global(test_config)
-        assert (config.config.container_prefix == "docker.io/reedcompbio")
+        assert (config.config.container_prefix == "ghcr.io/reed-compbio")
 
         test_config["container_registry"]["base_url"] = "another.repo"
         test_config["container_registry"]["owner"] = "different-owner"

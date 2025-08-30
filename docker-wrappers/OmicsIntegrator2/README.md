@@ -1,19 +1,19 @@
 # Omics Integrator 2 Docker image
 
-A Docker image for [Omics Integrator 2](https://github.com/fraenkel-lab/OmicsIntegrator2) that is available on [DockerHub](https://hub.docker.com/repository/docker/reedcompbio/omics-integrator-2).
+A Docker image for [Omics Integrator 2](https://github.com/fraenkel-lab/OmicsIntegrator2) that is available on [DockerHub](https://hub.docker.com/repository/docker/reed-compbio/omics-integrator-2).
 
 ## Building the Docker image
 
 To create the Docker image run:
 ```
-docker build -t reedcompbio/omics-integrator-2 -f Dockerfile .
+docker build -t reed-compbio/omics-integrator-2 -f Dockerfile .
 ```
 from this directory.
 
 To confirm that commands are run inside the conda environment run:
 ```
-winpty docker run reedcompbio/omics-integrator-2 conda list
-winpty docker run reedcompbio/omics-integrator-2 OmicsIntegrator -h
+winpty docker run reed-compbio/omics-integrator-2 conda list
+winpty docker run reed-compbio/omics-integrator-2 OmicsIntegrator -h
 ```
 The `winpty` prefix is only needed on Windows.
 

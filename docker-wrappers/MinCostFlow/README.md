@@ -1,20 +1,20 @@
 # MinCostFlow Docker image
 
-A Docker image for [MinCostFlow](https://github.com/gitter-lab/min-cost-flow) that is available on [DockerHub](https://hub.docker.com/repository/docker/reedcompbio/mincostflow).
+A Docker image for [MinCostFlow](https://github.com/gitter-lab/min-cost-flow) that is available on [DockerHub](https://hub.docker.com/repository/docker/reed-compbio/mincostflow).
 
 To create the Docker image run:
 ```
-docker build -t reedcompbio/mincostflow -f Dockerfile .
+docker build -t reed-compbio/mincostflow -f Dockerfile .
 ```
 from this directory.
 
 To inspect the installed Python packages:
 ```
-docker run reedcompbio/mincostflow pip list
+docker run reed-compbio/mincostflow pip list
 ```
 or inspect the Python script arguments:
 ```
-docker run reedcompbio/mincostflow python /MinCostFlow/minCostFlow.py -h
+docker run reed-compbio/mincostflow python /MinCostFlow/minCostFlow.py -h
 ```
 Windows users may need to add the prefix `winpty` prefix before these commands.
 
@@ -30,7 +30,7 @@ The Docker wrapper can be tested with `pytest -k test_mcf.py` from the root of t
 
 Alternatively, to run the Docker image directly, run the following command from the root of the `spras` repository
 ```
-docker run -w /data --mount type=bind,source=/${PWD},target=/data reedcompbio/mincostflow python /MinCostFlow/minCostFlow.py --edges_file /data/test/MinCostFlow/input/graph1/edges.txt --sources_file /data/test/MinCostFlowinput/graph1/sources.txt --targets_file /data/test/MinCostFlowinput/graph1/targets.txt --flow 1 --output graph1 --capacity 1  
+docker run -w /data --mount type=bind,source=/${PWD},target=/data reed-compbio/mincostflow python /MinCostFlow/minCostFlow.py --edges_file /data/test/MinCostFlow/input/graph1/edges.txt --sources_file /data/test/MinCostFlowinput/graph1/sources.txt --targets_file /data/test/MinCostFlowinput/graph1/targets.txt --flow 1 --output graph1 --capacity 1  
 ```
 
 This will run MinCostFlow on the test input files and write the output files to the root of the `spras` repository.
