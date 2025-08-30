@@ -1,4 +1,4 @@
 {
-    "dockerName": "omics-integrator-1",
+    "imageName": "omics-integrator-1",
     "architectures": ["linux/amd64"]
 }

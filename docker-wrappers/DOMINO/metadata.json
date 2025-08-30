@@ -1,4 +1,4 @@
 {
-    "dockerName": "domino",
+    "imageName": "domino",
     "architectures": ["linux/amd64"]
 }

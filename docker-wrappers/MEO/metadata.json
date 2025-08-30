@@ -1,4 +1,4 @@
 {
-    "dockerName": "meo",
+    "imageName": "meo",
     "architectures": ["linux/arm64", "linux/amd64"]
 }

@@ -51,7 +51,7 @@ def main():
 
     metadata_path = Path(dir_path, args.dir, "metadata.json")
     metadata = json.loads(metadata_path.read_text())
-    name = metadata['dockerName']
+    name = metadata['imageName']
     architectures = metadata['architectures']
     cwd = str(Path(dir_path, args.dir, metadata['cwd']) if 'cwd' in metadata else Path(dir_path, args.dir))
     tag = args.org_name + name + ":" + args.version
