@@ -1,12 +1,11 @@
 # Omics Integrator 1 wrapper
 # https://github.com/fraenkel-lab/OmicsIntegrator
-# Activates the conda environment before running command inside container
-# Uses the strategy from https://pythonspeed.com/articles/activate-conda-dockerfile/
-# by Itamar Turner-Trauring
-FROM continuumio/miniconda3:4.9.2
+# This version does not use conda
+FROM python:2.7.18
+LABEL org.opencontainers.image.source=https://github.com/Reed-CompBio/spras
 
 # Need to install msgsteiner-1.3 and dependencies
-RUN apt-get -qq update --allow-releaseinfo-change && \
+RUN apt-get -qq update && \
     apt-get install -y build-essential libx11-dev libboost-dev libboost-program-options-dev
 
 RUN commit=0a57ede6beeef6e63b86d19898e560d62015e85d && \
@@ -24,7 +23,5 @@ RUN commit=0a57ede6beeef6e63b86d19898e560d62015e85d && \
 ENV MSGSTEINER_PATH=/OmicsIntegrator/msgsteiner-1.3/msgsteiner
 WORKDIR /OmicsIntegrator
 
-COPY environment.yml .
-RUN conda env create -f environment.yml
-
-ENTRYPOINT ["conda", "run", "--no-capture-output", "-n", "oi1"]
+COPY requirements.txt .
+RUN pip install -r requirements.txt
