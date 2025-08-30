@@ -57,7 +57,7 @@ jobs:
     uses: "./.github/workflows/build-and-remove-template.yml"
     with:
       path: docker-wrappers/ResponseNet
-      container: reed-compbio/responsenet
+      container: ghcr.io/reed-compbio/responsenet
   build-and-remove-spras:
     uses: "./.github/workflows/build-and-remove-template.yml"
     with:
