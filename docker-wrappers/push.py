@@ -12,12 +12,21 @@ COMMAND_BUILDER_INSTANCE = COMMAND_BUILDX + ["create", "--name", "container", "-
 # https://stackoverflow.com/a/5137509/7589775
 dir_path = os.path.dirname(os.path.realpath(__file__))
 
-def construct_push_command(tags: list[str], dir: str, architectures: list[str]):
+def construct_push_command(
+    tags: list[str],
+    dir: str,
+    architectures: list[str],
+    push: bool
+):
     base_cmd = ["build"]
     for tag in tags:
         base_cmd.extend(["--tag", tag])
     base_cmd = base_cmd + ["--file", Path(dir_path, dir, "Dockerfile"), "--platform",
-                ",".join(architectures), "--builder", "container", "--push", "."]
+                ",".join(architectures), "--builder", "container"]
+    if push:
+        base_cmd.append("--push")
+    base_cmd.append(".")
+
     return COMMAND_BUILDX + base_cmd
 
 def parse_arguments():
@@ -29,6 +38,7 @@ def parse_arguments():
     parser.add_argument("--org-name", type=str, help="The organization to push to", default="ghcr.io/reed-compbio/")
     parser.add_argument("--yes", type=bool, help="Whether to automatically agree to pushing a container", action=argparse.BooleanOptionalAction)
     parser.add_argument("--relax", type=bool, help="Whether to not be strict on tag naming (this requires all versions start with `v`.)", action=argparse.BooleanOptionalAction)
+    parser.add_argument("--nopush", type=bool, help="Enabling nopush only builds the image. This is useful for testing architecture support", action=argparse.BooleanOptionalAction)
 
     return parser.parse_args()
 
@@ -62,11 +72,11 @@ def main():
     print(f"- Specified tag: {tag}")
     print(f"-    Latest tag: {tag_latest}")
     if not args.yes:
-        confirm = input("[y/n] Are you sure you want to push to these tags over these architectures? ")
+        confirm = input("[y/n] Are you sure you want to {} these tags over these architectures? ".format("build (because of --nopush)" if args.nopush else "push to"))
         if confirm.strip().lower() not in ('y', 'yes'):
             raise RuntimeError("Did not confirm dialog.")
 
-    push_command = construct_push_command([tag, tag_latest], args.dir, architectures)
+    push_command = construct_push_command([tag, tag_latest], args.dir, architectures, not args.nopush)
     result = subprocess.run(push_command, capture_output=False, cwd=cwd)
 
     exit(result.returncode)

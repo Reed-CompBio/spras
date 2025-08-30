@@ -30,3 +30,4 @@ The Docker wrapper can be tested with `pytest`.
 - Attribute https://github.com/fraenkel-lab/OmicsIntegrator2
 - Modify environment to use fraenkel-lab or [PyPI](https://pypi.org/project/OmicsIntegrator/) version instead of fork
 - Document usage
+- Use a different base image that is not `continuumio/miniconda3:4.9.2` to add arm64 support.
