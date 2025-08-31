@@ -7,7 +7,7 @@ module that imports this module can access a config option by checking the objec
 value. For example
 
 import spras.config.config as config
-container_framework = config.config.container_framework
+container_framework = config.config.container_settings.framework
 
 will grab the top level registry configuration option as it appears in the config file
 """
@@ -68,8 +68,6 @@ class Config:
         self.out_dir = parsed_raw_config.reconstruction_settings.locations.reconstruction_dir
         # Container settings used by PRMs.
         self.container_settings = ProcessedContainerSettings.from_container_settings(parsed_raw_config.containers, parsed_raw_config.hash_length)
-        # A Boolean specifying whether to unpack singularity containers. Default is False
-        self.unpack_singularity = False
         # A dictionary to store configured datasets against which SPRAS will be run
         self.datasets = None
         # A dictionary to store configured gold standard data against output of SPRAS runs

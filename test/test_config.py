@@ -161,22 +161,22 @@ class TestConfig:
 
         test_config["container_framework"] = "singularity"
         config.init_global(test_config)
-        assert (config.config.container_framework == "singularity")
+        assert (config.config.container_settings.framework == "singularity")
 
         # Test singularity with capitalization
         test_config["container_framework"] = "Singularity"
         config.init_global(test_config)
-        assert (config.config.container_framework == "singularity")
+        assert (config.config.container_settings.framework == "singularity")
 
         # Test docker
         test_config["container_framework"] = "docker"
         config.init_global(test_config)
-        assert (config.config.container_framework == "docker")
+        assert (config.config.container_settings.framework == "docker")
 
         # Test docker with capitalization
         test_config["container_framework"] = "Docker"
         config.init_global(test_config)
-        assert (config.config.container_framework == "docker")
+        assert (config.config.container_settings.framework == "docker")
 
         # Test unknown framework
         test_config["container_framework"] = "badFramework"
@@ -188,17 +188,17 @@ class TestConfig:
         test_config["container_registry"]["base_url"] = "docker.io"
         test_config["container_registry"]["owner"] = "reedcompbio"
         config.init_global(test_config)
-        assert (config.config.container_prefix == "docker.io/reedcompbio")
+        assert (config.config.container_settings.prefix == "docker.io/reedcompbio")
 
         test_config["container_registry"]["base_url"] = "another.repo"
         test_config["container_registry"]["owner"] = "different-owner"
         config.init_global(test_config)
-        assert (config.config.container_prefix == "another.repo/different-owner")
+        assert (config.config.container_settings.prefix == "another.repo/different-owner")
 
         test_config["container_registry"]["base_url"] = ""
         test_config["container_registry"]["owner"] = ""
         config.init_global(test_config)
-        assert (config.config.container_prefix == config.DEFAULT_CONTAINER_PREFIX)
+        assert (config.config.container_settings.prefix == config.DEFAULT_CONTAINER_PREFIX)
 
     def test_error_dataset_label(self):
         test_config = get_test_config()
