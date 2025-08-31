@@ -18,12 +18,14 @@ filler_dataset_data: dict[str, str | list[str]] = {
 # individual values of the dict can be changed and the whole initialization can be re-run.
 def get_test_config():
     test_raw_config = {
-        "container_framework": "singularity",
-        "container_registry": {
-            "base_url": "docker.io",
-            "owner": "reedcompbio",
+        "containers": {
+            "framework": "singularity",
+            "registry": {
+                "base_url": "docker.io",
+                "owner": "reedcompbio",
+            },
+            "hash_length": 7,
         },
-        "hash_length": 7,
         "reconstruction_settings": {
             "locations": {
                 "reconstruction_dir": "my_dir"
