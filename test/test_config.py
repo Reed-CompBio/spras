@@ -161,44 +161,44 @@ class TestConfig:
         # Test singularity
         test_config = get_test_config()
 
-        test_config["container_framework"] = "singularity"
+        test_config["containers"]["framework"] = "singularity"
         config.init_global(test_config)
         assert (config.config.container_settings.framework == "singularity")
 
         # Test singularity with capitalization
-        test_config["container_framework"] = "Singularity"
+        test_config["containers"]["framework"] = "Singularity"
         config.init_global(test_config)
         assert (config.config.container_settings.framework == "singularity")
 
         # Test docker
-        test_config["container_framework"] = "docker"
+        test_config["containers"]["framework"] = "docker"
         config.init_global(test_config)
         assert (config.config.container_settings.framework == "docker")
 
         # Test docker with capitalization
-        test_config["container_framework"] = "Docker"
+        test_config["containers"]["framework"] = "Docker"
         config.init_global(test_config)
         assert (config.config.container_settings.framework == "docker")
 
         # Test unknown framework
-        test_config["container_framework"] = "badFramework"
+        test_config["containers"]["framework"] = "badFramework"
         with pytest.raises(ValueError):
             config.init_global(test_config)
 
     def test_config_container_registry(self):
         test_config = get_test_config()
-        test_config["container_registry"]["base_url"] = "docker.io"
-        test_config["container_registry"]["owner"] = "reedcompbio"
+        test_config["containers"]["registry"]["base_url"] = "docker.io"
+        test_config["containers"]["registry"]["owner"] = "reedcompbio"
         config.init_global(test_config)
         assert (config.config.container_settings.prefix == "docker.io/reedcompbio")
 
-        test_config["container_registry"]["base_url"] = "another.repo"
-        test_config["container_registry"]["owner"] = "different-owner"
+        test_config["containers"]["registry"]["base_url"] = "another.repo"
+        test_config["containers"]["registry"]["owner"] = "different-owner"
         config.init_global(test_config)
         assert (config.config.container_settings.prefix == "another.repo/different-owner")
 
-        test_config["container_registry"]["base_url"] = ""
-        test_config["container_registry"]["owner"] = ""
+        test_config["containers"]["registry"]["base_url"] = ""
+        test_config["containers"]["registry"]["owner"] = ""
         config.init_global(test_config)
         assert (config.config.container_settings.prefix == config.DEFAULT_CONTAINER_PREFIX)
 
