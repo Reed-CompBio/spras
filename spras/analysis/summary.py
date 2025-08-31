@@ -50,22 +50,28 @@ def summarize_networks(file_paths: Iterable[Path], node_table: pd.DataFrame, alg
         # (We use dictionaries over list to make )
         data: OrderedDict[str, Any] = OrderedDict()
 
+        number_of_nodes = nw.number_of_nodes()
         data.update([
             ('Name', str(file_path)),
-            ('Number of nodes', nw.number_of_nodes()),
+            ('Number of nodes', number_of_nodes),
             ('Number of edges', nw.number_of_edges()),
             ('Number of connected components', nx.number_connected_components(nw)),
         ])
 
         # Save the max/median degree, average clustering coefficient, and density
-        degrees = [deg for _, deg in nw.degree()]
-        data.update([
-            # If the number of nodes are 0, degrees will equal [],
-            # making the following statistics all be zero.
-            ('Density', nx.density(nw)),
-            ('Max degree', max(degrees, default=0)),
-            ('Median degree', float(median(degrees or [0]))), # float to have output stay consistent
-        ])
+        if number_of_nodes == 0:
+            data.update([
+                ('Density', 0.0),
+                ('Max degree', 0),
+                ('Median degree', 0.0),
+            ])
+        else:
+            degrees = [deg for _, deg in nw.degree()]
+            data.update([
+                ('Density', nx.density(nw)),
+                ('Max degree', max(degrees, default=0)),
+                ('Median degree', float(median(degrees or [0]))), # float to have output stay consistent
+            ])
 
         cc = list(nx.connected_components(nw))
         # Save the max diameter
