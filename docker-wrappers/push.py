@@ -23,8 +23,9 @@ def construct_push_command(
         base_cmd.extend(["--tag", tag])
     base_cmd = base_cmd + ["--file", Path(dir_path, dir, "Dockerfile"), "--platform",
                 ",".join(architectures), "--builder", "container"]
-    if push:
-        base_cmd.append("--push")
+    # --load loads an image into the docker environment, which is the normal behavior
+    # for docker build.
+    base_cmd.append("--push" if push else "--load")
     base_cmd.append(".")
 
     return COMMAND_BUILDX + base_cmd

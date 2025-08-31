@@ -2,13 +2,6 @@
 
 A Docker image for [Omics Integrator](https://github.com/fraenkel-lab/OmicsIntegrator) that is available on the [GitHub Container Registry](https://github.com/orgs/Reed-CompBio/packages/container/package/omics-integrator-1).
 
-## Activating conda inside a Docker container
-
-By default, an installed conda environment will not be activated inside the Docker container.
-Docker does not invoke Bash as a login shell.
-[This blog post](https://pythonspeed.com/articles/activate-conda-dockerfile/) provides a workaround demonstrated here in `Dockerfile` and `env.yml`.
-It defines a custom ENTRYPOINT that uses `conda run` to run the command inside the conda environment.
-
 To create the Docker image run:
 ```
 docker build -t reed-compbio/omics-integrator-1 -f Dockerfile .
@@ -29,23 +22,13 @@ The Docker wrapper can be tested with `pytest`.
 The Docker wrapper also can be tested by running the Omics Integrator tests interactively:
 ```
 winpty docker run -it reed-compbio/omics-integrator-1 bash
-conda activate oi1
 python setup.py test -a "--msgpath=$MSGSTEINER_PATH"
 ```
 
-## No conda alternative
-An alternative version of the Omics Integrator image does not use conda.
-This simplifies using the same image for Docker and Singularity.
-This version uses `requirements.txt` instead of `environment.yml` to specify required Python packages.
-It can be built and tested in a manner similar to the conda-based image.
-```
-docker build -t reed-compbio/omics-integrator-1:no-conda -f Dockerfile_no_conda .
+## Versions
 
-winpty docker run -it reed-compbio/omics-integrator-1:no-conda bash
-python setup.py test -a "--msgpath=$MSGSTEINER_PATH"
-```
-
-This version of the image is the default used by SPRAS.
+- v1: Initial OmicsIntegrator1 from the [original no-conda image](https://github.com/Reed-CompBio/spras/blob/fad9fbf782ae0bd1e0cf660b7ef2a2d61df41cf5/docker-wrappers/OmicsIntegrator1/Dockerfile_no_conda)
+- v2: Updated the base image and manually installed python.
 
 ## TODO
 - Attribute https://github.com/fraenkel-lab/OmicsIntegrator
