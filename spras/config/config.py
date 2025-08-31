@@ -22,7 +22,8 @@ from typing import Any
 import numpy as np
 import yaml
 
-from spras.config.schema import ContainerFramework, RawConfig
+from spras.config.container_schema import ContainerSettings, ProcessedContainerSettings
+from spras.config.schema import RawConfig
 from spras.util import NpHashEncoder, hash_params_sha1_base32
 
 config = None
@@ -65,10 +66,8 @@ class Config:
 
         # Directory used for storing output
         self.out_dir = parsed_raw_config.reconstruction_settings.locations.reconstruction_dir
-        # Container framework used by PRMs. Valid options are "docker", "dsub", and "singularity"
-        self.container_framework = None
-        # The container prefix (host and organization) to use for images. Default is "docker.io/reedcompbio"
-        self.container_prefix: str = DEFAULT_CONTAINER_PREFIX
+        # Container settings used by PRMs.
+        self.container_settings = ProcessedContainerSettings.from_container_settings(parsed_raw_config.containers, parsed_raw_config.hash_length)
         # A Boolean specifying whether to unpack singularity containers. Default is False
         self.unpack_singularity = False
         # A dictionary to store configured datasets against which SPRAS will be run
@@ -285,19 +284,6 @@ class Config:
     def process_config(self, raw_config: RawConfig):
         # Set up a few top-level config variables
         self.out_dir = raw_config.reconstruction_settings.locations.reconstruction_dir
-
-        if raw_config.container_framework == ContainerFramework.dsub:
-            warnings.warn("'dsub' framework integration is experimental and may not be fully supported.", stacklevel=2)
-        self.container_framework = raw_config.container_framework
-
-        # Unpack settings for running in singularity mode. Needed when running PRM containers if already in a container.
-        if raw_config.unpack_singularity and self.container_framework != "singularity":
-            warnings.warn("unpack_singularity is set to True, but the container framework is not singularity. This setting will have no effect.", stacklevel=2)
-        self.unpack_singularity = raw_config.unpack_singularity
-
-        # Grab registry from the config, and if none is provided default to docker
-        if raw_config.container_registry and raw_config.container_registry.base_url != "" and raw_config.container_registry.owner != "":
-            self.container_prefix = raw_config.container_registry.base_url + "/" + raw_config.container_registry.owner
 
         self.process_datasets(raw_config)
         self.process_algorithms(raw_config)
