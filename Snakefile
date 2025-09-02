@@ -36,8 +36,8 @@ algorithms = list(algorithm_params)
 algorithms_with_params = [f'{algorithm}-params-{params_hash}' for algorithm, param_combos in algorithm_params.items() for params_hash in param_combos.keys()]
 dataset_labels = list(_config.config.datasets.keys())
 
-dataset_gold_standard_node_pairs = [f"{dataset}-{gs['label']}" for gs in _config.config.gold_standards.values() if gs['node_file'] for dataset in gs['dataset_labels']]
-dataset_gold_standard_edge_pairs = [f"{dataset}-{gs['label']}" for gs in _config.config.gold_standards.values() if gs['edge_file'] for dataset in gs['dataset_labels']]
+dataset_gold_standard_node_pairs = [f"{dataset}-{gs['label']}" for gs in _config.config.gold_standards.values() if gs['node_files'] for dataset in gs['dataset_labels']]
+dataset_gold_standard_edge_pairs = [f"{dataset}-{gs['label']}" for gs in _config.config.gold_standards.values() if gs['edge_files'] for dataset in gs['dataset_labels']]
 
 # Get algorithms that are running multiple parameter combinations
 def algo_has_mult_param_combos(algo):
@@ -176,9 +176,9 @@ rule merge_input:
 # TODO: Can we delete this function?
 def get_gold_standard_dependencies(wildcards):
     gs = _config.config.gold_standards[wildcards.gold_standard]
-    node_file = gs["node_file"]
-    edge_file = gs["edge_file"]
-    all_files = node_file + edge_file
+    node_files = gs["node_files"]
+    edge_files = gs["edge_files"]
+    all_files = node_files + edge_files
     all_files = [gs["data_dir"] + SEP + data_file for data_file in all_files]
     return all_files
 

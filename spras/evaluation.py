@@ -67,8 +67,6 @@ class Evaluation:
         Populates node_table.
 
         node_table is a single column of nodes pandas table.
-
-        returns: none
         """
         self.label = gold_standard_dict['label']  # cannot be empty, will break with a NoneType exception
         self.datasets = gold_standard_dict['dataset_labels']  # can be empty, snakemake will not run evaluation due to dataset_gold_standard_pairs in snakemake file
@@ -76,54 +74,66 @@ class Evaluation:
         data_loc = gold_standard_dict['data_dir']
 
         # cannot be empty, snakemake will run evaluation even if empty
-        node_file = gold_standard_dict["node_file"]
-        edge_file = gold_standard_dict["edge_file"]
+        node_files = gold_standard_dict["node_files"]
+        edge_files = gold_standard_dict["edge_files"]
 
         # exactly one gold standard file kind can be present in a gold standard dataset
-        has_node_file = len(node_file) > 0
-        has_edge_file = len(edge_file) > 0
+        has_node_files = len(node_files) > 0
+        has_edge_files = len(edge_files) > 0
 
-        if has_node_file and has_edge_file:
+        if has_node_files and has_edge_files:
             raise ValueError(
-                f"Gold standard '{self.label}': both node_file and edge_file provided. "
-                "Exactly one is allowed in a gold standard dataset."
+                f"Gold standard '{self.label}': both node_files and edge_files provided. "
+                "Only one type is allowed in a gold standard dataset."
             )
-        if not has_node_file and not has_edge_file:
+        if not has_node_files and not has_edge_files:
             raise ValueError(
-                f"Gold standard '{self.label}': neither node_file nor edge_file provided."
-            )
-
-        # TODO: later iteration - allow for multiple node or edge files in the list
-        # The files will be merged together to make one large node or edge table
-        if has_node_file and len(node_file) != 1:
-            raise ValueError(
-                f"Gold standard '{self.label}': node_file must contain exactly one file."
-            )
-        if has_edge_file and len(edge_file) != 1:
-            raise ValueError(
-                f"Gold standard '{self.label}': edge_file must contain exactly one file."
+                f"Gold standard '{self.label}': neither node_files nor edge_files provided."
             )
 
-        if has_node_file:
-            single_node_table = pd.read_table(os.path.join(data_loc, node_file[0]), header=None)
-            if single_node_table.shape[1] != 1:
-                raise ValueError(
-                    f"Gold standard '{self.label}': the provided node_file must have exactly 1 column of nodes."
-                )
-            single_node_table.columns = [self.NODE_ID]
-            self.node_table = single_node_table
+        if has_node_files:
 
-        if has_edge_file:
-            single_edge_table = pd.read_table(os.path.join(data_loc, edge_file[0]), header=None)
-            if single_edge_table.shape[1] != 3:
-                raise ValueError(
-                    f"Gold standard '{self.label}': the provided edge_file must have exactly 3 columns (Interactor1, Interactor2, Direction)."
-                )
-            single_edge_table.columns = ['Interactor1', 'Interactor2', 'Direction']
+            node_tables = []
+            for node_file in node_files:
+                node_table = pd.read_table(os.path.join(data_loc, node_file), header=None)
+                if node_table.shape[1] != 1:
+                    raise ValueError(
+                        f"Gold standard '{self.label}': each node_file provided must have exactly 1 column of nodes."
+                    )
+                node_tables.append(node_table)
 
-            self.mixed_edge_table = single_edge_table.copy()
-            self.undirected_edge_table = convert_directed_to_undirected(single_edge_table.copy())
-            self.directed_edge_table = convert_undirected_to_directed(single_edge_table.copy())
+            merged_node_table = pd.concat(node_tables, ignore_index=True)
+            merged_node_table = merged_node_table.drop_duplicates()
+            merged_node_table.columns = [self.NODE_ID]
+
+            self.node_table = merged_node_table
+
+
+        if has_edge_files:
+            edge_tables = []
+
+            for edge_file in edge_files:
+                edge_table = pd.read_table(os.path.join(data_loc, edge_file), header=None)
+                if edge_table.shape[1] != 3:
+                    raise ValueError(
+                        f"Gold standard '{self.label}': the provided edge_file must have exactly 3 columns that represent Interactor1, Interactor2, Direction."
+                    )
+                edge_tables.append(edge_table)
+
+            merged_edge_table = pd.concat(edge_tables, ignore_index=True)
+            merged_edge_table.columns = ['Interactor1', 'Interactor2', 'Direction']
+
+            mixed = merged_edge_table.copy()
+            mixed = mixed.drop_duplicates()
+            self.mixed_edge_table = mixed
+
+            undirected = convert_directed_to_undirected(merged_edge_table.copy())
+            undirected = undirected.drop_duplicates()
+            self.undirected_edge_table = undirected
+
+            directed = convert_undirected_to_directed(merged_edge_table.copy())
+            directed = directed.drop_duplicates()
+            self.directed_edge_table = directed
 
             # TODO: later iteration - update to make a self.node_table from the edge table
             # the node and edge files will go under the same dataset-gs pair folder

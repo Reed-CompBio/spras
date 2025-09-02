@@ -145,21 +145,35 @@ datasets:
     # Relative path from the spras directory
     data_dir: "input"
 
+# A gold standard dataset defines the ground-truth nodes or edges that
+# will be used to evaluate reconstructed networks.
+#
+# Each gold standard dataset must provide only either node_files or edge_files,
+# but not both. Multiple files are supported, and if more than one file is
+# listed they will be merged into a single table before evaluation.
+#
+# The merged file is then treated as the complete gold standard, and the
+# evaluation will only be run once on that combined gold standard dataset.
+
 gold_standards:
   - # Labels can only contain letters, numbers, or underscores
     label: gs0
-    node_file: ["gs_nodes0.txt"]
+    node_files: ["gs_nodes0.txt", "gs_nodes1.txt"]
     data_dir: "input"
     # List of dataset labels to compare with the specific gold standard dataset
     dataset_labels: ["data0"]
   - label: gs1
-    node_file: ["gs_nodes1.txt"]
+    node_files: ["gs_nodes1.txt"]
     data_dir: "input"
     dataset_labels: ["data1", "data0"]
   - label: gs2
-    edge_file: ["gs_edges0.txt"]
+    edge_files: ["gs_edges0.txt"]
     data_dir: "input"
     dataset_labels: ["data0", "data1"]
+  - label: gs3
+    edge_files: ["gs_edges0.txt", "gs_edges1.txt"]
+    data_dir: "input"
+    dataset_labels: ["data0"]
 
 # If we want to reconstruct then we should set run to true.
 # TODO: if include is true above but run is false here, algs are not run.
