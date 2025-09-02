@@ -26,10 +26,11 @@ algorithms:
       include: true
       run1:
         k: 100
-        # run2:
+        # run2:  uncomment for step #
         #   k: 200
 
   # do one or the other, and do 3 combinations total
+  #  - provide different ways parameters can be updated? list vs single int or str for now (show the other ways in the hard/in future stuff)
   - name: "omicsintegrator1"
     params:
       include: true
@@ -37,7 +38,7 @@ algorithms:
         b: 5
         w: 2
         d: 10
-        # run2:
+        # run2: uncomment for step #
         #   b: 6
         #   w: 4
         #   d: 10
@@ -47,7 +48,7 @@ algorithms:
 datasets:
   - # Labels can only contain letters, numbers, or underscores
     label: egfr
-    node_files: ["tps-egfr-prizes.txt"] # the start input nodes
+    node_files: ["tps-egfr-prizes.txt"] # the input nodes
     edge_files: ["phosphosite-irefindex13.0-uniprot.txt"] # the interactome
     # Placeholder
     other_files: []
@@ -63,7 +64,7 @@ reconstruction_settings:
 analysis:
   # Create one summary per pathway file and a single summary table for all pathways for each dataset
   summary:
-    include: true
+    include: false # set to true for step #
   # Create Cytoscape session file with all pathway graphs for each dataset
   cytoscape:
-    include: true
+    include: false # set to true for step #

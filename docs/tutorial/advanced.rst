@@ -9,3 +9,9 @@ More like these are all the things we can do with this, but will not be showing
 CHTC integration
 
 Anything not included in the config file
+
+1. Global Workflow Control
+
+Sets options that apply to the entire workflow.
+
+- Examples: the container framework (docker, singularity, dsub), where to pull container images from, and technical settings like hash_length.
