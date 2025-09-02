@@ -61,9 +61,9 @@ methods (PRMs) to omics data.
    :caption: Tutorials
 
    tutorial/introduction
-   tutorial/basic
-   tutorial/medium
-   tutorial/hard
+   tutorial/beginner
+   tutorial/intermediate
+   tutorial/advanced
 
 Indices and tables
 ==================
