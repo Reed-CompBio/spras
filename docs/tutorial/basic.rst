@@ -45,6 +45,9 @@ Step 1: Explanation of Configuration File
 - one analysis
 - Reconstruction Settings area
 
+# Figure out where to put the new configs and outputs 
+- should it live in docs/tutorial or live where the current inputs/outputs level right below spras
+
 # explain the rest that is used in medium. Anything unused like the global workflow control (explain that other containerization can be used etc) and any post analysis not used can be added to the hard tutorial (which is now more like the other things that can be done tutorial but won't be shown here)
 
 A configuration file controls how SPRAS runs.  It defines which algorithms to run, the parameters to use, the datasets and gold standards to include, the analyses to perform after reconstruction, and the container settings for execution. Think of it as the control center for the workflow.
