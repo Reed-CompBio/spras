@@ -1,2 +1,4 @@
 Ensemble_Source	Threshold	Precision	Recall	Average_Precision	Baseline
+Input_Nodes_Baseline	0.0	0.15384615384615385	1.0		
+Input_Nodes_Baseline	1.0	1.0	0.25		
 Aggregated	0.0	0.15384615384615385	1.0	0.15384615384615385	0.15384615384615385
