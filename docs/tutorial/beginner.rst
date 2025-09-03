@@ -87,7 +87,7 @@ A configuration file controls how SPRAS runs.  It defines which algorithms to ru
 SPRAS uses Snakemake, a workflow manager, together with Docker, containerized software, to read the configuration file and execute a SPRAS workflow. During a run, Snakemake will automatically fetch any missing Docker images as long as Docker is running. Snakemake considers a task from the configuration file complete once the expected output files are present in the output directory. As a result, rerunning the same configuration file may do nothing if those files already exist. If you want to continue running or rerun SPRAS with the same configuration file, remove the output directory (or its contents) or update the configuration file to trigger Snakemake to generate new results.
 
 For this part of the tutorial, we’ll use a pre-defined configuration file. 
-Download it here here: :download:`Beginner Config File <../_static/config/beginner.yaml>`
+Download it here: :download:`Beginner Config File <../_static/config/beginner.yaml>`
 
 Save the file into the config/ folder of your SPRAS installation.
 After adding this file, SPRAS will use the configuration to set up and reference your directory structure, which should now look like this:
@@ -194,17 +194,16 @@ From the root directory spras/ (not spras/spras, this holds the code to run spra
 
     snakemake --cores 1 --configfile config/beginner.yaml
 
-my Sub-subsection
+my Subsection
 -----------------
 My Sub-subsection
 ^^^^^^^^^^^^^^^^^
 - egfr 
 - one algorithm
 - three different preset combos
-    - run one at a time, then describe what is happening in the output files and the caching
-- provide a config template to use? YES but mostly prefilled out. leave one or two combos commented out that a user can rerun or provide examples in the tutorial itself that a user can copy and paste
-    - provide different ways parameters can be updated? list vs single int or str for now (show the other ways in the hard/in future stuff)
-
+    - run one then 2 at a time, then describe what is happening in the output files and the caching
+- then run the analysese and explain what is happening 
+(what is happening based on the logs (what is run/rerun), what the outputs are (pathway vs raw-pathway) (hashed parameters) (folders) (the other files that are not outputs))
 
 Step #: Understanding the Outputs / Visulizing the Outputs
 ==========================================================
