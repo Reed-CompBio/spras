@@ -6,10 +6,10 @@ TODO: add an explanation of this tutorial
 Step 1: Turn data into the input structure we require
 -----------------------------------------------------
 
-Step 2: Adding multiple PRAs to the workflow
----------------------------------------------
+TODO: show the different input types?
+allow people to do one or the other
 
-Step 3: Use/Show summary stats and ML code
+Step 2: Adding multiple PRAs to the workflow
 ---------------------------------------------
 
 1. Algorithms
@@ -28,6 +28,10 @@ Step 3: Use/Show summary stats and ML code
     - Bow Tie Builder
     - ResponseNet 
 
+
+Step 3: Use/Show summary stats and ML code
+---------------------------------------------
+
 4. Gold Standards
 
 Defines the input files SPRAS will use to evaluate output subnetworks
@@ -43,8 +47,6 @@ A gold standard dataset is comprised of:
 
 Controls which types of post-analysis are run, for this part of the tutorial:
 
-- Summary statistics: calculates metrics per dataset for each algorithm
-- Cytoscape export: generates .cys session files for each output subnetwork for easy visualization
 - Machine learning (ML): PCA, HAC, ensembling, and jaccard similarity that is run between algortihmns and per algorithm
 - Evaluation: Compares reconstructed pathways against the gold standards using different parameter selections
 - Each analysis has an include: true/false toggle
