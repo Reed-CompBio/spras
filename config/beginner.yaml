@@ -26,8 +26,22 @@ algorithms:
       include: true
       run1:
         k: 1
-        # run2:
-        #   k: [10, 100] # uncomment for step #3.X
+      run2:
+        k: [10, 100] # uncomment for step #
+
+# # do one or the other, and do 3 combinations total
+# #  - provide different ways parameters can be updated? list vs single int or str for now (show the other ways in the hard/in future stuff)
+# - name: "omicsintegrator1"
+#   params:
+#     include: true
+#     run1:
+#       b: 5
+#       w: 2
+#       d: 10
+#       # run2: uncomment for step #
+#       #   b: 6
+#       #   w: 4
+#       #   d: 10
 
 # Here we specify which pathways to run and other file location information.
 # Assume that if a dataset label does not change, the lists of associated input files do not change
@@ -43,14 +57,14 @@ datasets:
 
 reconstruction_settings:
 
-  # Set where everything is saved
+  # set where everything is saved
   locations:
     reconstruction_dir: "output/basic"
 
 analysis:
   # Create one summary per pathway file and a single summary table for all pathways for each dataset
   summary:
-    include: false # set to true for step #3.X
+    include: true # set to true for step #
   # Create Cytoscape session file with all pathway graphs for each dataset
   cytoscape:
-    include: false # set to true for step #3.X
+    include: true # set to true for step #
