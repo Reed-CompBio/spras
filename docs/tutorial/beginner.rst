@@ -90,7 +90,7 @@ For this part of the tutorial, we’ll use a pre-defined configuration file.
 Download it here: :download:`Beginner Config File <../_static/config/beginner.yaml>`
 
 Save the file into the config/ folder of your SPRAS installation.
-After adding this file, SPRAS will use the configuration to set up and reference your directory structure, which should now look like this:
+After adding this file, SPRAS will use the configuration to set up and reference your directory structure, which will look like this:
 
 .. code-block:: text
 
@@ -188,23 +188,252 @@ In this example:
 Step 3: Running SPRAS on a provided example dataset 
 ====================================================
 
-From the root directory spras/ (not spras/spras, this holds the code to run spras), run the command:
+3.1 Running SPRAS with the Beginner Config
+------------------------------------------
+From the root directory spras/, run the command below from the command line:
 
 .. code:: bash
 
     snakemake --cores 1 --configfile config/beginner.yaml
 
-my Subsection
------------------
-My Sub-subsection
-^^^^^^^^^^^^^^^^^
-- egfr 
-- one algorithm
-- three different preset combos
-    - run one then 2 at a time, then describe what is happening in the output files and the caching
-- then run the analysese and explain what is happening 
-(what is happening based on the logs (what is run/rerun), what the outputs are (pathway vs raw-pathway) (hashed parameters) (folders) (the other files that are not outputs))
+What Happens When You Run This Command
+^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+What your directory structure should like after this run:
 
-Step #: Understanding the Outputs / Visulizing the Outputs
+.. code-block:: text
+
+   spras/
+   ├── .snakemake/
+   │   └── log/
+   │       └── ... snakemake log files ...
+   ├── config/
+   │   └── basic.yaml
+   ├── inputs/
+   │   ├── phosphosite-irefindex13.0-uniprot.txt
+   │   └── tps-egfr-prizes.txt
+   ├── outputs/
+   │   └── basic/
+   │       └── egfr-pathlinker-params-D4TUKMX/
+   │            └── pathway.txt
+   │            └── raw-pathway.txt
+   │       └── logs/
+   │                └── dataset-egfr.yaml
+   │                └── parameters-pathlinker-params-D4TUKMX.yaml
+   │       └── prepared/
+   │            └── egfr-pathlinker-inputs
+   │                └── network.txt
+   │                └── nodetypes.txt
+   │       └── dataset-egfr-merged.pickle
+
+
+1. Snakemake starts the workflow
+
+Snakemake reads the options set in the beginner.yaml configuration file and determines which datasets, algorithms, and parameter combinations need to run.  It also checks if any post-analysis steps were requested.
+
+2. Preparing the dataset
+
+SPRAS takes the interactome and node prize files specified in the config and bundles them into a Dataset object to be used for processing algorithm specific inputs. This object is stored as a .pickle file (e.g. dataset-egfr-merged.pickle) so it can be reused for other algorithms without re-processing it.
+
+3. Creating algorithm specific inputs
+
+For each algorithm marked as include: true in the config, SPRAS generates input files tailored to that algorithm. In this case, only PathLinker is enabled. SPRAS creates the network.txt and nodetypes.txt files required by PathLinker.
+
+4. Organizing results with parameter hashes
+
+Each dataset–algorithm–parameter combination is placed in its own folder named like egfr-pathlinker-params-D4TUKMX/. D4TUKMX is a hash that uniquely identifies the specific parameter combination (k = 10 here). A matching log file in logs/parameters-pathlinker-params-D4TUKMX.yaml records the exact parameter values.
+
+5. Running the algorithm
+
+SPRAS launches the PathLinker Docker image, sending it the prepared files and parameter settings. PathLinker runs and produces a raw pathway output file (raw-pathway.txt) that holds the subnetwork it found in its own native format.
+
+6. Standardizing the results
+
+SPRAS parses the raw PathLinker output into a standardized SPRAS format (pathway.txt). This ensures all algorithms output are put into a standardized output, because their native formats differ.
+
+7. Logging the Snakemake run 
+
+Snakemake creates a dated log in .snakemake/log/. This log shows what rules ran and any errors that occurred during the SPRAS run.
+
+
+3.2 Running SPRAS with More Parameter Combinations
+---------------------------------------------------
+
+In the beginner.yaml configuration file, uncomment the run2 section under pathlinker so it looks like:
+
+.. code-block:: text
+    
+    run2:   
+        k: [10, 100] 
+        
+
+After saving the changes, rerun with:
+
+.. code:: bash
+
+    snakemake --cores 1 --configfile config/beginner.yaml
+
+What Happens When You Run This Command
+^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+
+What your directory structure should like after this run:
+
+.. code-block:: text
+
+   spras/
+   ├── .snakemake/
+   │   └── log/
+   │       └── ... snakemake log files ...
+   ├── config/
+   │   └── basic.yaml
+   ├── inputs/
+   │   ├── phosphosite-irefindex13.0-uniprot.txt
+   │   └── tps-egfr-prizes.txt
+   ├── outputs/
+   │   └── basic/
+   │       └── egfr-pathlinker-params-7S4SLU6/
+   │            └── pathway.txt
+   │            └── raw-pathway.txt
+   │       └── egfr-pathlinker-params-D4TUKMX/
+   │            └── pathway.txt
+   │            └── raw-pathway.txt
+   │       └── egfr-pathlinker-params-VQL7BDZ/
+   │            └── pathway.txt
+   │            └── raw-pathway.txt
+   │       └── logs/
+   │                └── dataset-egfr.yaml
+   │                └── parameters-pathlinker-params-7S4SLU6.yaml
+   │                └── parameters-pathlinker-params-D4TUKMX.yaml
+   │                └── parameters-pathlinker-params-VQL7BDZ.yaml
+   │       └── prepared/
+   │            └── egfr-pathlinker-inputs
+   │                └── network.txt
+   │                └── nodetypes.txt
+   │       └── dataset-egfr-merged.pickle
+
+
+1.	Snakemake loads the config file
+
+Snakemake reads the options in beginner.yaml to see which datasets, algorithms, and parameter combinations are enabled. It also checks if any post-analysis steps were requested.
+Snakemake examines cached results to avoid redundant work. It will only rerun steps that haven’t been completed before or that are outdated. For this part, the dataset pickle, the PathLinker inputs, and the previously run D4TUKMX parameter combination are reused from cache and not executed again.
+
+
+2. Organizing outputs per parameter combination
+
+Each new dataset–algorithm–parameter combination gets its own folder (e.g egfr-pathlinker-params-7S4SLU6/ and egfr-pathlinker-params-VQL7BDZ/)
+The hashes 7S4SLU6 and VQL7BDZ uniquely identifies the specific set of parameters used.
+
+3. Reusing prepared inputs with additional parameter combinations
+
+Since PathLinker has already been run once, SPRAS uses the cached prepared inputs (network.txt, nodetypes.txt) rather than regenerating them.
+For each new parameter combination, SPRAS calls the PathLinker Docker image with the cached inputs plus the updated parameter values. PathLinker then runs and produces a raw-pathway.txt file specific to each parameter hash.
+
+4. Parsing into standardized results
+
+SPRAS parses each new raw-pathway.txt file into a standardized SPRAS format (pathway.txt).
+
+
+3.3 Running Analyses within SPRAS
+---------------------------------
+To enable downstream analyses, update the analysis section in your configuration file by setting both summary and cytoscape to true. Your analysis section in the configuration file should look like this:
+
+.. code-block:: text
+
+    analysis:
+        summary:
+            include: true 
+        cytoscape:
+            include: true 
+
+After saving the changes, rerun with:
+
+.. code:: bash
+
+    snakemake --cores 1 --configfile config/beginner.yaml
+
+
+What Happens When You Run This Command
+^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+What your directory structure should like after this run:
+
+.. code-block:: text
+
+   spras/
+   ├── .snakemake/
+   │   └── log/
+   │       └── ... snakemake log files ...
+   ├── config/
+   │   └── basic.yaml
+   ├── inputs/
+   │   ├── phosphosite-irefindex13.0-uniprot.txt
+   │   └── tps-egfr-prizes.txt
+   ├── outputs/
+   │   └── basic/
+   │       └── egfr-pathlinker-params-7S4SLU6/
+   │            └── pathway.txt
+   │            └── raw-pathway.txt
+   │       └── egfr-pathlinker-params-D4TUKMX/
+   │            └── pathway.txt
+   │            └── raw-pathway.txt
+   │       └── egfr-pathlinker-params-VQL7BDZ/
+   │            └── pathway.txt
+   │            └── raw-pathway.txt
+   │       └── logs/
+   │                └── dataset-egfr.yaml
+   │                └── parameters-pathlinker-params-7S4SLU6.yaml
+   │                └── parameters-pathlinker-params-D4TUKMX.yaml
+   │                └── parameters-pathlinker-params-VQL7BDZ.yaml
+   │       └── prepared/
+   │            └── egfr-pathlinker-inputs
+   │                └── network.txt
+   │                └── nodetypes.txt
+   │       └── dataset-egfr-merged.pickle
+   │       └── egfr-cytoscape.cys
+   │       └── egfr-pathway-summary.txt
+
+1. Reusing cached results
+
+Snakemake reads the options set in beginner.yaml and checks for any requested post-analysis steps. Instead of rerunning completed tasks, it reuses cached results; in this case, the pathway.txt files generated from the previously executed PathLinker parameter combinations for the egfr dataset.
+
+2.	Running the summary analysis
+
+SPRAS aggregates the pathway.txt files from all selected parameter combinations into a single summary table. This table reports key graph-based statistics for each pathway, including:
+
+- Number of nodes
+- Number of edges
+- Number of connected components
+- Network density
+- Maximum degree
+- Median degree
+- Maximum diameter
+- Average path length
+
+The results are saved in egfr-pathway-summary.txt.
+
+3.	Running the Cytoscape analysis
+
+All pathway.txt files from the chosen parameter combinations are collected and passed into the Cytoscape Docker image. A Cytoscape session file is then generated, containing visualizations for each pathway. This file is saved as egfr-cytoscape.cys and can be opened in Cytoscape for interactive exploration.
+
+
+Step 4: Understanding the Outputs / Visulizing the Outputs
 ==========================================================
 
+- look at each output
+- look at the statistics
+- look at the cytoscape images
+
+- explain what is happening?
+
+.. image:: ../_static/images/1_pathway.png
+   :alt: description of the image
+   :width: 400
+   :align: center
+
+.. image:: ../_static/images/10_pathway.png
+   :alt: description of the image
+   :width: 400
+   :align: center
+
+.. image:: ../_static/images/100_pathway.png
+   :alt: description of the image
+   :width: 400
+   :align: center

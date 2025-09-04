@@ -15,3 +15,6 @@ Anything not included in the config file
 Sets options that apply to the entire workflow.
 
 - Examples: the container framework (docker, singularity, dsub), where to pull container images from, and technical settings like hash_length.
+
+running spras with multiple parameter combinations with multiple algorithms on multiple Datasets
+- for the tutorial we are only doing one dataset
