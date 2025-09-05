@@ -149,11 +149,15 @@ class ContainerError(RuntimeError):
 
         super(ContainerError, self).__init__(message, error_code, stdout, stderr, *args)
 
-    def streams_contain(self, snippet: str):
+    def streams_contain(self, needle: str):
+        """
+        Checks (with case sensitivity)
+        if any of the stdout/err streams have the provided needle.
+        """
         stdout = self.stdout if self.stdout else ''
         stderr = self.stderr if self.stderr else ''
 
-        return (snippet in stdout) or (snippet in stderr)
+        return (needle in stdout) or (needle in stderr)
 
     # Due to
     # https://github.com/snakemake/snakemake/blob/d4890b4da691506b6a258f7534ac41fdb7ef5ab4/src/snakemake/exceptions.py#L18

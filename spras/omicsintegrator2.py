@@ -130,10 +130,6 @@ class OmicsIntegrator2(PRM):
 
         container_suffix = "omics-integrator-2:v2"
 
-        # We use this later either if we encounter unrecoverable OI2 errors
-        # or as the main output file we want to post-process in parse_output.
-        output_tsv = Path(out_dir, 'oi2.tsv')
-
         run_container_and_log('Omics Integrator 2',
                                 container_framework,
                                 container_suffix,

@@ -35,7 +35,7 @@ class TestDOMINO:
 
     def test_domino_optional(self):
         # Include optional arguments
-        OUT_FILE_DEFAULT.unlink(missing_ok=True)
+        OUT_FILE_OPTIONAL.unlink(missing_ok=True)
         DOMINO.run(
             network=TEST_DIR / 'input' / 'simple' / 'domino-network.txt',
             active_genes=TEST_DIR / 'input' / 'simple' / 'domino-active-genes.txt',
