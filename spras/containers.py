@@ -236,10 +236,8 @@ def run_container_and_log(name: str, framework: str, container_suffix: str, comm
                 out = str(out, "utf-8")
             print(indent(out))
     except docker.errors.ContainerError as err:
-        # TODO: do we want to patch dockerpy to preserve stdout on ContainerError?
-        # ContainerError doesn't expose any stdout property, since it never gets stdout passed in in the first place:
-        # https://github.com/docker/docker-py/blob/6e6a273573fe77f00776b30de0685162a102e43f/docker/models/containers.py#L897-L908
-        # (Specifically, out = container.logs(stdout=False, stderr=True) erases the stdout usually attached to the local `out` variable in the above code.)
+        # TODO: dockerpy does not share stdout on error.
+        # https://github.com/Reed-CompBio/spras/issues/388
 
         stderr = err.stderr if err.stderr else ''
         stderr = str(stderr, 'utf-8') if isinstance(stderr, bytes) else stderr
