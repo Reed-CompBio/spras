@@ -222,7 +222,7 @@ def run_container_and_log(name: str, framework: str, container_suffix: str, comm
                     exit_status = int(out['return_code']) if 'return_code' in out else 0
                     out = ''.join(out['message'])
                     if exit_status != 0:
-                        message = f'An unexpected non-zero exit status ({exit_status}) occured while running this singularity container:\n' + indent(out)
+                        message = f'An unexpected non-zero exit status ({exit_status}) occurred while running this singularity container:\n' + indent(out)
                         raise ContainerError(message, exit_status, out, None)
                 else:
                     print("Note: The following output is an unknown message format which should be properly handled.")
