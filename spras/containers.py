@@ -133,7 +133,7 @@ class ContainerError(RuntimeError):
         """
         Constructs a new ContainerError.
 
-        @param message: The message to display to the user. This should usually refer to the indent call to differentriate between
+        @param message: The message to display to the user. This should usually refer to the indent call to differentiate between
         general logging done by Snakemake/logging calls.
         @param error_code: Also known as exit status; this should generally be non-zero for ContainerErrors.
         @param stdout: The standard output stream. If the origin of the stream is unknown, leave it in stdout.
