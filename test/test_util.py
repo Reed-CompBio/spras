@@ -41,7 +41,7 @@ class TestUtil:
                               ('test/OmicsIntegrator1/output', PurePosixPath('/spras'), '/spras/TNDO5TR/output'),
                               ('../src', '/spras', '/spras/NNBVZ6X/src')])
     def test_prepare_volume(self, filename, volume_base, expected_filename):
-        _, container_filename = prepare_volume(filename, volume_base)
+        _, container_filename = prepare_volume(filename, volume_base, config.config.container_settings)
         assert container_filename == expected_filename
 
     def test_convert_docker_path(self):

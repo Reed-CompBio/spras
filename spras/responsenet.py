@@ -1,5 +1,6 @@
 from pathlib import Path
 
+from spras.config.container_schema import ProcessedContainerSettings
 from spras.containers import prepare_volume, run_container_and_log
 from spras.interactome import (
     convert_undirected_to_directed,
@@ -53,7 +54,7 @@ class ResponseNet(PRM):
                      header=False)
 
     @staticmethod
-    def run(sources=None, targets=None, edges=None, output_file=None, gamma=10, container_framework="docker"):
+    def run(sources=None, targets=None, edges=None, output_file=None, gamma=10, container_settings=None):
         """
         Run ResponseNet with Docker (or singularity)
         @param sources: input sources (required)
@@ -61,8 +62,9 @@ class ResponseNet(PRM):
         @param edges: input network file (required)
         @param output_file: output file name (required)
         @param gamma: integer representing gamma (optional, default is 10)
-        @param container_framework: choose the container runtime framework, currently supports "docker" or "singularity" (optional)
+        @param container_settings: configure the container runtime
         """
+        if not container_settings: container_settings = ProcessedContainerSettings()
 
         # ensures that these parameters are required
         if not sources or not targets or not edges or not output_file:
@@ -74,19 +76,19 @@ class ResponseNet(PRM):
         # the tuple is for mapping the sources, targets, edges, and output
         volumes = list()
 
-        bind_path, sources_file = prepare_volume(sources, work_dir)
+        bind_path, sources_file = prepare_volume(sources, work_dir, container_settings)
         volumes.append(bind_path)
 
-        bind_path, targets_file = prepare_volume(targets, work_dir)
+        bind_path, targets_file = prepare_volume(targets, work_dir, container_settings)
         volumes.append(bind_path)
 
-        bind_path, edges_file = prepare_volume(edges, work_dir)
+        bind_path, edges_file = prepare_volume(edges, work_dir, container_settings)
         volumes.append(bind_path)
 
         # Create a prefix for the output filename and ensure the directory exists
         out_dir = Path(output_file).parent
         out_dir.mkdir(parents=True, exist_ok=True)
-        bind_path, mapped_out_dir = prepare_volume(str(out_dir), work_dir)
+        bind_path, mapped_out_dir = prepare_volume(str(out_dir), work_dir, container_settings)
         volumes.append(bind_path)
 
         mapped_out_prefix = Path(mapped_out_dir)
@@ -106,11 +108,11 @@ class ResponseNet(PRM):
 
         # constructs a docker run call
         run_container_and_log('ResponseNet',
-                              container_framework,
                               container_suffix,
                               command,
                               volumes,
-                              work_dir)
+                              work_dir,
+                              container_settings)
 
         # Rename the primary output file to match the desired output filename
         out_file_suffixed.rename(output_file)

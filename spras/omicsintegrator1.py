@@ -1,5 +1,6 @@
 from pathlib import Path
 
+from spras.config.container_schema import ProcessedContainerSettings
 from spras.containers import prepare_volume, run_container_and_log
 from spras.interactome import reinsert_direction_col_mixed
 from spras.prm import PRM
@@ -100,7 +101,7 @@ class OmicsIntegrator1(PRM):
     @staticmethod
     def run(edges=None, prizes=None, dummy_nodes=None, dummy_mode=None, mu_squared=None, exclude_terms=None,
             output_file=None, noisy_edges=None, shuffled_prizes=None, random_terminals=None,
-            seed=None, w=None, b=None, d=None, mu=None, noise=None, g=None, r=None, container_framework="docker"):
+            seed=None, w=None, b=None, d=None, mu=None, noise=None, g=None, r=None, container_settings=None):
         """
         Run Omics Integrator 1 in the Docker image with the provided parameters.
         Does not support the garnet, cyto30, knockout, cv, or cv-reps arguments.
@@ -122,8 +123,9 @@ class OmicsIntegrator1(PRM):
         @param noise: Standard Deviation of the gaussian noise added to edges in Noisy Edges Randomizations
         @param g: (gamma) msgsteiner reinforcement parameter that affects the convergence of the solution and runtime, with larger values leading to faster convergence but suboptimal results (default 0.001)
         @param r: msgsteiner parameter that adds random noise to edges, which is rarely needed (default 0)
-        @param container_framework: choose the container runtime framework, currently supports "docker" or "singularity" (optional)
+        @param container_settings: configure the container runtime
         """
+        if not container_settings: container_settings = ProcessedContainerSettings()
         if edges is None or prizes is None or output_file is None or w is None or b is None or d is None:
             raise ValueError('Required Omics Integrator 1 arguments are missing')
 
@@ -132,10 +134,10 @@ class OmicsIntegrator1(PRM):
         # Each volume is a tuple (src, dest)
         volumes = list()
 
-        bind_path, edge_file = prepare_volume(edges, work_dir)
+        bind_path, edge_file = prepare_volume(edges, work_dir, container_settings)
         volumes.append(bind_path)
 
-        bind_path, prize_file = prepare_volume(prizes, work_dir)
+        bind_path, prize_file = prepare_volume(prizes, work_dir, container_settings)
         volumes.append(bind_path)
 
         # 4 dummy mode possibilities:
@@ -148,20 +150,20 @@ class OmicsIntegrator1(PRM):
         if dummy_mode == 'file':
             if dummy_nodes is None:
                 raise ValueError("dummy_nodes file is required when dummy_mode is set to 'file'")
-            bind_path, dummy_file = prepare_volume(dummy_nodes, work_dir)
+            bind_path, dummy_file = prepare_volume(dummy_nodes, work_dir, container_settings)
             volumes.append(bind_path)
 
         out_dir = Path(output_file).parent
         # Omics Integrator 1 requires that the output directory exist
         out_dir.mkdir(parents=True, exist_ok=True)
-        bind_path, mapped_out_dir = prepare_volume(str(out_dir), work_dir)
+        bind_path, mapped_out_dir = prepare_volume(str(out_dir), work_dir, container_settings)
         volumes.append(bind_path)
 
         conf_file = 'oi1-configuration.txt'
         conf_file_local = Path(out_dir, conf_file)
         # Temporary file that will be deleted after running Omics Integrator 1
         write_conf(conf_file_local, w=w, b=b, d=d, mu=mu, noise=noise, g=g, r=r)
-        bind_path, conf_file = prepare_volume(str(conf_file_local), work_dir)
+        bind_path, conf_file = prepare_volume(str(conf_file_local), work_dir, container_settings)
         volumes.append(bind_path)
 
         command = ['python', '/OmicsIntegrator/scripts/forest.py',
@@ -197,11 +199,11 @@ class OmicsIntegrator1(PRM):
 
         container_suffix = "omics-integrator-1:no-conda" # no-conda version is the default
         run_container_and_log('Omics Integrator 1',
-                             container_framework,
                              container_suffix,  # no-conda version is the default
                              command,
                              volumes,
                              work_dir,
+                             container_settings,
                              {'TMPDIR': mapped_out_dir})
 
         conf_file_local.unlink(missing_ok=True)

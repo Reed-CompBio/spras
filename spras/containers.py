@@ -8,7 +8,7 @@ from typing import Iterator, List, Optional, Tuple, Union
 import docker
 import docker.errors
 
-import spras.config.config as config
+from spras.config.container_schema import ProcessedContainerSettings
 from spras.logging import indent
 from spras.util import hash_filename
 
@@ -131,47 +131,47 @@ def env_to_items(environment: dict[str, str]) -> Iterator[str]:
 # TODO consider a better default environment variable
 # Follow docker-py's naming conventions (https://docker-py.readthedocs.io/en/stable/containers.html)
 # Technically the argument is an image, not a container, but we use container here.
-def run_container(framework: str, container_suffix: str, command: List[str], volumes: List[Tuple[PurePath, PurePath]], working_dir: str, environment: Optional[dict[str, str]] = None):
+def run_container(container_suffix: str, command: List[str], volumes: List[Tuple[PurePath, PurePath]], working_dir: str, container_settings: ProcessedContainerSettings, environment: Optional[dict[str, str]] = None):
     """
     Runs a command in the container using Singularity or Docker
-    @param framework: singularity or docker
     @param container_suffix: name of the DockerHub container without the 'docker://' prefix
     @param command: command to run in the container
     @param volumes: a list of volumes to mount where each item is a (source, destination) tuple
     @param working_dir: the working directory in the container
+    @param container_settings: the settings to use to run the container
     @param environment: environment variables to set in the container
     @return: output from Singularity execute or Docker run
     """
-    normalized_framework = framework.casefold()
+    normalized_framework = container_settings.framework.casefold()
 
-    container = config.config.container_settings.prefix + "/" + container_suffix
+    container = container_settings.prefix + "/" + container_suffix
     if normalized_framework == 'docker':
         return run_container_docker(container, command, volumes, working_dir, environment)
     elif normalized_framework == 'singularity':
-        return run_container_singularity(container, command, volumes, working_dir, environment)
+        return run_container_singularity(container, command, volumes, working_dir, container_settings, environment)
     elif normalized_framework == 'dsub':
         return run_container_dsub(container, command, volumes, working_dir, environment)
     else:
-        raise ValueError(f'{framework} is not a recognized container framework. Choose "docker", "dsub", or "singularity".')
+        raise ValueError(f'{container_settings.framework} is not a recognized container framework. Choose "docker", "dsub", or "singularity".')
 
-def run_container_and_log(name: str, framework: str, container_suffix: str, command: List[str], volumes: List[Tuple[PurePath, PurePath]], working_dir: str, environment: Optional[dict[str, str]] = None):
+def run_container_and_log(name: str, container_suffix: str, command: List[str], volumes: List[Tuple[PurePath, PurePath]], working_dir: str, container_settings: ProcessedContainerSettings, environment: Optional[dict[str, str]] = None):
     """
     Runs a command in the container using Singularity or Docker with associated pretty printed messages.
     @param name: the display name of the running container for logging purposes
-    @param framework: singularity or docker
     @param container_suffix: name of the DockerHub container without the 'docker://' prefix
     @param command: command to run in the container
     @param volumes: a list of volumes to mount where each item is a (source, destination) tuple
     @param working_dir: the working directory in the container
+    @param container_settings: the container settings to use
     @param environment: environment variables to set in the container
     @return: output from Singularity execute or Docker run
     """
     if not environment:
         environment = {'SPRAS': 'True'}
 
-    print('Running {} on container framework "{}" on env {} with command: {}'.format(name, framework, list(env_to_items(environment)), ' '.join(command)), flush=True)
+    print('Running {} on container framework "{}" on env {} with command: {}'.format(name, container_settings.framework, list(env_to_items(environment)), ' '.join(command)), flush=True)
     try:
-        out = run_container(framework=framework, container_suffix=container_suffix, command=command, volumes=volumes, working_dir=working_dir, environment=environment)
+        out = run_container(container_suffix=container_suffix, command=command, volumes=volumes, working_dir=working_dir, container_settings=container_settings, environment=environment)
         if out is not None:
             if isinstance(out, list):
                 out = ''.join(out)
@@ -290,7 +290,7 @@ def run_container_docker(container: str, command: List[str], volumes: List[Tuple
     return out
 
 
-def run_container_singularity(container: str, command: List[str], volumes: List[Tuple[PurePath, PurePath]], working_dir: str, environment: Optional[dict[str, str]] = None):
+def run_container_singularity(container: str, command: List[str], volumes: List[Tuple[PurePath, PurePath]], working_dir: str, config: ProcessedContainerSettings, environment: Optional[dict[str, str]] = None):
     """
     Runs a command in the container using Singularity.
     Only available on Linux.
@@ -329,7 +329,7 @@ def run_container_singularity(container: str, command: List[str], volumes: List[
     singularity_options.extend(['--env', ",".join(env_to_items(environment))])
 
     # Handle unpacking singularity image if needed. Potentially needed for running nested unprivileged containers
-    if config.config.container_settings.unpack_singularity:
+    if config.unpack_singularity:
         # Split the string by "/"
         path_elements = container.split("/")
 
@@ -369,7 +369,7 @@ def run_container_singularity(container: str, command: List[str], volumes: List[
 
 
 # Because this is called independently for each file, the same local path can be mounted to multiple volumes
-def prepare_volume(filename: Union[str, PurePath], volume_base: Union[str, PurePath]) -> Tuple[Tuple[PurePath, PurePath], str]:
+def prepare_volume(filename: Union[str, os.PathLike], volume_base: Union[str, PurePath], config: ProcessedContainerSettings) -> Tuple[Tuple[PurePath, PurePath], str]:
     """
     Makes a file on the local file system accessible within a container by mapping the local (source) path to a new
     container (destination) path and renaming the file to be relative to the destination path.
@@ -385,10 +385,10 @@ def prepare_volume(filename: Union[str, PurePath], volume_base: Union[str, PureP
     if not base_path.is_absolute():
         raise ValueError(f'Volume base must be an absolute path: {volume_base}')
 
-    if isinstance(filename, PurePath):
+    if isinstance(filename, os.PathLike):
         filename = str(filename)
 
-    filename_hash = hash_filename(filename, config.config.container_settings.hash_length)
+    filename_hash = hash_filename(filename, config.hash_length)
     dest = PurePosixPath(base_path, filename_hash)
 
     abs_filename = Path(filename).resolve()

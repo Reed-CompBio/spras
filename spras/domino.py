@@ -3,6 +3,8 @@ from pathlib import Path
 
 import pandas as pd
 
+
+from spras.config.container_schema import ProcessedContainerSettings
 from spras.containers import prepare_volume, run_container_and_log
 from spras.interactome import (
     add_constant,
@@ -70,7 +72,7 @@ class DOMINO(PRM):
                         header=['ID_interactor_A', 'ppi', 'ID_interactor_B'])
 
     @staticmethod
-    def run(network=None, active_genes=None, output_file=None, slice_threshold=None, module_threshold=None, container_framework="docker"):
+    def run(network=None, active_genes=None, output_file=None, slice_threshold=None, module_threshold=None, container_settings=None):
         """
         Run DOMINO with Docker.
         Let visualization be always true, parallelization be always 1 thread, and use_cache be always false.
@@ -80,8 +82,9 @@ class DOMINO(PRM):
         @param output_file: path to the output pathway file (required)
         @param slice_threshold: the p-value threshold for considering a slice as relevant (optional)
         @param module_threshold: the p-value threshold for considering a putative module as final module (optional)
-        @param container_framework: choose the container runtime framework, currently supports "docker" or "singularity" (optional)
+        @param container_settings: configure the container runtime
         """
+        if not container_settings: container_settings = ProcessedContainerSettings()
 
         if not network or not active_genes or not output_file:
             raise ValueError('Required DOMINO arguments are missing')
@@ -91,19 +94,19 @@ class DOMINO(PRM):
         # Each volume is a tuple (source, destination)
         volumes = list()
 
-        bind_path, network_file = prepare_volume(network, work_dir)
+        bind_path, network_file = prepare_volume(network, work_dir, container_settings)
         volumes.append(bind_path)
 
-        bind_path, node_file = prepare_volume(active_genes, work_dir)
+        bind_path, node_file = prepare_volume(active_genes, work_dir, container_settings)
         volumes.append(bind_path)
 
         out_dir = Path(output_file).parent
         out_dir.mkdir(parents=True, exist_ok=True)
-        bind_path, mapped_out_dir = prepare_volume(str(out_dir), work_dir)
+        bind_path, mapped_out_dir = prepare_volume(str(out_dir), work_dir, container_settings)
         volumes.append(bind_path)
 
         slices_file = Path(out_dir, 'slices.txt')
-        bind_path, mapped_slices_file = prepare_volume(str(slices_file), work_dir)
+        bind_path, mapped_slices_file = prepare_volume(str(slices_file), work_dir, container_settings)
         volumes.append(bind_path)
 
         # Make the Python command to run within the container
@@ -113,11 +116,11 @@ class DOMINO(PRM):
 
         container_suffix = "domino"
         run_container_and_log('slicer',
-                             container_framework,
                              container_suffix,
                              slicer_command,
                              volumes,
-                             work_dir)
+                             work_dir,
+                             container_settings)
 
         # Make the Python command to run within the container
         domino_command = ['domino',
@@ -137,11 +140,11 @@ class DOMINO(PRM):
             domino_command.extend(['--module_threshold', str(module_threshold)])
 
         run_container_and_log('DOMINO',
-                             container_framework,
                              container_suffix,
                              domino_command,
                              volumes,
-                             work_dir)
+                             work_dir,
+                             container_settings)
 
         # DOMINO creates a new folder in out_dir to output its modules HTML files into called active_genes
         # The filename is determined by the input active_genes and cannot be configured
