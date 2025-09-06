@@ -33,19 +33,10 @@ conda activate oi1
 python setup.py test -a "--msgpath=$MSGSTEINER_PATH"
 ```
 
-## No conda alternative
-An alternative version of the Omics Integrator image does not use conda.
-This simplifies using the same image for Docker and Singularity.
-This version uses `requirements.txt` instead of `environment.yml` to specify required Python packages.
-It can be built and tested in a manner similar to the conda-based image.
-```
-docker build -t reedcompbio/omics-integrator-1:no-conda -f Dockerfile_no_conda .
-
-winpty docker run -it reedcompbio/omics-integrator-1:no-conda bash
-python setup.py test -a "--msgpath=$MSGSTEINER_PATH"
-```
-
-This version of the image is the default used by SPRAS.
+## Versions:
+- v1: Created a named conda environment in the container and used `ENTRYPOINT` to execute commands inside that environment. Not compatible with Singularity.
+- no-conda: Avoided conda and used a Python 2.7.18 base image to install the required Python dependencies.
+- v2: Installed Python 2.7.18 and all dependencies into a Debian slim image.
 
 ## TODO
 - Attribute https://github.com/fraenkel-lab/OmicsIntegrator
