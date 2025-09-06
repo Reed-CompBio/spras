@@ -174,7 +174,7 @@ class MEO(PRM):
         properties_file_local = Path(out_dir, properties_file)
         write_properties(filename=properties_file_local, edges=edge_file, sources=source_file, targets=target_file,
                          edge_output=mapped_output_file, path_output=mapped_path_output,
-                         max_path_length=max_path_length, local_search=local_search, rand_restarts=rand_restarts, framework=container_framework)
+                         max_path_length=max_path_length, local_search=local_search, rand_restarts=rand_restarts, framework=container_settings.framework)
         bind_path, properties_file = prepare_volume(str(properties_file_local), work_dir, container_settings)
         volumes.append(bind_path)
 
@@ -182,7 +182,7 @@ class MEO(PRM):
 
         container_suffix = "meo"
         run_container_and_log('Maximum Edge Orientation',
-                             container_framework,
+                             container_suffix,
                              command,
                              volumes,
                              work_dir,
