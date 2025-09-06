@@ -44,6 +44,14 @@ class ProcessedContainerSettings:
     unpack_singularity: bool = False
     prefix: str = DEFAULT_CONTAINER_PREFIX
     hash_length: int = 7
+    """
+    The hash length for container-specific usage. This does not appear in
+    the output folder, but it may show up in logs, and usually never needs
+    to be tinkered with. By default, this will be the top-level `hash_length`.
+
+    We prefer this `hash_length` in our container-running logic to
+    avoid a (future) dependency diamond.
+    """
 
     @staticmethod
     def from_container_settings(settings: ContainerSettings, default_hash_length: int) -> "ProcessedContainerSettings":
