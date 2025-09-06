@@ -4,6 +4,7 @@ from pathlib import Path
 
 import pytest
 
+from spras.config.container_schema import ContainerFramework, ProcessedContainerSettings
 import spras.config.config as config
 from spras.rwr import RWR
 
@@ -57,5 +58,5 @@ class TestRWR:
                 nodes=Path(TEST_DIR, 'input','rwr-nodes.txt'),
                 alpha=0.85,
                 output_file=OUT_FILE,
-                container_framework="singularity")
+                container_settings=ProcessedContainerSettings(framework=ContainerFramework.singularity))
         assert OUT_FILE.exists()

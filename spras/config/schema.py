@@ -15,6 +15,7 @@ from typing import Annotated, Optional
 
 from pydantic import AfterValidator, BaseModel, ConfigDict, Field
 
+from spras.config.container_schema import ContainerSettings
 from spras.config.util import CaseInsensitiveEnum
 
 # Most options here have an `include` property,
@@ -89,18 +90,6 @@ def label_validator(name: str):
         return label
     return validate
 
-class ContainerFramework(CaseInsensitiveEnum):
-    docker = 'docker'
-    # TODO: add apptainer variant once #260 gets merged
-    singularity = 'singularity'
-    dsub = 'dsub'
-
-class ContainerRegistry(BaseModel):
-    base_url: str
-    owner: str = Field(description="The owner or project of the registry")
-
-    model_config = ConfigDict(extra='forbid')
-
 class AlgorithmParams(BaseModel):
     include: bool
     directed: Optional[bool] = None
@@ -148,10 +137,7 @@ class ReconstructionSettings(BaseModel):
     model_config = ConfigDict(extra='forbid')
 
 class RawConfig(BaseModel):
-    # TODO: move these container values to a nested container key
-    container_framework: ContainerFramework = ContainerFramework.docker
-    unpack_singularity: bool = False
-    container_registry: ContainerRegistry
+    containers: ContainerSettings
 
     hash_length: int = DEFAULT_HASH_LENGTH
     "The length of the hash used to identify a parameter combination"
