@@ -4,6 +4,7 @@ from pathlib import Path
 
 import pytest
 
+from spras.config.container_schema import ContainerFramework, ProcessedContainerSettings
 import spras.config.config as config
 from spras.responsenet import ResponseNet
 
@@ -56,7 +57,8 @@ class TestResponseNet:
         ResponseNet.run(sources=TEST_DIR / 'input' / 'rn-sources.txt',
                         targets=TEST_DIR / 'input' / 'rn-targets.txt',
                         edges=TEST_DIR / 'input' / 'rn-edges.txt',
-                        output_file=OUT_FILE)
+                        output_file=OUT_FILE,
+                        container_settings=ProcessedContainerSettings(framework=ContainerFramework.singularity))
         assert OUT_FILE.exists()
 
         assert filecmp.cmp(OUT_FILE, EXPECTED_FILE, shallow=True)

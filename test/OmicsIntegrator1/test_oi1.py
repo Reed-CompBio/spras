@@ -3,6 +3,7 @@ from pathlib import Path
 
 import pytest
 
+from spras.config.container_schema import ContainerFramework, ProcessedContainerSettings
 import spras.config.config as config
 from spras.omicsintegrator1 import OmicsIntegrator1, write_conf
 
@@ -124,5 +125,5 @@ class TestOmicsIntegrator1:
                              w=5,
                              b=1,
                              d=10,
-                             container_framework="singularity")
+                             container_settings=ProcessedContainerSettings(framework=ContainerFramework.singularity))
         assert out_path.exists()

@@ -4,6 +4,7 @@ from pathlib import Path
 
 import pytest
 
+from spras.config.container_schema import ContainerFramework, ProcessedContainerSettings
 import spras.config.config as config
 
 config.init_from_file("config/config.yaml")
@@ -317,4 +318,4 @@ class TestBowTieBuilder:
                            sources=Path(TEST_DIR, 'input', 'btb-sources.txt'),
                            targets=Path(TEST_DIR, 'input', 'btb-targets.txt'),
                            output_file=OUT_FILE_DEFAULT,
-                           container_framework="singularity")
+                           container_settings=ProcessedContainerSettings(framework=ContainerFramework.singularity))
