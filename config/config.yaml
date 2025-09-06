@@ -1,4 +1,5 @@
-# yaml-language-server: $schema=./schema.json
+# Specify the schema:
+# yaml-language-server: $schema=schema.json
 
 # Global workflow control
 
