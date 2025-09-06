@@ -128,7 +128,7 @@ class OmicsIntegrator2(PRM):
         if seed is not None:
             command.extend(['--seed', str(seed)])
 
-        container_suffix = "omics-integrator-2:v2"
+        container_suffix = "omics-integrator-2:v1"
         run_container_and_log('Omics Integrator 2',
                              container_framework,
                              container_suffix,

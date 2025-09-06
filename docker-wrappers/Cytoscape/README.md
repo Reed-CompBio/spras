@@ -1,6 +1,6 @@
 # Cytoscape image
 
-A Docker image for [Cytoscape](https://cytoscape.org/) that is available on [DockerHub](https://hub.docker.com/repository/docker/reedcompbio/py4cytoscape).
+A Docker image for [Cytoscape](https://cytoscape.org/) that is available on the [GitHub Container Registry](https://github.com/orgs/Reed-CompBio/packages/container/package/py4cytoscape).
 It was originally derived from the [`docker-cytoscape-desktop/py4cytoscape`](https://github.com/cytoscape/docker-cytoscape-desktop/blob/173ab46b4b5e5c148113ad0c9960a6af3fc50432/py4cytoscape/Dockerfile) image.
 
 Thank you to Scooter Morris for help debugging problems running Cytoscape in Singularity.
@@ -9,7 +9,7 @@ Thank you to Scooter Morris for help debugging problems running Cytoscape in Sin
 
 To create the Docker image run:
 ```
-docker build -t reedcompbio/py4cytoscape -f Dockerfile .
+docker build -t reed-compbio/py4cytoscape -f Dockerfile .
 ```
 from this directory.
 
@@ -18,9 +18,9 @@ Test code is located in `test/analysis/test_cytoscape.py`.
 The Docker wrapper can be tested with `pytest`.
 
 ## Versions:
-- v1: Use supervisord to launch Cytoscape from a Python subprocess, then connect to Cytoscape with py4cytoscape. Only loads undirected pathways. Compatible with Singularity in local testing (Apptainer version 1.2.2-1.el7) but fails in GitHub Actions.
-- v2: Add support for edge direction column.
-- v3: Add support for header lines in files
+- (docker hub) v1: Use supervisord to launch Cytoscape from a Python subprocess, then connect to Cytoscape with py4cytoscape. Only loads undirected pathways. Compatible with Singularity in local testing (Apptainer version 1.2.2-1.el7) but fails in GitHub Actions.
+- (docker hub) v2: Add support for edge direction column.
+- v1: Add support for header lines in files
 
 ## TODO
 - Add an auth file for `xvfb-run`
