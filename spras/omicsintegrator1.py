@@ -66,16 +66,16 @@ class OmicsIntegrator1Params(BaseModel):
     "Controls the maximum path-length from root to terminal nodes"
 
     mu: float = 0.0
-    "Controls the degree-based negative prizes (defualt 0.0)"
+    "Controls the degree-based negative prizes (default 0.0)"
 
     noise: Optional[float] = None
     "Standard Deviation of the gaussian noise added to edges in Noisy Edges Randomizations"
 
-    g: Optional[float] = None
-    "(Gamma) multiplicative edge penalty from degree of endpoints"
+    g: float = 0.001
+    "msgsteiner reinforcement parameter that affects the convergence of the solution and runtime, with larger values leading to faster convergence but suboptimal results."
 
-    r: Optional[float] = None
-    "msgsteiner parameter that adds random noise to edges, which is rarely needed because the --noisyEdges option is recommended instead (default 0)"
+    r: float = 0
+    "msgsteiner parameter that adds random noise to edges, which is rarely needed."
 
     model_config = ConfigDict(extra='forbid', use_attribute_docstrings=True)
 
