@@ -236,17 +236,14 @@ def run_container_and_log(name: str, framework: str, container_suffix: str, comm
                 out = str(out, "utf-8")
             print(indent(out))
     except docker.errors.ContainerError as err:
-        # TODO: dockerpy does not share stdout on error.
-        # https://github.com/Reed-CompBio/spras/issues/388
-
-        stderr = err.stderr if err.stderr else ''
-        stderr = str(stderr, 'utf-8') if isinstance(stderr, bytes) else stderr
+        stdout = str(err.container.logs(stdout=True, stderr=False), 'utf-8')
+        stderr = str(err.container.logs(stdout=False, stderr=True), 'utf-8')
 
         message = textwrap.dedent(f'''\
                                   (Command formatted as list: `{err.command}`)
                                   An unexpected non-zero exit status ({err.exit_status}) inside the docker image {err.image} occurred:\n''') + indent(stderr)
         # We retrieved all of the information from docker.errors.ContainerError, so here, we ignore the original error.
-        raise ContainerError(message, err.exit_status, None, stderr) from None
+        raise ContainerError(message, err.exit_status, stdout, stderr) from None
 
 # TODO any issue with creating a new client each time inside this function?
 def run_container_docker(container: str, command: List[str], volumes: List[Tuple[PurePath, PurePath]], working_dir: str, environment: Optional[dict[str, str]] = None):
