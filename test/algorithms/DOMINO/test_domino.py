@@ -8,7 +8,7 @@ from spras.domino import DOMINO, post_domino_id_transform, pre_domino_id_transfo
 
 config.init_from_file("config/config.yaml")
 
-TEST_DIR = 'test/DOMINO/'
+TEST_DIR = 'test/algorithms/DOMINO/'
 OUT_FILE_DEFAULT = TEST_DIR+'output/domino-output.txt'
 OUT_FILE_OPTIONAL = TEST_DIR+'output/domino-output-thresholds.txt'
 

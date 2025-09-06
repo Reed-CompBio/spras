@@ -8,7 +8,7 @@ from spras.pathlinker import PathLinker
 
 config.init_from_file("config/config.yaml")
 
-TEST_DIR = 'test/PathLinker/'
+TEST_DIR = 'test/algorithms/PathLinker/'
 OUT_FILE_DEFAULT = TEST_DIR+'output/pathlinker-ranked-edges.txt'
 OUT_FILE_100 = TEST_DIR+'output/pathlinker-ranked-edges-k100.txt'
 
