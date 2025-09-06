@@ -34,12 +34,10 @@ class PathLinker(PRM):
         @param filename_map: a dict mapping file types in the required_inputs to the filename for that type
         @return:
         """
-        for input_type in PathLinker.required_inputs:
-            if input_type not in filename_map:
-                raise ValueError(f"{input_type} filename is missing")
+        PathLinker.validate_required_inputs(filename_map)
 
         # Get sources and targets for node input file
-        sources_targets = data.request_node_columns(["sources", "targets"])
+        sources_targets = data.get_node_columns(["sources", "targets"])
         if sources_targets is None:
             return False
         both_series = sources_targets.sources & sources_targets.targets
