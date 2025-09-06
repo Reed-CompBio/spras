@@ -120,7 +120,8 @@ class DOMINO(PRM):
                                 volumes,
                                 work_dir)
         except ContainerError as err:
-            # Occurs when DOMINO gets passed some empty dataframe.
+            # Occurs when DOMINO gets passed some empty dataframe from network_file.
+            # This counts as an empty input, so we return an empty output.
             if err.streams_contain("pandas.errors.EmptyDataError: No columns to parse from file"):
                 pass
             else:
@@ -151,7 +152,8 @@ class DOMINO(PRM):
                                   volumes,
                                   work_dir)
         except ContainerError as err:
-            # Occurs when DOMINO gets passed some empty dataframe.
+            # Occurs when DOMINO gets passed some empty dataframe from network_file.
+            # This counts as an empty input, so we return an empty output.
             if err.streams_contain("pandas.errors.EmptyDataError: No columns to parse from file"):
                 pass
             # Here, DOMINO
