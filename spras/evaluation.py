@@ -95,35 +95,41 @@ class Evaluation:
 
             node_tables = []
             for node_file in node_files:
-                node_table = pd.read_table(os.path.join(data_loc, node_file), header=None)
+                node_table = pd.read_table(os.path.join(data_loc, node_file), header=0)
                 if node_table.shape[1] != 1:
                     raise ValueError(
                         f"Gold standard '{self.label}': each node_file provided must have exactly 1 column of nodes."
                     )
+                node_table.columns = [self.NODE_ID]
                 node_tables.append(node_table)
 
             merged_node_table = pd.concat(node_tables, ignore_index=True)
             merged_node_table = merged_node_table.drop_duplicates()
-            merged_node_table.columns = [self.NODE_ID]
-
             self.node_table = merged_node_table
-
 
         if has_edge_files:
             edge_tables = []
 
             for edge_file in edge_files:
-                edge_table = pd.read_table(os.path.join(data_loc, edge_file), header=None)
+                edge_table = pd.read_table(os.path.join(data_loc, edge_file), header=0)
+
+                if edge_table.shape[1] == 2:
+                    # When no direction is specified, default to undirected edges
+                    edge_table["Direction"] = "U"
+
                 if edge_table.shape[1] != 3:
                     raise ValueError(
-                        f"Gold standard '{self.label}': the provided edge_file must have exactly 3 columns that represent Interactor1, Interactor2, Direction."
+                        f"Gold standard '{self.label}': the provided edge_file must have 2 or 3 columns that represent Interactor1, Interactor2, and optionally Direction."
                     )
+
+                edge_table.columns = ['Interactor1', 'Interactor2', 'Direction']
                 edge_tables.append(edge_table)
 
             merged_edge_table = pd.concat(edge_tables, ignore_index=True)
-            merged_edge_table.columns = ['Interactor1', 'Interactor2', 'Direction']
 
             mixed = merged_edge_table.copy()
+            # TODO: decide how to handle duplicate edges when one is directed and the other is undirected.
+            # should we prioritize keeping the directed edge over the undirected, or keep both and give a warning to the user?
             mixed = mixed.drop_duplicates()
             self.mixed_edge_table = mixed
 
@@ -512,6 +518,18 @@ class Evaluation:
 
     @staticmethod
     def edge_dummy_function(mixed_edge_table: pd.DataFrame, undirected_edge_table: pd.DataFrame, directed_edge_table: pd.DataFrame, dummy_file: str):
+        """
+        Temporary function to test edge file implementation.
+        Will be removed from SPRAS's evaluation code in the future.
+
+        Takes in the different edge table versions (mixed, fully directed, fully undirected)
+        for a specific edge gold standard dataset and writes them to a file.
+
+        @param mixed_edge_table: Edge gold standard treated as mixed directionality.
+        @param undirected_edge_table: Edge gold standard treated as fully undirected.
+        @param directed_edge_table: Edge gold standard treated as fully directed.
+        @param dummy_file: Filename to save the edge tables.
+        """
         with open(dummy_file, "w") as f:
             f.write("Mixed Edge Table\n")
             mixed_edge_table.to_csv(f, index=False)

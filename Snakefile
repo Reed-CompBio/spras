@@ -173,7 +173,7 @@ rule merge_input:
         runner.merge_input(dataset_dict, output.dataset_file)
 
 # Return all files used in the gold standard
-# TODO: Can we delete this function?
+# TODO: add what the use of this function is
 def get_gold_standard_dependencies(wildcards):
     gs = _config.config.gold_standards[wildcards.gold_standard]
     node_files = gs["node_files"]

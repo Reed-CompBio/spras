@@ -1,2 +1,3 @@
+Interactor1	Interactor2	Direction
 A	B	D
 B	C	U
