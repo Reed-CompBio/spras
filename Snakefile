@@ -172,8 +172,11 @@ rule merge_input:
         dataset_dict = get_dataset(_config.config.datasets, wildcards.dataset)
         runner.merge_input(dataset_dict, output.dataset_file)
 
-# Return all files used in the gold standard
-# TODO: add what the use of this function is
+
+
+# Ensures Snakemake knows merge_gs_input depends on the config specified gold standard input files, triggering a rerun if they change.
+# Indirection is used to gather these files since each gold standard dataset may provide a variable number of inputs.
+# Returns all files used in the gold standard
 def get_gold_standard_dependencies(wildcards):
     gs = _config.config.gold_standards[wildcards.gold_standard]
     node_files = gs["node_files"]
