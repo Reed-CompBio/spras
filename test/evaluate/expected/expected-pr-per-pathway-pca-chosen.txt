@@ -1,2 +1,2 @@
-Pathway	Precision	Recall
-test/evaluate/input/data-test-params-123/pathway.txt	0.6666666666666666	0.5
+Precision	Recall
+0.6666666666666666	0.5
