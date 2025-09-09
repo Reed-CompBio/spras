@@ -27,4 +27,4 @@ jobs:
           password: ${{ secrets.GITHUB_TOKEN }}
 
       - name: Build and push Docker image
-        run: python3 docker-wrappers/push.py --dir SPRAS --version ${{ github.ref_name }} --yes
+        run: python3 docker-wrappers/build.py --dir SPRAS --version ${{ github.ref_name }} --yes
