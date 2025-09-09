@@ -8,15 +8,15 @@ For convenience, we provide a `build.py` python file which pushes a docker image
 that we want to support.
 
 ```
-usage: build.py [-h] --dir DIR --version VERSION [--org-name ORG_NAME] [--yes | --no-yes] [--relax | --no-relax] [--nopush | --no-nopush]
+usage: build.py [-h] --dir DIR --version VERSION [--org-name ORG_NAME] [--yes | --no-yes] [--relax | --no-relax] [--push | --no-push]
 build.py: error: the following arguments are required: --dir, --version
 ```
 
-For example, using the default supported `ghcr.io` registry that SPRAS uses, we can push RWR v1:
+For example, using the default supported `ghcr.io` registry that SPRAS uses, we can build RWR v1:
 
 ```
 docker login ghcr.io -u reed-compbio
 python build.py --dir RWR --version v1
 ```
 
-You can also build the image without pushing it using `--nopush`, which will load the image into docker.
+You can also push the image using `--push`, which will push the image to the GitHub Container Registry.
