@@ -1,0 +1,95 @@
+My current plan for my COMBINE 25 tutorial (that will then be used for the spras doc tutorials)
+- I will be testing this on a user that has basic python knowledge but doesn't know spras
+
+*Tony will be giving a presentation on PRAs and SPRAS prior (hopefully) to this tutorial
+
+0) 
+- need to preinstall conda, docker, vscode(?) (or run on terminal), git, and cytoscape prior
+    - a few minimum dependencies like Docker and conda and git installed already, the rest are optional but recommended
+- Basic Python knowledge (running scripts, installing packages)
+- Some basic biology knowledge: what is a protein, a protein interaction etc
+Overview of PRAs (Pathway Reconstruction Algorithms) in plain language
+What SPRAS is and what problems it solves
+
+My plan is to create subfolders within the output directory so that results are separated by configuration or tutorial section (right now just "basic" and "medium"). 
+I rely on subfolders when I’m running many different SPRAS tests across datasets or testing different things with different configs, since it helps keep everything organized which is what will be used here. 
+In the basic case, we will be doing caching for the egfr dataset in its own subfolder. In the medium case, we will be building a new dataset and then running on that in its own subfolder. 
+
+
+1) basic
+Goal: Get new users comfortable installing SPRAS
+Goal: Run SPRAS with one algorthm on a small example dataset, then re-run it with three different parameter settings to see how network structure changes.
+
+Slides and/or Information to add to docs directly:
+Installation & environment setup (Docker Anaconda and Cytoscpare locally)
+SPRAS directory structure for a user & configuration files
+- config folder
+- input folder
+- output folder
+    - can control the creation of subfolders of outputs in the config file
+    - might need to be in a seperate step/slide
+Running SPRAS on a provided example dataset 
+- set up one algortihm and run
+- then run one algortihm with 3 different preset parameter settings
+Understanding the outputs
+- show the output and structure
+- show it visulized
+Viewing logs and monitoring runs
+
+Things to make:
+- need one small dataset to run on (either make a dummy one or just use egfr)
+    - Building around EGFR will be the least amount of work, and that pathway may be a good fit for the COMBINE audience
+- basic-config
+
+2) medium
+Goal: Run SPRAS with a couple more algorthm with many parameter settings on a smaller and larger example dataset to see how network structure changes.
+Goal: Use more of the post analysis tools
+- summary stats
+- ML
+
+Slides and/or Information to add to docs directly:
+For the larger dataset, teach a user how to turn data into the input structure we require
+- Formatting prize/source/target files and interactome files & explaining biological meaning
+Adding multiple PRAs to the workflow 
+- preset parameters
+Use/Show summary stats and ML code
+- will be useful for parameter tuning (the next tutorial)
+
+
+Things to make:
+- medium-config
+- need raw data to make the larger example
+    - can use panther pathways
+
+
+3) hard
+Goal: Run SPRAS with all algortihms with larger example dataset to create reproducible benchmarking experiments using gold standard data.
+Goal: use evaluation code
+Goal: learn how to parameter tune
+
+Slides and/or Information to add to docs directly:
+Configure the config file with larger dataset
+- set all Algorithms datasets, gold standards
+Explain parameter tuning
+Teach parameter tuning
+- Define coarse parameter spaces and define hueristics
+- Define fine parameter spaces after and hueristics
+- repeat
+- show how to use past post analysis tools help with finding parameters
+
+(maybe I show an example of this rather than doing it in a way the tutorial people do it)
+(then people can copy and paste it in and experience it?)
+
+Explain parameter selection
+Use the evaluation code and understanding the outputs
+- Per-pathway precision and recall plots / pca chosen and pr curves for ensemble
+- Where PCA-based chosen params land vs the full grid
+Agreement/disagreement between algorithms (heatmaps) using ML
+
+Things to make:
+- hard-config
+- make a hard-config with tuned parameters to provide after people attempt tuning
+
+
+Stuff I need to figure out:
+# test these tutorials for mac and windows user
