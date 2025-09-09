@@ -70,7 +70,7 @@ def summarize_networks(file_paths: Iterable[Path], node_table: pd.DataFrame, alg
             data.update([
                 ('Density', nx.density(nw)),
                 ('Max degree', max(degrees, default=0)),
-                ('Median degree', float(median(degrees or [0]))), # float to have output stay consistent
+                ('Median degree', float(median(degrees or [0.0]))), # float to have output stay consistent
             ])
 
         cc = list(nx.connected_components(nw))
