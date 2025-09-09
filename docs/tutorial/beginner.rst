@@ -2,7 +2,15 @@
 Beginner Tutorial - Set up & Running One Algorithm
 ##################################################
 
-TODO: add an explanation of this tutorial
+This tutorial provides a hands-on introduction to SPRAS. It is designed to show participants how to install the software, run example workflows, and use tools to interpret the results.
+
+You will learn how to:
+
+- Set up the SPRAS environment
+- Explore the folder structure and understand how inputs, configurations, and outputs are organized
+- Configure and run a pathway reconstruction algorithm on a provided dataset
+- Enable post-analysis steps to generate post analysis information (summary statistics and Cytoscape visualizations)
+
 
 Step 0: Clone the SPRAS repository, set up the environment, and run Docker
 ==========================================================================
@@ -414,26 +422,151 @@ The results are saved in egfr-pathway-summary.txt.
 All pathway.txt files from the chosen parameter combinations are collected and passed into the Cytoscape Docker image. A Cytoscape session file is then generated, containing visualizations for each pathway. This file is saved as egfr-cytoscape.cys and can be opened in Cytoscape for interactive exploration.
 
 
-Step 4: Understanding the Outputs / Visulizing the Outputs
-==========================================================
+Step 4: Understanding the Outputs
+==================================
 
-- look at each output
-- look at the statistics
-- look at the cytoscape images
+After completing the workflow, you will have several outputs that help you explore and interpret the results:
 
-- explain what is happening?
+1.	egfr-cytoscape.cys: a Cytoscape session file containing visualizations of the reconstructed subnetworks.
+2.	egfr-pathway-summary.txt: a summary file with statistics describing each network.
+3.	Algorithm parameter combination folders: each contains a pathway.txt file representing one reconstructed subnetwork.
+
+4.1 Reviewing the pathway.txt Files 
+-------------------------------------------
+
+Each algorithm and parameter combination produces a corresponding pathway.txt file. 
+These files contain the reconstructed subnetworks and can be used at face value, or for further post analysis.
+
+1.	Locate the files
+
+Navigate to the output directory spras/output/basic/. Inside, you will find subfolders corresponding to each dataset–algorithm–parameter combination.
+
+2. Open a pathway.txt file
+
+Each file lists the network edges that were reconstructed for that specific run. The format includes columns for the two interacting nodes, the rank, and the edge direction
+
+For example, the file egfr-pathlinker-params-7S4SLU6/pathway.txt contains the following reconstructed subnetwork:
+
+.. code-block:: text
+        
+    Node1	Node2	Rank	Direction
+    EGF_HUMAN	EGFR_HUMAN	1	D
+    EGF_HUMAN	S10A4_HUMAN	2	D
+    S10A4_HUMAN	MYH9_HUMAN	2	D
+    K7PPA8_HUMAN	MDM2_HUMAN	3	D
+    MDM2_HUMAN	P53_HUMAN	3	D
+    S10A4_HUMAN	K7PPA8_HUMAN	3	D
+    K7PPA8_HUMAN	SIR1_HUMAN	4	D
+    MDM2_HUMAN	MDM4_HUMAN	5	D
+    MDM4_HUMAN	P53_HUMAN	5	D
+    CD2A2_HUMAN	CDK4_HUMAN	6	D
+    CDK4_HUMAN	RB_HUMAN	6	D
+    MDM2_HUMAN	CD2A2_HUMAN	6	D
+    EP300_HUMAN	P53_HUMAN	7	D
+    K7PPA8_HUMAN	EP300_HUMAN	7	D
+    K7PPA8_HUMAN	UBP7_HUMAN	8	D
+    UBP7_HUMAN	P53_HUMAN	8	D
+    K7PPA8_HUMAN	MDM4_HUMAN	9	D
+    MDM4_HUMAN	MDM2_HUMAN	9	D
+
+The pathway.txt files serve as the foundation for further analysis, allowing you to explore and interpret the reconstructed networks in greater detail.
+In this case you can visulize them in cytoscape or compare their statistics to better understand these outputs.
+
+4.2 Reviewing Outputs in Cytoscape and Summary Files
+-----------------------------------------------------
+
+1.	Open Cytoscape
+
+Launch the Cytoscape application on your computer.
+
+2.	Load the Cytoscape session file
+
+Navigate to spras/output/basic/egfr-cytoscape.cys and open it in Cytoscape.
+
+.. image:: ../_static/images/cytoscape_upload_network.png
+   :alt: description of the image
+   :width: 500
+   :align: center
+
+.. raw:: html
+
+   <div style="margin:20px 0;"></div>
+   
+.. image:: ../_static/images/cytoscape-open-cys-file.png
+   :alt: description of the image
+   :width: 500
+   :align: center
+
+
+.. raw:: html
+
+   <div style="margin:20px 0;"></div>
+
+Once loaded, the session will display all reconstructed subnetworks for the chosen dataset, organized by algorithm and parameter combination.
+
+
+.. image:: ../_static/images/cytoscape-opened.png
+   :alt: description of the image
+   :width: 500
+   :align: center
+
+You can view and interact with each reconstructed subnetwork. Compare how the different parameter settings influence the pathways generated.
+
+
+3. 	Open the summary statistics file
+
+In your file explorer, go to spras/output/basic/egfr-pathway-summary.txt and open it locally.
+
+.. image:: ../_static/images/summary-stats.png
+   :alt: description of the image
+   :align: center
+
+.. raw:: html
+
+   <div style="margin:20px 0;"></div>
+
+
+- This file contains calculated statistics (e.g., number of nodes, edges, density, connected components) for each pathway.txt file, along with the parameter combinations that produced them.
+
+By reviewing this file, you can interpret and compare algorithm outputs side by side using their statistics.
+
+4.3 Comparing Across Parameter Combinations
+-------------------------------------------
+
+As you compare across parameter settings, notice how the reconstructed subnetworks change based on the different parameters used:
+
+The small parameter value (k=1) produced a compact subnetwork that highlights only the top-ranked interactions.
 
 .. image:: ../_static/images/1_pathway.png
    :alt: description of the image
    :width: 400
    :align: center
 
+.. raw:: html
+
+   <div style="margin:20px 0;"></div>
+
+
+The moderate parameter value (k=10) expanded the subnetwork, introducing additional nodes and edges that may uncover new connections but increase complexity.
+
 .. image:: ../_static/images/10_pathway.png
    :alt: description of the image
-   :width: 400
+   :width: 600
    :align: center
+
+.. raw:: html
+
+   <div style="margin:20px 0;"></div>
+
+The large parameter value (k=100) generates a much denser subnetwork, capturing a broader range of edges but also could introduce connections that may be less  meaningful.
 
 .. image:: ../_static/images/100_pathway.png
    :alt: description of the image
-   :width: 400
+   :width: 600
    :align: center
+
+.. raw:: html
+
+   <div style="margin:20px 0;"></div>
+
+Because the parameters used help determine which edges and nodes are included, each setting produces a different subnetwork. By examining the statistics (egfr-pathway-summary.txt) alongside the visualizations (Cytoscape), you can assess how parameter choices influence both the structure and interpretability of the outputs.
