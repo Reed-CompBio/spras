@@ -46,8 +46,6 @@ def summarize_networks(file_paths: Iterable[Path], node_table: pd.DataFrame, alg
         # directed or mixed graphs are parsed and summarized as an undirected graph
         nw = nx.read_edgelist(lines, data=(('weight', float), ('Direction', str)))
 
-        # Begin collecting data into a dictionary.
-        # (We use dictionaries over list to make )
         data: OrderedDict[str, Any] = OrderedDict()
 
         number_of_nodes = nw.number_of_nodes()
