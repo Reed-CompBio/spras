@@ -1,6 +1,5 @@
 # Omics Integrator 1 wrapper
 # https://github.com/fraenkel-lab/OmicsIntegrator
-# This version does not use conda
 FROM debian:12.11-slim
 LABEL org.opencontainers.image.source=https://github.com/Reed-CompBio/spras
 
