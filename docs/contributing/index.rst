@@ -20,7 +20,6 @@ Snakemake workflow. Before following this guide, a contributor will need
   introduction <https://swcarpentry.github.io/git-novice/>`__)
 - Familiarity with Docker and Dockerfiles to create images (`Carpentries
   introduction <https://carpentries-incubator.github.io/docker-introduction/>`__)
-- A `Docker Hub <https://hub.docker.com/>`__ account
 
 It is not necessary to have experience with Snakemake, Python testing,
 or pandas before getting started, but it may help with more complex
@@ -133,10 +132,10 @@ Build the Docker image by running
 
 ::
 
-   docker build -t <username>/local-neighborhood -f Dockerfile .
+   python3 ../build.py --dir LocalNeighborhood --version latest --org-name <username>
 
 from the ``LocalNeighborhood`` directory, where ``<username>`` is your
-Docker Hub username. Docker must be running on your system before
+GitHub username. Docker must be running on your system before
 executing this command.
 
 Test the image by running it with the example input files
@@ -161,15 +160,6 @@ instead of your local file system. The command assumes the test files
 have already been copied into the current working directory. Windows
 users may need to escape the absolute paths so that ``/data`` becomes
 ``//data``, etc. Confirm that the output file matches expectations.
-
-Push the new image to Docker Hub:
-
-::
-
-   docker push <username>/local-neighborhood
-
-Pushing an image requires being logged in, so run ``docker login`` first
-if needed using your Docker Hub username and password.
 
 Step 3: Write the Local Neighborhood wrapper functions
 ------------------------------------------------------
@@ -286,10 +276,10 @@ Local Neighborhood has no other parameters. Optionally set
 make testing faster.
 
 The config file has an option ``owner`` under the ``container_registry``
-settings that controls which Docker Hub account will be used when
-pulling Docker images. The same Docker Hub account will be used for all
+settings that controls which container registry account will be used when
+pulling Docker images. The same container registry account will be used for all
 images and cannot currently be set different for each algorithm. Set the
-``owner`` to match your Docker Hub username from Step 2.
+``owner`` to match your GitHub username from Step 2.
 
 After completing this step, try running the Local Neighborhood algorithm
 through SPRAS with
@@ -333,8 +323,8 @@ the pytest testing.
 Extend ``.github/workflows/build-containers.yml`` to pull and build the
 new Docker image. Follow the example for any of the other pathway
 reconstruction algorithm. First pull the image
-``<username>/local-neighborhood`` from Docker Hub. Then build the Docker
-image using the ``Dockerfile`` that was completed in Step 2.
+``<username>/local-neighborhood`` from the GitHub Container Registry.
+Then build the Docker image using the ``Dockerfile`` that was completed in Step 2.
 
 Modify generate inputs:
 
@@ -421,7 +411,7 @@ General steps for contributing a new pathway reconstruction algorithm
     ``<algorithm>``, and include any other files required to build that
     image in the subdirectory
 3.  Build and push the Docker image to the
-    `reed-compbio <https://hub.docker.com/orgs/reed-compbio>`__ Docker
+    `reed-compbio <https://github.com/orgs/Reed-CompBio/packages/>`__ GitHub
     organization (SPRAS maintainer required)
 4.  Add a new Python file ``spras/<algorithm>.py`` to implement the
     wrapper functions for ``<algorithm>``: specify the list of
