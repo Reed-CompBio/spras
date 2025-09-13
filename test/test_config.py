@@ -24,8 +24,8 @@ def get_test_config():
                 "base_url": "docker.io",
                 "owner": "reedcompbio",
             },
-            "hash_length": 7,
         },
+        "hash_length": 7,
         "reconstruction_settings": {
             "locations": {
                 "reconstruction_dir": "my_dir"
