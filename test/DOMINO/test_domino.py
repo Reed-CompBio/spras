@@ -3,6 +3,7 @@ from pathlib import Path
 
 import pytest
 
+from spras.config.container_schema import ContainerFramework, ProcessedContainerSettings
 import spras.config.config as config
 from spras.domino import DOMINO, post_domino_id_transform, pre_domino_id_transform
 
@@ -74,7 +75,7 @@ class TestDOMINO:
             network=TEST_DIR+'input/domino-network.txt',
             active_genes=TEST_DIR+'input/domino-active-genes.txt',
             output_file=OUT_FILE_DEFAULT,
-            container_framework="singularity")
+            container_settings=ProcessedContainerSettings(framework=ContainerFramework.singularity))
         assert out_path.exists()
 
     def test_pre_id_transform(self):
