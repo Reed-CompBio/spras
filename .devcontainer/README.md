@@ -1,7 +1,7 @@
 # SPRAS devcontainer
 
 The attached [devcontainer](https://containers.dev/) contains docker-in-docker and anaconda,
-with extra utilities for building Singularity. Good for problems with installing any three of these tools,
+with extra utilities for building Apptainer. Good for problems with installing any three of these tools,
 but Podman currently does not work within this devcontainer.
 
 Devcontainers can be launched in Visual Studio Code (not VSCodium!), through [JetBrains Gateway](https://www.jetbrains.com/remote-development/gateway/),
@@ -12,7 +12,7 @@ or with [GitPod](https://www.gitpod.io/docs/gitpod/configuration/devcontainer/ov
 
 Since building apptainer takes a while, we leave building apptainer as an external script one can run
 inside the devcontainer, but `go` and other necessary dependencies to build `apptainer` are already present in
-the devcontaier Dockerfile.
+the devcontainer Dockerfile.
 
 Below is a shell script which will do the entire installation for you (but it will change your
 shell's CWD):
