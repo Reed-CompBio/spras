@@ -1,3 +1,2 @@
-Interactor1	Interactor2
 A	B
 C	B

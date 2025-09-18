@@ -112,7 +112,7 @@ class Evaluation:
             edge_tables = []
 
             for edge_file in edge_files:
-                edge_table = pd.read_table(os.path.join(data_loc, edge_file), header=0)
+                edge_table = pd.read_table(os.path.join(data_loc, edge_file), header=None)
 
                 if edge_table.shape[1] == 2:
                     # When no direction is specified, default to undirected edges
