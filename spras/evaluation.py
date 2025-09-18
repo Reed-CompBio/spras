@@ -18,6 +18,7 @@ from spras.analysis.ml import create_palette
 from spras.interactome import (
     convert_directed_to_undirected,
     convert_undirected_to_directed,
+    sort_and_deduplicate_undirected,
 )
 
 
@@ -128,13 +129,11 @@ class Evaluation:
             merged_edge_table = pd.concat(edge_tables, ignore_index=True)
 
             mixed = merged_edge_table.copy()
-            # TODO: decide how to handle duplicate edges when one is directed and the other is undirected.
-            # should we prioritize keeping the directed edge over the undirected, or keep both and give a warning to the user?
-            mixed = mixed.drop_duplicates()
+            mixed = sort_and_deduplicate_undirected(mixed)
             self.mixed_edge_table = mixed
 
             undirected = convert_directed_to_undirected(merged_edge_table.copy())
-            undirected = undirected.drop_duplicates()
+            undirected = sort_and_deduplicate_undirected(undirected)
             self.undirected_edge_table = undirected
 
             directed = convert_undirected_to_directed(merged_edge_table.copy())
