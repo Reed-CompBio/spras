@@ -141,7 +141,7 @@ def run_container(framework: str, container_suffix: str, command: List[str], vol
     @param volumes: a list of volumes to mount where each item is a (source, destination) tuple
     @param working_dir: the working directory in the container
     @param environment: environment variables to set in the container
-    @param out_dir: output directory for the rule's artifacts. Only passed onto run_container_singularity for the purpose of profiling.
+    @param out_dir: output directory for the rule's artifacts. Only passed into run_container_singularity for the purpose of profiling.
     @return: output from Singularity execute or Docker run
     """
     normalized_framework = framework.casefold()

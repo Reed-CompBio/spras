@@ -37,6 +37,10 @@ def create_apptainer_container_stats(cgroup_path: str, out_dir: str):
     Reads the contents of the provided cgroup's memory.peak and cpu.stat files.
     This information is parsed and placed in the calling rule's output directory
     as 'usage-profile.tsv'.
+    In particular, we capture peak memory (in bytes) and various CPU usage statistics:
+    - user_usec: Total user CPU time consumed in microseconds
+    - system_usec: Total system CPU time consumed in microseconds
+    - usage_usec: Total CPU time (usually but not always user + system) consumed in microseconds
     @param cgroup_path: path to the cgroup directory for the container
     @param out_dir: output directory for the rule's artifacts -- used here to store profiling data
     """

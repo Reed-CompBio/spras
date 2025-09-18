@@ -152,6 +152,7 @@ class RawConfig(BaseModel):
     container_framework: ContainerFramework = ContainerFramework.docker
     unpack_singularity: bool = False
     container_registry: ContainerRegistry
+    enable_profiling: bool = False
 
     hash_length: int = DEFAULT_HASH_LENGTH
     "The length of the hash used to identify a parameter combination"
