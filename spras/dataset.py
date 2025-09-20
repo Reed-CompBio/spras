@@ -214,7 +214,7 @@ class Dataset:
         Get each `col_name` in `col_names` as a separate call to `get_node_columns`,
         allowing better column filtering for NODEIDs
         
-        This is useful for node lists of any specific column name.
+        This is useful for making separate node lists of specific column names.
         """
         needed_columns = set(col_names).difference(self.node_table.columns)
         if len(needed_columns) != 0:
