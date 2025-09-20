@@ -3,7 +3,7 @@ from pathlib import Path
 import pandas as pd
 
 from spras.containers import prepare_volume, run_container_and_log
-from spras.dataset import Dataset
+from spras.dataset import Dataset, MissingDataError
 from spras.interactome import reinsert_direction_col_undirected
 from spras.prm import PRM
 from spras.util import add_rank_column, duplicate_edges
@@ -43,7 +43,7 @@ class OmicsIntegrator2(PRM):
             node_df.loc[node_df['sources']==True, 'prize'] = 1.0
             node_df.loc[node_df['targets']==True, 'prize'] = 1.0
         else:
-            raise ValueError("Omics Integrator 2 requires node prizes or sources and targets")
+            raise MissingDataError("Omics Integrator 1", "(node prizes) or (sources and targets)")
 
         # Omics Integrator already gives warnings for strange prize values, so we won't here
         node_df.to_csv(filename_map['prizes'], sep='\t', index=False, columns=['NODEID', 'prize'], header=['name','prize'])

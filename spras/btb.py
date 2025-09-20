@@ -1,6 +1,7 @@
 from pathlib import Path
 
 from spras.containers import prepare_volume, run_container_and_log
+from spras.dataset import MissingDataError
 from spras.interactome import (
     convert_undirected_to_directed,
     reinsert_direction_col_directed,
@@ -40,19 +41,9 @@ class BowTieBuilder(PRM):
 
         # Get sources and write to file, repeat for targets
         # Does not check whether a node is a source and a target
-        for node_type in ['sources', 'targets']:
-            nodes = data.get_node_columns([node_type])
-            if nodes is None:
-                raise ValueError(f'No {node_type} found in the node files')
-
-            # TODO test whether this selection is needed, what values could the column contain that we would want to
-            # include or exclude?
-            nodes = nodes.loc[nodes[node_type]]
-            if node_type == "sources":
-                nodes.to_csv(filename_map["sources"], sep= '\t', index=False, columns=['NODEID'], header=False)
-            elif node_type == "targets":
-                nodes.to_csv(filename_map["targets"], sep= '\t', index=False, columns=['NODEID'], header=False)
-
+        sources_targets = data.get_node_columns(["sources", "targets"], "BowTieBuilder")
+        sources_targets.sources.to_csv(filename_map["sources"], sep= '\t', index=False, columns=['NODEID'], header=False)
+        sources_targets.targets.to_csv(filename_map["targets"], sep= '\t', index=False, columns=['NODEID'], header=False)
 
         # Create network file
         edges = data.get_interactome()

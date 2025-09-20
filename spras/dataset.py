@@ -10,6 +10,50 @@ Author: Chris Magnano
 
 Methods and intermediate state for loading data and putting it into pandas tables for use by pathway reconstruction algorithms.
 """
+class MissingDataError(RuntimeError):
+    """
+    Raises when there is missing data from the input dataframe, for `generate_input`.
+    This is thrown by PRMs.
+    """
+
+    scope: str
+    """
+    This is usually the name of the PRM throwing this error.
+    We generically call this 'scope'
+    """
+
+    missing_message: list[str] | str
+    """
+    Either a list of some specific data is missing, or we provide a custom
+    error message.
+
+    This is in the format:
+
+    (If a string) {Scope} is missing data: {message}
+    (If a list) {Scope} requires columns {message joined by ", "}
+    """
+
+    def process_message(scope: str, missing_message: list[str] | str) -> str:
+        if isinstance(missing_message, str):
+            return f"{scope} is missing data: {missing_message}"
+        else:
+            return "{} requires columns: {}".format(scope, ", ".join(missing_message))
+
+    def __init__(self, scope: str, missing_message: list[str] | str):
+        """
+        Constructs a new MissingDataError.
+
+        @param message: The message or missing columns to let the user know about.
+        See the `MissingDataError#missing_message` docstring for more info
+        """
+
+        self.scope = scope
+        self.missing_message = missing_message
+
+        super(MissingDataError, self).__init__(MissingDataError.process_message(scope, missing_message))
+
+    def __str__(self):
+        return MissingDataError.process_message(self.algorithm, self.missing_message)
 
 
 class Dataset:
@@ -132,13 +176,19 @@ class Dataset:
         self.node_table.insert(0, "NODEID", self.node_table.pop("NODEID"))
         self.other_files = dataset_dict["other_files"]
 
-    def get_node_columns(self, col_names: list[str]) -> pd.DataFrame:
+    def get_node_columns(self, col_names: list[str], scope: str) -> pd.DataFrame:
         """
-        returns: A table containing the requested column names and node IDs
+        @param scope: The name of the algorithm (or a more general 'scope' like SPRAS)
+            to fail on if get_node_columns fails.
+        @returns: A table containing the requested column names and node IDs
         for all nodes with at least 1 of the requested values being non-empty
         """
         if self.node_table is None:
             raise ValueError("node_table is None: can't request node columns of an empty dataset.")
+        
+        for name in col_names:
+            if name not in self.node_table:
+                raise MissingDataError(scope, col_names)
 
         col_names.append(self.NODE_ID)
         filtered_table = self.node_table[col_names]
