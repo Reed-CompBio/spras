@@ -34,8 +34,9 @@ class ResponseNet(PRM):
         ResponseNet.validate_required_inputs(filename_map)
 
         # will take the sources and write them to files, and repeats with targets
-        sources_targets = data.get_node_columns(['sources', 'targets'], "ResponseNet").to_dict(orient='series')
-        for node_type in sources_targets.keys():
+        node_types = ['sources', 'targets']
+        sources_targets = data.get_node_columns(node_types, "ResponseNet")
+        for node_type in node_types:
             # take nodes one column data frame, call sources/ target series
             nodes = sources_targets.loc[sources_targets[node_type]]
             # creates with the node type without headers
