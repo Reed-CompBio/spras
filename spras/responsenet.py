@@ -34,11 +34,9 @@ class ResponseNet(PRM):
         ResponseNet.validate_required_inputs(filename_map)
 
         # will take the sources and write them to files, and repeats with targets
-        node_types = ['sources', 'targets']
-        sources_targets = data.get_node_columns(node_types, "ResponseNet")
-        for node_type in node_types:
+        for node_type, nodes in data.get_node_columns_separate(['sources', 'targets'], "MinCostFlow").items():
             # take nodes one column data frame, call sources/ target series
-            nodes = sources_targets.loc[sources_targets[node_type]]
+            nodes = nodes.loc[nodes[node_type]]
             # creates with the node type without headers
             nodes.to_csv(filename_map[node_type], index=False, columns=['NODEID'], header=False)
 

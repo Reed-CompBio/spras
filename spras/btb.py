@@ -41,9 +41,10 @@ class BowTieBuilder(PRM):
 
         # Get sources and write to file, repeat for targets
         # Does not check whether a node is a source and a target
-        sources_targets = data.get_node_columns(["sources", "targets"], "BowTieBuilder")
-        sources_targets.sources.to_csv(filename_map["sources"], sep= '\t', index=False, columns=['NODEID'], header=False)
-        sources_targets.targets.to_csv(filename_map["targets"], sep= '\t', index=False, columns=['NODEID'], header=False)
+        for node_type, nodes in data.get_node_columns_separate(['sources', 'targets'], "BowTieBuilder").items():
+            # TODO test whether this selection is needed, what values could the column contain that we would want to
+            nodes = nodes.loc[nodes[node_type]]
+            nodes.to_csv(filename_map[node_type], sep='\t', index=False, columns=['NODEID'], header=False)
 
         # Create network file
         edges = data.get_interactome()

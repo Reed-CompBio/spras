@@ -98,12 +98,9 @@ class MEO(PRM):
 
         # Get sources and write to file, repeat for targets
         # Does not check whether a node is a source and a target
-        node_types = ['sources', 'targets']
-        sources_targets = data.get_node_columns(node_types, "MEO")
-        for node_type in node_types:
+        for node_type, nodes in data.get_node_columns_separate(['sources', 'targets'], "MEO").items():
             # TODO test whether this selection is needed, what values could the column contain that we would want to
-            # include or exclude?
-            nodes = sources_targets.loc[sources_targets[node_type]]
+            nodes = nodes.loc[nodes[node_type]]
             # replace _'s with underscore_replacement
             nodes['NODEID'] = nodes['NODEID'].str.replace('_', underscore_replacement)
             nodes.to_csv(filename_map[node_type], index=False, columns=['NODEID'], header=False)
