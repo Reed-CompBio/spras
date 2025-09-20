@@ -18,7 +18,7 @@ class ST_RWR(PRM):
         ST_RWR.validate_required_inputs(filename_map)
 
         # Get separate source and target nodes for source and target files
-        sources_targets = data.get_node_columns("Source-Target RWR", ["sources", "targets"])
+        sources_targets = data.get_node_columns(["sources", "targets"], "Source-Target RWR")
         sources_targets.sources.to_csv(filename_map['sources'],sep='\t',index=False,columns=['NODEID'],header=False)
         sources_targets.targets.to_csv(filename_map['targets'],sep='\t',index=False,columns=['NODEID'],header=False)
 

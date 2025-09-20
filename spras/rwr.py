@@ -19,7 +19,7 @@ class RWR(PRM):
         RWR.validate_required_inputs(filename_map)
 
         # Get sources and targets for node input file
-        sources_targets = data.get_node_columns("RWR", ["sources", "targets"])
+        sources_targets = data.get_node_columns(["sources", "targets"], "RWR")
         nodes = pd.DataFrame({'NODEID': sources_targets.sources['NODEID'].tolist() + sources_targets.targets['NODEID'].tolist()})
         nodes.to_csv(filename_map['nodes'],sep='\t',index=False,columns=['NODEID'],header=False)
 

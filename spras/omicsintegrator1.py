@@ -65,10 +65,10 @@ class OmicsIntegrator1(PRM):
 
         if data.contains_node_columns('prize'):
             # NODEID is always included in the node table
-            node_df = data.get_node_columns(['prize'])
+            node_df = data.get_node_columns(['prize'], 'Omics Integrator 1')
         elif data.contains_node_columns(['sources', 'targets']):
             # If there aren't prizes but are sources and targets, make prizes based on them
-            node_df = data.get_node_columns(['sources', 'targets'])
+            node_df = data.get_node_columns(['sources', 'targets'], 'Omics Integrator 1')
             node_df.loc[node_df['sources']==True, 'prize'] = 1.0
             node_df.loc[node_df['targets']==True, 'prize'] = 1.0
         else:

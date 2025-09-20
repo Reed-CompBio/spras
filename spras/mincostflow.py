@@ -40,7 +40,7 @@ class MinCostFlow(PRM):
         MinCostFlow.validate_required_inputs(filename_map)
 
         # will take the sources and write them to files, and repeats with targets
-        sources_targets = data.get_node_columns(['sources', 'targets'], "MEO").to_dict(orient='series')
+        sources_targets = data.get_node_columns(['sources', 'targets'], "MinCostFlow").to_dict(orient='series')
         for node_type, nodes in sources_targets.items():
             # take nodes one column data frame, call sources/ target series
             nodes = nodes.loc[nodes[node_type]]
