@@ -100,6 +100,7 @@ class MEO(PRM):
         # Does not check whether a node is a source and a target
         for node_type, nodes in data.get_node_columns_separate(['sources', 'targets'], "MEO").items():
             # TODO test whether this selection is needed, what values could the column contain that we would want to
+            # include or exclude?
             nodes = nodes.loc[nodes[node_type]]
             # replace _'s with underscore_replacement
             nodes['NODEID'] = nodes['NODEID'].str.replace('_', underscore_replacement)
