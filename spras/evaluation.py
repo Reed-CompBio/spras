@@ -93,8 +93,8 @@ class Evaluation:
             )
 
         if has_node_files:
-
             node_tables = []
+
             for node_file in node_files:
                 node_table = pd.read_table(os.path.join(data_loc, node_file), header=0)
                 if node_table.shape[1] != 1:

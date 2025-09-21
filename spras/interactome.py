@@ -17,6 +17,7 @@ def has_direction(df: pd.DataFrame) -> bool:
     # have at least one element?
     return not directed_df.empty
 
+
 def sort_and_deduplicate_undirected(df: pd.DataFrame) -> pd.DataFrame:
     """
     Sorts and removes duplicated undirected edges and directed edges are left unchanged.
@@ -57,6 +58,7 @@ def convert_undirected_to_directed(df: pd.DataFrame) -> pd.DataFrame:
     df.loc[mask, 'Direction'] = 'D'
     df = pd.concat([df, new_df], ignore_index=True)
     return df
+
 
 def convert_directed_to_undirected(df: pd.DataFrame) -> pd.DataFrame:
     """
