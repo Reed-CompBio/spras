@@ -282,6 +282,13 @@ class Config:
             self.pca_params["kde"] = True
             print("Setting kde to true; Evaluation analysis needs to run KDE for PCA-Chosen parameter selection.")
 
+        # Set summary include to True if Evaluation is set to True
+        # When a PCA-chosen parameter set is chosen, summary statistics are used to resolve tiebreakers.
+        if self.analysis_include_evaluation and not self.analysis_include_summary:
+            self.analysis_include_summary = True
+            print("Setting summary include to true; Evaluation analysis needs to use summary statistics for PCA-Chosen parameter selection.")
+
+
     def process_config(self, raw_config: RawConfig):
         # Set up a few top-level config variables
         self.out_dir = raw_config.reconstruction_settings.locations.reconstruction_dir
