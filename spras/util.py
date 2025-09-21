@@ -85,19 +85,19 @@ def add_rank_column(df: pd.DataFrame) -> pd.DataFrame:
 
 def shrink_rank_column(df: pd.DataFrame) -> pd.DataFrame:
     """
-    Takes a Rank column (e.g. [11, 2, 4, 2, 9]),
+    Takes the df `Rank` column (e.g. [11, 2, 4, 2, 9]),
     sorts it ([2, 2, 4, 9, 11])
     and removes the numeric gaps from it
     [1, 1, 2, 3, 4].
 
-    This will sort the entire original pandas by rank.
+    This will sort the original pandas dataframe by rank.
     """
     # We need at least one beginning value
     if df.empty:
         return df
 
-    df = df.sort_values(['Rank'], ascending=True)
-    df = df.reset_index(drop=True)
+    df = df.sort_values(['Rank'], ascending=True, inplace=False)
+    df = df.reset_index(drop=True, inplace=False)
     # https://stackoverflow.com/a/34856727/7589775
     df['NewRank'] = int(1)
     df['NewRank'] = df['NewRank'].astype('Int64')
