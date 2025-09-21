@@ -33,7 +33,7 @@ class DIAMOnD(PRM):
                 raise ValueError("{input_type} filename is missing")
 
         # Create seeds file - we set the seeds as the sources and targets
-        sources_targets = data.request_node_columns(["sources", "targets"])
+        sources_targets = data.get_node_columns(["sources", "targets"])
         if sources_targets is None:
             return False
         seeds_df = sources_targets[(sources_targets["sources"] == True) | (sources_targets["targets"] == True)]
