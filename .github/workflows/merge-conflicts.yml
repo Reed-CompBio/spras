@@ -1,0 +1,17 @@
+name: Label merge conflicts
+
+on:
+  schedule:
+    - cron: '*/30 * * * *' # run every 30 minutes
+  workflow_dispatch:
+
+jobs:
+  main:
+    runs-on: ubuntu-latest
+    if: github.repository == 'Reed-CompBio/spras'
+    steps:
+      - name: Check for PR merge conflicts
+        uses: eps1lon/actions-label-merge-conflict@1df065ebe6e3310545d4f4c4e862e43bdca146f0 # v3.0.3
+        with:
+          dirtyLabel: "merge-conflict"
+          repoToken: "${{ secrets.GITHUB_TOKEN }}"
