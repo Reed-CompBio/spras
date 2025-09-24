@@ -36,6 +36,7 @@ methods (PRMs) to omics data.
    :caption: Manual
 
    output
+   htcondor
 
 .. toctree::
    :maxdepth: 1
