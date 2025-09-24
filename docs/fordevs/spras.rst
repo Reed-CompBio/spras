@@ -8,6 +8,7 @@ Subpackages
    :maxdepth: 4
 
    spras.analysis
+   spras.config
 
 Submodules
 ----------
@@ -20,10 +21,10 @@ spras.allpairs module
    :undoc-members:
    :show-inheritance:
 
-spras.config module
--------------------
+spras.btb module
+----------------
 
-.. automodule:: spras.config
+.. automodule:: spras.btb
    :members:
    :undoc-members:
    :show-inheritance:
@@ -64,6 +65,14 @@ spras.interactome module
 ------------------------
 
 .. automodule:: spras.interactome
+   :members:
+   :undoc-members:
+   :show-inheritance:
+
+spras.logging module
+--------------------
+
+.. automodule:: spras.logging
    :members:
    :undoc-members:
    :show-inheritance:
@@ -116,10 +125,34 @@ spras.prm module
    :undoc-members:
    :show-inheritance:
 
+spras.responsenet module
+------------------------
+
+.. automodule:: spras.responsenet
+   :members:
+   :undoc-members:
+   :show-inheritance:
+
 spras.runner module
 -------------------
 
 .. automodule:: spras.runner
+   :members:
+   :undoc-members:
+   :show-inheritance:
+
+spras.rwr module
+----------------
+
+.. automodule:: spras.rwr
+   :members:
+   :undoc-members:
+   :show-inheritance:
+
+spras.strwr module
+------------------
+
+.. automodule:: spras.strwr
    :members:
    :undoc-members:
    :show-inheritance:
