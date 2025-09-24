@@ -210,7 +210,7 @@ Also test the functions available in the ``Dataset`` class.
 
 .. code:: python
 
-   > data.get_node_columns(['sources'])
+   > data.get_node_columns(['sources'], scope='SPRAS')
      sources NODEID
    0    True      A
 
