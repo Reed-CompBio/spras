@@ -37,11 +37,11 @@ algorithms_with_params = [f'{algorithm}-params-{params_hash}' for algorithm, par
 dataset_labels = list(_config.config.datasets.keys())
 dataset_gold_standard_node_pairs = [
     f"{_config.attach_spras_revision(dataset)}-{_config.attach_spras_revision(gs_values['label'])}"
-    for gs_values in _config.config.gold_standards.values() if gs['node_files'] for dataset in gs_values['dataset_labels']
+    for gs in _config.config.gold_standards.values() if gs['node_files'] for dataset in gs['dataset_labels']
 ]
 dataset_gold_standard_edge_pairs = [
     f"{_config.attach_spras_revision(dataset)}-{_config.attach_spras_revision(gs_values['label'])}"
-    for gs_values in _config.config.gold_standards.values() if gs['edge_files'] for dataset in gs_values['dataset_labels']
+    for gs in _config.config.gold_standards.values() if gs['edge_files'] for dataset in gs['dataset_labels']
 ]
 
 # Get algorithms that are running multiple parameter combinations
