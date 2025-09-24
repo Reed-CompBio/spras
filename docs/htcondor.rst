@@ -1,11 +1,11 @@
-Working with HTCondor
+Running with HTCondor
 =====================
 
-The folder ``docker-wrappers/SPRAS`` inside the SPRAS git repository
-contains several files that can be used to run workflows with this
-container on HTCondor. To use the ``spras`` image in this environment,
-first login to an HTCondor Access Point (AP). Then, from the AP clone
-this repo:
+The folder `docker-wrappers/SPRAS <https://github.com/Reed-CompBio/spras/tree/main/docker-wrappers/SPRAS>`_
+inside the SPRAS git repository contains several files that can be used to
+run workflows with this container on HTCondor. To use the ``spras``
+image in this environment, first login to an HTCondor Access Point (AP).
+Then, from the AP clone this repo:
 
 .. code:: bash
 
@@ -37,7 +37,7 @@ first is to submit all SPRAS jobs to a single remote Execution Point
 parallelize the workflow by submitting each job to its own EP.
 
 Converting Docker Images to Apptainer/Singularity Images
-~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+--------------------------------------------------------
 
 It may be necessary in some cases to create an Apptainer image for
 SPRAS, especially if you intend to run your workflow using distributed
@@ -61,7 +61,7 @@ After running this command, a new file called ``spras-v0.5.0.sif`` will
 exist in the directory where the command was run.
 
 Submitting All Jobs to a Single EP
-~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+----------------------------------
 
 Navigate to the ``spras/docker-wrappers/SPRAS`` directory and create the
 ``logs/`` directory (``mkdir logs``). Next, modify ``spras.sub`` so that
@@ -88,7 +88,7 @@ To run in the local CHTC pool, omit the ``+WantGlideIn`` and
 ``requirements`` lines
 
 Submitting Parallel Jobs
-~~~~~~~~~~~~~~~~~~~~~~~~
+------------------------
 
 Parallelizing SPRAS workflows with HTCondor requires the same setup as
 the previous section, but with two additions. First, it requires an
@@ -127,7 +127,7 @@ Then, to start the workflow with HTCondor in the CHTC pool, there are
 two options:
 
 Snakemake From Your Own Terminal
-^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
 The first option is to run Snakemake in a way that ties its execution to
 your terminal. This is good for testing short workflows and running
@@ -140,7 +140,7 @@ invoke Snakemake directly by running:
    snakemake --profile spras_profile
 
 Long Running Snakemake Jobs (Managed by HTCondor)
-^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
 The second option is to let HTCondor manage the Snakemake process, which
 allows the jobs to run as long as needed. Instead of seeing Snakemake
@@ -162,7 +162,7 @@ that rule (see the `troubleshooting section <#troubleshooting>`__ for
 information on how to use these extra log files).
 
 Adjusting Resources
-~~~~~~~~~~~~~~~~~~~
+-------------------
 
 Resource requirements can be adjusted as needed in
 ``spras_profile/config.yaml``, and HTCondor logs for this workflow can
@@ -189,7 +189,7 @@ jobs where they left off.
 SPRAS module into your conda environment.
 
 Job Monitoring
-~~~~~~~~~~~~~~
+--------------
 
 To monitor the state of the job, you can use a second terminal to run
 ``condor_q`` for a snapshot of how the workflow is doing, or you can run
@@ -210,7 +210,7 @@ change the ``container_image`` line of ``spras.sub`` to point to the new
 image.
 
 Troubleshooting
-~~~~~~~~~~~~~~~
+---------------
 
 Some errors Snakemake might encounter while executing rules in the
 workflow boil down to bad luck in a distributed, heterogeneous
@@ -238,7 +238,7 @@ github issue, please include a description of the error(s) and what
 troubleshooting steps you've already taken.
 
 How To Fix HTCondor Creds Error
-^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
 If you attempt to run a SPRAS HTCondor workflow and encounter an error
 containing:
