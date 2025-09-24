@@ -80,9 +80,11 @@ Navigate to the `spras/docker-wrappers/SPRAS` directory and create the `logs/` d
 container_image = < your spras image >.sif
 ```
 
+Make sure to modify the configuration file to have `unpack_singularity` set to `true`, and `container_framework` set to `singularity`: else, the
+workflow will (likely) fail.
+
 Then run `condor_submit spras.sub`, which will submit SPRAS to HTCondor as a single job with as many cores as indicated by the `NUM_PROCS` line in `spras.sub`, using the value of `EXAMPLE_CONFIG` as the SPRAS
-configuration file. Note that you can alter the configuration file to test various workflows, but you should leave `unpack_singularity = true`, or it
-is likely the job will be unsuccessful. By default, the `example_config.yaml` runs everything except for `cytoscape`, which appears to fail periodically
+configuration file. By default, the `example_config.yaml` runs everything except for `cytoscape`, which appears to fail periodically
 in HTCondor.
 
 **Note**: The `spras.sub` submit file is an example of how this workflow could be submitted from a CHTC Access Point (AP) to the OSPool. To run in the local
