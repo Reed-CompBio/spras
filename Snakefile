@@ -25,7 +25,7 @@ algorithm_params = _config.config.algorithm_params
 algorithm_directed = _config.config.algorithm_directed
 pca_params = _config.config.pca_params
 hac_params = _config.config.hac_params
-FRAMEWORK = _config.config.container_framework
+container_settings = _config.config.container_settings
 include_aggregate_algo_eval = _config.config.analysis_include_evaluation_aggregate_algo
 
 # Return the dataset or gold_standard dictionary from the config file given the label
@@ -281,7 +281,7 @@ rule reconstruct:
         # Remove the default placeholder parameter added for algorithms that have no parameters
         if 'spras_placeholder' in params:
             params.pop('spras_placeholder')
-        params['container_framework'] = FRAMEWORK
+        params['container_settings'] = container_settings
         runner.run(wildcards.algorithm, params)
 
 # Original pathway reconstruction output to universal output
@@ -313,7 +313,7 @@ rule viz_cytoscape:
     output: 
         session = SEP.join([out_dir, '{dataset}-cytoscape.cys'])
     run:
-        cytoscape.run_cytoscape(input.pathways, output.session, FRAMEWORK)
+        cytoscape.run_cytoscape(input.pathways, output.session, container_settings)
 
 
 # Write a single summary table for all pathways for each dataset

@@ -3,6 +3,7 @@ from pathlib import Path
 
 import pytest
 
+from spras.config.container_schema import ContainerFramework, ProcessedContainerSettings
 import spras.config.config as config
 from spras.meo import MEO, write_properties
 
@@ -66,5 +67,5 @@ class TestMaximumEdgeOrientation:
                 sources=TEST_DIR + 'input/meo-sources.txt',
                 targets=TEST_DIR + 'input/meo-targets.txt',
                 output_file=OUT_FILE,
-                container_framework="singularity")
+                container_settings=ProcessedContainerSettings(framework=ContainerFramework.singularity))
         assert out_path.exists()
