@@ -122,7 +122,7 @@ class OmicsIntegrator1(PRM):
         @param d: controls the maximum path-length from root to terminal nodes
         @param mu: controls the degree-based negative prizes (default 0.0)
         @param noise: Standard Deviation of the gaussian noise added to edges in Noisy Edges Randomizations
-        @param g: Gamma: multiplicative edge penalty from degree of endpoints
+        @param g: (gamma) msgsteiner reinforcement parameter that affects the convergence of the solution and runtime, with larger values leading to faster convergence but suboptimal results (default 0.001)
         @param r: msgsteiner parameter that adds random noise to edges, which is rarely needed (default 0)
         @param container_framework: choose the container runtime framework, currently supports "docker" or "singularity" (optional)
         """
@@ -197,10 +197,10 @@ class OmicsIntegrator1(PRM):
         if seed is not None:
             command.extend(['--seed', str(seed)])
 
-        container_suffix = "omics-integrator-1:no-conda" # no-conda version is the default
+        container_suffix = "omics-integrator-1:v2"
         run_container_and_log('Omics Integrator 1',
                              container_framework,
-                             container_suffix,  # no-conda version is the default
+                             container_suffix,
                              command,
                              volumes,
                              work_dir,
