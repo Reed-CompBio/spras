@@ -122,6 +122,13 @@ algorithms:
       run1:
         gamma: [10]
 
+  - name: "must"
+    params:
+      include: true
+      run1:
+        hub_penalty: [0, 0.5]
+        max_iterations: [11, 15]
+
 # Here we specify which pathways to run and other file location information.
 # DataLoader.py can currently only load a single dataset
 # Assume that if a dataset label does not change, the lists of associated input files do not change
