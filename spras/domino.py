@@ -27,7 +27,7 @@ Interactor1     ppi     Interactor2
 - it can include repeated and bidirectional edges
 """
 class DOMINO(PRM):
-    required_inputs = ['network', 'active_genes']
+    required_inputs = ['network.sif', 'active_genes']
     dois = ["10.15252/msb.20209593"]
 
     @staticmethod
@@ -66,11 +66,11 @@ class DOMINO(PRM):
         edges_df['Interactor1'] = edges_df['Interactor1'].apply(pre_domino_id_transform)
         edges_df['Interactor2'] = edges_df['Interactor2'].apply(pre_domino_id_transform)
 
-        edges_df.to_csv(filename_map['network'], sep='\t', index=False, columns=['Interactor1', 'ppi', 'Interactor2'],
+        edges_df.to_csv(filename_map['network.sif'], sep='\t', index=False, columns=['Interactor1', 'ppi', 'Interactor2'],
                         header=['ID_interactor_A', 'ppi', 'ID_interactor_B'])
 
     @staticmethod
-    def run(network=None, active_genes=None, output_file=None, slice_threshold=None, module_threshold=None, container_framework="docker"):
+    def run(network_sif=None, active_genes=None, output_file=None, slice_threshold=None, module_threshold=None, container_framework="docker"):
         """
         Run DOMINO with Docker.
         Let visualization be always true, parallelization be always 1 thread, and use_cache be always false.
@@ -83,7 +83,7 @@ class DOMINO(PRM):
         @param container_framework: choose the container runtime framework, currently supports "docker" or "singularity" (optional)
         """
 
-        if not network or not active_genes or not output_file:
+        if not network_sif or not active_genes or not output_file:
             raise ValueError('Required DOMINO arguments are missing')
 
         work_dir = '/spras'
@@ -91,7 +91,7 @@ class DOMINO(PRM):
         # Each volume is a tuple (source, destination)
         volumes = list()
 
-        bind_path, network_file = prepare_volume(network, work_dir)
+        bind_path, network_file = prepare_volume(network_sif, work_dir)
         volumes.append(bind_path)
 
         bind_path, node_file = prepare_volume(active_genes, work_dir)
@@ -107,11 +107,11 @@ class DOMINO(PRM):
         volumes.append(bind_path)
 
         # Make the Python command to run within the container
-        slicer_command = ['slicer',
+        slicer_command = ['python', '/DOMINO/src/runner_slice.py',
                           '--network_file', network_file,
                           '--output_file', mapped_slices_file]
 
-        container_suffix = "domino"
+        container_suffix = "domino:latest"
         run_container_and_log('slicer',
                              container_framework,
                              container_suffix,
@@ -120,7 +120,7 @@ class DOMINO(PRM):
                              work_dir)
 
         # Make the Python command to run within the container
-        domino_command = ['domino',
+        domino_command = ['python', '/DOMINO/src/runner.py',
                           '--active_genes_files', node_file,
                           '--network_file', network_file,
                           '--slices_file', mapped_slices_file,
@@ -157,7 +157,7 @@ class DOMINO(PRM):
         # Clean up DOMINO intermediate and pickle files
         slices_file.unlink(missing_ok=True)
         Path(out_dir, 'network.slices.pkl').unlink(missing_ok=True)
-        Path(network + '.pkl').unlink(missing_ok=True)
+        Path(f"{network_sif}.pkl").unlink(missing_ok=True)
 
     @staticmethod
     def parse_output(raw_pathway_file, standardized_pathway_file, params):
@@ -216,7 +216,8 @@ class DOMINO(PRM):
 
 def pre_domino_id_transform(node_id):
     """
-    DOMINO requires module edges to have the 'ENSG0' string as a prefix for visualization.
+    DOMINO requires module edges to have the 'ENSG0' string (Ensemble format)
+    as a prefix for visualization.
     Prepend each node id with this ID_PREFIX.
     @param node_id: the node id to transform
     @return the node id with the prefix added
