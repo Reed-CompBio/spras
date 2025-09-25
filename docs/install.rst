@@ -32,10 +32,10 @@ the image from Docker Hub:
 
     docker pull reedcompbio/spras:latest
 
-If you want to pull a specific version of spras, use the version for the image tag name. For example, to get spras v0.2.0:
+If you want to pull a specific version of spras, use the version for the image tag name. For example, to get spras v0.5.0:
 
 .. code-block:: bash
 
-    docker pull reedcompbio/spras:0.2.0
+    docker pull reedcompbio/spras:0.5.0
 
 .. _Download and Install Conda: https://conda-forge.org/download/

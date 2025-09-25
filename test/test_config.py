@@ -43,7 +43,7 @@ def get_test_config():
             "node_files": []
         }],
         "gold_standards": [{
-            "label": "gs1",
+            "label": "gs_fake",
             "dataset_labels": [],
             "node_files": [],
             "data_dir": "gs-fake"
@@ -338,6 +338,8 @@ class TestConfig:
     def test_eval_kde_coupling(self, eval_include, kde, expected_eval, expected_kde):
         test_config = get_test_config()
         test_config["analysis"]["ml"]["include"] = True
+        # dealing with other coupling issue
+        test_config["analysis"]["summary"]["include"] = True
 
         test_config["analysis"]["ml"]["kde"] = kde
         test_config["analysis"]["evaluation"]["include"] = eval_include
@@ -346,3 +348,24 @@ class TestConfig:
 
         assert config.config.analysis_include_evaluation == expected_eval
         assert config.config.pca_params["kde"] == expected_kde
+
+    @pytest.mark.parametrize("eval_include, summary_include, expected_eval, expected_summary", [
+        (True, True, True, True),
+        (True, False, True, True),
+        (False, True, False, True),
+        (False, False, False, False),
+    ])
+    def test_eval_summary_coupling(self, eval_include, summary_include, expected_eval, expected_summary):
+        test_config = get_test_config()
+        # dealing with other coupling issue
+        test_config["analysis"]["ml"]["include"] = True
+        test_config["analysis"]["ml"]["kde"] = True
+
+        test_config["analysis"]["summary"]["include"] = summary_include
+        test_config["analysis"]["evaluation"]["include"] = eval_include
+
+        config.init_global(test_config)
+
+        assert config.config.analysis_include_evaluation == expected_eval
+        assert config.config.analysis_include_summary == expected_summary
+
