@@ -14,6 +14,7 @@ __all__ = ['MuST']
 
 class MuST(PRM):
     required_inputs = ['network', 'seeds']
+    dois = ["10.1038/s41467-020-17189-2", "10.1038/s41467-021-27138-2"]
 
     @staticmethod
     def generate_inputs(data: Dataset, filename_map):
@@ -22,12 +23,10 @@ class MuST(PRM):
         @param data: dataset
         @param filename_map: a dict mapping file types in the required_inputs to the filename for that type
         """
-        for input_type in MuST.required_inputs:
-            if input_type not in filename_map:
-                raise ValueError("{input_type} filename is missing")
+        MuST.validate_required_inputs(filename_map)
 
         # Create seeds file.
-        sources_targets = data.request_node_columns(["sources", "targets"])
+        sources_targets = data.get_node_columns(["sources", "targets"])
         if sources_targets is None:
             return False
         seeds_df = sources_targets[(sources_targets["sources"] == True) | (sources_targets["targets"] == True)]
