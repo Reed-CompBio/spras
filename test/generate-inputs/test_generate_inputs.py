@@ -20,6 +20,7 @@ algo_exp_file = {
     'bowtiebuilder': 'edges',
     'strwr': 'network',
     'rwr': 'network',
+    'responsenet': 'edges',
     'must': 'network'
 }
 
@@ -50,3 +51,6 @@ class TestGenerateInputs:
             exp_file_name = algo_exp_file[algo]
             assert filecmp.cmp(OUTDIR + f"{algo}-{exp_file_name}.txt", EXPDIR + f"{algo}-{exp_file_name}-expected.txt",
                                shallow=False)
+
+            for file in filename_map.values():
+                assert Path(file).exists()

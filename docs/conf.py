@@ -43,4 +43,10 @@ exclude_patterns = ['_build', 'Thumbs.db', '.DS_Store']
 # https://www.sphinx-doc.org/en/master/usage/configuration.html#options-for-html-output
 
 html_theme = 'sphinx_rtd_theme'
+html_context = {
+    "display_github": True,
+    "github_user": "Reed-CompBio",
+    "github_repo": "spras",
+    "github_version": "main/docs/",
+}
 html_static_path = ['_static']
