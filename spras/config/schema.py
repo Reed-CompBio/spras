@@ -65,11 +65,17 @@ class EvaluationAnalysis(BaseModel):
 
     model_config = ConfigDict(extra='forbid')
 
+class Attribution(BaseModel):
+    include: bool
+
+    model_config = ConfigDict(extra='forbid')
+
 class Analysis(BaseModel):
     summary: SummaryAnalysis = SummaryAnalysis(include=False)
     cytoscape: CytoscapeAnalysis = CytoscapeAnalysis(include=False)
     ml: MlAnalysis = MlAnalysis(include=False)
     evaluation: EvaluationAnalysis = EvaluationAnalysis(include=False)
+    attribution: Attribution = Attribution(include=False)
 
     model_config = ConfigDict(extra='forbid')
 
