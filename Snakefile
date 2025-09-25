@@ -36,11 +36,11 @@ algorithms = list(algorithm_params)
 algorithms_with_params = [f'{algorithm}-params-{params_hash}' for algorithm, param_combos in algorithm_params.items() for params_hash in param_combos.keys()]
 dataset_labels = list(_config.config.datasets.keys())
 dataset_gold_standard_node_pairs = [
-    f"{_config.attach_spras_revision(dataset)}-{_config.attach_spras_revision(gs_values['label'])}"
+    f"{_config.attach_spras_revision(dataset)}-{_config.attach_spras_revision(gs['label'])}"
     for gs in _config.config.gold_standards.values() if gs['node_files'] for dataset in gs['dataset_labels']
 ]
 dataset_gold_standard_edge_pairs = [
-    f"{_config.attach_spras_revision(dataset)}-{_config.attach_spras_revision(gs_values['label'])}"
+    f"{_config.attach_spras_revision(dataset)}-{_config.attach_spras_revision(gs['label'])}"
     for gs in _config.config.gold_standards.values() if gs['edge_files'] for dataset in gs['dataset_labels']
 ]
 
