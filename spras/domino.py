@@ -3,7 +3,7 @@ from pathlib import Path
 
 import pandas as pd
 
-from spras.containers import prepare_volume, run_container
+from spras.containers import prepare_volume, run_container_and_log
 from spras.interactome import (
     add_constant,
     reinsert_direction_col_undirected,
@@ -28,6 +28,7 @@ Interactor1     ppi     Interactor2
 """
 class DOMINO(PRM):
     required_inputs = ['network.sif', 'active_genes']
+    dois = ["10.15252/msb.20209593"]
 
     @staticmethod
     def generate_inputs(data, filename_map):
@@ -37,14 +38,12 @@ class DOMINO(PRM):
         @param filename_map: a dict mapping file types in the required_inputs to the filename for that type
         @return:
         """
-        for input_type in DOMINO.required_inputs:
-            if input_type not in filename_map:
-                raise ValueError(f"{input_type} filename is missing")
+        DOMINO.validate_required_inputs(filename_map)
 
         # Get active genes for node input file
         if data.contains_node_columns('active'):
             # NODEID is always included in the node table
-            node_df = data.request_node_columns(['active'])
+            node_df = data.get_node_columns(['active'])
         else:
             raise ValueError('DOMINO requires active genes')
         node_df = node_df[node_df['active'] == True]
@@ -112,15 +111,13 @@ class DOMINO(PRM):
                           '--network_file', network_file,
                           '--output_file', mapped_slices_file]
 
-        print('Running slicer with arguments: {}'.format(' '.join(slicer_command)), flush=True)
-
         container_suffix = "domino:latest"
-        slicer_out = run_container(container_framework,
-                                   container_suffix,
-                                   slicer_command,
-                                   volumes,
-                                   work_dir)
-        print(slicer_out)
+        run_container_and_log('slicer',
+                             container_framework,
+                             container_suffix,
+                             slicer_command,
+                             volumes,
+                             work_dir)
 
         # Make the Python command to run within the container
         domino_command = ['python', '/DOMINO/src/runner.py',
@@ -139,14 +136,12 @@ class DOMINO(PRM):
         if module_threshold is not None:
             domino_command.extend(['--module_threshold', str(module_threshold)])
 
-        print('Running DOMINO with arguments: {}'.format(' '.join(domino_command)), flush=True)
-
-        domino_out = run_container(container_framework,
-                                   container_suffix,
-                                   domino_command,
-                                   volumes,
-                                   work_dir)
-        print(domino_out)
+        run_container_and_log('DOMINO',
+                             container_framework,
+                             container_suffix,
+                             domino_command,
+                             volumes,
+                             work_dir)
 
         # DOMINO creates a new folder in out_dir to output its modules HTML files into called active_genes
         # The filename is determined by the input active_genes and cannot be configured
@@ -154,10 +149,10 @@ class DOMINO(PRM):
         out_modules_dir = Path(out_dir, 'active_genes')
 
         # Concatenate each produced module HTML file into one file
-        with open(output_file, 'w') as fo:
+        with open(output_file, 'w') as f:
             for html_file in out_modules_dir.glob('module_*.html'):
                 with open(html_file, 'r') as fi:
-                    fo.write(fi.read())
+                    f.write(fi.read())
 
         # Clean up DOMINO intermediate and pickle files
         slices_file.unlink(missing_ok=True)
@@ -165,7 +160,7 @@ class DOMINO(PRM):
         Path(f"{network_sif}.pkl").unlink(missing_ok=True)
 
     @staticmethod
-    def parse_output(raw_pathway_file, standardized_pathway_file):
+    def parse_output(raw_pathway_file, standardized_pathway_file, params):
         """
         Convert the merged HTML modules into the universal pathway format
         @param raw_pathway_file: the merged HTML modules file
@@ -192,8 +187,10 @@ class DOMINO(PRM):
                     # columns that indicate edges
                     # Dropping the other rows eliminates the node information
                     module_df = pd.DataFrame(entries)
-                    module_df = module_df.loc[:, ['source', 'target']].dropna()
-
+                    try:
+                        module_df = module_df.loc[:, ['source', 'target']].dropna()
+                    except KeyError:
+                        module_df = pd.DataFrame()
                     # Add the edges from this module to the cumulative pathway edges
                     edges_df = pd.concat([edges_df, module_df], axis=0)
 

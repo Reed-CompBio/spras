@@ -17,7 +17,11 @@ algo_exp_file = {
     'omicsintegrator2': 'edges',
     'domino': 'network.sif',
     'pathlinker': 'network',
-    'allpairs': 'network'
+    'allpairs': 'network',
+    'bowtiebuilder': 'edges',
+    'strwr': 'network',
+    'rwr': 'network',
+    'responsenet': 'edges'
 }
 
 
@@ -53,3 +57,6 @@ class TestGenerateInputs:
             runner.prepare_inputs(algo, test_file, filename_map)
 
             assert filecmp.cmp(out_file, expected_file, shallow=False)
+
+            for file in filename_map.values():
+                assert Path(file).exists()

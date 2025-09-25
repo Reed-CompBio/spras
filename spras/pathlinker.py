@@ -1,7 +1,8 @@
 import warnings
 from pathlib import Path
 
-from spras.containers import prepare_volume, run_container
+from spras.containers import prepare_volume, run_container_and_log
+from spras.dataset import Dataset
 from spras.interactome import (
     convert_undirected_to_directed,
     reinsert_direction_col_directed,
@@ -13,7 +14,7 @@ __all__ = ['PathLinker']
 
 """
 Pathlinker will construct a fully directed graph from the provided input file
-- an edge is represented with a head and tail node, which represents the direction of the interation between two nodes
+- an edge is represented with a head and tail node, which represents the direction of the interaction between two nodes
 - uses networkx Digraph() object
 
 Expected raw input format:
@@ -23,6 +24,7 @@ Interactor1   Interactor2   Weight
 """
 class PathLinker(PRM):
     required_inputs = ['nodetypes', 'network']
+    dois = ["10.1038/npjsba.2016.2", "10.1089/cmb.2012.0274"]
 
     @staticmethod
     def generate_inputs(data, filename_map):
@@ -32,12 +34,10 @@ class PathLinker(PRM):
         @param filename_map: a dict mapping file types in the required_inputs to the filename for that type
         @return:
         """
-        for input_type in PathLinker.required_inputs:
-            if input_type not in filename_map:
-                raise ValueError(f"{input_type} filename is missing")
+        PathLinker.validate_required_inputs(filename_map)
 
         # Get sources and targets for node input file
-        sources_targets = data.request_node_columns(["sources", "targets"])
+        sources_targets = data.get_node_columns(["sources", "targets"])
         if sources_targets is None:
             return False
         both_series = sources_targets.sources & sources_targets.targets
@@ -47,7 +47,7 @@ class PathLinker(PRM):
             warnings.warn(warn_msg, stacklevel=1)
 
         # Create nodetype file
-        input_df = sources_targets[["NODEID"]].copy()
+        input_df = sources_targets[[Dataset.NODE_ID]].copy()
         input_df.columns = ["#Node"]
         input_df.loc[sources_targets["sources"] == True,"Node type"]="source"
         input_df.loc[sources_targets["targets"] == True,"Node type"]="target"
@@ -112,15 +112,13 @@ class PathLinker(PRM):
         if k is not None:
             command.extend(['-k', str(k)])
 
-        print('Running PathLinker with arguments: {}'.format(' '.join(command)), flush=True)
-
         container_suffix = "pathlinker:v2"
-        out = run_container(container_framework,
-                            container_suffix,
-                            command,
-                            volumes,
-                            work_dir)
-        print(out)
+        run_container_and_log('PathLinker',
+                             container_framework,
+                             container_suffix,
+                             command,
+                             volumes,
+                             work_dir)
 
         # Rename the primary output file to match the desired output filename
         # Currently PathLinker only writes one output file so we do not need to delete others
@@ -129,7 +127,7 @@ class PathLinker(PRM):
         output_edges.rename(output_file)
 
     @staticmethod
-    def parse_output(raw_pathway_file, standardized_pathway_file):
+    def parse_output(raw_pathway_file, standardized_pathway_file, params):
         """
         Convert a predicted pathway into the universal format
         @param raw_pathway_file: pathway file produced by an algorithm's run function

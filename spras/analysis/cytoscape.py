@@ -2,7 +2,7 @@ from pathlib import Path, PurePath
 from shutil import rmtree
 from typing import List, Union
 
-from spras.containers import prepare_volume, run_container
+from spras.containers import prepare_volume, run_container_and_log
 
 
 def run_cytoscape(pathways: List[Union[str, PurePath]], output_file: str, container_framework="docker") -> None:
@@ -17,7 +17,7 @@ def run_cytoscape(pathways: List[Union[str, PurePath]], output_file: str, contai
     # To work with Singularity, /spras must be mapped to a writeable location because that directory is fixed as
     # the home directory inside the container and Cytoscape writes configuration files there
     # $HOME cannot be set in the Dockerfile because Singularity overwrites home at launch
-    env = f'HOME={work_dir}'
+    env = {'HOME': work_dir}
 
     # Each volume is a tuple (src, dest)
     volumes = list()
@@ -46,14 +46,12 @@ def run_cytoscape(pathways: List[Union[str, PurePath]], output_file: str, contai
         # Provided the mapped pathway file path and the original file path as the label Cytoscape
         command.extend(['--pathway', f'{mapped_pathway}|{pathway}'])
 
-    print('Running Cytoscape with arguments: {}'.format(' '.join(command)), flush=True)
-
     container_suffix = "py4cytoscape:v3"
-    out = run_container(container_framework,
-                        container_suffix,
-                        command,
-                        volumes,
-                        work_dir,
-                        env)
-    print(out)
+    run_container_and_log('Cytoscape',
+                         container_framework,
+                         container_suffix,
+                         command,
+                         volumes,
+                         work_dir,
+                         env)
     rmtree(cytoscape_output_dir)
