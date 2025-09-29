@@ -14,6 +14,11 @@ container_framework: docker
 # as seen by its runtime container.
 # NOTE: Profiling is currently supported only when the container framework is set to apptainer/singularity
 #       and when the host system supports the 'cgroup' filesystem.
+#       When profiling via HTCondor, this assumes the current process is already in a two-level nested cgroup
+#       (introduced in HTCondor 24.8.0). To specify a minimum HTCondor version, use the following `requirements`
+#       expression:
+#
+#       requirements = versionGE(split(Target.CondorVersion)[1], "24.8.0") && (isenforcingdiskusage =!= true)
 enable_profiling: false
 
 # Only used if container_framework is set to singularity/apptainer, this will unpack the containers
