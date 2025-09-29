@@ -137,13 +137,14 @@ class DOMINO(PRM):
         if module_threshold is not None:
             domino_command.extend(['--module_threshold', str(module_threshold)])
 
-        run_container_and_log('DOMINO',
-                             container_framework,
-                             container_suffix,
-                             domino_command,
-                             volumes,
-                             out_dir,
-                             work_dir)
+        run_container_and_log(
+            'DOMINO',
+            container_framework,
+            container_suffix,
+            domino_command,
+            volumes,
+            work_dir,
+            out_dir)
 
         # DOMINO creates a new folder in out_dir to output its modules HTML files into called active_genes
         # The filename is determined by the input active_genes and cannot be configured
