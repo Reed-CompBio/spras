@@ -71,6 +71,8 @@ class Config:
         self.container_prefix: str = DEFAULT_CONTAINER_PREFIX
         # A Boolean specifying whether to unpack singularity containers. Default is False
         self.unpack_singularity = False
+        # A Boolean indiciating whether to enable container runtime profiling (apptainer/singularity only)
+        self.enable_profiling = False
         # A dictionary to store configured datasets against which SPRAS will be run
         self.datasets = None
         # A dictionary to store configured gold standard data against output of SPRAS runs
@@ -305,6 +307,10 @@ class Config:
         # Grab registry from the config, and if none is provided default to docker
         if raw_config.container_registry and raw_config.container_registry.base_url != "" and raw_config.container_registry.owner != "":
             self.container_prefix = raw_config.container_registry.base_url + "/" + raw_config.container_registry.owner
+
+        if raw_config.enable_profiling and not raw_config.container_framework in ["singularity", "apptainer"]:
+            warnings.warn("enable_profiling is set to true, but the container framework is not singularity/apptainer. This setting will have no effect.")
+        self.enable_profiling = raw_config.enable_profiling
 
         self.process_datasets(raw_config)
         self.process_algorithms(raw_config)
