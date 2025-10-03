@@ -132,7 +132,7 @@ def env_to_items(environment: dict[str, str]) -> Iterator[str]:
 # TODO consider a better default environment variable
 # Follow docker-py's naming conventions (https://docker-py.readthedocs.io/en/stable/containers.html)
 # Technically the argument is an image, not a container, but we use container here.
-def run_container(framework: str, container_suffix: str, command: List[str], volumes: List[Tuple[PurePath, PurePath]], working_dir: str, out_dir: str | os.PathLike, environment: Optional[dict[str, str]] = None):
+def run_container(framework: str, container_suffix: str, command: List[str], volumes: List[Tuple[PurePath, PurePath]], working_dir: str, out_dir: str | os.PathLike, environment: Optional[dict[str, str]] = None, network_disabled = False):
     """
     Runs a command in the container using Singularity or Docker
     @param framework: singularity or docker
@@ -140,15 +140,16 @@ def run_container(framework: str, container_suffix: str, command: List[str], vol
     @param command: command to run in the container
     @param volumes: a list of volumes to mount where each item is a (source, destination) tuple
     @param working_dir: the working directory in the container
-    @param environment: environment variables to set in the container
     @param out_dir: output directory for the rule's artifacts. Only passed into run_container_singularity for the purpose of profiling.
+    @param environment: environment variables to set in the container
+    @param network_disabled: Disables the network on the container. Only works for docker for now. This acts as a 'runtime assertion' that a container works w/o networking.
     @return: output from Singularity execute or Docker run
     """
     normalized_framework = framework.casefold()
 
     container = config.config.container_prefix + "/" + container_suffix
     if normalized_framework == 'docker':
-        return run_container_docker(container, command, volumes, working_dir, environment)
+        return run_container_docker(container, command, volumes, working_dir, environment, network_disabled)
     elif normalized_framework == 'singularity' or normalized_framework == "apptainer":
         return run_container_singularity(container, command, volumes, working_dir, out_dir, environment)
     elif normalized_framework == 'dsub':
@@ -156,7 +157,7 @@ def run_container(framework: str, container_suffix: str, command: List[str], vol
     else:
         raise ValueError(f'{framework} is not a recognized container framework. Choose "docker", "dsub", or "singularity".')
 
-def run_container_and_log(name: str, framework: str, container_suffix: str, command: List[str], volumes: List[Tuple[PurePath, PurePath]], working_dir: str, out_dir: str | os.PathLike, environment: Optional[dict[str, str]] = None):
+def run_container_and_log(name: str, framework: str, container_suffix: str, command: List[str], volumes: List[Tuple[PurePath, PurePath]], working_dir: str, out_dir: str | os.PathLike, environment: Optional[dict[str, str]] = None, network_disabled=False):
     """
     Runs a command in the container using Singularity or Docker with associated pretty printed messages.
     @param name: the display name of the running container for logging purposes
@@ -166,6 +167,7 @@ def run_container_and_log(name: str, framework: str, container_suffix: str, comm
     @param volumes: a list of volumes to mount where each item is a (source, destination) tuple
     @param working_dir: the working directory in the container
     @param environment: environment variables to set in the container
+    @param network_disabled: Disables the network on the container. Only works for docker for now. This acts as a 'runtime assertion' that a container works w/o networking.
     @return: output from Singularity execute or Docker run
     """
     if not environment:
@@ -173,7 +175,7 @@ def run_container_and_log(name: str, framework: str, container_suffix: str, comm
 
     print('Running {} on container framework "{}" on env {} with command: {}'.format(name, framework, list(env_to_items(environment)), ' '.join(command)), flush=True)
     try:
-        out = run_container(framework=framework, container_suffix=container_suffix, command=command, volumes=volumes, working_dir=working_dir, out_dir=out_dir, environment=environment)
+        out = run_container(framework=framework, container_suffix=container_suffix, command=command, volumes=volumes, working_dir=working_dir, out_dir=out_dir, environment=environment, network_disabled=network_disabled)
         if out is not None:
             if isinstance(out, list):
                 out = ''.join(out)
@@ -199,7 +201,7 @@ def run_container_and_log(name: str, framework: str, container_suffix: str, comm
         raise err
 
 # TODO any issue with creating a new client each time inside this function?
-def run_container_docker(container: str, command: List[str], volumes: List[Tuple[PurePath, PurePath]], working_dir: str, environment: Optional[dict[str, str]] = None):
+def run_container_docker(container: str, command: List[str], volumes: List[Tuple[PurePath, PurePath]], working_dir: str, environment: Optional[dict[str, str]] = None, network_disabled=False):
     """
     Runs a command in the container using Docker.
     Attempts to automatically correct file owner and group for new files created by the container, setting them to the
@@ -244,6 +246,7 @@ def run_container_docker(container: str, command: List[str], volumes: List[Tuple
                                 stderr=True,
                                 volumes=bind_paths,
                                 working_dir=working_dir,
+                                network_disabled=network_disabled,
                                 environment=environment).decode('utf-8')
 
     # TODO does this cleanup need to still run even if there was an error in the above run command?
@@ -278,6 +281,7 @@ def run_container_docker(container: str, command: List[str], volumes: List[Tuple
                                 stderr=True,
                                 volumes=bind_paths,
                                 working_dir=working_dir,
+                                network_disabled=network_disabled,
                                 environment=environment).decode('utf-8')
 
     # Raised on non-Unix systems
