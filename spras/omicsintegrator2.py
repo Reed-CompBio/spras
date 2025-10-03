@@ -135,6 +135,7 @@ class OmicsIntegrator2(PRM):
                              command,
                              volumes,
                              work_dir,
+                             out_dir
                              network_disabled=True)
 
         # TODO do we want to retain other output files?
