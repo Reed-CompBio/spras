@@ -65,6 +65,11 @@ algorithms:
           - 2
         g:
           - 3
+      run3:
+        b:
+          - 3
+        g:
+          - 3
   - name: meo
     params:
       include: true
