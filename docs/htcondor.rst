@@ -92,8 +92,7 @@ Submitting Parallel Jobs
 Parallelizing SPRAS workflows with HTCondor requires the same setup as
 the previous section, but with two additions. First, it requires an
 activated SPRAS conda environment with a ``pip install``-ed version of
-the SPRAS module (see the main ``README.md`` for detailed instructions
-on pip installation of SPRAS).
+the SPRAS module (via ``pip install .`` inside the SPRAS directory).
 
 Second, it requires an experimental executor for HTCondor that has been
 forked from the upstream `HTCondor Snakemake
