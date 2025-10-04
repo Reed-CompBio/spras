@@ -9,7 +9,7 @@ from spras.strwr import ST_RWR
 
 config.init_from_file("config/config.yaml")
 
-TEST_DIR = Path('test', 'ST_RWR')
+TEST_DIR = Path('test', 'algorithms', 'ST_RWR')
 OUT_FILE = Path(TEST_DIR, 'output', 'strwr-output.txt')
 EXPECTED_OUTPUT = Path(TEST_DIR, 'expected_output', 'strwr-output.txt')
 
