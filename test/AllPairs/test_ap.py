@@ -4,7 +4,7 @@ from pathlib import Path
 
 import pytest
 
-import spras.config as config
+import spras.config.config as config
 from spras.allpairs import AllPairs
 
 # Note that we don't directly use the config in the test, but we need the config
@@ -129,7 +129,7 @@ class TestAllPairs:
     def test_allpairs_zero_length(self):
         """
         Tests algorithm correctness of all_pairs_shortest_path.py by using AllPairs.run
-        The test case has a single soucre and target that is the same node, so the only path has
+        The test case has a single source and target that is the same node, so the only path has
         zero length.
         Therefore, the output pathway has no edges.
         """

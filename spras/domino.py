@@ -38,14 +38,12 @@ class DOMINO(PRM):
         @param filename_map: a dict mapping file types in the required_inputs to the filename for that type
         @return:
         """
-        for input_type in DOMINO.required_inputs:
-            if input_type not in filename_map:
-                raise ValueError(f"{input_type} filename is missing")
+        DOMINO.validate_required_inputs(filename_map)
 
         # Get active genes for node input file
         if data.contains_node_columns('active'):
             # NODEID is always included in the node table
-            node_df = data.request_node_columns(['active'])
+            node_df = data.get_node_columns(['active'])
         else:
             raise ValueError('DOMINO requires active genes')
         node_df = node_df[node_df['active'] == True]
@@ -119,7 +117,8 @@ class DOMINO(PRM):
                              container_suffix,
                              slicer_command,
                              volumes,
-                             work_dir)
+                             work_dir,
+                             out_dir)
 
         # Make the Python command to run within the container
         domino_command = ['domino',
@@ -138,12 +137,14 @@ class DOMINO(PRM):
         if module_threshold is not None:
             domino_command.extend(['--module_threshold', str(module_threshold)])
 
-        run_container_and_log('DOMINO',
-                             container_framework,
-                             container_suffix,
-                             domino_command,
-                             volumes,
-                             work_dir)
+        run_container_and_log(
+            'DOMINO',
+            container_framework,
+            container_suffix,
+            domino_command,
+            volumes,
+            work_dir,
+            out_dir)
 
         # DOMINO creates a new folder in out_dir to output its modules HTML files into called active_genes
         # The filename is determined by the input active_genes and cannot be configured
@@ -151,10 +152,10 @@ class DOMINO(PRM):
         out_modules_dir = Path(out_dir, 'active_genes')
 
         # Concatenate each produced module HTML file into one file
-        with open(output_file, 'w') as fo:
+        with open(output_file, 'w') as f:
             for html_file in out_modules_dir.glob('module_*.html'):
                 with open(html_file, 'r') as fi:
-                    fo.write(fi.read())
+                    f.write(fi.read())
 
         # Clean up DOMINO intermediate and pickle files
         slices_file.unlink(missing_ok=True)

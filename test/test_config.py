@@ -3,8 +3,15 @@ import pickle
 import numpy as np
 import pytest
 
-import spras.config as config
+import spras.config.config as config
+from spras.config.schema import DEFAULT_HASH_LENGTH
 
+filler_dataset_data: dict[str, str | list[str]] = {
+    "data_dir": "fake",
+    "edge_files": [],
+    "other_files": [],
+    "node_files": []
+}
 
 # Set up a dummy config for testing. For now, only include things that MUST exist in the dict
 # in order for the config init to complete. To test particular parts of the config initialization,
@@ -22,10 +29,26 @@ def get_test_config():
                 "reconstruction_dir": "my_dir"
             }
         },
-        "datasets": [{"label": "alg1"}, {"label": "alg2"}],
-        "gold_standards": [{"label": "gs1", "dataset_labels": []}],
+        "datasets": [{
+            "label": "alg1",
+            "data_dir": "fake",
+            "edge_files": [],
+            "other_files": [],
+            "node_files": []
+        }, {
+            "label": "alg2",
+            "data_dir": "faux",
+            "edge_files": [],
+            "other_files": [],
+            "node_files": []
+        }],
+        "gold_standards": [{
+            "label": "gs_fake",
+            "dataset_labels": [],
+            "node_files": [],
+            "data_dir": "gs-fake"
+        }],
         "algorithms": [
-            {"params": ["param2", "param2"]},
             {
                 "name": "strings",
                 "params": {
@@ -82,14 +105,14 @@ def get_test_config():
             },
             "ml": {
                 "include": False,
-                "aggregate_per_algorithm": False
+                "aggregate_per_algorithm": False,
             },
             "cytoscape": {
                 "include": False
             },
             "evaluation": {
                 "include": False,
-                 "aggregate_per_algorithm": False
+                "aggregate_per_algorithm": False
             },
         },
     }
@@ -123,9 +146,9 @@ class TestConfig:
         config.init_global(test_config)
         assert (config.config.hash_length == 7)
 
-        test_config["hash_length"] = ""
+        test_config.pop("hash_length", None)
         config.init_global(test_config)
-        assert (config.config.hash_length == config.DEFAULT_HASH_LENGTH)
+        assert (config.config.hash_length == DEFAULT_HASH_LENGTH)
 
         # Initialize the configuration
         test_config["hash_length"] = "12"
@@ -191,6 +214,7 @@ class TestConfig:
         test_config = get_test_config()
         correct_test_dicts = [{"label": "test"},  {"label": "123"}, {"label": "test123"}, {"label": "123test"}, {"label": "_"},
                               {"label": "test_test"}, {"label": "_test"}, {"label": "test_"}]
+        correct_test_dicts = [dict(list(d.items()) + list(filler_dataset_data.items())) for d in correct_test_dicts]
 
         for test_dict in correct_test_dicts:
             test_config["datasets"] = [test_dict]
@@ -301,3 +325,44 @@ class TestConfig:
         assert config.config.analysis_include_ml_aggregate_algo == expected_ml_agg
         assert config.config.analysis_include_evaluation == expected_eval
         assert config.config.analysis_include_evaluation_aggregate_algo == expected_eval_agg
+
+    @pytest.mark.parametrize("eval_include, kde, expected_eval, expected_kde", [
+        (True, True, True, True),
+        (True, False, True, True),
+        (False, True, False, True),
+        (False, False, False, False),
+    ])
+    def test_eval_kde_coupling(self, eval_include, kde, expected_eval, expected_kde):
+        test_config = get_test_config()
+        test_config["analysis"]["ml"]["include"] = True
+        # dealing with other coupling issue
+        test_config["analysis"]["summary"]["include"] = True
+
+        test_config["analysis"]["ml"]["kde"] = kde
+        test_config["analysis"]["evaluation"]["include"] = eval_include
+
+        config.init_global(test_config)
+
+        assert config.config.analysis_include_evaluation == expected_eval
+        assert config.config.pca_params["kde"] == expected_kde
+
+    @pytest.mark.parametrize("eval_include, summary_include, expected_eval, expected_summary", [
+        (True, True, True, True),
+        (True, False, True, True),
+        (False, True, False, True),
+        (False, False, False, False),
+    ])
+    def test_eval_summary_coupling(self, eval_include, summary_include, expected_eval, expected_summary):
+        test_config = get_test_config()
+        # dealing with other coupling issue
+        test_config["analysis"]["ml"]["include"] = True
+        test_config["analysis"]["ml"]["kde"] = True
+
+        test_config["analysis"]["summary"]["include"] = summary_include
+        test_config["analysis"]["evaluation"]["include"] = eval_include
+
+        config.init_global(test_config)
+
+        assert config.config.analysis_include_evaluation == expected_eval
+        assert config.config.analysis_include_summary == expected_summary
+

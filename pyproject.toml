@@ -19,27 +19,28 @@ classifiers = [
 requires-python = ">=3.11"
 dependencies = [
     "adjusttext==0.7.3",
-    # A bug was introduced in older versions of snakemake that prevent it from running. Update to fix
-    "snakemake==8.17.0",
-    "docker==5.0.3", # Switched from docker-py to docker because docker-py is not maintained in pypi. This appears to have no effect
-    "matplotlib==3.6",
-    "networkx==2.8",
-    "pandas==1.5",
-    "numpy==1.26.4",
-    "pip==22.1",
-    "requests==2.28",
-    "scikit-learn==1.2",
-    "seaborn==0.12",
-    "spython==0.2",
-    "sphinx==6.0",
-    "sphinx-rtd-theme==2.0.0",
+    "snakemake==9.6.2",
+    "docker==7.1.0",
+    "matplotlib==3.10.3",
+    "networkx==3.5",
+    "pandas==2.3.0",
+    "pydantic==2.11.7",
+    "numpy==2.3.1",
+    "requests==2.32.4",
+    "scikit-learn==1.7.0",
+    "seaborn==0.13.2",
+    "spython==0.3.14",
+
+    # toolchain deps
+    "pip==25.2",
 ]
 
 [project.optional-dependencies]
 dev = [
    # Only required for development
-    "pre-commit==2.20",
-    "pytest==8.0",
+    "pre-commit==4.2.0",
+    "pytest==8.4.1",
+    "pytest-split==0.10.0",
 ]
 
 [project.urls]
@@ -62,6 +63,7 @@ select = [
     "E711", # none-comparison
     "E713", # not-in-test
     "E714" , # not-is-test
+    "F401", # unused imports
     "F821", # undefined-name
     "F823", # undefined-local
     "F841", # unused-variable
@@ -69,8 +71,13 @@ select = [
     "W292", # missing-newline-at-end-of-file
 ]
 
-[tool.setuptools]
-# py-modules tells setuptools which directory is our actual module
-py-modules = ["spras"]
+[tool.setuptools.packages.find]
+where = ["."]
+include = ["spras*"]
+
+# Include non-python executables
+[tool.setuptools.package-data]
+"spras" = ["cgroup_wrapper.sh"]
+
 # packages tells setuptools what the exported package is called (ie allows import spras)
-packages = ["spras", "spras.analysis"]
+packages = ["spras", "spras.analysis", "spras.config"]

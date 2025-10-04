@@ -32,16 +32,14 @@ class OmicsIntegrator2(PRM):
         @param data: dataset
         @param filename_map: a dict mapping file types in the required_inputs to the filename for that type
         """
-        for input_type in OmicsIntegrator2.required_inputs:
-            if input_type not in filename_map:
-                raise ValueError(f"{input_type} filename is missing")
+        OmicsIntegrator2.validate_required_inputs(filename_map)
 
         if data.contains_node_columns('prize'):
             # NODEID is always included in the node table
-            node_df = data.request_node_columns(['prize'])
+            node_df = data.get_node_columns(['prize'])
         elif data.contains_node_columns(['sources', 'targets']):
             # If there aren't prizes but are sources and targets, make prizes based on them
-            node_df = data.request_node_columns(['sources', 'targets'])
+            node_df = data.get_node_columns(['sources', 'targets'])
             node_df.loc[node_df['sources']==True, 'prize'] = 1.0
             node_df.loc[node_df['targets']==True, 'prize'] = 1.0
         else:
@@ -67,7 +65,6 @@ class OmicsIntegrator2(PRM):
 
     # TODO add parameter validation
     # TODO add reasonable default values
-    # TODO document required arguments
     @staticmethod
     def run(edges=None, prizes=None, output_file=None, w=None, b=None, g=None, noise=None, noisy_edges=None,
             random_terminals=None, dummy_mode=None, seed=None, container_framework="docker"):
@@ -76,6 +73,17 @@ class OmicsIntegrator2(PRM):
         Only the .tsv output file is retained and then renamed.
         All other output files are deleted.
         @param output_file: the name of the output file, which will overwrite any existing file with this name
+        @param w: Omega: the weight of the edges connecting the dummy node to the nodes selected by dummyMode (default: 5)
+        @param b: Beta: scaling factor of prizes (default: 1)
+        @param g: Gamma: multiplicative edge penalty from degree of endpoints (default: 3)
+        @param noise: Standard Deviation of the gaussian noise added to edges in Noisy Edges Randomizations.
+        @param noisy_edges: An integer specifying how many times to add noise to the given edge values and re-run.
+        @param random_terminals: An integer specifying how many times to apply your given prizes to random nodes in the interactome and re-run
+        @param dummy_mode: Tells the program which nodes in the interactome to connect the dummy node to. (default: terminals)
+            "terminals" = connect to all terminals
+            "others" = connect to all nodes except for terminals
+            "all" = connect to all nodes in the interactome.
+        @param seed: The random seed to use for this run.
         @param container_framework: choose the container runtime framework, currently supports "docker" or "singularity" (optional)
         """
         if edges is None or prizes is None or output_file is None:
@@ -120,13 +128,15 @@ class OmicsIntegrator2(PRM):
         if seed is not None:
             command.extend(['--seed', str(seed)])
 
-        container_suffix = "omics-integrator-2:v2"
+        container_suffix = "omics-integrator-2:v3"
         run_container_and_log('Omics Integrator 2',
                              container_framework,
                              container_suffix,
                              command,
                              volumes,
-                             work_dir)
+                             work_dir,
+                             out_dir,
+                             network_disabled=True)
 
         # TODO do we want to retain other output files?
         # TODO if deleting other output files, write them all to a tmp directory and copy
