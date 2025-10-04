@@ -1,3 +1,4 @@
 include README.md
 include LICENSE
 recursive-include spras *.html
+include spras/cgroup_wrapper.sh

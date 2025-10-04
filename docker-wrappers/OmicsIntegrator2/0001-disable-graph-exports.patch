@@ -1,0 +1,26 @@
+From 5dc0e69fa3d1049ae8e1d8f51859335910245ad7 Mon Sep 17 00:00:00 2001
+From: "Tristan F.-R." <pub.tristanf@gmail.com>
+Date: Mon, 26 May 2025 09:52:34 -0700
+Subject: [PATCH] fix: disable graph exports
+
+this allows OI2 to work offline; plus, SPRAS already has graph visualizers.
+---
+ src/__main__.py | 2 +-
+ 1 file changed, 1 insertion(+), 1 deletion(-)
+
+diff --git a/src/__main__.py b/src/__main__.py
+index 49ef402..b7afbca 100644
+--- a/src/__main__.py
++++ b/src/__main__.py
+@@ -80,7 +80,7 @@ def main():
+         forest, augmented_forest = graph.output_forest_as_networkx(vertex_indices, edge_indices)
+ 
+     #oi.output_networkx_graph_as_graphml_for_cytoscape(augmented_forest, args.output_dir)
+-    oi.output_networkx_graph_as_interactive_html(augmented_forest, args.output_dir, args.filename+'.html')
++    # oi.output_networkx_graph_as_interactive_html(augmented_forest, args.output_dir, args.filename+'.html')
+     augmented_forest_df = oi.get_networkx_graph_as_dataframe_of_edges(augmented_forest)
+     output_dataframe_to_tsv(augmented_forest_df, args.output_dir, args.filename+'.tsv')
+ 
+-- 
+2.47.0
+

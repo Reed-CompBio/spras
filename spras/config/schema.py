@@ -97,8 +97,8 @@ def label_validator(name: str):
 
 class ContainerFramework(CaseInsensitiveEnum):
     docker = 'docker'
-    # TODO: add apptainer variant once #260 gets merged
     singularity = 'singularity'
+    apptainer = 'apptainer'
     dsub = 'dsub'
 
 class ContainerRegistry(BaseModel):
@@ -159,6 +159,7 @@ class RawConfig(BaseModel):
     container_framework: ContainerFramework = ContainerFramework.docker
     unpack_singularity: bool = False
     container_registry: ContainerRegistry
+    enable_profiling: bool = False
 
     hash_length: int = DEFAULT_HASH_LENGTH
     "The length of the hash used to identify a parameter combination"
