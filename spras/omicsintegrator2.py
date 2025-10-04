@@ -128,13 +128,15 @@ class OmicsIntegrator2(PRM):
         if seed is not None:
             command.extend(['--seed', str(seed)])
 
-        container_suffix = "omics-integrator-2:v1"
+        container_suffix = "omics-integrator-2:v3"
         run_container_and_log('Omics Integrator 2',
                              container_framework,
                              container_suffix,
                              command,
                              volumes,
-                             work_dir)
+                             work_dir,
+                             out_dir,
+                             network_disabled=True)
 
         # TODO do we want to retain other output files?
         # TODO if deleting other output files, write them all to a tmp directory and copy

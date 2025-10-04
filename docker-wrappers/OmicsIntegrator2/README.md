@@ -23,8 +23,9 @@ The `input` subdirectory contains test files `oi2-edges.txt` and `oi2-prizes.txt
 The Docker wrapper can be tested with `pytest`.
 
 ## Versions:
-- (docker hub) v1: Created a named conda environment in the container and used `ENTRYPOINT` to execute commands inside that environment. Not compatible with Singularity.
-- v1: Used the environment file to update the base conda environment so the `ENTRYPOINT` command was no longer needed. Compatible with Singularity.
+- v1: Created a named conda environment in the container and used `ENTRYPOINT` to execute commands inside that environment. Not compatible with Singularity.
+- v2: Used the environment file to update the base conda environment so the `ENTRYPOINT` command was no longer needed. Compatible with Singularity.
+- v3: Patch to work offline by never running `output_networkx_graph_as_interactive_html` ([#226](https://github.com/Reed-CompBio/spras/pull/226))
 
 ## TODO
 - Attribute https://github.com/fraenkel-lab/OmicsIntegrator2
