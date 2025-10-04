@@ -66,6 +66,8 @@ class Config:
 
         # Directory used for storing output
         self.out_dir = parsed_raw_config.reconstruction_settings.locations.reconstruction_dir
+        # A Boolean indicating whether to enable container runtime profiling (apptainer/singularity only)
+        self.enable_profiling = False
         # A dictionary to store configured datasets against which SPRAS will be run
         self.datasets = None
         # A dictionary to store configured gold standard data against output of SPRAS runs
@@ -279,9 +281,20 @@ class Config:
             self.pca_params["kde"] = True
             print("Setting kde to true; Evaluation analysis needs to run KDE for PCA-Chosen parameter selection.")
 
+        # Set summary include to True if Evaluation is set to True
+        # When a PCA-chosen parameter set is chosen, summary statistics are used to resolve tiebreakers.
+        if self.analysis_include_evaluation and not self.analysis_include_summary:
+            self.analysis_include_summary = True
+            print("Setting summary include to true; Evaluation analysis needs to use summary statistics for PCA-Chosen parameter selection.")
+
+
     def process_config(self, raw_config: RawConfig):
         # Set up a few top-level config variables
         self.out_dir = raw_config.reconstruction_settings.locations.reconstruction_dir
+
+        if raw_config.enable_profiling and not raw_config.container_settings.framework in ["singularity", "apptainer"]:
+            warnings.warn("enable_profiling is set to true, but the container framework is not singularity/apptainer. This setting will have no effect.")
+        self.enable_profiling = raw_config.enable_profiling
 
         self.process_datasets(raw_config)
         self.process_algorithms(raw_config)

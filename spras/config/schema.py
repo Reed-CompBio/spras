@@ -119,7 +119,8 @@ class Dataset(BaseModel):
 
 class GoldStandard(BaseModel):
     label: Annotated[str, AfterValidator(label_validator("Gold Standard"))]
-    node_files: list[str]
+    node_files: list[str] = []
+    edge_files: list[str] = []
     data_dir: str
     dataset_labels: list[str]
 
@@ -138,6 +139,7 @@ class ReconstructionSettings(BaseModel):
 
 class RawConfig(BaseModel):
     containers: ContainerSettings
+    enable_profiling: bool = False
 
     hash_length: int = DEFAULT_HASH_LENGTH
     "The length of the hash used to identify a parameter combination"
