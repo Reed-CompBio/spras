@@ -2,8 +2,8 @@ hash_length: 7
 container_framework: docker
 unpack_singularity: false
 container_registry:
-  base_url: docker.io
-  owner: reedcompbio
+  base_url: ghcr.io
+  owner: reed-compbio
 
 algorithms:
   - name: "pathlinker"
