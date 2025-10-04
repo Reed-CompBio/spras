@@ -120,6 +120,7 @@ class DOMINO(PRM):
                              slicer_command,
                              volumes,
                              work_dir,
+                             out_dir,
                              container_settings)
 
         # Make the Python command to run within the container
@@ -144,6 +145,7 @@ class DOMINO(PRM):
                              domino_command,
                              volumes,
                              work_dir,
+                             out_dir,
                              container_settings)
 
         # DOMINO creates a new folder in out_dir to output its modules HTML files into called active_genes

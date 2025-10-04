@@ -203,6 +203,7 @@ class OmicsIntegrator1(PRM):
                              command,
                              volumes,
                              work_dir,
+                             out_dir,
                              container_settings,
                              {'TMPDIR': mapped_out_dir})
 

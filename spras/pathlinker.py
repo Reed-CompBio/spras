@@ -120,6 +120,7 @@ class PathLinker(PRM):
                              command,
                              volumes,
                              work_dir,
+                             out_dir,
                              container_settings)
 
         # Rename the primary output file to match the desired output filename
