@@ -43,10 +43,10 @@ For example, to build reedcompbio/spras:v0.5.0 on Apple Silicon as a linux/amd64
 DOCKER_DEFAULT_PLATFORM=linux/amd64 docker build -t reedcompbio/spras:v0.5.0 -f docker-wrappers/SPRAS/Dockerfile .
 ```
 
-## With HTCondor
+## Running With HTCondor
 
-For information on how to use this docker image with HTCondor, see
-the [ReadTheDocs page on HTCondor](https://spras.readthedocs.io/en/latest/htcondor.html).
+For information on how to use this docker image with [HTCondor](https://htcondor.org/), see
+the [Read The Docs page on HTCondor](https://spras.readthedocs.io/en/latest/htcondor.html).
 
 ## Versions:
 

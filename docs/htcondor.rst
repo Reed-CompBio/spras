@@ -12,9 +12,8 @@ Then, from the AP clone this repo:
    git clone https://github.com/Reed-CompBio/spras.git
 
 **Note:** To work with SPRAS in HTCondor, it is recommended that you
-build an Apptainer image instead of using Docker. See `Converting Docker
-Images to Apptainer/Singularity
-Images <#converting-docker-images-to-apptainersingularity-images>`__ for
+build an Apptainer image instead of using Docker. See
+`Converting Docker Images to Apptainer/Singularity Images`_ for
 instructions. Importantly, the Apptainer image must be built for the
 linux/amd64 architecture. Most HTCondor APs will have ``apptainer``
 installed, but they may not have ``docker``. If this is the case, you
@@ -85,7 +84,7 @@ appears to fail periodically in HTCondor.
 **Note**: The ``spras.sub`` submit file is an example of how this
 workflow could be submitted from a CHTC Access Point (AP) to the OSPool.
 To run in the local CHTC pool, omit the ``+WantGlideIn`` and
-``requirements`` lines
+``requirements`` lines.
 
 Submitting Parallel Jobs
 ------------------------
