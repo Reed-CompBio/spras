@@ -17,8 +17,8 @@ DEFAULT_CONTAINER_PREFIX = "docker.io/reedcompbio"
 
 class ContainerFramework(CaseInsensitiveEnum):
     docker = 'docker'
-    # TODO: add apptainer variant once #260 gets merged
     singularity = 'singularity'
+    apptainer = 'apptainer'
     dsub = 'dsub'
 
 class ContainerRegistry(BaseModel):
