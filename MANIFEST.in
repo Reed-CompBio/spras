@@ -1,3 +1,4 @@
 include README.md
 include LICENSE
 include Snakefile
+include spras/cgroup_wrapper.sh

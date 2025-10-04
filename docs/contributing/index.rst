@@ -406,7 +406,7 @@ them, you can open a `GitHub
 issue <https://github.com/Reed-CompBio/spras/issues/new/choose>`__ to
 request feedback. However, once the pull request has been approved, it
 will **not** be merged as usual. The pull request will be closed so that
-the ``master`` branch of the fork stays synchronized with the ``master``
+the ``main`` branch of the fork stays synchronized with the ``main``
 branch of the main SPRAS repository.
 
 General steps for contributing a new pathway reconstruction algorithm
