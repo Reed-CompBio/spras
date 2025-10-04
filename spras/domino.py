@@ -118,7 +118,8 @@ class DOMINO(PRM):
                                 container_suffix,
                                 slicer_command,
                                 volumes,
-                                work_dir)
+                                work_dir,
+                                out_dir)
         except ContainerError as err:
             # Occurs when DOMINO gets passed some empty dataframe from network_file.
             # This counts as an empty input, so we return an empty output.
@@ -150,7 +151,8 @@ class DOMINO(PRM):
                                   container_suffix,
                                   domino_command,
                                   volumes,
-                                  work_dir)
+                                  work_dir,
+                                  out_dir)
         except ContainerError as err:
             # Occurs when DOMINO gets passed some empty dataframe from network_file.
             # This counts as an empty input, so we return an empty output.

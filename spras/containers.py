@@ -11,6 +11,7 @@ import docker.errors
 
 import spras.config.config as config
 from spras.logging import indent
+from spras.profiling import create_apptainer_container_stats, create_peer_cgroup
 from spras.util import hash_filename
 
 
@@ -175,7 +176,7 @@ def env_to_items(environment: dict[str, str]) -> Iterator[str]:
 # TODO consider a better default environment variable
 # Follow docker-py's naming conventions (https://docker-py.readthedocs.io/en/stable/containers.html)
 # Technically the argument is an image, not a container, but we use container here.
-def run_container(framework: str, container_suffix: str, command: List[str], volumes: List[Tuple[PurePath, PurePath]], working_dir: str, environment: Optional[dict[str, str]] = None):
+def run_container(framework: str, container_suffix: str, command: List[str], volumes: List[Tuple[PurePath, PurePath]], working_dir: str, out_dir: str | os.PathLike, environment: Optional[dict[str, str]] = None):
     """
     Runs a command in the container using Singularity or Docker
     @param framework: singularity or docker
@@ -184,6 +185,7 @@ def run_container(framework: str, container_suffix: str, command: List[str], vol
     @param volumes: a list of volumes to mount where each item is a (source, destination) tuple
     @param working_dir: the working directory in the container
     @param environment: environment variables to set in the container
+    @param out_dir: output directory for the rule's artifacts. Only passed into run_container_singularity for the purpose of profiling.
     @return: output from Singularity execute or Docker run
     """
     normalized_framework = framework.casefold()
@@ -191,14 +193,14 @@ def run_container(framework: str, container_suffix: str, command: List[str], vol
     container = config.config.container_prefix + "/" + container_suffix
     if normalized_framework == 'docker':
         return run_container_docker(container, command, volumes, working_dir, environment)
-    elif normalized_framework == 'singularity':
-        return run_container_singularity(container, command, volumes, working_dir, environment)
+    elif normalized_framework == 'singularity' or normalized_framework == "apptainer":
+        return run_container_singularity(container, command, volumes, working_dir, out_dir, environment)
     elif normalized_framework == 'dsub':
         return run_container_dsub(container, command, volumes, working_dir, environment)
     else:
         raise ValueError(f'{framework} is not a recognized container framework. Choose "docker", "dsub", or "singularity".')
 
-def run_container_and_log(name: str, framework: str, container_suffix: str, command: List[str], volumes: List[Tuple[PurePath, PurePath]], working_dir: str, environment: Optional[dict[str, str]] = None):
+def run_container_and_log(name: str, framework: str, container_suffix: str, command: List[str], volumes: List[Tuple[PurePath, PurePath]], working_dir: str, out_dir: str | os.PathLike, environment: Optional[dict[str, str]] = None):
     """
     Runs a command in the container using Singularity or Docker with associated pretty printed messages.
     @param name: the display name of the running container for logging purposes
@@ -215,7 +217,7 @@ def run_container_and_log(name: str, framework: str, container_suffix: str, comm
 
     print('Running {} on container framework "{}" on env {} with command: {}'.format(name, framework, list(env_to_items(environment)), ' '.join(command)), flush=True)
     try:
-        out = run_container(framework=framework, container_suffix=container_suffix, command=command, volumes=volumes, working_dir=working_dir, environment=environment)
+        out = run_container(framework=framework, container_suffix=container_suffix, command=command, volumes=volumes, working_dir=working_dir, out_dir=out_dir, environment=environment)
         if out is not None:
             if isinstance(out, list):
                 out = ''.join(out)
@@ -338,8 +340,7 @@ def run_container_docker(container: str, command: List[str], volumes: List[Tuple
     # finally:
     return out
 
-
-def run_container_singularity(container: str, command: List[str], volumes: List[Tuple[PurePath, PurePath]], working_dir: str, environment: Optional[dict[str, str]] = None):
+def run_container_singularity(container: str, command: List[str], volumes: List[Tuple[PurePath, PurePath]], working_dir: str, out_dir: str, environment: Optional[dict[str, str]] = None):
     """
     Runs a command in the container using Singularity.
     Only available on Linux.
@@ -347,6 +348,7 @@ def run_container_singularity(container: str, command: List[str], volumes: List[
     @param command: command to run in the container
     @param volumes: a list of volumes to mount where each item is a (source, destination) tuple
     @param working_dir: the working directory in the container
+    @param out_dir: output directory for the rule's artifacts -- used here to store profiling data
     @param environment: environment variable to set in the container
     @return: output from Singularity execute
     """
@@ -378,11 +380,14 @@ def run_container_singularity(container: str, command: List[str], volumes: List[
     singularity_options.extend(['--env', ",".join(env_to_items(environment))])
 
     # Handle unpacking singularity image if needed. Potentially needed for running nested unprivileged containers
+    expanded_image = None
     if config.config.unpack_singularity:
-        # Split the string by "/"
+        # The incoming image string is of the format <repository>/<owner>/<image name>:<tag> e.g.
+        # hub.docker.com/reedcompbio/spras:latest
+        # Here we first produce a .sif image using the image name and tag (base_cont)
+        # and then expand that image into a sandbox directory. For example,
+        # hub.docker.com/reedcompbio/spras:latest --> spras_latest.sif --> ./spras_latest/
         path_elements = container.split("/")
-
-        # Get the last element, which will indicate the base container name
         base_cont = path_elements[-1]
         base_cont = base_cont.replace(":", "_").split(":")[0]
         sif_file = base_cont + ".sif"
@@ -397,24 +402,49 @@ def run_container_singularity(container: str, command: List[str], volumes: List[
 
         base_cont_path = unpacked_dir / Path(base_cont)
 
-        # Check if the directory for base_cont already exists. When running concurrent jobs, it's possible
+        # Check whether the directory for base_cont_path already exists. When running concurrent jobs, it's possible
         # something else has already pulled/unpacked the container.
-        # Here, we expand the sif image from `image_path` to a directory indicated by `base_cont`
+        # Here, we expand the sif image from `image_path` to a directory indicated by `base_cont_path`
         if not base_cont_path.exists():
             Client.build(recipe=image_path, image=str(base_cont_path), sandbox=True, sudo=False)
+        expanded_image = base_cont_path  # This is the sandbox directory
 
-        # Execute the locally unpacked container.
-        return Client.execute(str(base_cont_path),
-                              command,
-                              options=singularity_options,
-                              bind=bind_paths)
+    # If not using the expanded sandbox image, we still need to prepend the docker:// prefix
+    # so apptainer knows to pull and convert the image format from docker to apptainer.
+    image_to_run = expanded_image if expanded_image else "docker://" + container
+    if config.config.enable_profiling:
+        # We won't end up using the spython client if profiling is enabled because
+        # we need to run everything manually to set up the cgroup
+        # Build the apptainer run command, which gets passed to the cgroup wrapper script
+        singularity_cmd = [
+            "apptainer", "exec"
+        ]
+        for bind in bind_paths:
+            singularity_cmd.extend(["--bind", bind])
+        singularity_cmd.extend(singularity_options)
+        singularity_cmd.append(image_to_run)
+        singularity_cmd.extend(command)
 
+        my_cgroup = create_peer_cgroup()
+        # The wrapper script is packaged with spras, and should be located in the same directory
+        # as `containers.py`.
+        wrapper = os.path.join(os.path.dirname(__file__), "cgroup_wrapper.sh")
+        cmd = [wrapper, my_cgroup] + singularity_cmd
+        proc = subprocess.run(cmd, capture_output=True, text=True, stderr=subprocess.STDOUT)
+
+        print("Reading memory and CPU stats from cgroup")
+        create_apptainer_container_stats(my_cgroup, out_dir)
+
+        result = proc.stdout
     else:
-        # Adding 'docker://' to the container indicates this is a Docker image Singularity must convert
-        return Client.execute('docker://' + container,
-                              command,
-                              options=singularity_options,
-                              bind=bind_paths)
+        result = Client.execute(
+            image=image_to_run,
+            command=command,
+            options=singularity_options,
+            bind=bind_paths
+        )
+
+    return result
 
 
 # Because this is called independently for each file, the same local path can be mounted to multiple volumes
