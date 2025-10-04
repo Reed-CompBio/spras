@@ -24,6 +24,7 @@ algorithms = {
     'domino': {},
     'bowtiebuilder': {},
     'responsenet': {},
+    'must': {},
     'strwr': {
         'threshold': 3,
         'dataset': Dataset({
