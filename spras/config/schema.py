@@ -121,7 +121,7 @@ class Dataset(BaseModel):
     # validation & coercion logic before we check it against our own
     # requirements
     label: Annotated[str, AfterValidator(label_validator("Dataset"))]
-    category: Optional[str]
+    category: Optional[str] = None
     "The dataset category, for working with multiple datasets at once in the configuration."
     node_files: list[str]
     edge_files: list[str]
