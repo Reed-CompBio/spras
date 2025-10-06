@@ -121,12 +121,14 @@ class Dataset(BaseModel):
     # validation & coercion logic before we check it against our own
     # requirements
     label: Annotated[str, AfterValidator(label_validator("Dataset"))]
+    category: Optional[str]
+    "The dataset category, for working with multiple datasets at once in the configuration."
     node_files: list[str]
     edge_files: list[str]
     other_files: list[str]
     data_dir: str
 
-    model_config = ConfigDict(extra='forbid')
+    model_config = ConfigDict(extra='forbid', use_attribute_docstrings=True)
 
 class GoldStandard(BaseModel):
     label: Annotated[str, AfterValidator(label_validator("Gold Standard"))]

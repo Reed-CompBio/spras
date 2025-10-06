@@ -1,7 +1,7 @@
 import os
 import pickle as pkl
 import warnings
-from typing import TypedDict
+from typing import NotRequired, TypedDict
 
 import pandas as pd
 
@@ -18,6 +18,7 @@ class DatasetDict(TypedDict):
     object. See spras/config/schema.py's `Dataset` class for the pydantic formation of `DatasetDict`.
     """
     label: str
+    category: NotRequired[str]
     node_files: list[str | os.PathLike]
     edge_files: list[str | os.PathLike]
     other_files: list[str | os.PathLike]
@@ -30,6 +31,7 @@ class Dataset:
 
     def __init__(self, dataset_dict: DatasetDict):
         self.label = None
+        self.category = None
         self.interactome = None
         self.node_table = None
         self.node_set = set()
@@ -78,6 +80,7 @@ class Dataset:
         """
 
         self.label = dataset_dict["label"]
+        self.category = dataset_dict["category"] if "category" in dataset_dict else None
 
         # Get file paths from config
         # TODO support multiple edge files
