@@ -31,12 +31,14 @@ def get_test_config():
         },
         "datasets": [{
             "label": "alg1",
+            "category": "category1",
             "data_dir": "fake",
             "edge_files": [],
             "other_files": [],
             "node_files": []
         }, {
             "label": "alg2",
+            "category": "category2",
             "data_dir": "faux",
             "edge_files": [],
             "other_files": [],
@@ -219,6 +221,28 @@ class TestConfig:
         for test_dict in correct_test_dicts:
             test_config["datasets"] = [test_dict]
             config.init_global(test_config)  # no error should be raised
+
+    def test_correct_dataset_category(self):
+        test_config = get_test_config()
+        config.init_global(test_config)
+        assert config.config.dataset_categories
+        assert len(config.config.dataset_categories["category1"]) == 1
+        assert len(config.config.dataset_categories["category2"]) == 1
+
+    def test_multiple_dataset_category(self):
+        test_config = get_test_config()
+        for dataset in test_config["datasets"]:
+            dataset["category"] = "category1"
+        config.init_global(test_config)
+        assert config.config.dataset_categories
+        assert len(config.config.dataset_categories["category1"]) == 2
+
+    def test_bad_dataset_category(self):
+        test_config = get_test_config()
+        for dataset in test_config["datasets"]:
+            dataset["category"] = "alg2"
+        with pytest.raises(ValueError): # categories can not match dataset labels
+            config.init_global(test_config)
 
     def test_error_gs_label(self):
         test_config = get_test_config()

@@ -73,6 +73,8 @@ class Config:
         self.unpack_singularity = False
         # A dictionary to store configured datasets against which SPRAS will be run
         self.datasets = None
+        # A dictionary to store dataset categories with their associated dataset labels
+        self.dataset_categories = None
         # A dictionary to store configured gold standard data against output of SPRAS runs
         self.gold_standards = None
         # The hash length SPRAS will use to identify parameter combinations.
@@ -124,11 +126,21 @@ class Config:
         # When Snakemake parses the config file it loads the datasets as OrderedDicts not dicts
         # Convert to dicts to simplify the yaml logging
         self.datasets = {}
+        self.dataset_categories = {}
         for dataset in raw_config.datasets:
             label = dataset.label
-            if label.lower() in [key.lower() for key in self.datasets.keys()]:
+            if label.casefold() in [key.casefold() for key in self.datasets.keys()]:
                 raise ValueError(f"Datasets must have unique case-insensitive labels, but the label {label} appears at least twice.")
             self.datasets[label] = dict(dataset)
+
+            # Extra check for conflicting categories which we don't store, yet.
+            category = dataset.category
+            if category:
+                if category.casefold() in [key.casefold() for key in self.datasets.keys()]:
+                    raise ValueError(f"Dataset categories can not appear as (case-insensitive) labels, yet category {category} appears as a label.")
+
+                category_dataset_labels = self.dataset_categories.setdefault(category, [])
+                category_dataset_labels.append(dataset.label)
 
         # parse gold standard information
         self.gold_standards = {gold_standard.label: dict(gold_standard) for gold_standard in raw_config.gold_standards}
