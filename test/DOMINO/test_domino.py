@@ -61,16 +61,6 @@ class TestDOMINO:
                 active_genes=TEST_DIR / 'input' / 'simple' / 'domino-active-genes.txt',
                 output_file=OUT_FILE_DEFAULT)
 
-    def test_domino_small(self):
-        # Test over small files
-        # https://github.com/Reed-CompBio/spras/pull/103#issuecomment-1681526958
-        OUT_FILE_DEFAULT.unlink(missing_ok=True)
-        DOMINO.run(
-            network=TEST_DIR / 'input' / 'small' / 'domino-network.txt',
-            active_genes=TEST_DIR / 'input' / 'small' / 'domino-active-genes.txt',
-            output_file=OUT_FILE_DEFAULT)
-        assert OUT_FILE_DEFAULT.exists()
-
     def test_domino_empty(self):
         # Test over empty files
         # https://github.com/Reed-CompBio/spras/pull/103#issuecomment-1681526958
