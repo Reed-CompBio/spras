@@ -122,7 +122,7 @@ class Dataset(BaseModel):
     # requirements
     label: Annotated[str, AfterValidator(label_validator("Dataset"))]
     category: Optional[str] = None
-    "The dataset category, for working with multiple datasets at once in the configuration."
+    "The dataset category, for working with dataset collections in the configuration."
     node_files: list[str]
     edge_files: list[str]
     other_files: list[str]
