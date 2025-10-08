@@ -24,3 +24,11 @@ OI1 takes some optional arguments:
   * ``all``: connect the dummy node to all nodes in the interactome (i.e. full set of nodes in graph)
   * ``others``: connect the dummy node to all nodes that are not terminal nodes (i.e. nodes without prizes)
   * ``file``: connect the dummy node to a specific list of nodes provided in a file
+
+Dataset Usage
+-------------
+
+OmicsIntegrator1 prefers ``prize``s, but will take the union of ``sources`` and ``targets``
+and set their 'prize' to 1 if ``prize`` is not specified.
+
+OmicsIntegrator1 considers graph directionality.

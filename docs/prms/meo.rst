@@ -12,3 +12,9 @@ MEO takes in three optional parameters:
 * local_search: a "Yes"/"No" parameter that enables MEO's local search functionality. See "Improving approximations with local search" in
   the associated paper for more information. This should almost always be yes.
 * rand_restarts: the number (int) of random restarts to use.
+
+Dataset Usage
+-------------
+
+MEO uses ``sources``, ``targets``, and edge weights. MEO also considers
+input graph directionality.
