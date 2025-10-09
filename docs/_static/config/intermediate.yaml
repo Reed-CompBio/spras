@@ -26,8 +26,8 @@ algorithms:
       include: true
       run1:
         k: 1
-        run2:
-          k: [10, 100]
+      run2:
+        k: [10, 100]
   - name: omicsintegrator1
     params:
       include: true
@@ -87,9 +87,6 @@ algorithms:
       run1:
         alpha: [0.85]
         threshold: [100, 200]
-  - name: "bowtiebuilder"
-    params:
-      include: true
 
 # Here we specify which pathways to run and other file location information.
 # Assume that if a dataset label does not change, the lists of associated input files do not change

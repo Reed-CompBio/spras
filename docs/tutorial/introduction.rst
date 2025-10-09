@@ -2,6 +2,37 @@
 SPRAS Tutorial
 ##############
 
+Purpose of this Tutorial
+========================
+This tutorial will introduce participants to SPRAS and demonstrate how it can be used to explore biological pathways from omics data. 
+
+Together, we will cover:
+
+1. How to set up and run SPRAS
+2. Running multiple algorithms with different parameters across one datasets
+3. Using the post-analysis tools to evaluate and compare results
+4. Building datasets for analysis
+5. Other things you can do with SPRAS
+
+Prerequisites for this tutorial
+===============================
+Required software:
+
+- `Conda <https://docs.conda.io/projects/conda/en/latest/user-guide/install/index.html>`__ : for managing environments
+- `Docker <https://www.docker.com/get-started/>`__ : for containerized runs
+- `Cytoscape <https://cytoscape.org//>`__ for visualizing networks (download locally, the web version will not suffice)
+- `Git <https://git-scm.com/downloads>`__: for cloning the SPRAS repository
+- A terminal or code editor (`VS Code <https://code.visualstudio.com/download>`__ is recommended, but any terminal will work)
+
+Required knowledge:
+
+- Basic Python skills
+- Basic biology concepts
+
+###############
+SPRAS Overview
+###############
+
 What is pathway reconstruction?
 ===============================
 Pathway reconstruction is a computational approach used in biology to rebuild biological pathways (such as signaling pathways) from high-throughput experimental data.
@@ -28,30 +59,3 @@ SPRAS provides an abstraction layer for pathway reconstruction algorithms by org
 A key strength of SPRAS is automation. From user provided input data and configurations, it can generate and execute complete workflows without requiring users to write complex scripts. This lowers the barrier to entry, allowing researchers to apply, evaluate, and compare multiple pathway reconstruction algorithms without deep computational expertise.
 
 SPRAS also supports scalable, reproducible analyses, making it especially valuable for a large number datasets and systematic investigations. In addition, it provides built-in evaluation and post analysis tools that provide further insights of the algorithm outputs.
-
-Purpose of this workshop
-========================
-This workshop will introduce participants to SPRAS and demonstrate how it can be used to explore biological pathways from omics data. Together, we will cover:
-
-.. TODO: update this once I have the tutorial up to date
-
-1. How to set up and run SPRAS
-2. Running multiple algorithms with different parameters across one datasets
-3. Using the post-analysis tools to evaluate and compare results
-4. Building datasets for analysis
-5. Other things you can do with SPRAS
-
-Prerequisites for this tutorial
-===============================
-Required software:
-
-- `Conda <https://docs.conda.io/projects/conda/en/latest/user-guide/install/index.html>`__ : for managing environments
-- `Docker <https://www.docker.com/get-started/>`__ : for containerized runs
-- `Cytoscape <https://cytoscape.org//>`__ for visualizing networks (download locally, the web version will not suffice)
-- `Git <https://git-scm.com/downloads>`__: for cloning the SPRAS repository
-- A terminal or code editor (`VS Code <https://code.visualstudio.com/download>`__ is recommended, but any terminal will work)
-
-Required knowledge:
-
-- Basic Python skills
-- Basic biology concepts

@@ -4,8 +4,17 @@ Intermediate Tutorial - Custom Data & Multi-Algorithm Runs
 
 TODO: add an explanation of this tutorial
 
+
+.. This tutorial provides a hands-on introduction to SPRAS. It is designed to show participants how to install the software, run example workflows, and use tools to interpret the results.
+
+You will learn how to:
+
+- Prepare and format data for use with SPRAS
+- Configure and run additional pathway reconstruction algorithms on a dataset
+- Enable post-analysis steps to generate post analysis information
+
 Step 1: Turn data into the input structure we require
-=========================================
+======================================================
 
 Show images and charts as to what is changing
 0) download the data?
@@ -51,7 +60,7 @@ Show images and charts as to what is changing
 
 
 Step 2: Adding multiple PRAs to the workflow
-=========================================
+=============================================
 
 Now that we've prepared our input data, we can begin running multiple pathway reconstruction algorithms on it.
 
@@ -93,30 +102,25 @@ SPRAS supports a wide range of algorithms, each designed around different biolog
 - Domino
 - Source-Targets Random Walk with Restarts
 - Random Walk with Restarts
-- BowTieBuilder
+- BowTieBuilder (Not optimized for large datasets; slower on big networks)
 - ResponseNet
 
-ADD THAT EACH ALGORITHM HAS BEEN WRAPPED BY SPRAS AND WE CALL DOCKER CONTAINERS TO SEND ALGORITHM INPUTS AND SPECIFIC PARAMETER COMBINATIONS TO THE DOCKER CONTAINER TO GET A SUBNETWORKS
+Wrapped Algorithms
+^^^^^^^^^^^^^^^^^^^
+Each algorithm has been wrapped by SPRAS. 
+Wrapping an algorithm in SPRAS involves three main steps:
 
-ADD THAT MORE INFORMATION ON EACH OF THE ALGORITHMS CAN BE FOUND IN OUR DOCUMENTATION UNDER SUPPORTED ALGORITHMS
+1. Input generation: SPRAS creates and formats the input files required by the algorithm based on the provided dataset
+2. Execution: SPRAS runs the algorithm within its corresponding Docker container, which holds the algorithm code. This is called for each specified parameter combination in the configuration file.
+3. Output Standardization: The raw outputs are converted into a standardized SPRAS format
 
 Inputs
 ^^^^^^^
-.. Each of these pathway reconstruction algorithms differ in the types of biological inputs they require and how they interpret those inputs to identify subnetworks.
-.. Some algorithms require source and target nodes, reconstructing subnetworks that connect these predefined start and end points through the interactome.
-.. Other algorithms use prizes, which are scores assigned to nodes of interest. These algorithms aim to identify subnetworks that contain or maximize the inclusion of prize nodes.
-.. Finally, some algorithms use active nodes, representing nodes of interest that are significantly "on" or perturbed under a given biological condition. These algorithms focus on identifying and including these active regions within the reconstructed subnetwork.
-
-
 These pathway reconstruction algorithms differ in the inputs nodes they require and how they interpret those nodes to identify subnetworks.
 Some use source and target nodes to connect predefined start and end points, others use prizes, which are scores assigned to nodes of interest, and some rely on active nodes that represent proteins or genes significantly “on” or perturbed under specific biological conditions.
 
 Along with differences in their inputs nodes, these algorithms also interpret the input interactome differently. 
 Some can handle directed graphs, others work only with undirected graphs, and a few support mixed directionaltiy graphs.
-
-SPRAS manages these differences automatically. 
-It takes in a single SPRAS standardized dataset and then reformats and updates it internally to match the input requirements of each algorithm that is selected for the run. 
-This ensures that every algorithm receives the correctly formatted data without requiring the user to prepare separate input files for each of the algorithms.
 
 Parameters
 ^^^^^^^^^^
@@ -126,19 +130,58 @@ These parameters vary widely between algorithms and reflect the unique optimizat
 
 2.3 Running SPRAS with Multiple Algorithms
 ------------------------------------------
+In the intermediate.yaml configuration file, it is set up have SPRAS run multiple algorithms (all of the algorithms supported in SPRAS except BowTieBuilder) with multiple parameter settings (if available) on one dataset.
 
 From the root directory spras/, run the command below from the command line:
 
 .. code:: bash
 
-    snakemake --cores 1 --configfile config/intermediate.yaml
+    snakemake --cores 4 --configfile config/intermediate.yaml
 
 
 What Happens When You Run This Command
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
-What your directory structure should like after this run:
 
-TODO: UPDATE THIS
+SPRAS will run more slowly than the beginner.yaml configuration. 
+A lot of the same automated steps (managed by Snakemake and Docker) is occurring behind the scenes; however this setup runs multiple algorithms with different parameter combinations, which naturally takes longer to complete.
+By increasing the number of cores to 4, it allows Snakemake to parallelize the work locally, speeding up execution when possible.
+
+1. Snakemake starts the workflow
+
+Snakemake reads the options set in the intermediate.yaml configuration file and determines which datasets, algorithms, and parameter combinations need to run.  It also checks if any post-analysis steps were requested.
+
+2. Preparing the dataset
+
+SPRAS takes the interactome and node prize files specified in the configuration and bundles them into a Dataset object to be used for processing algorithm specific inputs. 
+This object is stored as a .pickle file so it can be reused for other algorithms without re-processing it.
+
+3. Creating algorithm specific inputs
+
+For each algorithm marked as include: true in the configuration, SPRAS generates input files tailored to that algorithm. 
+In this case, every algorithm is enabled, so SPRAS creates the files required for each algorithm.
+
+4. Organizing results with parameter hashes
+
+Each <dataset>-<algorithm>-params-<a hash> combination folder is created. 
+A matching log file in logs/parameters-<algorithm>-params-<a hash>.yaml records the exact parameter values used.
+
+5. Running the algorithm
+
+SPRAS executes each algorithm by launching its corresponding Docker image multiple times (once for each parameter configuration). 
+During each run, SPRAS provides the prepared input files and the corresponding parameter settings to the container. Each algorithm then runs independently within its Docker environment and produces a raw pathway output file (raw-pathway.txt), which contains the reconstructed subnetwork in the algorithm's native format.
+
+6. Standardizing the results
+
+SPRAS parses each of the raw output into a standardized SPRAS format (pathway.txt). 
+This ensures all algorithms output are put into a standardized output, because their native formats differ.
+
+7. Logging the Snakemake run 
+
+Snakemake creates a dated log in .snakemake/log/. This log shows what rules ran and any errors that occurred during the SPRAS run.
+
+
+What Your Directory Structure Should Like After This Run:
+^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
 .. code-block:: text
 
@@ -153,46 +196,117 @@ TODO: UPDATE THIS
    │   └── tps-egfr-prizes.txt
    ├── outputs/
    │   └── basic/
-   │       └── egfr-pathlinker-params-D4TUKMX/
+   │       └── dataset-egfr-merged.pickle
+   │       └── egfr-meo-params-FJBHHNE
    │            └── pathway.txt
    │            └── raw-pathway.txt
-   │       └── logs/
-   │                └── dataset-egfr.yaml
-   │                └── parameters-pathlinker-params-D4TUKMX.yaml
-   │       └── prepared/
-   │            └── egfr-pathlinker-inputs
+   │       └── egfr-meo-params-GKEDDFZ
+   │            └── pathway.txt
+   │            └── raw-pathway.txt
+   │       └── egfr-meo-params-JQ4DL7K
+   │            └── pathway.txt
+   │            └── raw-pathway.txt
+   │       └── egfr-meo-params-OXXIFMZ
+   │            └── pathway.txt
+   │            └── raw-pathway.txt
+   │       └── egfr-mincostflow-params-42UBTQI
+   │            └── pathway.txt
+   │            └── raw-pathway.txt
+   │       └── egfr-mincostflow-params-4G2PQRB
+   │            └── pathway.txt
+   │            └── raw-pathway.txt
+   │       └── egfr-omicsintegrator1-params-FZI2OGW
+   │            └── pathway.txt
+   │            └── raw-pathway.txt
+   │       └── egfr-omicsintegrator1-params-GUMLBDZ
+   │            └── pathway.txt
+   │            └── raw-pathway.txt
+   │       └── egfr-omicsintegrator1-params-PCWFPQW
+   │            └── pathway.txt
+   │            └── raw-pathway.txt
+   │       └── egfr-omicsintegrator2-params-EHHWPMD
+   │            └── pathway.txt
+   │            └── raw-pathway.txt
+   │       └── egfr-omicsintegrator2-params-IV3IPCJ
+   │            └── pathway.txt
+   │            └── raw-pathway.txt
+   │       └── egfr-pathlinker-params-4YXABT7
+   │            └── pathway.txt
+   │            └── raw-pathway.txt
+   │       └── egfr-pathlinker-params-7S4SLU6
+   │            └── pathway.txt
+   │            └── raw-pathway.txt
+   │       └── egfr-pathlinker-params-D4TUKMX
+   │            └── pathway.txt
+   │            └── raw-pathway.txt
+   │       └── egfr-pathlinker-params-VQL7BDZ
+   │            └── pathway.txt
+   │            └── raw-pathway.txt
+   │       └── egfr-rwr-params-34NN6EK
+   │            └── pathway.txt
+   │            └── raw-pathway.txt
+   │       └── egfr-rwr-params-GGZCZBU
+   │            └── pathway.txt
+   │            └── raw-pathway.txt
+   │       └── egfr-strwr-params-34NN6EK
+   │            └── pathway.txt
+   │            └── raw-pathway.txt
+   │       └── egfr-strwr-params-GGZCZBU
+   │            └── pathway.txt
+   │            └── raw-pathway.txt
+   │       └── logs
+   │            └── datasets-egfr.yaml
+   │            └── parameters-allpairs-params-BEH6YB2.yaml
+   │            └── parameters-domino-params-V3X4RW7.yaml
+   │            └── parameters-meo-params-FJBHHNE.yaml
+   │            └── parameters-meo-params-GKEDDFZ.yaml
+   │            └── parameters-meo-params-JQ4DL7K.yaml
+   │            └── parameters-meo-params-OXXIFMZ.yaml
+   │            └── parameters-mincostflow-params-42UBTQI.yaml
+   │            └── parameters-mincostflow-params-4G2PQRB.yaml
+   │            └── parameters-mincostflow-params-GGT4CVE.yaml
+   │            └── parameters-omicsintegrator1-params-FZI2OGW.yaml
+   │            └── parameters-omicsintegrator1-params-GUMLBDZ.yaml
+   │            └── parameters-omicsintegrator1-params-PCWFPQW.yaml
+   │            └── parameters-omicsintegrator2-params-EHHWPMD.yaml
+   │            └── parameters-omicsintegrator2-params-IV3IPCJ.yaml
+   │            └── parameters-pathlinker-params-4YXABT7.yaml
+   │            └── parameters-pathlinker-params-7S4SLU6.yaml
+   │            └── parameters-pathlinker-params-D4TUKMX.yaml
+   │            └── parameters-pathlinker-params-VQL7BDZ.yaml
+   │            └── parameters-rwr-params-34NN6EK.yaml
+   │            └── parameters-rwr-params-GGZCZBU.yaml
+   │            └── parameters-strwr-params-34NN6EK.yaml
+   │            └── parameters-strwr-params-GGZCZBU.yaml
+   │       └── prepared
+   │            └── egfr-domino-inputs
+   │                ├── active_genes.txt
    │                └── network.txt
-   │                └── nodetypes.txt
-   │       └── dataset-egfr-merged.pickle
-
-
-1. Snakemake starts the workflow
-
-Snakemake reads the options set in the intermediate.yaml configuration file and determines which datasets, algorithms, and parameter combinations need to run.  It also checks if any post-analysis steps were requested.
-
-2. Preparing the dataset
-
-SPRAS takes the interactome and node prize files specified in the config and bundles them into a Dataset object to be used for processing algorithm specific inputs. This object is stored as a .pickle file so it can be reused for other algorithms without re-processing it.
-
-3. Creating algorithm specific inputs
-
-For each algorithm marked as include: true in the config, SPRAS generates input files tailored to that algorithm. In this case, every algorithm is enabled, so SPRAS creates the files required for each algorithm.
-
-4. Organizing results with parameter hashes
-
-Each <dataset>-<algorithm>-params-<a hash> combination folder is created. A matching log file in logs/parameters-<algorithm>-params-<a hash>.yaml records the exact parameter values used.
-
-5. Running the algorithm
-
-SPRAS executes each algorithm by launching its corresponding Docker image multiple times (once for each parameter configuration). During each run, SPRAS provides the prepared input files and the corresponding parameter settings to the container. Each algorithm then runs independently within its Docker environment and produces a raw pathway output file (raw-pathway.txt), which contains the reconstructed subnetwork in the algorithm's native format.
-
-6. Standardizing the results
-
-SPRAS parses each of the raw output into a standardized SPRAS format (pathway.txt). This ensures all algorithms output are put into a standardized output, because their native formats differ.
-
-7. Logging the Snakemake run 
-
-Snakemake creates a dated log in .snakemake/log/. This log shows what rules ran and any errors that occurred during the SPRAS run.
+   │            └── egfr-meo-inputs
+   │                ├── edges.txt
+   │                ├── sources.txt
+   │                └── targets.txt
+   │            └── egfr-mincostflow-inputs
+   │                ├── edges.txt
+   │                ├── sources.txt
+   │                └── targets.txt
+   │            └── egfr-omicsintegrator1-inputs
+   │                ├── dummy_nodes.txt
+   │                ├── edges.txt
+   │                └── prizes.txt
+   │            └── egfr-omicsintegrator2-inputs
+   │                ├── edges.txt
+   │                └── prizes.txt
+   │            └── egfr-pathlinker-inputs
+   │                ├── network.txt
+   │                ── nodetypes.txt
+   │            └── egfr-rwr-inputs
+   │                ├── network.txt
+   │                └── nodes.txt
+   │            └── egfr-strwr-inputs
+   |                ├── network.txt
+   |                ├── sources.txt
+   |                └── targets.txt
 
 2.4 Reviewing the pathway.txt Files 
 -------------------------------------------
