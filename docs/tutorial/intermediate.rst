@@ -96,6 +96,10 @@ SPRAS supports a wide range of algorithms, each designed around different biolog
 - BowTieBuilder
 - ResponseNet
 
+ADD THAT EACH ALGORITHM HAS BEEN WRAPPED BY SPRAS AND WE CALL DOCKER CONTAINERS TO SEND ALGORITHM INPUTS AND SPECIFIC PARAMETER COMBINATIONS TO THE DOCKER CONTAINER TO GET A SUBNETWORKS
+
+ADD THAT MORE INFORMATION ON EACH OF THE ALGORITHMS CAN BE FOUND IN OUR DOCUMENTATION UNDER SUPPORTED ALGORITHMS
+
 Inputs
 ^^^^^^^
 .. Each of these pathway reconstruction algorithms differ in the types of biological inputs they require and how they interpret those inputs to identify subnetworks.
