@@ -1,9 +1,10 @@
 from pathlib import Path
-from statistics import median
 from typing import Iterable
 
 import networkx as nx
 import pandas as pd
+
+from spras.statistics import compute_statistics, statistics_options
 
 
 def summarize_networks(file_paths: Iterable[Path], node_table: pd.DataFrame, algo_params: dict[str, dict],
@@ -47,44 +48,11 @@ def summarize_networks(file_paths: Iterable[Path], node_table: pd.DataFrame, alg
 
         # Save the network name, number of nodes, number edges, and number of connected components
         nw_name = str(file_path)
-        number_nodes = nw.number_of_nodes()
-        number_edges = nw.number_of_edges()
-        ncc = nx.number_connected_components(nw)
 
-        # Save the max/median degree, average clustering coefficient, and density
-        if number_nodes == 0:
-            max_degree = 0
-            median_degree = 0.0
-            density = 0.0
-        else:
-            degrees = [deg for _, deg in nw.degree()]
-            max_degree = max(degrees)
-            median_degree = median(degrees)
-            density = nx.density(nw)
-
-        cc = list(nx.connected_components(nw))
-        # Save the max diameter
-        # Use diameter only for components with ≥2 nodes (singleton components have diameter 0)
-        diameters = [
-            nx.diameter(nw.subgraph(c).copy()) if len(c) > 1 else 0
-            for c in cc
-        ]
-        max_diameter = max(diameters, default=0)
-
-        # Save the average path lengths
-        # Compute average shortest path length only for components with ≥2 nodes (undefined for singletons, set to 0.0)
-        avg_path_lengths = [
-            nx.average_shortest_path_length(nw.subgraph(c).copy()) if len(c) > 1 else 0.0
-            for c in cc
-        ]
-
-        if len(avg_path_lengths) != 0:
-            avg_path_len = sum(avg_path_lengths) / len(avg_path_lengths)
-        else:
-            avg_path_len = 0.0
+        graph_statistics = compute_statistics(nw, statistics_options)
 
         # Initialize list to store current network information
-        cur_nw_info = [nw_name, number_nodes, number_edges, ncc, density, max_degree, median_degree, max_diameter, avg_path_len]
+        cur_nw_info = [nw_name, *graph_statistics]
 
         # Iterate through each node property and save the intersection with the current network
         for node_list in nodes_by_col:
@@ -104,7 +72,7 @@ def summarize_networks(file_paths: Iterable[Path], node_table: pd.DataFrame, alg
         nw_info.append(cur_nw_info)
 
     # Prepare column names
-    col_names = ['Name', 'Number of nodes', 'Number of edges', 'Number of connected components', 'Density', 'Max degree', 'Median degree', 'Max diameter', 'Average path length']
+    col_names = ['Name', *statistics_options]
     col_names.extend(nodes_by_col_labs)
     col_names.append('Parameter combination')
 
