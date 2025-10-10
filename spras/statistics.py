@@ -78,7 +78,7 @@ def compute_statistics(graph: nx.DiGraph, statistics: list[str]) -> dict[str, fl
         # when we want them
         if not set(statistic_tuple).isdisjoint(set(statistics)):
             computed_tuple = compute(graph)
-            assert len(statistic_tuple) == computed_tuple, f"bad tuple length for {statistic_tuple}"
+            assert len(statistic_tuple) == len(computed_tuple), f"bad tuple length for {statistic_tuple}"
 
             current_computed_statistics = zip(statistic_tuple, computed_tuple)
             for stat, value in current_computed_statistics:
