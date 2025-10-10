@@ -589,5 +589,5 @@ The large parameter value (k=100) generates a much denser subnetwork, capturing 
 
    <div style="margin:20px 0;"></div>
 
-Because the parameters used help determine which edges and nodes are included, each setting produces a different subnetwork. 
+The parameters used here help determine which edges and nodes are included; each setting produces a different subnetwork.
 By examining the statistics (egfr-pathway-summary.txt) alongside the visualizations (Cytoscape), you can assess how parameter choices influence both the structure and interpretability of the outputs.
