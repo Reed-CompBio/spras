@@ -52,7 +52,7 @@ def summarize_networks(file_paths: Iterable[Path], node_table: pd.DataFrame, alg
         graph_statistics = compute_statistics(nw, statistics_options)
 
         # Initialize list to store current network information
-        cur_nw_info = [nw_name, *graph_statistics]
+        cur_nw_info = [nw_name, *graph_statistics.values()]
 
         # Iterate through each node property and save the intersection with the current network
         for node_list in nodes_by_col:
