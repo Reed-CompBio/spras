@@ -2,10 +2,8 @@
 Intermediate Tutorial - Custom Data & Multi-Algorithm Runs
 ##########################################################
 
-TODO: add an explanation of this tutorial
-
-
-.. This tutorial provides a hands-on introduction to SPRAS. It is designed to show participants how to install the software, run example workflows, and use tools to interpret the results.
+This tutorial builds on the introduction to SPRAS from the previous tutorial. 
+It guides participants through how to convert data into a format usable by pathway reconstruction algorithms, run multiple algorithms within a single workflow, and apply new tools to interpret and compare the resulting pathways.
 
 You will learn how to:
 
@@ -68,6 +66,7 @@ For this part of the tutorial, we'll use a pre-defined configuration file that i
 Download it here: :download:`Intermediate Config File <../_static/config/intermediate.yaml>`
 
 Save the file into the config/ folder of your SPRAS installation.
+
 After adding this file, SPRAS will use the configuration to set up and reference your directory structure, which will look like this:
 
 .. code-block:: text
@@ -143,7 +142,7 @@ What Happens When You Run This Command
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
 SPRAS will run more slowly than the beginner.yaml configuration. 
-A lot of the same automated steps (managed by Snakemake and Docker) is occurring behind the scenes; however this setup runs multiple algorithms with different parameter combinations, which naturally takes longer to complete.
+The same automated steps as in beginner.yaml (managed by Snakemake and Docker) run behind the scenes for intermediate.yaml; however, this configuration now runs multiple algorithms with different parameter combinations, which takes longer to complete.
 By increasing the number of cores to 4, it allows Snakemake to parallelize the work locally, speeding up execution when possible.
 
 1. Snakemake starts the workflow
@@ -311,73 +310,311 @@ What Your Directory Structure Should Like After This Run:
 2.4 Reviewing the pathway.txt Files 
 -------------------------------------------
 After running the intermediate configuration file, the output/intermediate/ directory will contain many more subfolders and files.
-This is because we ran 11 algorithms, several of which were executed multiple times with different parameter combinations.
 
 Just like in the beginner tutorial, each algorithm's results can be found in the spras/output/intermediate/ directory.
 Within it, you'll see subfolders corresponding to each dataset-algorithm-parameter combination. 
-Each folder contains a pathway.txt file that contains the reconstructed subnetwork for that specific run.
+Each folder contains a pathway.txt file that contains the standardized reconstructed subnetwork for that specific run.
 
-TODO CHOOSE NEW FILES
-For example, the file egfr-pathlinker-params-7S4SLU6/pathway.txt contains the following reconstructed subnetwork:
+For example, the file egfr-mincostflow-params-42UBTQI/pathway.txt contains the following reconstructed subnetwork:
 
 .. code-block:: text
         
     Node1	Node2	Rank	Direction
-    EGF_HUMAN	EGFR_HUMAN	1	D
-    EGF_HUMAN	S10A4_HUMAN	2	D
-    S10A4_HUMAN	MYH9_HUMAN	2	D
-    K7PPA8_HUMAN	MDM2_HUMAN	3	D
-    MDM2_HUMAN	P53_HUMAN	3	D
-    S10A4_HUMAN	K7PPA8_HUMAN	3	D
-    K7PPA8_HUMAN	SIR1_HUMAN	4	D
-    MDM2_HUMAN	MDM4_HUMAN	5	D
-    MDM4_HUMAN	P53_HUMAN	5	D
-    CD2A2_HUMAN	CDK4_HUMAN	6	D
-    CDK4_HUMAN	RB_HUMAN	6	D
-    MDM2_HUMAN	CD2A2_HUMAN	6	D
-    EP300_HUMAN	P53_HUMAN	7	D
-    K7PPA8_HUMAN	EP300_HUMAN	7	D
-    K7PPA8_HUMAN	UBP7_HUMAN	8	D
-    UBP7_HUMAN	P53_HUMAN	8	D
-    K7PPA8_HUMAN	MDM4_HUMAN	9	D
-    MDM4_HUMAN	MDM2_HUMAN	9	D
+    CBL_HUMAN	EGFR_HUMAN	1	U
+    EGFR_HUMAN	EGF_HUMAN	1	U
+    EMD_HUMAN	LMNA_HUMAN	1	U
+    FYN_HUMAN	KS6A3_HUMAN	1	U
+    EGF_HUMAN	HDAC6_HUMAN	1	U
+    HDAC6_HUMAN	HS90A_HUMAN	1	U
+    KS6A3_HUMAN	SRC_HUMAN	1	U
+    EGF_HUMAN	LMNA_HUMAN	1	U
+    MYH9_HUMAN	S10A4_HUMAN	1	U
+    EGF_HUMAN	S10A4_HUMAN	1	U
+    EMD_HUMAN	SRC_HUMAN	1	U
 
-As you explore these files, you'll notice that the subnetworks vary widely across algorithms and parameter settings.
+
+And the file egfr-omicsintegrator1-params-GUMLBDZ/pathway.txt contains the following reconstructed subnetwork:
+
+.. code-block:: text
+        
+    Node1	Node2	Rank	Direction
+    CBLB_HUMAN	EGFR_HUMAN	1	U
+    CBL_HUMAN	CD2AP_HUMAN	1	U
+    CBL_HUMAN	CRKL_HUMAN	1	U
+    CBL_HUMAN	EGFR_HUMAN	1	U
+    CBL_HUMAN	PLCG1_HUMAN	1	U
+    CDK1_HUMAN	NPM_HUMAN	1	D
+    CHD4_HUMAN	HDAC2_HUMAN	1	U
+    EGFR_HUMAN	EGF_HUMAN	1	U
+    EGFR_HUMAN	GRB2_HUMAN	1	U
+    EIF3B_HUMAN	EIF3G_HUMAN	1	U
+    FAK1_HUMAN	PAXI_HUMAN	1	U
+    GAB1_HUMAN	PTN11_HUMAN	1	U
+    GRB2_HUMAN	PTN11_HUMAN	1	U
+    GRB2_HUMAN	SHC1_HUMAN	1	U
+    HDAC2_HUMAN	SIN3A_HUMAN	1	U
+    HGS_HUMAN	STAM2_HUMAN	1	U
+    KS6A1_HUMAN	MK01_HUMAN	1	U
+    MK01_HUMAN	ABI1_HUMAN	1	D
+    MK01_HUMAN	ERF_HUMAN	1	D
+    MRE11_HUMAN	RAD50_HUMAN	1	U
+
+
+As you explore more of these files, you'll notice that the subnetworks vary widely across algorithms and parameter settings.
 While you can still open and inspect these files manually, the number of outputs is much greater than in the beginner.yaml run, making manual inspection less practical.
 The pathway.txt outputs serve as the foundation for further post-analysis, where you can systematically compare and interpret the reconstructed networks in greater detail.
 
 In the next steps, we'll use SPRAS's internal post analyses tools to further explore and analyze these outputs.
 
-Step 3: Use/Show summary stats and ML code
----------------------------------------------
+Step 3: Use ML Post-Analysis
+=============================
 
 To enable downstream analyses, update the analysis section in your configuration file by setting both summary, cytoscape, and ml, to true. Your analysis section in the configuration file should look like this:
 
 .. code-block:: text
 
     analysis:
-        summary:
-            include: true
-        cytoscape:
-            include: true
         ml:
             include: true
-            ... (ml parameters)
 
-In this part of the tutorial, we're also including the ML section to enable machine learning-based post-analysis within SPRAS.
+In this part of the tutorial, we're also including the machine learning (ml) section to enable machine learning-based post-analysis built within SPRAS.
 
-The machine learning (ML) analysis will performs unsupervised analyses such as Principal Component Analysis (PCA), Hierarchical Agglomerative Clustering (HAC), ensembling, and Jaccard similarity comparisons of the pathways.
-- These analyses help uncover patterns and similarities between algorithms or across multiple outputs from the same algorithm
-- The ML section includes configurable parameters that let you adjust the behavior of PCA, HAC, and the other ML analyses performed
+The ml analysis will perform unsupervised analyses such as Principal Component Analysis (PCA), Hierarchical Agglomerative Clustering (HAC), ensembling, and Jaccard similarity comparisons of the pathways.
+- These analyses help uncover patterns and similarities between different algorithms run on a given dataset
+- if aggregate_per_algorithm: is set to true, it additionally groups outputs by algorithm within each dataset to uncover patterns and similarities for an algorithm
+- The ML section includes configurable parameters that let you adjust the behavior of the ml analyses performed
+
+With these updates, SPRAS will run the full set of unsupervised machine learning analyses across all outputs for a given dataset.
 
 After saving the changes in the configuration file, rerun with:
 
 .. code:: bash
 
-    snakemake --cores 1 --configfile config/intermediate.yaml
+    snakemake --cores 4 --configfile config/intermediate.yaml
 
 
+What Happens When You Run This Command
+^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+1. Reusing cached results
 
-What the sturcutre should look at 
+Snakemake reads the options set in intermediate.yaml and checks for any requested post-analysis steps. 
+It reuses cached results; in this case, the pathway.txt files generated from the previously executed algorithms + parameter combinations on the egfr dataset.
 
-Look at the outputs and interpret what we see.
+2.	Running the ml analysis
+
+SPRAS aggregates all files generated for a dataset.
+These groupings include all the reconstructed subnetworks produced across algorithm for a given dataset (and, if enabled, grouped outputs per algorithm for a given dataset).
+SPRAS then performs all machine learning analyses on each grouping and saves the results in the dataset-ml/ directory.
+
+
+What Your Directory Structure Should Like After This Run:
+^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+
+.. code-block:: text
+
+   spras/
+   ├── .snakemake/
+   │   └── log/
+   │       └── ... snakemake log files ...
+   ├── config/
+   │   └── basic.yaml
+   ├── inputs/
+   │   ├── phosphosite-irefindex13.0-uniprot.txt
+   │   └── tps-egfr-prizes.txt
+   ├── outputs/
+   │   └── basic/
+   │       └── dataset-egfr-merged.pickle
+   │       └── egfr-meo-params-FJBHHNE
+   │            └── pathway.txt
+   │            └── raw-pathway.txt
+   │       └── egfr-meo-params-GKEDDFZ
+   │            └── pathway.txt
+   │            └── raw-pathway.txt
+   │       └── egfr-meo-params-JQ4DL7K
+   │            └── pathway.txt
+   │            └── raw-pathway.txt
+   │       └── egfr-meo-params-OXXIFMZ
+   │            └── pathway.txt
+   │            └── raw-pathway.txt
+   │       └── egfr-mincostflow-params-42UBTQI
+   │            └── pathway.txt
+   │            └── raw-pathway.txt
+   │       └── egfr-mincostflow-params-4G2PQRB
+   │            └── pathway.txt
+   │            └── raw-pathway.txt
+   │       └── egfr-omicsintegrator1-params-FZI2OGW
+   │            └── pathway.txt
+   │            └── raw-pathway.txt
+   │       └── egfr-omicsintegrator1-params-GUMLBDZ
+   │            └── pathway.txt
+   │            └── raw-pathway.txt
+   │       └── egfr-omicsintegrator1-params-PCWFPQW
+   │            └── pathway.txt
+   │            └── raw-pathway.txt
+   │       └── egfr-omicsintegrator2-params-EHHWPMD
+   │            └── pathway.txt
+   │            └── raw-pathway.txt
+   │       └── egfr-omicsintegrator2-params-IV3IPCJ
+   │            └── pathway.txt
+   │            └── raw-pathway.txt
+   │       └── egfr-pathlinker-params-4YXABT7
+   │            └── pathway.txt
+   │            └── raw-pathway.txt
+   │       └── egfr-pathlinker-params-7S4SLU6
+   │            └── pathway.txt
+   │            └── raw-pathway.txt
+   │       └── egfr-pathlinker-params-D4TUKMX
+   │            └── pathway.txt
+   │            └── raw-pathway.txt
+   │       └── egfr-pathlinker-params-VQL7BDZ
+   │            └── pathway.txt
+   │            └── raw-pathway.txt
+   │       └── egfr-rwr-params-34NN6EK
+   │            └── pathway.txt
+   │            └── raw-pathway.txt
+   │       └── egfr-rwr-params-GGZCZBU
+   │            └── pathway.txt
+   │            └── raw-pathway.txt
+   │       └── egfr-strwr-params-34NN6EK
+   │            └── pathway.txt
+   │            └── raw-pathway.txt
+   │       └── egfr-strwr-params-GGZCZBU
+   │            └── pathway.txt
+   │            └── raw-pathway.txt
+   │       └── egfr-ml
+   │            └── ensemble-pathway.txt
+   │            └── hac-clusters-horizontal.txt
+   │            └── hac-clusters-vertical.txt
+   │            └── hac-horizontal.png
+   │            └── hac-vertical.png
+   │            └── jaccard-heatmap.png
+   │            └── jaccard-matrix.txt
+   │            └── pca-coordinates.txt
+   │            └── pca-variance.txt
+   │            └── pca.png
+   │       └── logs
+   │            └── datasets-egfr.yaml
+   │            └── parameters-allpairs-params-BEH6YB2.yaml
+   │            └── parameters-domino-params-V3X4RW7.yaml
+   │            └── parameters-meo-params-FJBHHNE.yaml
+   │            └── parameters-meo-params-GKEDDFZ.yaml
+   │            └── parameters-meo-params-JQ4DL7K.yaml
+   │            └── parameters-meo-params-OXXIFMZ.yaml
+   │            └── parameters-mincostflow-params-42UBTQI.yaml
+   │            └── parameters-mincostflow-params-4G2PQRB.yaml
+   │            └── parameters-mincostflow-params-GGT4CVE.yaml
+   │            └── parameters-omicsintegrator1-params-FZI2OGW.yaml
+   │            └── parameters-omicsintegrator1-params-GUMLBDZ.yaml
+   │            └── parameters-omicsintegrator1-params-PCWFPQW.yaml
+   │            └── parameters-omicsintegrator2-params-EHHWPMD.yaml
+   │            └── parameters-omicsintegrator2-params-IV3IPCJ.yaml
+   │            └── parameters-pathlinker-params-4YXABT7.yaml
+   │            └── parameters-pathlinker-params-7S4SLU6.yaml
+   │            └── parameters-pathlinker-params-D4TUKMX.yaml
+   │            └── parameters-pathlinker-params-VQL7BDZ.yaml
+   │            └── parameters-rwr-params-34NN6EK.yaml
+   │            └── parameters-rwr-params-GGZCZBU.yaml
+   │            └── parameters-strwr-params-34NN6EK.yaml
+   │            └── parameters-strwr-params-GGZCZBU.yaml
+   │       └── prepared
+   │            └── egfr-domino-inputs
+   │                ├── active_genes.txt
+   │                └── network.txt
+   │            └── egfr-meo-inputs
+   │                ├── edges.txt
+   │                ├── sources.txt
+   │                └── targets.txt
+   │            └── egfr-mincostflow-inputs
+   │                ├── edges.txt
+   │                ├── sources.txt
+   │                └── targets.txt
+   │            └── egfr-omicsintegrator1-inputs
+   │                ├── dummy_nodes.txt
+   │                ├── edges.txt
+   │                └── prizes.txt
+   │            └── egfr-omicsintegrator2-inputs
+   │                ├── edges.txt
+   │                └── prizes.txt
+   │            └── egfr-pathlinker-inputs
+   │                ├── network.txt
+   │                ── nodetypes.txt
+   │            └── egfr-rwr-inputs
+   │                ├── network.txt
+   │                └── nodes.txt
+   │            └── egfr-strwr-inputs
+   |                ├── network.txt
+   |                ├── sources.txt
+   |                └── targets.txt
+
+Step 3.1: Reviewing the Outputs
+--------------------------------
+
+TODO: ADD SOME interpretATIONS
+
+Ensembles
+^^^^^^^^^
+
+.. code-block:: text
+
+    Node1	Node2	Frequency	Direction
+    EGF_HUMAN	EGFR_HUMAN	0.42857142857142855	D
+    EGF_HUMAN	S10A4_HUMAN	0.38095238095238093	D
+    S10A4_HUMAN	MYH9_HUMAN	0.38095238095238093	D
+    K7PPA8_HUMAN	MDM2_HUMAN	0.09523809523809523	D
+    MDM2_HUMAN	P53_HUMAN	0.19047619047619047	D
+    S10A4_HUMAN	K7PPA8_HUMAN	0.19047619047619047	D
+    K7PPA8_HUMAN	SIR1_HUMAN	0.19047619047619047	D
+    MDM2_HUMAN	MDM4_HUMAN	0.09523809523809523	D
+    MDM4_HUMAN	P53_HUMAN	0.09523809523809523	D
+    CD2A2_HUMAN	CDK4_HUMAN	0.09523809523809523	D
+    CDK4_HUMAN	RB_HUMAN	0.09523809523809523	D
+    MDM2_HUMAN	CD2A2_HUMAN	0.09523809523809523	D
+    EP300_HUMAN	P53_HUMAN	0.2857142857142857	D
+    K7PPA8_HUMAN	EP300_HUMAN	0.09523809523809523	D
+    ...
+    
+
+HAC
+^^^
+
+.. image:: ../_static/images/hac-horizontal.png
+   :alt: description of the image
+   :width: 500
+   :align: center
+
+.. raw:: html
+
+   <div style="margin:20px 0;"></div>
+
+.. image:: ../_static/images/hac-vertical.png
+   :alt: description of the image
+   :width: 300
+   :align: center
+
+.. raw:: html
+
+   <div style="margin:20px 0;"></div>
+
+PCA
+^^^
+
+.. image:: ../_static/images/pca.png
+   :alt: description of the image
+   :width: 500
+   :align: center
+
+.. raw:: html
+
+   <div style="margin:20px 0;"></div>
+
+Jaccard Similarity
+^^^^^^^^^^^^^^^^^^
+
+.. image:: ../_static/images/jaccard-heatmap.png
+   :alt: description of the image
+   :width: 500
+   :align: center
+
+.. raw:: html
+
+   <div style="margin:20px 0;"></div>
