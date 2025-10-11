@@ -2,7 +2,7 @@ from pathlib import Path
 
 import pandas as pd
 
-from spras.containers import prepare_volume, run_container
+from spras.containers import prepare_volume, run_container_and_log
 from spras.dataset import Dataset
 from spras.interactome import reinsert_direction_col_directed
 from spras.prm import PRM
@@ -68,13 +68,15 @@ class RWR(PRM):
             command.extend(['--alpha', str(alpha)])
 
         container_suffix = 'rwr:v1'
-        out = run_container(container_framework,
-                            container_suffix,
-                            command,
-                            volumes,
-                            work_dir)
+        run_container_and_log(
+            "RandomWalk with Restart",
+            container_framework,
+            container_suffix,
+            command,
+            volumes,
+            work_dir,
+            out_dir)
 
-        print(out)
         # Rename the primary output file to match the desired output filename
         output_edges = Path(out_dir, 'output.txt')
         output_edges.rename(output_file)

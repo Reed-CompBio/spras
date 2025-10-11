@@ -3,7 +3,7 @@ from pathlib import Path
 
 import pandas as pd
 
-from spras.containers import prepare_volume, run_container_and_log
+from spras.containers import ContainerError, prepare_volume, run_container_and_log
 from spras.interactome import (
     add_constant,
     reinsert_direction_col_undirected,
@@ -108,12 +108,21 @@ class DOMINO(PRM):
                           '--output_file', mapped_slices_file]
 
         container_suffix = "domino"
-        run_container_and_log('slicer',
-                             container_framework,
-                             container_suffix,
-                             slicer_command,
-                             volumes,
-                             work_dir)
+        try:
+            run_container_and_log('slicer',
+                                container_framework,
+                                container_suffix,
+                                slicer_command,
+                                volumes,
+                                work_dir,
+                                out_dir)
+        except ContainerError as err:
+            # Occurs when DOMINO gets passed some empty dataframe from network_file.
+            # This counts as an empty input, so we return an empty output.
+            if err.streams_contain("pandas.errors.EmptyDataError: No columns to parse from file"):
+                pass
+            else:
+                raise err
 
         # Make the Python command to run within the container
         domino_command = ['domino',
@@ -132,12 +141,26 @@ class DOMINO(PRM):
         if module_threshold is not None:
             domino_command.extend(['--module_threshold', str(module_threshold)])
 
-        run_container_and_log('DOMINO',
-                             container_framework,
-                             container_suffix,
-                             domino_command,
-                             volumes,
-                             work_dir)
+        try:
+            run_container_and_log('DOMINO',
+                                  container_framework,
+                                  container_suffix,
+                                  domino_command,
+                                  volumes,
+                                  work_dir,
+                                  out_dir)
+        except ContainerError as err:
+            # Occurs when DOMINO gets passed some empty dataframe from network_file.
+            # This counts as an empty input, so we return an empty output.
+            if err.streams_contain("pandas.errors.EmptyDataError: No columns to parse from file"):
+                pass
+            # Here, DOMINO
+            # still outputs to our output folder with a still viable HTML output.
+            # https://github.com/Reed-CompBio/spras/pull/103#issuecomment-1681526958
+            elif err.streams_contain("ValueError: cannot apply union_all to an empty list"):
+                pass
+            else:
+                raise err
 
         # DOMINO creates a new folder in out_dir to output its modules HTML files into called active_genes
         # The filename is determined by the input active_genes and cannot be configured
@@ -153,7 +176,7 @@ class DOMINO(PRM):
         # Clean up DOMINO intermediate and pickle files
         slices_file.unlink(missing_ok=True)
         Path(out_dir, 'network.slices.pkl').unlink(missing_ok=True)
-        Path(network + '.pkl').unlink(missing_ok=True)
+        Path(str(network) + '.pkl').unlink(missing_ok=True)
 
     @staticmethod
     def parse_output(raw_pathway_file, standardized_pathway_file, params):

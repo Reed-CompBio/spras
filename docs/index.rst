@@ -36,6 +36,7 @@ methods (PRMs) to omics data.
    :caption: Manual
 
    output
+   htcondor
 
 .. toctree::
    :maxdepth: 1
@@ -55,6 +56,7 @@ methods (PRMs) to omics data.
 
    contributing/index
    contributing/maintain
+   contributing/patching
 
 Indices and tables
 ==================

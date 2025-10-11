@@ -180,7 +180,8 @@ class MEO(PRM):
                              container_suffix,
                              command,
                              volumes,
-                             work_dir)
+                             work_dir,
+                             out_dir)
 
         properties_file_local.unlink(missing_ok=True)
 

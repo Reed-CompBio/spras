@@ -90,7 +90,8 @@ class AllPairs(PRM):
         volumes.append(bind_path)
 
         # Create the parent directories for the output file if needed
-        Path(output_file).parent.mkdir(parents=True, exist_ok=True)
+        out_dir = Path(output_file).parent
+        out_dir.mkdir(parents=True, exist_ok=True)
         bind_path, mapped_out_file = prepare_volume(output_file, work_dir)
         volumes.append(bind_path)
 
@@ -109,7 +110,8 @@ class AllPairs(PRM):
             container_suffix,
             command,
             volumes,
-            work_dir)
+            work_dir,
+            out_dir)
 
     @staticmethod
     def parse_output(raw_pathway_file, standardized_pathway_file, params):

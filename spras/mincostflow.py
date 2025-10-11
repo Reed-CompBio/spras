@@ -118,7 +118,8 @@ class MinCostFlow(PRM):
                              container_suffix,
                              command,
                              volumes,
-                             work_dir)
+                             work_dir,
+                             out_dir)
 
         # Check the output of the container
         out_dir_content = sorted(out_dir.glob('*.sif'))
