@@ -29,6 +29,7 @@ Dataset Usage
 -------------
 
 OmicsIntegrator1 prefers ``prize``s, but will take the union of ``sources`` and ``targets``
-and set their 'prize' to 1 if ``prize`` is not specified.
+and set their 'prize' to 1 if ``prize`` is not specified. If any ``dummy_nodes`` are specified,
+these are passed to OmicsIntegrator1 and can have their behavior configured with ``dummy_mode``.
 
 OmicsIntegrator1 considers graph directionality.
