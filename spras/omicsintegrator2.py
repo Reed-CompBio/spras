@@ -2,7 +2,7 @@ from pathlib import Path
 
 import pandas as pd
 
-from spras.containers import ContainerError, prepare_volume, run_container_and_log
+from spras.containers import prepare_volume, run_container_and_log
 from spras.dataset import Dataset
 from spras.interactome import reinsert_direction_col_undirected
 from spras.prm import PRM
