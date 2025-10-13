@@ -110,7 +110,7 @@ analysis:
   # Machine learning analysis (e.g. clustering) of the pathway output files for each dataset
   ml:
     # ml analysis per dataset
-    include: true # set to true for step 3
+    include: false # set to true for step 3
     # adds ml analysis per algorithm output
     # only runs for algorithms with multiple parameter combinations chosen
     aggregate_per_algorithm: false
