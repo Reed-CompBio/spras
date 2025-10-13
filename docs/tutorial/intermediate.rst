@@ -181,7 +181,7 @@ Wrapping an algorithm in SPRAS involves three main steps:
 
 1. Input generation: SPRAS creates and formats the input files required by the algorithm based on the provided dataset
 2. Execution: SPRAS runs the algorithm within its corresponding Docker container, which holds the algorithm code. This is called for each specified parameter combination in the configuration file.
-3. Output Standardization: The raw outputs are converted into a standardized SPRAS format
+3. Output standardization: The raw outputs are converted into a standardized SPRAS format
 
 Inputs
 ^^^^^^^
@@ -231,8 +231,8 @@ In this case, every algorithm is enabled, so SPRAS creates the files required fo
 
 4. Organizing results with parameter hashes
 
-Each <dataset>-<algorithm>-params-<a hash> combination folder is created. 
-A matching log file in logs/parameters-<algorithm>-params-<a hash>.yaml records the exact parameter values used.
+Each <dataset>-<algorithm>-params-<hash> combination folder is created. 
+A matching log file in logs/parameters-<algorithm>-params-<hash>.yaml records the exact parameter values used.
 
 5. Running the algorithm
 
@@ -434,7 +434,7 @@ As you explore more of these files, you'll notice that the subnetworks vary wide
 While you can still open and inspect these files manually, the number of outputs is much greater than in the beginner.yaml run, making manual inspection less practical.
 The pathway.txt outputs serve as the foundation for further post-analysis, where you can systematically compare and interpret the reconstructed networks in greater detail.
 
-In the next steps, we'll use SPRAS's internal post analyses tools to further explore and analyze these outputs.
+In the next steps, we'll use SPRAS's post analysis tools to further explore and analyze these outputs.
 
 Step 3: Use ML Post-Analysis
 =============================
@@ -450,7 +450,7 @@ To enable downstream analyses, update the analysis section in your configuration
 In this part of the tutorial, we're also including the machine learning (ml) section to enable machine learning-based post-analysis built within SPRAS.
 
 The ml analysis will perform unsupervised analyses such as Principal Component Analysis (PCA), Hierarchical Agglomerative Clustering (HAC), ensembling, and Jaccard similarity comparisons of the pathways.
-- These analyses help uncover patterns and similarities between different algorithms run on a given dataset
+These analyses help uncover patterns and similarities between different algorithms run on a given dataset
 - if aggregate_per_algorithm: is set to true, it additionally groups outputs by algorithm within each dataset to uncover patterns and similarities for an algorithm
 - The ML section includes configurable parameters that let you adjust the behavior of the ml analyses performed
 

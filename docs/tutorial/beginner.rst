@@ -6,7 +6,7 @@ This tutorial provides a hands-on introduction to SPRAS. It is designed to show 
 
 You will learn how to:
 
-- Set up the SPRAS environment
+- Set up the SPRAS software environment
 - Explore the folder structure and understand how inputs, configurations, and outputs are organized
 - Configure and run a pathway reconstruction algorithm on a provided dataset
 - Enable post-analysis steps to generate post analysis information (summary statistics and Cytoscape visualizations)
@@ -23,7 +23,7 @@ Launch Docker Desktop and wait until it says "Docker is running".
 0.2 Clone the SPRAS repository
 -------------------------------
 
-Visit the `SPRAS github repository <https://github.com/Reed-CompBio/spras>`__ and clone it locally
+Visit the `SPRAS GitHub repository <https://github.com/Reed-CompBio/spras>`__ and clone it locally
 
 0.3 Set up the SPRAS environment
 -------------------------------------
@@ -45,7 +45,7 @@ Run the following command to confirm that SPRAS has been set up successfully fro
 
    python -c "import spras; print('SPRAS import successful')"
 
-Step 1: Explanation of Configuration File
+Step 1: Explanation of configuration file
 =========================================
 
 A configuration file specifies how a SPRAS workflow should run; think of it as the control center for the workflow.
@@ -67,7 +67,7 @@ After adding this file, SPRAS will use the configuration to set up and reference
 
    spras/
    ├── config/
-   │   └── basic.yaml
+   │   └── beginner.yaml
    ├── inputs/
    │   ├── phosphosite-irefindex13.0-uniprot.txt # pre-defined in SPRAS already
    │   └── tps-egfr-prizes.txt # pre-defined in SPRAS already
@@ -125,7 +125,7 @@ The dataset must include the following types of keys and files:
 - label: a name that uniquely identifies a dataset throughout the SPRAS workflow and outputs.
 - node_files: Input files listing the “prizes” or important starting nodes ("sources" or "targets") for the algorithm
 - edge_files: Input interactome or network file that defines the relationships between nodes
-- other_files: This is placefolder for potential future delevelopment
+- other_files: This placefolder is not used
 - data_dir: The file path of the directory where the input dataset files are located
 
 Reconstruction Settings
@@ -200,7 +200,7 @@ A matching log file in logs/parameters-pathlinker-params-D4TUKMX.yaml records th
 
 5. Running the algorithm
 
-SPRAS launches the PathLinker Docker image, sending it the prepared files and parameter settings.
+SPRAS launches the PathLinker Docker image that it downloads from DockerHub, sending it the prepared files and parameter settings.
 PathLinker runs and produces a raw pathway output file (raw-pathway.txt) that holds the subnetwork it found in its own native format.
 
 6. Standardizing the results
@@ -221,7 +221,7 @@ What Your Directory Structure Should Like After This Run:
    │   └── log/
    │       └── ... snakemake log files ...
    ├── config/
-   │   └── basic.yaml
+   │   └── beginner.yaml
    ├── inputs/
    │   ├── phosphosite-irefindex13.0-uniprot.txt
    │   └── tps-egfr-prizes.txt
@@ -333,7 +333,7 @@ What Your Directory Structure Should Like After This Run:
    │   └── log/
    │       └── ... snakemake log files ...
    ├── config/
-   │   └── basic.yaml
+   │   └── beginner.yaml
    ├── inputs/
    │   ├── phosphosite-irefindex13.0-uniprot.txt
    │   └── tps-egfr-prizes.txt
@@ -368,7 +368,7 @@ These files contain the reconstructed subnetworks and can be used at face value,
 
 1.	Locate the files
 
-Navigate to the output directory spras/output/basic/. Inside, you will find subfolders corresponding to each dataset-algorithm-parameter combination.
+Navigate to the output directory spras/output/beginner/. Inside, you will find subfolders corresponding to each dataset-algorithm-parameter combination.
 
 2. Open a pathway.txt file
 

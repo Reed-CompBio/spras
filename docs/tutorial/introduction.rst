@@ -20,7 +20,7 @@ Required software:
 
 - `Conda <https://docs.conda.io/projects/conda/en/latest/user-guide/install/index.html>`__ : for managing environments
 - `Docker <https://www.docker.com/get-started/>`__ : for containerized runs
-- `Cytoscape <https://cytoscape.org//>`__ for visualizing networks (download locally, the web version will not suffice)
+- `Cytoscape <https://cytoscape.org/>`__ for visualizing networks (download locally, the web version will not suffice)
 - `Git <https://git-scm.com/downloads>`__: for cloning the SPRAS repository
 - A terminal or code editor (`VS Code <https://code.visualstudio.com/download>`__ is recommended, but any terminal will work)
 
@@ -35,15 +35,16 @@ SPRAS Overview
 
 What is pathway reconstruction?
 ===============================
-Pathway reconstruction is a computational approach used in biology to rebuild biological pathways (such as signaling pathways) from high-throughput experimental data.
+Pathway reconstruction is a computational approach used in biology to propose candidate biological pathways (such as signaling pathways) from high-throughput experimental data.
 
 Curated pathway databases provide references to pathways, but they are often generalized and may not capture the context-specific details relevant to a particular disease or experimental condition.
-To address this, pathway reconstruction algorithms help map molecules of interest (such as proteins, genes, or metabolites identified in omics experiments or that are known as points of reference) onto large-scale interaction networks, called interactomes (maps of molecular interactions in a cell).
+To address this, pathway reconstruction algorithms help map molecules of interest (such as proteins, genes, or metabolites identified in omics experiments) onto large-scale interaction networks, called interactomes (graphs of molecular interactions in a cell).
 The result is a customized subnetwork (pathway) that reflects the biology of the specific experiment or condition.
 
 Why use pathway reconstruction?
 ===============================
-Pathway reconstruction algorithms allow researchers to systematically find context-specific subnetworks without performing exhaustive experiments. Different algorithms use distinct computational strategies and parameters, providing flexibility to highlight various aspects of the underlying biology and generate new, testable hypotheses giving researchers the flexibility to create and identify different subnetworks specific to their experimental conditions.
+Pathway reconstruction algorithms allow researchers to systematically propose context-specific subnetworks without performing exhaustive experiments testing each individual interaction.
+Different algorithms use distinct computational strategies and parameters, providing flexibility to highlight various aspects of the underlying biology and generate new, testable hypotheses giving researchers the flexibility to create and identify different subnetworks specific to their experimental conditions.
 
 What is SPRAS?
 ===============
@@ -58,4 +59,4 @@ SPRAS provides an abstraction layer for pathway reconstruction algorithms by org
 
 A key strength of SPRAS is automation. From user provided input data and configurations, it can generate and execute complete workflows without requiring users to write complex scripts. This lowers the barrier to entry, allowing researchers to apply, evaluate, and compare multiple pathway reconstruction algorithms without deep computational expertise.
 
-SPRAS also supports scalable, reproducible analyses, making it especially valuable for a large number datasets and systematic investigations. In addition, it provides built-in evaluation and post analysis tools that provide further insights of the algorithm outputs.
+SPRAS also supports scalable, reproducible analyses, making it especially valuable for a large number of datasets and systematic investigations. In addition, it provides built-in evaluation and post analysis tools that provide further insights of the algorithm outputs.
