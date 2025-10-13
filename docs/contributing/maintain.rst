@@ -1,6 +1,10 @@
 Maintaining SPRAS
 =================
 
+Go dependency
+-----------------------
+The yamlfmt tool requires Go, which much be installed manually.
+
 Reviewing pull requests
 -----------------------
 
