@@ -59,4 +59,4 @@ SPRAS provides an abstraction layer for pathway reconstruction algorithms by org
 
 A key strength of SPRAS is automation. From user provided input data and configurations, it can generate and execute complete workflows without requiring users to write complex scripts. This lowers the barrier to entry, allowing researchers to apply, evaluate, and compare multiple pathway reconstruction algorithms without deep computational expertise.
 
-SPRAS also supports scalable, reproducible analyses, making it especially valuable for a large number of datasets and systematic investigations. In addition, it provides built-in evaluation and post analysis tools that provide further insights of the algorithm outputs.
+SPRAS also supports scalable analyses, making it especially valuable for a large number of datasets and systematic investigations. In addition, it provides built-in evaluation and post analysis tools that provide further insights of the algorithm outputs.
