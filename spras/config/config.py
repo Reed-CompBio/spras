@@ -309,7 +309,7 @@ class Config:
             self.container_prefix = raw_config.container_registry.base_url + "/" + raw_config.container_registry.owner
 
         if raw_config.enable_profiling and raw_config.container_framework not in ["singularity", "apptainer"]:
-            warnings.warn("enable_profiling is set to true, but the container framework is not singularity/apptainer. This setting will have no effect.")
+            warnings.warn("enable_profiling is set to true, but the container framework is not singularity/apptainer. This setting will have no effect.", stacklevel=2)
         self.enable_profiling = raw_config.enable_profiling
 
         self.process_datasets(raw_config)
