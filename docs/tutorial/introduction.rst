@@ -2,7 +2,7 @@
 SPRAS Tutorial
 ##############
 
-Purpose of this Tutorial
+Purpose of this tutorial
 ========================
 This tutorial will introduce participants to SPRAS and demonstrate how it can be used to explore biological pathways from omics data. 
 
