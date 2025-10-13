@@ -3,7 +3,8 @@ Maintaining SPRAS
 
 Go dependency
 -----------------------
-The yamlfmt tool requires Go, which much be installed manually.
+The yamlfmt tool requires `Go <https://go.dev/doc/install>`__, which must
+be installed manually.
 
 Reviewing pull requests
 -----------------------
