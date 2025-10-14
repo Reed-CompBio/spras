@@ -62,6 +62,16 @@ To perform post-analysis, most algorithm outputs must first be converted into a 
 
 What is SPRAS?
 ===============
+
+.. image:: ../_static/images/spras-overview.png
+   :alt: spras overview
+   :width: 600
+   :align: center
+
+.. raw:: html
+
+   <div style="margin:20px 0;"></div>
+
 The Signaling Pathway Reconstruction Analysis Streamliner (SPRAS) is a computational framework that unifies and simplifies the use of diverse pathway reconstruction algorithms.
 
 SPRAS allows users to run multiple datasets across multiple algorithms and many parameter settings in a single workflow.

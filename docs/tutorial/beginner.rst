@@ -246,7 +246,7 @@ A matching log file is placed in logs/parameters-pathlinker-params-D4TUKMX.yaml 
 
 5. Running the algorithm
 
-SPRAS downloads the PathLinker Docker image from Docker Hub and launches it in a container, sending the prepared input files and specific parameter settings needed for execution.
+SPRAS downloads the PathLinker Docker image from `DockerHub <https://hub.docker.com/u/reedcompbio>`__ and launches it in a container, sending the prepared input files and specific parameter settings needed for execution.
 
 PathLinker runs and generates an output file named raw-pathway.txt, which contains the reconstructed subnetwork in PathLinker's algorithm-specific format.
 
