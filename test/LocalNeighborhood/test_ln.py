@@ -14,7 +14,7 @@ SPRAS_ROOT = Path(__file__).parent.parent.parent.absolute()
 sys.path.append(str(Path(SPRAS_ROOT, 'docker-wrappers', 'LocalNeighborhood')))
 from local_neighborhood_alg import local_neighborhood
 
-TEST_DIR = Path('test', 'algorithms', 'LocalNeighborhood/')
+TEST_DIR = Path('test', 'LocalNeighborhood/')
 OUT_FILE = Path(TEST_DIR, 'output', 'ln-output.txt')
 
 
