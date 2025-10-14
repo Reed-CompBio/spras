@@ -18,6 +18,10 @@ Step 0: Clone the SPRAS repository, set up the environment, and run Docker
 0.1 Start Docker
 ----------------
 
+CONFUSED THE USERS WHY THIS WAS DONE FIRST
+ADD THIS TO A LATER STEp
+ALSO add an image on how to launch docker desktop 
+
 Launch Docker Desktop and wait until it says "Docker is running".
 
 0.2 Clone the SPRAS repository
@@ -28,6 +32,8 @@ Visit the `SPRAS GitHub repository <https://github.com/Reed-CompBio/spras>`__ an
 0.3 Set up the SPRAS environment
 -------------------------------------
 
+SHOW HOW TO SET UP SPRAS env
+ALSO EXPLAIN what is happening 
 From the root directory of the SPRAS repository, create and activate the Conda environment and install the SPRAS python package:
 
 .. code:: bash
@@ -39,6 +45,7 @@ From the root directory of the SPRAS repository, create and activate the Conda e
 0.4 Test the installation
 -------------------------
 
+SHOW RUNNING THIS
 Run the following command to confirm that SPRAS has been set up successfully from the command line:
 
 .. code:: bash
@@ -47,6 +54,8 @@ Run the following command to confirm that SPRAS has been set up successfully fro
 
 Step 1: Explanation of configuration file
 =========================================
+
+ADD IN THE LARGER PICTURE VIEW OF A CONFIG FILE (NOT ALL OF IT BUT PART OF IT)
 
 A configuration file specifies how a SPRAS workflow should run; think of it as the control center for the workflow.
 It defines which algorithms to run, the parameters to use, the datasets and gold standards to include, the analyses to perform after reconstruction, and the container settings for execution. 
@@ -60,6 +69,10 @@ To continue or rerun SPRAS with the same configuration file, delete the output d
 For this part of the tutorial, we'll use a pre-defined configuration file. 
 Download it here: :download:`Beginner Config File <../_static/config/beginner.yaml>`
 
+EXPLAIN WHAT A YAML FILE IS
+
+SHOW THIS ACTION OF MOVING IT TO THE FOLDER
+
 Save the file into the config/ folder of your SPRAS installation.
 After adding this file, SPRAS will use the configuration to set up and reference your directory structure, which will look like this:
 
@@ -72,12 +85,12 @@ After adding this file, SPRAS will use the configuration to set up and reference
    │   ├── phosphosite-irefindex13.0-uniprot.txt # pre-defined in SPRAS already
    │   └── tps-egfr-prizes.txt # pre-defined in SPRAS already
 
+ADD EXPLANATION OF THESE 2 FOLDERS
 
 Here's an overview of the major sections when looking at a configuration file:
 
 Algorithms
 -----------
-
 
 .. code-block:: yaml
     
@@ -159,6 +172,8 @@ Analysis
 
 SPRAS includes multiple downstream analyses that can be toggled on or off directly in the configuration file. 
 When enabled, these analyses are performed per dataset and produce summaries or visualizations of the results from all enabled algorithms for that dataset.
+
+EXPLAIN ALSO THAT THESE don;t include all of the options, but the config.yaml file in config/ 
 
 Step 2: Running SPRAS on a provided example dataset 
 ====================================================
