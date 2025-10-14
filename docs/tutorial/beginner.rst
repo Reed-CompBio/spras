@@ -9,7 +9,7 @@ You will learn how to:
 - Set up the SPRAS software environment
 - Explore the folder structure and understand how inputs, configurations, and outputs are organized
 - Configure and run a pathway reconstruction algorithm on a provided dataset
-- Enable post-analysis steps to generate post analysis information (summary statistics and Cytoscape visualizations)
+- Enable post-analysis steps to generate post analysis information
 
 
 Step 0: Clone the SPRAS repository, set up the environment, and run Docker
@@ -111,7 +111,7 @@ You can use the provided example datasets or add your own for custom experiments
    Input files can be stored anywhere as long as their paths are correctly referenced in the configuration file (explained later in this tutorial).
 
 1.2 Overview of the major sections of a configuration file:
---------------------------------------------------------
+------------------------------------------------------------
 
 Algorithms
 ^^^^^^^^^^^
@@ -165,7 +165,7 @@ The dataset must include the following types of keys and files:
 - data_dir: The file path of the directory where the input dataset files are located
 
 Reconstruction settings
-^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+^^^^^^^^^^^^^^^^^^^^^^^^^
 
 .. code-block:: yaml
 
@@ -177,7 +177,7 @@ The reconstruction_settings section controls where outputs are stored.
 Set reconstruction_dir to the directory path where you want results saved. SPRAS will automatically create this folder if it doesn't exist.
 
 Analysis
-^^^^^^^^^^^
+^^^^^^^^^
 
 .. code-block:: yaml
 
@@ -216,7 +216,7 @@ From the root directory spras/, run the command below from the command line:
 This command starts the workflow manager that automates all steps defined by SPRAS.
 It tells Snakemake to use one CPU core and to load settings from the config/beginner.yaml file.
 
-What Happens When You Run This Command
+What happens when you run this command
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
 SPRAS will execute quickly from your perspective; however, several automated steps (handled by Snakemake and Docker) occur behind the scenes.
@@ -307,7 +307,7 @@ Stores the results generated during a SPRAS workflow.
    SPRAS has additional files and directories to use during runs. However, for most users, and for the purposes of this tutorial, it isn't necessary to fully understand them.
 
 
-2.4 Running SPRAS with More Parameter Combinations
+2.4 Running SPRAS with more parameter combinations
 ---------------------------------------------------
 
 In the beginner.yaml configuration file, uncomment the run2 section under pathlinker so it looks like:
@@ -325,32 +325,31 @@ After saving the changes, rerun with:
 
     snakemake --cores 1 --configfile config/beginner.yaml
 
-What Happens When You Run This Command
+What happens when you run this command
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
 1.	Snakemake loads the configuration file
 
-Snakemake reads beginner.yaml to determine which datasets, algorithms, parameters, and post-analyses to run. 
+Snakemake again reads beginner.yaml to determine which datasets, algorithms, parameters, and post-analyses to run. 
+
 It reuses cached results to skip completed steps, rerunning only those that are new or outdated. 
-Here, the dataset pickle, PathLinker inputs, and D4TUKMX parameter set are reused instead of rerun.
+Here, the inputs and D4TUKMX parameter are reused.
 
 2. Organizing outputs per parameter combination
 
-Each new dataset-algorithm-parameter combination gets its own folder (e.g egfr-pathlinker-params-7S4SLU6/ and egfr-pathlinker-params-VQL7BDZ/)
+Each new dataset-algorithm-parameter combination gets its own folder (egfr-pathlinker-params-7S4SLU6/ and egfr-pathlinker-params-VQL7BDZ/)
 
 3. Reusing prepared inputs with additional parameter combinations
 
-Since PathLinker has already been run once, SPRAS uses the cached prepared inputs rather than regenerating them.
+For each new parameter combination and its corresponding cached prepared inputs,  SPRAS executes PathLinker by launching multiple Docker contatiners (once for each parameter configuration). 
 
-For each new parameter combination, SPRAS executes the PathLinker by launching multiple Docker contatiners (once for each parameter configuration). 
-
-PathLinker then runs and produces a raw-pathway.txt file specific to each parameter hash and places it in it's corresponding folder.
+PathLinker then runs and produces a raw-pathway.txt file specific to each parameter and places it in it's corresponding folder.
 
 4. Parsing into standardized results
 
-SPRAS parses each new raw-pathway.txt file into a standardized SPRAS format (pathway.txt).
+SPRAS parses each new raw-pathway.txt file into a standardized SPRAS format (pathway.txt) and places it in it's corresponding folder.
 
-What Your Directory Structure Should Like After This Run:
+What your directory structure should like after this run:
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 .. code-block:: text
 
@@ -387,10 +386,9 @@ What Your Directory Structure Should Like After This Run:
 
 
 2.5 Reviewing the pathway.txt Files 
--------------------------------------------
+------------------------------------
 
-Each algorithm and parameter combination produces a corresponding pathway.txt file. 
-These files contain the reconstructed subnetworks and can be used at face value, or for further post analysis.
+Each pathway.txt file contains the standardized reconstructed subnetworks and can be used at face value, or for further post analysis.
 
 1.	Locate the files
 
@@ -424,13 +422,15 @@ For example, the file egfr-pathlinker-params-7S4SLU6/pathway.txt contains the fo
     K7PPA8_HUMAN	MDM4_HUMAN	9	D
     MDM4_HUMAN	MDM2_HUMAN	9	D
 
-The pathway.txt files serve as the foundation for further analysis, allowing you to explore and interpret the reconstructed networks in greater detail.
-In this case you can visulize them in cytoscape or compare their statistics to better understand these outputs.
+Step 3: Running Post-Analyses 
+==============================
 
+3.1 Adding post-analyses to the beginner configuration
+------------------------------------------------------
 
-Step 3: Running Post-Analyses within SPRAS
-==========================================
-To enable downstream analyses, update the analysis section in your configuration file by setting both summary and cytoscape to true. Your analysis section in the configuration file should look like this:
+To enable downstream analyses, update the analysis section in your configuration file by setting both summary and cytoscape to true. 
+
+Your analysis section in the configuration file should look like this:
 
 .. code-block:: yaml
 
@@ -440,8 +440,9 @@ To enable downstream analyses, update the analysis section in your configuration
         cytoscape:
             include: true 
 
-summary generates graph topological summary statistics  for each algorithm's parameter combination output, generating a summary file for all reconstructed subnetworks for each dataset.
-This post analysis will report these statistics for each pathway:
+summary generates graph topological summary statistics for each algorithm's parameter combination output, generating a summary file for all reconstructed subnetworks for a given dataset.
+
+This will report these statistics for each pathway:
 
 - Number of nodes
 - Number of edges
@@ -452,7 +453,8 @@ This post analysis will report these statistics for each pathway:
 - Maximum diameter
 - Average path length
 
-cytoscape creates a Cytoscape session file (.cys) containing all reconstructed subnetworks for each dataset, making it easy to upload and visualize them directly in Cytoscape.
+cytoscape creates a Cytoscape session file (.cys) that includes all reconstructed subnetworks for a given dataset, eliminating the need to manually create individual graphs.
+This makes it easy to upload and visualize all the results directly within Cytoscape.
 
 With this update, the beginner.yaml configuration file is set up for SPRAS to run two post-analyses on the outputs generated by a single algorithm that was executed with multiple parameter settings on one dataset.
 
@@ -463,25 +465,28 @@ After saving the changes, rerun with:
     snakemake --cores 1 --configfile config/beginner.yaml
 
 
-What Happens When You Run This Command
+What happens when you run this command
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 1. Reusing cached results
 
 Snakemake reads the options set in beginner.yaml and checks for any requested post-analysis steps. 
+
 It reuses cached results; in this case, the pathway.txt files generated from the previously executed PathLinker parameter combinations for the egfr dataset.
 
 2.	Running the summary analysis
 
 SPRAS aggregates the pathway.txt files from all selected parameter combinations into a single summary table. 
+
 The results are saved in egfr-pathway-summary.txt.
 
 3.	Running the Cytoscape analysis
 
 All pathway.txt files from the chosen parameter combinations are collected and passed into the Cytoscape Docker image. 
+
 A Cytoscape session file is then generated, containing visualizations for each pathway and saved as egfr-cytoscape.cys.
 
-What Your Directory Structure Should Like After This Run:
-^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+What your directory structure should like after this run:
+^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 .. code-block:: text
 
    spras/
@@ -517,11 +522,11 @@ What Your Directory Structure Should Like After This Run:
    │       └── egfr-cytoscape.cys
    │       └── egfr-pathway-summary.txt
 
-Step 3.1: Reviewing the Outputs
------------------------------------
+3.1 Reviewing the outputs
+--------------------------
 
-Reviewing Summary Files
-^^^^^^^^^^^^^^^^^^^^^^^^
+Reviewing the summary file
+^^^^^^^^^^^^^^^^^^^^^^^^^^^
 1. Open the summary statistics file
 
 In your file explorer, go to spras/output/beginner/egfr-pathway-summary.txt and open it locally.
@@ -538,8 +543,12 @@ In your file explorer, go to spras/output/beginner/egfr-pathway-summary.txt and 
 This file summarizes the graph topological statistics for each output pathway.txt file for a given dataset, 
 along with the parameter combinations that produced them, allowing you to interpret and compare algorithm outputs side by side in a compact format.
 
-Reviewing Outputs in Cytoscape
+Reviewing outputs in Cytoscape
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+
+.. note::
+   Cytoscape is an open-source software platform for visualizing networks.
+   It allows you to explore networks interactively, apply layouts and styles, and integrate additional data for deeper analysis.
 
 1.	Open Cytoscape
 
