@@ -12,6 +12,9 @@ SPRAS wrappers tries to follow the naming conventions of the algorithms they wra
 This includes their name and their ``required_inputs``: when sensible, we preserve
 the file name of inputs required by the internal algorithm.
 
+For example, Maximum Edge Orientation calls a network ``edges``, while PathLinker
+calls a network ``network``. Therefore, we say ``edges`` in MEO when referring to a network.
+
 Reviewing pull requests
 -----------------------
 
