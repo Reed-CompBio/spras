@@ -25,20 +25,20 @@ def construct_push_command(
     base_cmd = ["build"]
     for tag in tags:
         base_cmd.extend(["--tag", tag])
-    
+
     if push and load:
         raise RuntimeError("You specified both container pushing and container loading. Did you mean to test the container first?")
-    
+
     base_cmd = base_cmd + [
         "--file",
         str(Path(dir_path, dir, "Dockerfile"))]
-    
+
     if not load:
         # Add the architectures if load is not specified.
         base_cmd = base_cmd + ["--platform", ",".join(architectures)]
 
     base_cmd = base_cmd + ["--builder", "container"]
-    
+
     if push: base_cmd.append("--push")
     if load: base_cmd.append("--load")
 
