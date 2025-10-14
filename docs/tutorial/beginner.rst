@@ -15,25 +15,14 @@ You will learn how to:
 Step 0: Clone the SPRAS repository, set up the environment, and run Docker
 ==========================================================================
 
-0.1 Start Docker
-----------------
-
-CONFUSED THE USERS WHY THIS WAS DONE FIRST
-ADD THIS TO A LATER STEp
-ALSO add an image on how to launch docker desktop 
-
-Launch Docker Desktop and wait until it says "Docker is running".
-
-0.2 Clone the SPRAS repository
+0.1 Clone the SPRAS repository
 -------------------------------
 
 Visit the `SPRAS GitHub repository <https://github.com/Reed-CompBio/spras>`__ and clone it locally
 
-0.3 Set up the SPRAS environment
+0.2 Set up the SPRAS environment
 -------------------------------------
 
-SHOW HOW TO SET UP SPRAS env
-ALSO EXPLAIN what is happening 
 From the root directory of the SPRAS repository, create and activate the Conda environment and install the SPRAS python package:
 
 .. code:: bash
@@ -42,39 +31,54 @@ From the root directory of the SPRAS repository, create and activate the Conda e
     conda activate spras
     python -m pip install .
 
-0.4 Test the installation
+.. note::
+   The first command performs a one time setup of the SPRAS dependencies by creating a Conda environment (an isolated space that keeps all required packages and versions separate from your system).
+
+   The second command activates the newly created environment so you can use these dependencies when running SPRAS; this step must be done each time you open a new terminal session.
+
+   The last command is a one time installation of the SPRAS package into the environment.
+
+0.3 Test the installation
 -------------------------
 
-SHOW RUNNING THIS
 Run the following command to confirm that SPRAS has been set up successfully from the command line:
 
 .. code:: bash
 
    python -c "import spras; print('SPRAS import successful')"
 
+0.4 Start Docker
+----------------
+
+Before running SPRAS, make sure Docker Desktop is running.
+
+Launch Docker Desktop and wait until it says "Docker is running".
+   
+.. note::
+   SPRAS itself does not run inside a Docker container.
+   However, Docker is required because SPRAS uses it to execute individual pathway reconstruction algorithms and certain post-analysis steps within isolated containers.
+   These containers include all the necessary dependencies to run each algorithm or post analysis.
+
 Step 1: Explanation of configuration file
 =========================================
 
-ADD IN THE LARGER PICTURE VIEW OF A CONFIG FILE (NOT ALL OF IT BUT PART OF IT)
-
 A configuration file specifies how a SPRAS workflow should run; think of it as the control center for the workflow.
+
 It defines which algorithms to run, the parameters to use, the datasets and gold standards to include, the analyses to perform after reconstruction, and the container settings for execution. 
 
-SPRAS uses Snakemake (a workflow manager) and containerized software (like Docker and Apptainer), to read the configuration file and execute a SPRAS workflow. 
+The configuration files used are written in YAML, a human-readable format that uses simple indentation and key-value pairs for data seralizaiton.
 
-Snakemake considers a task from the configuration file complete once the expected output files are present in the output directory. 
-As a result, rerunning the same configuration file may do nothing if those files already exist. 
-To continue or rerun SPRAS with the same configuration file, delete the output directory (or its contents) or modify the configuration file so Snakemake regenerates new results.
+SPRAS uses Snakemake to read the YAML configuration file and execute a SPRAS workflow accordingly.
+
+.. Snakemake considers a task from the configuration file complete once the expected output files are present in the output directory. 
+.. As a result, rerunning the same configuration file may do nothing if those files already exist. 
+.. To continue or rerun SPRAS with the same configuration file, delete the output directory (or its contents) or modify the configuration file so Snakemake regenerates new results.
 
 For this part of the tutorial, we'll use a pre-defined configuration file. 
 Download it here: :download:`Beginner Config File <../_static/config/beginner.yaml>`
 
-EXPLAIN WHAT A YAML FILE IS
-
-SHOW THIS ACTION OF MOVING IT TO THE FOLDER
-
 Save the file into the config/ folder of your SPRAS installation.
-After adding this file, SPRAS will use the configuration to set up and reference your directory structure, which will look like this:
+After adding this file, your directory structure will look like this (ignoring the rest of the folders):
 
 .. code-block:: text
 
@@ -82,10 +86,25 @@ After adding this file, SPRAS will use the configuration to set up and reference
    ├── config/
    │   └── beginner.yaml
    ├── inputs/
-   │   ├── phosphosite-irefindex13.0-uniprot.txt # pre-defined in SPRAS already
-   │   └── tps-egfr-prizes.txt # pre-defined in SPRAS already
+   │   ├── phosphosite-irefindex13.0-uniprot.txt # pre-defined in SPRAS already, used by the beginner.yaml file
+   │   └── tps-egfr-prizes.txt # pre-defined in SPRAS already, used by the beginner.yaml file
 
-ADD EXPLANATION OF THESE 2 FOLDERS
+config/
+-------
+
+The config/ folder stores configuration files for SPRAS.
+
+.. note::
+   You can name or place configuration files anywhere, as long as you provide the correct path when running SPRAS (explained later in this tutorial).
+
+input/
+------
+
+The inputs/ folder contains input data files.
+You can use the provided example datasets or add your own for custom experiments to this folder.
+
+.. note::
+   Input files can be stored anywhere as long as their paths are correctly referenced in the configuration file (explained later in this tutorial).
 
 Here's an overview of the major sections when looking at a configuration file:
 
@@ -115,7 +134,6 @@ Algorithm parameters can be organized into one or more run blocks (e.g., run1, r
 When defining a parameter, it can be passed as a single value or passed by listing parameters within a list.
 If multiple parameters are defined as lists within a run block, SPRAS generates all possible combinations (Cartesian product) of those list values together with any fixed single-value parameters in the same run block. 
 Each unique combination runs once per algorithm.
-Invalid or missing parameter keys will cause SPRAS to fail.
 
 Datasets
 --------
@@ -173,7 +191,12 @@ Analysis
 SPRAS includes multiple downstream analyses that can be toggled on or off directly in the configuration file. 
 When enabled, these analyses are performed per dataset and produce summaries or visualizations of the results from all enabled algorithms for that dataset.
 
-EXPLAIN ALSO THAT THESE don;t include all of the options, but the config.yaml file in config/ 
+.. note::
+   The configuration file and sections shown here do not represent the full set of options available in SPRAS.
+   
+   The SPRAS documentation is still under construction, and the examples provided (like beginner.yaml) only show the basic configuration needed for this tutorial.
+   
+   To see a more complete set of configurable options and parameters, refer to the full examples in config/config.yaml and config/egfr.yaml within the SPRAS repository.
 
 Step 2: Running SPRAS on a provided example dataset 
 ====================================================
@@ -243,7 +266,7 @@ What Your Directory Structure Should Like After This Run:
    │   ├── phosphosite-irefindex13.0-uniprot.txt
    │   └── tps-egfr-prizes.txt
    ├── outputs/
-   │   └── basic/
+   │   └── beginner/
    │       └── egfr-pathlinker-params-D4TUKMX/
    │            └── pathway.txt
    │            └── raw-pathway.txt
@@ -355,7 +378,7 @@ What Your Directory Structure Should Like After This Run:
    │   ├── phosphosite-irefindex13.0-uniprot.txt
    │   └── tps-egfr-prizes.txt
    ├── outputs/
-   │   └── basic/
+   │   └── beginner/
    │       └── egfr-pathlinker-params-7S4SLU6/
    │            └── pathway.txt
    │            └── raw-pathway.txt
@@ -480,12 +503,12 @@ What Your Directory Structure Should Like After This Run:
    │   └── log/
    │       └── ... snakemake log files ...
    ├── config/
-   │   └── basic.yaml
+   │   └── beginner.yaml
    ├── inputs/
    │   ├── phosphosite-irefindex13.0-uniprot.txt
    │   └── tps-egfr-prizes.txt
    ├── outputs/
-   │   └── basic/
+   │   └── beginner/
    │       └── egfr-pathlinker-params-7S4SLU6/
    │            └── pathway.txt
    │            └── raw-pathway.txt
@@ -510,16 +533,12 @@ What Your Directory Structure Should Like After This Run:
 
 Step 3.1: Reviewing the Outputs
 -----------------------------------
-After completing the workflow, you will have several post analysis outputs that help you explore and interpret the results:
-
-1.	egfr-cytoscape.cys: a Cytoscape session file containing visualizations of the reconstructed subnetworks.
-2.	egfr-pathway-summary.txt: a summary file with statistics describing each network.
 
 Reviewing Summary Files
 ^^^^^^^^^^^^^^^^^^^^^^^^
 1. Open the summary statistics file
 
-In your file explorer, go to spras/output/basic/egfr-pathway-summary.txt and open it locally.
+In your file explorer, go to spras/output/beginner/egfr-pathway-summary.txt and open it locally.
 
 .. image:: ../_static/images/summary-stats.png
    :alt: description of the image
@@ -542,7 +561,7 @@ Launch the Cytoscape application on your computer.
 
 2.	Load the Cytoscape session file
 
-Navigate to spras/output/basic/egfr-cytoscape.cys and open it in Cytoscape.
+Navigate to spras/output/beginner/egfr-cytoscape.cys and open it in Cytoscape.
 
 .. image:: ../_static/images/cytoscape_upload_network.png
    :alt: description of the image
@@ -605,6 +624,3 @@ The large parameter value (k=100) generates a much denser subnetwork, capturing 
 .. raw:: html
 
    <div style="margin:20px 0;"></div>
-
-The parameters used here help determine which edges and nodes are included; each setting produces a different subnetwork.
-By examining the statistics (egfr-pathway-summary.txt) alongside the visualizations (Cytoscape), you can assess how parameter choices influence both the structure and interpretability of the outputs.
