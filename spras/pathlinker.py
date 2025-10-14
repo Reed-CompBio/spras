@@ -113,7 +113,8 @@ class PathLinker(PRM):
                              container_suffix,
                              command,
                              volumes,
-                             work_dir)
+                             work_dir,
+                             out_dir)
 
         # Rename the primary output file to match the desired output filename
         # Currently PathLinker only writes one output file so we do not need to delete others
