@@ -1,0 +1,4 @@
+Node1	Node2
+S1	A
+A	T1
+A	T2

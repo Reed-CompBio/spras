@@ -1,18 +1,17 @@
 # See https://pre-commit.com for more information
 # See https://pre-commit.com/hooks.html for more hooks
-# See https://pre-commit.com/ for documentation
 default_language_version:
   # Match this to the version specified in environment.yml
   python: python3.11
 repos:
   - repo: https://github.com/pre-commit/pre-commit-hooks
-    rev: v4.4.0  # Use the ref you want to point at
+    rev: v4.4.0 # Use the ref you want to point at
     hooks:
       # Attempts to load all yaml files to verify syntax.
       - id: check-yaml
-      # Attempts to load all TOML files to verify syntax.
+        # Attempts to load all TOML files to verify syntax.
       - id: check-toml
-      # Trims trailing whitespace.
+        # Trims trailing whitespace.
       - id: trailing-whitespace
         # Preserves Markdown hard linebreaks.
         args: [--markdown-linebreak-ext=md]
@@ -24,3 +23,11 @@ repos:
     rev: 'v0.0.269'
     hooks:
       - id: ruff
+  - repo: https://github.com/google/yamlfmt
+    rev: v0.17.0
+    hooks:
+      - id: yamlfmt
+  - repo: https://github.com/crate-ci/typos
+    rev: v1.34.0
+    hooks:
+      - id: typos

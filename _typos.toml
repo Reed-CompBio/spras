@@ -1,0 +1,4 @@
+[type.txt]
+# Ignore data files
+extend-glob = ["*.txt"]
+check-file = false

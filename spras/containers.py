@@ -2,12 +2,16 @@ import os
 import platform
 import re
 import subprocess
+import textwrap
 from pathlib import Path, PurePath, PurePosixPath
-from typing import Any, Dict, List, Optional, Tuple, Union
+from typing import Iterator, List, Optional, Tuple, Union
 
 import docker
+import docker.errors
 
-import spras.config as config
+import spras.config.config as config
+from spras.logging import indent
+from spras.profiling import create_apptainer_container_stats, create_peer_cgroup
 from spras.util import hash_filename
 
 
@@ -90,7 +94,7 @@ def upload_gcs(local_path: str, gcs_path: str, is_dir: bool):
     subprocess.run(cmd, shell=True)
 
 
-def prepare_dsub_cmd(flags: dict):
+def prepare_dsub_cmd(flags: dict[str, str | list[str]]):
     # set constant flags
     dsub_command = 'dsub'
     flags['provider'] = 'google-cls-v2'
@@ -107,25 +111,72 @@ def prepare_dsub_cmd(flags: dict):
     ordered_flags = {f:flags[f] for f in flag_list if f in flags.keys()}
 
     # iteratively add flags to the command
-    for flag in ordered_flags.keys():
-        if isinstance(ordered_flags.get(flag), list):
-            for f in ordered_flags.get(flag):
+    for flag, value in ordered_flags.items():
+        if isinstance(value, list):
+            for f in value:
                 dsub_command = dsub_command + " --" + flag + " " + f
         else:
-            dsub_command = dsub_command + " --" + flag + " " + ordered_flags.get(flag)
+            dsub_command = dsub_command + " --" + flag + " " + value
 
     # Wait for dsub job to complete
     dsub_command = dsub_command + " --wait"
     print(f"dsub command: {dsub_command}")
     return dsub_command
 
+class ContainerError(RuntimeError):
+    """Raises when anything goes wrong inside a container"""
+
+    error_code: int
+    stdout: Optional[str]
+    stderr: Optional[str]
+
+    def __init__(self, message: str, error_code: int, stdout: Optional[str], stderr: Optional[str], *args):
+        """
+        Constructs a new ContainerError.
+
+        @param message: The message to display to the user. This should usually refer to the indent call to differentiate between
+        general logging done by Snakemake/logging calls.
+        @param error_code: Also known as exit status; this should generally be non-zero for ContainerErrors.
+        @param stdout: The standard output stream. If the origin of the stream is unknown, leave it in stdout.
+        @param stderr: The standard error stream.
+        """
+
+        # https://stackoverflow.com/a/26938914/7589775
+        self.message = message
+
+        self.error_code = error_code
+        self.stdout = stdout
+        self.stderr = stderr
+
+        super(ContainerError, self).__init__(message, error_code, stdout, stderr, *args)
+
+    def streams_contain(self, needle: str):
+        """
+        Checks (with case sensitivity)
+        if any of the stdout/err streams have the provided needle.
+        """
+        stdout = self.stdout if self.stdout else ''
+        stderr = self.stderr if self.stderr else ''
+
+        return (needle in stdout) or (needle in stderr)
+
+    # Due to
+    # https://github.com/snakemake/snakemake/blob/d4890b4da691506b6a258f7534ac41fdb7ef5ab4/src/snakemake/exceptions.py#L18
+    # this overrides the tostr implementation to have nicer container errors
+    def __str__(self):
+        return self.message
+
+def env_to_items(environment: dict[str, str]) -> Iterator[str]:
+    """
+    Turns an environment variable dictionary to KEY=VALUE pairs.
+    """
+    # TODO: we should also handle special escaping here.
+    return (f"{key}={value}" for key, value in environment.items())
 
 # TODO consider a better default environment variable
-# TODO environment currently a single string (e.g. 'TMPDIR=/OmicsIntegrator1'), should it be a list?
-# run_container_singularity assumes a single string
 # Follow docker-py's naming conventions (https://docker-py.readthedocs.io/en/stable/containers.html)
 # Technically the argument is an image, not a container, but we use container here.
-def run_container(framework: str, container_suffix: str, command: List[str], volumes: List[Tuple[PurePath, PurePath]], working_dir: str, environment: str = 'SPRAS=True'):
+def run_container(framework: str, container_suffix: str, command: List[str], volumes: List[Tuple[PurePath, PurePath]], working_dir: str, out_dir: str | os.PathLike, environment: Optional[dict[str, str]] = None, network_disabled = False):
     """
     Runs a command in the container using Singularity or Docker
     @param framework: singularity or docker
@@ -133,24 +184,73 @@ def run_container(framework: str, container_suffix: str, command: List[str], vol
     @param command: command to run in the container
     @param volumes: a list of volumes to mount where each item is a (source, destination) tuple
     @param working_dir: the working directory in the container
+    @param out_dir: output directory for the rule's artifacts. Only passed into run_container_singularity for the purpose of profiling.
     @param environment: environment variables to set in the container
+    @param network_disabled: Disables the network on the container. Only works for docker for now. This acts as a 'runtime assertion' that a container works w/o networking.
     @return: output from Singularity execute or Docker run
     """
     normalized_framework = framework.casefold()
 
     container = config.config.container_prefix + "/" + container_suffix
     if normalized_framework == 'docker':
-        return run_container_docker(container, command, volumes, working_dir, environment)
-    elif normalized_framework == 'singularity':
-        return run_container_singularity(container, command, volumes, working_dir, environment)
+        return run_container_docker(container, command, volumes, working_dir, environment, network_disabled)
+    elif normalized_framework == 'singularity' or normalized_framework == "apptainer":
+        return run_container_singularity(container, command, volumes, working_dir, out_dir, environment)
     elif normalized_framework == 'dsub':
         return run_container_dsub(container, command, volumes, working_dir, environment)
     else:
-        raise ValueError(f'{framework} is not a recognized container framework. Choose "docker" or "singularity".')
+        raise ValueError(f'{framework} is not a recognized container framework. Choose "docker", "dsub", or "singularity".')
 
+def run_container_and_log(name: str, framework: str, container_suffix: str, command: List[str], volumes: List[Tuple[PurePath, PurePath]], working_dir: str, out_dir: str | os.PathLike, environment: Optional[dict[str, str]] = None, network_disabled=False):
+    """
+    Runs a command in the container using Singularity or Docker with associated pretty printed messages.
+    @param name: the display name of the running container for logging purposes
+    @param framework: singularity or docker
+    @param container_suffix: name of the DockerHub container without the 'docker://' prefix
+    @param command: command to run in the container
+    @param volumes: a list of volumes to mount where each item is a (source, destination) tuple
+    @param working_dir: the working directory in the container
+    @param environment: environment variables to set in the container
+    @param network_disabled: Disables the network on the container. Only works for docker for now. This acts as a 'runtime assertion' that a container works w/o networking.
+    @return: output from Singularity execute or Docker run
+    """
+    if not environment:
+        environment = {'SPRAS': 'True'}
+
+    print('Running {} on container framework "{}" on env {} with command: {}'.format(name, framework, list(env_to_items(environment)), ' '.join(command)), flush=True)
+    try:
+        out = run_container(framework=framework, container_suffix=container_suffix, command=command, volumes=volumes, working_dir=working_dir, out_dir=out_dir, environment=environment, network_disabled=network_disabled)
+        if out is not None:
+            if isinstance(out, list):
+                out = ''.join(out)
+            elif isinstance(out, dict):
+                if 'message' in out:
+                    # This is the format of a singularity message.
+                    # See https://singularityhub.github.io/singularity-cli/api/source/spython.main.html?highlight=execute#spython.main.execute.execute.
+                    exit_status = int(out['return_code']) if 'return_code' in out else 0
+                    out = ''.join(out['message'])
+                    if exit_status != 0:
+                        message = f'An unexpected non-zero exit status ({exit_status}) occurred while running this singularity container:\n' + indent(out)
+                        raise ContainerError(message, exit_status, out, None)
+                else:
+                    print("Note: The following output is an unknown message format which should be properly handled.")
+                    print("Please file an issue at https://github.com/Reed-CompBio/spras/issues/new with this output.")
+                    out = str(out)
+            elif not isinstance(out, str):
+                out = str(out, "utf-8")
+            print(indent(out))
+    except docker.errors.ContainerError as err:
+        stdout = str(err.container.logs(stdout=True, stderr=False), 'utf-8')
+        stderr = str(err.container.logs(stdout=False, stderr=True), 'utf-8')
+
+        message = textwrap.dedent(f'''\
+                                  (Command formatted as list: `{err.command}`)
+                                  An unexpected non-zero exit status ({err.exit_status}) inside the docker image {err.image} occurred:\n''') + indent(stderr)
+        # We retrieved all of the information from docker.errors.ContainerError, so here, we ignore the original error.
+        raise ContainerError(message, err.exit_status, stdout, stderr) from None
 
 # TODO any issue with creating a new client each time inside this function?
-def run_container_docker(container: str, command: List[str], volumes: List[Tuple[PurePath, PurePath]], working_dir: str, environment: str = 'SPRAS=True'):
+def run_container_docker(container: str, command: List[str], volumes: List[Tuple[PurePath, PurePath]], working_dir: str, environment: Optional[dict[str, str]] = None, network_disabled=False):
     """
     Runs a command in the container using Docker.
     Attempts to automatically correct file owner and group for new files created by the container, setting them to the
@@ -161,86 +261,90 @@ def run_container_docker(container: str, command: List[str], volumes: List[Tuple
     @param volumes: a list of volumes to mount where each item is a (source, destination) tuple
     @param working_dir: the working directory in the container
     @param environment: environment variables to set in the container
-    @return: output from Docker run
+    @return: output from Docker run, or will error if the container errored.
     """
-    out = None
+
+    if not environment:
+        environment = {'SPRAS': 'True'}
+
+    # Initialize a Docker client using environment variables
     try:
-        # Initialize a Docker client using environment variables
         client = docker.from_env()
-        # Track the contents of the local directories that will be bound so that new files added can have their owner
-        # changed
-        pre_volume_contents = {}
-        src_dest_map = {}
-        for src, dest in volumes:
-            src_path = Path(src)
-            # The same source path can be in volumes more than once if there were multiple input or output files
-            # in the same directory
-            # Only check each unique source path once and track which of the possible destination paths was used
-            if src_path not in pre_volume_contents:
-                # Only list files in the directory, do not walk recursively because it could include
-                # a massive number of files
-                pre_volume_contents[src_path] = set(src_path.iterdir())
-                src_dest_map[src_path] = dest
-
-        bind_paths = [f'{prepare_path_docker(src)}:{dest}' for src, dest in volumes]
-
-        out = client.containers.run(container,
-                                    command,
-                                    stderr=True,
-                                    volumes=bind_paths,
-                                    working_dir=working_dir,
-                                    environment=[environment]).decode('utf-8')
-
-        # TODO does this cleanup need to still run even if there was an error in the above run command?
-        # On Unix, files written by the above Docker run command will be owned by root and cannot be modified
-        # outside the container by a non-root user
-        # Reset the file owner and the group inside the container
-        try:
-            # Only available on Unix
-            uid = os.getuid()
-            gid = os.getgid()
-
-            all_modified_volume_contents = set()
-            for src_path in pre_volume_contents.keys():
-                # Assumes the Docker run call is the only process that modified the contents
-                # Only considers files that were added, not files that were modified
-                post_volume_contents = set(src_path.iterdir())
-                modified_volume_contents = post_volume_contents - pre_volume_contents[src_path]
-                modified_volume_contents = [str(convert_docker_path(src_path, src_dest_map[src_path], p)) for p in
-                                            modified_volume_contents]
-                all_modified_volume_contents.update(modified_volume_contents)
-
-            # This command changes the ownership of output files so we don't
-            # get a permissions error when snakemake or the user try to touch the files
-            # Use --recursive because new directories could have been created inside the container
-            # Do not run the command if no files were modified
-            if len(all_modified_volume_contents) > 0:
-                chown_command = ['chown', f'{uid}:{gid}', '--recursive']
-                chown_command.extend(all_modified_volume_contents)
-                chown_command = ' '.join(chown_command)
-                client.containers.run(container,
-                                    chown_command,
-                                    stderr=True,
-                                    volumes=bind_paths,
-                                    working_dir=working_dir,
-                                    environment=[environment]).decode('utf-8')
-
-        # Raised on non-Unix systems
-        except AttributeError:
-            pass
-
-        # TODO: Not sure whether this is needed or where to close the client
-        client.close()
-
     except Exception as err:
-        print(err)
+        err.add_note("An error occurred when fetching the docker daemon: is docker installed and is dockerd running?")
+        raise err
+    # Track the contents of the local directories that will be bound so that new files added can have their owner
+    # changed
+    pre_volume_contents = {}
+    src_dest_map = {}
+    for src, dest in volumes:
+        src_path = Path(src)
+        # The same source path can be in volumes more than once if there were multiple input or output files
+        # in the same directory
+        # Only check each unique source path once and track which of the possible destination paths was used
+        if src_path not in pre_volume_contents:
+            # Only list files in the directory, do not walk recursively because it could include
+            # a massive number of files
+            pre_volume_contents[src_path] = set(src_path.iterdir())
+            src_dest_map[src_path] = dest
+
+    bind_paths = [f'{prepare_path_docker(src)}:{dest}' for src, dest in volumes]
+
+    out = client.containers.run(container,
+                                command,
+                                stderr=True,
+                                volumes=bind_paths,
+                                working_dir=working_dir,
+                                network_disabled=network_disabled,
+                                environment=environment).decode('utf-8')
+
+    # TODO does this cleanup need to still run even if there was an error in the above run command?
+    # On Unix, files written by the above Docker run command will be owned by root and cannot be modified
+    # outside the container by a non-root user
+    # Reset the file owner and the group inside the container
+    try:
+        # Only available on Unix
+        uid = os.getuid()
+        gid = os.getgid()
+
+        all_modified_volume_contents = set()
+        for src_path in pre_volume_contents.keys():
+            # Assumes the Docker run call is the only process that modified the contents
+            # Only considers files that were added, not files that were modified
+            post_volume_contents = set(src_path.iterdir())
+            modified_volume_contents = post_volume_contents - pre_volume_contents[src_path]
+            modified_volume_contents = [str(convert_docker_path(src_path, src_dest_map[src_path], p)) for p in
+                                        modified_volume_contents]
+            all_modified_volume_contents.update(modified_volume_contents)
+
+        # This command changes the ownership of output files so we don't
+        # get a permissions error when snakemake or the user try to touch the files
+        # Use --recursive because new directories could have been created inside the container
+        # Do not run the command if no files were modified
+        if len(all_modified_volume_contents) > 0:
+            chown_command = ['chown', f'{uid}:{gid}', '--recursive']
+            chown_command.extend(all_modified_volume_contents)
+            chown_command = ' '.join(chown_command)
+            client.containers.run(container,
+                                chown_command,
+                                stderr=True,
+                                volumes=bind_paths,
+                                working_dir=working_dir,
+                                network_disabled=network_disabled,
+                                environment=environment).decode('utf-8')
+
+    # Raised on non-Unix systems
+    except AttributeError:
+        pass
+
+    # TODO: Not sure whether this is needed or where to close the client
+    client.close()
     # Removed the finally block to address bugbear B012
     # "`return` inside `finally` blocks cause exceptions to be silenced"
     # finally:
     return out
 
-
-def run_container_singularity(container: str, command: List[str], volumes: List[Tuple[PurePath, PurePath]], working_dir: str, environment: str = 'SPRAS=True'):
+def run_container_singularity(container: str, command: List[str], volumes: List[Tuple[PurePath, PurePath]], working_dir: str, out_dir: str, environment: Optional[dict[str, str]] = None):
     """
     Runs a command in the container using Singularity.
     Only available on Linux.
@@ -248,9 +352,14 @@ def run_container_singularity(container: str, command: List[str], volumes: List[
     @param command: command to run in the container
     @param volumes: a list of volumes to mount where each item is a (source, destination) tuple
     @param working_dir: the working directory in the container
+    @param out_dir: output directory for the rule's artifacts -- used here to store profiling data
     @param environment: environment variable to set in the container
     @return: output from Singularity execute
     """
+
+    if not environment:
+        environment = {'SPRAS': 'True'}
+
     # spython is not compatible with Windows
     if platform.system() != 'Linux':
         raise NotImplementedError('Singularity support is only available on Linux')
@@ -265,43 +374,81 @@ def run_container_singularity(container: str, command: List[str], volumes: List[
     singularity_options = ['--cleanenv', '--containall', '--pwd', working_dir]
     # Singularity does not allow $HOME to be set as a regular environment variable
     # Capture it and use the special argument instead
-    if environment.startswith('HOME='):
-        home_dir = environment[5:]
+    if 'HOME' in environment:
+        home_dir = environment['HOME']
         singularity_options.extend(['--home', home_dir])
-    else:
-        singularity_options.extend(['--env', environment])
+        # We delete HOME to avoid adding it to `--env` right after.
+        del environment['HOME']
+
+    # https://docs.sylabs.io/guides/3.7/user-guide/environment_and_metadata.html#env-option
+    singularity_options.extend(['--env', ",".join(env_to_items(environment))])
 
     # Handle unpacking singularity image if needed. Potentially needed for running nested unprivileged containers
+    expanded_image = None
     if config.config.unpack_singularity:
-        # Split the string by "/"
+        # The incoming image string is of the format <repository>/<owner>/<image name>:<tag> e.g.
+        # hub.docker.com/reedcompbio/spras:latest
+        # Here we first produce a .sif image using the image name and tag (base_cont)
+        # and then expand that image into a sandbox directory. For example,
+        # hub.docker.com/reedcompbio/spras:latest --> spras_latest.sif --> ./spras_latest/
         path_elements = container.split("/")
-
-        # Get the last element, which will indicate the base container name
         base_cont = path_elements[-1]
         base_cont = base_cont.replace(":", "_").split(":")[0]
         sif_file = base_cont + ".sif"
 
-        # Adding 'docker://' to the container indicates this is a Docker image Singularity must convert
-        image_path = Client.pull('docker://' + container, name=sif_file)
+        # To allow caching unpacked singularity images without polluting git on local runs,
+        # we move all of the unpacked image files into a `.gitignore`d folder.
+        unpacked_dir = Path("unpacked")
+        unpacked_dir.mkdir(exist_ok=True)
 
-        # Check if the directory for base_cont already exists. When running concurrent jobs, it's possible
+        # Adding 'docker://' to the container indicates this is a Docker image Singularity must convert
+        image_path = Client.pull('docker://' + container, name=str(unpacked_dir / sif_file))
+
+        base_cont_path = unpacked_dir / Path(base_cont)
+
+        # Check whether the directory for base_cont_path already exists. When running concurrent jobs, it's possible
         # something else has already pulled/unpacked the container.
-        # Here, we expand the sif image from `image_path` to a directory indicated by `base_cont`
-        if not os.path.exists(base_cont):
-            Client.build(recipe=image_path, image=base_cont, sandbox=True, sudo=False)
+        # Here, we expand the sif image from `image_path` to a directory indicated by `base_cont_path`
+        if not base_cont_path.exists():
+            Client.build(recipe=image_path, image=str(base_cont_path), sandbox=True, sudo=False)
+        expanded_image = base_cont_path  # This is the sandbox directory
 
-        # Execute the locally unpacked container.
-        return Client.execute(base_cont,
-                        command,
-                        options=singularity_options,
-                        bind=bind_paths)
+    # If not using the expanded sandbox image, we still need to prepend the docker:// prefix
+    # so apptainer knows to pull and convert the image format from docker to apptainer.
+    image_to_run = expanded_image if expanded_image else "docker://" + container
+    if config.config.enable_profiling:
+        # We won't end up using the spython client if profiling is enabled because
+        # we need to run everything manually to set up the cgroup
+        # Build the apptainer run command, which gets passed to the cgroup wrapper script
+        singularity_cmd = [
+            "apptainer", "exec"
+        ]
+        for bind in bind_paths:
+            singularity_cmd.extend(["--bind", bind])
+        singularity_cmd.extend(singularity_options)
+        singularity_cmd.append(image_to_run)
+        singularity_cmd.extend(command)
 
+        my_cgroup = create_peer_cgroup()
+        # The wrapper script is packaged with spras, and should be located in the same directory
+        # as `containers.py`.
+        wrapper = os.path.join(os.path.dirname(__file__), "cgroup_wrapper.sh")
+        cmd = [wrapper, my_cgroup] + singularity_cmd
+        proc = subprocess.run(cmd, capture_output=True, text=True, stderr=subprocess.STDOUT)
+
+        print("Reading memory and CPU stats from cgroup")
+        create_apptainer_container_stats(my_cgroup, out_dir)
+
+        result = proc.stdout
     else:
-        # Adding 'docker://' to the container indicates this is a Docker image Singularity must convert
-        return Client.execute('docker://' + container,
-                              command,
-                              options=singularity_options,
-                              bind=bind_paths)
+        result = Client.execute(
+            image=image_to_run,
+            command=command,
+            options=singularity_options,
+            bind=bind_paths
+        )
+
+    return result
 
 
 # Because this is called independently for each file, the same local path can be mounted to multiple volumes
@@ -341,7 +488,7 @@ def prepare_volume(filename: Union[str, PurePath], volume_base: Union[str, PureP
     return (src, dest), container_filename
 
 
-def run_container_dsub(container: str, command: List[str], volumes: List[Tuple[PurePath, PurePath]], working_dir: str, environment: str = 'SPRAS=True') -> str:
+def run_container_dsub(container: str, command: List[str], volumes: List[Tuple[PurePath, PurePath]], working_dir: str, environment: Optional[dict[str, str]] = None) -> str:
     """
     Runs a command in the Google Cloud using dsub.
     @param container: name of the container in the Google Cloud Container Registry
@@ -351,10 +498,15 @@ def run_container_dsub(container: str, command: List[str], volumes: List[Tuple[P
     @param environment: environment variables to set in the container
     @return: path of output from dsub
     """
+    if not environment:
+        environment = {'SPRAS': 'True'}
+
     # Dictionary of flags for dsub command
     flags = dict()
 
     workspace_bucket = os.getenv('WORKSPACE_BUCKET')
+    if not workspace_bucket:
+        raise RuntimeError("The environment variable 'WORKSPACE_BUCKET' was not specified.")
     # Add path in the workspace bucket and label for dsub command for each volume
     dsub_volumes = [(src, dst, workspace_bucket + str(dst), "INPUT_" + str(i),) for i, (src, dst) in enumerate(volumes)]
 
@@ -391,7 +543,8 @@ def run_container_dsub(container: str, command: List[str], volumes: List[Tuple[P
 
     # Prepare flags for dsub command
     flags['image'] = container
-    flags['env'] = environment
+    # https://github.com/DataBiosphere/dsub/tree/030589190ca9df85935cf68de556c2fbd4bad30d?tab=readme-ov-file#passing-parameters-to-your-script
+    flags['env'] = list(env_to_items(environment))
     flags['input-recursive'] = [vol[3]+'='+vol[2] for vol in dsub_volumes]
     flags['output-recursive'] = "OUTPUT=" + workspace_bucket + working_dir
     flags['logging'] = workspace_bucket + '/dsub/'

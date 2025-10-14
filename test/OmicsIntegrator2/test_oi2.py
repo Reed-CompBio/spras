@@ -3,16 +3,16 @@ from pathlib import Path
 
 import pytest
 
-import spras.config as config
+import spras.config.config as config
 from spras.omicsintegrator2 import OmicsIntegrator2
 
 config.init_from_file("config/config.yaml")
 
-TEST_DIR = 'test/OmicsIntegrator2/'
-EDGE_FILE = TEST_DIR+'input/oi2-edges.txt'
-PRIZE_FILE = TEST_DIR+'input/oi2-prizes.txt'
-OUT_FILE = Path(TEST_DIR, 'output', 'test.tsv')
+TEST_DIR = Path('test', 'OmicsIntegrator2')
+OUT_FILE = TEST_DIR / 'output' / 'test.tsv'
 
+EDGE_FILE = TEST_DIR / 'input' / 'simple' / 'oi2-edges.txt'
+PRIZE_FILE = TEST_DIR / 'input' / 'simple' / 'oi2-prizes.txt'
 
 class TestOmicsIntegrator2:
     """
