@@ -3,7 +3,6 @@ from pathlib import Path
 from spras.containers import prepare_volume, run_container_and_log
 from spras.dataset import Direction, GraphMultiplicity
 from spras.interactome import (
-    convert_undirected_to_directed,
     reinsert_direction_col_undirected,
 )
 from spras.prm import PRM

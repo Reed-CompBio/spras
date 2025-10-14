@@ -13,7 +13,7 @@ class PRM(ABC):
     """
 
     required_inputs: list[str] = []
-    
+
     # DOIs aren't strictly required (e.g. local neighborhood),
     # but it should be explicitly declared that there are no DOIs by defining an empty list.
     dois: list[str] = typing.cast(list[str], None)
