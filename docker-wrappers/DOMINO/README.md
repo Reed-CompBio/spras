@@ -21,3 +21,7 @@ The `winpty` prefix is only needed on Windows.
 - Resolve upstream ValueError with small inputs https://github.com/Shamir-Lab/DOMINO/issues/11
 - Use cache or reuse slices files from previous runs on the same network
 - Investigate why DOMINO does not build on amd64 after https://github.com/Reed-CompBio/spras/pull/235.
+
+## Versions
+
+- `v1`: Initial DOMINO container.

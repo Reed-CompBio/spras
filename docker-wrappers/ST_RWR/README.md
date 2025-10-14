@@ -16,3 +16,7 @@ docker build -t reed-compbio/st-rwr -f Dockerfile .
 Test code is located in `test/ST_RWR`.
 The `input` subdirectory contains test files `strwr-network.txt`, `strwr-sources.txt`, and `strwr-targets.txt`
 The Docker wrapper can be tested with `pytest`.
+
+## Versions
+
+- v1: Initial version.

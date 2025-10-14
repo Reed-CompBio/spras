@@ -18,9 +18,9 @@ Test code is located in `test/analysis/test_cytoscape.py`.
 The Docker wrapper can be tested with `pytest`.
 
 ## Versions:
-- (docker hub) v1: Use supervisord to launch Cytoscape from a Python subprocess, then connect to Cytoscape with py4cytoscape. Only loads undirected pathways. Compatible with Singularity in local testing (Apptainer version 1.2.2-1.el7) but fails in GitHub Actions.
-- (docker hub) v2: Add support for edge direction column.
-- v1: Add support for header lines in files
+- v1: Use supervisord to launch Cytoscape from a Python subprocess, then connect to Cytoscape with py4cytoscape. Only loads undirected pathways. Compatible with Singularity in local testing (Apptainer version 1.2.2-1.el7) but fails in GitHub Actions.
+- v2: Add support for edge direction column.
+- v3: Add support for header lines in files
 
 ## TODO
 - Add an auth file for `xvfb-run`

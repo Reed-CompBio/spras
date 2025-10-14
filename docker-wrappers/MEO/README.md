@@ -22,3 +22,7 @@ The Docker wrapper can be tested with `pytest`.
 - Attribute https://github.com/agitter/meo/
 - Document usage
 - Consider Alpine-based base image
+
+## Versions
+
+- `v1`: Initial MEO container

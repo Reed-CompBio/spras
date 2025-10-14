@@ -36,3 +36,7 @@ docker run -w /data --mount type=bind,source=/${PWD},target=/data reed-compbio/m
 This will run MinCostFlow on the test input files and write the output files to the root of the `spras` repository.
 
 Windows users may need to escape the absolute paths so that `/data` becomes `//data`, etc.
+
+## Versions
+
+- `v1`: Initial MinCostFlow docker container.
