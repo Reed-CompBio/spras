@@ -293,7 +293,7 @@ class Config:
         self.out_dir = raw_config.reconstruction_settings.locations.reconstruction_dir
 
         if raw_config.enable_profiling and raw_config.containers.framework not in ["singularity", "apptainer"]:
-            warnings.warn("enable_profiling is set to true, but the container framework is not singularity/apptainer. This setting will have no effect.")
+            warnings.warn("enable_profiling is set to true, but the container framework is not singularity/apptainer. This setting will have no effect.", stacklevel=2)
         self.enable_profiling = raw_config.enable_profiling
 
         self.process_datasets(raw_config)
