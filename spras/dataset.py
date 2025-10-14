@@ -188,7 +188,7 @@ class Dataset:
 
         if self.node_table is None:
             raise ValueError("node_table is None: can't request node columns of an empty dataset.")
-        
+
         needed_columns = set(col_names).difference(self.node_table.columns)
         if len(needed_columns) != 0:
             raise MissingDataError(scope, needed_columns)
@@ -208,12 +208,12 @@ class Dataset:
                 stacklevel=1,
             )
         return filtered_table
-    
+
     def get_node_columns_separate(self, col_names: list[str], scope: str) -> dict[str, pd.DataFrame]:
         """
         Get each `col_name` in `col_names` as a separate call to `get_node_columns`,
         allowing better column filtering for NODEIDs
-        
+
         This is useful for making separate node lists of specific column names.
         """
         needed_columns = set(col_names).difference(self.node_table.columns)
@@ -223,7 +223,7 @@ class Dataset:
         result_dict: dict[str, pd.DataFrame] = dict()
         for name in col_names:
             result_dict[name] = self.get_node_columns([name], scope)
-        
+
         return result_dict
 
     def contains_node_columns(self, col_names: list[str] | str):

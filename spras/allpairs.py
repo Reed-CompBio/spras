@@ -2,7 +2,7 @@ import warnings
 from pathlib import Path
 
 from spras.containers import prepare_volume, run_container_and_log
-from spras.dataset import Dataset, MissingDataError
+from spras.dataset import Dataset
 from spras.interactome import (
     convert_undirected_to_directed,
     has_direction,

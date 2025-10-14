@@ -1,7 +1,6 @@
 from pathlib import Path
 
 from spras.containers import prepare_volume, run_container_and_log
-from spras.dataset import MissingDataError
 from spras.interactome import (
     convert_undirected_to_directed,
     reinsert_direction_col_directed,
