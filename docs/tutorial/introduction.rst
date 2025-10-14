@@ -29,6 +29,16 @@ Required knowledge:
 - Ability to run command line operations and modify YAML files.
 - Basic biology concepts
 
+.. note::
+    This tutorial will require downloading approximately 18.3 GB of Docker images and running many Docker containers.
+
+    SPRAS does not automatically clean up these containers or images after execution, so users will need to remove them manually if desired.
+    
+    To remove all stopped containers run: docker container prune
+
+    To remove unused Docker images: docker image prune
+
+
 ###############
 SPRAS Overview
 ###############
