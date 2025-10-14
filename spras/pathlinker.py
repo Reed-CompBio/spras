@@ -112,7 +112,7 @@ class PathLinker(PRM):
         if k is not None:
             command.extend(['-k', str(k)])
 
-        container_suffix = "pathlinker:v1"
+        container_suffix = "pathlinker:v2"
         run_container_and_log('PathLinker',
                              container_framework,
                              container_suffix,
