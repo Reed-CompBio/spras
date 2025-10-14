@@ -441,7 +441,7 @@ Step 3: Use ML Post-Analysis
 
 To enable downstream analyses, update the analysis section in your configuration file by setting both summary, cytoscape, and ml, to true. Your analysis section in the configuration file should look like this:
 
-.. code-block:: text
+.. code-block:: yaml
 
     analysis:
         ml:
