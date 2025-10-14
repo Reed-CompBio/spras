@@ -2,9 +2,15 @@ Maintaining SPRAS
 =================
 
 Go dependency
------------------------
-The yamlfmt tool requires `Go <https://go.dev/doc/install>`__, which must
+-------------
+The ``yamlfmt`` tool requires `Go <https://go.dev/doc/install>`__, which must
 be installed manually.
+
+Naming conventions
+------------------
+SPRAS wrappers tries to follow the naming conventions of the algorithms they wrap.
+This includes their name and their ``required_inputs``: when sensible, we preserve
+the file name of inputs required by the internal algorithm.
 
 Reviewing pull requests
 -----------------------
