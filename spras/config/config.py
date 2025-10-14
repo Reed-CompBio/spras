@@ -292,7 +292,7 @@ class Config:
         # Set up a few top-level config variables
         self.out_dir = raw_config.reconstruction_settings.locations.reconstruction_dir
 
-        if raw_config.enable_profiling and not raw_config.container_settings.framework in ["singularity", "apptainer"]:
+        if raw_config.enable_profiling and not raw_config.containers.framework in ["singularity", "apptainer"]:
             warnings.warn("enable_profiling is set to true, but the container framework is not singularity/apptainer. This setting will have no effect.")
         self.enable_profiling = raw_config.enable_profiling
 
