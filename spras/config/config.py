@@ -111,7 +111,7 @@ class Config:
         # A Boolean specifying whether to run the evaluation per algorithm analysis
         self.analysis_include_evaluation_aggregate_algo = None
         # A dict with secret file paths (e.g. licenses)
-        self.secrets = None
+        self.secrets = { "gurobi": parsed_raw_config.secrets.gurobi }
 
         self.process_config(parsed_raw_config)
 
