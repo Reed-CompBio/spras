@@ -34,7 +34,7 @@ Required knowledge:
 
     SPRAS does not automatically clean up these containers or images after execution, so users will need to remove them manually if desired.
     
-    To stop all running containers: docker stop $(docker ps -q)
+    To stop all running containers: docker stop $(docker ps -a -q)
 
     To remove all stopped containers run: docker container prune
 
