@@ -47,7 +47,7 @@ class ResponseNet(PRM):
         edges = data.get_interactome(ResponseNet.interactome_properties)
 
         # creates the edges files that contains the head and tail nodes and the weights after them
-        edges.to_csv(filename_map['edges'], sep='\t', index=False, columns=["Interactor1", "Interactor2", "Weight"],
+        edges.df.to_csv(filename_map['edges'], sep='\t', index=False, columns=["Interactor1", "Interactor2", "Weight"],
                      header=False)
 
     @staticmethod
