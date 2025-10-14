@@ -1,9 +1,10 @@
 import shutil
 from pathlib import Path
+
 import pytest
 
-from spras.btb import BowTieBuilder as BTB
 import spras.config.config as config
+from spras.btb import BowTieBuilder as BTB
 
 config.init_from_file("config/config.yaml")
 
