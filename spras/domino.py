@@ -3,7 +3,7 @@ from pathlib import Path
 
 import pandas as pd
 
-from spras.containers import prepare_volume, run_container_and_log
+from spras.containers import ContainerError, prepare_volume, run_container_and_log
 from spras.interactome import (
     add_constant,
     reinsert_direction_col_undirected,
@@ -28,6 +28,7 @@ Interactor1     ppi     Interactor2
 """
 class DOMINO(PRM):
     required_inputs = ['network', 'active_genes']
+    dois = ["10.15252/msb.20209593"]
 
     @staticmethod
     def generate_inputs(data, filename_map):
@@ -37,14 +38,12 @@ class DOMINO(PRM):
         @param filename_map: a dict mapping file types in the required_inputs to the filename for that type
         @return:
         """
-        for input_type in DOMINO.required_inputs:
-            if input_type not in filename_map:
-                raise ValueError(f"{input_type} filename is missing")
+        DOMINO.validate_required_inputs(filename_map)
 
         # Get active genes for node input file
         if data.contains_node_columns('active'):
             # NODEID is always included in the node table
-            node_df = data.request_node_columns(['active'])
+            node_df = data.get_node_columns(['active'])
         else:
             raise ValueError('DOMINO requires active genes')
         node_df = node_df[node_df['active'] == True]
@@ -113,12 +112,21 @@ class DOMINO(PRM):
                           '--output_file', mapped_slices_file]
 
         container_suffix = "domino"
-        run_container_and_log('slicer',
-                             container_framework,
-                             container_suffix,
-                             slicer_command,
-                             volumes,
-                             work_dir)
+        try:
+            run_container_and_log('slicer',
+                                container_framework,
+                                container_suffix,
+                                slicer_command,
+                                volumes,
+                                work_dir,
+                                out_dir)
+        except ContainerError as err:
+            # Occurs when DOMINO gets passed some empty dataframe from network_file.
+            # This counts as an empty input, so we return an empty output.
+            if err.streams_contain("pandas.errors.EmptyDataError: No columns to parse from file"):
+                pass
+            else:
+                raise err
 
         # Make the Python command to run within the container
         domino_command = ['domino',
@@ -137,12 +145,26 @@ class DOMINO(PRM):
         if module_threshold is not None:
             domino_command.extend(['--module_threshold', str(module_threshold)])
 
-        run_container_and_log('DOMINO',
-                             container_framework,
-                             container_suffix,
-                             domino_command,
-                             volumes,
-                             work_dir)
+        try:
+            run_container_and_log('DOMINO',
+                                  container_framework,
+                                  container_suffix,
+                                  domino_command,
+                                  volumes,
+                                  work_dir,
+                                  out_dir)
+        except ContainerError as err:
+            # Occurs when DOMINO gets passed some empty dataframe from network_file.
+            # This counts as an empty input, so we return an empty output.
+            if err.streams_contain("pandas.errors.EmptyDataError: No columns to parse from file"):
+                pass
+            # Here, DOMINO
+            # still outputs to our output folder with a still viable HTML output.
+            # https://github.com/Reed-CompBio/spras/pull/103#issuecomment-1681526958
+            elif err.streams_contain("ValueError: cannot apply union_all to an empty list"):
+                pass
+            else:
+                raise err
 
         # DOMINO creates a new folder in out_dir to output its modules HTML files into called active_genes
         # The filename is determined by the input active_genes and cannot be configured
@@ -150,15 +172,15 @@ class DOMINO(PRM):
         out_modules_dir = Path(out_dir, 'active_genes')
 
         # Concatenate each produced module HTML file into one file
-        with open(output_file, 'w') as fo:
+        with open(output_file, 'w') as f:
             for html_file in out_modules_dir.glob('module_*.html'):
                 with open(html_file, 'r') as fi:
-                    fo.write(fi.read())
+                    f.write(fi.read())
 
         # Clean up DOMINO intermediate and pickle files
         slices_file.unlink(missing_ok=True)
         Path(out_dir, 'network.slices.pkl').unlink(missing_ok=True)
-        Path(network + '.pkl').unlink(missing_ok=True)
+        Path(str(network) + '.pkl').unlink(missing_ok=True)
 
     @staticmethod
     def parse_output(raw_pathway_file, standardized_pathway_file, params):
@@ -188,8 +210,10 @@ class DOMINO(PRM):
                     # columns that indicate edges
                     # Dropping the other rows eliminates the node information
                     module_df = pd.DataFrame(entries)
-                    module_df = module_df.loc[:, ['source', 'target']].dropna()
-
+                    try:
+                        module_df = module_df.loc[:, ['source', 'target']].dropna()
+                    except KeyError:
+                        module_df = pd.DataFrame()
                     # Add the edges from this module to the cumulative pathway edges
                     edges_df = pd.concat([edges_df, module_df], axis=0)
 

@@ -1,8 +1,6 @@
 from pathlib import Path
 
-import pandas as pd
-
-from spras.containers import prepare_volume, run_container
+from spras.containers import prepare_volume, run_container_and_log
 from spras.dataset import Dataset
 from spras.interactome import reinsert_direction_col_directed
 from spras.prm import PRM
@@ -13,19 +11,18 @@ __all__ = ['ST_RWR']
 # Note: This class is almost identical to the rwr.py file.
 class ST_RWR(PRM):
     required_inputs = ['network','sources','targets']
+    dois = []
 
     @staticmethod
     def generate_inputs(data, filename_map):
-        for input_type in ST_RWR.required_inputs:
-            if input_type not in filename_map:
-                raise ValueError(f"{input_type} filename is missing")
+        ST_RWR.validate_required_inputs(filename_map)
 
-        # Get seperate source and target nodes for source and target files
+        # Get separate source and target nodes for source and target files
         if data.contains_node_columns(["sources","targets"]):
-            sources = data.request_node_columns(["sources"])
+            sources = data.get_node_columns(["sources"])
             sources.to_csv(filename_map['sources'],sep='\t',index=False,columns=['NODEID'],header=False)
 
-            targets = data.request_node_columns(["targets"])
+            targets = data.get_node_columns(["targets"])
             targets.to_csv(filename_map['targets'],sep='\t',index=False,columns=['NODEID'],header=False)
         else:
             raise ValueError("Invalid node data")
@@ -80,13 +77,15 @@ class ST_RWR(PRM):
             command.extend(['--alpha', str(alpha)])
 
         container_suffix = 'st-rwr:v1'
-        out = run_container(container_framework,
-                            container_suffix,
-                            command,
-                            volumes,
-                            work_dir)
+        run_container_and_log(
+            "Source-Target RandomWalk with Restart",
+            container_framework,
+            container_suffix,
+            command,
+            volumes,
+            work_dir,
+            out_dir)
 
-        print(out)
         # Rename the primary output file to match the desired output filename
         output_edges = Path(out_dir, 'output.txt')
         output_edges.rename(output_file)

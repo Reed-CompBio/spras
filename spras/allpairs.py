@@ -16,6 +16,7 @@ __all__ = ['AllPairs']
 
 class AllPairs(PRM):
     required_inputs = ['nodetypes', 'network', 'directed_flag']
+    dois = []
 
     @staticmethod
     def generate_inputs(data: Dataset, filename_map):
@@ -24,13 +25,11 @@ class AllPairs(PRM):
         @param data: dataset
         @param filename_map: a dict mapping file types in the required_inputs to the filename for that type
         """
-        for input_type in AllPairs.required_inputs:
-            if input_type not in filename_map:
-                raise ValueError("{input_type} filename is missing")
+        AllPairs.validate_required_inputs(filename_map)
 
         # Get sources and targets for node input file
         # Borrowed code from pathlinker.py
-        sources_targets = data.request_node_columns(["sources", "targets"])
+        sources_targets = data.get_node_columns(["sources", "targets"])
         if sources_targets is None:
             raise ValueError("All Pairs Shortest Paths requires sources and targets")
 
@@ -93,7 +92,8 @@ class AllPairs(PRM):
         volumes.append(bind_path)
 
         # Create the parent directories for the output file if needed
-        Path(output_file).parent.mkdir(parents=True, exist_ok=True)
+        out_dir = Path(output_file).parent
+        out_dir.mkdir(parents=True, exist_ok=True)
         bind_path, mapped_out_file = prepare_volume(output_file, work_dir)
         volumes.append(bind_path)
 
@@ -112,7 +112,8 @@ class AllPairs(PRM):
             container_suffix,
             command,
             volumes,
-            work_dir)
+            work_dir,
+            out_dir)
 
     @staticmethod
     def parse_output(raw_pathway_file, standardized_pathway_file, params):

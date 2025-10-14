@@ -4,8 +4,8 @@ import shutil
 import yaml
 from spras.dataset import Dataset
 from spras.evaluation import Evaluation
-from spras.analysis import ml, summary, graphspace, cytoscape
-import spras.config as _config
+from spras.analysis import ml, summary, cytoscape
+import spras.config.config as _config
 
 # Snakemake updated the behavior in the 6.5.0 release https://github.com/snakemake/snakemake/pull/1037
 # and using the wrong separator prevents Snakemake from matching filenames to the rules that can produce them
@@ -26,6 +26,7 @@ algorithm_directed = _config.config.algorithm_directed
 pca_params = _config.config.pca_params
 hac_params = _config.config.hac_params
 FRAMEWORK = _config.config.container_framework
+include_aggregate_algo_eval = _config.config.analysis_include_evaluation_aggregate_algo
 
 # Return the dataset or gold_standard dictionary from the config file given the label
 def get_dataset(_datasets, label):
@@ -34,7 +35,9 @@ def get_dataset(_datasets, label):
 algorithms = list(algorithm_params)
 algorithms_with_params = [f'{algorithm}-params-{params_hash}' for algorithm, param_combos in algorithm_params.items() for params_hash in param_combos.keys()]
 dataset_labels = list(_config.config.datasets.keys())
-dataset_gold_standard_pairs = [f"{dataset}-{gs_values['label']}" for gs_values in _config.config.gold_standards.values() for dataset in gs_values['dataset_labels']]
+
+dataset_gold_standard_node_pairs = [f"{dataset}-{gs['label']}" for gs in _config.config.gold_standards.values() if gs['node_files'] for dataset in gs['dataset_labels']]
+dataset_gold_standard_edge_pairs = [f"{dataset}-{gs['label']}" for gs in _config.config.gold_standards.values() if gs['edge_files'] for dataset in gs['dataset_labels']]
 
 # Get algorithms that are running multiple parameter combinations
 def algo_has_mult_param_combos(algo):
@@ -75,11 +78,6 @@ def make_final_input(wildcards):
         # add table summarizing all pathways for each dataset
         final_input.extend(expand('{out_dir}{sep}{dataset}-pathway-summary.txt',out_dir=out_dir,sep=SEP,dataset=dataset_labels))
 
-    if _config.config.analysis_include_graphspace:
-        # add graph and style JSON files.
-        final_input.extend(expand('{out_dir}{sep}{dataset}-{algorithm_params}{sep}gs.json',out_dir=out_dir,sep=SEP,dataset=dataset_labels,algorithm_params=algorithms_with_params))
-        final_input.extend(expand('{out_dir}{sep}{dataset}-{algorithm_params}{sep}gsstyle.json',out_dir=out_dir,sep=SEP,dataset=dataset_labels,algorithm_params=algorithms_with_params))
-    
     if _config.config.analysis_include_cytoscape:
         final_input.extend(expand('{out_dir}{sep}{dataset}-cytoscape.cys',out_dir=out_dir,sep=SEP,dataset=dataset_labels))
 
@@ -94,7 +92,7 @@ def make_final_input(wildcards):
         final_input.extend(expand('{out_dir}{sep}{dataset}-ml{sep}ensemble-pathway.txt',out_dir=out_dir,sep=SEP,dataset=dataset_labels,algorithm_params=algorithms_with_params))
         final_input.extend(expand('{out_dir}{sep}{dataset}-ml{sep}jaccard-matrix.txt',out_dir=out_dir,sep=SEP,dataset=dataset_labels,algorithm_params=algorithms_with_params))
         final_input.extend(expand('{out_dir}{sep}{dataset}-ml{sep}jaccard-heatmap.png',out_dir=out_dir,sep=SEP,dataset=dataset_labels,algorithm_params=algorithms_with_params))
-    
+
     if _config.config.analysis_include_ml_aggregate_algo:
         final_input.extend(expand('{out_dir}{sep}{dataset}-ml{sep}{algorithm}-pca.png',out_dir=out_dir,sep=SEP,dataset=dataset_labels,algorithm=algorithms_mult_param_combos))
         final_input.extend(expand('{out_dir}{sep}{dataset}-ml{sep}{algorithm}-pca-variance.txt',out_dir=out_dir,sep=SEP,dataset=dataset_labels,algorithm=algorithms_mult_param_combos))
@@ -106,14 +104,27 @@ def make_final_input(wildcards):
         final_input.extend(expand('{out_dir}{sep}{dataset}-ml{sep}{algorithm}-ensemble-pathway.txt',out_dir=out_dir,sep=SEP,dataset=dataset_labels,algorithm=algorithms))
         final_input.extend(expand('{out_dir}{sep}{dataset}-ml{sep}{algorithm}-jaccard-matrix.txt',out_dir=out_dir,sep=SEP,dataset=dataset_labels,algorithm=algorithms))
         final_input.extend(expand('{out_dir}{sep}{dataset}-ml{sep}{algorithm}-jaccard-heatmap.png',out_dir=out_dir,sep=SEP,dataset=dataset_labels,algorithm=algorithms))
-    
+
     if _config.config.analysis_include_evaluation:
-        final_input.extend(expand('{out_dir}{sep}{dataset_gold_standard_pair}-evaluation.txt',out_dir=out_dir,sep=SEP,dataset_gold_standard_pair=dataset_gold_standard_pairs,algorithm_params=algorithms_with_params))
+        final_input.extend(expand('{out_dir}{sep}{dataset_gold_standard_pair}-eval{sep}pr-per-pathway-nodes.txt',out_dir=out_dir,sep=SEP,dataset_gold_standard_pair=dataset_gold_standard_node_pairs,algorithm_params=algorithms_with_params))
+        final_input.extend(expand('{out_dir}{sep}{dataset_gold_standard_pair}-eval{sep}pr-per-pathway-nodes.png',out_dir=out_dir,sep=SEP,dataset_gold_standard_pair=dataset_gold_standard_node_pairs))
+        final_input.extend(expand('{out_dir}{sep}{dataset_gold_standard_pair}-eval{sep}pr-pca-chosen-pathway-nodes.txt',out_dir=out_dir,sep=SEP,dataset_gold_standard_pair=dataset_gold_standard_node_pairs))
+        final_input.extend(expand('{out_dir}{sep}{dataset_gold_standard_pair}-eval{sep}pr-pca-chosen-pathway-nodes.png',out_dir=out_dir,sep=SEP,dataset_gold_standard_pair=dataset_gold_standard_node_pairs))
+        final_input.extend(expand('{out_dir}{sep}{dataset_gold_standard_pair}-eval{sep}pr-curve-ensemble-nodes.png',out_dir=out_dir,sep=SEP,dataset_gold_standard_pair=dataset_gold_standard_node_pairs))
+        final_input.extend(expand('{out_dir}{sep}{dataset_gold_standard_pair}-eval{sep}pr-curve-ensemble-nodes.txt',out_dir=out_dir,sep=SEP,dataset_gold_standard_pair=dataset_gold_standard_node_pairs))
+        # dummy file
+        final_input.extend(expand('{out_dir}{sep}{dataset_gold_standard_pair}-eval{sep}dummy-edge.txt',out_dir=out_dir,sep=SEP,dataset_gold_standard_pair=dataset_gold_standard_edge_pairs))
     
-    if len(final_input) == 0:
-        # No analysis added yet, so add reconstruction output files if they exist.
-        # (if analysis is specified, these should be implicitly run).
-        final_input.extend(expand('{out_dir}{sep}{dataset}-{algorithm_params}{sep}pathway.txt', out_dir=out_dir, sep=SEP, dataset=dataset_labels, algorithm_params=algorithms_with_params))
+    if _config.config.analysis_include_evaluation_aggregate_algo:
+        final_input.extend(expand('{out_dir}{sep}{dataset_gold_standard_pair}-eval{sep}pr-per-pathway-for-{algorithm}-nodes.txt',out_dir=out_dir,sep=SEP,dataset_gold_standard_pair=dataset_gold_standard_node_pairs,algorithm=algorithms))
+        final_input.extend(expand('{out_dir}{sep}{dataset_gold_standard_pair}-eval{sep}pr-per-pathway-for-{algorithm}-nodes.png',out_dir=out_dir,sep=SEP,dataset_gold_standard_pair=dataset_gold_standard_node_pairs,algorithm=algorithms))
+        final_input.extend(expand('{out_dir}{sep}{dataset_gold_standard_pair}-eval{sep}pr-pca-chosen-pathway-per-algorithm-nodes.txt',out_dir=out_dir,sep=SEP,dataset_gold_standard_pair=dataset_gold_standard_node_pairs))
+        final_input.extend(expand('{out_dir}{sep}{dataset_gold_standard_pair}-eval{sep}pr-pca-chosen-pathway-per-algorithm-nodes.png',out_dir=out_dir,sep=SEP,dataset_gold_standard_pair=dataset_gold_standard_node_pairs))
+        final_input.extend(expand('{out_dir}{sep}{dataset_gold_standard_pair}-eval{sep}pr-curve-ensemble-nodes-per-algorithm-nodes.png',out_dir=out_dir,sep=SEP,dataset_gold_standard_pair=dataset_gold_standard_node_pairs))
+        final_input.extend(expand('{out_dir}{sep}{dataset_gold_standard_pair}-eval{sep}pr-curve-ensemble-nodes-per-algorithm-nodes.txt',out_dir=out_dir,sep=SEP,dataset_gold_standard_pair=dataset_gold_standard_node_pairs))
+
+    # Since (formatted) pathway files are interesting to the user, we preserve them.
+    final_input.extend(expand('{out_dir}{sep}{dataset}-{algorithm_params}{sep}pathway.txt', out_dir=out_dir, sep=SEP, dataset=dataset_labels, algorithm_params=algorithms_with_params))
 
     # Create log files for the parameters and datasets
     final_input.extend(expand('{out_dir}{sep}logs{sep}parameters-{algorithm_params}.yaml', out_dir=out_dir, sep=SEP, algorithm_params=algorithms_with_params))
@@ -155,23 +166,29 @@ def get_dataset_dependencies(wildcards):
 rule merge_input:
     # Depends on the node, edge, and other files for this dataset so the rule and downstream rules are rerun if they change
     input: get_dataset_dependencies
-    output: dataset_file = SEP.join([out_dir, '{dataset}-merged.pickle'])
+    output: dataset_file = SEP.join([out_dir, 'dataset-{dataset}-merged.pickle'])
     run:
         # Pass the dataset to PRRunner where the files will be merged and written to disk (i.e. pickled)
         dataset_dict = get_dataset(_config.config.datasets, wildcards.dataset)
         runner.merge_input(dataset_dict, output.dataset_file)
 
-# Return all files used in the gold standard
+
+
+# Ensures Snakemake knows merge_gs_input depends on the config specified gold standard input files, triggering a rerun if they change.
+# Indirection is used to gather these files since each gold standard dataset may provide a variable number of inputs.
+# Returns all files used in the gold standard
 def get_gold_standard_dependencies(wildcards):
     gs = _config.config.gold_standards[wildcards.gold_standard]
-    all_files = gs["node_files"]
+    node_files = gs["node_files"]
+    edge_files = gs["edge_files"]
+    all_files = node_files + edge_files
     all_files = [gs["data_dir"] + SEP + data_file for data_file in all_files]
     return all_files
 
 # Merge all node files for a gold_standard into a single node table
 rule merge_gs_input:
     input: get_gold_standard_dependencies
-    output: gold_standard_file = SEP.join([out_dir, '{gold_standard}-merged.pickle'])
+    output: gold_standard_file = SEP.join([out_dir, 'gs-{gold_standard}-merged.pickle'])
     run:
         gold_standard_dict = get_dataset(_config.config.gold_standards, wildcards.gold_standard)
         Evaluation.merge_gold_standard_input(gold_standard_dict, output.gold_standard_file)
@@ -183,7 +200,7 @@ rule merge_gs_input:
 # The checkpoint produces a directory instead of a list of output files because the number and types of output
 # files is algorithm-dependent
 checkpoint prepare_input:
-    input: dataset_file = SEP.join([out_dir, '{dataset}-merged.pickle'])
+    input: dataset_file = SEP.join([out_dir, 'dataset-{dataset}-merged.pickle'])
     # Output is a directory that will contain all prepared files for pathway reconstruction
     output: output_dir = directory(SEP.join([out_dir, 'prepared', '{dataset}-{algorithm}-inputs']))
     # Run the preprocessing script for this algorithm
@@ -214,14 +231,29 @@ def collect_prepared_input(wildcards):
     prepared_inputs = expand(f'{prepared_dir}{SEP}{{type}}.txt',type=runner.get_required_inputs(algorithm=wildcards.algorithm))
     # If the directory is missing, do nothing because the missing output triggers running prepare_input
     if os.path.isdir(prepared_dir):
-        # If the directory exists, confirm all prepared input files exist as well (as opposed to some or none)
-        missing_inputs = False
-        for input in prepared_inputs:
-            if not os.path.isfile(input):
-                missing_inputs = True
-        # If any expected files were missing, delete the entire directory so the call below triggers running prepare_input
-        if missing_inputs:
-            shutil.rmtree(prepared_dir)
+        # First, check if .snakemake_timestamp, the last written file in a directory rule,
+        # exists. This prevents multithreading errors if we accidentally read a directory
+        # before it finishes. A proper API for querying this is opened as an issue at
+        # https://github.com/snakemake/snakemake/issues/439.
+        if not os.path.isfile(os.path.join(prepared_dir, '.snakemake_timestamp')):
+            # Running this has two goals:
+            # - If there is another thread running this, in correspondence with
+            # https://snakemake.readthedocs.io/en/stable/snakefiles/rules.html#data-dependent-conditional-execution,
+            # this will raise a IncompleteCheckpointException and poll again until that checkpoint is ready.
+            # - If the prior Snakemake execution was forcefully terminated (and prepared_inputs didn't finish,
+            # which must be the case since .snakemake_timestamp is the last file to be added),
+            # we can reproduce the prepared_inputs file, allowing resilliency against unexpected crashes.
+            checkpoints.prepare_input.get(**wildcards)
+        else:
+            # If the directory exists, confirm all prepared input files exist as well (as opposed to some or none)
+            missing_inputs = []
+            for input in prepared_inputs:
+                if not os.path.isfile(input):
+                    missing_inputs.append(input)
+            # If any expected files were missing, ask to delete the entire directory so the call below triggers running prepare_input
+            if len(missing_inputs) != 0:
+                raise RuntimeError(f"Not all input files were provided. (Missing {missing_inputs})\n" +
+                    f"To prevent multithreading errors, please remove the {prepared_inputs} directory and rerun the workflow.")
 
     # Check whether prepare_input has been run for these wildcards (dataset-algorithm pair) and run if needed
     # The check is executed by checking whether the prepare_input output exists, which is a directory
@@ -257,7 +289,7 @@ rule reconstruct:
 rule parse_output:
     input: 
         raw_file = SEP.join([out_dir, '{dataset}-{algorithm}-{params}', 'raw-pathway.txt']),
-        dataset_file = SEP.join([out_dir, '{dataset}-merged.pickle'])
+        dataset_file = SEP.join([out_dir, 'dataset-{dataset}-merged.pickle'])
     output: standardized_file = SEP.join([out_dir, '{dataset}-{algorithm}-{params}', 'pathway.txt'])
     run:
         params = reconstruction_params(wildcards.algorithm, wildcards.params).copy()
@@ -274,15 +306,6 @@ rule parse_output:
 #     run:
 #         summary.run(input.standardized_file,output.summary_file)
 
-# Write GraphSpace JSON graphs
-rule viz_graphspace:
-    input: standardized_file = SEP.join([out_dir, '{dataset}-{algorithm}-{params}', 'pathway.txt'])
-    output:
-        graph_json = SEP.join([out_dir, '{dataset}-{algorithm}-{params}', 'gs.json']),
-        style_json = SEP.join([out_dir, '{dataset}-{algorithm}-{params}', 'gsstyle.json'])
-    run:
-        graphspace.write_json(input.standardized_file,output.graph_json,output.style_json)
-
 
 # Write a Cytoscape session file with all pathways for each dataset
 rule viz_cytoscape:
@@ -298,7 +321,7 @@ rule summary_table:
     input:
         # Collect all pathways generated for the dataset
         pathways = expand('{out_dir}{sep}{{dataset}}-{algorithm_params}{sep}pathway.txt', out_dir=out_dir, sep=SEP, algorithm_params=algorithms_with_params),
-        dataset_file = SEP.join([out_dir, '{dataset}-merged.pickle'])
+        dataset_file = SEP.join([out_dir, 'dataset-{dataset}-merged.pickle'])
     output: summary_table = SEP.join([out_dir, '{dataset}-pathway-summary.txt'])
     run:
         # Load the node table from the pickled dataset file
@@ -320,9 +343,9 @@ rule ml_analysis:
         hac_clusters_horizontal = SEP.join([out_dir, '{dataset}-ml', 'hac-clusters-horizontal.txt']),
     run: 
         summary_df = ml.summarize_networks(input.pathways)
-        ml.pca(summary_df, output.pca_image, output.pca_variance, output.pca_coordinates, **pca_params)
         ml.hac_vertical(summary_df, output.hac_image_vertical, output.hac_clusters_vertical, **hac_params)
         ml.hac_horizontal(summary_df, output.hac_image_horizontal, output.hac_clusters_horizontal, **hac_params)
+        ml.pca(summary_df, output.pca_image, output.pca_variance, output.pca_coordinates, **pca_params)
 
 # Calculated Jaccard similarity between output pathways for each dataset
 rule jaccard_similarity:
@@ -349,7 +372,8 @@ rule ensemble:
 
 # Returns all pathways for a specific algorithm
 def collect_pathways_per_algo(wildcards):
-    filtered_algo_params = [algo_param for algo_param in algorithms_with_params if wildcards.algorithm in algo_param]
+    # filters parameters to be those where the algorithm name (prefix before the first dash) matches wildcards.algorithm
+    filtered_algo_params = [algo_param for algo_param in algorithms_with_params if algo_param.split("-")[0] == wildcards.algorithm]
     return expand('{out_dir}{sep}{{dataset}}-{algorithm_params}{sep}pathway.txt', out_dir=out_dir, sep=SEP, algorithm_params=filtered_algo_params)
 
 # Cluster the output pathways for each dataset per algorithm
@@ -366,9 +390,9 @@ rule ml_analysis_aggregate_algo:
         hac_clusters_horizontal = SEP.join([out_dir, '{dataset}-ml', '{algorithm}-hac-clusters-horizontal.txt']),
     run:
         summary_df = ml.summarize_networks(input.pathways)
-        ml.pca(summary_df, output.pca_image, output.pca_variance, output.pca_coordinates, **pca_params)
         ml.hac_vertical(summary_df, output.hac_image_vertical, output.hac_clusters_vertical, **hac_params)
         ml.hac_horizontal(summary_df, output.hac_image_horizontal, output.hac_clusters_horizontal, **hac_params)
+        ml.pca(summary_df, output.pca_image, output.pca_variance, output.pca_coordinates, **pca_params)
 
 # Ensemble the output pathways for each dataset per algorithm
 rule ensemble_per_algo:
@@ -393,25 +417,155 @@ rule jaccard_similarity_per_algo:
 
 # Return the gold standard pickle file for a specific gold standard
 def get_gold_standard_pickle_file(wildcards):
-    parts = wildcards.dataset_gold_standard_pairs.split('-')
+    parts = wildcards.dataset_gold_standard_pair.split('-')
     gs = parts[1]
-    return SEP.join([out_dir, f'{gs}-merged.pickle'])
-    
+    return SEP.join([out_dir, f'gs-{gs}-merged.pickle'])
+
 # Returns the dataset corresponding to the gold standard pair
 def get_dataset_label(wildcards):
-    parts = wildcards.dataset_gold_standard_pairs.split('-')
+    parts = wildcards.dataset_gold_standard_pair.split('-')
     dataset = parts[0]
     return dataset
 
-# Run evaluation code for a specific dataset's pathway outputs against its paired gold standard
-rule evaluation:
+
+# Returns all pathways for a specific dataset
+def collect_pathways_per_dataset(wildcards):
+    dataset_label = get_dataset_label(wildcards)
+    return expand('{out_dir}{sep}{dataset_label}-{algorithm_params}{sep}pathway.txt', out_dir=out_dir, sep=SEP, algorithm_params=algorithms_with_params, dataset_label=dataset_label)
+
+# Run precision and recall for all pathway outputs for a dataset against its paired gold standard
+rule evaluation_pr_per_pathways:
     input: 
-        gold_standard_file = get_gold_standard_pickle_file,
-        pathways = expand('{out_dir}{sep}{dataset_label}-{algorithm_params}{sep}pathway.txt', out_dir=out_dir, sep=SEP, algorithm_params=algorithms_with_params, dataset_label=get_dataset_label),
-    output: eval_file = SEP.join([out_dir, "{dataset_gold_standard_pairs}-evaluation.txt"])
+        node_gold_standard_file = get_gold_standard_pickle_file,
+        pathways = collect_pathways_per_dataset
+    output: 
+        node_pr_file = SEP.join([out_dir, '{dataset_gold_standard_pair}-eval', "pr-per-pathway-nodes.txt"]),
+        node_pr_png = SEP.join([out_dir, '{dataset_gold_standard_pair}-eval', 'pr-per-pathway-nodes.png']),
     run:
-        node_table = Evaluation.from_file(input.gold_standard_file).node_table
-        Evaluation.precision(input.pathways, node_table, output.eval_file)
+        node_table = Evaluation.from_file(input.node_gold_standard_file).node_table
+        pr_df = Evaluation.node_precision_and_recall(input.pathways, node_table)
+        Evaluation.precision_and_recall_per_pathway(pr_df, output.node_pr_file, output.node_pr_png)
+        
+# Returns all pathways for a specific algorithm and dataset
+def collect_pathways_per_algo_per_dataset(wildcards):
+    dataset_label = get_dataset_label(wildcards)
+    filtered_algo_params = [algo_param for algo_param in algorithms_with_params if algo_param.split("-")[0] == wildcards.algorithm]
+    return expand('{out_dir}{sep}{dataset_label}-{algorithm_params}{sep}pathway.txt', out_dir=out_dir, sep=SEP, algorithm_params=filtered_algo_params, dataset_label=dataset_label)
+
+# Run precision and recall per algorithm for all pathway outputs for a dataset against its paired gold standard
+rule evaluation_per_algo_pr_per_pathways:
+    input: 
+        node_gold_standard_file = get_gold_standard_pickle_file,
+        pathways =  collect_pathways_per_algo_per_dataset,
+    output: 
+        node_pr_file = SEP.join([out_dir, '{dataset_gold_standard_pair}-eval', "pr-per-pathway-for-{algorithm}-nodes.txt"]),
+        node_pr_png = SEP.join([out_dir, '{dataset_gold_standard_pair}-eval', 'pr-per-pathway-for-{algorithm}-nodes.png']),
+    run:
+        node_table = Evaluation.from_file(input.node_gold_standard_file).node_table
+        pr_df = Evaluation.node_precision_and_recall(input.pathways, node_table)
+        Evaluation.precision_and_recall_per_pathway(pr_df, output.node_pr_file, output.node_pr_png, include_aggregate_algo_eval)
+
+# Return pathway summary file per dataset
+def collect_summary_statistics_per_dataset(wildcards):
+    dataset_label = get_dataset_label(wildcards)
+    return SEP.join([out_dir, f'{dataset_label}-pathway-summary.txt'])
+
+# Returns pca coordinate per dataset
+def collect_pca_coordinates_per_dataset(wildcards):
+    dataset_label = get_dataset_label(wildcards)
+    return expand('{out_dir}{sep}{dataset}-ml{sep}pca-coordinates.txt', out_dir=out_dir, sep=SEP, dataset=dataset_label)
+
+
+# Run PCA chosen to select the representative from all pathway outputs for a given dataset, 
+# then evaluate with precision and recall against the corresponding gold standard
+rule evaluation_pca_chosen:
+    input: 
+        node_gold_standard_file = get_gold_standard_pickle_file,
+        pca_coordinates_file = collect_pca_coordinates_per_dataset,
+        pathway_summary_file = collect_summary_statistics_per_dataset
+    output: 
+        node_pca_chosen_pr_file = SEP.join([out_dir, '{dataset_gold_standard_pair}-eval', 'pr-pca-chosen-pathway-nodes.txt']),
+        node_pca_chosen_pr_png = SEP.join([out_dir, '{dataset_gold_standard_pair}-eval', 'pr-pca-chosen-pathway-nodes.png']),
+    run:
+        node_table = Evaluation.from_file(input.node_gold_standard_file).node_table
+        pca_chosen_pathway = Evaluation.pca_chosen_pathway(input.pca_coordinates_file, input.pathway_summary_file, out_dir)
+        pr_df = Evaluation.node_precision_and_recall(pca_chosen_pathway, node_table)
+        Evaluation.precision_and_recall_pca_chosen_pathway(pr_df, output.node_pca_chosen_pr_file, output.node_pca_chosen_pr_png)
+
+# Returns pca coordinates for a specific algorithm and dataset
+def collect_pca_coordinates_per_algo_per_dataset(wildcards):
+    dataset_label = get_dataset_label(wildcards)
+    return expand('{out_dir}{sep}{dataset}-ml{sep}{algorithm}-pca-coordinates.txt', out_dir=out_dir, sep=SEP, dataset=dataset_label, algorithm=algorithms_mult_param_combos) #TODO we are using algos with mult param combos, what to do when empty?
+
+# Run PCA chosen to select the representative pathway per algorithm pathway outputs for a given dataset, 
+# then evaluate with precision and recall against the corresponding gold standard
+rule evaluation_per_algo_pca_chosen:
+    input: 
+        node_gold_standard_file = get_gold_standard_pickle_file,
+        pca_coordinates_file = collect_pca_coordinates_per_algo_per_dataset,
+        pathway_summary_file = collect_summary_statistics_per_dataset
+    output: 
+        node_pca_chosen_pr_file = SEP.join([out_dir, '{dataset_gold_standard_pair}-eval', 'pr-pca-chosen-pathway-per-algorithm-nodes.txt']),
+        node_pca_chosen_pr_png = SEP.join([out_dir, '{dataset_gold_standard_pair}-eval', 'pr-pca-chosen-pathway-per-algorithm-nodes.png']),
+    run:
+        node_table = Evaluation.from_file(input.node_gold_standard_file).node_table
+        pca_chosen_pathways = Evaluation.pca_chosen_pathway(input.pca_coordinates_file, input.pathway_summary_file, out_dir)
+        pr_df = Evaluation.node_precision_and_recall(pca_chosen_pathways, node_table)
+        Evaluation.precision_and_recall_pca_chosen_pathway(pr_df, output.node_pca_chosen_pr_file, output.node_pca_chosen_pr_png, include_aggregate_algo_eval)
+
+# Return the dataset pickle file for a specific dataset
+def get_dataset_pickle_file(wildcards):
+    dataset_label = get_dataset_label(wildcards)
+    return SEP.join([out_dir, f'dataset-{dataset_label}-merged.pickle'])
+
+# Returns ensemble file for each dataset
+def collect_ensemble_per_dataset(wildcards):
+    dataset_label = get_dataset_label(wildcards)
+    return expand('{out_dir}{sep}{dataset}-ml{sep}ensemble-pathway.txt', out_dir=out_dir, sep=SEP, dataset=dataset_label)
+
+# Run precision-recall curves for each ensemble pathway within a dataset evaluated against its corresponding gold standard
+rule evaluation_ensemble_pr_curve:
+    input: 
+        node_gold_standard_file = get_gold_standard_pickle_file,
+        dataset_file = get_dataset_pickle_file,
+        ensemble_file = collect_ensemble_per_dataset
+    output: 
+        node_pr_curve_png = SEP.join([out_dir, '{dataset_gold_standard_pair}-eval', 'pr-curve-ensemble-nodes.png']),
+        node_pr_curve_file = SEP.join([out_dir, '{dataset_gold_standard_pair}-eval', 'pr-curve-ensemble-nodes.txt']),
+    run:
+        node_table = Evaluation.from_file(input.node_gold_standard_file).node_table
+        node_ensemble_dict = Evaluation.edge_frequency_node_ensemble(node_table, input.ensemble_file, input.dataset_file)
+        Evaluation.precision_recall_curve_node_ensemble(node_ensemble_dict, node_table, output.node_pr_curve_png, output.node_pr_curve_file)
+
+# Returns list of algorithm specific ensemble files per dataset
+def collect_ensemble_per_algo_per_dataset(wildcards):
+    dataset_label = get_dataset_label(wildcards)
+    return expand('{out_dir}{sep}{dataset}-ml{sep}{algorithm}-ensemble-pathway.txt', out_dir=out_dir, sep=SEP, dataset=dataset_label, algorithm=algorithms)
+
+# Run precision-recall curves for each algorithm's ensemble pathway within a dataset evaluated against its corresponding gold standard
+rule evaluation_per_algo_ensemble_pr_curve:
+    input: 
+        node_gold_standard_file = get_gold_standard_pickle_file,
+        dataset_file = get_dataset_pickle_file,
+        ensemble_files = collect_ensemble_per_algo_per_dataset
+    output: 
+        node_pr_curve_png = SEP.join([out_dir, '{dataset_gold_standard_pair}-eval', 'pr-curve-ensemble-nodes-per-algorithm-nodes.png']),
+        node_pr_curve_file = SEP.join([out_dir, '{dataset_gold_standard_pair}-eval', 'pr-curve-ensemble-nodes-per-algorithm-nodes.txt']),
+    run:
+        node_table = Evaluation.from_file(input.node_gold_standard_file).node_table
+        node_ensembles_dict = Evaluation.edge_frequency_node_ensemble(node_table, input.ensemble_files, input.dataset_file)
+        Evaluation.precision_recall_curve_node_ensemble(node_ensembles_dict, node_table, output.node_pr_curve_png, output.node_pr_curve_file, include_aggregate_algo_eval)
+
+rule evaluation_edge_dummy:
+    input: 
+        edge_gold_standard_file = get_gold_standard_pickle_file,
+    output: 
+        dummy_file = SEP.join([out_dir, '{dataset_gold_standard_pair}-eval', 'dummy-edge.txt']),
+    run:
+        mixed_edge_table = Evaluation.from_file(input.edge_gold_standard_file).mixed_edge_table
+        undirected_edge_table = Evaluation.from_file(input.edge_gold_standard_file).undirected_edge_table
+        directed_edge_table = Evaluation.from_file(input.edge_gold_standard_file).directed_edge_table
+        Evaluation.edge_dummy_function(mixed_edge_table, undirected_edge_table, directed_edge_table, output.dummy_file)
 
 # Remove the output directory
 rule clean:

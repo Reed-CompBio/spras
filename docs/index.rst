@@ -13,7 +13,9 @@
 Welcome to SPRAS's documentation!
 =================================
 
-SPRAS is a Python package that builds on Snakemake and Docker to provide a standardized, reproducible, and scalable framework for applying pathway reconstruction
+SPRAS is a Python package that builds on `Snakemake <https://snakemake.readthedocs.io>`_ and
+`Docker <https://en.wikipedia.org/wiki/Docker_(software)>`_ to provide a standardized,
+reproducible, and scalable framework for applying pathway reconstruction
 methods (PRMs) to omics data.
 
 .. image:: _static/spras-overview.png
@@ -27,8 +29,14 @@ methods (PRMs) to omics data.
 
    about
    install
-   vignettes
+   usage
+
+.. toctree::
+   :maxdepth: 1
+   :caption: Manual
+
    output
+   htcondor
 
 .. toctree::
    :maxdepth: 1
@@ -46,7 +54,18 @@ methods (PRMs) to omics data.
    :maxdepth: 1
    :caption: Contributing
 
-   contributing
+   contributing/index
+   contributing/maintain
+   contributing/patching
+
+.. toctree::
+   :maxdepth: 1
+   :caption: Tutorials
+
+   tutorial/introduction
+   tutorial/beginner
+   tutorial/intermediate
+   tutorial/advanced
 
 Indices and tables
 ==================
