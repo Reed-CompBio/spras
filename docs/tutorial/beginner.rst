@@ -79,7 +79,7 @@ Algorithms
 -----------
 
 
-.. code-block:: text
+.. code-block:: yaml
     
     algorithms:
     - name: omicsintegrator1
@@ -107,7 +107,7 @@ Invalid or missing parameter keys will cause SPRAS to fail.
 Datasets
 --------
 
-.. code-block:: text
+.. code-block:: yaml
 
     datasets:
     - 
@@ -131,7 +131,7 @@ The dataset must include the following types of keys and files:
 Reconstruction Settings
 -----------------------
 
-.. code-block:: text
+.. code-block:: yaml
 
     reconstruction_settings:
     locations:
@@ -145,7 +145,7 @@ If you are running multiple configuration files, you can set unique paths to kee
 Analysis
 --------
 
-.. code-block:: text
+.. code-block:: yaml
 
     analysis:
     summary:
@@ -289,7 +289,7 @@ SPRAS has additional files and directories to use during runs. However, for most
 
 In the beginner.yaml configuration file, uncomment the run2 section under pathlinker so it looks like:
 
-.. code-block:: text
+.. code-block:: yaml
     
     run2:   
         k: [10, 100] 
@@ -408,7 +408,7 @@ Step 3: Running Post-Analyses within SPRAS
 ==========================================
 To enable downstream analyses, update the analysis section in your configuration file by setting both summary and cytoscape to true. Your analysis section in the configuration file should look like this:
 
-.. code-block:: text
+.. code-block:: yaml
 
     analysis:
         summary:
