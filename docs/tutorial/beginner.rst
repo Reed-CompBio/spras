@@ -176,6 +176,8 @@ From the root directory spras/, run the command below from the command line:
 What Happens When You Run This Command
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 SPRAS will executes quickly from your perspective; however, several automated steps (handled by Snakemake and Docker) occur behind the scenes. 
+(ADD IN THAT APPLE COMPUTETERS WILL TAKE A SECOND BECAUSE OUR DOCKER IMAGES ARE AMD AND NOT ARM)
+
 
 1. Snakemake starts the workflow
 
