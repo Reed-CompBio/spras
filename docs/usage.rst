@@ -16,7 +16,7 @@ Parallelizing SPRAS
 
 SPRAS works on any specified number of cores, and will, thanks to Snakemake,
 automatically know how to best distribute work across various cores to
-finish pathway reconstruction and analysis on a configuration as fast as
+finish work specified in a configuration as fast as
 possible.
 
 To parallelize SPRAS, specify ``--cores`` to be a value higher than ``1``:
