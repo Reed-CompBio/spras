@@ -25,6 +25,6 @@ To parallelize SPRAS, specify ``--cores`` to be a value higher than ``1``:
 
     snakemake --cores 4 --configfile config.yaml
 
-SPRAS also intends to support high-performance computing: SPRAS officially
+SPRAS also supports high-performance computing with it's integration with
 supports `HTCondor <https://htcondor.org/>`_. See :doc:`Running with HTCondor <../htcondor>`
 for more information.
