@@ -26,7 +26,7 @@ class MinCostFlow(PRM):
     required_inputs = ['sources', 'targets', 'edges']
     # NOTE: This is the DOI for the ResponseNet paper.
     # This version of MinCostFlow is inspired by the ResponseNet paper, but does not have
-    # its own referencable DOI.
+    # its own referenceable DOI.
     dois = ["10.1038/ng.337"]
 
     @staticmethod
@@ -37,14 +37,11 @@ class MinCostFlow(PRM):
         @param filename_map: a dict mapping file types in the required_inputs to the filename for that type
         """
 
-        # ensures the required input are within the filename_map
-        for input_type in MinCostFlow.required_inputs:
-            if input_type not in filename_map:
-                raise ValueError(f"{input_type} filename is missing")
+        MinCostFlow.validate_required_inputs(filename_map)
 
         # will take the sources and write them to files, and repeats with targets
         for node_type in ['sources', 'targets']:
-            nodes = data.request_node_columns([node_type])
+            nodes = data.get_node_columns([node_type])
             if nodes is None:
                 raise ValueError(f'No {node_type} found in the node files')
             # take nodes one column data frame, call sources/ target series
@@ -124,7 +121,8 @@ class MinCostFlow(PRM):
                              container_suffix,
                              command,
                              volumes,
-                             work_dir)
+                             work_dir,
+                             out_dir)
 
         # Check the output of the container
         out_dir_content = sorted(out_dir.glob('*.sif'))

@@ -2,7 +2,7 @@ from pathlib import Path
 
 import pandas as pd
 
-from spras.containers import prepare_volume, run_container
+from spras.containers import prepare_volume, run_container_and_log
 from spras.dataset import Dataset
 from spras.interactome import reinsert_direction_col_directed
 from spras.prm import PRM
@@ -16,14 +16,12 @@ class RWR(PRM):
 
     @staticmethod
     def generate_inputs(data, filename_map):
-        for input_type in RWR.required_inputs:
-            if input_type not in filename_map:
-                raise ValueError(f"{input_type} filename is missing")
+        RWR.validate_required_inputs(filename_map)
 
         # Get sources and targets for node input file
         if data.contains_node_columns(["sources","targets"]):
-            sources = data.request_node_columns(["sources"])
-            targets = data.request_node_columns(["targets"])
+            sources = data.get_node_columns(["sources"])
+            targets = data.get_node_columns(["targets"])
             nodes = pd.DataFrame({'NODEID':sources['NODEID'].tolist() + targets['NODEID'].tolist()})
             nodes.to_csv(filename_map['nodes'],sep='\t',index=False,columns=['NODEID'],header=False)
         else:
@@ -74,13 +72,15 @@ class RWR(PRM):
             command.extend(['--alpha', str(alpha)])
 
         container_suffix = 'rwr:v1'
-        out = run_container(container_framework,
-                            container_suffix,
-                            command,
-                            volumes,
-                            work_dir)
+        run_container_and_log(
+            "RandomWalk with Restart",
+            container_framework,
+            container_suffix,
+            command,
+            volumes,
+            work_dir,
+            out_dir)
 
-        print(out)
         # Rename the primary output file to match the desired output filename
         output_edges = Path(out_dir, 'output.txt')
         output_edges.rename(output_file)
