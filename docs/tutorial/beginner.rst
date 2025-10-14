@@ -59,8 +59,8 @@ Launch Docker Desktop and wait until it says "Docker is running".
    However, Docker is required because SPRAS uses it to execute individual pathway reconstruction algorithms and certain post-analysis steps within isolated containers.
    These containers include all the necessary dependencies to run each algorithm or post analysis.
 
-Step 1: Explanation of configuration file
-=========================================
+Step 1: Configuration files
+============================
 
 A configuration file specifies how a SPRAS workflow should run; think of it as the control center for the workflow.
 
@@ -73,6 +73,9 @@ SPRAS uses Snakemake to read the YAML configuration file and execute a SPRAS wor
 .. Snakemake considers a task from the configuration file complete once the expected output files are present in the output directory. 
 .. As a result, rerunning the same configuration file may do nothing if those files already exist. 
 .. To continue or rerun SPRAS with the same configuration file, delete the output directory (or its contents) or modify the configuration file so Snakemake regenerates new results.
+
+1.1 Save config for this tutorial
+----------------------------------
 
 For this part of the tutorial, we'll use a pre-defined configuration file. 
 Download it here: :download:`Beginner Config File <../_static/config/beginner.yaml>`
@@ -89,16 +92,17 @@ After adding this file, your directory structure will look like this (ignoring t
    │   ├── phosphosite-irefindex13.0-uniprot.txt # pre-defined in SPRAS already, used by the beginner.yaml file
    │   └── tps-egfr-prizes.txt # pre-defined in SPRAS already, used by the beginner.yaml file
 
+
 config/
--------
+^^^^^^^^^
 
 The config/ folder stores configuration files for SPRAS.
 
 .. note::
-   You can name or place configuration files anywhere, as long as you provide the correct path when running SPRAS (explained later in this tutorial).
+   You can store configuration files anywhere, as long as you provide the correct path when running SPRAS (explained later in this tutorial).
 
 input/
-------
+^^^^^^^^
 
 The inputs/ folder contains input data files.
 You can use the provided example datasets or add your own for custom experiments to this folder.
@@ -106,10 +110,11 @@ You can use the provided example datasets or add your own for custom experiments
 .. note::
    Input files can be stored anywhere as long as their paths are correctly referenced in the configuration file (explained later in this tutorial).
 
-Here's an overview of the major sections when looking at a configuration file:
+1.2 Overview of the major sections of a configuration file:
+--------------------------------------------------------
 
 Algorithms
------------
+^^^^^^^^^^^
 
 .. code-block:: yaml
     
@@ -136,7 +141,7 @@ If multiple parameters are defined as lists within a run block, SPRAS generates 
 Each unique combination runs once per algorithm.
 
 Datasets
---------
+^^^^^^^^^^^
 
 .. code-block:: yaml
 
@@ -159,8 +164,8 @@ The dataset must include the following types of keys and files:
 - other_files: This placefolder is not used
 - data_dir: The file path of the directory where the input dataset files are located
 
-Reconstruction Settings
------------------------
+Reconstruction settings
+^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
 .. code-block:: yaml
 
@@ -168,13 +173,11 @@ Reconstruction Settings
     locations:
         reconstruction_dir: "output"
 
-
 The reconstruction_settings section controls where outputs are stored.
 Set reconstruction_dir to the directory path where you want results saved. SPRAS will automatically create this folder if it doesn't exist.
-If you are running multiple configuration files, you can set unique paths to keep outputs organized and separate.
 
 Analysis
---------
+^^^^^^^^^^^
 
 .. code-block:: yaml
 
@@ -186,7 +189,6 @@ Analysis
     ml:
         include: true
    
-
 
 SPRAS includes multiple downstream analyses that can be toggled on or off directly in the configuration file. 
 When enabled, these analyses are performed per dataset and produce summaries or visualizations of the results from all enabled algorithms for that dataset.
@@ -201,7 +203,7 @@ When enabled, these analyses are performed per dataset and produce summaries or 
 Step 2: Running SPRAS on a provided example dataset 
 ====================================================
 
-2.1 Running SPRAS with the Beginner Configuration
+2.1 Running SPRAS with the beginner configuration
 -------------------------------------------------
 In the beginner.yaml configuration file, it is set up have SPRAS run a single algorithm with one parameter setting on one dataset.
 
@@ -211,48 +213,54 @@ From the root directory spras/, run the command below from the command line:
 
     snakemake --cores 1 --configfile config/beginner.yaml
 
+This command starts the workflow manager that automates all steps defined by SPRAS.
+It tells Snakemake to use one CPU core and to load settings from the config/beginner.yaml file.
+
 What Happens When You Run This Command
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
-SPRAS will executes quickly from your perspective; however, several automated steps (handled by Snakemake and Docker) occur behind the scenes. 
-(ADD IN THAT APPLE COMPUTETERS WILL TAKE A SECOND BECAUSE OUR DOCKER IMAGES ARE AMD AND NOT ARM)
 
+SPRAS will execute quickly from your perspective; however, several automated steps (handled by Snakemake and Docker) occur behind the scenes.
+
+.. note::
+   On Apple computers (M1/M2/M3 chips), the first run may take slightly longer because the SPRAS Docker images are built for AMD architectures, not ARM, so Docker must perform additional image translation before execution.
 
 1. Snakemake starts the workflow
 
 Snakemake reads the options set in the beginner.yaml configuration file and determines which datasets, algorithms, and parameter combinations need to run and if any post-analysis steps were requested.
 
-2. Preparing the dataset
+2. Creating algorithm specific inputs
 
-SPRAS takes the interactome and node prize files specified in the configuration and bundles them into a Dataset object to be used for processing algorithm specific inputs. 
-This object is stored as a .pickle file (e.g. dataset-egfr-merged.pickle) so it can be reused for other algorithms without re-processing it.
+For each algorithm marked as include: true in the configuration, SPRAS generates input files tailored to those algorithms using the dataset specified in the config file. 
 
-3. Creating algorithm specific inputs
-
-For each algorithm marked as include: true in the configuration, SPRAS generates input files tailored to that algorithm using the input standardized egfr dataset. 
 In this case, only PathLinker is enabled. 
-SPRAS creates the network.txt and nodetypes.txt files required by PathLinker in the prepared/egfr-pathlinker-inputs/.
+SPRAS creates the files required by PathLinker and places them in the prepared/egfr-pathlinker-inputs/.
 
 4. Organizing results with parameter hashes
 
-Each dataset-algorithm-parameter combination is placed in its own folder named like egfr-pathlinker-params-D4TUKMX/. 
-D4TUKMX is a hash that uniquely identifies the specific parameter combination (k = 10 here). 
-A matching log file in logs/parameters-pathlinker-params-D4TUKMX.yaml records the exact parameter values.
+Each dataset-algorithm-parameter combination is placed in its own folder named like <dataset>-<algorithm>-params-<hash>.  
+
+For this configuration file only egfr-pathlinker-params-D4TUKMX/ is created.
+D4TUKMX is a hash that uniquely identifies a specific parameter combination (k = 10). 
+
+A matching log file is placed in logs/parameters-pathlinker-params-D4TUKMX.yaml which records the exact parameter value used.
 
 5. Running the algorithm
 
-SPRAS launches the PathLinker Docker image that it downloads from DockerHub, sending it the prepared files and parameter settings.
-PathLinker runs and produces a raw pathway output file (raw-pathway.txt) that holds the subnetwork it found in its own native format.
+SPRAS downloads the PathLinker Docker image from Docker Hub and launches it in a container, sending the prepared input files and specific parameter settings needed for execution.
+
+PathLinker runs and generates an output file named raw-pathway.txt, which contains the reconstructed subnetwork in PathLinker's algorithm-specific format.
+
+SPRAS then saves this file in its corresponding folder.
 
 6. Standardizing the results
 
-SPRAS parses the raw PathLinker output into a standardized SPRAS format (pathway.txt). 
-This ensures all algorithms output are put into a standardized output, because their native formats differ.
+SPRAS parses the raw PathLinker output into a standardized SPRAS format (pathway.txt) and SPRAS saves this file in its corresponding folder.
 
 7. Logging the Snakemake run 
 
-Snakemake creates a dated log in .snakemake/log/. This log shows what rules ran and any errors that occurred during the SPRAS run.
+Snakemake creates a dated log in .snakemake/log/. This log shows what jobs ran and any errors that occurred during the SPRAS run.
 
-What Your Directory Structure Should Like After This Run:
+What your directory structure should like after this run:
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 .. code-block:: text
 
@@ -280,46 +288,23 @@ What Your Directory Structure Should Like After This Run:
    │       └── dataset-egfr-merged.pickle
 
 
-Step 2.2: Overview of the SPRAS Folder Structure
-=================================================
-
-After running the SPRAS command, you'll see that the folder structure includes four main directories that organize everything needed to run workflows and store their results.
-
-.. code-block:: text
-
-   spras/
-   ├── .snakemake/
-   │   └── log/
-   │       └── ... snakemake log files ...
-   ├── config/
-   │   └── ... other configs ...
-   ├── inputs/
-   │   └── ... input files ...
-   ├── outputs/
-   │   └── ... output files ...
+After running the SPRAS command two more folders are added to SPRAS
 
 .snakemake/log/
----------------
+^^^^^^^^^^^^^^^
 
-The .snakemake/log/ directory contains records of all Snakemake jobs that were executed for the SPRAS run, including any errors encountered during those runs.
-
-config/
--------
-
-Holds configuration files (YAML) that define which algorithms to run, what datasets to use, and which analyses to perform.
-
-input/
-------
-
-Contains the input data files, such as interactome edge files and input nodes. This is where you can place your own datasets when running custom experiments.
+The .snakemake/log/ directory contains records of all Snakemake jobs that were executed for the SPRAS run.
 
 output/
 -------
 
-Stores all results generated by SPRAS. Subfolders are created automatically for each run, and their structure can be controlled through the configuration file.
+Stores the results generated during a SPRAS workflow.
 
-By default, the directories are named to be config/, input/, and output/. The config/, input/, and output/ folders can be placed anywhere and named anything within the SPRAS repository. Their input/ and output/ locations can be updated in the configuration file, and the configuration file itself can be set by providing its path when running the SPRAS command.
-SPRAS has additional files and directories to use during runs. However, for most users, and for the purposes of this tutorial, it isn't necessary to fully understand them.
+.. note:: 
+   Output folders and files can be stored anywhere, as long as the reconstruction_dir parameter in the configuration file is set to the directory path where you want the results to be saved.
+
+.. note::
+   SPRAS has additional files and directories to use during runs. However, for most users, and for the purposes of this tutorial, it isn't necessary to fully understand them.
 
 
 2.4 Running SPRAS with More Parameter Combinations
@@ -352,13 +337,14 @@ Here, the dataset pickle, PathLinker inputs, and D4TUKMX parameter set are reuse
 2. Organizing outputs per parameter combination
 
 Each new dataset-algorithm-parameter combination gets its own folder (e.g egfr-pathlinker-params-7S4SLU6/ and egfr-pathlinker-params-VQL7BDZ/)
-The hashes 7S4SLU6 and VQL7BDZ uniquely identifies the specific set of parameters used.
 
 3. Reusing prepared inputs with additional parameter combinations
 
-Since PathLinker has already been run once, SPRAS uses the cached prepared inputs (network.txt, nodetypes.txt) rather than regenerating them.
-For each new parameter combination, SPRAS executes the PathLinker by launching its corresponding Docker image multiple times (once for each parameter configuration). 
-PathLinker then runs and produces a raw-pathway.txt file specific to each parameter hash.
+Since PathLinker has already been run once, SPRAS uses the cached prepared inputs rather than regenerating them.
+
+For each new parameter combination, SPRAS executes the PathLinker by launching multiple Docker contatiners (once for each parameter configuration). 
+
+PathLinker then runs and produces a raw-pathway.txt file specific to each parameter hash and places it in it's corresponding folder.
 
 4. Parsing into standardized results
 

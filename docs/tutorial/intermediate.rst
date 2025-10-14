@@ -237,7 +237,7 @@ A matching log file in logs/parameters-<algorithm>-params-<hash>.yaml records th
 5. Running the algorithm
 
 SPRAS executes each algorithm by launching its corresponding Docker image multiple times (once for each parameter configuration). 
-During each run, SPRAS provides the prepared input files and the corresponding parameter settings to the container. Each algorithm then runs independently within its Docker environment and produces a raw pathway output file (raw-pathway.txt), which contains the reconstructed subnetwork in the algorithm's native format.
+During each run, SPRAS provides the prepared input files and the corresponding parameter settings to the container. Each algorithm then runs independently within its Docker container and produces a raw pathway output file (raw-pathway.txt), which contains the reconstructed subnetwork in the algorithm's native format.
 
 6. Standardizing the results
 
