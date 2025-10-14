@@ -10,11 +10,11 @@ config.init_from_file("config/config.yaml")
 
 # TODO consider refactoring to simplify the import
 # Modify the path because of the - in the directory
-SPRAS_ROOT = Path(__file__).parent.parent.parent.absolute()
+SPRAS_ROOT = Path(__file__).parent.parent.parent.parent.absolute()
 sys.path.append(str(Path(SPRAS_ROOT, 'docker-wrappers', 'BowTieBuilder')))
 from spras.btb import BowTieBuilder as BTB
 
-TEST_DIR = Path('test', 'BowTieBuilder/')
+TEST_DIR = Path('test', 'algorithms', 'BowTieBuilder/')
 OUT_FILE_DEFAULT = Path(TEST_DIR, 'output', 'raw-pathway.txt')
 
 
