@@ -93,4 +93,4 @@ jobs:
           locked: false
       - name: Run pre-commit
         # https://github.com/pre-commit/action/blob/576ff52938d158a24ac7e009dfa94b1455e7df99/action.yml#L19
-        run: pixi run pre-commit run --show-diff-on-failure --color=always
+        run: pixi run pre-commit run --all-files --show-diff-on-failure --color=always
