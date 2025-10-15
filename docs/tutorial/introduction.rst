@@ -34,11 +34,11 @@ Required knowledge:
 
     SPRAS does not automatically clean up these containers or images after execution, so users will need to remove them manually if desired.
     
-    To stop all running containers: docker stop $(docker ps -a -q)
+    To stop all running containers: ``docker stop $(docker ps -a -q)``
 
-    To remove all stopped containers run: docker container prune
+    To remove all stopped containers run: ``docker container prune``
 
-    To remove unused Docker images: docker image prune
+    To remove unused Docker images: ``docker image prune``
 
 
 ###############
@@ -72,7 +72,7 @@ What is SPRAS?
 
    <div style="margin:20px 0;"></div>
 
-The Signaling Pathway Reconstruction Analysis Streamliner (SPRAS) is a computational framework that unifies and simplifies the use of diverse pathway reconstruction algorithms.
+Signaling Pathway Reconstruction Analysis Streamliner (SPRAS) is a computational framework that unifies and simplifies the use of diverse pathway reconstruction algorithms.
 
 SPRAS allows users to run multiple datasets across multiple algorithms and many parameter settings in a single workflow.
 The framework automatically handles data preprocessing, algorithm execution, and post-processing, allowing users to run multiple algorithms seamlessly without manual setup.
