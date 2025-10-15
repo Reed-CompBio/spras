@@ -63,7 +63,7 @@ To perform post-analysis, most algorithm outputs must first be converted into a 
 What is SPRAS?
 ===============
 
-.. image:: ../_static/images/spras-overview.png
+.. image:: ../_static/spras-overview.png
    :alt: spras overview
    :width: 600
    :align: center
