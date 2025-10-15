@@ -2,7 +2,6 @@ import argparse
 import itertools
 import os
 import subprocess
-import sys
 from pathlib import Path
 
 # https://stackoverflow.com/a/5137509/7589775
