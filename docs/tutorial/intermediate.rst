@@ -160,19 +160,19 @@ After adding this file, SPRAS will use the configuration to set up and reference
 2.1 Supported Algorithms in SPRAS
 ---------------------------------
 
-SPRAS supports a wide range of algorithms, each designed around different biological assumptions and optimization strategies:
+SPRAS supports a wide range of algorithms, each designed around different biological assumptions and optimization strategies (LINK THE SUPPORTED ALGORITHMS TAB)
 
-- Pathlinker
-- Omics Integrator 1 
-- Omics Integrator 2
-- MEO
-- Minimum-Cost Flow
-- All pairs shortest paths
-- Domino
-- Source-Targets Random Walk with Restarts
-- Random Walk with Restarts
-- BowTieBuilder (Not optimized for large datasets; slower on big networks)
-- ResponseNet
+.. - Pathlinker
+.. - Omics Integrator 1 
+.. - Omics Integrator 2
+.. - MEO
+.. - Minimum-Cost Flow
+.. - All pairs shortest paths
+.. - Domino
+.. - Source-Targets Random Walk with Restarts
+.. - Random Walk with Restarts
+.. - BowTieBuilder (Not optimized for large datasets; slower on big networks)
+.. - ResponseNet
 
 Wrapped Algorithms
 ^^^^^^^^^^^^^^^^^^^
@@ -211,7 +211,7 @@ From the root directory spras/, run the command below from the command line:
 What Happens When You Run This Command
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
-SPRAS will run more slowly than the beginner.yaml configuration. 
+SPRAS will slower when using the intermediate.yaml configuration. 
 The same automated steps as in beginner.yaml (managed by Snakemake and Docker) run behind the scenes for intermediate.yaml; however, this configuration now runs multiple algorithms with different parameter combinations, which takes longer to complete.
 By increasing the number of cores to 4, it allows Snakemake to parallelize the work locally, speeding up execution when possible.
 
