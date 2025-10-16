@@ -985,7 +985,7 @@ Higher similarity values indicate that pathways share many of the same edges, wh
 References
 -----------
 
-.. [1] Kanehisa, M., Furumichi, M., Sato, Y., Matsuura, Y. and Ishiguro-Watanabe, M.; KEGG: biological systems database as a model of the real world. Nucleic Acids Res. 53, D672-D677 (2025). [pubmed] [doi]
-.. [2] Kanehisa, M; Toward understanding the origin and evolution of cellular organisms. Protein Sci. 28, 1947-1951 (2019) [pubmed] [doi]
-.. [3] Kanehisa, M. and Goto, S.; KEGG: Kyoto Encyclopedia of Genes and Genomes. Nucleic Acids Res. 28, 27-30 (2000). [pubmed] [doi]
+.. [1] Kanehisa, M., Furumichi, M., Sato, Y., Matsuura, Y. and Ishiguro-Watanabe, M.; KEGG: biological systems database as a model of the real world. Nucleic Acids Res. 53, D672-D677 (2025).
+.. [2] Kanehisa, M; Toward understanding the origin and evolution of cellular organisms. Protein Sci. 28, 1947-1951 (2019)
+.. [3] Kanehisa, M. and Goto, S.; KEGG: Kyoto Encyclopedia of Genes and Genomes. Nucleic Acids Res. 28, 27-30 (2000).
 .. [4] Köksal AS, Beck K, Cronin DR, McKenna A, Camp AND, Srivastava S, MacGilvray ME, Bodík R, Wolf-Yadlin A, Fraenkel E, Fisher J, Gitter A. Synthesizing Signaling Pathways from Temporal Phosphoproteomic Data. Cell Rep. 2018 Sep 25;24(13):3607-3618. doi: 10.1016/j.celrep.2018.08.085. PMID: 30257219; PMCID: PMC6295338.
