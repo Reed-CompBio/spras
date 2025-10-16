@@ -14,6 +14,19 @@ You will learn how to:
 Step 1: Transforming Data into SPRAS-Compatible Inputs 
 ======================================================
 
+
+TODO: EXPLAIN WHAT INPUTS ARE BEFORE GOING INTO MAKING A SET 
+
+.. Inputs
+.. ^^^^^^^
+.. These pathway reconstruction algorithms differ in the inputs nodes they require and how they interpret those nodes to identify subnetworks.
+.. Some use source and target nodes to connect predefined start and end points, others use prizes, which are scores assigned to nodes of interest, and some rely on active nodes that represent proteins or genes significantly “on” or perturbed under specific biological conditions.
+
+.. Along with differences in their inputs nodes, these algorithms also interpret the input interactome differently. 
+.. Some can handle directed graphs, others work only with undirected graphs, and a few support mixed directionaltiy graphs.
+
+
+
 1.1 Understanding the Data
 -------------------------------------------------------------------
 
@@ -120,25 +133,25 @@ This interactome includes 653 of the 701 proteins with mass spectrometry-based p
    ├── config/
    │   └── ...
    ├── inputs/
-   │   ├── THE DATA
-   │   └── THE NETWORK
+   │   ├── phosphosite-irefindex13.0-uniprot.txt # pre-defined in SPRAS already, used by the intermediate.yaml file
+   │   └── tps-egfr-prizes.txt # pre-defined in SPRAS already, used by the intermediate.yaml file
    ├── outputs/
    │   └── basic/
    │       └── ... output files ...
 
 
 
-Step 2: Adding multiple PRAs to the workflow
-=============================================
+Step 2: Running multiple algorithms 
+====================================
 
-Now that we've prepared our input data, we can begin running multiple pathway reconstruction algorithms on it.
+We can begin running multiple pathway reconstruction algorithms on it.
 
 For this part of the tutorial, we'll use a pre-defined configuration file that includes additional algorithms and post-analysis steps available in SPRAS.
 Download it here: :download:`Intermediate Config File <../_static/config/intermediate.yaml>`
 
 Save the file into the config/ folder of your SPRAS installation.
 
-After adding this file, SPRAS will use the configuration to set up and reference your directory structure, which will look like this:
+After adding this file, your directory structure will look like this (ignoring the rest of the folders):
 
 .. code-block:: text
 
@@ -147,109 +160,94 @@ After adding this file, SPRAS will use the configuration to set up and reference
    │   └── log/
    │       └── ... snakemake log files ...
    ├── config/
-   │   └── basic.yaml
-   │   └── intermediate.yaml
+   │   ├── basic.yaml
+   │   ├── intermediate.yaml
+   │   └── ... other configs ...
    ├── inputs/
-   │   ├── THE DATA
-   │   └── THE NETWORK
+   │   ├── phosphosite-irefindex13.0-uniprot.txt # pre-defined in SPRAS already, used by the intermediate.yaml file
+   │   ├── tps-egfr-prizes.txt # pre-defined in SPRAS already, used by the intermediate.yaml file
+   │   └── ... other input data ...
    ├── outputs/
    │   └── basic/
    │       └── ... output files ...
 
 
-2.1 Supported Algorithms in SPRAS
+2.1 Algorithms in SPRAS
 ---------------------------------
 
-SPRAS supports a wide range of algorithms, each designed around different biological assumptions and optimization strategies (LINK THE SUPPORTED ALGORITHMS TAB)
+SPRAS supports a wide range of algorithms, each designed around different biological assumptions and optimization strategies 
+(See :doc:`Pathway Reconstruction Methods <../prms/prms>` for SPRAS's list of integrated algorithms.)
 
-.. - Pathlinker
-.. - Omics Integrator 1 
-.. - Omics Integrator 2
-.. - MEO
-.. - Minimum-Cost Flow
-.. - All pairs shortest paths
-.. - Domino
-.. - Source-Targets Random Walk with Restarts
-.. - Random Walk with Restarts
-.. - BowTieBuilder (Not optimized for large datasets; slower on big networks)
-.. - ResponseNet
-
-Wrapped Algorithms
+Wrapped algorithms
 ^^^^^^^^^^^^^^^^^^^
-Each algorithm has been wrapped by SPRAS. 
-Wrapping an algorithm in SPRAS involves three main steps:
+Each algorithm has been wrapped by SPRAS which involves three main steps.
 
-1. Input generation: SPRAS creates and formats the input files required by the algorithm based on the provided dataset
-2. Execution: SPRAS runs the algorithm within its corresponding Docker container, which holds the algorithm code. This is called for each specified parameter combination in the configuration file.
-3. Output standardization: The raw outputs are converted into a standardized SPRAS format
+For an algorithm specific wrapper, the wrapper includes a module that will create and format the input files required by the algorithm using the datasets specified in the configuration file.
 
-Inputs
-^^^^^^^
-These pathway reconstruction algorithms differ in the inputs nodes they require and how they interpret those nodes to identify subnetworks.
-Some use source and target nodes to connect predefined start and end points, others use prizes, which are scores assigned to nodes of interest, and some rely on active nodes that represent proteins or genes significantly “on” or perturbed under specific biological conditions.
+Each algorithm has an associated Docker image located on `DockerHub <https://hub.docker.com/u/reedcompbio>`__ that contains all necessary software dependencies needed to run it.
+In SPRAS, it uses each image to launch a container for a specified parameter combination, providing it with the prepared algorithm specific inputs and an output filename (raw-pathway.txt).
 
-Along with differences in their inputs nodes, these algorithms also interpret the input interactome differently. 
-Some can handle directed graphs, others work only with undirected graphs, and a few support mixed directionaltiy graphs.
+With each of the raw-pathway.txt files, a  wrapper includes a module that will convert the algorithm specific format into a standardized SPRAS format.
 
-Parameters
-^^^^^^^^^^
-Each algorithm also exposes its own set of parameters that control its optimization strategy.
-Some algorithms have no adjustable parameters, while others include multiple tunable settings that influence how subnetworks are created.
-These parameters vary widely between algorithms and reflect the unique optimization techniques each method employs under the hood.
-
-2.3 Running SPRAS with Multiple Algorithms
+2.3 Running SPRAS with multiple algorithms
 ------------------------------------------
-In the intermediate.yaml configuration file, it is set up have SPRAS run multiple algorithms (all of the algorithms supported in SPRAS except BowTieBuilder) with multiple parameter settings (if available) on one dataset.
+In the ``intermediate.yaml`` configuration file, it is set up to have SPRAS run multiple algorithms with multiple parameter settings on a single dataset.
 
-From the root directory spras/, run the command below from the command line:
+From the root directory, run the command below from the command line:
 
 .. code:: bash
 
     snakemake --cores 4 --configfile config/intermediate.yaml
 
 
-What Happens When You Run This Command
+What happens when you run this command
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
-SPRAS will slower when using the intermediate.yaml configuration. 
-The same automated steps as in beginner.yaml (managed by Snakemake and Docker) run behind the scenes for intermediate.yaml; however, this configuration now runs multiple algorithms with different parameter combinations, which takes longer to complete.
+SPRAS will run "slower" when using the ``intermediate.yaml`` configuration. 
+
+Similar automated steps from the previous tutorial runs behind the scenes for ``intermediate.yaml``. 
+However, this configuration now runs multiple algorithms with different parameter combinations, which takes longer to complete.
 By increasing the number of cores to 4, it allows Snakemake to parallelize the work locally, speeding up execution when possible.
+(See :doc:`Using SPRAS <../usage>` for more information on SPRAS's parallelization.)
+
 
 1. Snakemake starts the workflow
 
-Snakemake reads the options set in the intermediate.yaml configuration file and determines which datasets, algorithms, and parameter combinations need to run.  It also checks if any post-analysis steps were requested.
+Snakemake reads the options set in the ``intermediate.yaml`` configuration file and determines which datasets, algorithms, and parameter combinations need to run. 
+It also checks if any post-analysis steps were requested.
 
-2. Preparing the dataset
-
-SPRAS takes the interactome and node prize files specified in the configuration and bundles them into a Dataset object to be used for processing algorithm specific inputs. 
-This object is stored as a .pickle file so it can be reused for other algorithms without re-processing it.
-
-3. Creating algorithm specific inputs
+2. Creating algorithm specific inputs
 
 For each algorithm marked as include: true in the configuration, SPRAS generates input files tailored to that algorithm. 
-In this case, every algorithm is enabled, so SPRAS creates the files required for each algorithm.
 
-4. Organizing results with parameter hashes
+In this case, every algorithm is enabled, so SPRAS formats the input files required for each algorithm.
 
-Each <dataset>-<algorithm>-params-<hash> combination folder is created. 
-A matching log file in logs/parameters-<algorithm>-params-<hash>.yaml records the exact parameter values used.
+3. Organizing results with parameter hashes
 
-5. Running the algorithm
+Each ``<dataset>-<algorithm>-params-<hash>`` combination gets its own folder created in ``output/intermediate/``. 
 
-SPRAS executes each algorithm by launching its corresponding Docker image multiple times (once for each parameter configuration). 
-During each run, SPRAS provides the prepared input files and the corresponding parameter settings to the container. Each algorithm then runs independently within its Docker container and produces a raw pathway output file (raw-pathway.txt), which contains the reconstructed subnetwork in the algorithm's native format.
+A matching log file in ``logs/parameters-<algorithm>-params-<hash>.yaml`` records the exact parameter values used.
 
-6. Standardizing the results
+4. Running the algorithm
 
-SPRAS parses each of the raw output into a standardized SPRAS format (pathway.txt). 
-This ensures all algorithms output are put into a standardized output, because their native formats differ.
+SPRAS pulls each algorithm's Docker image from `DockerHub <https://hub.docker.com/u/reedcompbio>`__ if it isn't already downloaded locally 
 
-7. Logging the Snakemake run 
+SPRAS executes each algorithm by launching multiple Docker contatiners using the algorithm specific Docker image (once for each parameter configuration), sending the prepared input files and specific parameter settings needed for execution.
 
-Snakemake creates a dated log in .snakemake/log/. This log shows what rules ran and any errors that occurred during the SPRAS run.
+Each algorithm runs independently within its Docker container and generates an output file named raw-pathway.txt, which contains the reconstructed subnetwork in the algorithm-specific format.
+
+SPRAS then saves these files to the corresponding folder.
+
+5. Standardizing the results
+
+SPRAS parses each of the raw output into a standardized SPRAS format (pathway.txt) and SPRAS saves this file in its corresponding folder.
+
+6. Logging the Snakemake run 
+
+Snakemake creates a dated log in ``.snakemake/log/`` This log shows what jobs ran and any errors that occurred during the SPRAS run.
 
 
-What Your Directory Structure Should Like After This Run:
+What your directory structure should like after this run:
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
 .. code-block:: text
@@ -377,15 +375,23 @@ What Your Directory Structure Should Like After This Run:
    |                ├── sources.txt
    |                └── targets.txt
 
-2.4 Reviewing the pathway.txt Files 
--------------------------------------------
+2.4 Reviewing the pathway.txt files 
+-------------------------------------
 After running the intermediate configuration file, the output/intermediate/ directory will contain many more subfolders and files.
 
-Just like in the beginner tutorial, each algorithm's results can be found in the spras/output/intermediate/ directory.
-Within it, you'll see subfolders corresponding to each dataset-algorithm-parameter combination. 
-Each folder contains a pathway.txt file that contains the standardized reconstructed subnetwork for that specific run.
+Again, each pathway.txt file contains the standardized reconstructed subnetworks and can be used at face value, or for further post analysis.
 
-For example, the file egfr-mincostflow-params-42UBTQI/pathway.txt contains the following reconstructed subnetwork:
+
+1.	Locate the files
+
+Navigate to the output directory ``output/intermediate/``. Inside, you will find subfolders corresponding to each <dataset>-<algorithm>-params-<hash> combination.
+
+2. Open a pathway.txt file
+
+Each file lists the network edges that were reconstructed for that specific run. The format includes columns for the two interacting nodes, the rank, and the edge direction
+
+
+For example, the file  ``egfr-mincostflow-params-42UBTQI/pathway.txt`` contains the following reconstructed subnetwork:
 
 .. code-block:: text
         
@@ -403,7 +409,7 @@ For example, the file egfr-mincostflow-params-42UBTQI/pathway.txt contains the f
     EMD_HUMAN	SRC_HUMAN	1	U
 
 
-And the file egfr-omicsintegrator1-params-GUMLBDZ/pathway.txt contains the following reconstructed subnetwork:
+And the file ``egfr-omicsintegrator1-params-GUMLBDZ/pathway.txt`` contains the following reconstructed subnetwork:
 
 .. code-block:: text
         
@@ -430,28 +436,24 @@ And the file egfr-omicsintegrator1-params-GUMLBDZ/pathway.txt contains the follo
     MRE11_HUMAN	RAD50_HUMAN	1	U
 
 
-As you explore more of these files, you'll notice that the subnetworks vary widely across algorithms and parameter settings.
-While you can still open and inspect these files manually, the number of outputs is much greater than in the beginner.yaml run, making manual inspection less practical.
-The pathway.txt outputs serve as the foundation for further post-analysis, where you can systematically compare and interpret the reconstructed networks in greater detail.
-
-In the next steps, we'll use SPRAS's post analysis tools to further explore and analyze these outputs.
-
-Step 3: Use ML Post-Analysis
+Step 3: Use ML post-analysis
 =============================
 
-To enable downstream analyses, update the analysis section in your configuration file by setting both summary, cytoscape, and ml, to true. Your analysis section in the configuration file should look like this:
+3.1 Adding ML post-analysis to the intermediate configuration
+-------------------------------------------------------------
+
+To enable the ML analysis, update the analysis section in your configuration file by setting ml to true. 
+Your analysis section in the configuration file should look like this:
 
 .. code-block:: yaml
 
     analysis:
         ml:
             include: true
+            ... (other parameters preset)
 
-In this part of the tutorial, we're also including the machine learning (ml) section to enable machine learning-based post-analysis built within SPRAS.
-
-The ml analysis will perform unsupervised analyses such as Principal Component Analysis (PCA), Hierarchical Agglomerative Clustering (HAC), ensembling, and Jaccard similarity comparisons of the pathways.
-These analyses help uncover patterns and similarities between different algorithms run on a given dataset
-- if aggregate_per_algorithm: is set to true, it additionally groups outputs by algorithm within each dataset to uncover patterns and similarities for an algorithm
+The ml analysis will perform unsupervised analyses such as principal component analysis (PCA), hierarchical agglomerative clustering (HAC), ensembling, and jaccard similarity comparisons of the pathways.
+- if aggregate_per_algorithm: is set to true, it additionally groups outputs by algorithm within each dataset to uncover patterns and similarities per algorithm
 - The ML section includes configurable parameters that let you adjust the behavior of the ml analyses performed
 
 With these updates, SPRAS will run the full set of unsupervised machine learning analyses across all outputs for a given dataset.
@@ -463,21 +465,20 @@ After saving the changes in the configuration file, rerun with:
     snakemake --cores 4 --configfile config/intermediate.yaml
 
 
-What Happens When You Run This Command
+What happens when you run this command
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 1. Reusing cached results
 
-Snakemake reads the options set in intermediate.yaml and checks for any requested post-analysis steps. 
-It reuses cached results; in this case, the pathway.txt files generated from the previously executed algorithms + parameter combinations on the egfr dataset.
+Snakemake reads the options set in ``intermediate.yaml`` and checks for any requested post-analysis steps. 
+It reuses cached results; here the pathway.txt files generated from the previously executed algorithms on the egfr dataset are reused.
 
 2.	Running the ml analysis
 
-SPRAS aggregates all files generated for a dataset.
-These groupings include all the reconstructed subnetworks produced across algorithm for a given dataset (and, if enabled, grouped outputs per algorithm for a given dataset).
-SPRAS then performs all machine learning analyses on each grouping and saves the results in the dataset-ml/ directory.
+SPRAS aggregates all the reconstructed subnetworks produced across the specified algorithms for a given dataset.
+SPRAS then performs machine learning analyses on each these groups and saves the results in the ``<dataset>-ml/`` (egfr-ml/) folder.
 
 
-What Your Directory Structure Should Like After This Run:
+What your directory structure should like after this run:
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
 .. code-block:: text
@@ -616,17 +617,20 @@ What Your Directory Structure Should Like After This Run:
    |                ├── sources.txt
    |                └── targets.txt
 
-Step 3.1: Reviewing the Outputs
---------------------------------
+Step 3.2: Reviewing the ML outputs
+-----------------------------------
 
 Ensembles
 ^^^^^^^^^
-After running multiple algorithms or parameter settings on the same dataset, SPRAS can ensemble the resulting pathways to identify consistent, high-confidence interactions.
+
+1. Open the ensemble file
+
+In your file explorer, go to ``output/intermediate/egfr-ml/ensemble-pathway.txt`` and open it locally.
+
+After running multiple algorithms or parameter settings on the same dataset, SPRAS can ensemble the resulting pathways to identify consistent, high-frequency interactions.
 
 Each pathway output is represented as a binary edge list (1 = edge present, 0 = edge absent).
-SPRAS calculates the mean of these binary values across all runs to determine the edge frequency (the proportion of times each edge appears across the outputs).
-Edges that occur more often are considered more robust and can be used to build a consensus network.
-
+SPRAS calculates the edge frequency by calculating the proportion of times each edge appears across the outputs.
 
 .. code-block:: text
 
@@ -647,16 +651,22 @@ Edges that occur more often are considered more robust and can be used to build 
     K7PPA8_HUMAN	EP300_HUMAN	0.09523809523809523	D
     ...
     
-High frequency edges indicate interactions consistently recovered by multiple algorithms, suggesting stronger biological relevance.
+High frequency edges indicate interactions consistently recovered by multiple algorithms.
 Low frequency edges may reflect noise or algorithm-specific connections.
 
-HAC
-^^^
-SPRAS includes Hierarchical Agglomerative Clustering (HAC) to group similar pathways outputs based on shared edges.
+Hierarchical agglomerative clustering
+^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+
+1. Open the HAC image(s)
+
+In your file explorer, go to ``output/intermediate/egfr-ml/hac-horizontal.png`` and/or ``output/intermediate/egfr-ml/hac-vertical.png`` and open it locally.
+
+
+SPRAS includes HAC to group similar pathways outputs based on shared edges.
 This helps identify clusters of algorithms that produce comparable subnetworks and highlights distinct reconstruction behaviors.
 
 In the plots below, each branch represents a cluster of related pathways.
-Shorter distances between branches indicate greater similarity.
+Shorter distances between branches indicate outputs with greater similarity.
 
 .. image:: ../_static/images/hac-horizontal.png
    :alt: description of the image
@@ -679,10 +689,16 @@ Shorter distances between branches indicate greater similarity.
 HAC visualizations help compare which algorithms and parameter settings produce similar pathway structures.
 Tight clusters indicate similar behavior, while isolated branches may reveal unique or outlier results.
 
-PCA
-^^^
-SPRAS also includes Principal Component Analysis (PCA) to visualize variation across pathway outputs.
-Each point represents a pathway, places based on its overall network structure.
+Principal component analysis
+^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+
+1. Open the PCA image
+
+In your file explorer, go to ``output/intermediate/egfr-ml/pca.png`` and open it locally.
+
+
+SPRAS also includes PCA to visualize variation across pathway outputs.
+Each point represents a pathway, placed based on its overall network structure.
 Pathways that cluster together in PCA space are more similar, while those farther apart differ in their reconstructed subnetworks.
 
 .. image:: ../_static/images/pca.png
@@ -694,15 +710,20 @@ Pathways that cluster together in PCA space are more similar, while those farthe
 
    <div style="margin:20px 0;"></div>
 
-PCA can help identify patterns such as clusters of similar algorithms, parameter sensitivities, or outlier outputs.
+PCA may help identify patterns such as clusters of similar algorithms, parameter sensitivities, or outlier outputs.
 
-Jaccard Similarity
+Jaccard similarity
 ^^^^^^^^^^^^^^^^^^
 
-SPRAS computes pairwise Jaccard similarity between pathway outputs to measure how much overlap exists between their reconstructed subnetworks.
-The Jaccard index is calculated from the binary edge representation of each pathway and reflects the proportion of shared edges between two pathways relative to their total combined edges.
+1. Open the jaccard heatmap image
 
-Higher similarity values indicate that pathways share many of the same interactions, while lower values suggest distinct or divergent reconstructions.
+In your file explorer, go to ``output/intermediate/egfr-ml/jaccard-heatmap.png`` and open it locally.
+
+
+SPRAS computes pairwise jaccard similarity between pathway outputs to measure how much overlap exists between their reconstructed subnetworks.
+
+Higher similarity values indicate that pathways share many of the same edges, while lower values suggest distinct reconstructions.
+The heatmap visualizes how similar the output pathways are between algorithms and parameter settings. 
 
 .. image:: ../_static/images/jaccard-heatmap.png
    :alt: description of the image
@@ -712,5 +733,3 @@ Higher similarity values indicate that pathways share many of the same interacti
 .. raw:: html
 
    <div style="margin:20px 0;"></div>
-
-The heatmap visualizes how similar the output pathways are between algorithms and parameter settings. 
