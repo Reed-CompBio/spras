@@ -32,11 +32,11 @@ From the root directory of the SPRAS repository, create and activate the Conda e
     python -m pip install .
 
 .. note::
-   The first command performs a one time setup of the SPRAS dependencies by creating a Conda environment (an isolated space that keeps all required packages and versions separate from your system).
+   The first command performs a one-time installation of the SPRAS dependencies by creating a Conda environment (an isolated space that keeps all required packages and versions separate from your system).
 
    The second command activates the newly created environment so you can use these dependencies when running SPRAS; this step must be done each time you open a new terminal session.
 
-   The last command is a one time installation of the SPRAS package into the environment.
+   The last command is a one-time installation of the SPRAS package into the environment.
 
 0.3 Test the installation
 -------------------------
@@ -166,11 +166,16 @@ Each dataset you define will be run against all of the algorithms enabled in the
 
 The dataset must include the following types of keys and files:
 
-- label: a name that uniquely identifies a dataset throughout the SPRAS workflow and outputs.
-- node_files: Input files listing the “prizes” or important starting nodes ("sources" or "targets") for the algorithm
-- edge_files: Input interactome or network file that defines the relationships between nodes
+- label: a name that uniquely identifies a dataset throughout the SPRAS workflow and outputs
+- node_files: Input files listing nodes of interest
+- edge_files: Input interactome file that defines the relationships between nodes
 - other_files: This placefolder is not used
 - data_dir: The file path of the directory where the input dataset files are located
+
+.. note::
+   A node represents a molecule, and an edge represents an interaction connecting two molecules.
+   An interactome is a large network of possible interactions that defines many edges connecting molecules.
+
 
 Reconstruction settings
 ^^^^^^^^^^^^^^^^^^^^^^^^^
@@ -245,7 +250,7 @@ SPRAS creates the files required by PathLinker and places them in the ``prepared
 
 4. Organizing results with parameter hashes
 
-Each new ``<dataset>-<algorithm>-params-<hash>`` combination gets its own folder created in ``output/basic/``.
+Each new <dataset>-<algorithm>-params-<hash> combination gets its own folder created in ``output/basic/``.
 
 For this configuration file only ``egfr-pathlinker-params-D4TUKMX/`` in ``output/basic`` is created.
 D4TUKMX is a hash that uniquely identifies a specific parameter combination (k = 10). 
@@ -256,13 +261,13 @@ A matching log file is placed in ``logs/parameters-pathlinker-params-D4TUKMX.yam
 
 SPRAS downloads the PathLinker Docker image from `DockerHub <https://hub.docker.com/u/reedcompbio>`__ and launches it in a container, sending the prepared input files and specific parameter settings needed for execution.
 
-PathLinker runs and generates an output file named raw-pathway.txt, which contains the reconstructed subnetwork in PathLinker's algorithm-specific format.
+PathLinker runs and generates an output file named ``raw-pathway.txt``, which contains the reconstructed subnetwork in PathLinker's algorithm-specific format.
 
 SPRAS then saves this file in its corresponding folder.
 
 6. Standardizing the results
 
-SPRAS parses the raw PathLinker output into a standardized SPRAS format (pathway.txt) and SPRAS saves this file in its corresponding folder.
+SPRAS parses the raw PathLinker output into a standardized SPRAS format (``pathway.txt``) and SPRAS saves this file in its corresponding folder.
 
 7. Logging the Snakemake run 
 
@@ -345,7 +350,7 @@ Here, the Pathlinker prepared inputs are reused.
 
 2. Organizing outputs per parameter combination
 
-Each new ``<dataset>-<algorithm>-params-<hash>`` combination gets its own folder created in ``output/basic/``.
+Each new <dataset>-<algorithm>-params-<hash> combination gets its own folder created in ``output/basic/``.
 
 A matching log file is placed in ``logs/parameters-<dataset>-params-<hash>.yaml`` which records the exact parameter value used.
 
@@ -353,11 +358,11 @@ A matching log file is placed in ``logs/parameters-<dataset>-params-<hash>.yaml`
 
 For each new parameter combination and its corresponding cached prepared inputs, SPRAS executes PathLinker by launching multiple Docker contatiners (once for each parameter configuration). 
 
-PathLinker then runs and produces a raw-pathway.txt file specific to each parameter and places it in it's corresponding folder.
+PathLinker then runs and produces a ``raw-pathway.txt`` file specific to each parameter and places it in it's corresponding folder.
 
 4. Parsing into standardized results
 
-SPRAS parses each new raw-pathway.txt file into a standardized SPRAS format (pathway.txt) and places it in it's corresponding folder.
+SPRAS parses each new ``raw-pathway.txt`` file into a standardized SPRAS format (``pathway.txt``) and places it in it's corresponding folder.
 
 5. Logging the Snakemake run 
 
@@ -403,13 +408,13 @@ What your directory structure should like after this run:
 2.5 Reviewing the pathway.txt Files 
 ------------------------------------
 
-Each pathway.txt file contains the standardized reconstructed subnetworks and can be used at face value, or for further post analysis.
+Each ``pathway.txt`` file contains the standardized reconstructed subnetworks and can be used at face value, or for further post analysis.
 
 1.	Locate the files
 
 Navigate to the output ``directory spras/output/beginner/``. Inside, you will find subfolders corresponding to each <dataset>-<algorithm>-params-<hash> combination.
 
-2. Open a pathway.txt file
+2. Open a ``pathway.txt`` file
 
 Each file lists the network edges that were reconstructed for that specific run. The format includes columns for the two interacting nodes, the rank, and the edge direction
 
@@ -455,7 +460,7 @@ Your analysis section in the configuration file should look like this:
         cytoscape:
             include: true 
 
-summary generates graph topological summary statistics for each algorithm's parameter combination output, generating a summary file for all reconstructed subnetworks for a given dataset.
+``summary`` generates graph topological summary statistics for each algorithm's parameter combination output, generating a summary file for all reconstructed subnetworks for a given dataset.
 
 This will report these statistics for each pathway:
 
@@ -468,7 +473,7 @@ This will report these statistics for each pathway:
 - Maximum diameter
 - Average path length
 
-cytoscape creates a Cytoscape session file (.cys) that includes all reconstructed subnetworks for a given dataset, eliminating the need to manually create an individual visualization per output.
+``cytoscape`` creates a Cytoscape session file (.cys) that includes all reconstructed subnetworks for a given dataset, eliminating the need to manually create an individual visualization per output.
 This makes it easy to upload and visualize all the results directly within Cytoscape.
 
 With this update, the ``beginner.yaml`` configuration file is set up for SPRAS to run two post-analyses on the outputs generated by a single algorithm that was executed with multiple parameter settings on one dataset.
@@ -486,17 +491,17 @@ What happens when you run this command
 
 Snakemake reads the options set in  ``beginner.yaml`` and checks for any requested post-analysis steps. 
 
-It reuses cached results; here the pathway.txt files generated from the previously executed PathLinker algorithm on the egfr dataset are reused.
+It reuses cached results; here the ``pathway.txt`` files generated from the previously executed PathLinker algorithm on the egfr dataset are reused.
 
 2.	Running the summary analysis
 
-SPRAS aggregates the pathway.txt files from all selected parameter combinations into a single summary table. 
+SPRAS aggregates the ``pathway.txt`` files from all selected parameter combinations into a single summary table. 
 
 The results are saved in ``egfr-pathway-summary.txt``.
 
 3.	Running the Cytoscape analysis
 
-All pathway.txt files from the chosen parameter combinations are collected and passed into the Cytoscape Docker image. 
+All ``pathway.txt`` files from the chosen parameter combinations are collected and passed into the Cytoscape Docker image. 
 
 A Cytoscape session file is then generated, containing visualizations for each pathway and saved as ``egfr-cytoscape.cys``.
 
@@ -555,7 +560,7 @@ In your file explorer, go to ``output/beginner/egfr-pathway-summary.txt`` and op
    <div style="margin:20px 0;"></div>
 
 
-This file summarizes the graph topological statistics for each output pathway.txt file for a given dataset, 
+This file summarizes the graph topological statistics for each output ``pathway.txt`` file for a given dataset, 
 along with the parameter combinations that produced them, allowing you to interpret and compare algorithm outputs side by side in a compact format.
 
 Reviewing outputs in Cytoscape

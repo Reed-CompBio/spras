@@ -1,8 +1,9 @@
-##########################################################
-Intermediate Tutorial - Custom Data & Multi-Algorithm Runs
-##########################################################
+###########################################################
+Intermediate Tutorial - Prepare Data & Multi-Algorithm Runs
+###########################################################
 
 This tutorial builds on the introduction to SPRAS from the previous tutorial. 
+
 It guides participants through how to convert data into a format usable by pathway reconstruction algorithms, run multiple algorithms within a single workflow, and apply new tools to interpret and compare the resulting pathways.
 
 You will learn how to:
@@ -11,118 +12,366 @@ You will learn how to:
 - Configure and run additional pathway reconstruction algorithms on a dataset
 - Enable post-analysis steps to generate post analysis information
 
-Step 1: Transforming Data into SPRAS-Compatible Inputs 
-======================================================
+Step 1: Transforming high throughput experimental data into SPRAS compatible input data
+========================================================================================
+
+1.1 What is the SPRAS-standardized input data?
+-----------------------------------------------
+
+A pathway reconstruction algorithm requires a set of input nodes and an interactome; however, each algorithm expects its inputs to follow a unique format.
+
+To simplify this process, SPRAS requires all input data in a dataset to be formatted once into a standardized SPRAS format.
+SPRAS then automatically generates algorithm-specific input files when an algorithm is enabled in the configuration file.
+
+.. note::
+    Each algorithm uses the input nodes to guide or constrain the optimization process used to construct reconstruct subnetworks.
+
+    An algorithm maps these input nodes onto the interactome and uses the network to identify connecting paths between the input nodes to form subnetworks.
 
 
-TODO: EXPLAIN WHAT INPUTS ARE BEFORE GOING INTO MAKING A SET 
+Pathway reconstruction algorithms differ in the inputs nodes they require and how they interpret those nodes to identify subnetworks.
 
-.. Inputs
-.. ^^^^^^^
-.. These pathway reconstruction algorithms differ in the inputs nodes they require and how they interpret those nodes to identify subnetworks.
-.. Some use source and target nodes to connect predefined start and end points, others use prizes, which are scores assigned to nodes of interest, and some rely on active nodes that represent proteins or genes significantly “on” or perturbed under specific biological conditions.
+- Some use source and target nodes to defined start and end points. 
+- Some use prizes, which assign numerical scores assigned to nodes of interest.
+- Some rely on active nodes, representing nodes that are significantly “on” under specific conditions.
 
-.. Along with differences in their inputs nodes, these algorithms also interpret the input interactome differently. 
-.. Some can handle directed graphs, others work only with undirected graphs, and a few support mixed directionaltiy graphs.
+An example of a node file required by SPRAS follows a tab-separated format:
 
+.. code-block:: text
 
+    NODEID  prize sources targets active
+    A       1.0     True            True
+    B       3.3             True    True
+    C       2.5     True            True
+    D       1.9             True    True
 
-1.1 Understanding the Data
--------------------------------------------------------------------
+.. note::
+    If a user provides only one type of input node but wants to run algorithms that require a different type, SPRAS can automatically convert the inputs into the compatible format:
 
-We start with mass spectrometry data containing three biological replicates, each with two technical replicates (IMAC and IP).
-ADD THAT WE COMBINE THESE TOGETHER
-Each replicate measures peptide abundance across multiple time points (0 to 124 minutes).
+    - Source-target nodes can be used with all algorithms by making a prize column set to 1 and an active column set to True
+    - Prize data can be adapted for active based algorithms by automatically making an active column set to True
+    - Active data can be adapted for prize based algorithms by making a prize column set to 1
 
-Show images and charts as to what is changing instead of giving the code
+Along with differences in their inputs nodes, pathway reconstruction algorithms also interpret the input interactome differently.
 
-The goal is to turn this experimental data into the format that SPRAS expects;
-a list of proteins with associated prizes and a defined set of source and target proteins.
+- Some can handle directed interactomes, others work only with undirected interactomes, and a few support mixed directionaltiy interactomes
 
+SPRAS automatically converts the user-provided edge file into the format expected by each algorithm, ensuring that the directionality of the interactome matches the algorithm's requirements.
 
-1.2 Filtering and Normalizing the Replicates
--------------------------------------------------------------------
+An example of an edge file required by SPRAS follows a tab-separated format:
 
-When working with multiple replicates, we want to ensure that all of the peptides measures are present in all three replicates.
-This guarantees consistent observation of the peptides across experiments.
+.. code-block:: text
 
-For each replicate after removing the peptides that are not in all three replicates, each replicate needs to be renoramlized to ensure each replicate is internally consistent and comparable, reducing bias from replicate specific intensity differences.
+    A	B   0.98   U
+    B	C   0.77   D
 
-1.3 Detecting Significant Changes using Tukey's HSD Test
---------------------------------------------------------------
-
-After filtering and renormalizing, Tukey's Honest Significant Difference (HSD) test is preformed for each peptide.
-
-Tukey's HSD evaluates the significance of differences in mean peptide intensities across all pairs of time points while correcting for multiple comparisons within each peptide's time course. 
-
-For each peptide, Tukey's HSD reports a p-value for every pair of time points, representing how likely the observed difference in abundance occurred by chance across the three biological replicates. 
-Lower p-values indicate stronger evidence that a peptide's abundance truly changes between those time points.
+.. note::  
+    SPRAS supports multiple standardized input formats.
+    More information about input data formats can be found in the ``inputs/README.md`` file within the SPRAS repository.
 
 
-1.4 From p-values to Prizes for Pathway Reconstruction
---------------------------------------------------------
+1.2 Example high throughput data
+---------------------------------
 
-In SPRAS, prizes quantify how “interesting” a protein is to a given condition. 
-Peptides with low p-values reflect statistically significant changes and therefore are likely to represent interesting biologically active or perturbed proteins to use for pathway reconstruction.
+An example dataset is the EGF response mass spectrometry data, which includes three biological replicates, each with two technical replicates (IMAC and IP).
+For each biological replicate, the technical replicates are combined to produce a single dataset of peptide abundances measured over time (0-124 minutes).
 
-We transform the p-values into scores that capture statistically significant changes across replicates using the transformation -log10(p-value).
-This produces higher scores for smaller p-values, highlighting peptides with stronger changes over time.
+.. note::
+    Mass spectrometry is a technique used to measure and identify proteins in a sample.
+    It works by breaking proteins into smaller pieces called peptides and measuring their mass using their mass-to-charge ratio.
+    The data show how much of each peptide is present which can show protein levels change under different conditions.
 
-To compute these scores, we identify the smallest p-value across all relevant time comparisons for each peptide.
-The relevant comparisons include each time point versus the baseline (0 min) and each consecutive time point.
+    Since proteins interact with each other in biological pathways, changes in their levels can reveal which parts of a pathway are active or affected.
+    By mapping these changing proteins onto known interaction networks, pathway reconstruction algorithms can identify which signaling pathways are likely involved in the biological response to a specific condition.
 
-We then apply the -log10 transformation to the smallest p-value for each peptide to obtain a positive prize score, where smaller p-values yield higher scores.
-This process generates a peptide-level prize table that quantifies how strongly each peptide responds over time.
+Example of one of the biological replicate A with one peptide:
 
-1.5 Aggregating Prizes at the Protein Level
---------------------------------------------
+.. list-table::
+   :header-rows: 1
+   :widths: 20 15 10 10 10 10 10 10 10 10 10 10 
 
-Multiple peptides can map to the same protein in this data, so we  keep the maximum prize among all its peptides, representing the strongest observed response.
+   * - peptide
+     - protein
+     - gene.name
+     - modified.sites
+     - 0 min
+     - 2 min
+     - 4 min
+     - 8 min
+     - 16 min
+     - 32 min
+     - 64 min
+     - 128 mn
+   * - K.n[305.21]AFWMAIGGDRDEIEGLS[167.00]S[167.00]DEEH.-
+     - Q6PD74,B4DG44,Q5JPJ4,Q6AWA0
+     - AAGAB
+     - S310,S311
+     - 14.97
+     - 14.81
+     - 13.99
+     - 13.98
+     - 12.87
+     - 13.88
+     - 13.91
+     - 15.60
+    
 
-We also convert the protein identifiers to UniProt Entry Names to ensure consistency across the other data sources that will be used, allowing all data components to align within the same naming space.
+The goal is to turn this experimental data into the format that SPRAS expects.
+
+
+1.3 Filtering and normalizing the replicates
+----------------------------------------------
+
+Before analysis, we filter out peptides not present in all three replicates to ensure consistency.
+Then, we normalize each replicate so intensity values are comparable and not biased by replicate-specific effects.
+
+.. list-table::
+   :header-rows: 1
+   :widths: 20 15 10 10 10 10 10 10 10 10 10 10 10
+
+   * - peptide
+     - protein
+     - gene.name
+     - modified.sites
+     - 0 min
+     - 2 min
+     - 4 min
+     - 8 min
+     - 16 min
+     - 32 min
+     - 64 min
+     - 128 mn
+     - replicate
+   * - K.n[305.21]AFWMAIGGDRDEIEGLS[167.00]S[167.00]DEEH.-
+     - Q6PD74,B4DG44,Q5JPJ4,Q6AWA0
+     - AAGAB
+     - S310,S311
+     - 2.17
+     - 2.09
+     - 1.98
+     - 1.78
+     - 1.99
+     - 2.12
+     - 2.25
+     - 1.46
+     - C
+   * - K.n[305.21]AFWMAIGGDRDEIEGLS[167.00]S[167.00]DEEH.-
+     - Q6PD74,B4DG44,Q5JPJ4,Q6AWA0
+     - AAGAB
+     - S310,S311
+     - 4.03
+     - 3.73
+     - 3.32
+     - 3.36
+     - 3.35
+     - 3.37
+     - 3.35
+     - 3.86
+     - B
+   * - K.n[305.21]AFWMAIGGDRDEIEGLS[167.00]S[167.00]DEEH.-
+     - Q6PD74,B4DG44,Q5JPJ4,Q6AWA0
+     - AAGAB
+     - S310,S311
+     - 5.60
+     - 4.75
+     - 4.69
+     - 4.59
+     - 4.32
+     - 4.90
+     - 4.90
+     - 5.48
+     - A
+     
+1.4 Computing p-values using Tukey's HSD Test
+-----------------------------------------------
+
+We want to calculate the p-values per peptide.
+This tells us how likely changes in abundance happen by chance.
+
+We use Tukey's Honest Significant Difference (HSD) test to compare all time points and correct for multiple testing to get a p-value for every pair of time points.
+
+.. list-table::
+   :header-rows: 1
+   :widths: 25 20 7 7 7 7 7 7 7 7 7 7 7 7 7 7 7 7 7 7 7 7 7 7 7 7 7 7 7 7
+
+   * - peptide
+     - protein
+     - 2min vs 0min
+     - 4min vs 0min
+     - 8min vs 0min
+     - 16min vs 0min
+     - 32min.vs.0min
+     - 64min.vs.0min
+     - 128min.vs.0min
+     - 4min.vs.2min
+     - 8min.vs.2min
+     - 16min.vs.2min
+     - 32min.vs.2min
+     - 64min.vs.2min
+     - 128min.vs.2min
+     - 8min.vs.4min
+     - 16min.vs.4min
+     - 32min.vs.4min
+     - 64min.vs.4min
+     - 128min.vs.4min
+     - 16min.vs.8min
+     - 32min.vs.8min
+     - 64min.vs.8min
+     - 128min.vs.8min
+     - 32min.vs.16min
+     - 64min.vs.16min
+     - 128min.vs.16min
+     - 64min.vs.32min
+     - 128min.vs.32min
+     - 128min.vs.64min
+   * - K.n[305.21]ADVLEAHEAEAEEPEAGK[432.30]S[167.00]EAEDDEDEVDDLPSSR.R
+     - QQ6PD74,B4DG44,Q5JPJ4,Q6AWA0
+     - 0.67
+     - 0.25
+     - 0.14
+     - 0.12	
+     - 0.52
+     - 0.76
+     - 0.84
+     - 0.99
+     - 0.93	
+     - 0.90	
+     - 1.00	
+     - 1.00
+     - 1.00
+     - 1.00
+     - 1.00
+     - 1.00
+     - 0.97
+     - 0.94
+     - 1.00
+     - 0.98
+     - 0.87
+     - 0.80
+     - 0.96
+     - 0.83
+     - 0.75
+     - 1.00
+     - 1.00
+     - 1.00
+
+
+
+
+Lower p-values indicate stronger evidence that a peptide's abundance significantly changes between those time points.
+
+1.5 From p-values to prizes 
+----------------------------
+
+P-values are transformed using -log10(p-value) so smaller p-values give larger prize scores.
+
+For each peptide, the smallest p-value is selected (representing the most significant change) between each time point to the baseline (0 min) and between consecutive time points.
+
+For each protein mapped to multiple peptides, the maximum prize value across all its peptides is assigned.
+
+Finally, all protein identifiers (using the first one listed for each protein) are converted to UniProt Entry Names to match the identifiers that will be used in the interactome. 
+
+.. note::
+    All node identifiers should use the same naming space across every part of the data in a dataset.
+
+.. list-table::
+   :header-rows: 1
+   :widths: 25 20 7 7 7
+
+   * - peptide
+     - protein
+     - uniprot entry name
+     - min p-value
+     - -log10(min p-value)
+   * - K.n[305.21]AFWMAIGGDRDEIEGLS[167.00]S[167.00]DEEH.-
+     - Q6PD74,B4DG44,Q5JPJ4,Q6AWA0
+     - AAGAB_HUMAN 
+     - 0.12392034609392
+     - 0.906857382317364
+
+
+Input node data put into a SPRAS-standardized format:
+
+.. code-block:: text
+
+    NODE_ID     prize
+    AAGAB_HUMAN	0.906857382
 
 1.6 From Prizes to Source and Targets / Actives 
 -----------------------------------------------
 
-- add the egfr pathway (cite it) 
+.. image:: ../_static/images/egf-pathway.png
+   :alt: description of the image
+   :width: 400
+   :align: center
+
+.. raw:: html
+
+   <div style="margin:20px 0;"></div>
 
 
-After assigning protein-level prizes, the next step is to define sources, targets, and actives for use in pathway reconstruction.
+Using known pathway knowledge [1]_ [2]_ [3]_:
 
-We use prior biological knowledge to guide this.
-For example, in the EGFR signaling pathway, EGF acts as the initiating signal and EGFR as its receptor.
-We can set EGF as the source (with the highest prize score) and EGFR as a target (with the second-highest score).
-All other pathway proteins are treated as targets (with the score set from the previous step), since they represent downstream components influenced by EGF-EGFR signaling.
+- EGF serves as a source for the pathway
+- EGF is known to initiate signaling, so it can be assigned a high score (greater than all other nodes) to emphasize its importance and guide algorithms to start reconstruction from this point.
+- EGFR acts as a target in the pathway
+- All other downstream proteins detected in the data can also treated as targets
+- All proteins in the data can be considered active since they correspond to proteins that are active under the given biological condition
 
-Finally, actives refer to nodes in a biological network that are significantly “on” or highly active under a given biological condition.
-In this context, all proteins chosen can be considered active since they correspond to active under the given biological condition.
+Input node data put into a SPRAS-standardized format:
 
+.. code-block:: text
 
-1.7 Combing the data into a spras standardized data 
----------------------------------------------------
-
+    NODE_ID     prize       source  target  active
+    AAGAB_HUMAN	0.906857382         True   True
+    ... more nodes
+    EGF_HUMAN	10	        True	True	True
+    EGFR_HUMAN	6.787874699		    True	True
+    ... more nodes
 
 1.8 Finding an Interactome to use
 ----------------------------------
 
-Next, we need to define the interactome, the background protein-protein interaction (PPI) network used by pathway reconstruction algorithms to identify connections between sources and targets, prizes, and actives.
+To connect our proteins, we use a background PPI network, the interactome.
+For this dataset, two interactomes are merged (directed edges prioritized when available):
 
-Databases, such as STRING, contatin interactomes that represent known interacts between proteins.
+- iRefIndex v13 (159,095 undirected interactions)
+- PhosphoSitePlus (4,080 directed kinase-substrate interactions)
+
+.. image:: ../_static/images/egf-interactome.png
+   :alt: description of the image
+   :width: 400
+   :align: center
+
+.. raw:: html
+
+   <div style="margin:20px 0;"></div>
 
 
-However, for this analysis, we use a human PPI network compiled from two sources:
+The final network has 15,677 proteins and 157,984 edges (~4k of them are directed), and covers 653 of our 702 prize proteins.
+The proteins identifiers in the interactome are converted to use UniProt Entry Names.
 
-- iRefIndex (version 13.0), containing 159,095 undirected interactions, and
-- PhosphoSitePlus, containing 4,080 directed kinase–substrate interactions.
+Interactome data put into a SPRAS-standardized format:
 
-We merge the two sources, by prioritizing directed edges wherever possible otherwise keeping the undirected edges.
-The final network contains 15,677 proteins, 157,984 undirected, and 3,917 directed interactions, using UniProt Entry Names for the identifiers of the nodes.
+.. code-block:: text
 
-This interactome includes 653 of the 701 proteins with mass spectrometry-based prizes.
+    TACC1_HUMAN	RUXG_HUMAN	0.736771	U
+    TACC1_HUMAN	KAT2A_HUMAN	0.292198	U
+    TACC1_HUMAN	CKAP5_HUMAN	0.724783	U
+    TACC1_HUMAN	YETS4_HUMAN	0.542597	U
+    TACC1_HUMAN	LSM7_HUMAN	0.714823	U
+    AURKC_HUMAN	TACC1_HUMAN	0.553333	D
+    TACC1_HUMAN	AURKA_HUMAN	0.401165	U
+    TACC1_HUMAN	KDM1A_HUMAN	0.367850	U
+    TACC1_HUMAN	MEMO1_HUMAN	0.367850	U
+    TACC1_HUMAN	HD_HUMAN	0.367850	U
+    ... more edges
 
+.. note::
+    Many databases exist that provide interactomes. One being STRING, which contains known protein-protein interactions across different species.
 
-8) This data is already saved into SPRAS
-
+1.9 This SPRAS-standardized data is already saved into SPRAS
+------------------------------------------------------------
 
 .. code-block:: text
 
@@ -140,11 +389,12 @@ This interactome includes 653 of the 701 proteins with mass spectrometry-based p
    │       └── ... output files ...
 
 
+The data used in this part of the tutorial can be found in the `supplementary materials <https://pmc.ncbi.nlm.nih.gov/articles/PMC6295338/>`_ under data supplement 2 and supplement 3 [4]_.
 
 Step 2: Running multiple algorithms 
 ====================================
 
-We can begin running multiple pathway reconstruction algorithms on it.
+We can begin running multiple pathway reconstruction algorithms.
 
 For this part of the tutorial, we'll use a pre-defined configuration file that includes additional algorithms and post-analysis steps available in SPRAS.
 Download it here: :download:`Intermediate Config File <../_static/config/intermediate.yaml>`
@@ -180,14 +430,14 @@ SPRAS supports a wide range of algorithms, each designed around different biolog
 
 Wrapped algorithms
 ^^^^^^^^^^^^^^^^^^^
-Each algorithm has been wrapped by SPRAS which involves three main steps.
+Each pathway reconstruction algorithm within SPRAS has actually been wrapped by SPRAS.
 
-For an algorithm specific wrapper, the wrapper includes a module that will create and format the input files required by the algorithm using the datasets specified in the configuration file.
+For an algorithm-specific wrapper, the wrapper includes a module that will create and format the input files required by the algorithm using the SPRAS-standardized input data.
 
 Each algorithm has an associated Docker image located on `DockerHub <https://hub.docker.com/u/reedcompbio>`__ that contains all necessary software dependencies needed to run it.
-In SPRAS, it uses each image to launch a container for a specified parameter combination, providing it with the prepared algorithm specific inputs and an output filename (raw-pathway.txt).
+For an algorithm-specific wrapper, it contains a module that will call each image to launch a container for a specified parameter combination, set of prepared algorithm-specific inputs and an output filename (``raw-pathway.txt``).
 
-With each of the raw-pathway.txt files, a  wrapper includes a module that will convert the algorithm specific format into a standardized SPRAS format.
+With each of the ``raw-pathway.txt`` files, an algorithm-specific wrapper includes a module that will convert the algorithm-specific format into a standardized SPRAS format.
 
 2.3 Running SPRAS with multiple algorithms
 ------------------------------------------
@@ -216,7 +466,7 @@ By increasing the number of cores to 4, it allows Snakemake to parallelize the w
 Snakemake reads the options set in the ``intermediate.yaml`` configuration file and determines which datasets, algorithms, and parameter combinations need to run. 
 It also checks if any post-analysis steps were requested.
 
-2. Creating algorithm specific inputs
+2. Creating algorithm-specific inputs
 
 For each algorithm marked as include: true in the configuration, SPRAS generates input files tailored to that algorithm. 
 
@@ -224,7 +474,7 @@ In this case, every algorithm is enabled, so SPRAS formats the input files requi
 
 3. Organizing results with parameter hashes
 
-Each ``<dataset>-<algorithm>-params-<hash>`` combination gets its own folder created in ``output/intermediate/``. 
+Each <dataset>-<algorithm>-params-<hash> combination gets its own folder created in ``output/intermediate/``. 
 
 A matching log file in ``logs/parameters-<algorithm>-params-<hash>.yaml`` records the exact parameter values used.
 
@@ -232,15 +482,15 @@ A matching log file in ``logs/parameters-<algorithm>-params-<hash>.yaml`` record
 
 SPRAS pulls each algorithm's Docker image from `DockerHub <https://hub.docker.com/u/reedcompbio>`__ if it isn't already downloaded locally 
 
-SPRAS executes each algorithm by launching multiple Docker contatiners using the algorithm specific Docker image (once for each parameter configuration), sending the prepared input files and specific parameter settings needed for execution.
+SPRAS executes each algorithm by launching multiple Docker contatiners using the algorithm-specific Docker image (once for each parameter configuration), sending the prepared input files and specific parameter settings needed for execution.
 
-Each algorithm runs independently within its Docker container and generates an output file named raw-pathway.txt, which contains the reconstructed subnetwork in the algorithm-specific format.
+Each algorithm runs independently within its Docker container and generates an output file named ``raw-pathway.txt``, which contains the reconstructed subnetwork in the algorithm-specific format.
 
 SPRAS then saves these files to the corresponding folder.
 
 5. Standardizing the results
 
-SPRAS parses each of the raw output into a standardized SPRAS format (pathway.txt) and SPRAS saves this file in its corresponding folder.
+SPRAS parses each of the raw output into a standardized SPRAS format (``pathway.txt``) and SPRAS saves this file in its corresponding folder.
 
 6. Logging the Snakemake run 
 
@@ -379,14 +629,14 @@ What your directory structure should like after this run:
 -------------------------------------
 After running the intermediate configuration file, the output/intermediate/ directory will contain many more subfolders and files.
 
-Again, each pathway.txt file contains the standardized reconstructed subnetworks and can be used at face value, or for further post analysis.
+Again, each ``pathway.txt`` file contains the standardized reconstructed subnetworks and can be used at face value, or for further post analysis.
 
 
 1.	Locate the files
 
 Navigate to the output directory ``output/intermediate/``. Inside, you will find subfolders corresponding to each <dataset>-<algorithm>-params-<hash> combination.
 
-2. Open a pathway.txt file
+2. Open a ``pathway.txt`` file
 
 Each file lists the network edges that were reconstructed for that specific run. The format includes columns for the two interacting nodes, the rank, and the edge direction
 
@@ -452,9 +702,9 @@ Your analysis section in the configuration file should look like this:
             include: true
             ... (other parameters preset)
 
-The ml analysis will perform unsupervised analyses such as principal component analysis (PCA), hierarchical agglomerative clustering (HAC), ensembling, and jaccard similarity comparisons of the pathways.
-- if aggregate_per_algorithm: is set to true, it additionally groups outputs by algorithm within each dataset to uncover patterns and similarities per algorithm
-- The ML section includes configurable parameters that let you adjust the behavior of the ml analyses performed
+``ml`` will perform unsupervised analyses such as principal component analysis (PCA), hierarchical agglomerative clustering (HAC), ensembling, and jaccard similarity comparisons of the pathways.
+
+- The  ``ml`` section includes configurable parameters that let you adjust the behavior of the analyses performed
 
 With these updates, SPRAS will run the full set of unsupervised machine learning analyses across all outputs for a given dataset.
 
@@ -470,12 +720,12 @@ What happens when you run this command
 1. Reusing cached results
 
 Snakemake reads the options set in ``intermediate.yaml`` and checks for any requested post-analysis steps. 
-It reuses cached results; here the pathway.txt files generated from the previously executed algorithms on the egfr dataset are reused.
+It reuses cached results; here the ``pathway.txt`` files generated from the previously executed algorithms on the egfr dataset are reused.
 
 2.	Running the ml analysis
 
 SPRAS aggregates all the reconstructed subnetworks produced across the specified algorithms for a given dataset.
-SPRAS then performs machine learning analyses on each these groups and saves the results in the ``<dataset>-ml/`` (egfr-ml/) folder.
+SPRAS then performs machine learning analyses on each these groups and saves the results in the ``<dataset>-ml/`` (``egfr-ml/``) folder.
 
 
 What your directory structure should like after this run:
@@ -628,8 +878,6 @@ Ensembles
 In your file explorer, go to ``output/intermediate/egfr-ml/ensemble-pathway.txt`` and open it locally.
 
 After running multiple algorithms or parameter settings on the same dataset, SPRAS can ensemble the resulting pathways to identify consistent, high-frequency interactions.
-
-Each pathway output is represented as a binary edge list (1 = edge present, 0 = edge absent).
 SPRAS calculates the edge frequency by calculating the proportion of times each edge appears across the outputs.
 
 .. code-block:: text
@@ -687,7 +935,7 @@ Shorter distances between branches indicate outputs with greater similarity.
    <div style="margin:20px 0;"></div>
 
 HAC visualizations help compare which algorithms and parameter settings produce similar pathway structures.
-Tight clusters indicate similar behavior, while isolated branches may reveal unique or outlier results.
+Tight clusters indicate similar output behavior, while isolated branches may reveal unique results.
 
 Principal component analysis
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^
@@ -695,7 +943,6 @@ Principal component analysis
 1. Open the PCA image
 
 In your file explorer, go to ``output/intermediate/egfr-ml/pca.png`` and open it locally.
-
 
 SPRAS also includes PCA to visualize variation across pathway outputs.
 Each point represents a pathway, placed based on its overall network structure.
@@ -710,7 +957,7 @@ Pathways that cluster together in PCA space are more similar, while those farthe
 
    <div style="margin:20px 0;"></div>
 
-PCA may help identify patterns such as clusters of similar algorithms, parameter sensitivities, or outlier outputs.
+PCA may help identify patterns such as clusters of similar algorithms outputs, parameter sensitivities, and/or outlier outputs.
 
 Jaccard similarity
 ^^^^^^^^^^^^^^^^^^
@@ -721,9 +968,7 @@ In your file explorer, go to ``output/intermediate/egfr-ml/jaccard-heatmap.png``
 
 
 SPRAS computes pairwise jaccard similarity between pathway outputs to measure how much overlap exists between their reconstructed subnetworks.
-
-Higher similarity values indicate that pathways share many of the same edges, while lower values suggest distinct reconstructions.
-The heatmap visualizes how similar the output pathways are between algorithms and parameter settings. 
+The heatmap visualizes how similar the output pathways are between algorithms and their parameter settings. 
 
 .. image:: ../_static/images/jaccard-heatmap.png
    :alt: description of the image
@@ -733,3 +978,14 @@ The heatmap visualizes how similar the output pathways are between algorithms an
 .. raw:: html
 
    <div style="margin:20px 0;"></div>
+
+Higher similarity values indicate that pathways share many of the same edges, while lower values suggest distinct reconstructions.
+
+
+References
+-----------
+
+.. [1] Kanehisa, M., Furumichi, M., Sato, Y., Matsuura, Y. and Ishiguro-Watanabe, M.; KEGG: biological systems database as a model of the real world. Nucleic Acids Res. 53, D672-D677 (2025). [pubmed] [doi]
+.. [2] Kanehisa, M; Toward understanding the origin and evolution of cellular organisms. Protein Sci. 28, 1947-1951 (2019) [pubmed] [doi]
+.. [3] Kanehisa, M. and Goto, S.; KEGG: Kyoto Encyclopedia of Genes and Genomes. Nucleic Acids Res. 28, 27-30 (2000). [pubmed] [doi]
+.. [4] Köksal AS, Beck K, Cronin DR, McKenna A, Camp AND, Srivastava S, MacGilvray ME, Bodík R, Wolf-Yadlin A, Fraenkel E, Fisher J, Gitter A. Synthesizing Signaling Pathways from Temporal Phosphoproteomic Data. Cell Rep. 2018 Sep 25;24(13):3607-3618. doi: 10.1016/j.celrep.2018.08.085. PMID: 30257219; PMCID: PMC6295338.
