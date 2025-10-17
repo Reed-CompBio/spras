@@ -358,11 +358,11 @@ A matching log file is placed in ``logs/parameters-<dataset>-params-<hash>.yaml`
 
 For each new parameter combination and its corresponding cached prepared inputs, SPRAS executes PathLinker by launching multiple Docker contatiners (once for each parameter configuration). 
 
-PathLinker then runs and produces a ``raw-pathway.txt`` file specific to each parameter and places it in it's corresponding folder.
+PathLinker then runs and produces a ``raw-pathway.txt`` file specific to each parameter and places it in its corresponding folder.
 
 4. Parsing into standardized results
 
-SPRAS parses each new ``raw-pathway.txt`` file into a standardized SPRAS format (``pathway.txt``) and places it in it's corresponding folder.
+SPRAS parses each new ``raw-pathway.txt`` file into a standardized SPRAS format (``pathway.txt``) and places it in its corresponding folder.
 
 5. Logging the Snakemake run 
 
@@ -448,7 +448,7 @@ Step 3: Running Post-Analyses
 3.1 Adding post-analyses to the beginner configuration
 ------------------------------------------------------
 
-To enable downstream analyses, update the analysis section in your configuration file by setting both summary and cytoscape to true. 
+To enable downstream analyses, update the analysis section in your configuration file by setting both ``summary`` and ``cytoscape`` to have ``include`` set to true.
 
 Your analysis section in the configuration file should look like this:
 
