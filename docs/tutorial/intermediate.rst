@@ -54,7 +54,7 @@ An example of a node file required by SPRAS follows a tab-separated format:
 
 Along with differences in their inputs nodes, pathway reconstruction algorithms also interpret the input interactome differently.
 
-- Some can handle directed interactomes, others work only with undirected interactomes, and a few support mixed directionaltiy interactomes
+- Some can handle directed interactomes, others work only with undirected interactomes, and a few support mixed directionaltiy interactomes.
 
 SPRAS automatically converts the user-provided edge file into the format expected by each algorithm, ensuring that the directionality of the interactome matches the algorithm's requirements.
 
@@ -263,7 +263,7 @@ Lower p-values indicate stronger evidence that a peptide's abundance significant
 1.5 From p-values to prizes 
 ----------------------------
 
-P-values are transformed using -log10(p-value) so smaller p-values give larger prize scores.
+P-values are transformed using ``-log10(p-value)`` so smaller p-values give larger prize scores.
 
 For each peptide, the smallest p-value is selected (representing the most significant change) between each time point to the baseline (0 min) and between consecutive time points.
 
@@ -272,7 +272,7 @@ For each protein mapped to multiple peptides, the maximum prize value across all
 Finally, all protein identifiers (using the first one listed for each protein) are converted to UniProt Entry Names to match the identifiers that will be used in the interactome. 
 
 .. note::
-    All node identifiers should use the same naming space across every part of the data in a dataset.
+    All node identifiers should use the same namespace across every part of the data in a dataset.
 
 .. list-table::
    :header-rows: 1
@@ -332,7 +332,7 @@ Input node data put into a SPRAS-standardized format:
 1.8 Finding an Interactome to use
 ----------------------------------
 
-To connect our proteins, we use a background PPI network, the interactome.
+To connect our proteins, we use a background protein-protein interaction (PPI) network (the interactome).
 For this dataset, two interactomes are merged (directed edges prioritized when available):
 
 - iRefIndex v13 (159,095 undirected interactions)
@@ -368,7 +368,7 @@ Interactome data put into a SPRAS-standardized format:
     ... more edges
 
 .. note::
-    Many databases exist that provide interactomes. One being STRING, which contains known protein-protein interactions across different species.
+    Many databases exist that provide interactomes. One being `STRING <https://string-db.org/>`__, which contains known protein-protein interactions across different species.
 
 1.9 This SPRAS-standardized data is already saved into SPRAS
 ------------------------------------------------------------
