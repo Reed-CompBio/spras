@@ -8,7 +8,7 @@ be installed manually.
 
 Naming conventions
 ------------------
-SPRAS wrappers tries to follow the naming conventions of the algorithms they wrap.
+SPRAS wrappers try to follow the naming conventions of the algorithms they wrap.
 This includes their name and their ``required_inputs``: when sensible, we preserve
 the file name of inputs required by the internal algorithm.
 
