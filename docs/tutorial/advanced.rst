@@ -4,57 +4,74 @@ Advanced Capabilities and Features
 
 Parameter tuning
 ================
+Parameter tuning is the process of determining which parameter combinations should be explored for each algorithm for a given dataset.
+Parameter tuning focuses on defining and refining the parameter search space.
 
-More like these are all the things we can do with this, but will not be showing
-
-- mention parameter tuning
-- say that parameters are not preset and need to be tuned for each dataset
-
-Picking params for algos hard; need a way to pick parameters
+Each dataset has unique characteristics so there are no preset parameters combinations to use and instead must be tuned individually for an algorithm.
+SPRAS provides a flexible framework for getting parameter grids for any algorithms for a given dataset.
 
 Grid Search
 ------------
-write down the process a user can usually use
 
-write down the method we use when trying to tune 1000s of dataset at the same time?
+A grid search systematically tests different combinations of parameter values to see how each affects network reconstruction results.
 
-- or just the general one (coarse-> fine -optional> evaluation and other analysis)
+In SPRAS, users can define parameter grids for each algorithm directly in the configuration file.
+When executed, SPRAS automatically runs each algorithm across all parameter combinations and collects the resulting subnetworks.
 
-pick grids via graph hueristics
-It is important to note that during grid search and refinement (Stages 1 and 2), no gold standard based evaluation should be performed to determine which grid spaces to keep. At that stage, users must rely solely on graph properties to guide refinement.
+SPRAS will also supports parameter refinement using graph topological heuristics.
+These topological metrics help identify parameter regions that produce stable or biologically plausible outputs networks.
+Based on these heuristics, SPRAS will generate new configuration files with refined parameter grids for each algorithm per dataset.
+
+Users can then further narrow these grids around promising regions to fine-tune the outputs an algorithm produces.
 
 
 Parameter selection
 -------------------
 
-Parameter selection is actually handled in the evaluation code, which supports multiple strategies such as ensemble selection, PCA-based selection, or using the grids directly with no parameter selection.
-This functionality is already implemented for nodes, and work is underway to extend it to edges.
+Parameter selection refers to the process of determining which parameter combinations should be used for evalaution and how to identify the “best” set of parameters per algorithm for a given dataset.
 
-Once the grid space search is complete for each dataset, the user can enable evaluation (by setting evaluation: true) and run all of the parameter selection code.
+Parameter selection is handled in the evaluation code, which supports multiple parameter selection strategies.
 
+Once the grid space search is complete for each dataset, the user can enable evaluation (by setting evaluation include to true) and it will run all of the parameter selection code.
 
 PCA-based parameter selection
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
-The Principal Component Analysis (PCA) approach selects a representative parameter setting for each pathway reconstruction algorithm. Parameter settings are used to generate pathway outputs, which are then projected into algorithm-specific PCA spaces. Within each space, a centroid is calculated to represent the average position of the algorithm's outputs. The output closest to this centroid, based on Euclidean distance, is identified as the most representative. The corresponding parameter setting is then selected as most representative, ensuring that the chosen pathway is most characteristic of the algorithm's overall reconstruction space. We plot precision and recall plots per algorithm per dataset and precision and recall plots per dataset.
 
+The PCA-based approach identifies a representative parameter setting for each pathway reconstruction algorithm on a given dataset.
+It selects the single parameter combination that best captures the central trend of an algorithm's reconstruction behavior.
 
-TODO: show images of each of the selection methods if available
+.. image:: ../_static/images/pca-kde.png
+   :alt: description of the image
+   :width: 500
+   :align: center
 
+.. raw:: html
+
+   <div style="margin:20px 0;"></div>
+
+For each algorithm, all reconstructed subnetworks are projected into an algorithm-specific PCA space.
+This projection summarizes how the algorithm's outputs vary across different parameter combinations, allowing patterns in the outputs to be visualized in a lower-dimensional space.
+
+Within each PCA space, a kernel density estimate (KDE) is computed over the projected points to identify regions of high density.
+The output closest to the highest KDE peak is selected as the most representative parameter setting, as it corresponds to the region where the algorithm most consistently produces similar subnetworks.
 
 Ensemble network-based parameter selection
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+The ensemble-based approach combines results from all parameter settings for each pathway reconstruction algorithm on a given dataset.
+Instead of focusing on a single "best" parameter combination, it summarizes the algorithm's overall reconstruction behavior across parameters.
 
-The ensemble network-based approach uses edge frequency analysis to aggregate outputs across all parameter settings for each pathway reconstruction algorithm. All the generated pathway outputs are aggregated into algorithm-specific ensemble networks. In these networks, edge weights reflect the average frequency of each interaction across outputs. The resulting consensus networks capture the core structure of each algorithm's outputs without overfitting to any single parameter setting. Rather than selecting one optimal pathway/parameter setting, this approach offers a holistic view of each algorithm's reconstruction behavior. We generate a pr-curve per algorithm per dataset and a pr-curve per dataset.
+All reconstructed subnetworks are merged into algorithm-specific ensemble networks, where each edge weight reflects how frequently that interaction appears across the outputs.
+Edges that occur more often are assigned higher weights, highlighting interactions that are most consistently recovered by the algorithm.
 
+These consensus networks help identify the core patterns of an algorithm's output's without needing to choose a single parameter setting.
 
-For ensmeble just show an ensemble file and explain this selection method (we get frequencies)
-- can get prcs with this by thresholding on the frequencies
+.. This approach is useful when users want to understand the overall stability of an algorithm's reconstructions or when no clear optimal parameter combination exists.
 
 Ground truth-based evaluation without parameter selection
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
-The no parameter selection approach evaluates all possible parameter combinations for each algorithm, comparing each resulting algorithm-specific output against a ground-truth dataset. By generating precision and recall plots for each algorithm per output pathway, it provides an unbiased measure of how effectively an algorithm reconstructs biologically relevant networks. We plot precision and recall plots per algorithm per dataset and precision and recall plots per dataset.
 
-just show the just show the pathway.txt files directly 
+The no parameter selection approach chooses all parameter combinations for each pathway reconstruction algorithm on a given dataset.
+This approach can be useful for idenitifying patterns in algorithm performance without favoring any specific parameter setting.
 
 Evaluation
 ============
@@ -90,21 +107,46 @@ When gold standards are provided and evaluation is enabled (include: true), SPRA
 
 A gold standard dataset must include the following types of keys and files:
 
-- label: a name that uniquely identifies a gold standard dataset throughout the SPRAS workflow and outputs
+- label: a name that uniquely identifies a gold standard dataset throughout the SPRAS workflow and outputs.
 - node_file or edge_file: A list of node or edge files. Only one of these can be defined per gold standard dataset.
-- data_dir: The file path of the directory where the input gold standard dataset files are located
+- data_dir: The file path of the directory where the input gold standard dataset files are located.
 - dataset_labels: a list of dataset labels indicating which datasets this gold standard dataset should be evaluated against.
 
 When evaluation is enabled, SPRAS will automatically run its built-in evaluation analysis on each defined dataset-gold standard pair.
 This evaluation computes metrics such as precision, recall, and precision-recall curves, depending on the parameter selection method used.
 
-Evaluation is closely integrated with the parameter tuning process:
+For each pathway, evaluation can be run independently of any parameter selection method (the ground truth-based evaluation without parameter selection idea) to directly inspect precision and recall for each reconstructed network from a given dataset.
 
-- users can run evaluation independently of any parameter selection method to directly inspect precision and recall for each reconstructed network from a given dataset.
-- TODO: separate into two different poitnts 
-ensemble or PCA-based parameter selection methods can generate precision-recall curves by thresholing on the frequencies in an ensemble of reconstructed networks or compute the precision and recall for a selected reconstructed network chosen by PCA from a dataset.
+.. image:: ../_static/images/pr-per-pathway-nodes.png
+   :alt: description of the image
+   :width: 400
+   :align: center
 
-TODO: add images of what these outputs look like
+.. raw:: html
+
+   <div style="margin:20px 0;"></div>
+
+Ensemble-based parameter selection generates precision-recall curves by thresholding on the frequency of edges across an ensemble of reconstructed networks for an algorithm for given dataset.
+
+.. image:: ../_static/images/pr-curve-ensemble-nodes-per-algorithm-nodes.png
+   :alt: description of the image
+   :width: 400
+   :align: center
+
+.. raw:: html
+
+   <div style="margin:20px 0;"></div>
+
+PCA-based parameter selection computes a precision and recall for a single reconstructed network selected using PCA from all reconstructed networks for an algorithm for given dataset.
+
+.. image:: ../_static/images/pr-pca-chosen-pathway-per-algorithm-nodes.png
+   :alt: description of the image
+   :width: 400
+   :align: center
+
+.. raw:: html
+
+   <div style="margin:20px 0;"></div>
 
 .. note:: 
     Evaluation will only execute if ml include is also set to true, since the parameter selection step depends on the PCA ML analysis.
