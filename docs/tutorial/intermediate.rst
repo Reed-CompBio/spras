@@ -48,9 +48,9 @@ An example of a node file required by SPRAS follows a tab-separated format:
 .. note::
     If a user provides only one type of input node but wants to run algorithms that require a different type, SPRAS can automatically convert the inputs into the compatible format:
 
-    - Source-target nodes can be used with all algorithms by making a prize column set to 1 and an active column set to True
-    - Prize data can be adapted for active based algorithms by automatically making an active column set to True
-    - Active data can be adapted for prize based algorithms by making a prize column set to 1
+    - Source-target nodes can be used with all algorithms by making a prize column set to 1 and an active column set to True.
+    - Prize data can be adapted for active based algorithms by automatically making an active column set to True.
+    - Active data can be adapted for prize based algorithms by making a prize column set to 1.
 
 Along with differences in their inputs nodes, pathway reconstruction algorithms also interpret the input interactome differently.
 
@@ -312,11 +312,11 @@ Input node data put into a SPRAS-standardized format:
 
 Using known pathway knowledge [1]_ [2]_ [3]_:
 
-- EGF serves as a source for the pathway
+- EGF serves as a source for the pathway.
 - EGF is known to initiate signaling, so it can be assigned a high score (greater than all other nodes) to emphasize its importance and guide algorithms to start reconstruction from this point.
-- EGFR acts as a target in the pathway
-- All other downstream proteins detected in the data can also treated as targets
-- All proteins in the data can be considered active since they correspond to proteins that are active under the given biological condition
+- EGFR acts as a target in the pathway.
+- All other downstream proteins detected in the data can also treated as targets.
+- All proteins in the data can be considered active since they correspond to proteins that are active under the given biological condition.
 
 Input node data put into a SPRAS-standardized format:
 
@@ -704,7 +704,7 @@ Your analysis section in the configuration file should look like this:
 
 ``ml`` will perform unsupervised analyses such as principal component analysis (PCA), hierarchical agglomerative clustering (HAC), ensembling, and jaccard similarity comparisons of the pathways.
 
-- The  ``ml`` section includes configurable parameters that let you adjust the behavior of the analyses performed
+- The  ``ml`` section includes configurable parameters that let you adjust the behavior of the analyses performed.
 
 With these updates, SPRAS will run the full set of unsupervised machine learning analyses across all outputs for a given dataset.
 
