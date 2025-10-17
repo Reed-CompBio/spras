@@ -1,29 +1,9 @@
+###################################
 Advanced Capabilities and Features
-======================================
-
-Evaluation
-------------
-
-Sometime user have a file where they can do evaluation on the outputs they are getting out
-- not always the case though
-
-we give option to provide gold standards and then have built in evaluation on those gold standards
-- they are intertwined with the parameter selection in how those create the evaluation plots
-- we have an option to do no parameter selection and see the outputs precision and recall directly
-
-4. Gold Standards
-
-Defines the input files SPRAS will use to evaluate output subnetworks
-
-A gold standard dataset is comprised of: 
-
-- a label: defines the name of the gold standard dataset
-- node_file or edge_file: a list of either node files or edge files. Only one or the other can exist in a single dataset. At the moment only one edge or one node file can exist in one dataset
-- data_dir: the path to where the input gold standard files live
-- dataset_labels: a list of dataset labels that link each gold standard links to one or more datasets via the dataset labels
+###################################
 
 Parameter tuning
------------------
+================
 
 More like these are all the things we can do with this, but will not be showing
 
@@ -33,29 +13,114 @@ More like these are all the things we can do with this, but will not be showing
 Picking params for algos hard; need a way to pick parameters
 
 Grid Search
-^^^^^^^^^^^^
+------------
 write down the process a user can usually use
 
 write down the method we use when trying to tune 1000s of dataset at the same time?
 
-- or just the general one (coarse-> fine -optional> evaluation)
+- or just the general one (coarse-> fine -optional> evaluation and other analysis)
 
 pick grids via graph hueristics
+It is important to note that during grid search and refinement (Stages 1 and 2), no gold standard based evaluation should be performed to determine which grid spaces to keep. At that stage, users must rely solely on graph properties to guide refinement.
 
-Parameter Selection
-^^^^^^^^^^^^^^^^^^^^
 
-show images of each of the selection methods if available
+Parameter selection
+-------------------
+
+Parameter selection is actually handled in the evaluation code, which supports multiple strategies such as ensemble selection, PCA-based selection, or using the grids directly with no parameter selection.
+This functionality is already implemented for nodes, and work is underway to extend it to edges.
+
+Once the grid space search is complete for each dataset, the user can enable evaluation (by setting evaluation: true) and run all of the parameter selection code.
+
+
+PCA-based parameter selection
+^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+The Principal Component Analysis (PCA) approach selects a representative parameter setting for each pathway reconstruction algorithm. Parameter settings are used to generate pathway outputs, which are then projected into algorithm-specific PCA spaces. Within each space, a centroid is calculated to represent the average position of the algorithm's outputs. The output closest to this centroid, based on Euclidean distance, is identified as the most representative. The corresponding parameter setting is then selected as most representative, ensuring that the chosen pathway is most characteristic of the algorithm's overall reconstruction space. We plot precision and recall plots per algorithm per dataset and precision and recall plots per dataset.
+
+
+TODO: show images of each of the selection methods if available
+
+
+Ensemble network-based parameter selection
+^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+
+The ensemble network-based approach uses edge frequency analysis to aggregate outputs across all parameter settings for each pathway reconstruction algorithm. All the generated pathway outputs are aggregated into algorithm-specific ensemble networks. In these networks, edge weights reflect the average frequency of each interaction across outputs. The resulting consensus networks capture the core structure of each algorithm's outputs without overfitting to any single parameter setting. Rather than selecting one optimal pathway/parameter setting, this approach offers a holistic view of each algorithm's reconstruction behavior. We generate a pr-curve per algorithm per dataset and a pr-curve per dataset.
+
+
+For ensmeble just show an ensemble file and explain this selection method (we get frequencies)
+- can get prcs with this by thresholding on the frequencies
+
+Ground truth-based evaluation without parameter selection
+^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+The no parameter selection approach evaluates all possible parameter combinations for each algorithm, comparing each resulting algorithm-specific output against a ground-truth dataset. By generating precision and recall plots for each algorithm per output pathway, it provides an unbiased measure of how effectively an algorithm reconstructs biologically relevant networks. We plot precision and recall plots per algorithm per dataset and precision and recall plots per dataset.
+
+just show the just show the pathway.txt files directly 
+
+Evaluation
+============
+
+In some cases, users may have a gold standard file that allows them to evaluate the quality of the reconstructed subnetworks generated by pathway reconstruction algorithms.
+
+However, gold standards may not exist for certain types of experimental data where validated ground truth interactions or molecules are unavailable or incomplete. 
+For example, in emerging research areas or poorly characterized biological systems, interactions may not yet be experimentally verified or fully known, making it difficult to define a reliable reference network for evaluation.
+
+Adding gold standard datasets and evaluation post analysis a configuration
+--------------------------------------------------------------------------
+
+In the configuration file, users can specify one or more gold standard datasets to evaluate the subnetworks reconstructed from each dataset.
+When gold standards are provided and evaluation is enabled (include: true), SPRAS will automatically compare the reconstructed subnetworks for a specific dataset against the corresponding gold standards.
+
+.. code-block:: yaml
+
+    gold_standards:
+        - 
+        label: gs1
+        node_files: ["gs_nodes0.txt", "gs_nodes1.txt"]
+        data_dir: "input"
+        dataset_labels: ["data0"]
+        - 
+        label: gs2
+        edge_files: ["gs_edges0.txt"]
+        data_dir: "input"
+        dataset_labels: ["data0", "data1"]
+
+    analysis:
+        evaluation:
+        include: true
+
+A gold standard dataset must include the following types of keys and files:
+
+- label: a name that uniquely identifies a gold standard dataset throughout the SPRAS workflow and outputs
+- node_file or edge_file: A list of node or edge files. Only one of these can be defined per gold standard dataset.
+- data_dir: The file path of the directory where the input gold standard dataset files are located
+- dataset_labels: a list of dataset labels indicating which datasets this gold standard dataset should be evaluated against.
+
+When evaluation is enabled, SPRAS will automatically run its built-in evaluation analysis on each defined dataset-gold standard pair.
+This evaluation computes metrics such as precision, recall, and precision-recall curves, depending on the parameter selection method used.
+
+Evaluation is closely integrated with the parameter tuning process:
+
+- users can run evaluation independently of any parameter selection method to directly inspect precision and recall for each reconstructed network from a given dataset.
+- TODO: separate into two different poitnts 
+ensemble or PCA-based parameter selection methods can generate precision-recall curves by thresholing on the frequencies in an ensemble of reconstructed networks or compute the precision and recall for a selected reconstructed network chosen by PCA from a dataset.
+
+TODO: add images of what these outputs look like
+
+.. note:: 
+    Evaluation will only execute if ml include is also set to true, since the parameter selection step depends on the PCA ML analysis.
+
+.. note:: 
+    To see evaluation in action, run SPRAS using the config.yaml or egfr.yaml configuration files.
 
 CHTC integration
------------------
+=================
 
 Running locally hard and slow when too many algo parameter datasets 
 Need way to run long term
 SPRAS runs jobs; CHTC can run these jobs in parallel when available
 
 Ability to run with different container frameworks
-^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+---------------------------------------------------
 
 CHTC requires apptainer/singularity
 - SPRAS allows a user to change the type of images to use 

@@ -164,7 +164,7 @@ Datasets
 In the configuration file, datasets are defined under the datasets section. 
 Each dataset you define will be run against all of the algorithms enabled in the configuration file.
 
-The dataset must include the following types of keys and files:
+A dataset must include the following types of keys and files:
 
 - label: a name that uniquely identifies a dataset throughout the SPRAS workflow and outputs
 - node_files: Input files listing nodes of interest
