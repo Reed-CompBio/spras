@@ -22,8 +22,11 @@ SPRAS will also supports parameter refinement using graph topological heuristics
 These topological metrics help identify parameter regions that produce stable or biologically plausible outputs networks.
 Based on these heuristics, SPRAS will generate new configuration files with refined parameter grids for each algorithm per dataset.
 
-Users can then further narrow these grids around promising regions to fine-tune the outputs an algorithm produces.
+Users can further refine these grids by rerunning the updated configuration and adjusting the parameter ranges around the newly identified regions to find and fine-tune the most promising algorithm specific outputs for a given dataset.
 
+.. note::
+
+    Some grid search features are still under development and will be added in future SPRAS releases.
 
 Parameter selection
 -------------------
@@ -149,7 +152,7 @@ PCA-based parameter selection computes a precision and recall for a single recon
    <div style="margin:20px 0;"></div>
 
 .. note:: 
-    Evaluation will only execute if ml include is also set to true, since the parameter selection step depends on the PCA ML analysis.
+    Evaluation will only execute if ml include is also set to true, because the PCA parameter selection step depends on the PCA ML analysis.
 
 .. note:: 
     To see evaluation in action, run SPRAS using the config.yaml or egfr.yaml configuration files.
@@ -157,19 +160,24 @@ PCA-based parameter selection computes a precision and recall for a single recon
 CHTC integration
 =================
 
-Running locally hard and slow when too many algo parameter datasets 
-Need way to run long term
-SPRAS runs jobs; CHTC can run these jobs in parallel when available
+Running SPRAS locally can become slow and resource intensive, especially when running many algorithms, parameter combinations, or datasets simultaneously.
+
+To address this, SPRAS supports integration with the Center for High-Throughput Computing (CHTC), allowing Snakemake jobs to be distributed in parallel and executed across available compute.
+
+See :doc:`Running with HTCondor <../htcondor>` for more information on SPRAS's integrations with HTConder.
+
 
 Ability to run with different container frameworks
 ---------------------------------------------------
 
-CHTC requires apptainer/singularity
-- SPRAS allows a user to change the type of images to use 
+CHTC uses Apptainer to run containerized software in secure, high-performance environments.
 
-1. Global Workflow Control
+SPRAS accommodates this by allowing users to specify which container framework to use globally within their workflow configuration.
 
-Sets options that apply to the entire workflow.
+The global workflow control section in the configuration file allows a user to set which SPRAS supported container framework to use:
 
-- Examples: the container framework (docker, singularity, dsub) and where to pull container images from
+.. code-block:: yaml
 
+    container_framework: docker
+
+- the frameworks include Docker, Apptainer/Singularity, or dsub
