@@ -1,5 +1,8 @@
 # SPRAS Docker image
 
+> [!NOTE]
+> All other containers are on the GitHub Container Registry. Until the next SPRAS release, the SPRAS docker image will remain on Docker Hub.
+
 ## Building Images
 
 A Docker image for SPRAS that is available on [DockerHub](https://hub.docker.com/repository/docker/reedcompbio/spras)
