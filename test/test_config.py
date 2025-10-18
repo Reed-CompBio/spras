@@ -114,6 +114,9 @@ def get_test_config():
                 "include": False,
                 "aggregate_per_algorithm": False
             },
+            "attribution": {
+                "include": False
+            },
         },
     }
 
