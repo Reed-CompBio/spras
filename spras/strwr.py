@@ -1,7 +1,7 @@
 from pathlib import Path
 
 from spras.containers import prepare_volume, run_container_and_log
-from spras.dataset import Dataset
+from spras.dataset import Dataset, Direction, GraphMultiplicity
 from spras.interactome import reinsert_direction_col_directed
 from spras.prm import PRM
 from spras.util import add_rank_column, duplicate_edges, raw_pathway_df
@@ -12,6 +12,7 @@ __all__ = ['ST_RWR']
 class ST_RWR(PRM):
     required_inputs = ['network','sources','targets']
     dois = []
+    interactome_properties = [Direction.DIRECTED, GraphMultiplicity.SIMPLE]
 
     @staticmethod
     def generate_inputs(data, filename_map):
@@ -28,7 +29,7 @@ class ST_RWR(PRM):
             raise ValueError("Invalid node data")
 
         # Get edge data for network file
-        edges = data.get_interactome()
+        edges = data.get_interactome(ST_RWR.interactome_properties).df
         edges.to_csv(filename_map['network'],sep='|',index=False,columns=['Interactor1','Interactor2'],header=False)
 
     @staticmethod
@@ -102,7 +103,7 @@ class ST_RWR(PRM):
             df = df.sort_values(by=['score'], ascending=False)
             df = df.head(int(threshold))
             raw_dataset = Dataset.from_file(params.get('dataset'))
-            interactome = raw_dataset.get_interactome().get(['Interactor1','Interactor2'])
+            interactome = raw_dataset.get_interactome([]).df.get(['Interactor1','Interactor2'])
             interactome = interactome[interactome['Interactor1'].isin(df['node'])
                                       & interactome['Interactor2'].isin(df['node'])]
             interactome = add_rank_column(interactome)
