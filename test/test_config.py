@@ -110,6 +110,9 @@ def get_test_config():
             "cytoscape": {
                 "include": False
             },
+            "visjs": {
+                "include": False
+            },
             "evaluation": {
                 "include": False,
                 "aggregate_per_algorithm": False
