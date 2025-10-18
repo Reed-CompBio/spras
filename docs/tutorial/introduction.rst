@@ -36,7 +36,7 @@ Required knowledge:
     
     To stop all running containers: ``docker stop $(docker ps -a -q)``
 
-    To remove all stopped containers run: ``docker container prune``
+    To remove all stopped containers: ``docker container prune``
 
     To remove unused Docker images: ``docker image prune``
 
@@ -50,12 +50,12 @@ What is pathway reconstruction?
 
 A pathway is a type of graph that describes how different molecules interact with one another for a biological process.
 
-Curated pathway databases provide useful well studied references of pathways but are often generalized. 
+Curated pathway databases provide useful well studied references of pathways but are often general or incomplete. 
 This means they may miss context-specific details relevant to a particular condition or experiment.
 
 Pathway reconstruction algorithms address this by mapping molecules of interest onto large-scale interaction networks (interactomes) to generate candidate context-specific subnetworks that better reflect the high-throughput experimental data.
 
-These algorithms allow researchers to systematically propose hypothetical subnetworks that capture the unique characteristics of a given context without having to experimentally test every individual interaction.
+These algorithms allow researchers to propose computational-backed hypothetical subnetworks that capture the unique characteristics of a given context without having to experimentally test every individual interaction.
 
 Running multiple pathway reconstruction algorithms on several datasets is difficult due to each requiring unique inputs, software environments, and some are not readily available.
 To perform post-analysis, most algorithm outputs must first be converted into a unified, standardized format.

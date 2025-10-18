@@ -78,8 +78,8 @@ For each biological replicate, the technical replicates are combined to produce 
 
 .. note::
     Mass spectrometry is a technique used to measure and identify proteins in a sample.
-    It works by breaking proteins into smaller pieces called peptides and measuring their mass using their mass-to-charge ratio.
-    The data show how much of each peptide is present which can show protein levels change under different conditions.
+    It works by breaking proteins into smaller pieces called peptides and measuring their mass-to-charge ratio, which enables identifying which peptide is being measured.
+    The data show how much of each peptide is present, which can show protein levels or protein chemical modifications change under different conditions.
 
     Since proteins interact with each other in biological pathways, changes in their levels can reveal which parts of a pathway are active or affected.
     By mapping these changing proteins onto known interaction networks, pathway reconstruction algorithms can identify which signaling pathways are likely involved in the biological response to a specific condition.
@@ -266,6 +266,7 @@ Lower p-values indicate stronger evidence that a peptide's abundance significant
 P-values are transformed using ``-log10(p-value)`` so smaller p-values give larger prize scores.
 
 For each peptide, the smallest p-value is selected (representing the most significant change) between each time point to the baseline (0 min) and between consecutive time points.
+This is because the ultimate network analysis will not use the temporal information.
 
 For each protein mapped to multiple peptides, the maximum prize value across all its peptides is assigned.
 
@@ -312,7 +313,7 @@ Input node data put into a SPRAS-standardized format:
 
 Using known pathway knowledge [1]_ [2]_ [3]_:
 
-- EGF serves as a source for the pathway.
+- EGF serves as a source for the pathway and was the experimental treatment.
 - EGF is known to initiate signaling, so it can be assigned a high score (greater than all other nodes) to emphasize its importance and guide algorithms to start reconstruction from this point.
 - EGFR acts as a target in the pathway.
 - All other downstream proteins detected in the data can also treated as targets.
@@ -368,7 +369,7 @@ Interactome data put into a SPRAS-standardized format:
     ... more edges
 
 .. note::
-    Many databases exist that provide interactomes. One being `STRING <https://string-db.org/>`__, which contains known protein-protein interactions across different species.
+    Many databases exist that provide interactomes. One is `STRING <https://string-db.org/>`__, which contains known protein-protein interactions across different species.
 
 1.9 This SPRAS-standardized data is already saved into SPRAS
 ------------------------------------------------------------
@@ -430,7 +431,7 @@ SPRAS supports a wide range of algorithms, each designed around different biolog
 
 Wrapped algorithms
 ^^^^^^^^^^^^^^^^^^^
-Each pathway reconstruction algorithm within SPRAS has actually been wrapped by SPRAS.
+Each pathway reconstruction algorithm within SPRAS has been wrapped for SPRAS, meaning it has been prepared for the SPRAS framework.
 
 For an algorithm-specific wrapper, the wrapper includes a module that will create and format the input files required by the algorithm using the SPRAS-standardized input data.
 
@@ -638,7 +639,7 @@ Navigate to the output directory ``output/intermediate/``. Inside, you will find
 
 2. Open a ``pathway.txt`` file
 
-Each file lists the network edges that were reconstructed for that specific run. The format includes columns for the two interacting nodes, the rank, and the edge direction
+Each file lists the network edges that were reconstructed for that specific run. The format includes columns for the two interacting nodes, the rank, and the edge direction.
 
 
 For example, the file  ``egfr-mincostflow-params-42UBTQI/pathway.txt`` contains the following reconstructed subnetwork:

@@ -166,11 +166,11 @@ Each dataset you define will be run against all of the algorithms enabled in the
 
 A dataset must include the following types of keys and files:
 
-- label: a name that uniquely identifies a dataset throughout the SPRAS workflow and outputs
-- node_files: Input files listing nodes of interest
-- edge_files: Input interactome file that defines the relationships between nodes
-- other_files: This placefolder is not used
-- data_dir: The file path of the directory where the input dataset files are located
+- ``label``: a name that uniquely identifies a dataset throughout the SPRAS workflow and outputs
+- ``node_files``: Input files listing nodes of interest
+- ``edge_files``: Input interactome file that defines the relationships between nodes
+- ``other_files``: This placeholder is not used
+- ``data_dir``: The file path of the directory where the input dataset files are located
 
 .. note::
    A node represents a molecule, and an edge represents an interaction connecting two molecules.
@@ -246,7 +246,7 @@ Snakemake reads the options set in the ``beginner.yaml`` configuration file and 
 For each algorithm marked as include: true in the configuration, SPRAS generates input files tailored to those algorithms using the dataset specified in the config file. 
 
 In this case, only PathLinker is enabled. 
-SPRAS creates the files required by PathLinker and places them in the ``prepared/egfr-pathlinker-inputs/``.
+SPRAS creates the files required by PathLinker and places them in the ``prepared/egfr-pathlinker-inputs/`` directory.
 
 4. Organizing results with parameter hashes
 
@@ -346,7 +346,7 @@ What happens when you run this command
 Snakemake again reads ``beginner.yaml`` to determine which datasets, algorithms, parameters, and post-analyses to run. 
 
 It reuses cached results to skip completed steps, rerunning only those that are new or outdated. 
-Here, the Pathlinker prepared inputs are reused.
+Here, the PathLinker prepared inputs are reused.
 
 2. Organizing outputs per parameter combination
 
@@ -356,7 +356,7 @@ A matching log file is placed in ``logs/parameters-<dataset>-params-<hash>.yaml`
 
 3. Reusing prepared inputs with additional parameter combinations
 
-For each new parameter combination and its corresponding cached prepared inputs, SPRAS executes PathLinker by launching multiple Docker contatiners (once for each parameter configuration). 
+For each new parameter combination and its corresponding cached prepared inputs, SPRAS executes PathLinker by launching multiple Docker contatiners (one for each parameter configuration). 
 
 PathLinker then runs and produces a ``raw-pathway.txt`` file specific to each parameter and places it in its corresponding folder.
 

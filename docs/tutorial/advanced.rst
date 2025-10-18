@@ -7,7 +7,8 @@ Parameter tuning
 Parameter tuning is the process of determining which parameter combinations should be explored for each algorithm for a given dataset.
 Parameter tuning focuses on defining and refining the parameter search space.
 
-Each dataset has unique characteristics so there are no preset parameters combinations to use and instead must be tuned individually for an algorithm.
+Each dataset has unique characteristics so there are no preset parameters combinations to use.
+Instead, we recommend tuning parameters individually for each new dataset.
 SPRAS provides a flexible framework for getting parameter grids for any algorithms for a given dataset.
 
 Grid Search
@@ -18,8 +19,8 @@ A grid search systematically tests different combinations of parameter values to
 In SPRAS, users can define parameter grids for each algorithm directly in the configuration file.
 When executed, SPRAS automatically runs each algorithm across all parameter combinations and collects the resulting subnetworks.
 
-SPRAS will also supports parameter refinement using graph topological heuristics.
-These topological metrics help identify parameter regions that produce stable or biologically plausible outputs networks.
+SPRAS will also support parameter refinement using graph topological heuristics.
+These topological metrics help identify parameter regions that produce biologically plausible outputs networks.
 Based on these heuristics, SPRAS will generate new configuration files with refined parameter grids for each algorithm per dataset.
 
 Users can further refine these grids by rerunning the updated configuration and adjusting the parameter ranges around the newly identified regions to find and fine-tune the most promising algorithm specific outputs for a given dataset.
@@ -52,7 +53,7 @@ It selects the single parameter combination that best captures the central trend
 
    <div style="margin:20px 0;"></div>
 
-For each algorithm, all reconstructed subnetworks are projected into an algorithm-specific PCA space.
+For each algorithm, all reconstructed subnetworks are projected into an algorithm-specific 2D PCA space based on the set of edges produced by the respective parameter combinations for that algorithm.
 This projection summarizes how the algorithm's outputs vary across different parameter combinations, allowing patterns in the outputs to be visualized in a lower-dimensional space.
 
 Within each PCA space, a kernel density estimate (KDE) is computed over the projected points to identify regions of high density.
@@ -110,10 +111,10 @@ When gold standards are provided and evaluation is enabled (include: true), SPRA
 
 A gold standard dataset must include the following types of keys and files:
 
-- label: a name that uniquely identifies a gold standard dataset throughout the SPRAS workflow and outputs.
-- node_file or edge_file: A list of node or edge files. Only one of these can be defined per gold standard dataset.
-- data_dir: The file path of the directory where the input gold standard dataset files are located.
-- dataset_labels: a list of dataset labels indicating which datasets this gold standard dataset should be evaluated against.
+- ``label``: a name that uniquely identifies a gold standard dataset throughout the SPRAS workflow and outputs.
+- ``node_file`` or ``edge_file``: A list of node or edge files. Only one of these can be defined per gold standard dataset.
+- ``data_dir``: The file path of the directory where the input gold standard dataset files are located.
+- ``dataset_labels``: a list of dataset labels indicating which datasets this gold standard dataset should be evaluated against.
 
 When evaluation is enabled, SPRAS will automatically run its built-in evaluation analysis on each defined dataset-gold standard pair.
 This evaluation computes metrics such as precision, recall, and precision-recall curves, depending on the parameter selection method used.
@@ -157,12 +158,12 @@ PCA-based parameter selection computes a precision and recall for a single recon
 .. note:: 
     To see evaluation in action, run SPRAS using the config.yaml or egfr.yaml configuration files.
 
-CHTC integration
+HTCondor integration
 =================
 
 Running SPRAS locally can become slow and resource intensive, especially when running many algorithms, parameter combinations, or datasets simultaneously.
 
-To address this, SPRAS supports integration with the Center for High-Throughput Computing (CHTC), allowing Snakemake jobs to be distributed in parallel and executed across available compute.
+To address this, SPRAS supports an integration with `HTCondor <https://htcondor.org/>`__ (a high throughput computing system), allowing Snakemake jobs to be distributed in parallel and executed across available compute.
 
 See :doc:`Running with HTCondor <../htcondor>` for more information on SPRAS's integrations with HTConder.
 
@@ -180,4 +181,4 @@ The global workflow control section in the configuration file allows a user to s
 
     container_framework: docker
 
-- the frameworks include Docker, Apptainer/Singularity, or dsub
+The frameworks include Docker, Apptainer/Singularity, or dsub
