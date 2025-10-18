@@ -9,3 +9,17 @@ https://github.com/Reed-CompBio/ResponseNet.
 ResponseNet takes one optional parameter:
 
 * gamma: (int) controls the size of the output graph: more gamma means more 'flow' gets passed along starting from the sources.
+
+Dataset Usage
+-------------
+
+ResponseNet uses ``sources``, ``targets``, and edge weights. ResponseNet
+considers graph directionality.
+
+Implementation Details
+----------------------
+
+ResponseNet's internal algorithm only takes in directed graphs.
+Any pathway inputted into ResponseNet gets converted into a directed graph,
+where undirected edges get converted into two directed edges pointing opposite of one
+another.

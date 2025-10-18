@@ -10,6 +10,21 @@ PathLinker takes one optional argument:
 
 * k: The number of paths to find (*k* shortest paths).
 
+Dataset Usage
+-------------
+
+PathLinker uses ``sources``, ``targets``, and edge weights. PathLinker
+considers graph directionality.
+
+Implementation Details
+----------------------
+
+PathLinker's internal algorithm only takes in directed graphs.
+Any pathway inputted into PathLinker gets converted into a directed graph,
+where undirected edges get converted into two directed edges pointing opposite of one
+another.
+
+
 External links
 ++++++++++++++
 

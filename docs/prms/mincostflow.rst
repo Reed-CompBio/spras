@@ -11,6 +11,19 @@ MinCostFlow takes two optional parameters:
 * flow: (int) the amount of flow going through the graph
 * capacity: the (float) max capacity for edges
 
+Dataset Usage
+-------------
+
+MinCostFlow uses the input's ``sources``, ``targets``, and edge weights. MinCostFlow also
+considers directionality.
+
+Implementation Details
+----------------------
+
+MinCostFlow converts all undirected edges into directed edges
+where undirected edges get converted into two directed edges
+pointing opposite of one another.
+
 External links
 ++++++++++++++
 
