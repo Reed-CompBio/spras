@@ -1,6 +1,8 @@
 File formats
 ============
 
+All SPRAS file formats are tab-separated values.
+
 Node file
 ---------
 
@@ -11,13 +13,14 @@ such as prizes. Any nodes that are listed in a node file but are not
 present in one or more edges in the edge file will be removed. For
 example:
 
-::
-
-   NODEID	prize	sources	targets	active dummy
-   A	1.0		True	True	True
-   B	3.3	True		True
-   C	2.5		True	True
-   D	1.9	True	True	True
++--------+-------+---------+---------+--------+-------+
+| NODEID | prize | sources | targets | active | dummy |
++========+=======+=========+=========+========+=======+
+| A      | 1.0   |         | True    | True   | True  |
+| B      | 3.3   | True    |         | True   |       |
+| C      | 2.5   |         | True    | True   |       |
+| D      | 1.9   | True    | True    | True   |       |
++--------+-------+---------+---------+--------+-------+
 
 A secondary format provides only a list of node identifiers and uses the
 filename as the node attribute, as in the example ``sources.txt``. This
@@ -37,17 +40,19 @@ being the highest confidence for the edge.
 
 For example:
 
-::
-
-   A	B	0.98    U
-   B	C	0.77    D
++---+---+------+---+
+| A | B | 0.98 | U |
++===+===+======+===+
+| B | C | 0.77 | D |
++---+---+------+---+
 
 or
 
-::
-
-   A	B	0.98
-   B	C	0.77 
++---+---+------+
+| A | B | 0.98 |
++===+===+======+
+| B | C | 0.77 |
++---+---+------+
 
 Gold Standard
 -------------
