@@ -301,8 +301,8 @@ Input node data put into a SPRAS-standardized format:
 1.6 From Prizes to Source and Targets / Actives 
 -----------------------------------------------
 
-.. image:: ../_static/images/egf-pathway.png
-   :alt: description of the image
+.. image:: ../_static/images/erbb-signaling-pathway.png
+   :alt: The KEGG ErbB signaling pathway (has04012).
    :width: 400
    :align: center
 
@@ -340,8 +340,8 @@ For this dataset, two interactomes are merged (directed edges prioritized when a
 - PhosphoSitePlus (4,080 directed kinase-substrate interactions)
 
 .. image:: ../_static/images/egf-interactome.png
-   :alt: description of the image
-   :width: 400
+   :alt: The combined interactome of iRefIndex v13 and PhosphoSitePlus
+   :width: 600
    :align: center
 
 .. raw:: html
@@ -918,8 +918,8 @@ In the plots below, each branch represents a cluster of related pathways.
 Shorter distances between branches indicate outputs with greater similarity.
 
 .. image:: ../_static/images/hac-horizontal.png
-   :alt: description of the image
-   :width: 500
+   :alt: Hierarchical agglomerative clustering horizontal view
+   :width: 600
    :align: center
 
 .. raw:: html
@@ -927,7 +927,7 @@ Shorter distances between branches indicate outputs with greater similarity.
    <div style="margin:20px 0;"></div>
 
 .. image:: ../_static/images/hac-vertical.png
-   :alt: description of the image
+   :alt: Hierarchical agglomerative clustering vertical view with colors only
    :width: 300
    :align: center
 
@@ -950,8 +950,8 @@ Each point represents a pathway, placed based on its overall network structure.
 Pathways that cluster together in PCA space are more similar, while those farther apart differ in their reconstructed subnetworks.
 
 .. image:: ../_static/images/pca.png
-   :alt: description of the image
-   :width: 500
+   :alt: Principal component analysis visualization across pathway outputs
+   :width: 600
    :align: center
 
 .. raw:: html
@@ -972,8 +972,8 @@ SPRAS computes pairwise jaccard similarity between pathway outputs to measure ho
 The heatmap visualizes how similar the output pathways are between algorithms and their parameter settings. 
 
 .. image:: ../_static/images/jaccard-heatmap.png
-   :alt: description of the image
-   :width: 500
+   :alt: Jaccard heatmap of the overlap between pathway outputs
+   :width: 600
    :align: center
 
 .. raw:: html

@@ -45,8 +45,8 @@ The PCA-based approach identifies a representative parameter setting for each pa
 It selects the single parameter combination that best captures the central trend of an algorithm's reconstruction behavior.
 
 .. image:: ../_static/images/pca-kde.png
-   :alt: description of the image
-   :width: 500
+   :alt: Principal component analysis visualization across pathway outputs with a kernel density estimate computed on top 
+   :width: 600
    :align: center
 
 .. raw:: html
@@ -122,8 +122,8 @@ This evaluation computes metrics such as precision, recall, and precision-recall
 For each pathway, evaluation can be run independently of any parameter selection method (the ground truth-based evaluation without parameter selection idea) to directly inspect precision and recall for each reconstructed network from a given dataset.
 
 .. image:: ../_static/images/pr-per-pathway-nodes.png
-   :alt: description of the image
-   :width: 400
+   :alt: Precision and recall computed for each pathway and visualized on a scatter plot
+   :width: 600
    :align: center
 
 .. raw:: html
@@ -133,8 +133,8 @@ For each pathway, evaluation can be run independently of any parameter selection
 Ensemble-based parameter selection generates precision-recall curves by thresholding on the frequency of edges across an ensemble of reconstructed networks for an algorithm for given dataset.
 
 .. image:: ../_static/images/pr-curve-ensemble-nodes-per-algorithm-nodes.png
-   :alt: description of the image
-   :width: 400
+   :alt: Precision-recall curve computed for a single ensemble file / pathway and visualized as a curve
+   :width: 600
    :align: center
 
 .. raw:: html
@@ -144,8 +144,8 @@ Ensemble-based parameter selection generates precision-recall curves by threshol
 PCA-based parameter selection computes a precision and recall for a single reconstructed network selected using PCA from all reconstructed networks for an algorithm for given dataset.
 
 .. image:: ../_static/images/pr-pca-chosen-pathway-per-algorithm-nodes.png
-   :alt: description of the image
-   :width: 400
+   :alt: Precision and recall computed for each pathway chosen by the PCA-selection method and visualized on a scatter plot
+   :width: 600
    :align: center
 
 .. raw:: html
@@ -159,7 +159,7 @@ PCA-based parameter selection computes a precision and recall for a single recon
     To see evaluation in action, run SPRAS using the config.yaml or egfr.yaml configuration files.
 
 HTCondor integration
-=================
+=====================
 
 Running SPRAS locally can become slow and resource intensive, especially when running many algorithms, parameter combinations, or datasets simultaneously.
 

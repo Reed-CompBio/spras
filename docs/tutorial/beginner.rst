@@ -552,7 +552,7 @@ Reviewing the summary file
 In your file explorer, go to ``output/beginner/egfr-pathway-summary.txt`` and open it locally.
 
 .. image:: ../_static/images/summary-stats.png
-   :alt: description of the image
+   :alt: Summary statistics of the three parameter combinations run for PathLinker 
    :align: center
 
 .. raw:: html
@@ -579,8 +579,8 @@ Launch the Cytoscape application on your computer.
 Navigate to  ``output/beginner/egfr-cytoscape.cys`` and open it in Cytoscape.
 
 .. image:: ../_static/images/cytoscape_upload_network.png
-   :alt: description of the image
-   :width: 500
+   :alt: Cytoscape and clicking which button to upload the .cys file
+   :width: 600
    :align: center
 
 .. raw:: html
@@ -588,8 +588,8 @@ Navigate to  ``output/beginner/egfr-cytoscape.cys`` and open it in Cytoscape.
    <div style="margin:20px 0;"></div>
    
 .. image:: ../_static/images/cytoscape-open-cys-file.png
-   :alt: description of the image
-   :width: 500
+   :alt: Picking which .cys file to upload to Cytoscape 
+   :width: 600
    :align: center
 
 
@@ -600,7 +600,7 @@ Navigate to  ``output/beginner/egfr-cytoscape.cys`` and open it in Cytoscape.
 Once loaded, the session will display all reconstructed subnetworks for a given dataset, organized by algorithm and parameter combination.
 
 .. image:: ../_static/images/cytoscape-opened.png
-   :alt: description of the image
+   :alt: What cytoscape should look like after uploading the .cys file
    :width: 500
    :align: center
 
@@ -609,8 +609,8 @@ You can view and interact with each reconstructed subnetwork. Compare how the di
 The small parameter value (k=1) produced a compact subnetwork:
 
 .. image:: ../_static/images/1_pathway.png
-   :alt: description of the image
-   :width: 400
+   :alt: The output network with parameter combination k = 1 used for PathLinker visualized in Cytoscape
+   :width: 600
    :align: center
 
 .. raw:: html
@@ -621,7 +621,7 @@ The small parameter value (k=1) produced a compact subnetwork:
 The moderate parameter value (k=10) expanded the subnetwork, introducing additional nodes and edges that may uncover new connections:
 
 .. image:: ../_static/images/10_pathway.png
-   :alt: description of the image
+   :alt: The output network with parameter combination k = 10 used for PathLinker visualized in Cytoscape
    :width: 600
    :align: center
 
@@ -632,7 +632,7 @@ The moderate parameter value (k=10) expanded the subnetwork, introducing additio
 The large parameter value (k=100) generates a much denser subnetwork, capturing a broader range of edges but also could introduce connections that may be less  meaningful:
 
 .. image:: ../_static/images/100_pathway.png
-   :alt: description of the image
+   :alt: The output network with parameter combination k = 100 used for PathLinker visualized in Cytoscape
    :width: 600
    :align: center
 
