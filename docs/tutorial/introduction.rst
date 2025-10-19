@@ -57,8 +57,8 @@ Pathway reconstruction algorithms address this by mapping molecules of interest 
 
 These algorithms allow researchers to propose computational-backed hypothetical subnetworks that capture the unique characteristics of a given context without having to experimentally test every individual interaction.
 
-Running multiple pathway reconstruction algorithms on several datasets is difficult due to each requiring unique inputs, software environments, and some are not readily available.
-To perform post-analysis, most algorithm outputs must first be converted into a unified, standardized format.
+Running a single pathway reconstruction algorithm on a single dataset can be challenging, since each algorithm often requires its own input format, software environment, or even a full reimplementation.
+These challenges only grow when scaling up to using multiple algorithms and datasets.
 
 What is SPRAS?
 ===============
