@@ -14,7 +14,7 @@ SPRAS provides a flexible framework for getting parameter grids for any algorith
 Grid Search
 ------------
 
-A grid search systematically tests different combinations of parameter values to see how each affects network reconstruction results.
+A grid search systematically checks different combinations of parameter values to see how each affects network reconstruction results.
 
 In SPRAS, users can define parameter grids for each algorithm directly in the configuration file.
 When executed, SPRAS automatically runs each algorithm across all parameter combinations and collects the resulting subnetworks.
@@ -32,11 +32,10 @@ Users can further refine these grids by rerunning the updated configuration and 
 Parameter selection
 -------------------
 
-Parameter selection refers to the process of determining which parameter combinations should be used for evalaution and how to identify the “best” set of parameters per algorithm for a given dataset.
+Parameter selection refers to the process of determining which parameter combinations should be used for evaluation on a gold standard dataset.
 
 Parameter selection is handled in the evaluation code, which supports multiple parameter selection strategies.
-
-Once the grid space search is complete for each dataset, the user can enable evaluation (by setting evaluation include to true) and it will run all of the parameter selection code.
+Once the grid space search is complete for each dataset, the user can enable evaluation (by setting evaluation ``include: true``) and it will run all of the parameter selection code.
 
 PCA-based parameter selection
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
@@ -88,7 +87,7 @@ Adding gold standard datasets and evaluation post analysis a configuration
 --------------------------------------------------------------------------
 
 In the configuration file, users can specify one or more gold standard datasets to evaluate the subnetworks reconstructed from each dataset.
-When gold standards are provided and evaluation is enabled (include: true), SPRAS will automatically compare the reconstructed subnetworks for a specific dataset against the corresponding gold standards.
+When gold standards are provided and evaluation is enabled (``include: true``), SPRAS will automatically compare the reconstructed subnetworks for a specific dataset against the corresponding gold standards.
 
 .. code-block:: yaml
 
@@ -106,7 +105,7 @@ When gold standards are provided and evaluation is enabled (include: true), SPRA
 
     analysis:
         evaluation:
-        include: true
+            include: true
 
 A gold standard dataset must include the following types of keys and files:
 
@@ -152,7 +151,7 @@ PCA-based parameter selection computes a precision and recall for a single recon
    <div style="margin:20px 0;"></div>
 
 .. note:: 
-    Evaluation will only execute if ml include is also set to true, because the PCA parameter selection step depends on the PCA ML analysis.
+    Evaluation will only execute if ml has ``include: true``, because the PCA parameter selection step depends on the PCA ML analysis.
 
 .. note:: 
     To see evaluation in action, run SPRAS using the config.yaml or egfr.yaml configuration files.

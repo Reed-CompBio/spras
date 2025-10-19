@@ -243,7 +243,7 @@ Snakemake reads the options set in the ``beginner.yaml`` configuration file and 
 
 2. Creating algorithm-specific inputs
 
-For each algorithm marked as include: true in the configuration, SPRAS generates input files tailored to those algorithms using the dataset specified in the config file. 
+For each algorithm marked as ``include: true`` in the configuration, SPRAS generates input files tailored to those algorithms using the dataset specified in the config file. 
 
 In this case, only PathLinker is enabled. 
 SPRAS creates the files required by PathLinker and places them in the ``prepared/egfr-pathlinker-inputs/`` directory.

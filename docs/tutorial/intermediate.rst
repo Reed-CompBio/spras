@@ -54,11 +54,14 @@ An example of a node file required by SPRAS follows a tab-separated format:
 
 Along with differences in their inputs nodes, pathway reconstruction algorithms also interpret the input interactome differently.
 
-- Some can handle directed interactomes, others work only with undirected interactomes, and a few support mixed directionaltiy interactomes.
+- Some algorithms can handle only fully directed interactomes. These interactomes include edges with a specific direction (A -> B).
+- Others work only with fully undirected interactomes. These interactomes have edges without direction (A - B).
+- And some support mixed-directionaltiy interactomes. These interactomes contain both directed and undirected edges.
+
 
 SPRAS automatically converts the user-provided edge file into the format expected by each algorithm, ensuring that the directionality of the interactome matches the algorithm's requirements.
 
-An example of an edge file required by SPRAS follows a tab-separated format:
+An example of an edge file required by SPRAS follows a tab-separated format. where ``U`` indicates an undirected edge and ``D`` indicates a directed edge:
 
 .. code-block:: text
 
@@ -73,15 +76,16 @@ An example of an edge file required by SPRAS follows a tab-separated format:
 1.2 Example high throughput data
 ---------------------------------
 
-An example dataset is the EGF response mass spectrometry data, which includes three biological replicates, each with two technical replicates (IMAC and IP).
-For each biological replicate, the technical replicates are combined to produce a single dataset of peptide abundances measured over time (0-124 minutes).
+An example dataset is using EGF response mass spectrometry data [4]_.
+The experiment for this data was repeated three times, known as biological replicates, to ensure the results are consistent.
+Each replicate measures the abundance of peptides at different time points (0-128 minutes) to capture how protein activity changes over time.
 
 .. note::
     Mass spectrometry is a technique used to measure and identify proteins in a sample.
     It works by breaking proteins into smaller pieces called peptides and measuring their mass-to-charge ratio, which enables identifying which peptide is being measured.
-    The data show how much of each peptide is present, which can show protein levels or protein chemical modifications change under different conditions.
+    The data show how much of each peptide is present, which can show how protein phosphorylation abundances change under different conditions.
 
-    Since proteins interact with each other in biological pathways, changes in their levels can reveal which parts of a pathway are active or affected.
+    Since proteins interact with each other in biological pathways, changes in their phosphorylation abundances can reveal which parts of a pathway are active or affected.
     By mapping these changing proteins onto known interaction networks, pathway reconstruction algorithms can identify which signaling pathways are likely involved in the biological response to a specific condition.
 
 Example of one of the biological replicate A with one peptide:
@@ -257,8 +261,7 @@ We use Tukey's Honest Significant Difference (HSD) test to compare all time poin
 
 
 
-
-Lower p-values indicate stronger evidence that a peptide's abundance significantly changes between those time points.
+Lower p-values indicate that the observed differences in peptide abundance between time points are less likely to have occurred by chance.
 
 1.5 From p-values to prizes 
 ----------------------------
@@ -314,8 +317,8 @@ Input node data put into a SPRAS-standardized format:
 Using known pathway knowledge [1]_ [2]_ [3]_:
 
 - EGF serves as a source for the pathway and was the experimental treatment.
-- EGF is known to initiate signaling, so it can be assigned a high score (greater than all other nodes) to emphasize its importance and guide algorithms to start reconstruction from this point.
-- EGFR acts as a target in the pathway.
+- EGF is known to initiate signaling, so it can be added and assigned a high score (greater than all other nodes) to emphasize its importance and guide algorithms to start reconstruction from this point. (EGF is currently not in the data)
+- EGFR is in the current data. Looking at the pathway, we can see that EGFR acts as a target in the pathway.
 - All other downstream proteins detected in the data can also treated as targets.
 - All proteins in the data can be considered active since they correspond to proteins that are active under the given biological condition.
 
@@ -469,7 +472,7 @@ It also checks if any post-analysis steps were requested.
 
 2. Creating algorithm-specific inputs
 
-For each algorithm marked as include: true in the configuration, SPRAS generates input files tailored to that algorithm. 
+For each algorithm marked as ``include: true`` in the configuration, SPRAS generates input files tailored to that algorithm. 
 
 In this case, every algorithm is enabled, so SPRAS formats the input files required for each algorithm.
 
