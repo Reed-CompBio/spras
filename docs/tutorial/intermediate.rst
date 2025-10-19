@@ -628,10 +628,9 @@ What your directory structure should like after this run:
 
 2.4 Reviewing the pathway.txt files 
 -------------------------------------
-After running the intermediate configuration file, the output/intermediate/ directory will contain many more subfolders and files.
+After running the intermediate configuration file, the ``output/intermediate/`` directory will contain many more subfolders and files.
 
 Again, each ``pathway.txt`` file contains the standardized reconstructed subnetworks and can be used at face value, or for further post analysis.
-
 
 1.	Locate the files
 

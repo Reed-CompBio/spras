@@ -67,9 +67,8 @@ Instead of focusing on a single "best" parameter combination, it summarizes the 
 All reconstructed subnetworks are merged into algorithm-specific ensemble networks, where each edge weight reflects how frequently that interaction appears across the outputs.
 Edges that occur more often are assigned higher weights, highlighting interactions that are most consistently recovered by the algorithm.
 
-These consensus networks help identify the core patterns of an algorithm's output's without needing to choose a single parameter setting.
+These consensus networks help identify the core patterns and overall stability of an algorithm's output's without needing to choose a single parameter setting (no clear optimal parameter combination could exists).
 
-.. This approach is useful when users want to understand the overall stability of an algorithm's reconstructions or when no clear optimal parameter combination exists.
 
 Ground truth-based evaluation without parameter selection
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
