@@ -74,7 +74,7 @@ What is SPRAS?
 
 Signaling Pathway Reconstruction Analysis Streamliner (SPRAS) is a computational framework that unifies and simplifies the use of diverse pathway reconstruction algorithms.
 
-SPRAS allows users to run multiple datasets across multiple algorithms and many parameter settings in a single workflow.
+SPRAS allows users to run multiple datasets across multiple algorithms and many parameter settings in a single scalable workflow.
 The framework automatically handles data preprocessing, algorithm execution, and post-processing, allowing users to run multiple algorithms seamlessly without manual setup.
 Built-in analysis tools enable users to explore, compare, and evaluate reconstructed pathways with ease.
 
@@ -83,5 +83,7 @@ SPRAS is implemented in Python and leverages two technologies for workflow autom
 - Snakemake: a workflow management system that defines and executes jobs automatically, removing the need for users to write complex scripts
 - Docker: runs algorithms and post analysis in a containerized environment.
 
-
+A key strength of SPRAS is automation.
+From provided input data and configurations, SPRAS can generate and execute complete workflows without requiring users to write complex scripts.
+This lowers the barrier to entry, allowing researchers to apply, evaluate, and compare multiple pathway reconstruction algorithms without deep computational expertise.
 
