@@ -14,7 +14,7 @@ Dataset Usage
 -------------
 
 BowTieBuilder uses ``sources``, ``targets``, and edge weights. Input graph
-directionality is considered
+directionality is considered.
 
 Implementation Details
 ----------------------
