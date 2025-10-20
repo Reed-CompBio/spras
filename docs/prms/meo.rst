@@ -17,4 +17,5 @@ Dataset Usage
 -------------
 
 MEO uses ``sources``, ``targets``, and edge weights. MEO also considers
-input graph directionality.
+input graph directionality: all undirected edges are converted into directed
+edges, and the output sub-network is directed.

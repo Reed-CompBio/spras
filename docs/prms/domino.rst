@@ -13,7 +13,8 @@ Dataset Usage
 -------------
 
 DOMINO requires the `active` column to be set. DOMINO does not consider edge weights,
-but DOMINO does consider graph directionality.
+nor graph directionality: directed edges are treated as undirected edges, and DOMINO
+returns an undirected subnetwork.
 
 Implementation Details
 ----------------------

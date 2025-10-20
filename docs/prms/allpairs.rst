@@ -13,7 +13,8 @@ Dataset Usage
 -------------
 
 All Pairs Shortest Paths uses ``sources``, ``targets``, and edge weights.
-All Pairs Shortest Paths also considers graph directionality.
+All Pairs Shortest Paths also can incorporate graph directionality: it accepts directed, undirected, and mixed graphs.
+However, All Pairs Shortest Paths always returns an undirected subnetwork.
 
 Implementation Details
 ----------------------

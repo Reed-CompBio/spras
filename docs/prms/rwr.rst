@@ -16,8 +16,8 @@ Dataset Usage
 -------------
 
 RWR considers the union of ``sources`` and ``targets`` as the
-input active nodes.
-
+input active nodes. The input interactome is treated as directed, and the
+output subnetwork is also directed.
 
 Implementation Details
 ----------------------

@@ -14,7 +14,8 @@ ST_RWR is implemented at https://github.com/reed-compbio/rwr.
 Dataset Usage
 -------------
 
-ST_RWR considers ``sources`` and ``targets``.
+ST_RWR considers ``sources`` and ``targets``. The input interactome is treated as directed, and the
+output subnetwork is also directed.
 
 Implementation Details
 ----------------------

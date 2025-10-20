@@ -26,4 +26,5 @@ Dataset Usage
 OmicsIntegrator2 prefers ``prize``s, but will take the union of ``sources`` and ``targets``
 and set their 'prize' to 1 if ``prize`` is not specified.
 
-OmicsIntegrator2 does not consider graph directionality.
+OmicsIntegrator2 does not consider graph directionality: all edges are treated as undirected,
+and the output sub-network is undirected.
