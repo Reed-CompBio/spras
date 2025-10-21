@@ -261,7 +261,7 @@ We use Tukey's Honest Significant Difference (HSD) test to compare all time poin
 
 
 
-Lower p-values indicate that the observed differences in peptide abundance between time points are less likely to have occurred by chance.
+Peptides with lower p-values are more statistically significant and may represent biologically meaningful changes in phosphorylation over time.
 
 1.5 From p-values to prizes 
 ----------------------------
@@ -318,7 +318,7 @@ Using known pathway knowledge [1]_ [2]_ [3]_:
 
 - EGF serves as a source for the pathway and was the experimental treatment.
 - EGF is known to initiate signaling, so it can be added and assigned a high score (greater than all other nodes) to emphasize its importance and guide algorithms to start reconstruction from this point. (EGF is currently not in the data)
-- EGFR is in the current data. Looking at the pathway, we can see that EGFR acts as a target in the pathway.
+- EGFR is in the current data. Looking at the pathway, we can see that EGFR directly interacts with EGF in the pathway.
 - All other downstream proteins detected in the data can also treated as targets.
 - All proteins in the data can be considered active since they correspond to proteins that are active under the given biological condition.
 
