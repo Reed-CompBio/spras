@@ -14,11 +14,15 @@ ST_RWR is implemented at https://github.com/reed-compbio/rwr.
 Dataset Usage
 -------------
 
-ST_RWR considers ``sources`` and ``targets``. The input interactome is treated as directed, and the
-output subnetwork is also directed.
+ST_RWR considers ``sources`` and ``targets``. ST_RWR considers interactome directionality,
+and the output subnetwork is also directed.
 
 Implementation Details
 ----------------------
 
 ST_RWR returns a ranked list of nodes: SPRAS returns the induced subgraph
 from the number of nodes corresponding to the user-specified ``threshold``.
+
+ST_RWR's internal algorithm only takes in directed graphs.
+SPRAS will automatically convert edges to directed edges as necessary.
+For more information, see the section on :ref:`algorithm directionality <directionality>`.

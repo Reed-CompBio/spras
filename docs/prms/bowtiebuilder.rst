@@ -19,7 +19,6 @@ directionality is considered.
 Implementation Details
 ----------------------
 
-BowTieBuilder's internal algorithm only takes in directed graphs.
-Any pathway inputted into BowTieBuilder gets converted into a directed graph,
-where undirected edges get converted into two directed edges pointing opposite of one
-another.
+BowTieBuilder's internal implementation only takes in directed interactomes.
+SPRAS will automatically convert edges to directed edges as necessary.
+For more information, see the section on :ref:`algorithm directionality <directionality>`.

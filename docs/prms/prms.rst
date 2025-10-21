@@ -12,6 +12,23 @@ running pathway reconstruction. Implementation details are also provided, for us
 important decisions that differentiate the SPRAS-wrapped version from the original
 algorithm.
 
+.. _directionality:
+
+Directionality Details
+----------------------
+
+Some algorithms only accept fully undirected or fully directed interactomes as input. For input
+data, SPRAS will try to preserve as much directionality information as possible. Mixed interactomes
+are also accepted in SPRAS.
+
+SPRAS will automatically convert the input interactome to the desired directionality by the algorithm:
+this can mean that, for some algorithms, interactome direction may be ignored. Other algorithms will
+consider interactome directionality, whether by accepting mixed interactomes directly,
+or converting undirected edges into directed edges.
+
+For converting undirected edges to directed edges, unless otherwise specified, undirected edges
+will be converted into two directed edges pointing opposite of one another.
+
 .. toctree::
    :maxdepth: 1
    :caption: All Pairs

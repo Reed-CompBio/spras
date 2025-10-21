@@ -14,12 +14,11 @@ Dataset Usage
 -------------
 
 ResponseNet uses ``sources``, ``targets``, and edge weights. ResponseNet
-considers graph directionality.
+considers interactome directionality, but returns an undirected subnetwork.
 
 Implementation Details
 ----------------------
 
 ResponseNet's internal algorithm only takes in directed graphs.
-Any pathway inputted into ResponseNet gets converted into a directed graph,
-where undirected edges get converted into two directed edges pointing opposite of one
-another.
+SPRAS will automatically convert edges to directed edges as necessary.
+For more information, see the section on :ref:`algorithm directionality <directionality>`.

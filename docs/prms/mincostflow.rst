@@ -20,9 +20,9 @@ considers directionality.
 Implementation Details
 ----------------------
 
-MinCostFlow converts all undirected edges into directed edges
-where undirected edges get converted into two directed edges
-pointing opposite of one another.
+MinCostFlow's internal implementation only accepts directed interactomes.
+SPRAS will automatically convert edges to directed edges as necessary.
+For more information, see the section on :ref:`algorithm directionality <directionality>`.
 
 External links
 ++++++++++++++

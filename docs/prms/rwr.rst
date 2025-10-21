@@ -16,7 +16,7 @@ Dataset Usage
 -------------
 
 RWR considers the union of ``sources`` and ``targets`` as the
-input active nodes. The input interactome is treated as directed, and the
+input active nodes. Input interactome directionality is considered, and the
 output subnetwork is also directed.
 
 Implementation Details
@@ -24,3 +24,7 @@ Implementation Details
 
 RWR returns a ranked list of nodes: SPRAS returns the induced subgraph
 from the number of nodes corresponding to the user-specified ``threshold``.
+
+RWR's internal algorithm only takes in directed graphs.
+SPRAS will automatically convert edges to directed edges as necessary.
+For more information, see the section on :ref:`algorithm directionality <directionality>`.

@@ -13,12 +13,12 @@ Dataset Usage
 -------------
 
 All Pairs Shortest Paths uses ``sources``, ``targets``, and edge weights.
-All Pairs Shortest Paths also can incorporate graph directionality: it accepts directed, undirected, and mixed graphs.
+All Pairs Shortest Paths accepts directed graphs.
 However, All Pairs Shortest Paths always returns an undirected subnetwork.
 
 Implementation Details
 ----------------------
 
-When All Pairs Shortest Paths gets passed a mixed graph, it considers the entire graph to be
-directed, by converting all undirected edges to two directed edges pointing
-opposite of one another.
+All Pairs Shortest Paths only accepts fully undirected or directed graphs.
+SPRAS will automatically convert edges to directed edges as necessary.
+For more information, see the section on :ref:`algorithm directionality <directionality>`.

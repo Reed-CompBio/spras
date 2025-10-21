@@ -17,5 +17,11 @@ Dataset Usage
 -------------
 
 MEO uses ``sources``, ``targets``, and edge weights. MEO also considers
-input graph directionality: all undirected edges are converted into directed
-edges, and the output sub-network is directed.
+input graph directionality, and the output sub-network is directed.
+
+Implementation Details
+----------------------
+
+MEO's internal implementation only accepts directed interactomes.
+SPRAS will automatically convert edges to directed edges as necessary.
+For more information, see the section on :ref:`algorithm directionality <directionality>`.
