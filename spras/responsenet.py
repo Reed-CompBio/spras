@@ -105,12 +105,14 @@ class ResponseNet(PRM):
         container_suffix = "responsenet:v2"
 
         # constructs a docker run call
-        run_container_and_log('ResponseNet',
-                              container_framework,
-                              container_suffix,
-                              command,
-                              volumes,
-                              work_dir)
+        run_container_and_log(
+            'ResponseNet',
+            container_framework,
+            container_suffix,
+            command,
+            volumes,
+            work_dir,
+            out_dir)
 
         # Rename the primary output file to match the desired output filename
         out_file_suffixed.rename(output_file)
