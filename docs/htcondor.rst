@@ -71,7 +71,7 @@ it uses the SPRAS apptainer image you created:
    container_image = < your spras image >.sif
 
 Make sure to modify the configuration file to have
-``unpack_singularity`` set to ``true``, and ``container_framework`` set
+``unpack_singularity`` set to ``true``, and ``containers.framework`` set
 to ``singularity``: else, the workflow will (likely) fail.
 
 Then run ``condor_submit spras.sub``, which will submit SPRAS to

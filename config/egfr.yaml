@@ -9,7 +9,7 @@ containers:
   #   - There is no support for other environments at the moment.
   framework: docker
 
-  # Only used if container_framework is set to singularity, this will unpack the singularity containers
+  # Only used if framework is set to singularity, this will unpack the singularity containers
   # to the local filesystem. This is useful when PRM containers need to run inside another container,
   # such as would be the case in an HTCondor/OSPool environment.
   # NOTE: This unpacks singularity containers to the local filesystem, which will take up space in a way

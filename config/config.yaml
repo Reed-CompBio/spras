@@ -10,7 +10,7 @@ containers:
   # - dsub -- experimental with limited support, used for running on Google Cloud
   framework: docker
 
-  # Only used if container_framework is set to singularity/apptainer, this will unpack the containers
+  # Only used if framework is set to singularity/apptainer, this will unpack the containers
   # to the local filesystem. This is useful when PRM containers need to run inside another container,
   # such as would be the case in an HTCondor/OSPool environment.
   # NOTE: This unpacks containers to the local filesystem, which will take up space in a way
