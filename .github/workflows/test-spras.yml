@@ -33,6 +33,8 @@ jobs:
         # (with the max specified by `--splits 2`), to save CI time by parallelization
         test_group: [1, 2]
         os: [ubuntu-latest]
+      # we want all tests to run, even if some fail.
+      fail-fast: false
     steps:
       - name: Checkout repository
         uses: actions/checkout@v4
