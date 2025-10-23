@@ -18,7 +18,7 @@ Prerequisites for this tutorial
 ===============================
 Required software:
 
-- `Conda <https://docs.conda.io/projects/conda/en/latest/user-guide/install/index.html>`__ : for managing environments
+- `Pixi <https://pixi.sh/latest/installation/>`__ : for managing environments
 - `Docker <https://www.docker.com/get-started/>`__ : for containerized runs
 - `Git <https://git-scm.com/downloads>`__: for cloning the SPRAS repository
 - A terminal or code editor (`VS Code <https://code.visualstudio.com/download>`__ is recommended, but any terminal will work)
