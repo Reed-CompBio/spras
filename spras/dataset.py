@@ -130,7 +130,7 @@ class Dataset:
                     single_node_table, how="left", on=self.NODE_ID, suffixes=(None, "_DROP")
                 ).filter(regex="^(?!.*DROP)")
             except ValueError as error:
-                raise ValueError(f"An error occured when trying to merge {node_file} with the rest of the node files.") from error
+                raise ValueError(f"An error occurred when trying to merge {node_file} with the rest of the node files.") from error
         # Ensure that the NODEID column always appears first, which is required for some downstream analyses
         self.node_table.insert(0, "NODEID", self.node_table.pop("NODEID"))
         self.other_files = dataset_dict["other_files"]
