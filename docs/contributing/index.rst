@@ -1,5 +1,5 @@
 Contributing a new pathway reconstruction algorithm
-=========================================
+===================================================
 
 The SPRAS maintainers welcome external contributions. Code contributions
 will be licensed using the project's MIT license.
