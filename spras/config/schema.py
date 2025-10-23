@@ -103,7 +103,6 @@ class ContainerRegistry(BaseModel):
 
 class AlgorithmParams(BaseModel):
     include: bool
-    directed: Optional[bool] = None
 
     # TODO: use array of runs instead. We currently rely on the
     # extra parameters here to extract the algorithm parameter information,

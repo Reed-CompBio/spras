@@ -168,9 +168,6 @@ class Config:
                 # Do not parse the rest of the parameters for this algorithm if it is not included
                 continue
 
-            if cur_params.directed is not None:
-                warnings.warn("UPDATE: we no longer use the directed key in the config file", stacklevel=2)
-
             cur_params = cur_params.__pydantic_extra__
             if cur_params is None:
                 raise RuntimeError("An internal error occurred: ConfigDict extra should be set on AlgorithmParams.")
