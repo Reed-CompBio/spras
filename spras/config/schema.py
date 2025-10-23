@@ -11,7 +11,7 @@ We declare models using two classes here:
 """
 
 import re
-from typing import Annotated, Optional
+from typing import Annotated
 
 from pydantic import AfterValidator, BaseModel, ConfigDict, Field
 
