@@ -99,6 +99,8 @@ reconstruction_settings:
 analysis:
   cytoscape:
     include: true
+  visjs:
+    include: false
   summary:
     include: true
   ml:
