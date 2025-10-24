@@ -7,6 +7,7 @@ from spras.dataset import Dataset
 from spras.domino import DOMINO
 from spras.meo import MEO
 from spras.mincostflow import MinCostFlow
+from spras.netmix2 import NetMix2
 from spras.omicsintegrator1 import OmicsIntegrator1
 from spras.omicsintegrator2 import OmicsIntegrator2
 from spras.pathlinker import PathLinker
@@ -21,6 +22,7 @@ algorithms: dict[str, type[PRM]] = {
     "domino": DOMINO,
     "meo": MEO,
     "mincostflow": MinCostFlow,
+    "netmix2": NetMix2,
     "omicsintegrator1": OmicsIntegrator1,
     "omicsintegrator2": OmicsIntegrator2,
     "pathlinker": PathLinker,
