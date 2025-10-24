@@ -20,14 +20,26 @@ Required software:
 
 - `Conda <https://docs.conda.io/projects/conda/en/latest/user-guide/install/index.html>`__ : for managing environments
 - `Docker <https://www.docker.com/get-started/>`__ : for containerized runs
-- `Cytoscape <https://cytoscape.org/>`__ for visualizing networks (download locally, the web version will not suffice)
 - `Git <https://git-scm.com/downloads>`__: for cloning the SPRAS repository
 - A terminal or code editor (`VS Code <https://code.visualstudio.com/download>`__ is recommended, but any terminal will work)
+- (Optional) `Cytoscape <https://cytoscape.org/>`__ for visualizing networks (download locally, the web version will not suffice)
 
 Required knowledge:
 
-- Basic Python skills
+- Ability to run command line operations and modify YAML files.
 - Basic biology concepts
+
+.. note::
+    This tutorial will require downloading approximately 18.3 GB of Docker images and running many Docker containers.
+
+    SPRAS does not automatically clean up these containers or images after execution, so users will need to remove them manually if desired.
+    
+    To stop all running containers: ``docker stop $(docker ps -a -q)``
+
+    To remove all stopped containers: ``docker container prune``
+
+    To remove unused Docker images: ``docker image prune``
+
 
 ###############
 SPRAS Overview
@@ -35,28 +47,43 @@ SPRAS Overview
 
 What is pathway reconstruction?
 ===============================
-Pathway reconstruction is a computational approach used in biology to propose candidate biological pathways (such as signaling pathways) from high-throughput experimental data.
 
-Curated pathway databases provide references to pathways, but they are often generalized and may not capture the context-specific details relevant to a particular disease or experimental condition.
-To address this, pathway reconstruction algorithms help map molecules of interest (such as proteins, genes, or metabolites identified in omics experiments) onto large-scale interaction networks, called interactomes (graphs of molecular interactions in a cell).
-The result is a customized subnetwork (pathway) that reflects the biology of the specific experiment or condition.
+A pathway is a type of graph that describes how different molecules interact with one another for a biological process.
 
-Why use pathway reconstruction?
-===============================
-Pathway reconstruction algorithms allow researchers to systematically propose context-specific subnetworks without performing exhaustive experiments testing each individual interaction.
-Different algorithms use distinct computational strategies and parameters, providing flexibility to highlight various aspects of the underlying biology and generate new, testable hypotheses giving researchers the flexibility to create and identify different subnetworks specific to their experimental conditions.
+Curated pathway databases provide useful well studied references of pathways but are often general or incomplete. 
+This means they may miss context-specific details relevant to a particular condition or experiment.
+
+Pathway reconstruction algorithms address this by mapping molecules of interest onto large-scale interaction networks (interactomes) to generate candidate context-specific subnetworks that better reflect the high-throughput experimental data.
+
+These algorithms allow researchers to propose computational-backed hypothetical subnetworks that capture the unique characteristics of a given context without having to experimentally test every individual interaction.
+
+Running a single pathway reconstruction algorithm on a single dataset can be challenging, since each algorithm often requires its own input format, software environment, or even a full reimplementation.
+These challenges only grow when scaling up to using multiple algorithms and datasets.
 
 What is SPRAS?
 ===============
-The Signaling Pathway Reconstruction Analysis Streamliner (SPRAS) is a computational framework that unifies, standardizes, and streamlines the use of diverse pathway reconstructon algorithms.
 
-SPRAS provides an abstraction layer for pathway reconstruction algorithms by organizing every step into a unified schema. It uses workflow management (Snakemake), containerization, and config-driven runs to build modular and interoperable pipelines that cover the entire process:
+.. image:: ../_static/spras-overview.png
+   :alt: spras overview
+   :width: 600
+   :align: center
 
-1. Pre-processing of data
-2. Algorithm execution
-3. Post-processing of results
-4. Downstream analysis and evaluation
+.. raw:: html
 
-A key strength of SPRAS is automation. From user provided input data and configurations, it can generate and execute complete workflows without requiring users to write complex scripts. This lowers the barrier to entry, allowing researchers to apply, evaluate, and compare multiple pathway reconstruction algorithms without deep computational expertise.
+   <div style="margin:20px 0;"></div>
 
-SPRAS also supports scalable analyses, making it especially valuable for a large number of datasets and systematic investigations. In addition, it provides built-in evaluation and post analysis tools that provide further insights of the algorithm outputs.
+Signaling Pathway Reconstruction Analysis Streamliner (SPRAS) is a computational framework that unifies and simplifies the use of diverse pathway reconstruction algorithms.
+
+SPRAS allows users to run multiple datasets across multiple algorithms and many parameter settings in a single scalable workflow.
+The framework automatically handles data preprocessing, algorithm execution, and post-processing, allowing users to run multiple algorithms seamlessly without manual setup.
+Built-in analysis tools enable users to explore, compare, and evaluate reconstructed pathways with ease.
+
+SPRAS is implemented in Python and leverages two technologies for workflow automation:
+
+- Snakemake: a workflow management system that defines and executes jobs automatically, removing the need for users to write complex scripts
+- Docker: runs algorithms and post analysis in a containerized environment.
+
+A key strength of SPRAS is automation.
+From provided input data and configurations, SPRAS can generate and execute complete workflows without requiring users to write complex scripts.
+This lowers the barrier to entry, allowing researchers to apply, evaluate, and compare multiple pathway reconstruction algorithms without deep computational expertise.
+

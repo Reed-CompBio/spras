@@ -1,9 +1,10 @@
 hash_length: 7
-container_framework: docker
-unpack_singularity: false
-container_registry:
-  base_url: docker.io
-  owner: reedcompbio
+containers:
+  framework: docker
+  unpack_singularity: false
+  registry:
+    base_url: docker.io
+    owner: reedcompbio
 
 # Each algorithm has an 'include' parameter. By toggling 'include' to true/false the user can change
 # which algorithms are run in a given experiment.
@@ -26,8 +27,9 @@ algorithms:
       include: true
       run1:
         k: 1
-        # run2: # uncomment for step 3.2
-        #   k: [10, 100] # uncomment for step 3.2
+
+      # run2: # uncomment for step 3.2
+      #   k: [10, 100] # uncomment for step 3.2
 
 # Here we specify which pathways to run and other file location information.
 # Assume that if a dataset label does not change, the lists of associated input files do not change
@@ -45,7 +47,7 @@ reconstruction_settings:
 
   # Set where everything is saved
   locations:
-    reconstruction_dir: "output/basic"
+    reconstruction_dir: "output/beginner"
 
 analysis:
   # Create one summary per pathway file and a single summary table for all pathways for each dataset
