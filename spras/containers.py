@@ -176,7 +176,7 @@ def env_to_items(environment: dict[str, str]) -> Iterator[str]:
 # TODO consider a better default environment variable
 # Follow docker-py's naming conventions (https://docker-py.readthedocs.io/en/stable/containers.html)
 # Technically the argument is an image, not a container, but we use container here.
-def run_container(framework: str, container_suffix: str, command: List[str], volumes: List[Tuple[PurePath, PurePath]], working_dir: str, out_dir: str | os.PathLike, container_settings: ProcessedContainerSettings, environment: Optional[dict[str, str]] = None, network_disabled = False):
+def run_container(container_suffix: str, command: List[str], volumes: List[Tuple[PurePath, PurePath]], working_dir: str, out_dir: str | os.PathLike, container_settings: ProcessedContainerSettings, environment: Optional[dict[str, str]] = None, network_disabled = False):
     """
     Runs a command in the container using Singularity or Docker
     @param container_suffix: name of the DockerHub container without the 'docker://' prefix
@@ -201,7 +201,7 @@ def run_container(framework: str, container_suffix: str, command: List[str], vol
     else:
         raise ValueError(f'{container_settings.framework} is not a recognized container framework. Choose "docker", "dsub", or "singularity".')
 
-def run_container_and_log(name: str, framework: str, container_suffix: str, command: List[str], volumes: List[Tuple[PurePath, PurePath]], working_dir: str, out_dir: str | os.PathLike, container_settings: ProcessedContainerSettings, environment: Optional[dict[str, str]] = None, network_disabled=False):
+def run_container_and_log(name: str, container_suffix: str, command: List[str], volumes: List[Tuple[PurePath, PurePath]], working_dir: str, out_dir: str | os.PathLike, container_settings: ProcessedContainerSettings, environment: Optional[dict[str, str]] = None, network_disabled=False):
     """
     Runs a command in the container using Singularity or Docker with associated pretty printed messages.
     @param name: the display name of the running container for logging purposes
@@ -219,7 +219,7 @@ def run_container_and_log(name: str, framework: str, container_suffix: str, comm
 
     print('Running {} on container framework "{}" on env {} with command: {}'.format(name, container_settings.framework, list(env_to_items(environment)), ' '.join(command)), flush=True)
     try:
-        out = run_container(framework=framework, container_suffix=container_suffix, command=command, volumes=volumes, working_dir=working_dir, out_dir=out_dir, container_settings=container_settings, environment=environment, network_disabled=network_disabled)
+        out = run_container(container_suffix=container_suffix, command=command, volumes=volumes, working_dir=working_dir, out_dir=out_dir, container_settings=container_settings, environment=environment, network_disabled=network_disabled)
         if out is not None:
             if isinstance(out, list):
                 out = ''.join(out)
