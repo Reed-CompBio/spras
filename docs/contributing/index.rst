@@ -1,5 +1,5 @@
 Contributing a new pathway reconstruction algorithm
-=========================================
+===================================================
 
 The SPRAS maintainers welcome external contributions. Code contributions
 will be licensed using the project's MIT license.
@@ -285,7 +285,7 @@ Local Neighborhood has no other parameters. Optionally set
 ``include: false`` for the other pathway reconstruction algorithms to
 make testing faster.
 
-The config file has an option ``owner`` under the ``container_registry``
+The config file has an option ``owner`` under the ``containers.registry``
 settings that controls which Docker Hub account will be used when
 pulling Docker images. The same Docker Hub account will be used for all
 images and cannot currently be set different for each algorithm. Set the

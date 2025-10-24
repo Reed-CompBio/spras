@@ -7,7 +7,7 @@ module that imports this module can access a config option by checking the objec
 value. For example
 
 import spras.config.config as config
-container_framework = config.config.container_framework
+container_framework = config.config.container_settings.framework
 
 will grab the top level registry configuration option as it appears in the config file
 """
@@ -25,7 +25,8 @@ from typing import Any
 import numpy as np
 import yaml
 
-from spras.config.schema import ContainerFramework, RawConfig
+from spras.config.container_schema import ProcessedContainerSettings
+from spras.config.schema import RawConfig
 from spras.util import NpHashEncoder, hash_params_sha1_base32
 
 config = None
@@ -86,18 +87,16 @@ class Config:
 
         # Directory used for storing output
         self.out_dir = parsed_raw_config.reconstruction_settings.locations.reconstruction_dir
-        # Container framework used by PRMs. Valid options are "docker", "dsub", and "singularity"
-        self.container_framework = None
-        # The container prefix (host and organization) to use for images. Default is "docker.io/reedcompbio"
-        self.container_prefix: str = DEFAULT_CONTAINER_PREFIX
-        # A Boolean specifying whether to unpack singularity containers. Default is False
-        self.unpack_singularity = False
+        # A Boolean indicating whether to enable container runtime profiling (apptainer/singularity only)
+        self.enable_profiling = False
         # A dictionary to store configured datasets against which SPRAS will be run
         self.datasets = None
         # A dictionary to store configured gold standard data against output of SPRAS runs
         self.gold_standards = None
         # The hash length SPRAS will use to identify parameter combinations.
         self.hash_length = parsed_raw_config.hash_length
+        # Container settings used by PRMs.
+        self.container_settings = ProcessedContainerSettings.from_container_settings(parsed_raw_config.containers, self.hash_length)
         # The list of algorithms to run in the workflow. Each is a dict with 'name' as an expected key.
         self.algorithms = None
         # A nested dict mapping algorithm names to dicts that map parameter hashes to parameter combinations.
@@ -317,18 +316,9 @@ class Config:
         # Set up a few top-level config variables
         self.out_dir = raw_config.reconstruction_settings.locations.reconstruction_dir
 
-        if raw_config.container_framework == ContainerFramework.dsub:
-            warnings.warn("'dsub' framework integration is experimental and may not be fully supported.", stacklevel=2)
-        self.container_framework = raw_config.container_framework
-
-        # Unpack settings for running in singularity mode. Needed when running PRM containers if already in a container.
-        if raw_config.unpack_singularity and self.container_framework != "singularity":
-            warnings.warn("unpack_singularity is set to True, but the container framework is not singularity. This setting will have no effect.", stacklevel=2)
-        self.unpack_singularity = raw_config.unpack_singularity
-
-        # Grab registry from the config, and if none is provided default to docker
-        if raw_config.container_registry and raw_config.container_registry.base_url != "" and raw_config.container_registry.owner != "":
-            self.container_prefix = raw_config.container_registry.base_url + "/" + raw_config.container_registry.owner
+        if raw_config.enable_profiling and raw_config.containers.framework not in ["singularity", "apptainer"]:
+            warnings.warn("enable_profiling is set to true, but the container framework is not singularity/apptainer. This setting will have no effect.", stacklevel=2)
+        self.enable_profiling = raw_config.enable_profiling
 
         self.process_datasets(raw_config)
         self.process_algorithms(raw_config)

@@ -133,12 +133,14 @@ class BowTieBuilder(PRM):
                    mapped_out_prefix]
 
         container_suffix = "bowtiebuilder:v2"
-        run_container_and_log('BowTieBuilder',
-                              container_framework,
-                              container_suffix,
-                              command,
-                              volumes,
-                              work_dir)
+        run_container_and_log(
+            'BowTieBuilder',
+            container_framework,
+            container_suffix,
+            command,
+            volumes,
+            work_dir,
+            out_dir)
         # Output is already written to raw-pathway.txt file
 
 
