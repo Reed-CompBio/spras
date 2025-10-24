@@ -12,8 +12,8 @@ import spras.config.config as _config
 SEP = '/'
 
 wildcard_constraints:
-    params="params-\w+",
-    dataset="\w+"
+    params=r"params-\w+",
+    dataset=r"\w+"
 
 # Elsewhere we import this as config, but in the Snakefile, the variable config is already populated
 # with the parsed config.yaml. This is done by Snakemake, which magically pipes config into this file
