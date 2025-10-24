@@ -191,7 +191,7 @@ def run_container(framework: str, container_suffix: str, command: List[str], vol
     """
     normalized_framework = framework.casefold()
 
-    container = config.config.container_prefix + "/" + container_suffix
+    container = config.config.container_settings.prefix + "/" + container_suffix
     if normalized_framework == 'docker':
         return run_container_docker(container, command, volumes, working_dir, environment, network_disabled)
     elif normalized_framework == 'singularity' or normalized_framework == "apptainer":
@@ -385,7 +385,7 @@ def run_container_singularity(container: str, command: List[str], volumes: List[
 
     # Handle unpacking singularity image if needed. Potentially needed for running nested unprivileged containers
     expanded_image = None
-    if config.config.unpack_singularity:
+    if config.config.container_settings.unpack_singularity:
         # The incoming image string is of the format <repository>/<owner>/<image name>:<tag> e.g.
         # hub.docker.com/reedcompbio/spras:latest
         # Here we first produce a .sif image using the image name and tag (base_cont)
@@ -471,7 +471,7 @@ def prepare_volume(filename: Union[str, PurePath], volume_base: Union[str, PureP
     if isinstance(filename, PurePath):
         filename = str(filename)
 
-    filename_hash = hash_filename(filename, config.config.hash_length)
+    filename_hash = hash_filename(filename, config.config.container_settings.hash_length)
     dest = PurePosixPath(base_path, filename_hash)
 
     abs_filename = Path(filename).resolve()
