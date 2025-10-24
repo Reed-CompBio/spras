@@ -15,7 +15,7 @@ Dataset Usage
 -------------
 
 MinCostFlow uses the input's ``sources``, ``targets``, and edge weights. MinCostFlow also
-considers directionality.
+edge direction information.
 
 Implementation Details
 ----------------------

@@ -13,8 +13,7 @@ BowTieBuilder does not take in any arguments.
 Dataset Usage
 -------------
 
-BowTieBuilder uses ``sources``, ``targets``, and edge weights. Input graph
-directionality is considered.
+BowTieBuilder uses ``sources``, ``targets``, edge weights, and edge direction information.
 
 Implementation Details
 ----------------------

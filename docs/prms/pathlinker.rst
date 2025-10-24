@@ -14,12 +14,12 @@ Dataset Usage
 -------------
 
 PathLinker uses ``sources``, ``targets``, and edge weights. PathLinker
-considers graph directionality.
+uses edge direction information.
 
 Implementation Details
 ----------------------
 
-PathLinker's internal algorithm only takes in directed graphs.
+Internally, PathLinker only takes in directed graphs.
 SPRAS will automatically convert edges to directed edges as necessary.
 For more information, see the section on :ref:`algorithm directionality <directionality>`.
 

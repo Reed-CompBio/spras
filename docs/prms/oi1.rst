@@ -32,4 +32,4 @@ OmicsIntegrator1 prefers ``prize``s, but will take the union of ``sources`` and 
 and set their 'prize' to 1 if ``prize`` is not specified. If any ``dummy_nodes`` are specified,
 these are passed to OmicsIntegrator1 and can have their behavior configured with ``dummy_mode``.
 
-OmicsIntegrator1 accepts mixed directionality graphs.
+OmicsIntegrator1 uses edge direction information.

@@ -16,12 +16,12 @@ MEO takes in three optional parameters:
 Dataset Usage
 -------------
 
-MEO uses ``sources``, ``targets``, and edge weights. MEO also considers
-input graph directionality, and the output sub-network is directed.
+MEO uses ``sources``, ``targets``, and edge weights. MEO also uses
+edge direction information, and the output sub-network is directed.
 
 Implementation Details
 ----------------------
 
-MEO's internal implementation only accepts directed interactomes.
+Internally, MEO only accepts directed interactomes.
 SPRAS will automatically convert edges to directed edges as necessary.
 For more information, see the section on :ref:`algorithm directionality <directionality>`.

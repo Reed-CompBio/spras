@@ -23,6 +23,6 @@ Implementation Details
 ST_RWR returns a ranked list of nodes: SPRAS returns the induced subgraph
 from the number of nodes corresponding to the user-specified ``threshold``.
 
-ST_RWR's internal algorithm only takes in directed graphs.
+Internally, ST_RWR only takes in directed graphs.
 SPRAS will automatically convert edges to directed edges as necessary.
 For more information, see the section on :ref:`algorithm directionality <directionality>`.
