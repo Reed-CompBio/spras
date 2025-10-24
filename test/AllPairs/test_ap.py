@@ -4,9 +4,9 @@ from pathlib import Path
 
 import pytest
 
-from spras.config.container_schema import ContainerFramework, ProcessedContainerSettings
 import spras.config.config as config
 from spras.allpairs import AllPairs
+from spras.config.container_schema import ContainerFramework, ProcessedContainerSettings
 
 # Note that we don't directly use the config in the test, but we need the config
 # to be initialized under the hood nonetheless. Initializing the config has implications

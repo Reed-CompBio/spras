@@ -3,8 +3,8 @@ from pathlib import Path
 
 import pytest
 
-from spras.config.container_schema import ContainerFramework, ProcessedContainerSettings
 import spras.config.config as config
+from spras.config.container_schema import ContainerFramework, ProcessedContainerSettings
 from spras.omicsintegrator1 import OmicsIntegrator1, write_conf
 
 config.init_from_file("config/config.yaml")
