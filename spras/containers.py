@@ -2,6 +2,7 @@ import os
 import platform
 import re
 import subprocess
+import textwrap
 from pathlib import Path, PurePath, PurePosixPath
 from typing import Iterator, List, Optional, Tuple, Union
 
@@ -122,6 +123,49 @@ def prepare_dsub_cmd(flags: dict[str, str | list[str]]):
     print(f"dsub command: {dsub_command}")
     return dsub_command
 
+class ContainerError(RuntimeError):
+    """Raises when anything goes wrong inside a container"""
+
+    error_code: int
+    stdout: Optional[str]
+    stderr: Optional[str]
+
+    def __init__(self, message: str, error_code: int, stdout: Optional[str], stderr: Optional[str], *args):
+        """
+        Constructs a new ContainerError.
+
+        @param message: The message to display to the user. This should usually refer to the indent call to differentiate between
+        general logging done by Snakemake/logging calls.
+        @param error_code: Also known as exit status; this should generally be non-zero for ContainerErrors.
+        @param stdout: The standard output stream. If the origin of the stream is unknown, leave it in stdout.
+        @param stderr: The standard error stream.
+        """
+
+        # https://stackoverflow.com/a/26938914/7589775
+        self.message = message
+
+        self.error_code = error_code
+        self.stdout = stdout
+        self.stderr = stderr
+
+        super(ContainerError, self).__init__(message, error_code, stdout, stderr, *args)
+
+    def streams_contain(self, needle: str):
+        """
+        Checks (with case sensitivity)
+        if any of the stdout/err streams have the provided needle.
+        """
+        stdout = self.stdout if self.stdout else ''
+        stderr = self.stderr if self.stderr else ''
+
+        return (needle in stdout) or (needle in stderr)
+
+    # Due to
+    # https://github.com/snakemake/snakemake/blob/d4890b4da691506b6a258f7534ac41fdb7ef5ab4/src/snakemake/exceptions.py#L18
+    # this overrides the tostr implementation to have nicer container errors
+    def __str__(self):
+        return self.message
+
 def env_to_items(environment: dict[str, str]) -> Iterator[str]:
     """
     Turns an environment variable dictionary to KEY=VALUE pairs.
@@ -132,7 +176,7 @@ def env_to_items(environment: dict[str, str]) -> Iterator[str]:
 # TODO consider a better default environment variable
 # Follow docker-py's naming conventions (https://docker-py.readthedocs.io/en/stable/containers.html)
 # Technically the argument is an image, not a container, but we use container here.
-def run_container(container_suffix: str, command: List[str], volumes: List[Tuple[PurePath, PurePath]], working_dir: str, out_dir: str | os.PathLike, container_settings: ProcessedContainerSettings, environment: Optional[dict[str, str]] = None):
+def run_container(framework: str, container_suffix: str, command: List[str], volumes: List[Tuple[PurePath, PurePath]], working_dir: str, out_dir: str | os.PathLike, container_settings: ProcessedContainerSettings, environment: Optional[dict[str, str]] = None, network_disabled = False):
     """
     Runs a command in the container using Singularity or Docker
     @param container_suffix: name of the DockerHub container without the 'docker://' prefix
@@ -140,23 +184,24 @@ def run_container(container_suffix: str, command: List[str], volumes: List[Tuple
     @param volumes: a list of volumes to mount where each item is a (source, destination) tuple
     @param working_dir: the working directory in the container
     @param container_settings: the settings to use to run the container
-    @param environment: environment variables to set in the container
     @param out_dir: output directory for the rule's artifacts. Only passed into run_container_singularity for the purpose of profiling.
+    @param environment: environment variables to set in the container
+    @param network_disabled: Disables the network on the container. Only works for docker for now. This acts as a 'runtime assertion' that a container works w/o networking.
     @return: output from Singularity execute or Docker run
     """
     normalized_framework = container_settings.framework.casefold()
 
     container = container_settings.prefix + "/" + container_suffix
     if normalized_framework == 'docker':
-        return run_container_docker(container, command, volumes, working_dir, container_settings, environment)
+        return run_container_docker(container, command, volumes, working_dir, environment, network_disabled)
     elif normalized_framework == 'singularity' or normalized_framework == "apptainer":
         return run_container_singularity(container, command, volumes, working_dir, out_dir, container_settings, environment)
     elif normalized_framework == 'dsub':
-        return run_container_dsub(container, command, volumes, working_dir, container_settings, environment)
+        return run_container_dsub(container, command, volumes, working_dir, environment)
     else:
         raise ValueError(f'{container_settings.framework} is not a recognized container framework. Choose "docker", "dsub", or "singularity".')
 
-def run_container_and_log(name: str, container_suffix: str, command: List[str], volumes: List[Tuple[PurePath, PurePath]], working_dir: str, out_dir: str | os.PathLike, container_settings: ProcessedContainerSettings, environment: Optional[dict[str, str]] = None):
+def run_container_and_log(name: str, framework: str, container_suffix: str, command: List[str], volumes: List[Tuple[PurePath, PurePath]], working_dir: str, out_dir: str | os.PathLike, container_settings: ProcessedContainerSettings, environment: Optional[dict[str, str]] = None, network_disabled=False):
     """
     Runs a command in the container using Singularity or Docker with associated pretty printed messages.
     @param name: the display name of the running container for logging purposes
@@ -166,6 +211,7 @@ def run_container_and_log(name: str, container_suffix: str, command: List[str], 
     @param working_dir: the working directory in the container
     @param container_settings: the container settings to use
     @param environment: environment variables to set in the container
+    @param network_disabled: Disables the network on the container. Only works for docker for now. This acts as a 'runtime assertion' that a container works w/o networking.
     @return: output from Singularity execute or Docker run
     """
     if not environment:
@@ -173,7 +219,7 @@ def run_container_and_log(name: str, container_suffix: str, command: List[str], 
 
     print('Running {} on container framework "{}" on env {} with command: {}'.format(name, container_settings.framework, list(env_to_items(environment)), ' '.join(command)), flush=True)
     try:
-        out = run_container(container_suffix=container_suffix, command=command, volumes=volumes, working_dir=working_dir, out_dir=out_dir, container_settings=container_settings, environment=environment)
+        out = run_container(framework=framework, container_suffix=container_suffix, command=command, volumes=volumes, working_dir=working_dir, out_dir=out_dir, container_settings=container_settings, environment=environment, network_disabled=network_disabled)
         if out is not None:
             if isinstance(out, list):
                 out = ''.join(out)
@@ -181,25 +227,30 @@ def run_container_and_log(name: str, container_suffix: str, command: List[str], 
                 if 'message' in out:
                     # This is the format of a singularity message.
                     # See https://singularityhub.github.io/singularity-cli/api/source/spython.main.html?highlight=execute#spython.main.execute.execute.
-                    if 'return_code' in out and not out['return_code'] == 0:
-                        print(f"(Program exited with non-zero exit code '{out['return_code']}')")
+                    exit_status = int(out['return_code']) if 'return_code' in out else 0
                     out = ''.join(out['message'])
+                    if exit_status != 0:
+                        message = f'An unexpected non-zero exit status ({exit_status}) occurred while running this singularity container:\n' + indent(out)
+                        raise ContainerError(message, exit_status, out, None)
                 else:
-                    print("Note: This is an unknown message format - if you want this pretty printed, please file an issue at https://github.com/Reed-CompBio/spras/issues/new.")
+                    print("Note: The following output is an unknown message format which should be properly handled.")
+                    print("Please file an issue at https://github.com/Reed-CompBio/spras/issues/new with this output.")
                     out = str(out)
             elif not isinstance(out, str):
                 out = str(out, "utf-8")
             print(indent(out))
     except docker.errors.ContainerError as err:
-        print(f"(Command formatted as list: `{err.command}`)")
-        print(f"An unexpected non-zero exit status ({err.exit_status}) inside the docker image {err.image} occurred:")
-        err = str(err.stderr if err.stderr is not None else "", "utf-8")
-        print(indent(err))
-    except Exception as err:
-        raise err
+        stdout = str(err.container.logs(stdout=True, stderr=False), 'utf-8')
+        stderr = str(err.container.logs(stdout=False, stderr=True), 'utf-8')
+
+        message = textwrap.dedent(f'''\
+                                  (Command formatted as list: `{err.command}`)
+                                  An unexpected non-zero exit status ({err.exit_status}) inside the docker image {err.image} occurred:\n''') + indent(stderr)
+        # We retrieved all of the information from docker.errors.ContainerError, so here, we ignore the original error.
+        raise ContainerError(message, err.exit_status, stdout, stderr) from None
 
 # TODO any issue with creating a new client each time inside this function?
-def run_container_docker(container: str, command: List[str], volumes: List[Tuple[PurePath, PurePath]], working_dir: str, environment: Optional[dict[str, str]] = None):
+def run_container_docker(container: str, command: List[str], volumes: List[Tuple[PurePath, PurePath]], working_dir: str, environment: Optional[dict[str, str]] = None, network_disabled=False):
     """
     Runs a command in the container using Docker.
     Attempts to automatically correct file owner and group for new files created by the container, setting them to the
@@ -244,6 +295,7 @@ def run_container_docker(container: str, command: List[str], volumes: List[Tuple
                                 stderr=True,
                                 volumes=bind_paths,
                                 working_dir=working_dir,
+                                network_disabled=network_disabled,
                                 environment=environment).decode('utf-8')
 
     # TODO does this cleanup need to still run even if there was an error in the above run command?
@@ -278,6 +330,7 @@ def run_container_docker(container: str, command: List[str], volumes: List[Tuple
                                 stderr=True,
                                 volumes=bind_paths,
                                 working_dir=working_dir,
+                                network_disabled=network_disabled,
                                 environment=environment).decode('utf-8')
 
     # Raised on non-Unix systems

@@ -13,7 +13,7 @@ We declare models using two classes here:
 import re
 from typing import Annotated, Optional
 
-from pydantic import AfterValidator, BaseModel, ConfigDict, Field
+from pydantic import AfterValidator, BaseModel, ConfigDict
 
 from spras.config.container_schema import ContainerSettings
 from spras.config.util import CaseInsensitiveEnum

@@ -9,9 +9,9 @@ from spras.domino import DOMINO, post_domino_id_transform, pre_domino_id_transfo
 
 config.init_from_file("config/config.yaml")
 
-TEST_DIR = 'test/DOMINO/'
-OUT_FILE_DEFAULT = TEST_DIR+'output/domino-output.txt'
-OUT_FILE_OPTIONAL = TEST_DIR+'output/domino-output-thresholds.txt'
+TEST_DIR = Path('test', 'DOMINO')
+OUT_FILE_DEFAULT = TEST_DIR / 'output' / 'domino-output.txt'
+OUT_FILE_OPTIONAL = TEST_DIR / 'output' / 'domino-output-thresholds.txt'
 
 
 class TestDOMINO:
@@ -26,34 +26,32 @@ class TestDOMINO:
 
     def test_domino_required(self):
         # Only include required arguments
-        out_path = Path(OUT_FILE_DEFAULT)
-        out_path.unlink(missing_ok=True)
+        OUT_FILE_DEFAULT.unlink(missing_ok=True)
         DOMINO.run(
-            network=TEST_DIR+'input/domino-network.txt',
-            active_genes=TEST_DIR+'input/domino-active-genes.txt',
+            network=TEST_DIR / 'input' / 'simple' / 'domino-network.txt',
+            active_genes=TEST_DIR / 'input' / 'simple' / 'domino-active-genes.txt',
             output_file=OUT_FILE_DEFAULT)
         # output_file should be empty
-        assert out_path.exists()
+        assert OUT_FILE_DEFAULT.exists()
 
     def test_domino_optional(self):
         # Include optional arguments
-        out_path = Path(OUT_FILE_OPTIONAL)
-        out_path.unlink(missing_ok=True)
+        OUT_FILE_OPTIONAL.unlink(missing_ok=True)
         DOMINO.run(
-            network=TEST_DIR+'input/domino-network.txt',
-            active_genes=TEST_DIR+'input/domino-active-genes.txt',
+            network=TEST_DIR / 'input' / 'simple' / 'domino-network.txt',
+            active_genes=TEST_DIR / 'input' / 'simple' / 'domino-active-genes.txt',
             output_file=OUT_FILE_OPTIONAL,
             slice_threshold=0.4,
             module_threshold=0.06)
         # output_file should be empty
-        assert out_path.exists()
+        assert OUT_FILE_OPTIONAL.exists()
 
     def test_domino_missing_active_genes(self):
         # Test the expected error is raised when active_genes argument is missing
         with pytest.raises(ValueError):
             # No active_genes
             DOMINO.run(
-                network=TEST_DIR+'input/domino-network.txt',
+                network=TEST_DIR / 'input' / 'simple' / 'domino-network.txt',
                 output_file=OUT_FILE_DEFAULT)
 
     def test_domino_missing_network(self):
@@ -61,22 +59,32 @@ class TestDOMINO:
         with pytest.raises(ValueError):
             # No network
             DOMINO.run(
-                active_genes=TEST_DIR+'input/domino-active-genes.txt',
+                active_genes=TEST_DIR / 'input' / 'simple' / 'domino-active-genes.txt',
                 output_file=OUT_FILE_DEFAULT)
+
+    def test_domino_empty(self):
+        # Test over empty files
+        # https://github.com/Reed-CompBio/spras/pull/103#issuecomment-1681526958
+        OUT_FILE_DEFAULT.unlink(missing_ok=True)
+        DOMINO.run(
+            network=TEST_DIR / 'input' / 'empty' / 'domino-network.txt',
+            active_genes=TEST_DIR / 'input' / 'empty' / 'domino-active-genes.txt',
+            output_file=OUT_FILE_DEFAULT)
+        assert OUT_FILE_DEFAULT.exists()
+
 
     # Only run Singularity test if the binary is available on the system
     # spython is only available on Unix, but do not explicitly skip non-Unix platforms
     @pytest.mark.skipif(not shutil.which('singularity'), reason='Singularity not found on system')
     def test_domino_singularity(self):
-        out_path = Path(OUT_FILE_DEFAULT)
-        out_path.unlink(missing_ok=True)
+        OUT_FILE_DEFAULT.unlink(missing_ok=True)
         # Only include required arguments and run with Singularity
         DOMINO.run(
-            network=TEST_DIR+'input/domino-network.txt',
-            active_genes=TEST_DIR+'input/domino-active-genes.txt',
+            network=TEST_DIR / 'input' / 'simple' / 'domino-network.txt',
+            active_genes=TEST_DIR / 'input' / 'simple' / 'domino-active-genes.txt',
             output_file=OUT_FILE_DEFAULT,
             container_settings=ProcessedContainerSettings(framework=ContainerFramework.singularity))
-        assert out_path.exists()
+        assert OUT_FILE_DEFAULT.exists()
 
     def test_pre_id_transform(self):
         """

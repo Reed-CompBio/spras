@@ -22,7 +22,7 @@ from typing import Any
 import numpy as np
 import yaml
 
-from spras.config.container_schema import ContainerSettings, ProcessedContainerSettings
+from spras.config.container_schema import ProcessedContainerSettings
 from spras.config.schema import RawConfig
 from spras.util import NpHashEncoder, hash_params_sha1_base32
 
@@ -292,8 +292,8 @@ class Config:
         # Set up a few top-level config variables
         self.out_dir = raw_config.reconstruction_settings.locations.reconstruction_dir
 
-        if raw_config.enable_profiling and not raw_config.container_settings.framework in ["singularity", "apptainer"]:
-            warnings.warn("enable_profiling is set to true, but the container framework is not singularity/apptainer. This setting will have no effect.")
+        if raw_config.enable_profiling and raw_config.containers.framework not in ["singularity", "apptainer"]:
+            warnings.warn("enable_profiling is set to true, but the container framework is not singularity/apptainer. This setting will have no effect.", stacklevel=2)
         self.enable_profiling = raw_config.enable_profiling
 
         self.process_datasets(raw_config)
