@@ -1,9 +1,10 @@
 hash_length: 7
-container_framework: docker
-unpack_singularity: false
-container_registry:
-  base_url: docker.io
-  owner: reedcompbio
+containers:
+  framework: docker
+  unpack_singularity: false
+  registry:
+    base_url: docker.io
+    owner: reedcompbio
 
 # Each algorithm has an 'include' parameter. By toggling 'include' to true/false the user can change
 # which algorithms are run in a given experiment.

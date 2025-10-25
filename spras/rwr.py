@@ -4,7 +4,10 @@ import pandas as pd
 
 from spras.containers import prepare_volume, run_container_and_log
 from spras.dataset import Dataset
-from spras.interactome import reinsert_direction_col_directed
+from spras.interactome import (
+    convert_undirected_to_directed,
+    reinsert_direction_col_directed,
+)
 from spras.prm import PRM
 from spras.util import add_rank_column, duplicate_edges, raw_pathway_df
 
@@ -29,6 +32,8 @@ class RWR(PRM):
 
         # Get edge data for network file
         edges = data.get_interactome()
+        edges = convert_undirected_to_directed(edges)
+
         edges.to_csv(filename_map['network'],sep='|',index=False,columns=['Interactor1','Interactor2'],header=False)
 
     @staticmethod
