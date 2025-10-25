@@ -3,8 +3,8 @@ containers:
   framework: docker
   unpack_singularity: false
   registry:
-    base_url: ghcr.io
-    owner: reed-compbio
+    base_url: docker.io
+    owner: reedcompbio
 
 algorithms:
   - name: "pathlinker"
