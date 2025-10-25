@@ -48,12 +48,15 @@ def run_cytoscape(pathways: List[Union[str, PurePath]], output_file: str, contai
         # Provided the mapped pathway file path and the original file path as the label Cytoscape
         command.extend(['--pathway', f'{mapped_pathway}|{pathway}'])
 
+    out_dir = Path(output_file).parent
+
     container_suffix = "py4cytoscape:v3"
     run_container_and_log('Cytoscape',
                          container_suffix,
                          command,
                          volumes,
                          work_dir,
+                         out_dir,
                          container_settings,
                          env)
     rmtree(cytoscape_output_dir)
