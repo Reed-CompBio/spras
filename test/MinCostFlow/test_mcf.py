@@ -4,6 +4,7 @@ from pathlib import Path
 import pytest
 
 import spras.config.config as config
+from spras.config.container_schema import ContainerFramework, ProcessedContainerSettings
 from spras.mincostflow import MinCostFlow
 
 config.init_from_file("config/config.yaml")
@@ -112,6 +113,6 @@ class TestMinCostFlow:
                         output_file=OUT_FILE,
                         flow=1,
                         capacity=1,
-                        container_framework="singularity")
+                        container_settings=ProcessedContainerSettings(framework=ContainerFramework.singularity))
         assert out_path.exists()
 

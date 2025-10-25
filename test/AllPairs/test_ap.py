@@ -6,6 +6,7 @@ import pytest
 
 import spras.config.config as config
 from spras.allpairs import AllPairs
+from spras.config.container_schema import ContainerFramework, ProcessedContainerSettings
 
 # Note that we don't directly use the config in the test, but we need the config
 # to be initialized under the hood nonetheless. Initializing the config has implications
@@ -73,7 +74,7 @@ class TestAllPairs:
             network=str(TEST_DIR / 'input' / 'sample-in-net.txt'),
             directed_flag=str(TEST_DIR / 'input' / 'directed-flag-false.txt'),
             output_file=str(out_path),
-            container_framework="singularity")
+            container_settings=ProcessedContainerSettings(framework=ContainerFramework.singularity))
         assert out_path.exists()
 
     @pytest.mark.skipif(not shutil.which('singularity'), reason='Singularity not found on system')
@@ -87,7 +88,7 @@ class TestAllPairs:
             network=str(TEST_DIR / 'input/sample-in-net.txt'),
             directed_flag=str(TEST_DIR / 'input' / 'directed-flag-false.txt'),
             output_file=str(out_path),
-            container_framework="singularity")
+            container_settings=ProcessedContainerSettings(framework=ContainerFramework.singularity))
         config.config.container_settings.unpack_singularity = False
         assert out_path.exists()
 
