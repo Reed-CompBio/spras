@@ -386,7 +386,7 @@ def run_container_singularity(container: str, command: List[str], volumes: List[
 
     # Handle unpacking singularity image if needed. Potentially needed for running nested unprivileged containers
     expanded_image = None
-    if config.config.container_settings.unpack_singularity:
+    if config.unpack_singularity:
         # The incoming image string is of the format <repository>/<owner>/<image name>:<tag> e.g.
         # hub.docker.com/reedcompbio/spras:latest
         # Here we first produce a .sif image using the image name and tag (base_cont)
@@ -417,7 +417,7 @@ def run_container_singularity(container: str, command: List[str], volumes: List[
     # If not using the expanded sandbox image, we still need to prepend the docker:// prefix
     # so apptainer knows to pull and convert the image format from docker to apptainer.
     image_to_run = expanded_image if expanded_image else "docker://" + container
-    if config.config.enable_profiling:
+    if config.enable_profiling:
         # We won't end up using the spython client if profiling is enabled because
         # we need to run everything manually to set up the cgroup
         # Build the apptainer run command, which gets passed to the cgroup wrapper script
