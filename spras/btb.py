@@ -36,14 +36,12 @@ class BowTieBuilder(PRM):
         @param filename_map: a dict mapping file types in the required_inputs to the filename for that type
         @return:
         """
-        for input_type in BowTieBuilder.required_inputs:
-            if input_type not in filename_map:
-                raise ValueError(f"{input_type} filename is missing")
+        BowTieBuilder.validate_required_inputs(filename_map)
 
         # Get sources and write to file, repeat for targets
         # Does not check whether a node is a source and a target
         for node_type in ['sources', 'targets']:
-            nodes = data.request_node_columns([node_type])
+            nodes = data.get_node_columns([node_type])
             if nodes is None:
                 raise ValueError(f'No {node_type} found in the node files')
 
@@ -135,12 +133,14 @@ class BowTieBuilder(PRM):
                    mapped_out_prefix]
 
         container_suffix = "bowtiebuilder:v2"
-        run_container_and_log('BowTieBuilder',
-                              container_framework,
-                              container_suffix,
-                              command,
-                              volumes,
-                              work_dir)
+        run_container_and_log(
+            'BowTieBuilder',
+            container_framework,
+            container_suffix,
+            command,
+            volumes,
+            work_dir,
+            out_dir)
         # Output is already written to raw-pathway.txt file
 
 

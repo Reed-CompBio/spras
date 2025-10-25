@@ -1,17 +1,12 @@
-import sys
+import shutil
 from pathlib import Path
 
 import pytest
 
 import spras.config.config as config
+from spras.btb import BowTieBuilder as BTB
 
 config.init_from_file("config/config.yaml")
-
-# TODO consider refactoring to simplify the import
-# Modify the path because of the - in the directory
-SPRAS_ROOT = Path(__file__).parent.parent.parent.absolute()
-sys.path.append(str(Path(SPRAS_ROOT, 'docker-wrappers', 'BowTieBuilder')))
-from spras.btb import BowTieBuilder as BTB
 
 TEST_DIR = Path('test', 'BowTieBuilder/')
 OUT_FILE_DEFAULT = Path(TEST_DIR, 'output', 'raw-pathway.txt')
@@ -306,3 +301,14 @@ class TestBowTieBuilder:
 
         # Check if the sets are equal, regardless of the order of lines
         assert output_content == expected_content, 'Output file does not match expected output file'
+
+    # Only run Singularity test if the binary is available on the system
+    # spython is only available on Unix, but do not explicitly skip non-Unix platforms
+    @pytest.mark.skipif(not shutil.which('singularity'), reason='Singularity not found on system')
+    def test_btb_singularity(self):
+        OUT_FILE_DEFAULT.unlink(missing_ok=True)
+        BTB.run(edges=Path(TEST_DIR, 'input', 'source-to-source-edges.txt'),
+                           sources=Path(TEST_DIR, 'input', 'btb-sources.txt'),
+                           targets=Path(TEST_DIR, 'input', 'btb-targets.txt'),
+                           output_file=OUT_FILE_DEFAULT,
+                           container_framework="singularity")

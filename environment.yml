@@ -24,15 +24,14 @@ dependencies:
   - tabulate=0.9.0
 
   # toolchain deps
-  - pip=22.1
+  - pip=25.2
   # This should be the same as requires-python minus the >=.
   - python=3.11
 
   # development dependencies
   - pre-commit=4.2.0
   - pytest=8.4.1
-  # development dependencies - conda-specific
-  - go=1.24
+  - pytest-split=0.10.0
 
   - pip:
       - dsub==0.4.13

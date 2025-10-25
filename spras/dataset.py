@@ -133,11 +133,14 @@ class Dataset:
         self.node_table.insert(0, "NODEID", self.node_table.pop("NODEID"))
         self.other_files = dataset_dict["other_files"]
 
-    def request_node_columns(self, col_names):
+    def get_node_columns(self, col_names: list[str]) -> pd.DataFrame:
         """
         returns: A table containing the requested column names and node IDs
         for all nodes with at least 1 of the requested values being non-empty
         """
+        if self.node_table is None:
+            raise ValueError("node_table is None: can't request node columns of an empty dataset.")
+
         col_names.append(self.NODE_ID)
         filtered_table = self.node_table[col_names]
         filtered_table = filtered_table.dropna(
@@ -154,7 +157,9 @@ class Dataset:
             )
         return filtered_table
 
-    def contains_node_columns(self, col_names):
+    def contains_node_columns(self, col_names: list[str] | str):
+        if self.node_table is None:
+            raise ValueError("node_table is None: can't request node columns of an empty dataset.")
         """
         col_names: A list-like object of column names to check or a string of a single column name to check.
         returns: Whether or not all columns in col_names exist in the dataset.
@@ -167,11 +172,10 @@ class Dataset:
                     return False
                 return True
 
-    def request_edge_columns(self, col_names):
-        return None
-
     def get_other_files(self):
         return self.other_files.copy()
 
     def get_interactome(self) -> pd.DataFrame | None:
+        if self.interactome is None:
+            raise ValueError("interactome is None: can't copy a non-existent interactome.")
         return self.interactome.copy(deep = True)

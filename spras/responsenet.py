@@ -31,15 +31,11 @@ class ResponseNet(PRM):
         @param data: dataset
         @param filename_map: a dict mapping file types in the required_inputs to the filename for that type
         """
-
-        # ensures the required input are within the filename_map
-        for input_type in ResponseNet.required_inputs:
-            if input_type not in filename_map:
-                raise ValueError(f"{input_type} filename is missing")
+        ResponseNet.validate_required_inputs(filename_map)
 
         # will take the sources and write them to files, and repeats with targets
         for node_type in ['sources', 'targets']:
-            nodes = data.request_node_columns([node_type])
+            nodes = data.get_node_columns([node_type])
             if nodes is None:
                 raise ValueError(f'No {node_type} found in the node files')
             # take nodes one column data frame, call sources/ target series
@@ -109,12 +105,14 @@ class ResponseNet(PRM):
         container_suffix = "responsenet:v2"
 
         # constructs a docker run call
-        run_container_and_log('ResponseNet',
-                              container_framework,
-                              container_suffix,
-                              command,
-                              volumes,
-                              work_dir)
+        run_container_and_log(
+            'ResponseNet',
+            container_framework,
+            container_suffix,
+            command,
+            volumes,
+            work_dir,
+            out_dir)
 
         # Rename the primary output file to match the desired output filename
         out_file_suffixed.rename(output_file)
