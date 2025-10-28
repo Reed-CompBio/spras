@@ -1,5 +1,5 @@
 """
-Dynamic construction of algoithm parameters with runtime type information for
+Dynamic construction of algorithm parameters with runtime type information for
 parameter combinations. This has been isolated from schema.py as it is not declarative,
 and rather mainly contains validators and lower-level pydantic code.
 """
