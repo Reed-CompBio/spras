@@ -4,9 +4,12 @@ from typing import Optional
 from pydantic import BaseModel, ConfigDict
 
 from spras.config.container_schema import ProcessedContainerSettings
-from spras.containers import prepare_volume, run_container
+from spras.containers import prepare_volume, run_container_and_log
 from spras.dataset import Dataset
-from spras.interactome import reinsert_direction_col_directed
+from spras.interactome import (
+    convert_undirected_to_directed,
+    reinsert_direction_col_directed,
+)
 from spras.prm import PRM
 from spras.util import add_rank_column, duplicate_edges, raw_pathway_df
 
@@ -42,6 +45,8 @@ class ST_RWR(PRM[ST_RWRParams]):
 
         # Get edge data for network file
         edges = data.get_interactome()
+        edges = convert_undirected_to_directed(edges)
+
         edges.to_csv(filename_map['network'],sep='|',index=False,columns=['Interactor1','Interactor2'],header=False)
 
     @staticmethod
@@ -90,13 +95,15 @@ class ST_RWR(PRM[ST_RWRParams]):
             command.extend(['--alpha', str(args.alpha)])
 
         container_suffix = 'st-rwr:v1'
-        out = run_container(container_suffix,
-                            command,
-                            volumes,
-                            work_dir,
-                            container_settings)
+        run_container_and_log(
+            "Source-Target RandomWalk with Restart",
+            container_suffix,
+            command,
+            volumes,
+            work_dir,
+            out_dir,
+            container_settings)
 
-        print(out)
         # Rename the primary output file to match the desired output filename
         output_edges = Path(out_dir, 'output.txt')
         output_edges.rename(output_file)

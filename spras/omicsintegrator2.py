@@ -12,7 +12,7 @@ from spras.interactome import reinsert_direction_col_undirected
 from spras.prm import PRM
 from spras.util import add_rank_column, duplicate_edges
 
-__all__ = ['OmicsIntegrator2', 'OmicsIntegrator2Params']
+__all__ = ['DummyMode', 'OmicsIntegrator2', 'OmicsIntegrator2Params']
 
 class DummyMode(CaseInsensitiveEnum):
     terminals = 'terminals'
@@ -108,24 +108,6 @@ class OmicsIntegrator2(PRM[OmicsIntegrator2Params]):
     # TODO add reasonable default values
     @staticmethod
     def run(inputs, output_file, args=None, container_settings=None):
-        """
-        Run Omics Integrator 2 in the Docker image with the provided parameters.
-        Only the .tsv output file is retained and then renamed.
-        All other output files are deleted.
-        @param output_file: the name of the output file, which will overwrite any existing file with this name
-        @param w: Omega: the weight of the edges connecting the dummy node to the nodes selected by dummyMode (default: 5)
-        @param b: Beta: scaling factor of prizes (default: 1)
-        @param g: Gamma: multiplicative edge penalty from degree of endpoints (default: 3)
-        @param noise: Standard Deviation of the gaussian noise added to edges in Noisy Edges Randomizations.
-        @param noisy_edges: An integer specifying how many times to add noise to the given edge values and re-run.
-        @param random_terminals: An integer specifying how many times to apply your given prizes to random nodes in the interactome and re-run
-        @param dummy_mode: Tells the program which nodes in the interactome to connect the dummy node to. (default: terminals)
-            "terminals" = connect to all terminals
-            "others" = connect to all nodes except for terminals
-            "all" = connect to all nodes in the interactome.
-        @param seed: The random seed to use for this run.
-        @param container_framework: choose the container runtime framework, currently supports "docker" or "singularity" (optional)
-        """
         if not container_settings: container_settings = ProcessedContainerSettings()
         if not args: args = OmicsIntegrator2Params()
         OmicsIntegrator2.validate_required_run_args(inputs)
@@ -169,13 +151,15 @@ class OmicsIntegrator2(PRM[OmicsIntegrator2Params]):
         if args.seed is not None:
             command.extend(['--seed', str(args.seed)])
 
-        container_suffix = "omics-integrator-2:v2"
+        container_suffix = "omics-integrator-2:v3"
         run_container_and_log('Omics Integrator 2',
                              container_suffix,
                              command,
                              volumes,
                              work_dir,
-                             container_settings)
+                             out_dir,
+                             container_settings,
+                             network_disabled=True)
 
         # TODO do we want to retain other output files?
         # TODO if deleting other output files, write them all to a tmp directory and copy

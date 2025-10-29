@@ -17,8 +17,8 @@ DEFAULT_CONTAINER_PREFIX = "docker.io/reedcompbio"
 
 class ContainerFramework(CaseInsensitiveEnum):
     docker = 'docker'
-    # TODO: add apptainer variant once #260 gets merged
     singularity = 'singularity'
+    apptainer = 'apptainer'
     dsub = 'dsub'
 
 class ContainerRegistry(BaseModel):
@@ -33,20 +33,33 @@ class ContainerRegistry(BaseModel):
 class ContainerSettings(BaseModel):
     framework: ContainerFramework = ContainerFramework.docker
     unpack_singularity: bool = False
-    registry: ContainerRegistry
-    hash_length: int = 7
 
     model_config = ConfigDict(extra='forbid')
+    enable_profiling: bool = False
+    "A Boolean indicating whether to enable container runtime profiling (apptainer/singularity only)"
+    registry: ContainerRegistry
+
+    model_config = ConfigDict(extra='forbid', use_attribute_docstrings=True)
 
 @dataclass
 class ProcessedContainerSettings:
     framework: ContainerFramework = ContainerFramework.docker
     unpack_singularity: bool = False
     prefix: str = DEFAULT_CONTAINER_PREFIX
+    enable_profiling: bool = False
     hash_length: int = 7
+    """
+    The hash length for container-specific usage. This does not appear in
+    the output folder, but it may show up in logs, and usually never needs
+    to be tinkered with. This will be the top-level `hash_length` specified
+    in the config.
+
+    We prefer this `hash_length` in our container-running logic to
+    avoid a (future) dependency diamond.
+    """
 
     @staticmethod
-    def from_container_settings(settings: ContainerSettings, default_hash_length: int) -> "ProcessedContainerSettings":
+    def from_container_settings(settings: ContainerSettings, hash_length: int) -> "ProcessedContainerSettings":
         if settings.framework == ContainerFramework.dsub:
             warnings.warn("'dsub' framework integration is experimental and may not be fully supported.", stacklevel=2)
         container_framework = settings.framework
@@ -65,5 +78,5 @@ class ProcessedContainerSettings:
             framework=container_framework,
             unpack_singularity=unpack_singularity,
             prefix=container_prefix,
-            hash_length=settings.hash_length or default_hash_length
+            hash_length=hash_length
         )

@@ -6,6 +6,7 @@ import pytest
 
 import spras.config.config as config
 from spras.rwr import RWR, RWRParams
+from spras.config.container_schema import ContainerFramework, ProcessedContainerSettings
 
 config.init_from_file("config/config.yaml")
 
@@ -57,5 +58,5 @@ class TestRWR:
                  "nodes": Path(TEST_DIR, 'input','rwr-nodes.txt')},
                 args=RWRParams(alpha=0.85, threshold=200),
                 output_file=OUT_FILE,
-                container_framework="singularity")
+                container_settings=ProcessedContainerSettings(framework=ContainerFramework.singularity))
         assert OUT_FILE.exists()

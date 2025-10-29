@@ -1,5 +1,5 @@
 Contributing a new pathway reconstruction algorithm
-=========================================
+===================================================
 
 The SPRAS maintainers welcome external contributions. Code contributions
 will be licensed using the project's MIT license.
@@ -285,7 +285,7 @@ Local Neighborhood has no other parameters. Optionally set
 ``include: false`` for the other pathway reconstruction algorithms to
 make testing faster.
 
-The config file has an option ``owner`` under the ``container_registry``
+The config file has an option ``owner`` under the ``containers.registry``
 settings that controls which Docker Hub account will be used when
 pulling Docker images. The same Docker Hub account will be used for all
 images and cannot currently be set different for each algorithm. Set the
@@ -406,7 +406,7 @@ them, you can open a `GitHub
 issue <https://github.com/Reed-CompBio/spras/issues/new/choose>`__ to
 request feedback. However, once the pull request has been approved, it
 will **not** be merged as usual. The pull request will be closed so that
-the ``master`` branch of the fork stays synchronized with the ``master``
+the ``main`` branch of the fork stays synchronized with the ``main``
 branch of the main SPRAS repository.
 
 General steps for contributing a new pathway reconstruction algorithm

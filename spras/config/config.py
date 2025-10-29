@@ -7,7 +7,7 @@ module that imports this module can access a config option by checking the objec
 value. For example
 
 import spras.config.config as config
-container_framework = config.config.container_framework
+container_framework = config.config.container_settings.framework
 
 will grab the top level registry configuration option as it appears in the config file
 """
@@ -16,6 +16,7 @@ import copy as copy
 import itertools as it
 import os
 from typing import Any
+import warnings
 
 import numpy as np
 import yaml
@@ -62,16 +63,14 @@ class Config:
 
         # Directory used for storing output
         self.out_dir = parsed_raw_config.reconstruction_settings.locations.reconstruction_dir
-        # Container framework used by PRMs. Valid options are "docker", "dsub", and "singularity"
-        self.container_settings = ProcessedContainerSettings.from_container_settings(parsed_raw_config.containers, parsed_raw_config.hash_length)
-        # A Boolean specifying whether to unpack singularity containers. Default is False
-        self.unpack_singularity = False
         # A dictionary to store configured datasets against which SPRAS will be run
         self.datasets = None
         # A dictionary to store configured gold standard data against output of SPRAS runs
         self.gold_standards = None
         # The hash length SPRAS will use to identify parameter combinations.
         self.hash_length = parsed_raw_config.hash_length
+        # Container settings used by PRMs.
+        self.container_settings = ProcessedContainerSettings.from_container_settings(parsed_raw_config.containers, self.hash_length)
         # The list of algorithms to run in the workflow. Each is a dict with 'name' as an expected key.
         self.algorithms = None
         # A nested dict mapping algorithm names to dicts that map parameter hashes to parameter combinations.
@@ -254,8 +253,18 @@ class Config:
             self.pca_params["kde"] = True
             print("Setting kde to true; Evaluation analysis needs to run KDE for PCA-Chosen parameter selection.")
 
+        # Set summary include to True if Evaluation is set to True
+        # When a PCA-chosen parameter set is chosen, summary statistics are used to resolve tiebreakers.
+        if self.analysis_include_evaluation and not self.analysis_include_summary:
+            self.analysis_include_summary = True
+            print("Setting summary include to true; Evaluation analysis needs to use summary statistics for PCA-Chosen parameter selection.")
+
+
     def process_config(self, raw_config: RawConfig):
         self.out_dir = raw_config.reconstruction_settings.locations.reconstruction_dir
+
+        if raw_config.containers.enable_profiling and raw_config.containers.framework not in ["singularity", "apptainer"]:
+            warnings.warn("enable_profiling is set to true, but the container framework is not singularity/apptainer. This setting will have no effect.", stacklevel=2)
 
         self.process_datasets(raw_config)
         self.process_algorithms(raw_config)

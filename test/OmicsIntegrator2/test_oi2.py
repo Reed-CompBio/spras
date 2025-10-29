@@ -4,14 +4,16 @@ from pathlib import Path
 import pytest
 
 import spras.config.config as config
-from spras.omicsintegrator2 import OmicsIntegrator2, OmicsIntegrator2Params
+from spras.omicsintegrator2 import OmicsIntegrator2, OmicsIntegrator2Params, DummyMode
+from spras.config.container_schema import ContainerFramework, ProcessedContainerSettings
 
 config.init_from_file("config/config.yaml")
 
 TEST_DIR = Path('test', 'OmicsIntegrator2')
-EDGE_FILE = TEST_DIR / 'input' / 'oi2-edges.txt'
-PRIZE_FILE = TEST_DIR / 'input' / 'oi2-prizes.txt'
 OUT_FILE = TEST_DIR / 'output' / 'test.tsv'
+
+EDGE_FILE = TEST_DIR / 'input' / 'simple' / 'oi2-edges.txt'
+PRIZE_FILE = TEST_DIR / 'input' / 'simple' / 'oi2-prizes.txt'
 
 class TestOmicsIntegrator2:
     """
@@ -46,7 +48,7 @@ class TestOmicsIntegrator2:
                                                          noise=0.1,
                                                          noisy_edges=0,
                                                          random_terminals=0,
-                                                         dummy_mode='terminals',
+                                                         dummy_mode=DummyMode.terminals,
                                                          seed=2))
         assert OUT_FILE.exists()
 
@@ -59,5 +61,5 @@ class TestOmicsIntegrator2:
         OmicsIntegrator2.run({"edges": EDGE_FILE,
                               "prizes": PRIZE_FILE},
                              output_file=OUT_FILE,
-                             container_framework="singularity")
+                             container_settings=ProcessedContainerSettings(framework=ContainerFramework.singularity))
         assert OUT_FILE.exists()

@@ -121,6 +121,7 @@ class BowTieBuilder(PRM[Empty]):
                               command,
                               volumes,
                               work_dir,
+                              out_dir,
                               container_settings)
         # Output is already written to raw-pathway.txt file
 

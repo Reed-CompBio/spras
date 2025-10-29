@@ -13,7 +13,7 @@ We declare models using two classes here:
 import re
 from typing import Annotated
 
-from pydantic import AfterValidator, BaseModel, ConfigDict, Field
+from pydantic import AfterValidator, BaseModel, ConfigDict
 
 from spras.config.algorithms import AlgorithmUnion
 from spras.config.container_schema import ContainerSettings
@@ -91,18 +91,6 @@ def label_validator(name: str):
         return label
     return validate
 
-class ContainerFramework(CaseInsensitiveEnum):
-    docker = 'docker'
-    # TODO: add apptainer variant once #260 gets merged
-    singularity = 'singularity'
-    dsub = 'dsub'
-
-class ContainerRegistry(BaseModel):
-    base_url: str
-    owner: str = Field(description="The owner or project of the registry")
-
-    model_config = ConfigDict(extra='forbid')
-
 class Dataset(BaseModel):
     # We prefer AfterValidator here to allow pydantic to run its own
     # validation & coercion logic before we check it against our own
@@ -117,7 +105,8 @@ class Dataset(BaseModel):
 
 class GoldStandard(BaseModel):
     label: Annotated[str, AfterValidator(label_validator("Gold Standard"))]
-    node_files: list[str]
+    node_files: list[str] = []
+    edge_files: list[str] = []
     data_dir: str
     dataset_labels: list[str]
 

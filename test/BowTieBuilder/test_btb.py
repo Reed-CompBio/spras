@@ -1,18 +1,13 @@
 import shutil
-import sys
 from pathlib import Path
 
 import pytest
 
 import spras.config.config as config
+from spras.btb import BowTieBuilder as BTB
+from spras.config.container_schema import ContainerFramework, ProcessedContainerSettings
 
 config.init_from_file("config/config.yaml")
-
-# TODO consider refactoring to simplify the import
-# Modify the path because of the - in the directory
-SPRAS_ROOT = Path(__file__).parent.parent.parent.absolute()
-sys.path.append(str(Path(SPRAS_ROOT, 'docker-wrappers', 'BowTieBuilder')))
-from spras.btb import BowTieBuilder as BTB
 
 TEST_DIR = Path('test', 'BowTieBuilder/')
 OUT_FILE_DEFAULT = Path(TEST_DIR, 'output', 'raw-pathway.txt')
@@ -313,4 +308,4 @@ class TestBowTieBuilder:
                            sources=Path(TEST_DIR, 'input', 'btb-sources.txt'),
                            targets=Path(TEST_DIR, 'input', 'btb-targets.txt'),
                            output_file=OUT_FILE_DEFAULT,
-                           container_framework="singularity")
+                           container_settings=ProcessedContainerSettings(framework=ContainerFramework.singularity))

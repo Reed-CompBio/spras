@@ -5,6 +5,7 @@ import pytest
 
 import spras.config.config as config
 from spras.mincostflow import MinCostFlow, MinCostFlowParams
+from spras.config.container_schema import ContainerFramework, ProcessedContainerSettings
 
 config.init_from_file("config/config.yaml")
 
@@ -108,5 +109,5 @@ class TestMinCostFlow:
                          "edges": TEST_DIR + 'input/' + graph + '/edges.txt'},
                         output_file=OUT_FILE,
                         args=MinCostFlowParams(flow=1, capacity=1),
-                        container_framework="singularity")
+                        container_settings=ProcessedContainerSettings(framework=ContainerFramework.singularity))
         assert out_path.exists()

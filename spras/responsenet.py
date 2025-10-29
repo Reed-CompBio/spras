@@ -2,6 +2,7 @@ from pathlib import Path
 
 from pydantic import BaseModel, ConfigDict
 
+from spras.config.container_schema import ProcessedContainerSettings
 from spras.containers import prepare_volume, run_container_and_log
 from spras.interactome import (
     convert_undirected_to_directed,
@@ -104,12 +105,14 @@ class ResponseNet(PRM[ResponseNetParams]):
         container_suffix = "responsenet:v2"
 
         # constructs a docker run call
-        run_container_and_log('ResponseNet',
-                              container_suffix,
-                              command,
-                              volumes,
-                              work_dir,
-                              container_settings)
+        run_container_and_log(
+            'ResponseNet',
+            container_suffix,
+            command,
+            volumes,
+            work_dir,
+            out_dir,
+            container_settings)
 
         # Rename the primary output file to match the desired output filename
         out_file_suffixed.rename(output_file)

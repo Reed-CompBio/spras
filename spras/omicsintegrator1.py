@@ -211,12 +211,13 @@ class OmicsIntegrator1(PRM[OmicsIntegrator1Params]):
         if args.seed is not None:
             command.extend(['--seed', str(args.seed)])
 
-        container_suffix = "omics-integrator-1:no-conda" # no-conda version is the default
+        container_suffix = "omics-integrator-1:v2"
         run_container_and_log('Omics Integrator 1',
-                             container_suffix,  # no-conda version is the default
+                             container_suffix,
                              command,
                              volumes,
                              work_dir,
+                             out_dir,
                              container_settings,
                              {'TMPDIR': mapped_out_dir})
 

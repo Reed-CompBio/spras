@@ -1,2 +1,4 @@
 test_A|B
 B|C
+B|test_A
+C|B

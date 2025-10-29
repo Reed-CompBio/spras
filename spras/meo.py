@@ -200,6 +200,7 @@ class MEO(PRM[MEOParams]):
                              command,
                              volumes,
                              work_dir,
+                             out_dir,
                              container_settings)
 
         properties_file_local.unlink(missing_ok=True)

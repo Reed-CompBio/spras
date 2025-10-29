@@ -6,7 +6,6 @@ containers:
   registry:
     base_url: docker.io
     owner: reedcompbio
-  hash_length: 7
 
 algorithms:
   - name: "pathlinker"

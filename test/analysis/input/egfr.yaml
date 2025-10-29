@@ -2,8 +2,11 @@
 hash_length: 7
 
 containers:
-  # Specify the container framework. Current supported versions include 'docker' and
-  # 'singularity'. If container_framework is not specified, SPRAS will default to docker.
+  # Specify the container framework used by each PRM wrapper. Valid options include:
+  # - docker (default if not specified)
+  # - singularity -- Also known as apptainer, useful in HPC/HTC environments where docker isn't allowed
+  # - dsub -- experimental with limited support, used for running on Google Cloud with the All of Us cloud environment.
+  #   - There is no support for other environments at the moment.
   framework: docker
 
   # Only used if container_framework is set to singularity, this will unpack the singularity containers
@@ -11,7 +14,8 @@ containers:
   # such as would be the case in an HTCondor/OSPool environment.
   # NOTE: This unpacks singularity containers to the local filesystem, which will take up space in a way
   # that persists after the workflow is complete. To clean up the unpacked containers, the user must
-  # manually delete them.
+  # manually delete them. For convenience, these unpacked files will exist in the current working directory
+  # under `unpacked`.
   unpack_singularity: false
 
   # Allow the user to configure which container registry containers should be pulled from

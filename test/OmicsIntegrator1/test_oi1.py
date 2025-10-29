@@ -5,6 +5,7 @@ import pytest
 
 import spras.config.config as config
 from spras.omicsintegrator1 import OmicsIntegrator1, OmicsIntegrator1Params, write_conf
+from spras.config.container_schema import ContainerFramework, ProcessedContainerSettings
 
 config.init_from_file("config/config.yaml")
 
@@ -121,5 +122,5 @@ class TestOmicsIntegrator1:
                                 w=5,
                                 b=1,
                                 d=10),
-                             container_settings="singularity")
+                             container_settings=ProcessedContainerSettings(framework=ContainerFramework.singularity))
         assert out_path.exists()
