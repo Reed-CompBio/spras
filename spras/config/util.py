@@ -6,6 +6,7 @@ only import this config file.
 
 from enum import Enum
 from typing import Any
+import yaml
 
 from pydantic import BaseModel, ConfigDict
 
@@ -26,6 +27,11 @@ class CaseInsensitiveEnum(str, Enum):
                     return member
         return None
 
+# We also need to allow `CaseInsensitiveEnum` to be represented in yaml.safe_dump:
+yaml.SafeDumper.add_multi_representer(
+    CaseInsensitiveEnum,
+    yaml.representer.SafeRepresenter.represent_str,
+)
 
 class Empty(BaseModel):
     """
