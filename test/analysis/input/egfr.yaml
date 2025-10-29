@@ -29,15 +29,15 @@ containers:
 
 algorithms:
   - name: pathlinker
-    params:
-      include: true
+    include: true
+    runs:
       run1:
         k:
           - 10
           - 20
   - name: omicsintegrator1
-    params:
-      include: true
+    include: true
+    runs:
       run1:
         b:
           - 0.55
@@ -55,8 +55,8 @@ algorithms:
           - 0.008
         dummy_mode: ["file"]
   - name: omicsintegrator2
-    params:
-      include: true
+    include: true
+    runs:
       run1:
         b:
           - 4
@@ -68,8 +68,8 @@ algorithms:
         g:
           - 3
   - name: meo
-    params:
-      include: true
+    include: true
+    runs:
       run1:
         local_search:
           - "Yes"
@@ -78,8 +78,8 @@ algorithms:
         rand_restarts:
           - 10
   - name: domino
-    params:
-      include: true
+    include: true
+    runs:
       run1:
         slice_threshold:
           - 0.3

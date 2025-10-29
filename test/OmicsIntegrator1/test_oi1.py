@@ -5,7 +5,7 @@ import pytest
 
 import spras.config.config as config
 from spras.config.container_schema import ContainerFramework, ProcessedContainerSettings
-from spras.omicsintegrator1 import OmicsIntegrator1, OmicsIntegrator1Params, write_conf
+from spras.omicsintegrator1 import DummyMode, OmicsIntegrator1, OmicsIntegrator1Params, write_conf
 
 config.init_from_file("config/config.yaml")
 
@@ -45,7 +45,7 @@ class TestOmicsIntegrator1:
                               "prizes": TEST_DIR+'input/oi1-prizes.txt'},
                              output_file=OUT_FILE,
                              args=OmicsIntegrator1Params(
-                                 dummy_mode='terminals',
+                                 dummy_mode=DummyMode.terminals,
                                  mu_squared=True,
                                  exclude_terms=True,
                                  noisy_edges=0,
@@ -70,7 +70,7 @@ class TestOmicsIntegrator1:
                               "dummy_nodes": TEST_DIR + 'input/oi1-dummy.txt'},
                              output_file=OUT_FILE,
                              args=OmicsIntegrator1Params(
-                                dummy_mode='file',
+                                dummy_mode=DummyMode.file,
                                 w=5,
                                 b=1,
                                 d=10,
@@ -106,7 +106,7 @@ class TestOmicsIntegrator1:
                                     w=5,
                                     b=1,
                                     d=10,
-                                    dummy_mode='file'))
+                                    dummy_mode=DummyMode.file))
 
     # Only run Singularity test if the binary is available on the system
     # spython is only available on Unix, but do not explicitly skip non-Unix platforms

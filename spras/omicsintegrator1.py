@@ -4,12 +4,13 @@ from typing import Optional
 from pydantic import BaseModel, ConfigDict
 
 from spras.config.container_schema import ProcessedContainerSettings
+from spras.config.util import CaseInsensitiveEnum
 from spras.containers import prepare_volume, run_container_and_log
 from spras.interactome import reinsert_direction_col_mixed
 from spras.prm import PRM
 from spras.util import add_rank_column, duplicate_edges, raw_pathway_df
 
-__all__ = ['OmicsIntegrator1', 'OmicsIntegrator1Params', 'write_conf']
+__all__ = ['DummyMode', 'OmicsIntegrator1', 'OmicsIntegrator1Params', 'write_conf']
 
 
 # TODO decide on default number of processes and threads
@@ -39,8 +40,18 @@ def write_conf(filename=Path('config.txt'), w=None, b=None, d=None, mu=None, noi
         f.write('processes = 1\n')
         f.write('threads = 1\n')
 
+class DummyMode(CaseInsensitiveEnum):
+    terminals = 'terminals'
+    "connect the dummy node to all nodes that have been assigned prizes"
+    all = 'all'
+    "connect the dummy node to all nodes in the interactome i.e. full set of nodes in graph"
+    others = 'others'
+    "connect the dummy node to all nodes that are not terminal nodes i.e. nodes w/o prizes"
+    file = 'file'
+    "connect the dummy node to a specific list of nodes provided in a file"
+
 class OmicsIntegrator1Params(BaseModel):
-    dummy_mode: Optional[str] = None
+    dummy_mode: Optional[DummyMode] = None
     mu_squared: bool = False
     exclude_terms: bool = False
 
@@ -155,15 +166,9 @@ class OmicsIntegrator1(PRM[OmicsIntegrator1Params]):
         bind_path, prize_file = prepare_volume(inputs["prizes"], work_dir, container_settings)
         volumes.append(bind_path)
 
-        # 4 dummy mode possibilities:
-        #   1. terminals -> connect the dummy node to all nodes that have been assigned prizes
-        #   2. all ->  connect the dummy node to all nodes in the interactome i.e. full set of nodes in graph
-        #   3. others -> connect the dummy node to all nodes that are not terminal nodes i.e. nodes w/o prizes
-        #   4. file -> connect the dummy node to a specific list of nodes provided in a file
-
         # add dummy node file to the volume if dummy_mode is not None and it is 'file'
         dummy_file = None
-        if args.dummy_mode == 'file':
+        if args.dummy_mode == DummyMode.file:
             if "dummy_nodes" not in inputs:
                 raise ValueError("dummy_nodes file is required when dummy_mode is set to 'file'")
             bind_path, dummy_file = prepare_volume(inputs["dummy_nodes"], work_dir, container_settings)
@@ -198,7 +203,7 @@ class OmicsIntegrator1(PRM[OmicsIntegrator1Params]):
                 command.extend(['--dummyMode', dummy_file])
             # else pass in the dummy_mode and let oi1 handle it
             else:
-                command.extend(['--dummyMode', args.dummy_mode])
+                command.extend(['--dummyMode', str(args.dummy_mode)])
 
         # Add optional arguments
         if args.mu_squared:
