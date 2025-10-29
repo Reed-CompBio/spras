@@ -6,8 +6,8 @@ only import this config file.
 
 from enum import Enum
 from typing import Any
-import yaml
 
+import yaml
 from pydantic import BaseModel, ConfigDict
 
 

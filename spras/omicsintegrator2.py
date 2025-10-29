@@ -147,7 +147,7 @@ class OmicsIntegrator2(PRM[OmicsIntegrator2Params]):
             command.extend(['--random_terminals', str(args.random_terminals)])
         if args.dummy_mode is not None:
             # This argument does not follow the other naming conventions
-            command.extend(['--dummyMode', str(args.dummy_mode)])
+            command.extend(['--dummyMode', args.dummy_mode.value])
         if args.seed is not None:
             command.extend(['--seed', str(args.seed)])
 

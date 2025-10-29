@@ -197,13 +197,13 @@ class OmicsIntegrator1(PRM[OmicsIntegrator1Params]):
                    '--outlabel', 'oi1']
 
         # add the dummy mode argument
-        if args.dummy_mode is not None and args.dummy_mode:
+        if args.dummy_mode is not None:
             # for custom dummy modes, add the file
             if dummy_file:
                 command.extend(['--dummyMode', dummy_file])
             # else pass in the dummy_mode and let oi1 handle it
             else:
-                command.extend(['--dummyMode', str(args.dummy_mode)])
+                command.extend(['--dummyMode', args.dummy_mode.value])
 
         # Add optional arguments
         if args.mu_squared:
