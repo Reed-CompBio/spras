@@ -164,7 +164,7 @@ class OmicsIntegrator1(PRM[OmicsIntegrator1Params]):
         # add dummy node file to the volume if dummy_mode is not None and it is 'file'
         dummy_file = None
         if args.dummy_mode == 'file':
-            if inputs["dummy_nodes"] is None:
+            if "dummy_nodes" not in inputs:
                 raise ValueError("dummy_nodes file is required when dummy_mode is set to 'file'")
             bind_path, dummy_file = prepare_volume(inputs["dummy_nodes"], work_dir, container_settings)
             volumes.append(bind_path)
