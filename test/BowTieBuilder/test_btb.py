@@ -304,8 +304,8 @@ class TestBowTieBuilder:
     @pytest.mark.skipif(not shutil.which('singularity'), reason='Singularity not found on system')
     def test_btb_singularity(self):
         OUT_FILE_DEFAULT.unlink(missing_ok=True)
-        BTB.run(edges=Path(TEST_DIR, 'input', 'source-to-source-edges.txt'),
-                           sources=Path(TEST_DIR, 'input', 'btb-sources.txt'),
-                           targets=Path(TEST_DIR, 'input', 'btb-targets.txt'),
-                           output_file=OUT_FILE_DEFAULT,
-                           container_settings=ProcessedContainerSettings(framework=ContainerFramework.singularity))
+        BTB.run({"edges": Path(TEST_DIR, 'input', 'source-to-source-edges.txt'),
+                 "sources": Path(TEST_DIR, 'input', 'btb-sources.txt'),
+                 "targets": Path(TEST_DIR, 'input', 'btb-targets.txt')},
+                 output_file=OUT_FILE_DEFAULT,
+                 container_settings=ProcessedContainerSettings(framework=ContainerFramework.singularity))

@@ -31,8 +31,7 @@ class TestDOMINO:
 
     def test_domino_required(self):
         # Only include required arguments
-        out_path = Path(OUT_FILE_DEFAULT)
-        out_path.unlink(missing_ok=True)
+        OUT_FILE_DEFAULT.unlink(missing_ok=True)
         DOMINO.run({"network": TEST_DIR / 'input' / 'simple' / 'domino-network.txt',
                     "active_genes": TEST_DIR / 'input' / 'simple' / 'domino-active-genes.txt'},
                    output_file=OUT_FILE_DEFAULT)
@@ -42,8 +41,7 @@ class TestDOMINO:
 
     def test_domino_optional(self):
         # Include optional arguments
-        out_path = Path(OUT_FILE_OPTIONAL)
-        out_path.unlink(missing_ok=True)
+        OUT_FILE_DEFAULT.unlink(missing_ok=True)
         DOMINO.run({"network": TEST_DIR / 'input' / 'simple' / 'domino-network.txt',
                     "active_genes": TEST_DIR / 'input' / 'simple' / 'domino-active-genes.txt'},
                    output_file=OUT_FILE_OPTIONAL,
