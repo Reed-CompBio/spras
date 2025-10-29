@@ -2,6 +2,7 @@ from pathlib import Path
 
 from pydantic import BaseModel, ConfigDict
 
+from spras.config.container_schema import ProcessedContainerSettings
 from spras.containers import prepare_volume, run_container_and_log
 from spras.interactome import (
     convert_undirected_to_directed,
@@ -64,8 +65,10 @@ class ResponseNet(PRM[ResponseNetParams]):
                      header=False)
 
     @staticmethod
-    def run(inputs, output_file, args, container_settings):
+    def run(inputs, output_file, args=None, container_settings=None):
+        if not container_settings: container_settings = ProcessedContainerSettings()
         ResponseNet.validate_required_run_args(inputs)
+        if not args: args = ResponseNetParams()
 
         # the data files will be mapped within this directory within the container
         work_dir = '/ResponseNet'
