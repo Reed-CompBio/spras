@@ -15,8 +15,8 @@ will grab the top level registry configuration option as it appears in the confi
 import copy as copy
 import itertools as it
 import os
-from typing import Any
 import warnings
+from typing import Any
 
 import numpy as np
 import yaml

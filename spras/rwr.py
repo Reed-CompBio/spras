@@ -5,7 +5,6 @@ import pandas as pd
 from pydantic import BaseModel, ConfigDict
 
 from spras.config.container_schema import ProcessedContainerSettings
-from spras.containers import prepare_volume, run_container
 from spras.containers import prepare_volume, run_container_and_log
 from spras.dataset import Dataset
 from spras.interactome import (

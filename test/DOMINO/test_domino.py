@@ -4,13 +4,13 @@ from pathlib import Path
 import pytest
 
 import spras.config.config as config
+from spras.config.container_schema import ContainerFramework, ProcessedContainerSettings
 from spras.domino import (
     DOMINO,
     DominoParams,
     post_domino_id_transform,
     pre_domino_id_transform,
 )
-from spras.config.container_schema import ContainerFramework, ProcessedContainerSettings
 
 config.init_from_file("config/config.yaml")
 

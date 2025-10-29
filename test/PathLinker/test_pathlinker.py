@@ -4,8 +4,8 @@ from pathlib import Path
 import pytest
 
 import spras.config.config as config
-from spras.pathlinker import PathLinker, PathLinkerParams
 from spras.config.container_schema import ContainerFramework, ProcessedContainerSettings
+from spras.pathlinker import PathLinker, PathLinkerParams
 
 config.init_from_file("config/config.yaml")
 

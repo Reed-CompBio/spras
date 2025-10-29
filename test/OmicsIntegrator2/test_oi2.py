@@ -4,8 +4,8 @@ from pathlib import Path
 import pytest
 
 import spras.config.config as config
-from spras.omicsintegrator2 import OmicsIntegrator2, OmicsIntegrator2Params, DummyMode
 from spras.config.container_schema import ContainerFramework, ProcessedContainerSettings
+from spras.omicsintegrator2 import DummyMode, OmicsIntegrator2, OmicsIntegrator2Params
 
 config.init_from_file("config/config.yaml")
 

@@ -4,8 +4,8 @@ from pathlib import Path
 import pytest
 
 import spras.config.config as config
-from spras.meo import MEO, MEOParams, write_properties
 from spras.config.container_schema import ContainerFramework, ProcessedContainerSettings
+from spras.meo import MEO, MEOParams, write_properties
 
 config.init_from_file("config/config.yaml")
 

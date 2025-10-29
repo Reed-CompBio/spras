@@ -4,8 +4,8 @@ from pathlib import Path
 import pytest
 
 import spras.config.config as config
-from spras.mincostflow import MinCostFlow, MinCostFlowParams
 from spras.config.container_schema import ContainerFramework, ProcessedContainerSettings
+from spras.mincostflow import MinCostFlow, MinCostFlowParams
 
 config.init_from_file("config/config.yaml")
 

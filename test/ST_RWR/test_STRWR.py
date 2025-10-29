@@ -5,8 +5,8 @@ from pathlib import Path
 import pytest
 
 import spras.config.config as config
-from spras.strwr import ST_RWR, ST_RWRParams
 from spras.config.container_schema import ContainerFramework, ProcessedContainerSettings
+from spras.strwr import ST_RWR, ST_RWRParams
 
 config.init_from_file("config/config.yaml")
 
