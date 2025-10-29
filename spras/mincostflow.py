@@ -15,10 +15,10 @@ from spras.util import add_rank_column, duplicate_edges, raw_pathway_df
 __all__ = ['MinCostFlow', 'MinCostFlowParams']
 
 class MinCostFlowParams(BaseModel):
-    flow: Optional[float] = None
+    flow: Optional[int] = None
     "amount of flow going through the graph"
 
-    capacity: Optional[float] = None
+    capacity: Optional[int] = None
     "amount of capacity allowed on each edge"
 
     model_config = ConfigDict(extra='forbid', use_attribute_docstrings=True)

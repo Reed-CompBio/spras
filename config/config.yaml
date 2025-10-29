@@ -97,7 +97,7 @@ algorithms:
     include: true
     runs:
       run1:
-        flow: 1 # The flow must be an int
+        flow: 1
         capacity: 1
 
   - name: "allpairs"
