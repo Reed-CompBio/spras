@@ -202,6 +202,8 @@ class Evaluation:
                 "The input DataFrame must include a preprocessed 'Algorithm' column to calculate precision and recall per pathway file."
             )
 
+        pr_df.sort_values(by=['Algorithm', 'Recall', 'Pathway'], axis=0, ascending=True, inplace=True)
+
         # save figure
         plt.figure(figsize=(10, 7))
         color_palette = create_palette(pr_df['Algorithm'].tolist())
@@ -313,9 +315,10 @@ class Evaluation:
                 "The input DataFrame must include a preprocessed 'Gold_Standard_Type' column indicating the edge directionality used for the gold standard, which is required to visualize precision and recall for each pathway file per gold standard type."
             )
 
+        pr_df.sort_values(by=['Algorithm', 'Gold_Standard_Type', 'Recall', 'Pathway'], axis=0, ascending=True, inplace=True)
 
         gs_types = pr_df["Gold_Standard_Type"].unique().tolist()
-        fig, axes = plt.subplots(1, len(gs_types), figsize=(6 * len(gs_types), 5), sharex=True, sharey=True, constrained_layout=True)
+        fig, axes = plt.subplots(1, len(gs_types), figsize=(6 * len(gs_types), 5), sharex=True, sharey=True)
         color_palette = create_palette(pr_df['Algorithm'].tolist())
 
         for ax, gs_type in zip(axes, gs_types, strict=True):
@@ -361,7 +364,6 @@ class Evaluation:
         """
         if not pr_df.empty:
             pr_df['Algorithm'] = pr_df['Pathway'].apply(lambda p: Path(p).parent.name.split('-')[1])
-            pr_df.sort_values(by=['Recall', 'Pathway'], axis=0, ascending=True, inplace=True)
 
             if aggregate_per_algorithm:
                 # Guaranteed to only have one algorithm in Algorithm column
@@ -396,7 +398,6 @@ class Evaluation:
 
         if not pr_df.empty:
             pr_df['Algorithm'] = pr_df['Pathway'].apply(lambda p: Path(p).parent.name.split('-')[1])
-            pr_df.sort_values(by=['Recall', 'Pathway'], axis=0, ascending=True, inplace=True)
 
             if not edge_evaluation:
                 if aggregate_per_algorithm:
