@@ -36,6 +36,8 @@ jobs:
         # (with the max specified by `--splits 2`), to save CI time by parallelization
         test_group: [1, 2]
         os: [ubuntu-latest]
+      # we want all tests to run, even if some fail.
+      fail-fast: false
     steps:
       - name: Checkout repository
         uses: actions/checkout@v4
@@ -110,4 +112,4 @@ jobs:
       - name: Run pre-commit
         shell: bash --login {0}
         # https://github.com/pre-commit/action/blob/576ff52938d158a24ac7e009dfa94b1455e7df99/action.yml#L19
-        run: pre-commit run --show-diff-on-failure --color=always
+        run: pre-commit run --all-files --show-diff-on-failure --color=always

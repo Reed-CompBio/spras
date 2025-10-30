@@ -81,14 +81,14 @@ class TestAllPairs:
         out_path = OUT_DIR / 'sample-out-unpack.txt'
         out_path.unlink(missing_ok=True)
         # Indicate via config mechanism that we want to unpack the Singularity container
-        config.config.unpack_singularity = True
+        config.config.container_settings.unpack_singularity = True
         AllPairs.run(
             nodetypes=str(TEST_DIR / 'input/sample-in-nodetypes.txt'),
             network=str(TEST_DIR / 'input/sample-in-net.txt'),
             directed_flag=str(TEST_DIR / 'input' / 'directed-flag-false.txt'),
             output_file=str(out_path),
             container_framework="singularity")
-        config.config.unpack_singularity = False
+        config.config.container_settings.unpack_singularity = False
         assert out_path.exists()
 
     def test_allpairs_correctness(self):

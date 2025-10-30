@@ -14,8 +14,9 @@ import re
 from typing import Annotated, Optional
 
 import networkx as nx
-from pydantic import AfterValidator, BaseModel, ConfigDict, Field
+from pydantic import AfterValidator, BaseModel, ConfigDict
 
+from spras.config.container_schema import ContainerSettings
 from spras.config.util import CaseInsensitiveEnum
 from spras.interval import Interval
 from spras.statistics import compute_statistics, statistics_options
@@ -91,18 +92,6 @@ def label_validator(name: str):
             raise ValueError(f"{name} label '{label}' contains invalid values. {name} labels can only contain letters, numbers, or underscores.")
         return label
     return validate
-
-class ContainerFramework(CaseInsensitiveEnum):
-    docker = 'docker'
-    singularity = 'singularity'
-    apptainer = 'apptainer'
-    dsub = 'dsub'
-
-class ContainerRegistry(BaseModel):
-    base_url: str
-    owner: str = Field(description="The owner or project of the registry")
-
-    model_config = ConfigDict(extra='forbid')
 
 class AlgorithmParams(BaseModel):
     include: bool
@@ -197,10 +186,7 @@ class GraphHeuristics(BaseModel):
     model_config = ConfigDict(extra='forbid')
 
 class RawConfig(BaseModel):
-    # TODO: move these container values to a nested container key
-    container_framework: ContainerFramework = ContainerFramework.docker
-    unpack_singularity: bool = False
-    container_registry: ContainerRegistry
+    containers: ContainerSettings
     enable_profiling: bool = False
 
     hash_length: int = DEFAULT_HASH_LENGTH
