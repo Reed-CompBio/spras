@@ -13,13 +13,11 @@ We declare models using two classes here:
 import re
 from typing import Annotated, Optional
 
-import networkx as nx
 from pydantic import AfterValidator, BaseModel, ConfigDict
 
 from spras.config.container_schema import ContainerSettings
+from spras.config.heuristics import GraphHeuristics
 from spras.config.util import CaseInsensitiveEnum
-from spras.interval import Interval
-from spras.statistics import compute_statistics, statistics_options
 
 # Most options here have an `include` property,
 # which is meant to make disabling parts of the configuration easier.
@@ -137,51 +135,6 @@ class Locations(BaseModel):
 # NOTE: This setting doesn't have any uses past setting the output_dir as of now.
 class ReconstructionSettings(BaseModel):
     locations: Locations
-
-    model_config = ConfigDict(extra='forbid')
-
-class GraphHeuristics(BaseModel):
-    number_of_nodes: list[Interval] = []
-    number_of_edges: list[Interval] = []
-    number_of_connected_components: list[Interval] = []
-    density: list[Interval] = []
-
-    max_degree: list[Interval] = []
-    median_degree: list[Interval] = []
-    max_diameter: list[Interval] = []
-    average_path_length: list[Interval] = []
-
-    def validate_graph(self, graph: nx.DiGraph):
-        statistics_dictionary = {
-            'Number of nodes': self.number_of_nodes,
-            'Number of edges': self.number_of_edges,
-            'Number of connected components': self.number_of_connected_components,
-            'Density': self.density,
-            'Max degree': self.max_degree,
-            'Median degree': self.median_degree,
-            'Max diameter': self.max_diameter,
-            'Average path length': self.average_path_length
-        }
-
-        # quick assert: is statistics_dictionary exhaustive?
-        assert set(statistics_dictionary.keys()) == set(statistics_options)
-
-        stats = compute_statistics(
-            graph,
-            list(k for k, v in statistics_dictionary.items() if len(v) == 0)
-        )
-
-        for key, value in stats.items():
-            intervals = statistics_dictionary[key]
-
-            matches_heuristics = False
-            for interval in intervals:
-                if interval.mem(value):
-                    matches_heuristics = True
-                    break
-
-            if not matches_heuristics:
-                raise RuntimeError(f"Heuristic {key} with value {value} does not match {intervals}!")
 
     model_config = ConfigDict(extra='forbid')
 
