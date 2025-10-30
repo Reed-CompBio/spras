@@ -82,7 +82,7 @@ def compute_statistics(graph: nx.DiGraph, statistics: list[str]) -> dict[str, fl
             computed_tuple = compute(graph)
             assert len(statistic_tuple) == len(computed_tuple), f"bad tuple length for {statistic_tuple}"
 
-            current_computed_statistics = zip(statistic_tuple, computed_tuple)
+            current_computed_statistics = zip(statistic_tuple, computed_tuple, strict=True)
             for stat, value in current_computed_statistics:
                 computed_statistics[stat] = value
 
