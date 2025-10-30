@@ -10,7 +10,7 @@ we can say "1500 <" for "1500 < x", or "1000 < x < 2000", etc.
 import tokenize
 from enum import Enum
 from io import BytesIO
-from typing import Any, Optional, Self
+from typing import Any, Optional, Self, cast
 
 from pydantic import BaseModel, model_validator
 
@@ -31,7 +31,7 @@ class Operand(Enum):
         match self:
             case Operand.LTE: return True
             case Operand.EQ: return True
-            case Operand.GT: return True
+            case Operand.GTE: return True
         return False
 
     def as_closed(self):
@@ -57,6 +57,14 @@ class Operand(Enum):
             case Operand.EQ: return left == right
             case Operand.GTE: return left >= right
             case Operand.GT: return left > right
+    
+    def flip(self):
+        match self:
+            case Operand.LT: return Operand.GT
+            case Operand.LTE: return Operand.GTE
+            case Operand.EQ: return Operand.EQ
+            case Operand.GTE: return Operand.LTE
+            case Operand.GT: return Operand.LT
 
     @classmethod
     def combine(cls, left: Self, right: Self):
@@ -64,11 +72,13 @@ class Operand(Enum):
         match (left, right):
             case (Operand.LTE, Operand.LTE): return Operand.LTE
             case (Operand.LT, Operand.LTE): return Operand.LT
+            case (Operand.LTE, Operand.LT): return Operand.LT
             case (Operand.LT, Operand.LT): return Operand.LT
             case (Operand.EQ, op): return op
             case (op, Operand.EQ): return op
             case (Operand.GTE, Operand.GTE): return Operand.GTE
             case (Operand.GT, Operand.GTE): return Operand.GT
+            case (Operand.GTE, Operand.GT): return Operand.GT
             case (Operand.GT, Operand.GT): return Operand.GT
         return None
 
@@ -108,12 +118,8 @@ class Interval(BaseModel):
     @classmethod
     def right_operand(cls, num: float, operand: Operand) -> Self:
         """Creates an interval whose operand is on the right (e.g. 300<)"""
-        match operand:
-            case Operand.LT: return cls(lower=num, upper=None, lower_closed=False, upper_closed=False)
-            case Operand.LTE: return cls(lower=num, upper=None, lower_closed=True, upper_closed=False)
-            case Operand.EQ: return cls.single(num)
-            case Operand.GTE: return cls(lower=None, upper=num, lower_closed=False, upper_closed=False)
-            case Operand.GT: return cls(lower=None, upper=num, lower_closed=False, upper_closed=True)
+        # TODO: remove cast?
+        return cast(Self, Interval.left_operand(operand.flip(), num))
 
     @classmethod
     def from_string(cls, input: str) -> Self:
@@ -158,7 +164,7 @@ class Interval(BaseModel):
 
         # Case 3: number operand (id?)
         if len(tokens) == 0 or len(tokens) == 1:
-            if len(tokens) == 1: assert is_id(tokens[1])
+            if len(tokens) == 1: assert is_id(tokens[0])
             return cls.right_operand(number, operand)
 
         # Case 4: number operand id operand number
@@ -178,15 +184,23 @@ class Interval(BaseModel):
 
         # are our two numbers valid?
         combined_operand = Operand.combine(operand, second_operand)
-        assert combined_operand is not None, f"operands {operand.value} and {second_operand} must combine well with each other!"
+        assert combined_operand is not None, f"operands {operand.value} and {second_operand.value} must combine well with each other!"
         assert combined_operand.compare(number, second_number), f"{number} {operand.value} {second_number} does not hold!"
 
-        return cls(
-            lower=number,
-            upper=second_number,
-            lower_closed=operand.is_closed(),
-            upper_closed=second_operand.is_closed()
-        )
+        if combined_operand.as_opened() == Operand.LT:
+            return cls(
+                lower=number,
+                upper=second_number,
+                lower_closed=operand.is_closed(),
+                upper_closed=second_operand.is_closed()
+            )
+        else:
+            return cls(
+                lower=second_number,
+                upper=number,
+                lower_closed=second_operand.is_closed(),
+                upper_closed=operand.is_closed()
+            )
 
     def __str__(self) -> str:
         if not self.lower and not self.upper: return "{empty interval}"
@@ -197,8 +211,11 @@ class Interval(BaseModel):
 
         if self.lower == self.upper and self.lower_closed and self.upper_closed: return str(self.lower)
 
-        return str(self.lower) + " " + Operand.LT.with_closed(self.lower_closed).value + " " + "x" \
-            + Operand.LT.with_closed(self.upper_closed).value + str(self.upper)
+        return str(self.lower) + " " + Operand.LT.with_closed(self.lower_closed).value + " x " \
+            + Operand.LT.with_closed(self.upper_closed).value + " " + str(self.upper)
+
+    def __repr__(self) -> str:
+        return f"Interval[{str(self)}]"
 
     # For parsing Intervals automatically with pydantic.
     @model_validator(mode="before")
