@@ -488,7 +488,6 @@ class Evaluation:
             rep_pathway = os.path.join(output_dir, f"{closest_to_kde_peak['datapoint_labels']}", "pathway.txt")
             rep_pathways.append(rep_pathway)
 
-        print(rep_pathways)
         return rep_pathways
 
     @staticmethod
