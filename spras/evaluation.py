@@ -2,7 +2,7 @@ import os
 import pickle as pkl
 from os import PathLike
 from pathlib import Path
-from typing import Dict, Iterable, Union
+from typing import Iterable, Union, TypedDict
 
 import matplotlib.pyplot as plt
 import numpy as np
@@ -21,22 +21,25 @@ from spras.interactome import (
     sort_and_deduplicate_undirected,
 )
 
+class GoldStandardDict(TypedDict):
+    label: str
+    node_files: list[str]
+    edge_files: list[str]
+    data_dir: str
+    dataset_labels: list[str]
 
 class Evaluation:
     NODE_ID = 'NODEID'
 
-    def __init__(self, gold_standard_dict: Dict):
-        self.label = None
-        self.datasets = None
-        self.node_table = None
-        self.mixed_edge_table = None
-        self.undirected_edge_table = None
-        self.directed_edge_table = None
-        self.load_files_from_dict(gold_standard_dict)
-        return
+    label: str
+    datasets: list[str]
+    node_table: pd.DataFrame
+    mixed_edge_table: pd.DataFrame
+    undirected_edge_table: pd.DataFrame
+    directed_edge_table: pd.DataFrame
 
     @staticmethod
-    def merge_gold_standard_input(gs_dict, gs_file):
+    def merge_gold_standard_input(gs_dict: GoldStandardDict, gs_file):
         """
         Merge files listed for this gold standard dataset and write the dataset to disk
         @param gs_dict: gold standard dataset to process
@@ -45,7 +48,7 @@ class Evaluation:
         gs_dataset = Evaluation(gs_dict)
         gs_dataset.to_file(gs_file)
 
-    def to_file(self, file_name):
+    def to_file(self, file_name: str | os.PathLike):
         """
         Saves gold standard object to pickle file
         """
@@ -53,7 +56,7 @@ class Evaluation:
             pkl.dump(self, f)
 
     @staticmethod
-    def from_file(file_name):
+    def from_file(file_name: str | os.PathLike):
         """
         Loads gold standard object from a pickle file.
         Usage: gold_standard = Evaluation.from_file(pickle_file)
@@ -61,7 +64,7 @@ class Evaluation:
         with open(file_name, 'rb') as f:
             return pkl.load(f)
 
-    def load_files_from_dict(self, gold_standard_dict: Dict):
+    def __init__(self, gold_standard_dict: GoldStandardDict):
         """
         Loads gold standard files from gold_standard_dict, which is one gold standard dataset
         dictionary from the list in the config file with the fields in the config file.
@@ -352,7 +355,7 @@ class Evaluation:
         return rep_pathways
 
     @staticmethod
-    def edge_frequency_node_ensemble(node_table: pd.DataFrame, ensemble_files: list[Union[str, PathLike]], dataset_file: str) -> dict:
+    def edge_frequency_node_ensemble(node_table: pd.DataFrame, ensemble_files: Iterable[Union[str, PathLike]], dataset_file: str) -> dict:
         """
         Generates a dictionary of node ensembles using edge frequency data from a list of ensemble files.
         A list of ensemble files can contain an aggregated ensemble or algorithm-specific ensembles per dataset
