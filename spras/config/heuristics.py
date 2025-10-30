@@ -1,7 +1,9 @@
 import networkx as nx
 from pydantic import BaseModel, ConfigDict
+
 from spras.interval import Interval
 from spras.statistics import compute_statistics, statistics_options
+
 
 class GraphHeuristicError(RuntimeError):
     """
@@ -18,7 +20,7 @@ class GraphHeuristicError(RuntimeError):
         super().__init__(GraphHeuristicError.to_string(failed_heuristics))
 
         self.failed_heuristics = failed_heuristics
-    
+
     def __str__(self) -> str:
         return GraphHeuristicError.to_string(self.failed_heuristics)
 

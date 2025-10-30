@@ -7,9 +7,13 @@ we can say "1500 <" for "1500 < x", or "1000 < x < 2000", etc.
 [If there is ever a library that does this, we should replace this code with that library.]
 """
 
+import tokenize
 from enum import Enum
+from io import BytesIO
 from typing import Any, Optional, Self
+
 from pydantic import BaseModel, model_validator
+
 
 class Operand(Enum):
     LT = "<"
@@ -21,7 +25,7 @@ class Operand(Enum):
     @classmethod
     def from_str(cls, string: str) -> Optional[Self]:
         return next((enum for enum in list(cls) if enum.value == string), None)
-    
+
     def is_closed(self) -> bool:
         """Whether this is a closed inequality. We consider = to be closed."""
         match self:
@@ -43,7 +47,7 @@ class Operand(Enum):
             case Operand.LTE: return Operand.LT
             case Operand.GTE: return Operand.GT
         return self
-    
+
     def with_closed(self, closed: bool): return self.as_closed() if closed else self.as_opened()
 
     def compare(self, left, right) -> bool:
@@ -53,7 +57,7 @@ class Operand(Enum):
             case Operand.EQ: return left == right
             case Operand.GTE: return left >= right
             case Operand.GT: return left > right
-    
+
     @classmethod
     def combine(cls, left: Self, right: Self):
         """Combines two operands, returning None if the operands don't combine well."""
@@ -79,12 +83,12 @@ class Interval(BaseModel):
             meets_lower = self.lower <= num if self.lower_closed else self.lower < num
         else:
             meets_lower = True
-        
+
         if self.upper is not None:
             meets_upper = num <= self.upper if self.upper_closed else num < self.upper
         else:
             meets_upper = True
-        
+
         return meets_lower and meets_upper
 
     @classmethod
@@ -113,8 +117,10 @@ class Interval(BaseModel):
 
     @classmethod
     def from_string(cls, input: str) -> Self:
-        tokens = [token.strip() for token in input.split(" ")]
-        
+        # We can't do a normal string#split here for cases like "1500<"
+        tokens = [t.string for t in tokenize.tokenize(BytesIO(input.encode('utf-8')).readline) if t.string != ""]
+        tokens.pop() # drop utf-8 indicator
+
         assert len(tokens) != 0
 
         def parse_num(numstr: str) -> Optional[int]:
@@ -130,18 +136,18 @@ class Interval(BaseModel):
         if is_id(tokens[0]):
             # No other cases have an id at the beginning: we get rid of it.
             tokens.pop()
-        
+
         operand = Operand.from_str(tokens[0])
         if operand is not None:
             # (cont.) Case 1: (id?) operand number
             number = parse_num(tokens[1])
             assert number is not None, f"found operand {operand.value} and expected a number, but found {tokens[1]} instead."
             return cls.left_operand(operand, number)
-            
+
         # All other cases have a number
         number = parse_num(tokens.pop())
         assert number is not None, f"expected an inequality, got {input} instead"
-        
+
         # Case 2: number
         if len(tokens) == 0:
             return cls.single(number)
@@ -158,7 +164,7 @@ class Interval(BaseModel):
         # Case 4: number operand id operand number
         id = tokens.pop()
         assert is_id(id), f"got an inequality of the form {number} {operand.value} and expected nothing or another identifier, but got {id} instead."
-        
+
         second_operand_str = tokens.pop()
         second_operand = Operand.from_str(second_operand_str)
         assert second_operand is not None, f"got an inequality of the form {number} {operand.value} {id} and was expecting an operand, but got {second_operand_str} instead."
@@ -174,7 +180,7 @@ class Interval(BaseModel):
         combined_operand = Operand.combine(operand, second_operand)
         assert combined_operand is not None, f"operands {operand.value} and {second_operand} must combine well with each other!"
         assert combined_operand.compare(number, second_number), f"{number} {operand.value} {second_number} does not hold!"
-        
+
         return cls(
             lower=number,
             upper=second_number,
