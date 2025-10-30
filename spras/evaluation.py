@@ -40,7 +40,7 @@ class Evaluation:
     directed_edge_table: pd.DataFrame
 
     @staticmethod
-    def merge_gold_standard_input(gs_dict: GoldStandardDict, gs_file):
+    def merge_gold_standard_input(gs_dict: GoldStandardDict, gs_file: str | os.PathLike):
         """
         Merge files listed for this gold standard dataset and write the dataset to disk
         @param gs_dict: gold standard dataset to process
@@ -305,7 +305,7 @@ class Evaluation:
                 plt.close()
 
     @staticmethod
-    def pca_chosen_pathway(coordinates_files: list[Union[str, PathLike]], pathway_summary_file: str, output_dir: str):
+    def pca_chosen_pathway(coordinates_files: Iterable[Union[str, PathLike]], pathway_summary_file: str, output_dir: str):
         """
         Identifies the pathway closest to a specified highest kernel density estimated (KDE) peak based on PCA
         coordinates
