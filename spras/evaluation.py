@@ -2,7 +2,7 @@ import os
 import pickle as pkl
 from os import PathLike
 from pathlib import Path
-from typing import Iterable, Union, TypedDict
+from typing import Iterable, TypedDict, Union
 
 import matplotlib.pyplot as plt
 import numpy as np
@@ -20,6 +20,7 @@ from spras.interactome import (
     convert_undirected_to_directed,
     sort_and_deduplicate_undirected,
 )
+
 
 class GoldStandardDict(TypedDict):
     label: str
