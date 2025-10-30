@@ -119,7 +119,7 @@ class Interval(BaseModel):
     def from_string(cls, input: str) -> Self:
         # We can't do a normal string#split here for cases like "1500<"
         tokens = [t.string for t in tokenize.tokenize(BytesIO(input.encode('utf-8')).readline) if t.string != ""]
-        tokens.pop() # drop utf-8 indicator
+        tokens.pop(0) # drop utf-8 indicator
 
         assert len(tokens) != 0
 
@@ -135,7 +135,7 @@ class Interval(BaseModel):
         # Case 1: (id?) operand number
         if is_id(tokens[0]):
             # No other cases have an id at the beginning: we get rid of it.
-            tokens.pop()
+            tokens.pop(0)
 
         operand = Operand.from_str(tokens[0])
         if operand is not None:
@@ -145,15 +145,15 @@ class Interval(BaseModel):
             return cls.left_operand(operand, number)
 
         # All other cases have a number
-        number = parse_num(tokens.pop())
-        assert number is not None, f"expected an inequality, got {input} instead"
+        number = parse_num(tokens.pop(0))
+        assert number is not None, f"expected a number, got {input} instead"
 
         # Case 2: number
         if len(tokens) == 0:
             return cls.single(number)
 
         # All other cases have an operand
-        operand = Operand.from_str(tokens.pop())
+        operand = Operand.from_str(tokens.pop(0))
         assert operand is not None, f"got {number}, expected an operand afterward."
 
         # Case 3: number operand (id?)
@@ -162,14 +162,14 @@ class Interval(BaseModel):
             return cls.right_operand(number, operand)
 
         # Case 4: number operand id operand number
-        id = tokens.pop()
+        id = tokens.pop(0)
         assert is_id(id), f"got an inequality of the form {number} {operand.value} and expected nothing or another identifier, but got {id} instead."
 
-        second_operand_str = tokens.pop()
+        second_operand_str = tokens.pop(0)
         second_operand = Operand.from_str(second_operand_str)
         assert second_operand is not None, f"got an inequality of the form {number} {operand.value} {id} and was expecting an operand, but got {second_operand_str} instead."
 
-        second_number_str = tokens.pop()
+        second_number_str = tokens.pop(0)
         second_number = parse_num(second_number_str)
         assert second_number is not None, f"got an inequality of the form {number} {operand.value} {id} {second_operand.value} and was expecting a number, but got {second_number_str} instead."
 
