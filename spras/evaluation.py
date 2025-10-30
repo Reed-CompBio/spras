@@ -316,6 +316,7 @@ class Evaluation:
             )
 
         pr_df.sort_values(by=['Algorithm', 'Gold_Standard_Type', 'Recall', 'Pathway'], axis=0, ascending=True, inplace=True)
+        # TODO: fix the layout of the output png
 
         gs_types = pr_df["Gold_Standard_Type"].unique().tolist()
         fig, axes = plt.subplots(1, len(gs_types), figsize=(6 * len(gs_types), 5), sharex=True, sharey=True)
@@ -342,7 +343,7 @@ class Evaluation:
         fig.supylabel("Precision")
         fig.suptitle(title)
         handles, labels = axes[0].get_legend_handles_labels()
-        fig.legend(handles, labels, loc="upper right") # TODO: when doing aggregate per algorithm, check if this needs to be fixed to be in a different place (issue might be constrained_layout)
+        fig.legend(handles, labels, loc="upper right")
         plt.savefig(output_png)
         plt.close(fig)
 
@@ -429,16 +430,6 @@ class Evaluation:
                 plt.legend()
                 plt.savefig(output_png)
                 plt.close()
-
-    # TODO
-    # need to make a edge_precision_recall function to make the pr_df
-    # I think then the precision_and_recall_pca_chosen_pathway function can be reused but needs to be updated to be able to differentiate between nodes or edges
-    # i think I can do that with a boolean
-    # then I need to make a edges_visualize_precision_and_recall_plot that is called
-    # these can then be reused for no parameter selection evaluation
-    # i think I will need to make a new snakemake rule for each of the evaluatuon because the gold standards only include nodes or edges,
-    # sharing the same one will cause errors that one type of evalaution doesn't exist
-
 
     @staticmethod
     def pca_chosen_pathway(coordinates_files: list[Union[str, PathLike]], pathway_summary_file: str, output_dir: str):
