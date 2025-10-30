@@ -7,9 +7,11 @@ computing more than necessary if we have dependencies. See the top level
 """
 
 import itertools
-import networkx as nx
 from statistics import median
 from typing import Callable
+
+import networkx as nx
+
 
 def compute_degree(graph: nx.DiGraph) -> tuple[int, float]:
     """
@@ -43,7 +45,7 @@ def compute_on_cc(graph: nx.DiGraph) -> tuple[int, float]:
         avg_path_len = sum(avg_path_lengths) / len(avg_path_lengths)
     else:
         avg_path_len = 0.0
-    
+
     return max_diameter, avg_path_len
 
 # The type signature on here is quite bad. I would like to say that an n-tuple has n-outputs.
@@ -52,7 +54,7 @@ statistics_computation: dict[tuple[str, ...], Callable[[nx.DiGraph], tuple[float
     ('Number of edges',): lambda graph : (graph.number_of_edges(),),
     ('Number of connected components',): lambda graph : (nx.number_connected_components(graph),),
     ('Density',): lambda graph : (nx.density(graph),),
-    
+
     ('Max degree', 'Median degree'): compute_degree,
     ('Max diameter', 'Average path length'): compute_on_cc,
 }
@@ -63,7 +65,7 @@ statistics_options: list[str] = list(itertools.chain(*(list(key) for key in stat
 def compute_statistics(graph: nx.DiGraph, statistics: list[str]) -> dict[str, float | int]:
     """
     Computes `statistics` for a graph corresponding to the top-level `statistics` dictionary
-    in this file. 
+    in this file.
     """
 
     # early-scan cutoff for statistics:
@@ -71,7 +73,7 @@ def compute_statistics(graph: nx.DiGraph, statistics: list[str]) -> dict[str, fl
     for stat in statistics:
         if stat not in statistics_options:
             raise RuntimeError(f"Statistic {stat} not a computable statistics! Available statistics: {statistics_options}")
-    
+
     # now, we can compute statistics only
     computed_statistics: dict[str, float | int] = dict()
     for statistic_tuple, compute in statistics_computation.items():
