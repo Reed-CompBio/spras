@@ -48,6 +48,8 @@ def run_cytoscape(pathways: List[Union[str, PurePath]], output_file: str, contai
         # Provided the mapped pathway file path and the original file path as the label Cytoscape
         command.extend(['--pathway', f'{mapped_pathway}|{pathway}'])
 
+    # out_dir does not contain all Cytoscape output files, but it is where
+    # profiling's `usage-profile.tsv` file goes if `enable_profiling` is enabled.
     out_dir = Path(output_file).parent
 
     container_suffix = "py4cytoscape:v3"
