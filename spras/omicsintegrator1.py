@@ -50,6 +50,11 @@ class DummyMode(CaseInsensitiveEnum):
     file = 'file'
     "connect the dummy node to a specific list of nodes provided in a file"
 
+    # To make sure that DummyMode prints as `terminals`, etc.. in JSON dictionaries
+    # (since they use object representation internally.)
+    def __repr__(self) -> str:
+        return f"'{self.name}'"
+
 class OmicsIntegrator1Params(BaseModel):
     dummy_mode: Optional[DummyMode] = None
     mu_squared: bool = False
@@ -67,7 +72,7 @@ class OmicsIntegrator1Params(BaseModel):
     seed: Optional[int] = None
     "The randomness seed to use."
 
-    w: int
+    w: float
     "Float that affects the number of connected components, with higher values leading to more components"
 
     b: float
@@ -83,7 +88,7 @@ class OmicsIntegrator1Params(BaseModel):
     "Standard Deviation of the gaussian noise added to edges in Noisy Edges Randomizations"
 
     g: float = 0.001
-    "msgsteiner reinforcement parameter that affects the convergence of the solution and runtime, with larger values leading to faster convergence but suboptimal results."
+    "(gamma) msgsteiner reinforcement parameter that affects the convergence of the solution and runtime, with larger values leading to faster convergence but suboptimal results."
 
     r: float = 0
     "msgsteiner parameter that adds random noise to edges, which is rarely needed."

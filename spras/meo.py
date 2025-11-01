@@ -82,7 +82,7 @@ class MEOParams(BaseModel):
     """
 
     rand_restarts: Optional[int] = None
-    "The number of random restarts to do."
+    "The number of random restarts to use."
 
     model_config = ConfigDict(extra='forbid', use_attribute_docstrings=True)
 

@@ -20,13 +20,13 @@ class DummyMode(CaseInsensitiveEnum):
     all = 'all'
 
 class OmicsIntegrator2Params(BaseModel):
-    w: float = 6
+    w: float = 5
     "Omega: the weight of the edges connecting the dummy node to the nodes selected by dummyMode"
 
     b: float = 1
     "Beta: scaling factor of prizes"
 
-    g: float = 20
+    g: float = 3
     "Gamma: multiplicative edge penalty from degree of endpoints"
 
     noise: Optional[float] = None
