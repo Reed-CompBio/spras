@@ -35,7 +35,6 @@ class TestDOMINO:
         DOMINO.run({"network": TEST_DIR / 'input' / 'simple' / 'domino-network.txt',
                     "active_genes": TEST_DIR / 'input' / 'simple' / 'domino-active-genes.txt'},
                    output_file=OUT_FILE_DEFAULT)
-        OUT_FILE_DEFAULT.unlink(missing_ok=True)
         # output_file should be empty
         assert OUT_FILE_DEFAULT.exists()
 
