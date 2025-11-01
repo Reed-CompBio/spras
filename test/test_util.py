@@ -3,6 +3,7 @@ from pathlib import PurePosixPath, PureWindowsPath
 import pytest
 
 import spras.config.config as config
+from spras.config.container_schema import ProcessedContainerSettings
 from spras.containers import convert_docker_path, prepare_path_docker, prepare_volume
 from spras.util import hash_params_sha1_base32
 
@@ -41,7 +42,7 @@ class TestUtil:
                               ('test/OmicsIntegrator1/output', PurePosixPath('/spras'), '/spras/TNDO5TR/output'),
                               ('../src', '/spras', '/spras/NNBVZ6X/src')])
     def test_prepare_volume(self, filename, volume_base, expected_filename):
-        _, container_filename = prepare_volume(filename, volume_base, config.config.container_settings)
+        _, container_filename = prepare_volume(filename, volume_base, ProcessedContainerSettings())
         assert container_filename == expected_filename
 
     def test_convert_docker_path(self):

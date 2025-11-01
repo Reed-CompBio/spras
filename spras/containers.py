@@ -199,7 +199,7 @@ def run_container(container_suffix: str, command: List[str], volumes: List[Tuple
     elif normalized_framework == 'dsub':
         return run_container_dsub(container, command, volumes, working_dir, environment)
     else:
-        raise ValueError(f'{container_settings.framework} is not a recognized container framework. Choose "docker", "dsub", or "singularity".')
+        raise ValueError(f'{container_settings.framework} is not a recognized container framework. Choose "docker", "dsub", "apptainer", or "singularity".')
 
 def run_container_and_log(name: str, container_suffix: str, command: List[str], volumes: List[Tuple[PurePath, PurePath]], working_dir: str, out_dir: str | os.PathLike, container_settings: ProcessedContainerSettings, environment: Optional[dict[str, str]] = None, network_disabled=False):
     """
