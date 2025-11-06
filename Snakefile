@@ -295,6 +295,7 @@ rule parse_output:
         params = reconstruction_params(wildcards.algorithm, wildcards.params).copy()
         params['dataset'] = input.dataset_file
         runner.parse_output(wildcards.algorithm, input.raw_file, output.standardized_file, params)
+        _config.config.heuristics.validate_graph_from_file(output.standardized_file)
 
 # TODO: reuse in the future once we make summary work for mixed graphs. See https://github.com/Reed-CompBio/spras/issues/128
 # Collect summary statistics for a single pathway

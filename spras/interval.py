@@ -57,7 +57,7 @@ class Operand(Enum):
             case Operand.EQ: return left == right
             case Operand.GTE: return left >= right
             case Operand.GT: return left > right
-    
+
     def flip(self):
         match self:
             case Operand.LT: return Operand.GT
