@@ -1,4 +1,5 @@
 from pathlib import Path
+
 import pytest
 
 from spras.config.heuristics import GraphHeuristics, GraphHeuristicsError
@@ -16,7 +17,7 @@ class TestHeuristics:
     def test_empty(self):
         self.parse({ 'number_of_nodes': '<1' }
                        ).validate_graph_from_file(FIXTURES_DIR / 'empty.txt')
-        
+
         with pytest.raises(GraphHeuristicsError):
             self.parse({ 'number_of_nodes': '0<' }
                        ).validate_graph_from_file(FIXTURES_DIR / 'empty.txt')
