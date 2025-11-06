@@ -134,6 +134,7 @@ dmypy.json
 
 # Snakemake
 .snakemake/
+report.html
 
 # Output files
 output/

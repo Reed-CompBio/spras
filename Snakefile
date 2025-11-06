@@ -290,7 +290,12 @@ rule parse_output:
     input: 
         raw_file = SEP.join([out_dir, '{dataset}-{algorithm}-{params}', 'raw-pathway.txt']),
         dataset_file = SEP.join([out_dir, 'dataset-{dataset}-merged.pickle'])
-    output: standardized_file = SEP.join([out_dir, '{dataset}-{algorithm}-{params}', 'pathway.txt'])
+    output:
+        standardized_file = report(
+            SEP.join([out_dir, '{dataset}-{algorithm}-{params}', 'pathway.txt']),
+            category="Reconstructed Output",
+            subcategory="{dataset}"
+        )
     run:
         params = reconstruction_params(wildcards.algorithm, wildcards.params).copy()
         params['dataset'] = input.dataset_file
