@@ -10,9 +10,10 @@ we can say "1500 <" for "1500 < x", or "1000 < x < 2000", etc.
 import tokenize
 from enum import Enum
 from io import BytesIO
-from typing import Any, Optional, Self, cast
+from typing import Any, ClassVar, Optional, Self, cast
 
-from pydantic import BaseModel, model_validator
+from pydantic import model_serializer, model_validator
+from pydantic.dataclasses import dataclass
 
 
 class Operand(Enum):
@@ -82,7 +83,10 @@ class Operand(Enum):
             case (Operand.GT, Operand.GT): return Operand.GT
         return None
 
-class Interval(BaseModel):
+@dataclass
+class Interval:
+    EMPTY_STRING: ClassVar[str] = "{empty interval}"
+
     lower: Optional[float]
     upper: Optional[float]
     lower_closed: bool
@@ -110,10 +114,10 @@ class Interval(BaseModel):
         """Creates an interval whose operand is on the left (e.g. <300)"""
         match operand:
             case Operand.LT: return cls(lower=None, upper=num, lower_closed=False, upper_closed=False)
-            case Operand.LTE: return cls(lower=None, upper=num, lower_closed=True, upper_closed=False)
+            case Operand.LTE: return cls(lower=None, upper=num, lower_closed=False, upper_closed=True)
             case Operand.EQ: return cls.single(num)
-            case Operand.GTE: return cls(lower=num, upper=None, lower_closed=False, upper_closed=False)
-            case Operand.GT: return cls(lower=num, upper=None, lower_closed=False, upper_closed=True)
+            case Operand.GTE: return cls(lower=num, upper=None, lower_closed=True, upper_closed=False)
+            case Operand.GT: return cls(lower=num, upper=None, lower_closed=False, upper_closed=False)
 
     @classmethod
     def right_operand(cls, num: float, operand: Operand) -> Self:
@@ -203,10 +207,10 @@ class Interval(BaseModel):
             )
 
     def __str__(self) -> str:
-        if not self.lower and not self.upper: return "{empty interval}"
-        if not self.lower:
+        if self.lower is None and self.upper is None: return Interval.EMPTY_STRING
+        if self.lower is None:
             return Operand.LT.with_closed(self.upper_closed).value + " " + str(self.upper)
-        if not self.upper:
+        if self.upper is None:
             return str(self.lower) + " " + Operand.LT.with_closed(self.lower_closed).value
 
         if self.lower == self.upper and self.lower_closed and self.upper_closed: return str(self.lower)
@@ -221,6 +225,10 @@ class Interval(BaseModel):
     @model_validator(mode="before")
     @classmethod
     def from_literal(cls, data: Any) -> Any:
-        if isinstance(data, str):
-            return cls.from_string(data)
+        if isinstance(data, int) or isinstance(data, float) or isinstance(data, str):
+            return vars(cls.from_string(str(data)))
         return data
+
+    @model_serializer(mode='plain')
+    def serialize_model(self) -> str:
+        return str(self)

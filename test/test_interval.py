@@ -6,6 +6,9 @@ class TestInterval:
         assert Interval.single(5) == Interval(lower=5, upper=5, lower_closed=True, upper_closed=True)
         assert Interval.from_string("5") == Interval.single(5)
 
+    def test_interval_gt_0(self):
+        assert Interval.from_string(">0") == Interval(lower=0, upper=None, lower_closed=False, upper_closed=False)
+
     def test_string_permutations(self):
         assert Interval.from_string("<5") == Interval.from_string("<  5")
         assert Interval.from_string("5<") == Interval.from_string("5 < x")
