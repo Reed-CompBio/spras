@@ -74,13 +74,13 @@ class GraphHeuristics(BaseModel):
 
     def validate_graph_from_file(self, path: str | os.PathLike):
         # TODO: re-use from summary.py once we have a mixed/hypergraph library
-        G = nx.read_edgelist(path, data=(('weight', float), ('Direction', str)), create_using=nx.DiGraph)
+        G: nx.DiGraph = nx.read_edgelist(path, data=(('Rank', str), ('Direction', str)), create_using=nx.DiGraph)
 
         # We explicitly use `list` here to stop add_edge
         # from expanding our iterator infinitely.
         for source, target, data in list(G.edges(data=True)):
             if data["Direction"] == 'U':
-                G.add_edge(target, source, data)
+                G.add_edge(target, source, data=data)
             pass
 
         return self.validate_graph(G)
