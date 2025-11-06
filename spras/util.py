@@ -102,8 +102,6 @@ def raw_pathway_df(raw_pathway_file: str, sep: str = '\t', header: int = None) -
 
     return df
 
-def output_pathw
-
 
 def duplicate_edges(df: pd.DataFrame) -> tuple[pd.DataFrame, bool]:
     """
