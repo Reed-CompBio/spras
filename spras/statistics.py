@@ -24,7 +24,8 @@ def compute_degree(graph: nx.DiGraph) -> tuple[int, float]:
         degrees = [deg for _, deg in graph.degree()]
         return max(degrees), median(degrees)
 
-def compute_on_cc(graph: nx.DiGraph) -> tuple[int, float]:
+def compute_on_cc(directed_graph: nx.DiGraph) -> tuple[int, float]:
+    graph: nx.Graph = directed_graph.to_undirected()
     cc = list(nx.connected_components(graph))
     # Save the max diameter
     # Use diameter only for components with ≥2 nodes (singleton components have diameter 0)
@@ -52,7 +53,7 @@ def compute_on_cc(graph: nx.DiGraph) -> tuple[int, float]:
 statistics_computation: dict[tuple[str, ...], Callable[[nx.DiGraph], tuple[float | int, ...]]] = {
     ('Number of nodes',): lambda graph : (graph.number_of_nodes(),),
     ('Number of edges',): lambda graph : (graph.number_of_edges(),),
-    ('Number of connected components',): lambda graph : (nx.number_connected_components(graph),),
+    ('Number of connected components',): lambda graph : (nx.number_connected_components(graph.to_undirected()),),
     ('Density',): lambda graph : (nx.density(graph),),
 
     ('Max degree', 'Median degree'): compute_degree,
