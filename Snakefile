@@ -293,8 +293,8 @@ rule parse_output:
     output:
         standardized_file = report(
             SEP.join([out_dir, '{dataset}-{algorithm}-{params}', 'pathway.txt']),
-            category="Reconstructed Output",
-            subcategory="{dataset}"
+            category="dataset-{dataset}",
+            subcategory="Reconstructed Output"
         )
     run:
         params = reconstruction_params(wildcards.algorithm, wildcards.params).copy()
@@ -316,7 +316,11 @@ rule parse_output:
 rule viz_cytoscape:
     input: pathways = expand('{out_dir}{sep}{{dataset}}-{algorithm_params}{sep}pathway.txt', out_dir=out_dir, sep=SEP, algorithm_params=algorithms_with_params)
     output: 
-        session = SEP.join([out_dir, '{dataset}-cytoscape.cys'])
+        session = report(
+            SEP.join([out_dir, '{dataset}-cytoscape.cys']),
+            category="dataset-{dataset}",
+            subcategory="Visualization"
+        )
     run:
         cytoscape.run_cytoscape(input.pathways, output.session, FRAMEWORK)
 
@@ -327,7 +331,8 @@ rule summary_table:
         # Collect all pathways generated for the dataset
         pathways = expand('{out_dir}{sep}{{dataset}}-{algorithm_params}{sep}pathway.txt', out_dir=out_dir, sep=SEP, algorithm_params=algorithms_with_params),
         dataset_file = SEP.join([out_dir, 'dataset-{dataset}-merged.pickle'])
-    output: summary_table = SEP.join([out_dir, '{dataset}-pathway-summary.txt'])
+    output:
+        summary_table = report(SEP.join([out_dir, '{dataset}-pathway-summary.txt']), category="dataset-{dataset}", subcategory="Summary")
     run:
         # Load the node table from the pickled dataset file
         node_table = Dataset.from_file(input.dataset_file).node_table
@@ -339,13 +344,13 @@ rule ml_analysis:
     input: 
         pathways = expand('{out_dir}{sep}{{dataset}}-{algorithm_params}{sep}pathway.txt', out_dir=out_dir, sep=SEP, algorithm_params=algorithms_with_params)
     output: 
-        pca_image = SEP.join([out_dir, '{dataset}-ml', 'pca.png']),
-        pca_variance= SEP.join([out_dir, '{dataset}-ml', 'pca-variance.txt']),
-        pca_coordinates = SEP.join([out_dir, '{dataset}-ml', 'pca-coordinates.txt']),
-        hac_image_vertical = SEP.join([out_dir, '{dataset}-ml', 'hac-vertical.png']),
-        hac_clusters_vertical = SEP.join([out_dir, '{dataset}-ml', 'hac-clusters-vertical.txt']),
-        hac_image_horizontal = SEP.join([out_dir, '{dataset}-ml', 'hac-horizontal.png']),
-        hac_clusters_horizontal = SEP.join([out_dir, '{dataset}-ml', 'hac-clusters-horizontal.txt']),
+        pca_image = report(SEP.join([out_dir, '{dataset}-ml', 'pca.png']), category="dataset-{dataset}", subcategory="ML"),
+        pca_variance = report(SEP.join([out_dir, '{dataset}-ml', 'pca-variance.txt']), category="dataset-{dataset}", subcategory="ML"),
+        pca_coordinates = report(SEP.join([out_dir, '{dataset}-ml', 'pca-coordinates.txt']), category="dataset-{dataset}", subcategory="ML"),
+        hac_image_vertical = report(SEP.join([out_dir, '{dataset}-ml', 'hac-vertical.png']), category="dataset-{dataset}", subcategory="ML"),
+        hac_clusters_vertical = report(SEP.join([out_dir, '{dataset}-ml', 'hac-clusters-vertical.txt']), category="dataset-{dataset}", subcategory="ML"),
+        hac_image_horizontal = report(SEP.join([out_dir, '{dataset}-ml', 'hac-horizontal.png']), category="dataset-{dataset}", subcategory="ML"),
+        hac_clusters_horizontal = report(SEP.join([out_dir, '{dataset}-ml', 'hac-clusters-horizontal.txt']), category="dataset-{dataset}", subcategory="ML"),
     run: 
         summary_df = ml.summarize_networks(input.pathways)
         ml.hac_vertical(summary_df, output.hac_image_vertical, output.hac_clusters_vertical, **hac_params)
@@ -358,8 +363,8 @@ rule jaccard_similarity:
         pathways = expand('{out_dir}{sep}{{dataset}}-{algorithm_params}{sep}pathway.txt',
                           out_dir=out_dir, sep=SEP, algorithm_params=algorithms_with_params)
     output:
-        jaccard_similarity_matrix = SEP.join([out_dir, '{dataset}-ml', 'jaccard-matrix.txt']),
-        jaccard_similarity_heatmap = SEP.join([out_dir, '{dataset}-ml', 'jaccard-heatmap.png'])
+        jaccard_similarity_matrix = report(SEP.join([out_dir, '{dataset}-ml', 'jaccard-matrix.txt']), category="dataset-{dataset}", subcategory="ML"),
+        jaccard_similarity_heatmap = report(SEP.join([out_dir, '{dataset}-ml', 'jaccard-heatmap.png']), category="dataset-{dataset}", subcategory="ML"),
     run:
         summary_df = ml.summarize_networks(input.pathways)
         ml.jaccard_similarity_eval(summary_df, output.jaccard_similarity_matrix, output.jaccard_similarity_heatmap)
@@ -370,7 +375,7 @@ rule ensemble:
     input:
         pathways = expand('{out_dir}{sep}{{dataset}}-{algorithm_params}{sep}pathway.txt', out_dir=out_dir, sep=SEP, algorithm_params=algorithms_with_params)
     output:
-        ensemble_network_file = SEP.join([out_dir,'{dataset}-ml', 'ensemble-pathway.txt'])
+        ensemble_network_file = report(SEP.join([out_dir,'{dataset}-ml', 'ensemble-pathway.txt']), category="dataset-{dataset}", subcategory="ML"),
     run:
         summary_df = ml.summarize_networks(input.pathways)
         ml.ensemble_network(summary_df, output.ensemble_network_file)
@@ -386,13 +391,13 @@ rule ml_analysis_aggregate_algo:
     input:
         pathways = collect_pathways_per_algo
     output:
-        pca_image = SEP.join([out_dir, '{dataset}-ml', '{algorithm}-pca.png']),
-        pca_variance= SEP.join([out_dir, '{dataset}-ml', '{algorithm}-pca-variance.txt']),
-        pca_coordinates = SEP.join([out_dir, '{dataset}-ml', '{algorithm}-pca-coordinates.txt']),
-        hac_image_vertical = SEP.join([out_dir, '{dataset}-ml', '{algorithm}-hac-vertical.png']),
-        hac_clusters_vertical = SEP.join([out_dir, '{dataset}-ml', '{algorithm}-hac-clusters-vertical.txt']),
-        hac_image_horizontal = SEP.join([out_dir, '{dataset}-ml', '{algorithm}-hac-horizontal.png']),
-        hac_clusters_horizontal = SEP.join([out_dir, '{dataset}-ml', '{algorithm}-hac-clusters-horizontal.txt']),
+        pca_image = report(SEP.join([out_dir, '{dataset}-ml', '{algorithm}-pca.png']), category="dataset-{dataset}", subcategory="ML"),
+        pca_variance = report(SEP.join([out_dir, '{dataset}-ml', '{algorithm}-pca-variance.txt']), category="dataset-{dataset}", subcategory="ML"),
+        pca_coordinates = report(SEP.join([out_dir, '{dataset}-ml', '{algorithm}-pca-coordinates.txt']), category="dataset-{dataset}", subcategory="ML"),
+        hac_image_vertical = report(SEP.join([out_dir, '{dataset}-ml', '{algorithm}-hac-vertical.png']), category="dataset-{dataset}", subcategory="ML"),
+        hac_clusters_vertical = report(SEP.join([out_dir, '{dataset}-ml', '{algorithm}-hac-clusters-vertical.txt']), category="dataset-{dataset}", subcategory="ML"),
+        hac_image_horizontal = report(SEP.join([out_dir, '{dataset}-ml', '{algorithm}-hac-horizontal.png']), category="dataset-{dataset}", subcategory="ML"),
+        hac_clusters_horizontal = report(SEP.join([out_dir, '{dataset}-ml', '{algorithm}-hac-clusters-horizontal.txt']), category="dataset-{dataset}", subcategory="ML"),
     run:
         summary_df = ml.summarize_networks(input.pathways)
         ml.hac_vertical(summary_df, output.hac_image_vertical, output.hac_clusters_vertical, **hac_params)
@@ -404,7 +409,7 @@ rule ensemble_per_algo:
     input:
         pathways = collect_pathways_per_algo
     output:
-        ensemble_network_file = SEP.join([out_dir,'{dataset}-ml', '{algorithm}-ensemble-pathway.txt'])
+        ensemble_network_file = report(SEP.join([out_dir,'{dataset}-ml', '{algorithm}-ensemble-pathway.txt']), category="dataset-{dataset}", subcategory="ML"),
     run:
         summary_df = ml.summarize_networks(input.pathways)
         ml.ensemble_network(summary_df, output.ensemble_network_file)
@@ -414,8 +419,8 @@ rule jaccard_similarity_per_algo:
     input:
          pathways = collect_pathways_per_algo
     output:
-        jaccard_similarity_matrix = SEP.join([out_dir, '{dataset}-ml', '{algorithm}-jaccard-matrix.txt']),
-        jaccard_similarity_heatmap = SEP.join([out_dir, '{dataset}-ml', '{algorithm}-jaccard-heatmap.png'])
+        jaccard_similarity_matrix = report(SEP.join([out_dir, '{dataset}-ml', '{algorithm}-jaccard-matrix.txt']), category="dataset-{dataset}", subcategory="ML"),
+        jaccard_similarity_heatmap = report(SEP.join([out_dir, '{dataset}-ml', '{algorithm}-jaccard-heatmap.png']), category="dataset-{dataset}", subcategory="ML"),
     run:
         summary_df = ml.summarize_networks(input.pathways)
         ml.jaccard_similarity_eval(summary_df, output.jaccard_similarity_matrix, output.jaccard_similarity_heatmap)
@@ -444,8 +449,8 @@ rule evaluation_pr_per_pathways:
         node_gold_standard_file = get_gold_standard_pickle_file,
         pathways = collect_pathways_per_dataset
     output: 
-        node_pr_file = SEP.join([out_dir, '{dataset_gold_standard_pair}-eval', "pr-per-pathway-nodes.txt"]),
-        node_pr_png = SEP.join([out_dir, '{dataset_gold_standard_pair}-eval', 'pr-per-pathway-nodes.png']),
+        node_pr_file = report(SEP.join([out_dir, '{dataset_gold_standard_pair}-eval', "pr-per-pathway-nodes.txt"]), category="dgs-{dataset_gold_standard_pair}", subcategory="Evaluation"),
+        node_pr_png = report(SEP.join([out_dir, '{dataset_gold_standard_pair}-eval', 'pr-per-pathway-nodes.png']), category="dgs-{dataset_gold_standard_pair}", subcategory="Evaluation"),
     run:
         node_table = Evaluation.from_file(input.node_gold_standard_file).node_table
         pr_df = Evaluation.node_precision_and_recall(input.pathways, node_table)
@@ -463,8 +468,8 @@ rule evaluation_per_algo_pr_per_pathways:
         node_gold_standard_file = get_gold_standard_pickle_file,
         pathways =  collect_pathways_per_algo_per_dataset,
     output: 
-        node_pr_file = SEP.join([out_dir, '{dataset_gold_standard_pair}-eval', "pr-per-pathway-for-{algorithm}-nodes.txt"]),
-        node_pr_png = SEP.join([out_dir, '{dataset_gold_standard_pair}-eval', 'pr-per-pathway-for-{algorithm}-nodes.png']),
+        node_pr_file = report(SEP.join([out_dir, '{dataset_gold_standard_pair}-eval', "pr-per-pathway-for-{algorithm}-nodes.txt"]), category="dgs-{dataset_gold_standard_pair}", subcategory="Evaluation"),
+        node_pr_png = report(SEP.join([out_dir, '{dataset_gold_standard_pair}-eval', 'pr-per-pathway-for-{algorithm}-nodes.png']), category="dgs-{dataset_gold_standard_pair}", subcategory="Evaluation"),
     run:
         node_table = Evaluation.from_file(input.node_gold_standard_file).node_table
         pr_df = Evaluation.node_precision_and_recall(input.pathways, node_table)
@@ -489,8 +494,8 @@ rule evaluation_pca_chosen:
         pca_coordinates_file = collect_pca_coordinates_per_dataset,
         pathway_summary_file = collect_summary_statistics_per_dataset
     output: 
-        node_pca_chosen_pr_file = SEP.join([out_dir, '{dataset_gold_standard_pair}-eval', 'pr-pca-chosen-pathway-nodes.txt']),
-        node_pca_chosen_pr_png = SEP.join([out_dir, '{dataset_gold_standard_pair}-eval', 'pr-pca-chosen-pathway-nodes.png']),
+        node_pca_chosen_pr_file = report(SEP.join([out_dir, '{dataset_gold_standard_pair}-eval', 'pr-pca-chosen-pathway-nodes.txt']), category="dgs-{dataset_gold_standard_pair}", subcategory="Evaluation"),
+        node_pca_chosen_pr_png = report(SEP.join([out_dir, '{dataset_gold_standard_pair}-eval', 'pr-pca-chosen-pathway-nodes.png']), category="dgs-{dataset_gold_standard_pair}", subcategory="Evaluation"),
     run:
         node_table = Evaluation.from_file(input.node_gold_standard_file).node_table
         pca_chosen_pathway = Evaluation.pca_chosen_pathway(input.pca_coordinates_file, input.pathway_summary_file, out_dir)
@@ -510,8 +515,8 @@ rule evaluation_per_algo_pca_chosen:
         pca_coordinates_file = collect_pca_coordinates_per_algo_per_dataset,
         pathway_summary_file = collect_summary_statistics_per_dataset
     output: 
-        node_pca_chosen_pr_file = SEP.join([out_dir, '{dataset_gold_standard_pair}-eval', 'pr-pca-chosen-pathway-per-algorithm-nodes.txt']),
-        node_pca_chosen_pr_png = SEP.join([out_dir, '{dataset_gold_standard_pair}-eval', 'pr-pca-chosen-pathway-per-algorithm-nodes.png']),
+        node_pca_chosen_pr_file = report(SEP.join([out_dir, '{dataset_gold_standard_pair}-eval', 'pr-pca-chosen-pathway-per-algorithm-nodes.txt']), category="dgs-{dataset_gold_standard_pair}", subcategory="Evaluation"),
+        node_pca_chosen_pr_png = report(SEP.join([out_dir, '{dataset_gold_standard_pair}-eval', 'pr-pca-chosen-pathway-per-algorithm-nodes.png']), category="dgs-{dataset_gold_standard_pair}", subcategory="Evaluation"),
     run:
         node_table = Evaluation.from_file(input.node_gold_standard_file).node_table
         pca_chosen_pathways = Evaluation.pca_chosen_pathway(input.pca_coordinates_file, input.pathway_summary_file, out_dir)
@@ -535,8 +540,8 @@ rule evaluation_ensemble_pr_curve:
         dataset_file = get_dataset_pickle_file,
         ensemble_file = collect_ensemble_per_dataset
     output: 
-        node_pr_curve_png = SEP.join([out_dir, '{dataset_gold_standard_pair}-eval', 'pr-curve-ensemble-nodes.png']),
-        node_pr_curve_file = SEP.join([out_dir, '{dataset_gold_standard_pair}-eval', 'pr-curve-ensemble-nodes.txt']),
+        node_pr_curve_png = report(SEP.join([out_dir, '{dataset_gold_standard_pair}-eval', 'pr-curve-ensemble-nodes.png']), category="dgs-{dataset_gold_standard_pair}", subcategory="Evaluation"),
+        node_pr_curve_file = report(SEP.join([out_dir, '{dataset_gold_standard_pair}-eval', 'pr-curve-ensemble-nodes.txt']), category="dgs-{dataset_gold_standard_pair}", subcategory="Evaluation"),
     run:
         node_table = Evaluation.from_file(input.node_gold_standard_file).node_table
         node_ensemble_dict = Evaluation.edge_frequency_node_ensemble(node_table, input.ensemble_file, input.dataset_file)
@@ -554,8 +559,8 @@ rule evaluation_per_algo_ensemble_pr_curve:
         dataset_file = get_dataset_pickle_file,
         ensemble_files = collect_ensemble_per_algo_per_dataset
     output: 
-        node_pr_curve_png = SEP.join([out_dir, '{dataset_gold_standard_pair}-eval', 'pr-curve-ensemble-nodes-per-algorithm-nodes.png']),
-        node_pr_curve_file = SEP.join([out_dir, '{dataset_gold_standard_pair}-eval', 'pr-curve-ensemble-nodes-per-algorithm-nodes.txt']),
+        node_pr_curve_png = report(SEP.join([out_dir, '{dataset_gold_standard_pair}-eval', 'pr-curve-ensemble-nodes-per-algorithm-nodes.png']), category="dgs-{dataset_gold_standard_pair}", subcategory="Evaluation"),
+        node_pr_curve_file = report(SEP.join([out_dir, '{dataset_gold_standard_pair}-eval', 'pr-curve-ensemble-nodes-per-algorithm-nodes.txt']), category="dgs-{dataset_gold_standard_pair}", subcategory="Evaluation"),
     run:
         node_table = Evaluation.from_file(input.node_gold_standard_file).node_table
         node_ensembles_dict = Evaluation.edge_frequency_node_ensemble(node_table, input.ensemble_files, input.dataset_file)
@@ -565,7 +570,7 @@ rule evaluation_edge_dummy:
     input: 
         edge_gold_standard_file = get_gold_standard_pickle_file,
     output: 
-        dummy_file = SEP.join([out_dir, '{dataset_gold_standard_pair}-eval', 'dummy-edge.txt']),
+        dummy_file = report(SEP.join([out_dir, '{dataset_gold_standard_pair}-eval', 'dummy-edge.txt']), category="dgs-{dataset_gold_standard_pair}", subcategory="Evaluation"),
     run:
         mixed_edge_table = Evaluation.from_file(input.edge_gold_standard_file).mixed_edge_table
         undirected_edge_table = Evaluation.from_file(input.edge_gold_standard_file).undirected_edge_table
