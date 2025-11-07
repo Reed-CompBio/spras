@@ -152,7 +152,7 @@ class Evaluation:
         This function takes a list of file paths corresponding to pathway reconstruction algorithm outputs,
         each formatted as a tab-separated file with columns 'Node1', 'Node2', 'Rank', and 'Direction'.
         It compares the set of predicted nodes (from both columns Node1 and Node2) to a provided gold standard node table
-        and computes precision and recall per file.
+        and computes a precision and recall per file.
 
         @param file_paths: list of file paths of pathway reconstruction algorithm outputs
         @param node_table: the gold standard nodes
@@ -239,7 +239,7 @@ class Evaluation:
 
         This function takes a list of file paths corresponding to pathway reconstruction algorithm outputs,
         each formatted as a tab-separated file with columns 'Node1', 'Node2', 'Rank', and 'Direction'.
-        It compares the set of predicted edges to the three provided gold standard edge tables and computes precision and recall per file.
+        It compares the set of predicted edges to the three provided gold standard edge tables and computes a precision and recall per file.
 
         @param file_paths: list of file paths of pathway reconstruction algorithm outputs
         @param mixed_edge_table: the gold standard edges that includes directed and undirected edges
@@ -249,7 +249,7 @@ class Evaluation:
                 - 'Pathway': Path object corresponding to each pathway file
                 - 'Precision': Precision of predicted nodes vs. gold standard nodes
                 - 'Recall': Recall of predicted nodes vs. gold standard nodes
-                - 'Gold_Standard_Type': Which  gold standard was used to calculate the precision and recall
+                - 'Gold_Standard_Type': Which gold standard was used to calculate the precision and recall
         """
 
         y_true_mixed = set(map(tuple, mixed_edge_table[['Interactor1', 'Interactor2', 'Direction']].values))
@@ -291,12 +291,12 @@ class Evaluation:
     @staticmethod
     def edges_visualize_precision_and_recall_plot(pr_df: pd.DataFrame, output_file: str | PathLike, output_png: str | PathLike, title: str):
         """
-        Generates three scatter plot subplots showing edge precision and recall values for each pathway across three edge gold standard types,
+        Generates three scatter subplots showing edge precision and recall values for each pathway across the three edge gold standard types,
         and saves both the resulting plots and the corresponding data.
 
-        This function is intended for visualizing how different pathway reconstructions perform
-        (not a precision-recall curve) showing the precision and recall of each parameter combination
-        for each algorithm per edge gold standard dataset.
+        This function is intended for visualizing how different pathway reconstructions perform,
+        showing the precision and recall of each parameter combination for each algorithm across
+        each edge gold standard dataset (not a precision-recall curve).
 
         @param pr_df: Dataframe of calculated precision and recall for each pathway file per edge gold standard.
                       Must include a preprocessed 'Algorithm' column and 'Gold_Standard_Type" column
@@ -355,8 +355,9 @@ class Evaluation:
     def precision_and_recall_per_pathway(pr_df: pd.DataFrame, output_file: str | PathLike, output_png: str | PathLike, aggregate_per_algorithm: bool = False):
         """
         Function for visualizing per pathway precision and recall across all algorithms. Each point in the plot represents
-        a single pathway reconstruction. If `aggregate_per_algorithm` is set to True, each plot is restricted to a single
-        algorithm and titled accordingly.
+        a single pathway reconstruction.
+
+        If `aggregate_per_algorithm` is set to True, each plot is restricted to a single algorithm and titled accordingly.
 
         @param pr_df: Dataframe of calculated precision and recall for each pathway file
         @param output_file: the filename to save the precision and recall of each pathway
@@ -385,15 +386,18 @@ class Evaluation:
 
         Function for visualizing the precision and recall of the single parameter combination selected via PCA,
         either for each algorithm individually or one combination shared across all algorithms. Each point represents
-        a pathway reconstruction corresponding to the PCA-selected parameter combination. If `aggregate_per_algorithm`
-        is True, the plot includes a pca chosen pathway per algorithm and titled accordingly. If `edge_evaluation` is True,
-        the plot will include the evaluation across the three gold standard edge files.
+        a pathway reconstruction corresponding to the PCA-selected parameter combination.
+
+        If `aggregate_per_algorithm` is True, the output_png includes a pca chosen pathway per algorithm and titled accordingly.
+
+        If `edge_evaluation` is True, the output PNG shows performance across all three edge gold standards;
+        if False, the output PNG shows evaluation for the single node gold standard.
 
         @param pr_df: Dataframe of calculated precision and recall for each pathway file
         @param output_file: the filename to save the precision and recall of each pathway
         @param output_png: the filename to plot the precision and recall of each pathway (not a PRC)
         @param aggregate_per_algorithm: Boolean indicating if this function is used per algorithm (Default False)
-        @param edge_evaluation: Boolean indicating if this function is used for creating edge_evaluation plots (Default False; used for node evaluation)
+        @param edge_evaluation: Boolean indicating if this function is used for creating edge_evaluation plots (Default False)
         """
         # TODO update to add in the pathways for the algorithms that do not provide a pca chosen pathway https://github.com/Reed-CompBio/spras/issues/341
 
