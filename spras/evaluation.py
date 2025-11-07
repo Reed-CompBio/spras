@@ -319,7 +319,7 @@ class Evaluation:
         # TODO: fix the layout of the output png
 
         gs_types = pr_df["Gold_Standard_Type"].unique().tolist()
-        fig, axes = plt.subplots(1, len(gs_types), figsize=(6 * len(gs_types), 5), sharex=True, sharey=True)
+        fig, axes = plt.subplots(1, len(gs_types), figsize=(6 * len(gs_types), 5))
         color_palette = create_palette(pr_df['Algorithm'].tolist())
 
         for ax, gs_type in zip(axes, gs_types, strict=True):
