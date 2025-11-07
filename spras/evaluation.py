@@ -152,7 +152,7 @@ class Evaluation:
         This function takes a list of file paths corresponding to pathway reconstruction algorithm outputs,
         each formatted as a tab-separated file with columns 'Node1', 'Node2', 'Rank', and 'Direction'.
         It compares the set of predicted nodes (from both columns Node1 and Node2) to a provided gold standard node table
-        and computes a precision and recall per file.
+        and computes precision and recall per file.
 
         @param file_paths: list of file paths of pathway reconstruction algorithm outputs
         @param node_table: the gold standard nodes
@@ -233,13 +233,14 @@ class Evaluation:
         pr_df.drop(columns=['Algorithm'], inplace=True)
         pr_df.to_csv(output_file, sep='\t', index=False)
 
+    @staticmethod
     def edge_precision_and_recall(file_paths: Iterable[Union[str, PathLike]], mixed_edge_table: pd.DataFrame, directed_edge_table: pd.DataFrame, undirected_edge_table: pd.DataFrame) -> pd.DataFrame:
         """
         Computes edge-level precision and recall for each pathway reconstruction output file against three edge gold standard tables.
 
         This function takes a list of file paths corresponding to pathway reconstruction algorithm outputs,
         each formatted as a tab-separated file with columns 'Node1', 'Node2', 'Rank', and 'Direction'.
-        It compares the set of predicted edges to the three provided gold standard edge tables and computes a precision and recall per file.
+        It compares the set of predicted edges to the three provided gold standard edge tables and computes precision and recall per file.
 
         @param file_paths: list of file paths of pathway reconstruction algorithm outputs
         @param mixed_edge_table: the gold standard edges that includes directed and undirected edges
@@ -649,27 +650,5 @@ class Evaluation:
         not_last_rows = complete_df.duplicated(subset='Ensemble_Source', keep='first')
         complete_df.loc[not_last_rows, ['Average_Precision', 'Baseline']] = None
         complete_df.to_csv(output_file, index=False, sep='\t')
-
-    @staticmethod
-    def edge_dummy_function(mixed_edge_table: pd.DataFrame, undirected_edge_table: pd.DataFrame, directed_edge_table: pd.DataFrame, dummy_file: str):
-        """
-        Temporary function to test edge file implementation.
-        Will be removed from SPRAS's evaluation code in the future.
-
-        Takes in the different edge table versions (mixed, fully directed, fully undirected)
-        for a specific edge gold standard dataset and writes them to a file.
-
-        @param mixed_edge_table: Edge gold standard treated as mixed directionality.
-        @param undirected_edge_table: Edge gold standard treated as fully undirected.
-        @param directed_edge_table: Edge gold standard treated as fully directed.
-        @param dummy_file: Filename to save the edge tables.
-        """
-        with open(dummy_file, "w") as f:
-            f.write("Mixed Edge Table\n")
-            mixed_edge_table.to_csv(f, index=False)
-            f.write("\n\nUndirected Edge Table\n")
-            undirected_edge_table.to_csv(f, index=False)
-            f.write("\n\nDirected Edge Table\n")
-            directed_edge_table.to_csv(f, index=False)
 
 

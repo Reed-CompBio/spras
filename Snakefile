@@ -554,12 +554,6 @@ rule evaluation_per_algo_pca_chosen_edges:
         
         Evaluation.precision_and_recall_pca_chosen_pathway(pr_df, output.edge_pca_chosen_pr_file, output.edge_pca_chosen_pr_png, include_aggregate_algo_eval, edge_evaluation=True)
 
-# Returns pca coordinates for a specific algorithm and dataset
-def collect_pca_coordinates_per_algo_per_dataset(wildcards):
-    dataset_label = get_dataset_label(wildcards)
-    return expand('{out_dir}{sep}{dataset}-ml{sep}{algorithm}-pca-coordinates.txt', out_dir=out_dir, sep=SEP, dataset=dataset_label, algorithm=algorithms_mult_param_combos) #TODO we are using algos with mult param combos, what to do when empty?
-
-
 # Return the dataset pickle file for a specific dataset
 def get_dataset_pickle_file(wildcards):
     dataset_label = get_dataset_label(wildcards)
