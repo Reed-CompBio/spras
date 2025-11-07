@@ -178,7 +178,7 @@ class MEO(PRM):
 
         command = ['java', '-jar', '/meo/EOMain.jar', properties_file]
 
-        container_suffix = "meo"
+        container_suffix = "meo:v2"
         run_container_and_log('Maximum Edge Orientation',
                              container_framework,
                              container_suffix,
