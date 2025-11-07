@@ -352,7 +352,7 @@ class Evaluation:
         pr_df.to_csv(output_file, sep='\t', index=False)
 
     @staticmethod
-    def precision_and_recall_per_pathway(pr_df: pd.DataFrame, output_file: str | PathLike, output_png: str | PathLike, aggregate_per_algorithm: bool = False):
+    def precision_and_recall_per_pathway(pr_df: pd.DataFrame, output_file: str | PathLike, output_png: str | PathLike, aggregate_per_algorithm: bool = False, edge_evaluation: bool = False):
         """
         Function for visualizing per pathway precision and recall across all algorithms. Each point in the plot represents
         a single pathway reconstruction.
@@ -367,13 +367,23 @@ class Evaluation:
         if not pr_df.empty:
             pr_df['Algorithm'] = pr_df['Pathway'].apply(lambda p: Path(p).parent.name.split('-')[1])
 
-            if aggregate_per_algorithm:
-                # Guaranteed to only have one algorithm in Algorithm column
-                title = f"Precision and Recall Plot Per Pathway for {pr_df['Algorithm'].unique()[0].capitalize()}"
-            else:
-                title = "Precision and Recall Plot Per Pathway Per Algorithm"
+            if not edge_evaluation:
+                if aggregate_per_algorithm:
+                    # Guaranteed to only have one algorithm in Algorithm column
+                    title = f"Node Precision and Recall Plot Per Pathway for {pr_df['Algorithm'].unique()[0].capitalize()}"
+                else:
+                    title = "Node Precision and Recall Plot Per Pathway Per Algorithm"
 
-            Evaluation.nodes_visualize_precision_and_recall_plot(pr_df, output_file, output_png, title)
+                    Evaluation.nodes_visualize_precision_and_recall_plot(pr_df, output_file, output_png, title)
+
+            else:
+                if aggregate_per_algorithm :
+                        title = f"Edge Precision and Recall Plot Per Pathway for {pr_df['Algorithm'].unique()[0].capitalize()}"
+                else:
+                    title = "Edge Precision and Recall Plot Per Pathway Per Algorithm"
+
+                Evaluation.edges_visualize_precision_and_recall_plot(pr_df, output_file, output_png, title)
+
 
         else:
             # this block should never be reached — having 0 pathways implies that no algorithms or parameter combinations were run,
