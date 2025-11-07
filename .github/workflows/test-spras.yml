@@ -96,7 +96,7 @@ jobs:
         run: snakemake --cores 4 --configfile config/config.yaml --show-failed-logs --strict-dag-evaluation cyclic-graph --strict-dag-evaluation functions --strict-dag-evaluation periodic-wildcards
       - name: Collect Snakemake workflow report
         shell: bash --login {0}
-        run: snakemake --configfile config/config.yaml --report
+        run: snakemake --configfile config/config.yaml --report report.zip
 
   # Run pre-commit checks on source files
   pre-commit:
