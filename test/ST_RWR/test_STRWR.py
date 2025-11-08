@@ -5,6 +5,7 @@ from pathlib import Path
 import pytest
 
 import spras.config.config as config
+from spras.config.container_schema import ContainerFramework, ProcessedContainerSettings
 from spras.strwr import ST_RWR
 
 config.init_from_file("config/config.yaml")
@@ -78,5 +79,5 @@ class TestSTRWR:
                    targets=Path(TEST_DIR, 'input','strwr-targets.txt'),
                    alpha=0.85,
                    output_file=OUT_FILE,
-                   container_framework="singularity")
+                   container_settings=ProcessedContainerSettings(framework=ContainerFramework.singularity))
         assert OUT_FILE.exists()
