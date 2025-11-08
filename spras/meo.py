@@ -1,6 +1,7 @@
 import os
 from pathlib import Path
 
+from spras.config.container_schema import ProcessedContainerSettings
 from spras.containers import prepare_volume, run_container_and_log
 from spras.interactome import (
     add_directionality_constant,
@@ -125,7 +126,7 @@ class MEO(PRM):
     # TODO document required arguments
     @staticmethod
     def run(edges=None, sources=None, targets=None, output_file=None, max_path_length=None, local_search=None,
-            rand_restarts=None, container_framework="docker"):
+            rand_restarts=None, container_settings=None):
         """
         Run Maximum Edge Orientation in the Docker image with the provided parameters.
         The properties file is generated from the provided arguments.
@@ -137,8 +138,9 @@ class MEO(PRM):
         @param max_path_length: the maximal length of a path from sources and targets to orient.
         @param local_search: a "Yes"/"No" parameter that enables MEO's local search functionality. See "Improving approximations with local search" in the associated paper for more information.
         @param rand_restarts: The (int) of random restarts to use.
-        @param container_framework: choose the container runtime framework, currently supports "docker" or "singularity" (optional)
+        @param container_settings: configure the container runtime
         """
+        if not container_settings: container_settings = ProcessedContainerSettings()
         if edges is None or sources is None or targets is None or output_file is None:
             raise ValueError('Required Maximum Edge Orientation arguments are missing')
 
@@ -147,45 +149,45 @@ class MEO(PRM):
         # Each volume is a tuple (src, dest)
         volumes = list()
 
-        bind_path, edge_file = prepare_volume(edges, work_dir)
+        bind_path, edge_file = prepare_volume(edges, work_dir, container_settings)
         volumes.append(bind_path)
 
-        bind_path, source_file = prepare_volume(sources, work_dir)
+        bind_path, source_file = prepare_volume(sources, work_dir, container_settings)
         volumes.append(bind_path)
 
-        bind_path, target_file = prepare_volume(targets, work_dir)
+        bind_path, target_file = prepare_volume(targets, work_dir, container_settings)
         volumes.append(bind_path)
 
         out_dir = Path(output_file).parent
         # Maximum Edge Orientation requires that the output directory exist
         out_dir.mkdir(parents=True, exist_ok=True)
 
-        bind_path, mapped_output_file = prepare_volume(str(output_file), work_dir)
+        bind_path, mapped_output_file = prepare_volume(str(output_file), work_dir, container_settings)
         volumes.append(bind_path)
 
         # Hard code the path output filename, which will be deleted
         path_output_file = Path(out_dir, 'path-output.txt')
-        bind_path, mapped_path_output = prepare_volume(str(path_output_file), work_dir)
+        bind_path, mapped_path_output = prepare_volume(str(path_output_file), work_dir, container_settings)
         volumes.append(bind_path)
 
         properties_file = 'meo-properties.txt'
         properties_file_local = Path(out_dir, properties_file)
         write_properties(filename=properties_file_local, edges=edge_file, sources=source_file, targets=target_file,
                          edge_output=mapped_output_file, path_output=mapped_path_output,
-                         max_path_length=max_path_length, local_search=local_search, rand_restarts=rand_restarts, framework=container_framework)
-        bind_path, properties_file = prepare_volume(str(properties_file_local), work_dir)
+                         max_path_length=max_path_length, local_search=local_search, rand_restarts=rand_restarts, framework=container_settings.framework)
+        bind_path, properties_file = prepare_volume(str(properties_file_local), work_dir, container_settings)
         volumes.append(bind_path)
 
         command = ['java', '-jar', '/meo/EOMain.jar', properties_file]
 
-        container_suffix = "meo:v1"
+        container_suffix = "meo:v2"
         run_container_and_log('Maximum Edge Orientation',
-                             container_framework,
                              container_suffix,
                              command,
                              volumes,
                              work_dir,
-                             out_dir)
+                             out_dir,
+                             container_settings)
 
         properties_file_local.unlink(missing_ok=True)
 
