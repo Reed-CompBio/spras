@@ -4,7 +4,7 @@ import pandas as pd
 
 from spras.config.container_schema import ProcessedContainerSettings
 from spras.containers import prepare_volume, run_container_and_log
-from spras.dataset import Dataset
+from spras.dataset import Dataset, Direction, GraphMultiplicity
 from spras.interactome import reinsert_direction_col_undirected
 from spras.prm import PRM
 from spras.util import add_rank_column, duplicate_edges
@@ -25,6 +25,7 @@ class OmicsIntegrator2(PRM):
     required_inputs = ['prizes', 'edges']
     # OI2 does not have a specific paper. Instead, we link to the OI1 paper.
     dois = ["10.1371/journal.pcbi.1004879"]
+    interactome_properties = [Direction.UNDIRECTED, GraphMultiplicity.SIMPLE]
 
     def generate_inputs(data: Dataset, filename_map):
         """
@@ -50,7 +51,7 @@ class OmicsIntegrator2(PRM):
         node_df.to_csv(filename_map['prizes'], sep='\t', index=False, columns=['NODEID', 'prize'], header=['name','prize'])
 
         # Create network file
-        edges_df = data.get_interactome()
+        edges_df = data.get_interactome(OmicsIntegrator2.interactome_properties).df
 
         # Format network file
         # edges_df = convert_directed_to_undirected(edges_df)
