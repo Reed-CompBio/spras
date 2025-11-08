@@ -1,6 +1,7 @@
 # DOMINO wrapper
 # https://github.com/Shamir-Lab/DOMINO
 FROM python:3.7
+LABEL org.opencontainers.image.source=https://github.com/Reed-CompBio/spras
 
 RUN pip install domino-python==0.1.1
 

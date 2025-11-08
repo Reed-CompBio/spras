@@ -28,7 +28,7 @@ from spras.util import NpHashEncoder, hash_params_sha1_base32
 
 config = None
 
-DEFAULT_CONTAINER_PREFIX = "docker.io/reedcompbio"
+DEFAULT_CONTAINER_PREFIX = "ghcr.io/reed-compbio"
 
 # This will get called in the Snakefile, instantiating the singleton with the raw config
 def init_global(config_dict):
