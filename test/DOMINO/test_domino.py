@@ -4,6 +4,7 @@ from pathlib import Path
 import pytest
 
 import spras.config.config as config
+from spras.config.container_schema import ContainerFramework, ProcessedContainerSettings
 from spras.domino import DOMINO, post_domino_id_transform, pre_domino_id_transform
 
 config.init_from_file("config/config.yaml")
@@ -82,7 +83,7 @@ class TestDOMINO:
             network_sif=TEST_DIR / 'input' / 'simple' / 'domino-network.sif',
             active_genes=TEST_DIR / 'input' / 'simple' / 'domino-active-genes.txt',
             output_file=OUT_FILE_DEFAULT,
-            container_framework="singularity")
+            container_settings=ProcessedContainerSettings(framework=ContainerFramework.singularity))
         assert OUT_FILE_DEFAULT.exists()
 
     def test_pre_id_transform(self):

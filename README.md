@@ -1,5 +1,6 @@
 # Signaling Pathway Reconstruction Analysis Streamliner (SPRAS)
 [![Test SPRAS](https://github.com/Reed-CompBio/spras/actions/workflows/test-spras.yml/badge.svg)](https://github.com/Reed-CompBio/spras/actions/workflows/test-spras.yml)
+[![Documentation](https://readthedocs.org/projects/spras/badge/?version=latest)](https://spras.readthedocs.io)
 
 SPRAS is a work-in-progress dockerized library of pathway reconstruction enhancement tools.
 The framework will contain different pathway reconstruction algorithms that connect genes and proteins of interest in the context of a general protein-protein interaction network, allowing users to run multiple algorithms on their inputs.

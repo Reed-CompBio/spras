@@ -2,7 +2,8 @@ from pathlib import Path
 
 import pandas as pd
 
-from spras.containers import ContainerError, prepare_volume, run_container_and_log
+from spras.config.container_schema import ProcessedContainerSettings
+from spras.containers import prepare_volume, run_container_and_log
 from spras.dataset import Dataset
 from spras.interactome import reinsert_direction_col_undirected
 from spras.prm import PRM
@@ -67,7 +68,7 @@ class OmicsIntegrator2(PRM):
     # TODO add reasonable default values
     @staticmethod
     def run(edges=None, prizes=None, output_file=None, w=None, b=None, g=None, noise=None, noisy_edges=None,
-            random_terminals=None, dummy_mode=None, seed=None, container_framework="docker"):
+            random_terminals=None, dummy_mode=None, seed=None, container_settings=None):
         """
         Run Omics Integrator 2 in the Docker image with the provided parameters.
         Only the .tsv output file is retained and then renamed.
@@ -84,8 +85,9 @@ class OmicsIntegrator2(PRM):
             "others" = connect to all nodes except for terminals
             "all" = connect to all nodes in the interactome.
         @param seed: The random seed to use for this run.
-        @param container_framework: choose the container runtime framework, currently supports "docker" or "singularity" (optional)
+        @param container_settings: configure the container runtime
         """
+        if not container_settings: container_settings = ProcessedContainerSettings()
         if edges is None or prizes is None or output_file is None:
             raise ValueError('Required Omics Integrator 2 arguments are missing')
 
@@ -94,16 +96,16 @@ class OmicsIntegrator2(PRM):
         # Each volume is a tuple (src, dest)
         volumes = list()
 
-        bind_path, edge_file = prepare_volume(edges, work_dir)
+        bind_path, edge_file = prepare_volume(edges, work_dir, container_settings)
         volumes.append(bind_path)
 
-        bind_path, prize_file = prepare_volume(prizes, work_dir)
+        bind_path, prize_file = prepare_volume(prizes, work_dir, container_settings)
         volumes.append(bind_path)
 
         out_dir = Path(output_file).parent
         # Omics Integrator 2 requires that the output directory exist
         out_dir.mkdir(parents=True, exist_ok=True)
-        bind_path, mapped_out_dir = prepare_volume(out_dir, work_dir)
+        bind_path, mapped_out_dir = prepare_volume(out_dir, work_dir, container_settings)
         volumes.append(bind_path)
 
         command = ['OmicsIntegrator', '-e', edge_file, '-p', prize_file,
@@ -130,12 +132,12 @@ class OmicsIntegrator2(PRM):
 
         container_suffix = "omics-integrator-2:v3"
         run_container_and_log('Omics Integrator 2',
-                             container_framework,
                              container_suffix,
                              command,
                              volumes,
                              work_dir,
                              out_dir,
+                             container_settings,
                              network_disabled=True)
 
         # TODO do we want to retain other output files?
