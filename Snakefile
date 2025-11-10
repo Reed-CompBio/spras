@@ -22,7 +22,6 @@ _config.init_global(config)
 
 out_dir = _config.config.out_dir
 algorithm_params = _config.config.algorithm_params
-algorithm_directed = _config.config.algorithm_directed
 pca_params = _config.config.pca_params
 hac_params = _config.config.hac_params
 container_settings = _config.config.container_settings

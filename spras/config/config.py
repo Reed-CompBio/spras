@@ -76,8 +76,6 @@ class Config:
         # A nested dict mapping algorithm names to dicts that map parameter hashes to parameter combinations.
         # Only includes algorithms that are set to be run with 'include: true'.
         self.algorithm_params: dict[str, dict[str, Any]] = dict()
-        # Deprecated. Previously a dict mapping algorithm names to a Boolean tracking whether they used directed graphs.
-        self.algorithm_directed = None
         # A dict with the analysis settings
         self.analysis_params = parsed_raw_config.analysis
         # A dict with the evaluation settings
@@ -149,7 +147,6 @@ class Config:
         """
         prior_params_hashes = set()
         self.algorithm_params = dict()
-        self.algorithm_directed = dict()
         self.algorithms = raw_config.algorithms
         for alg in self.algorithms:
             if alg.include:
