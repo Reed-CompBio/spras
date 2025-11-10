@@ -181,6 +181,8 @@ wrapper functions for the Local Neighborhood algorithm. Use
 Call the new class within ``local_neighborhood.py``
 ``LocalNeighborhood`` and set ``__all__`` so the class can be
 `imported <https://docs.python.org/3/tutorial/modules.html#importing-from-a-package>`__.
+Make sure to specify the type of parameters passed in to ``LocalNeighborhood`` as ``Empty``
+(see ``AllPairs`` for an example of this.)
 Specify the list of ``required_input`` files to be ``network`` and
 ``nodes``, and set the ``dois`` property to be an empty list. These
 entries are used to tell Snakemake what input files should be present
@@ -242,7 +244,9 @@ the format ``<vertex1>|<vertex2>``, which also differs from the
 ``omicsintegrator1.py`` example. ``spras/dataset.py`` provides functions
 that provide access to node information and the interactome (edge list).
 
-Implement the ``run`` function, following the PathLinker example. The
+Implement the ``run`` function, following the PathLinker example. Since
+there are no arguments, you do not need to instantiate a new instance of ``Empty``
+if parameters are not specified. The
 ``prepare_volume`` utility function is needed to prepare the network and
 nodes input files to be mounted and used inside the container. It is
 also used to prepare the path for the output file, which is different
