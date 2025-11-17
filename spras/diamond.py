@@ -15,7 +15,7 @@ __all__ = ['DIAMOnD']
 class DIAMOnD(PRM):
     """
     DIAMOnD is a disease module detection algorithm,
-    which has been modified here, using sources and targets as seeds, to act as a pathway reconstruction algorithm.
+    which has been modified here, using actives as seeds, to act as a pathway reconstruction algorithm.
     It does not account for node scores, and takes in undirected graphs as input.
     """
     required_inputs = ['seeds', 'network']
@@ -32,11 +32,11 @@ class DIAMOnD(PRM):
             if input_type not in filename_map:
                 raise ValueError("{input_type} filename is missing")
 
-        # Create seeds file - we set the seeds as the sources and targets
-        sources_targets = data.get_node_columns(["sources", "targets"])
-        if sources_targets is None:
+        # Create seeds file - we set the seeds as the actives
+        actives = data.get_node_columns(["active"])
+        if actives is None:
             return False
-        seeds_df = sources_targets[(sources_targets["sources"] == True) | (sources_targets["targets"] == True)]
+        seeds_df = actives[(actives["active"] == True)]
         seeds_df = seeds_df.sort_values(by=[Dataset.NODE_ID], ascending=True, ignore_index=True)
         seeds_df.to_csv(filename_map['seeds'], index=False, columns=[Dataset.NODE_ID], header=None)
 
