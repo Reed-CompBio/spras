@@ -294,9 +294,10 @@ rule parse_output:
         dataset_file = SEP.join([out_dir, 'dataset-{dataset}-merged.pickle'])
     output: standardized_file = SEP.join([out_dir, '{dataset}-{algorithm}-{params}', 'pathway.txt'])
     run:
-        params = reconstruction_params(wildcards.algorithm, wildcards.params).copy()
-        params['dataset'] = input.dataset_file
-        runner.parse_output(wildcards.algorithm, input.raw_file, output.standardized_file, params)
+        with open(input.dataset_file, 'rb') as dataset_file:
+            params = reconstruction_params(wildcards.algorithm, wildcards.params).copy()
+            params['dataset'] = input.dataset_file
+            runner.parse_output(wildcards.algorithm, input.raw_file, output.standardized_file, params)
 
 # TODO: reuse in the future once we make summary work for mixed graphs. See https://github.com/Reed-CompBio/spras/issues/128
 # Collect summary statistics for a single pathway
