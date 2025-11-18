@@ -16,7 +16,7 @@ __all__ = ['RWR']
 
 class RWR(PRM):
     required_inputs = ['network','nodes']
-    dois = []
+    dois = ["10.1093/bioinformatics/btq680"]
 
     @staticmethod
     def generate_inputs(data, filename_map):
