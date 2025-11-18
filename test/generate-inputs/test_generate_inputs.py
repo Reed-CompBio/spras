@@ -2,8 +2,6 @@ import filecmp
 import os
 from pathlib import Path
 
-import yaml
-
 from spras import runner
 from spras.config.config import Config
 
@@ -34,15 +32,14 @@ class TestGenerateInputs:
         Path(OUTDIR).mkdir(parents=True, exist_ok=True)
 
     def test_prepare_inputs_networks(self):
-        config_loc = os.path.join("test", "generate-inputs", "inputs", "test_config.yaml")
+        config_loc = Path("test", "generate-inputs", "inputs", "test_config.yaml")
 
-        with open(config_loc) as config_file:
-            config = Config(yaml.load(config_file, Loader=yaml.FullLoader))
-        test_file = "test/generate-inputs/output/test_pickled_dataset.pkl"
+        config = Config.from_file(config_loc)
+        test_file = Path("test", "generate-inputs", "output", "test_pickled_dataset.pkl")
 
-        test_dataset = list((ds for ds in config.datasets.values() if ds.label == "test_data"))[0]
-        with open(test_file, 'w') as test_file:
-            runner.merge_input(test_dataset, test_file)
+        assert len(config.datasets) == 1
+        test_dataset = list(config.datasets.values())[0]
+        runner.merge_input(test_dataset, test_file)
 
         for algo in algo_exp_file.keys():
             inputs = runner.get_required_inputs(algo)
@@ -51,7 +48,7 @@ class TestGenerateInputs:
             runner.prepare_inputs(algo, test_file, filename_map)
             exp_file_name = algo_exp_file[algo]
             assert filecmp.cmp(OUTDIR + f"{algo}-{exp_file_name}.txt", EXPDIR + f"{algo}-{exp_file_name}-expected.txt",
-                               shallow=False)
+                            shallow=False)
 
             for file in filename_map.values():
                 assert Path(file).exists()

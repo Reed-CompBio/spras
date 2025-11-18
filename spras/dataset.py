@@ -1,11 +1,12 @@
 import os
 import pickle as pkl
 import warnings
-from typing import IO, Union
+from typing import Union
 
 import pandas as pd
 
 from spras.config.dataset import DatasetSchema
+from spras.util import FileLike, open_weak
 
 """
 Author: Chris Magnano
@@ -28,12 +29,13 @@ class Dataset:
         self.load_files_from_dict(dataset_params)
         return
 
-    def to_file(self, file: IO):
+    def to_file(self, file: FileLike):
         """Saves dataset object to pickle file"""
-        pkl.dump(self, file)
+        with open_weak(file) as f:
+            pkl.dump(self, f)
 
     @classmethod
-    def from_file(cls, file: Union[IO, "Dataset"]):
+    def from_file(cls, file: Union[FileLike, "Dataset"]):
         """
         Loads dataset object from a pickle file or another `Dataset` object.
         Usage: dataset = Dataset.from_file(pickle_file)
@@ -43,7 +45,8 @@ class Dataset:
             # `Dataset` objects in generate_inputs or parse_outputs.)
             return file
 
-        return pkl.load(file)
+        with open_weak(file) as file:
+            return pkl.load(file)
 
     def load_files_from_dict(self, dataset_params: DatasetSchema):
         """

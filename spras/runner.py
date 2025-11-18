@@ -1,4 +1,4 @@
-from typing import IO, Any
+from typing import Any
 
 # supported algorithm imports
 from spras.allpairs import AllPairs
@@ -14,7 +14,7 @@ from spras.prm import PRM
 from spras.responsenet import ResponseNet
 from spras.rwr import RWR
 from spras.strwr import ST_RWR
-from spras.util import FileDescriptorOrPath
+from spras.util import FileLike, LoosePathLike
 
 algorithms: dict[str, type[PRM]] = {
     "allpairs": AllPairs,
@@ -54,7 +54,7 @@ def get_required_inputs(algorithm: str):
     return algorithm_runner.required_inputs
 
 
-def merge_input(dataset_data: DatasetSchema, dataset_output: IO):
+def merge_input(dataset_data: DatasetSchema, dataset_output: FileLike):
     """
     Merge files listed for this dataset and write the dataset to disk
     @param dataset_dict: dataset to process
@@ -64,7 +64,7 @@ def merge_input(dataset_data: DatasetSchema, dataset_output: IO):
     dataset.to_file(dataset_output)
 
 
-def prepare_inputs(algorithm: str, data_file: IO, filename_map: dict[str, str]):
+def prepare_inputs(algorithm: str, data_file: FileLike, filename_map: dict[str, str]):
     """
     Prepare general dataset files for this algorithm
     @param algorithm: algorithm name
@@ -77,7 +77,7 @@ def prepare_inputs(algorithm: str, data_file: IO, filename_map: dict[str, str]):
     return algorithm_runner.generate_inputs(dataset, filename_map)
 
 
-def parse_output(algorithm: str, raw_pathway_file: FileDescriptorOrPath, standardized_pathway_file: FileDescriptorOrPath, params: dict[str, Any]):
+def parse_output(algorithm: str, raw_pathway_file: LoosePathLike, standardized_pathway_file: LoosePathLike, params: dict[str, Any]):
     """
     Convert a predicted pathway into the universal format
     @param algorithm: algorithm name

@@ -170,8 +170,7 @@ rule merge_input:
     run:
         # Pass the dataset to PRRunner where the files will be merged and written to disk (i.e. pickled)
         dataset_dict = get_dataset(_config.config.datasets, wildcards.dataset)
-        with open(output.dataset_file, 'wb') as dataset_file:
-            runner.merge_input(dataset_dict, dataset_file)
+        runner.merge_input(dataset_dict, dataset_file)
 
 
 
@@ -212,8 +211,7 @@ checkpoint prepare_input:
         # and write the output files specified by required_inputs
         # The filename_map provides the output file path for each required input file type
         filename_map = {input_type: SEP.join([out_dir, 'prepared', f'{wildcards.dataset}-{wildcards.algorithm}-inputs', f'{input_type}.txt']) for input_type in runner.get_required_inputs(wildcards.algorithm)}
-        with open(input.dataset_file, 'rb') as dataset_file:
-            runner.prepare_inputs(wildcards.algorithm, dataset_file, filename_map)
+        runner.prepare_inputs(wildcards.algorithm, dataset_file, filename_map)
 
 # Collect the prepared input files from the specified directory
 # If the directory does not exist for this dataset-algorithm pair, the checkpoint will detect that
@@ -294,10 +292,9 @@ rule parse_output:
         dataset_file = SEP.join([out_dir, 'dataset-{dataset}-merged.pickle'])
     output: standardized_file = SEP.join([out_dir, '{dataset}-{algorithm}-{params}', 'pathway.txt'])
     run:
-        with open(input.dataset_file, 'rb') as dataset_file:
-            params = reconstruction_params(wildcards.algorithm, wildcards.params).copy()
-            params['dataset'] = dataset_file
-            runner.parse_output(wildcards.algorithm, input.raw_file, output.standardized_file, params)
+        params = reconstruction_params(wildcards.algorithm, wildcards.params).copy()
+        params['dataset'] = dataset_file
+        runner.parse_output(wildcards.algorithm, input.raw_file, output.standardized_file, params)
 
 # TODO: reuse in the future once we make summary work for mixed graphs. See https://github.com/Reed-CompBio/spras/issues/128
 # Collect summary statistics for a single pathway
@@ -327,11 +324,10 @@ rule summary_table:
         dataset_file = SEP.join([out_dir, 'dataset-{dataset}-merged.pickle'])
     output: summary_table = SEP.join([out_dir, '{dataset}-pathway-summary.txt'])
     run:
-        with open(input.dataset_file, 'rb') as dataset_file:
-            # Load the node table from the pickled dataset file
-            node_table = Dataset.from_file(dataset_file).node_table
-            summary_df = summary.summarize_networks(input.pathways, node_table, algorithm_params, algorithms_with_params)
-            summary_df.to_csv(output.summary_table, sep='\t', index=False)
+        # Load the node table from the pickled dataset file
+        node_table = Dataset.from_file(dataset_file).node_table
+        summary_df = summary.summarize_networks(input.pathways, node_table, algorithm_params, algorithms_with_params)
+        summary_df.to_csv(output.summary_table, sep='\t', index=False)
 
 # Cluster the output pathways for each dataset
 rule ml_analysis:

@@ -17,6 +17,7 @@ import itertools as it
 import os
 import warnings
 from collections.abc import Iterable
+from pathlib import Path
 from typing import Any
 
 import numpy as np
@@ -37,19 +38,7 @@ def init_global(config_dict):
 
 def init_from_file(filepath):
     global config
-
-    # Handle opening the file and parsing the yaml
-    filepath = os.path.abspath(filepath)
-    try:
-        with open(filepath, 'r') as yaml_file:
-            config_dict = yaml.safe_load(yaml_file)
-    except FileNotFoundError as e:
-        raise RuntimeError(f"Error: The specified config '{filepath}' could not be found.") from e
-    except yaml.YAMLError as e:
-        raise RuntimeError(f"Error: Failed to parse config '{filepath}'") from e
-
-    # And finally, initialize
-    config = Config(config_dict)
+    config = Config.from_file(filepath)
 
 
 class Config:
@@ -107,6 +96,20 @@ class Config:
         self.analysis_include_evaluation_aggregate_algo = None
 
         self.process_config(parsed_raw_config)
+
+    @classmethod
+    def from_file(cls, filepath: str | os.PathLike):
+        # Handle opening the file and parsing the yaml
+        filepath = Path(filepath).absolute()
+        try:
+            with open(filepath, 'r') as yaml_file:
+                config_dict = yaml.safe_load(yaml_file)
+        except FileNotFoundError as e:
+            raise RuntimeError(f"Error: The specified config '{filepath}' could not be found.") from e
+        except yaml.YAMLError as e:
+            raise RuntimeError(f"Error: Failed to parse config '{filepath}'") from e
+
+        return cls(config_dict)
 
     def process_datasets(self, raw_config: RawConfig):
         """

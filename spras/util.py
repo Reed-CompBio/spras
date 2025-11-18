@@ -7,14 +7,25 @@ import hashlib
 import json
 from os import PathLike
 from pathlib import Path
-from typing import Any, Dict, Optional, TypeAlias, Union
+from typing import IO, Any, Dict, Optional, TypeAlias, Union
 
 import numpy as np
 import pandas as pd
 
 # This should be from `_typeshed import FileDescriptorOrPath`, but this is a typing module
 # and not part of stdlib.
-FileDescriptorOrPath: TypeAlias = Union[int, str, bytes, PathLike[str], PathLike[bytes]]
+LoosePathLike = Union[str, PathLike[str]]
+FileDescriptorOrPath: TypeAlias = Union[PathLike[bytes], int, bytes, LoosePathLike]
+FileLike: TypeAlias = Union[FileDescriptorOrPath, IO]
+
+def open_weak(file: FileLike, mode: str = 'rt') -> IO:
+    """
+    Opens a file, weakening the return type to IO
+    but allowing for varied file input.
+    """
+    if isinstance(file, IO):
+        return file
+    return open(file, mode)
 
 # https://stackoverflow.com/a/57915246/7589775
 # numpy variables are not, by default, encodable by python's JSONEncoder.
@@ -69,7 +80,7 @@ def hash_filename(filename: str | PathLike, length: Optional[int] = None) -> str
     return hash_params_sha1_base32({'filename': filename}, length)
 
 
-def make_required_dirs(path: FileDescriptorOrPath):
+def make_required_dirs(path: LoosePathLike):
     """
     Create the directory and parent directories required before an output file can be written to the specified path.
     Existing directories will not raise an error.
@@ -88,7 +99,7 @@ def add_rank_column(df: pd.DataFrame) -> pd.DataFrame:
     return df
 
 
-def raw_pathway_df(raw_pathway_file: str, sep: str = '\t', header: int = None) -> pd.DataFrame:
+def raw_pathway_df(raw_pathway_file: LoosePathLike, sep: str = '\t', header: int = None) -> pd.DataFrame:
     """
     Creates dataframe from contents in raw pathway file,
     otherwise returns an empty dataframe with standard output column names
