@@ -1,8 +1,9 @@
 import typing
 from abc import ABC, abstractmethod
-from typing import Any
+from typing import Any, Mapping
 
 from spras.dataset import Dataset
+from spras.util import LoosePathLike
 
 
 class PRM(ABC):
@@ -29,7 +30,7 @@ class PRM(ABC):
 
     @staticmethod
     @abstractmethod
-    def generate_inputs(data: Dataset, filename_map: dict[str, str]):
+    def generate_inputs(data: Dataset, filename_map: Mapping[str, LoosePathLike]):
         raise NotImplementedError
 
     @staticmethod
@@ -39,11 +40,11 @@ class PRM(ABC):
 
     @staticmethod
     @abstractmethod
-    def parse_output(raw_pathway_file: str, standardized_pathway_file: str, params: dict[str, Any]):
+    def parse_output(raw_pathway_file: str, standardized_pathway_file: str, params: Mapping[str, Any]):
         raise NotImplementedError
 
     @classmethod
-    def validate_required_inputs(cls, filename_map: dict[str, str]):
+    def validate_required_inputs(cls, filename_map: Mapping[str, LoosePathLike]):
         for input_type in cls.required_inputs:
             if input_type not in filename_map:
                 raise ValueError("{input_type} filename is missing")

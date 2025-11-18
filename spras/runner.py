@@ -1,4 +1,4 @@
-from typing import Any
+from typing import Any, Mapping
 
 # supported algorithm imports
 from spras.allpairs import AllPairs
@@ -64,7 +64,7 @@ def merge_input(dataset_data: DatasetSchema, dataset_output: FileLike):
     dataset.to_file(dataset_output)
 
 
-def prepare_inputs(algorithm: str, data_file: FileLike, filename_map: dict[str, str]):
+def prepare_inputs(algorithm: str, data_file: FileLike, filename_map: Mapping[str, LoosePathLike]):
     """
     Prepare general dataset files for this algorithm
     @param algorithm: algorithm name
@@ -77,7 +77,7 @@ def prepare_inputs(algorithm: str, data_file: FileLike, filename_map: dict[str, 
     return algorithm_runner.generate_inputs(dataset, filename_map)
 
 
-def parse_output(algorithm: str, raw_pathway_file: LoosePathLike, standardized_pathway_file: LoosePathLike, params: dict[str, Any]):
+def parse_output(algorithm: str, raw_pathway_file: LoosePathLike, standardized_pathway_file: LoosePathLike, params: Mapping[str, Any]):
     """
     Convert a predicted pathway into the universal format
     @param algorithm: algorithm name

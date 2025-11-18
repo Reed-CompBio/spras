@@ -12,10 +12,13 @@ from typing import IO, Any, Dict, Optional, TypeAlias, Union
 import numpy as np
 import pandas as pd
 
+"""Represents a file that points to some location."""
+LoosePathLike = Union[str, PathLike[str]]
 # This should be from `_typeshed import FileDescriptorOrPath`, but this is a typing module
 # and not part of stdlib.
-LoosePathLike = Union[str, PathLike[str]]
+"""Represents a file that hasn't been opened yet. Contains less data than `LoosePathLike`."""
 FileDescriptorOrPath: TypeAlias = Union[PathLike[bytes], int, bytes, LoosePathLike]
+"""Represents an openable file. To use this, use `open_weak`. Contains less data than `FileDescriptorOrPath`."""
 FileLike: TypeAlias = Union[FileDescriptorOrPath, IO]
 
 def open_weak(file: FileLike, mode: str = 'rt') -> IO:
