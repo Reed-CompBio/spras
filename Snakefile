@@ -156,9 +156,9 @@ rule log_datasets:
 # Input preparation needs to be rerun if these files are modified
 def get_dataset_dependencies(wildcards):
     dataset = _config.config.datasets[wildcards.dataset]
-    all_files = dataset["node_files"] + dataset["edge_files"] + dataset["other_files"]
+    all_files = dataset.node_files + dataset.edge_files + dataset.other_files
     # Add the relative file path
-    all_files = [dataset["data_dir"] + SEP + data_file for data_file in all_files]
+    all_files = [dataset.data_dir + SEP + data_file for data_file in all_files]
 
     return all_files
 
