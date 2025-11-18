@@ -12,9 +12,10 @@ We declare models using two classes here:
 
 from typing import Annotated, Optional
 
-from pydantic import AfterValidator, BaseModel, ConfigDict, Field
+from pydantic import AfterValidator, BaseModel, ConfigDict
 
 from spras.config.dataset import DatasetSchema
+from spras.config.container_schema import ContainerSettings
 from spras.config.util import CaseInsensitiveEnum, label_validator
 
 # Most options here have an `include` property,
@@ -125,10 +126,7 @@ class ReconstructionSettings(BaseModel):
     model_config = ConfigDict(extra='forbid')
 
 class RawConfig(BaseModel):
-    # TODO: move these container values to a nested container key
-    container_framework: ContainerFramework = ContainerFramework.docker
-    unpack_singularity: bool = False
-    container_registry: ContainerRegistry
+    containers: ContainerSettings
 
     hash_length: int = DEFAULT_HASH_LENGTH
     "The length of the hash used to identify a parameter combination"

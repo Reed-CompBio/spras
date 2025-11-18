@@ -2,9 +2,13 @@ from pathlib import Path
 
 import pandas as pd
 
-from spras.containers import prepare_volume, run_container
+from spras.config.container_schema import ProcessedContainerSettings
+from spras.containers import prepare_volume, run_container_and_log
 from spras.dataset import Dataset
-from spras.interactome import reinsert_direction_col_directed
+from spras.interactome import (
+    convert_undirected_to_directed,
+    reinsert_direction_col_directed,
+)
 from spras.prm import PRM
 from spras.util import add_rank_column, duplicate_edges, raw_pathway_df
 
@@ -29,10 +33,13 @@ class RWR(PRM):
 
         # Get edge data for network file
         edges = data.get_interactome()
+        edges = convert_undirected_to_directed(edges)
+
         edges.to_csv(filename_map['network'],sep='|',index=False,columns=['Interactor1','Interactor2'],header=False)
 
     @staticmethod
-    def run(network=None, nodes=None, alpha=None, output_file=None, container_framework="docker", threshold=None):
+    def run(network=None, nodes=None, alpha=None, output_file=None, container_settings=None, threshold=None):
+        if not container_settings: container_settings = ProcessedContainerSettings()
         if not nodes:
             raise ValueError('Required RWR arguments are missing')
 
@@ -47,10 +54,10 @@ class RWR(PRM):
         # Each volume is a tuple (src, dest)
         volumes = list()
 
-        bind_path, nodes_file = prepare_volume(nodes, work_dir)
+        bind_path, nodes_file = prepare_volume(nodes, work_dir, container_settings)
         volumes.append(bind_path)
 
-        bind_path, network_file = prepare_volume(network, work_dir)
+        bind_path, network_file = prepare_volume(network, work_dir, container_settings)
         volumes.append(bind_path)
 
         # RWR does not provide an argument to set the output directory
@@ -58,7 +65,7 @@ class RWR(PRM):
         out_dir = Path(output_file).parent
         # RWR requires that the output directory exist
         out_dir.mkdir(parents=True, exist_ok=True)
-        bind_path, mapped_out_dir = prepare_volume(str(out_dir), work_dir)
+        bind_path, mapped_out_dir = prepare_volume(str(out_dir), work_dir, container_settings)
         volumes.append(bind_path)
         mapped_out_prefix = mapped_out_dir + "/output.txt"
         command = ['python',
@@ -72,13 +79,15 @@ class RWR(PRM):
             command.extend(['--alpha', str(alpha)])
 
         container_suffix = 'rwr:v1'
-        out = run_container(container_framework,
-                            container_suffix,
-                            command,
-                            volumes,
-                            work_dir)
+        run_container_and_log(
+            "RandomWalk with Restart",
+            container_suffix,
+            command,
+            volumes,
+            work_dir,
+            out_dir,
+            container_settings)
 
-        print(out)
         # Rename the primary output file to match the desired output filename
         output_edges = Path(out_dir, 'output.txt')
         output_edges.rename(output_file)

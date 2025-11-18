@@ -4,6 +4,7 @@ from pathlib import Path
 import pytest
 
 import spras.config.config as config
+from spras.config.container_schema import ContainerFramework, ProcessedContainerSettings
 from spras.pathlinker import PathLinker
 
 config.init_from_file("config/config.yaml")
@@ -60,5 +61,5 @@ class TestPathLinker:
             nodetypes=TEST_DIR+'input/sample-in-nodetypes.txt',
             network=TEST_DIR+'input/sample-in-net.txt',
             output_file=OUT_FILE_DEFAULT,
-            container_framework="singularity")
+            container_settings=ProcessedContainerSettings(framework=ContainerFramework.singularity))
         assert out_path.exists()

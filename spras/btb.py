@@ -1,5 +1,6 @@
 from pathlib import Path
 
+from spras.config.container_schema import ProcessedContainerSettings
 from spras.containers import prepare_volume, run_container_and_log
 from spras.interactome import (
     convert_undirected_to_directed,
@@ -68,15 +69,16 @@ class BowTieBuilder(PRM):
 
     # Skips parameter validation step
     @staticmethod
-    def run(sources=None, targets=None, edges=None, output_file=None, container_framework="docker"):
+    def run(sources=None, targets=None, edges=None, output_file=None, container_settings=None):
         """
         Run BTB with Docker
         @param sources:  input source file (required)
         @param targets:  input target file (required)
         @param edges:    input edge file (required)
         @param output_file: path to the output pathway file (required)
-        @param container_framework: choose the container runtime framework, currently supports "docker" or "singularity" (optional)
+        @param container_settings: configure the container runtime
         """
+        if not container_settings: container_settings = ProcessedContainerSettings()
 
         # Tests for pytest (docker container also runs this)
         # Testing out here avoids the trouble that container errors provide
@@ -105,19 +107,19 @@ class BowTieBuilder(PRM):
         # Each volume is a tuple (src, dest)
         volumes = list()
 
-        bind_path, source_file = prepare_volume(sources, work_dir)
+        bind_path, source_file = prepare_volume(sources, work_dir, container_settings)
         volumes.append(bind_path)
 
-        bind_path, target_file = prepare_volume(targets, work_dir)
+        bind_path, target_file = prepare_volume(targets, work_dir, container_settings)
         volumes.append(bind_path)
 
-        bind_path, edges_file = prepare_volume(edges, work_dir)
+        bind_path, edges_file = prepare_volume(edges, work_dir, container_settings)
         volumes.append(bind_path)
 
         # Use its --output argument to set the output file prefix to specify an absolute path and prefix
         out_dir = Path(output_file).parent
         out_dir.mkdir(parents=True, exist_ok=True)
-        bind_path, mapped_out_dir = prepare_volume(str(out_dir), work_dir)
+        bind_path, mapped_out_dir = prepare_volume(str(out_dir), work_dir, container_settings)
         volumes.append(bind_path)
         mapped_out_prefix = mapped_out_dir + '/raw-pathway.txt'  # Use posix path inside the container
 
@@ -134,11 +136,12 @@ class BowTieBuilder(PRM):
 
         container_suffix = "bowtiebuilder:v2"
         run_container_and_log('BowTieBuilder',
-                              container_framework,
                               container_suffix,
                               command,
                               volumes,
-                              work_dir)
+                              work_dir,
+                              out_dir,
+                              container_settings)
         # Output is already written to raw-pathway.txt file
 
 
