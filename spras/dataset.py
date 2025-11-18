@@ -1,9 +1,11 @@
 import os
 import pickle as pkl
 import warnings
-from typing import TypedDict
+from typing import IO, Union
 
 import pandas as pd
+
+from spras.config.dataset import DatasetSchema
 
 """
 Author: Chris Magnano
@@ -12,23 +14,12 @@ Author: Chris Magnano
 Methods and intermediate state for loading data and putting it into pandas tables for use by pathway reconstruction algorithms.
 """
 
-class DatasetDict(TypedDict):
-    """
-    Type class containing a collection of information pertaining to creating a Dataset
-    object. See spras/config/schema.py's `Dataset` class for the pydantic formation of `DatasetDict`.
-    """
-    label: str
-    node_files: list[str | os.PathLike]
-    edge_files: list[str | os.PathLike]
-    other_files: list[str | os.PathLike]
-    data_dir: str | os.PathLike
-
 class Dataset:
 
     NODE_ID = "NODEID"
     warning_threshold = 0.05  # Threshold for scarcity of columns to warn user
 
-    def __init__(self, dataset_dict: DatasetDict):
+    def __init__(self, dataset_dict: DatasetSchema):
         self.label = None
         self.interactome = None
         self.node_table = None
@@ -37,28 +28,24 @@ class Dataset:
         self.load_files_from_dict(dataset_dict)
         return
 
-    def to_file(self, file_name: str):
-        """
-        Saves dataset object to pickle file
-        """
-        with open(file_name, "wb") as f:
-            pkl.dump(self, f)
+    def to_file(self, file: IO):
+        """Saves dataset object to pickle file"""
+        pkl.dump(self, file)
 
     @classmethod
-    def from_file(cls, file_name: str):
+    def from_file(cls, file: Union[IO, "Dataset"]):
         """
-        Loads dataset object from a pickle file.
+        Loads dataset object from a pickle file or another `Dataset` object.
         Usage: dataset = Dataset.from_file(pickle_file)
         """
-        if isinstance(file_name, Dataset):
-            # No work to be done
-            # (this use-case is useful for testing.)
-            return file_name
+        if isinstance(file, Dataset):
+            # No work to be done (this use-case is used when processing
+            # `Dataset` objects in generate_inputs or parse_outputs.)
+            return file
 
-        with open(file_name, "rb") as f:
-            return pkl.load(f)
+        return pkl.load(file)
 
-    def load_files_from_dict(self, dataset_dict: DatasetDict):
+    def load_files_from_dict(self, dataset_dict: DatasetSchema):
         """
         Loads data files from dataset_dict, which is one dataset dictionary from the list
         in the config file with the fields in the config file.
@@ -77,14 +64,14 @@ class Dataset:
         returns: none
         """
 
-        self.label = dataset_dict["label"]
+        self.label = dataset_dict.label
 
         # Get file paths from config
         # TODO support multiple edge files
-        interactome_loc = dataset_dict["edge_files"][0]
-        node_data_files = dataset_dict["node_files"]
+        interactome_loc = dataset_dict.edge_files[0]
+        node_data_files = dataset_dict.node_files
         # edge_data_files = [""]  # Currently None
-        data_loc = dataset_dict["data_dir"]
+        data_loc = dataset_dict.data_dir
 
         # Load everything as pandas tables
         self.interactome = pd.read_table(
@@ -141,7 +128,7 @@ class Dataset:
             ).filter(regex="^(?!.*DROP)")
         # Ensure that the NODEID column always appears first, which is required for some downstream analyses
         self.node_table.insert(0, "NODEID", self.node_table.pop("NODEID"))
-        self.other_files = dataset_dict["other_files"]
+        self.other_files = dataset_dict.other_files
 
     def get_node_columns(self, col_names: list[str]) -> pd.DataFrame:
         """

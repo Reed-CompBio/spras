@@ -170,7 +170,8 @@ rule merge_input:
     run:
         # Pass the dataset to PRRunner where the files will be merged and written to disk (i.e. pickled)
         dataset_dict = get_dataset(_config.config.datasets, wildcards.dataset)
-        runner.merge_input(dataset_dict, output.dataset_file)
+        with open(output.dataset_file, 'w') as dataset_file:
+            runner.merge_input(dataset_dict, dataset_file)
 
 
 
@@ -211,7 +212,8 @@ checkpoint prepare_input:
         # and write the output files specified by required_inputs
         # The filename_map provides the output file path for each required input file type
         filename_map = {input_type: SEP.join([out_dir, 'prepared', f'{wildcards.dataset}-{wildcards.algorithm}-inputs', f'{input_type}.txt']) for input_type in runner.get_required_inputs(wildcards.algorithm)}
-        runner.prepare_inputs(wildcards.algorithm, input.dataset_file, filename_map)
+        with open(input.dataset_file, 'w') as dataset_file:
+            runner.prepare_inputs(wildcards.algorithm, dataset_file, filename_map)
 
 # Collect the prepared input files from the specified directory
 # If the directory does not exist for this dataset-algorithm pair, the checkpoint will detect that

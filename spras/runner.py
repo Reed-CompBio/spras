@@ -1,9 +1,9 @@
-from typing import Any
+from typing import IO, Any
 
 # supported algorithm imports
 from spras.allpairs import AllPairs
 from spras.btb import BowTieBuilder
-from spras.dataset import Dataset
+from spras.dataset import Dataset, DatasetSchema
 from spras.domino import DOMINO
 from spras.meo import MEO
 from spras.mincostflow import MinCostFlow
@@ -53,17 +53,17 @@ def get_required_inputs(algorithm: str):
     return algorithm_runner.required_inputs
 
 
-def merge_input(dataset_dict, dataset_file: str):
+def merge_input(dataset_data: DatasetSchema, dataset_output: IO):
     """
     Merge files listed for this dataset and write the dataset to disk
     @param dataset_dict: dataset to process
     @param dataset_file: output filename
     """
-    dataset = Dataset(dataset_dict)
-    dataset.to_file(dataset_file)
+    dataset = Dataset(dataset_data)
+    dataset.to_file(dataset_output)
 
 
-def prepare_inputs(algorithm: str, data_file: str, filename_map: dict[str, str]):
+def prepare_inputs(algorithm: str, data_file: IO, filename_map: dict[str, str]):
     """
     Prepare general dataset files for this algorithm
     @param algorithm: algorithm name

@@ -5,6 +5,7 @@ from pathlib import Path
 import yaml
 
 from spras import runner
+from spras.config.config import Config
 
 OUTDIR = "test/generate-inputs/output/"
 EXPDIR = "test/generate-inputs/expected/"
@@ -36,11 +37,12 @@ class TestGenerateInputs:
         config_loc = os.path.join("test", "generate-inputs", "inputs", "test_config.yaml")
 
         with open(config_loc) as config_file:
-            config = yaml.load(config_file, Loader=yaml.FullLoader)
+            config = Config(yaml.load(config_file, Loader=yaml.FullLoader))
         test_file = "test/generate-inputs/output/test_pickled_dataset.pkl"
 
-        test_dataset = next((ds for ds in config["datasets"] if ds["label"] == "test_data"), None)
-        runner.merge_input(test_dataset, test_file)
+        test_dataset = list((ds for ds in config.datasets.values() if ds.label == "test_data"))[0]
+        with open(test_file, 'w') as test_file:
+            runner.merge_input(test_dataset, test_file)
 
         for algo in algo_exp_file.keys():
             inputs = runner.get_required_inputs(algo)

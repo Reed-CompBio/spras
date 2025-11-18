@@ -22,7 +22,7 @@ from typing import Any
 import numpy as np
 import yaml
 
-from spras.config.schema import ContainerFramework, RawConfig
+from spras.config.schema import ContainerFramework, DatasetSchema, RawConfig
 from spras.util import NpHashEncoder, hash_params_sha1_base32
 
 config = None
@@ -72,7 +72,7 @@ class Config:
         # A Boolean specifying whether to unpack singularity containers. Default is False
         self.unpack_singularity = False
         # A dictionary to store configured datasets against which SPRAS will be run
-        self.datasets = None
+        self.datasets: dict[str, DatasetSchema] = {}
         # A dictionary to store configured gold standard data against output of SPRAS runs
         self.gold_standards = None
         # The hash length SPRAS will use to identify parameter combinations.
@@ -123,12 +123,11 @@ class Config:
         # Currently assumes all datasets have a label and the labels are unique
         # When Snakemake parses the config file it loads the datasets as OrderedDicts not dicts
         # Convert to dicts to simplify the yaml logging
-        self.datasets = {}
         for dataset in raw_config.datasets:
             label = dataset.label
             if label.lower() in [key.lower() for key in self.datasets.keys()]:
                 raise ValueError(f"Datasets must have unique case-insensitive labels, but the label {label} appears at least twice.")
-            self.datasets[label] = dict(dataset)
+            self.datasets[label] = dataset
 
         # parse gold standard information
         self.gold_standards = {gold_standard.label: dict(gold_standard) for gold_standard in raw_config.gold_standards}

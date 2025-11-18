@@ -5,12 +5,16 @@ Utility functions for pathway reconstruction
 import base64
 import hashlib
 import json
+from os import PathLike
 from pathlib import Path
-from typing import Any, Dict, Optional
+from typing import Any, Dict, Optional, TypeAlias, Union
 
 import numpy as np
 import pandas as pd
 
+# This should be from `_typeshed import FileDescriptorOrPath`, but this is a typing module
+# and not part of stdlib.
+FileDescriptorOrPath: TypeAlias = Union[int, str, bytes, PathLike[str], PathLike[bytes]]
 
 # https://stackoverflow.com/a/57915246/7589775
 # numpy variables are not, by default, encodable by python's JSONEncoder.
