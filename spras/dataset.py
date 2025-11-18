@@ -20,15 +20,6 @@ class Dataset:
     NODE_ID = "NODEID"
     warning_threshold = 0.05  # Threshold for scarcity of columns to warn user
 
-    def __init__(self, dataset_params: DatasetSchema):
-        self.label = None
-        self.interactome = None
-        self.node_table = None
-        self.node_set = set()
-        self.other_files = []
-        self.load_files_from_dict(dataset_params)
-        return
-
     def to_file(self, file: FileLike):
         """Saves dataset object to pickle file"""
         with open_weak(file) as f:
@@ -48,11 +39,11 @@ class Dataset:
         with open_weak(file) as file:
             return pkl.load(file)
 
-    def load_files_from_dict(self, dataset_params: DatasetSchema):
+    def __init__(self, dataset_params: DatasetSchema):
         """
-        Loads data files from dataset_dict, which is one dataset dictionary from the list
-        in the config file with the fields in the config file.
-        Populates node_table and interactome.
+        Loads data files from dataset_params, which is one dataset schema object
+        from the list in the config file with the fields in the config file.
+        Creates a new `Dataset` instance.
 
         node_table is a single merged pandas table.
 
@@ -63,8 +54,6 @@ class Dataset:
         We might want to eventually add an additional "algs" argument so only
         subsets of the entire config file are loaded, alternatively this could
         be handled outside this class.
-
-        returns: none
         """
 
         self.label = dataset_params.label
