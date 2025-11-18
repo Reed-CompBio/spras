@@ -73,7 +73,7 @@ def hash_params_sha1_base32(params_dict: Dict[str, Any], length: Optional[int] =
         return params_base32[:length]
 
 
-def hash_filename(filename: str | PathLike, length: Optional[int] = None) -> str:
+def hash_filename(filename: LoosePathLike, length: Optional[int] = None) -> str:
     """
     Hash of a filename using hash_params_sha1_base32
     @param filename: filename to hash

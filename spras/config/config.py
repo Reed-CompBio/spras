@@ -14,7 +14,6 @@ will grab the top level registry configuration option as it appears in the confi
 
 import copy as copy
 import itertools as it
-import os
 import warnings
 from collections.abc import Iterable
 from pathlib import Path
@@ -25,7 +24,7 @@ import yaml
 
 from spras.config.container_schema import ProcessedContainerSettings
 from spras.config.schema import DatasetSchema, RawConfig
-from spras.util import NpHashEncoder, hash_params_sha1_base32
+from spras.util import LoosePathLike, NpHashEncoder, hash_params_sha1_base32
 
 config = None
 
@@ -98,7 +97,7 @@ class Config:
         self.process_config(parsed_raw_config)
 
     @classmethod
-    def from_file(cls, filepath: str | os.PathLike):
+    def from_file(cls, filepath: LoosePathLike):
         # Handle opening the file and parsing the yaml
         filepath = Path(filepath).absolute()
         try:
