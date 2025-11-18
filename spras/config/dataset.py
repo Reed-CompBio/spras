@@ -1,8 +1,10 @@
 import os
 from typing import Annotated
+
 from pydantic import AfterValidator, BaseModel, ConfigDict
 
 from spras.config.util import label_validator
+
 
 class DatasetSchema(BaseModel):
     """

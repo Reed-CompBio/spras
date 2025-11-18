@@ -22,8 +22,8 @@ from typing import Any
 import numpy as np
 import yaml
 
-from spras.config.schema import DatasetSchema, RawConfig
 from spras.config.container_schema import ProcessedContainerSettings
+from spras.config.schema import DatasetSchema, RawConfig
 from spras.util import NpHashEncoder, hash_params_sha1_base32
 
 config = None

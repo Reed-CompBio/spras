@@ -12,10 +12,10 @@ We declare models using two classes here:
 
 from typing import Annotated, Optional
 
-from pydantic import AfterValidator, BaseModel, ConfigDict
+from pydantic import AfterValidator, BaseModel, ConfigDict, Field
 
-from spras.config.dataset import DatasetSchema
 from spras.config.container_schema import ContainerSettings
+from spras.config.dataset import DatasetSchema
 from spras.config.util import CaseInsensitiveEnum, label_validator
 
 # Most options here have an `include` property,
