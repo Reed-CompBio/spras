@@ -296,7 +296,7 @@ rule parse_output:
     run:
         with open(input.dataset_file, 'rb') as dataset_file:
             params = reconstruction_params(wildcards.algorithm, wildcards.params).copy()
-            params['dataset'] = input.dataset_file
+            params['dataset'] = dataset_file
             runner.parse_output(wildcards.algorithm, input.raw_file, output.standardized_file, params)
 
 # TODO: reuse in the future once we make summary work for mixed graphs. See https://github.com/Reed-CompBio/spras/issues/128
