@@ -22,7 +22,7 @@ class TestDataset:
     def test_not_allow_no_cols_headers(self):
         with pytest.raises(pandas.errors.EmptyDataError):
             Dataset(DatasetSchema(
-                label='empty-headers',
+                label='empty_headers',
                 edge_files=['network.txt'],
                 node_files=['sources.txt', 'node-prizes.txt'],
                 other_files=[],
@@ -42,7 +42,7 @@ class TestDataset:
     def test_empty_network(self):
         with pytest.raises(pandas.errors.EmptyDataError):
             Dataset(DatasetSchema(
-                label='empty-network',
+                label='empty_network',
                 edge_files=['network.txt'],
                 node_files=['sources.txt', 'node-prizes.txt'],
                 other_files=[],
