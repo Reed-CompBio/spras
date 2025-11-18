@@ -12,7 +12,7 @@ We declare models using two classes here:
 
 from typing import Annotated, Optional
 
-from pydantic import AfterValidator, BaseModel, ConfigDict, Field
+from pydantic import AfterValidator, BaseModel, ConfigDict
 
 from spras.config.container_schema import ContainerSettings
 from spras.config.dataset import DatasetSchema
@@ -77,18 +77,6 @@ class Analysis(BaseModel):
 
 # The default length of the truncated hash used to identify parameter combinations
 DEFAULT_HASH_LENGTH = 7
-
-class ContainerFramework(CaseInsensitiveEnum):
-    docker = 'docker'
-    # TODO: add apptainer variant once #260 gets merged
-    singularity = 'singularity'
-    dsub = 'dsub'
-
-class ContainerRegistry(BaseModel):
-    base_url: str
-    owner: str = Field(description="The owner or project of the registry")
-
-    model_config = ConfigDict(extra='forbid')
 
 class AlgorithmParams(BaseModel):
     include: bool
