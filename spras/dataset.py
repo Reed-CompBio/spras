@@ -22,7 +22,7 @@ class Dataset:
 
     def to_file(self, file: FileLike):
         """Saves dataset object to pickle file"""
-        with open_weak(file) as f:
+        with open_weak(file, "wb") as f:
             pkl.dump(self, f)
 
     @classmethod
@@ -36,7 +36,7 @@ class Dataset:
             # `Dataset` objects in generate_inputs or parse_outputs.)
             return file
 
-        with open_weak(file) as file:
+        with open_weak(file, "rb") as file:
             return pkl.load(file)
 
     def __init__(self, dataset_params: DatasetSchema):
