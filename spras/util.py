@@ -5,6 +5,7 @@ Utility functions for pathway reconstruction
 import base64
 import hashlib
 import json
+import os
 from pathlib import Path
 from typing import Any, Dict, Optional
 
@@ -55,7 +56,7 @@ def hash_params_sha1_base32(params_dict: Dict[str, Any], length: Optional[int] =
         return params_base32[:length]
 
 
-def hash_filename(filename: str, length: Optional[int] = None) -> str:
+def hash_filename(filename: str | os.PathLike, length: Optional[int] = None) -> str:
     """
     Hash of a filename using hash_params_sha1_base32
     @param filename: filename to hash
@@ -65,7 +66,7 @@ def hash_filename(filename: str, length: Optional[int] = None) -> str:
     return hash_params_sha1_base32({'filename': filename}, length)
 
 
-def make_required_dirs(path: str):
+def make_required_dirs(path: str | os.PathLike):
     """
     Create the directory and parent directories required before an output file can be written to the specified path.
     Existing directories will not raise an error.
