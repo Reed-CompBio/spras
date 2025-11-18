@@ -19,13 +19,13 @@ class Dataset:
     NODE_ID = "NODEID"
     warning_threshold = 0.05  # Threshold for scarcity of columns to warn user
 
-    def __init__(self, dataset_dict: DatasetSchema):
+    def __init__(self, dataset_params: DatasetSchema):
         self.label = None
         self.interactome = None
         self.node_table = None
         self.node_set = set()
         self.other_files = []
-        self.load_files_from_dict(dataset_dict)
+        self.load_files_from_dict(dataset_params)
         return
 
     def to_file(self, file: IO):
@@ -45,7 +45,7 @@ class Dataset:
 
         return pkl.load(file)
 
-    def load_files_from_dict(self, dataset_dict: DatasetSchema):
+    def load_files_from_dict(self, dataset_params: DatasetSchema):
         """
         Loads data files from dataset_dict, which is one dataset dictionary from the list
         in the config file with the fields in the config file.
@@ -64,14 +64,14 @@ class Dataset:
         returns: none
         """
 
-        self.label = dataset_dict.label
+        self.label = dataset_params.label
 
         # Get file paths from config
         # TODO support multiple edge files
-        interactome_loc = dataset_dict.edge_files[0]
-        node_data_files = dataset_dict.node_files
+        interactome_loc = dataset_params.edge_files[0]
+        node_data_files = dataset_params.node_files
         # edge_data_files = [""]  # Currently None
-        data_loc = dataset_dict.data_dir
+        data_loc = dataset_params.data_dir
 
         # Load everything as pandas tables
         self.interactome = pd.read_table(
@@ -128,7 +128,7 @@ class Dataset:
             ).filter(regex="^(?!.*DROP)")
         # Ensure that the NODEID column always appears first, which is required for some downstream analyses
         self.node_table.insert(0, "NODEID", self.node_table.pop("NODEID"))
-        self.other_files = dataset_dict.other_files
+        self.other_files = dataset_params.other_files
 
     def get_node_columns(self, col_names: list[str]) -> pd.DataFrame:
         """

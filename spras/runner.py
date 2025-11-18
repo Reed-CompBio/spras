@@ -14,6 +14,7 @@ from spras.prm import PRM
 from spras.responsenet import ResponseNet
 from spras.rwr import RWR
 from spras.strwr import ST_RWR
+from spras.util import FileDescriptorOrPath
 
 algorithms: dict[str, type[PRM]] = {
     "allpairs": AllPairs,
@@ -76,7 +77,7 @@ def prepare_inputs(algorithm: str, data_file: IO, filename_map: dict[str, str]):
     return algorithm_runner.generate_inputs(dataset, filename_map)
 
 
-def parse_output(algorithm: str, raw_pathway_file: str, standardized_pathway_file: str, params: dict[str, Any]):
+def parse_output(algorithm: str, raw_pathway_file: FileDescriptorOrPath, standardized_pathway_file: FileDescriptorOrPath, params: dict[str, Any]):
     """
     Convert a predicted pathway into the universal format
     @param algorithm: algorithm name
@@ -84,4 +85,4 @@ def parse_output(algorithm: str, raw_pathway_file: str, standardized_pathway_fil
     @param standardized_pathway_file: the same pathway written in the universal format
     """
     algorithm_runner = get_algorithm(algorithm)
-    return algorithm_runner.parse_output(raw_pathway_file, standardized_pathway_file, params)
+    return algorithm_runner.parse_output(str(raw_pathway_file), str(standardized_pathway_file), params)
