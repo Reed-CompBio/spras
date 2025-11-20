@@ -16,7 +16,9 @@ __all__ = ['RWR']
 
 class RWR(PRM):
     required_inputs = ['network','nodes']
-    dois = ["10.1093/bioinformatics/btq680"]
+    # Paper relevant to biological applications of random walks,
+    # then the original TrustRank paper.
+    dois = ["10.1093/bioinformatics/btq680", "10.1016/b978-012088469-8/50052-8"]
 
     @staticmethod
     def generate_inputs(data, filename_map):
