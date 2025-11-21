@@ -17,7 +17,7 @@ __all__ = ['PathLinker', 'PathLinkerParams']
 
 class PathLinkerParams(BaseModel):
     k: int = 100
-    "path length"
+    "Number of paths"
 
     model_config = ConfigDict(extra='forbid', use_attribute_docstrings=True)
 

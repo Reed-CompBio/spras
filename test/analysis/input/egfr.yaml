@@ -72,7 +72,7 @@ algorithms:
     runs:
       run1:
         local_search:
-          - "Yes"
+          - true
         max_path_length:
           - 3
         rand_restarts:

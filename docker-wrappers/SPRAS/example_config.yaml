@@ -79,7 +79,7 @@ algorithms:
       include: true
       run1:
         max_path_length: [3]
-        local_search: ["Yes"]
+        local_search: [true]
         rand_restarts: [10]
 
   - name: "mincostflow"
