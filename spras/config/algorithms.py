@@ -18,7 +18,9 @@ __all__ = ['AlgorithmUnion']
 def is_numpy_friendly(type: type[Any] | None) -> bool:
     """
     Whether the passed in type can have any numpy helpers.
-    This is mainly used to provide hints in the JSON schema.
+    This is used to provide hints in the JSON schema,
+    and to determine whether or not to allow for easy ranges using
+    `python_evalish_coerce`.
     """
     allowed_types = (int, float)
 
