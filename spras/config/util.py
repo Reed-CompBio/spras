@@ -27,7 +27,8 @@ class CaseInsensitiveEnum(str, Enum):
                     return member
         return None
 
-# We also need to allow `CaseInsensitiveEnum` to be represented in yaml.safe_dump:
+# We also need to allow `CaseInsensitiveEnum` to be represented in yaml.safe_dump,
+# allowing us to safely log parameters in Snakemake:
 # https://github.com/yaml/pyyaml/issues/722#issue-1781352490
 yaml.SafeDumper.add_multi_representer(
     CaseInsensitiveEnum,

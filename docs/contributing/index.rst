@@ -244,9 +244,7 @@ the format ``<vertex1>|<vertex2>``, which also differs from the
 ``omicsintegrator1.py`` example. ``spras/dataset.py`` provides functions
 that provide access to node information and the interactome (edge list).
 
-Implement the ``run`` function, following the PathLinker example. Since
-there are no arguments, you do not need to instantiate a new instance of ``Empty``
-if parameters are not specified.
+Implement the ``run`` function, following the AllPairs example.
 ``prepare_volume`` utility function is needed to prepare the network and
 nodes input files to be mounted and used inside the container. It is
 also used to prepare the path for the output file, which is different

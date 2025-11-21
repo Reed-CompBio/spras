@@ -12,6 +12,7 @@ from pydantic import BaseModel, BeforeValidator, ConfigDict, Field, create_model
 
 from spras.runner import algorithms
 
+# This contains the dynamically generated algorithm schema for use in `schema.py`
 __all__ = ['AlgorithmUnion']
 
 def is_numpy_friendly(type: type[Any] | None) -> bool:
@@ -78,11 +79,11 @@ def list_coerce(value: Any) -> Any:
         return [value]
     return value
 
+# This is the most 'hacky' part of this code, but, thanks to pydantic, we avoid reflection
+# and preserve rich type information at runtime.
 def construct_algorithm_model(name: str, model: type[BaseModel], model_default: Optional[BaseModel]) -> type[BaseModel]:
     """
     Dynamically constructs a parameter-combination model based on the original args model.
-    This is the most 'hacky' part of this code, but, thanks to pydantic, we avoid reflection
-    and preserve rich type information at runtime.
     """
     # First, we need to take our 'model' and coerce it to permit parameter combinations.
     # This assumes that all of the keys are flattened, so we only get a structure like so:

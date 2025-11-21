@@ -42,6 +42,8 @@ class PRM(ABC, Generic[T]):
         """
         raise NotImplementedError
 
+    # This is used in `runner.py` to avoid a dependency diamond when trying
+    # to import the actual algorithm schema.
     @classmethod
     def run_typeless(cls, inputs: dict[str, str | os.PathLike], output_file: str | os.PathLike, args: dict[str, Any], container_settings: ProcessedContainerSettings):
         """

@@ -191,7 +191,7 @@ class Config:
                                         f'(current length {self.hash_length}).')
 
                     # We preserve the run name as it carries useful information for the parameter log,
-                    # and is useful for testing.
+                    # and is useful for configuration testing.
                     run_dict["_spras_run_name"] = run_name
 
                     self.algorithm_params[alg.name][params_hash] = run_dict
