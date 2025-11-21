@@ -1,10 +1,16 @@
+import copy
 import pickle
+from typing import Iterable
 
-import numpy as np
 import pytest
+from pydantic import BaseModel
 
 import spras.config.config as config
+from spras.config.container_schema import DEFAULT_CONTAINER_PREFIX
 from spras.config.schema import DEFAULT_HASH_LENGTH
+from spras.meo import MEOParams
+from spras.mincostflow import MinCostFlowParams
+from spras.omicsintegrator2 import DummyMode, OmicsIntegrator2Params
 
 filler_dataset_data: dict[str, str | list[str]] = {
     "data_dir": "fake",
@@ -18,10 +24,12 @@ filler_dataset_data: dict[str, str | list[str]] = {
 # individual values of the dict can be changed and the whole initialization can be re-run.
 def get_test_config():
     test_raw_config = {
-        "container_framework": "singularity",
-        "container_registry": {
-            "base_url": "docker.io",
-            "owner": "reedcompbio",
+        "containers": {
+            "framework": "singularity",
+            "registry": {
+                "base_url": "docker.io",
+                "owner": "reedcompbio",
+            },
         },
         "hash_length": 7,
         "reconstruction_settings": {
@@ -43,61 +51,44 @@ def get_test_config():
             "node_files": []
         }],
         "gold_standards": [{
-            "label": "gs1",
+            "label": "gs_fake",
             "dataset_labels": [],
             "node_files": [],
             "data_dir": "gs-fake"
         }],
         "algorithms": [
+            # Since there is algorithm validation,
+            # we are (mostly) forced to use real algorithm parameters here.
+            # To make this more readable, we make the 'test names' the run names.
+            # TODO: we don't have a test for combinations of strings anymore. This seems to be fine,
+            # but it would be nice to have once we introduce an algorithm that takes more than 1 string parameter.
             {
-                "name": "strings",
-                "params": {
-                    "include": True,
-                    "run1": {"test": "str1", "test2": ["str2", "str3"]}
+                "name": "omicsintegrator2",
+                "include": True,
+                "runs": {
+                    "strings": {"dummy_mode": ["terminals", "others"], "b": 3},
+                    # spacing in np.linspace is on purpose
+                    "singleton_string_np_linspace": {"dummy_mode": "terminals", "b": "np.linspace(0,    5,2,)"},
+                    "str_array_np_logspace": {"dummy_mode": ["others", "all"], "g": "np.logspace(1,1)"}
                 }
             },
             {
-                "name": "numbersAndBools",
-                "params": {
-                    "include": True,
-                    "run1": {"a": 1, "b": [float(2.0), 3], "c": [4], "d": float(5.6), "f": False}
+                "name": "meo",
+                "include": True,
+                "runs": {
+                    "numbersAndBoolsDuplicate": {"max_path_length": 1, "rand_restarts": [float(2.0), 3], "local_search": [True, False]},
+                    "numbersAndBool": {"max_path_length": 2, "rand_restarts": [float(2.0), 3], "local_search": [True]},
+                    "numbersAndBools": {"max_path_length": 1, "rand_restarts": [float(2.0), 3], "local_search": [True, False]},
+                    "boolArrTest": {"local_search": [True, False], "max_path_length": "range(1, 3)"}
                 }
             },
             {
-                "name": "singleton_int64_with_array",
-                "params": {
-                    "include": True,
-                    "run1": {"test": np.int64(1), "test2": [2, 3]}
+                "name": "mincostflow",
+                "include": True,
+                "runs": {
+                    "int64artifact": {"flow": "np.arange(5, 7)", "capacity": [2, 3]}
                 }
             },
-            {
-                "name": "singleton_string_np_linspace",
-                "params": {
-                    "include": True,
-                    "run1": {"test": "str1", "test2": "np.linspace(0,5,2)"}
-                }
-            },
-            {
-                "name": "str_array_np_logspace",
-                "params": {
-                    "include": True,
-                    "run1": {"test": ["a", "b"], "test2": "np.logspace(1,1)"}
-                }
-            },
-            {
-                "name": "int64artifact",
-                "params": {
-                    "include": True,
-                    "run1": {"test": "np.arange(5,6)", "test2": [2, 3]}
-                }
-            },
-            {
-                "name": "boolArrTest",
-                "params": {
-                    "include": True,
-                    "run1": {"flags": [True, False], "range": "range(1, 3)"}
-                }
-            }
         ],
         "analysis": {
             "summary": {
@@ -119,22 +110,49 @@ def get_test_config():
 
     return test_raw_config
 
-def value_test_util(name: str, configurations: list):
-    assert name in config.config.algorithm_params, f"{name} isn't a present algorithm configuration!"
+def value_test_util(alg: str, run_name: str, param_type: type[BaseModel], configurations: Iterable[BaseModel]):
+    """
+    Utility test function to be able to test against certain named runs
+    under algorithms. This is, unfortunately, a very holistic function that depends
+    on the current state of how config parsing is.
+    """
+    assert alg in config.config.algorithm_params, f"{alg} isn't a present algorithm name!"
+    runs = config.config.algorithm_params[alg]
+    # Filter using the internal _spras_run_name key.
+    runs = {hash: params for hash, params in runs.items() if params["_spras_run_name"] == run_name}
 
-    keys = config.config.algorithm_params[name]
-    values = [config.config.algorithm_params[name][key] for key in keys]
+    # We copy values so we don't mutate it
+    values: list[dict] = copy.deepcopy(list(runs.values()))
+    for value in values:
+        # then, remove the internal key for easy comparison.
+        del value["_spras_run_name"]
+
+    # Since configurations is a bunch of objects, we need to turn those into dictionaries
+    # and exclude their defaults.
+    new_configurations = [config.model_dump(exclude_defaults=True) for config in configurations]
+
+    # Same for values, but we reserialize them first
+    values = [param_type.model_validate(value).model_dump(exclude_defaults=True) for value in values]
+
+    # Now, we need to also remove any dynamic values from values and configurations
+    # (_time and seeded values)
+    for value in values:
+        value.pop("_time", None)
+        value.pop("seed", None)
+    for configuration in new_configurations:
+        configuration.pop("_time", None)
+        configuration.pop("seed", None)
 
     # https://stackoverflow.com/a/50486270/7589775
     # Note: We use pickle as we also compare dictionaries in these two sets - some kind of consistent total ordering
     # is required for the tests to consistently pass when comparing them to `configurations`.
-    set_values = set(tuple(sorted(d.items())) for d in sorted(values, key=lambda x: pickle.dumps(x, protocol=3)))
-    set_configurations = set(tuple(sorted(d.items())) for d in sorted(configurations, key=lambda x: pickle.dumps(x, protocol=3)))
+    final_values = sorted(tuple(sorted(d.items())) for d in sorted(values, key=lambda x: pickle.dumps(x, protocol=3)))
+    final_configurations = sorted(tuple(sorted(d.items())) for d in sorted(new_configurations, key=lambda x: pickle.dumps(x, protocol=3)))
 
-    if set_values != set_configurations:
-        print(f'Got: {set_values}')
-        print(f'Expected: {set_configurations}')
-        assert set_values == set_configurations
+    if final_values != final_configurations:
+        print(f'Got: {final_values}')
+        print(f'Expected: {final_configurations}')
+        assert final_values == final_configurations
 
 class TestConfig:
     """
@@ -159,46 +177,46 @@ class TestConfig:
         # Test singularity
         test_config = get_test_config()
 
-        test_config["container_framework"] = "singularity"
+        test_config["containers"]["framework"] = "singularity"
         config.init_global(test_config)
-        assert (config.config.container_framework == "singularity")
+        assert (config.config.container_settings.framework == "singularity")
 
         # Test singularity with capitalization
-        test_config["container_framework"] = "Singularity"
+        test_config["containers"]["framework"] = "Singularity"
         config.init_global(test_config)
-        assert (config.config.container_framework == "singularity")
+        assert (config.config.container_settings.framework == "singularity")
 
         # Test docker
-        test_config["container_framework"] = "docker"
+        test_config["containers"]["framework"] = "docker"
         config.init_global(test_config)
-        assert (config.config.container_framework == "docker")
+        assert (config.config.container_settings.framework == "docker")
 
         # Test docker with capitalization
-        test_config["container_framework"] = "Docker"
+        test_config["containers"]["framework"] = "Docker"
         config.init_global(test_config)
-        assert (config.config.container_framework == "docker")
+        assert (config.config.container_settings.framework == "docker")
 
         # Test unknown framework
-        test_config["container_framework"] = "badFramework"
+        test_config["containers"]["framework"] = "badFramework"
         with pytest.raises(ValueError):
             config.init_global(test_config)
 
     def test_config_container_registry(self):
         test_config = get_test_config()
-        test_config["container_registry"]["base_url"] = "docker.io"
-        test_config["container_registry"]["owner"] = "reedcompbio"
+        test_config["containers"]["registry"]["base_url"] = "docker.io"
+        test_config["containers"]["registry"]["owner"] = "reedcompbio"
         config.init_global(test_config)
-        assert (config.config.container_prefix == "docker.io/reedcompbio")
+        assert (config.config.container_settings.prefix == "docker.io/reedcompbio")
 
-        test_config["container_registry"]["base_url"] = "another.repo"
-        test_config["container_registry"]["owner"] = "different-owner"
+        test_config["containers"]["registry"]["base_url"] = "another.repo"
+        test_config["containers"]["registry"]["owner"] = "different-owner"
         config.init_global(test_config)
-        assert (config.config.container_prefix == "another.repo/different-owner")
+        assert (config.config.container_settings.prefix == "another.repo/different-owner")
 
-        test_config["container_registry"]["base_url"] = ""
-        test_config["container_registry"]["owner"] = ""
+        test_config["containers"]["registry"]["base_url"] = ""
+        test_config["containers"]["registry"]["owner"] = ""
         config.init_global(test_config)
-        assert (config.config.container_prefix == config.DEFAULT_CONTAINER_PREFIX)
+        assert (config.config.container_settings.prefix == DEFAULT_CONTAINER_PREFIX)
 
     def test_error_dataset_label(self):
         test_config = get_test_config()
@@ -240,17 +258,51 @@ class TestConfig:
         test_config = get_test_config()
         config.init_global(test_config)
 
-        value_test_util('strings', [{'test': "str1", 'test2': "str2"}, {'test': 'str1', 'test2': 'str3'}])
-        value_test_util('numbersAndBools', [{'a': 1, 'b': float(2.0), 'c': 4, 'd': 5.6, 'f': False}, {'a': 1, 'b': 3, 'c': 4, 'd': 5.6, 'f': False}])
+        value_test_util('omicsintegrator2', 'strings', OmicsIntegrator2Params, [
+            OmicsIntegrator2Params(dummy_mode=DummyMode.terminals, b=3),
+            OmicsIntegrator2Params(dummy_mode=DummyMode.others, b=3)
+        ])
 
-        value_test_util('singleton_int64_with_array', [{'test': 1, 'test2': 2}, {'test': 1, 'test2': 3}])
-        value_test_util('singleton_string_np_linspace', [{'test': "str1", 'test2': 5.0}, {'test': "str1", 'test2': 0.0}])
-        value_test_util('str_array_np_logspace', [{'test': "a", 'test2': 10}] * 10 + [{'test': "b", 'test2': 10}] * 10)
+        value_test_util('omicsintegrator2', 'singleton_string_np_linspace', OmicsIntegrator2Params, [
+            OmicsIntegrator2Params(dummy_mode=DummyMode.terminals, b=5.0),
+            OmicsIntegrator2Params(dummy_mode=DummyMode.terminals, b=0.0)
+        ])
 
-        value_test_util('int64artifact', [{'test': 5, 'test2': 2}, {'test': 5, 'test2': 3}])
+        value_test_util('omicsintegrator2', 'str_array_np_logspace', OmicsIntegrator2Params, [
+            # While these both repeat 50 times, parameter hash makes sure to not duplicate the work.
+            # This serves as a test to make sure _time isn't inserted during parameter combinations.
+            OmicsIntegrator2Params(dummy_mode=DummyMode.others, g=10), OmicsIntegrator2Params(dummy_mode=DummyMode.all, g=10)
+        ])
 
-        value_test_util('boolArrTest', [{'flags': True, 'range': 1}, {'flags': False, 'range': 2},
-                                     {'flags': False, 'range': 1}, {'flags': True, 'range': 2}])
+        value_test_util('meo', 'numbersAndBools', MEOParams, [
+            MEOParams(max_path_length=1, rand_restarts=2, local_search=False),
+            MEOParams(max_path_length=1, rand_restarts=2, local_search=True),
+            MEOParams(max_path_length=1, rand_restarts=3, local_search=False),
+            MEOParams(max_path_length=1, rand_restarts=3, local_search=True),
+        ])
+
+        # Encoding this behavior: run names are not passed into the parameter hash,
+        # and thus won't duplicate runs.
+        value_test_util('meo', 'numbersAndBoolsDuplicate', MEOParams, [])
+
+        value_test_util('meo', 'numbersAndBool', MEOParams, [
+            MEOParams(max_path_length=2, rand_restarts=2, local_search=True),
+            MEOParams(max_path_length=2, rand_restarts=3, local_search=True),
+        ])
+
+        value_test_util('mincostflow', 'int64artifact', MinCostFlowParams, [
+            MinCostFlowParams(flow=5, capacity=2),
+            MinCostFlowParams(flow=5, capacity=3),
+            MinCostFlowParams(flow=6, capacity=2),
+            MinCostFlowParams(flow=6, capacity=3)
+        ])
+
+        value_test_util('meo', 'boolArrTest', MEOParams, [
+            MEOParams(local_search=True, max_path_length=1),
+            MEOParams(local_search=True, max_path_length=2),
+            MEOParams(local_search=False, max_path_length=1),
+            MEOParams(local_search=False, max_path_length=2)
+        ])
 
     @pytest.mark.parametrize("ml_include, eval_include, expected_ml, expected_eval", [
         (True, True, True, True),
@@ -335,6 +387,8 @@ class TestConfig:
     def test_eval_kde_coupling(self, eval_include, kde, expected_eval, expected_kde):
         test_config = get_test_config()
         test_config["analysis"]["ml"]["include"] = True
+        # dealing with other coupling issue
+        test_config["analysis"]["summary"]["include"] = True
 
         test_config["analysis"]["ml"]["kde"] = kde
         test_config["analysis"]["evaluation"]["include"] = eval_include
@@ -343,3 +397,24 @@ class TestConfig:
 
         assert config.config.analysis_include_evaluation == expected_eval
         assert config.config.pca_params["kde"] == expected_kde
+
+    @pytest.mark.parametrize("eval_include, summary_include, expected_eval, expected_summary", [
+        (True, True, True, True),
+        (True, False, True, True),
+        (False, True, False, True),
+        (False, False, False, False),
+    ])
+    def test_eval_summary_coupling(self, eval_include, summary_include, expected_eval, expected_summary):
+        test_config = get_test_config()
+        # dealing with other coupling issue
+        test_config["analysis"]["ml"]["include"] = True
+        test_config["analysis"]["ml"]["kde"] = True
+
+        test_config["analysis"]["summary"]["include"] = summary_include
+        test_config["analysis"]["evaluation"]["include"] = eval_include
+
+        config.init_global(test_config)
+
+        assert config.config.analysis_include_evaluation == expected_eval
+        assert config.config.analysis_include_summary == expected_summary
+

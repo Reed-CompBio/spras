@@ -1,6 +1,9 @@
 import warnings
 from pathlib import Path
 
+from pydantic import BaseModel, ConfigDict
+
+from spras.config.container_schema import ProcessedContainerSettings
 from spras.containers import prepare_volume, run_container_and_log
 from spras.dataset import Dataset
 from spras.interactome import (
@@ -10,7 +13,13 @@ from spras.interactome import (
 from spras.prm import PRM
 from spras.util import duplicate_edges, raw_pathway_df
 
-__all__ = ['PathLinker']
+__all__ = ['PathLinker', 'PathLinkerParams']
+
+class PathLinkerParams(BaseModel):
+    k: int = 100
+    "Number of paths"
+
+    model_config = ConfigDict(extra='forbid', use_attribute_docstrings=True)
 
 """
 Pathlinker will construct a fully directed graph from the provided input file
@@ -22,7 +31,7 @@ Interactor1   Interactor2   Weight
 - the expected raw input file should have node pairs in the 1st and 2nd columns, with a weight in the 3rd column
 - it can include repeated and bidirectional edges
 """
-class PathLinker(PRM):
+class PathLinker(PRM[PathLinkerParams]):
     required_inputs = ['nodetypes', 'network']
     dois = ["10.1038/npjsba.2016.2", "10.1089/cmb.2012.0274"]
 
@@ -64,33 +73,21 @@ class PathLinker(PRM):
         edges.to_csv(filename_map["network"],sep="\t",index=False,columns=["Interactor1","Interactor2","Weight"],
                      header=["#Interactor1","Interactor2","Weight"])
 
-    # Skips parameter validation step
     @staticmethod
-    def run(nodetypes=None, network=None, output_file=None, k=None, container_framework="docker"):
-        """
-        Run PathLinker with Docker
-        @param nodetypes:  input node types with sources and targets (required)
-        @param network:  input network file (required)
-        @param output_file: path to the output pathway file (required)
-        @param k: path length (optional)
-        @param container_framework: choose the container runtime framework, currently supports "docker" or "singularity" (optional)
-        """
-        # Add additional parameter validation
-        # Do not require k
-        # Use the PathLinker default
-        # Could consider setting the default here instead
-        if not nodetypes or not network or not output_file:
-            raise ValueError('Required PathLinker arguments are missing')
+    def run(inputs, output_file, args=None, container_settings=None):
+        if not container_settings: container_settings = ProcessedContainerSettings()
+        if not args: args = PathLinkerParams()
+        PathLinker.validate_required_run_args(inputs)
 
         work_dir = '/spras'
 
         # Each volume is a tuple (src, dest)
         volumes = list()
 
-        bind_path, node_file = prepare_volume(nodetypes, work_dir)
+        bind_path, node_file = prepare_volume(inputs["nodetypes"], work_dir, container_settings)
         volumes.append(bind_path)
 
-        bind_path, network_file = prepare_volume(network, work_dir)
+        bind_path, network_file = prepare_volume(inputs["network"], work_dir, container_settings)
         volumes.append(bind_path)
 
         # PathLinker does not provide an argument to set the output directory
@@ -98,7 +95,7 @@ class PathLinker(PRM):
         out_dir = Path(output_file).parent
         # PathLinker requires that the output directory exist
         out_dir.mkdir(parents=True, exist_ok=True)
-        bind_path, mapped_out_dir = prepare_volume(str(out_dir), work_dir)
+        bind_path, mapped_out_dir = prepare_volume(str(out_dir), work_dir, container_settings)
         volumes.append(bind_path)
         mapped_out_prefix = mapped_out_dir + '/out'  # Use posix path inside the container
 
@@ -108,17 +105,16 @@ class PathLinker(PRM):
                    node_file,
                    '--output', mapped_out_prefix]
 
-        # Add optional argument
-        if k is not None:
-            command.extend(['-k', str(k)])
+        command.extend(['-k', str(args.k)])
 
         container_suffix = "pathlinker:v2"
         run_container_and_log('PathLinker',
-                             container_framework,
                              container_suffix,
                              command,
                              volumes,
-                             work_dir)
+                             work_dir,
+                             out_dir,
+                             container_settings)
 
         # Rename the primary output file to match the desired output filename
         # Currently PathLinker only writes one output file so we do not need to delete others

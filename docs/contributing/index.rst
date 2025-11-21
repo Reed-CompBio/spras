@@ -1,5 +1,5 @@
 Contributing a new pathway reconstruction algorithm
-=========================================
+===================================================
 
 The SPRAS maintainers welcome external contributions. Code contributions
 will be licensed using the project's MIT license.
@@ -181,6 +181,8 @@ wrapper functions for the Local Neighborhood algorithm. Use
 Call the new class within ``local_neighborhood.py``
 ``LocalNeighborhood`` and set ``__all__`` so the class can be
 `imported <https://docs.python.org/3/tutorial/modules.html#importing-from-a-package>`__.
+Make sure to specify the type of parameters passed in to ``LocalNeighborhood`` as ``Empty``
+(see ``AllPairs`` for an example of this.)
 Specify the list of ``required_input`` files to be ``network`` and
 ``nodes``, and set the ``dois`` property to be an empty list. These
 entries are used to tell Snakemake what input files should be present
@@ -242,7 +244,7 @@ the format ``<vertex1>|<vertex2>``, which also differs from the
 ``omicsintegrator1.py`` example. ``spras/dataset.py`` provides functions
 that provide access to node information and the interactome (edge list).
 
-Implement the ``run`` function, following the PathLinker example. The
+Implement the ``run`` function, following the AllPairs example.
 ``prepare_volume`` utility function is needed to prepare the network and
 nodes input files to be mounted and used inside the container. It is
 also used to prepare the path for the output file, which is different
@@ -285,7 +287,7 @@ Local Neighborhood has no other parameters. Optionally set
 ``include: false`` for the other pathway reconstruction algorithms to
 make testing faster.
 
-The config file has an option ``owner`` under the ``container_registry``
+The config file has an option ``owner`` under the ``containers.registry``
 settings that controls which Docker Hub account will be used when
 pulling Docker images. The same Docker Hub account will be used for all
 images and cannot currently be set different for each algorithm. Set the
@@ -406,7 +408,7 @@ them, you can open a `GitHub
 issue <https://github.com/Reed-CompBio/spras/issues/new/choose>`__ to
 request feedback. However, once the pull request has been approved, it
 will **not** be merged as usual. The pull request will be closed so that
-the ``master`` branch of the fork stays synchronized with the ``master``
+the ``main`` branch of the fork stays synchronized with the ``main``
 branch of the main SPRAS repository.
 
 General steps for contributing a new pathway reconstruction algorithm
