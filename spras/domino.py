@@ -81,8 +81,6 @@ class DOMINO(PRM[DominoParams]):
         if not args: args = DominoParams()
         DOMINO.validate_required_run_args(inputs)
 
-        # Let visualization be always true, parallelization be always 1 thread, and use_cache be always false.
-
         work_dir = '/spras'
 
         # Each volume is a tuple (source, destination)
@@ -126,6 +124,7 @@ class DOMINO(PRM[DominoParams]):
                 raise err
 
         # Make the Python command to run within the container
+        # Let visualization be always true, parallelization be always 1 thread, and use_cache be always false.
         domino_command = ['domino',
                           '--active_genes_files', node_file,
                           '--network_file', network_file,
