@@ -28,7 +28,8 @@ def is_numpy_friendly(type: type[Any] | None) -> bool:
 
 def python_evalish_coerce(value: Any) -> Any:
     """
-    Allows for using numpy and python calls.
+    Allows for using numpy and python calls. `range`, `np.linspace`, `np.arange`, and
+    `np.logspace` are expanded.
 
     **Safety Note**: This does not prevent availability attacks: this can still exhaust
     resources if wanted. This only prevents secret leakage.
@@ -84,6 +85,10 @@ def list_coerce(value: Any) -> Any:
 def construct_algorithm_model(name: str, model: type[BaseModel], model_default: Optional[BaseModel]) -> type[BaseModel]:
     """
     Dynamically constructs a parameter-combination model based on the original args model.
+
+    Parameter arguments such as `int` get turned into `list[int]`, and have extra conveniences attached:
+    - Values can be passed as lists (1 -> [1])
+    - Ranges and other convenient calls are expanded (see `python_evalish_coerce`)
     """
     # First, we need to take our 'model' and coerce it to permit parameter combinations.
     # This assumes that all of the keys are flattened, so we only get a structure like so:
