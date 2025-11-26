@@ -129,7 +129,7 @@ class Config:
         Keys in the parameter dictionary are strings
         """
         prior_params_hashes = set()
-        self.algorithm_params = dict()
+        self.algorithm_params: dict[str, Any] = dict()
         self.algorithm_directed = dict()
         self.algorithms = raw_config.algorithms
         for alg in self.algorithms:

@@ -105,11 +105,30 @@ def get_test_config():
             "summary": {
                 "include": False
             },
-            "ml": {
+            "pca": {
                 "include": False,
                 "aggregate_per_algorithm": False,
+                "evaluation": {
+                    "include": False
+                }
+            },
+            "hac": {
+                "include": False,
+                "aggregate_per_algorithm": False,
+                "evaluation": {
+                    "include": False
+                }
+            },
+            "ensemble": {
+                "include": False,
+                "evaluation": {
+                    "include": False
+                }
             },
             "cytoscape": {
+                "include": False
+            },
+            "jaccard": {
                 "include": False
             },
             "evaluation": {
@@ -254,54 +273,21 @@ class TestConfig:
         value_test_util('boolArrTest', [{'flags': True, 'range': 1}, {'flags': False, 'range': 2},
                                      {'flags': False, 'range': 1}, {'flags': True, 'range': 2}])
 
-    @pytest.mark.parametrize("ml_include, eval_include, expected_ml, expected_eval", [
+    @pytest.mark.parametrize("include, eval_include, expected_include, expected_eval", [
         (True, True, True, True),
         (True, False, True, False),
         (False, True, False, False),
         (False, False, False, False)
     ])
-    def test_eval_ml_coupling(self, ml_include, eval_include, expected_ml, expected_eval):
+    @pytest.mark.parametrize("analysis_type", ["pca", "hac", "ensemble"])
+    def test_eval_pca_coupling(self, include, eval_include, expected_include, expected_eval, analysis_type):
         test_config = get_test_config()
-        test_config["analysis"]["ml"]["include"] = ml_include
-        test_config["analysis"]["evaluation"]["include"] = eval_include
+        test_config["analysis"][analysis_type]["include"] = include
+        test_config["analysis"][analysis_type]["evaluation"]["include"] = eval_include
         config.init_global(test_config)
 
-        assert config.config.analysis_include_ml == expected_ml
-        assert config.config.analysis_include_evaluation == expected_eval
-
-    @pytest.mark.parametrize("ml_include, ml_agg_include, expected_ml, expected_ml_agg", [
-        (True, True, True, True),
-        (True, False, True, False),
-        (False, True, False, False),
-        (False, False, False, False)
-    ])
-    def test_ml_agg_algo_coupling(self, ml_include, ml_agg_include, expected_ml, expected_ml_agg):
-        test_config = get_test_config()
-        test_config["analysis"]["ml"]["include"] = ml_include
-        test_config["analysis"]["ml"]["aggregate_per_algorithm"] = ml_agg_include
-        config.init_global(test_config)
-
-        assert config.config.analysis_include_ml == expected_ml
-        assert config.config.analysis_include_ml_aggregate_algo == expected_ml_agg
-
-    @pytest.mark.parametrize("eval_include, agg_algo, expected_eval, expected_agg_algo", [
-        (True, True, True, True),
-        (True, False, True, False),
-        (False, True, False, False),
-        (False, False, False, False),
-    ])
-    def test_eval_agg_algo_coupling(self, eval_include, agg_algo, expected_eval, expected_agg_algo):
-        test_config = get_test_config()
-        test_config["analysis"]["ml"]["include"] = True
-        test_config["analysis"]["ml"]["aggregate_per_algorithm"] = True
-
-        test_config["analysis"]["evaluation"]["include"] = eval_include
-        test_config["analysis"]["evaluation"]["aggregate_per_algorithm"] = agg_algo
-
-        config.init_global(test_config)
-
-        assert config.config.analysis_include_evaluation == expected_eval
-        assert config.config.analysis_include_evaluation_aggregate_algo == expected_agg_algo
+        assert vars(config.config.analysis)[analysis_type].include == expected_include
+        assert vars(config.config.analysis)[analysis_type].evaluation.include == expected_eval
 
     @pytest.mark.parametrize("ml_include, ml_agg, eval_include, eval_agg, expected_ml, expected_ml_agg, expected_eval, expected_eval_agg", [
         (False, True,  True,  True,  False, False, False, False),
@@ -310,61 +296,21 @@ class TestConfig:
         (True,  True,  True,  True,  True,  True,  True,  True),
         (True,  False, False, False, True,  False, False, False),
     ])
+    @pytest.mark.parametrize("analysis_type", ["pca", "hac", "ensemble"])
     def test_eval_ml_agg_algo_coupling(self, ml_include, ml_agg, eval_include, eval_agg, expected_ml, expected_ml_agg,
-                                       expected_eval, expected_eval_agg):
-        # the value of ml include and ml aggregate_per_algorithm can affect the value of evaluation include and
+                                       expected_eval, expected_eval_agg, analysis_type):
+        # the value of pca include and pca aggregate_per_algorithm can affect the value of evaluation include and
         # evaluation aggregate_per_algorithm
         test_config = get_test_config()
 
-        test_config["analysis"]["ml"]["include"] = ml_include
-        test_config["analysis"]["ml"]["aggregate_per_algorithm"] = ml_agg
-        test_config["analysis"]["evaluation"]["include"] = eval_include
-        test_config["analysis"]["evaluation"]["aggregate_per_algorithm"] = eval_agg
+        test_config["analysis"][analysis_type]["include"] = ml_include
+        test_config["analysis"][analysis_type]["aggregate_per_algorithm"] = ml_agg
+        test_config["analysis"][analysis_type]["evaluation"]["include"] = eval_include
+        test_config["analysis"][analysis_type]["evaluation"]["aggregate_per_algorithm"] = eval_agg
 
         config.init_global(test_config)
 
-        assert config.config.analysis_include_ml == expected_ml
-        assert config.config.analysis_include_ml_aggregate_algo == expected_ml_agg
-        assert config.config.analysis_include_evaluation == expected_eval
-        assert config.config.analysis_include_evaluation_aggregate_algo == expected_eval_agg
-
-    @pytest.mark.parametrize("eval_include, kde, expected_eval, expected_kde", [
-        (True, True, True, True),
-        (True, False, True, True),
-        (False, True, False, True),
-        (False, False, False, False),
-    ])
-    def test_eval_kde_coupling(self, eval_include, kde, expected_eval, expected_kde):
-        test_config = get_test_config()
-        test_config["analysis"]["ml"]["include"] = True
-        # dealing with other coupling issue
-        test_config["analysis"]["summary"]["include"] = True
-
-        test_config["analysis"]["ml"]["kde"] = kde
-        test_config["analysis"]["evaluation"]["include"] = eval_include
-
-        config.init_global(test_config)
-
-        assert config.config.analysis_include_evaluation == expected_eval
-        assert config.config.pca_params["kde"] == expected_kde
-
-    @pytest.mark.parametrize("eval_include, summary_include, expected_eval, expected_summary", [
-        (True, True, True, True),
-        (True, False, True, True),
-        (False, True, False, True),
-        (False, False, False, False),
-    ])
-    def test_eval_summary_coupling(self, eval_include, summary_include, expected_eval, expected_summary):
-        test_config = get_test_config()
-        # dealing with other coupling issue
-        test_config["analysis"]["ml"]["include"] = True
-        test_config["analysis"]["ml"]["kde"] = True
-
-        test_config["analysis"]["summary"]["include"] = summary_include
-        test_config["analysis"]["evaluation"]["include"] = eval_include
-
-        config.init_global(test_config)
-
-        assert config.config.analysis_include_evaluation == expected_eval
-        assert config.config.analysis_include_summary == expected_summary
-
+        assert vars(config.config.analysis)[analysis_type].include == expected_ml, f"Include was not {expected_ml}!"
+        assert vars(config.config.analysis)[analysis_type].aggregate_per_algorithm == expected_ml_agg, f"Aggregate per algorithm was not {expected_ml_agg}!"
+        assert vars(config.config.analysis)[analysis_type].evaluation.include == expected_eval, f"evaluation include was not {expected_eval}!"
+        assert vars(config.config.analysis)[analysis_type].evaluation.aggregate_per_algorithm == expected_eval_agg, f"evaluation aggregate per algorithm was not {expected_eval_agg}!"

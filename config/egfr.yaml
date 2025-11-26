@@ -178,6 +178,8 @@ analysis:
     evaluation:
       include: true
       aggregate_per_algorithm: true
+  jaccard:
+    enable: false
   evaluation:
     include: false
     aggregate_per_algorithm: false

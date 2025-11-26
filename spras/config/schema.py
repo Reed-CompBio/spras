@@ -71,6 +71,9 @@ class AggregateEvaluationAnalysis(AggregateAnalysis):
         if self.evaluation.include and not self.include:
             warnings.warn("evaluation.include is set to True but include is set to False; setting evaluation.include to False", stacklevel=2)
             self.evaluation.include = False
+        if self.evaluation.aggregate_per_algorithm and not self.aggregate_per_algorithm:
+            warnings.warn("evaluation.aggregate_per_algorithm is set to True but aggregate_per_algorithm is set to False; setting evaluation.aggregate_per_algorithm to False", stacklevel=2)
+            self.evaluation.aggregate_per_algorithm = False
         return self
 
 class PcaAnalysis(AggregateEvaluationAnalysis):

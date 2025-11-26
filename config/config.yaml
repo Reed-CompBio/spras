@@ -246,6 +246,9 @@ analysis:
     evaluation:
       include: true
       aggregate_per_algorithm: true
+  # Jaccard pathway output
+  jaccard:
+    enable: true
   evaluation:
     # evaluation per dataset-goldstandard pair.
     # This evaluation specifically generates precision-recall curves:
