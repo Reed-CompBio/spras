@@ -205,33 +205,50 @@ analysis:
   # Create Cytoscape session file with all pathway graphs for each dataset
   cytoscape:
     include: true
-  # Machine learning analysis (e.g. clustering) of the pathway output files for each dataset
-  ml:
-    # ml analysis per dataset
+  # The following analysis options also have an `aggregate_per_algorithm` option,
+  # which adds the respective analysis to an algorithm as a whole.
+  # This will only run if the adjacent `include` is true.
+
+  # Principle component analysis of the pathway output files
+  pca:
     include: true
-    # adds ml analysis per algorithm output
-    # only runs for algorithms with multiple parameter combinations chosen
     aggregate_per_algorithm: true
+    evaluation:
+      include: true
+      aggregate_per_algorithm: true
     # specify how many principal components to calculate
     components: 2
     # boolean to show the labels on the pca graph
     labels: true
-    # 'ward', 'complete', 'average', 'single'
-    # if linkage: ward, must use metric: euclidean
-    linkage: 'ward'
-    # 'euclidean', 'manhattan', 'cosine'
-    metric: 'euclidean'
     # controls whether kernel density estimation (KDE) is computed and visualized on top of PCA plots.
     # the coordinates of the KDE maximum (kde_peak) are also saved to the PCA coordinates output file.
     # KDE needs to be run in order to select a parameter combination with PCA because the maximum kernel density is used
     # to pick the 'best' parameter combination.
     kde: true
-    # removes empty pathways from consideration in ml analysis (pca only)
+    # removes empty pathways from consideration in ml analysis
     remove_empty_pathways: false
-  evaluation:
-    # evaluation per dataset-goldstandard pair
-    # evaluation will not run unless ml include is set to true
+  # Hierarchical agglomerative clustering analysis of the pathway output files
+  hac:
     include: true
-    # adds evaluation per algorithm per dataset-goldstandard pair
-    # evaluation per algorithm will not run unless ml include and ml aggregate_per_algorithm are set to true
+    aggregate_per_algorithm: true
+    evaluation:
+      include: true
+      aggregate_per_algorithm: true
+    # 'ward', 'complete', 'average', 'single'
+    # if linkage: ward, must use metric: euclidean
+    linkage: 'ward'
+    # 'euclidean', 'manhattan', 'cosine'
+    metric: 'euclidean'
+  # Ensembling pathway output
+  ensemble:
+    include: true
+    aggregate_per_algorithm: true
+    evaluation:
+      include: true
+      aggregate_per_algorithm: true
+  evaluation:
+    # evaluation per dataset-goldstandard pair.
+    # This evaluation specifically generates precision-recall curves:
+    # to run evaluation on top of the other options, see the respective `evaluation` blocks under the other analyses.
+    include: true
     aggregate_per_algorithm: true

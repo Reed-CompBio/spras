@@ -82,29 +82,7 @@ class Config:
         # Deprecated. Previously a dict mapping algorithm names to a Boolean tracking whether they used directed graphs.
         self.algorithm_directed = None
         # A dict with the analysis settings
-        self.analysis_params = parsed_raw_config.analysis
-        # A dict with the evaluation settings
-        self.evaluation_params = self.analysis_params.evaluation
-        # A dict with the ML settings
-        self.ml_params = self.analysis_params.ml
-        # A Boolean specifying whether to run ML analysis for individual algorithms
-        self.analysis_include_ml_aggregate_algo = None
-        # A dict with the PCA settings
-        self.pca_params = None
-        # A dict with the hierarchical clustering settings
-        self.hac_params = None
-        # A Boolean specifying whether to run the summary analysis
-        self.analysis_include_summary = None
-        # A Boolean specifying whether to run the Cytoscape analysis
-        self.analysis_include_cytoscape = None
-        # A Boolean specifying whether to run the ML analysis
-        self.analysis_include_ml = None
-        # A Boolean specifying whether to run the Evaluation analysis
-        self.analysis_include_evaluation = None
-        # A Boolean specifying whether to run the ML per algorithm analysis
-        self.analysis_include_ml_aggregate_algo = None
-        # A Boolean specifying whether to run the evaluation per algorithm analysis
-        self.analysis_include_evaluation_aggregate_algo = None
+        self.analysis = parsed_raw_config.analysis
 
         self.process_config(parsed_raw_config)
 
@@ -225,66 +203,11 @@ class Config:
                                         f'(current length {self.hash_length}).')
                     self.algorithm_params[alg.name][params_hash] = run_dict
 
-    def process_analysis(self, raw_config: RawConfig):
-        if not raw_config.analysis:
-            return
-
-        # self.ml_params is a class, pca_params needs to be a dict.
-        self.pca_params = {
-            "components": self.ml_params.components,
-            "labels": self.ml_params.labels,
-            "kde": self.ml_params.kde,
-            "remove_empty_pathways": self.ml_params.remove_empty_pathways
-        }
-
-        self.hac_params = {
-            "linkage": self.ml_params.linkage,
-            "metric": self.ml_params.metric
-        }
-
-        self.analysis_include_summary = raw_config.analysis.summary.include
-        self.analysis_include_cytoscape = raw_config.analysis.cytoscape.include
-        self.analysis_include_ml = raw_config.analysis.ml.include
-        self.analysis_include_evaluation = raw_config.analysis.evaluation.include
-
-        # Only run ML aggregate per algorithm if analysis include ML is set to True
-        if self.ml_params.aggregate_per_algorithm and self.analysis_include_ml:
-            self.analysis_include_ml_aggregate_algo = raw_config.analysis.ml.aggregate_per_algorithm
-        else:
-            self.analysis_include_ml_aggregate_algo = False
-
+    def process_analysis(self):
         # Raises an error if Evaluation is enabled but no gold standard data is provided
-        if self.gold_standards == {} and self.analysis_include_evaluation:
+        if self.gold_standards == {} and self.analysis.evaluation.include:
             raise ValueError("Evaluation analysis cannot run as gold standard data not provided. "
                              "Please set evaluation include to false or provide gold standard data.")
-
-        # Only run Evaluation if ML is set to True
-        if not self.analysis_include_ml:
-            self.analysis_include_evaluation = False
-
-        # Only run Evaluation aggregate per algorithm if analysis include ML is set to True
-        if self.evaluation_params.aggregate_per_algorithm and self.analysis_include_evaluation:
-            self.analysis_include_evaluation_aggregate_algo = raw_config.analysis.evaluation.aggregate_per_algorithm
-        else:
-            self.analysis_include_evaluation_aggregate_algo = False
-
-        # Only run Evaluation per algorithm if ML per algorithm is set to True
-        if not self.analysis_include_ml_aggregate_algo:
-            self.analysis_include_evaluation_aggregate_algo = False
-
-        # Set kde to True if Evaluation is set to True
-        # When Evaluation is True, PCA is used to pick a single parameter combination for all algorithms with multiple
-        # parameter combinations and KDE is used to choose the parameter combination in the PC space
-        if self.analysis_include_evaluation and not self.pca_params["kde"]:
-            self.pca_params["kde"] = True
-            print("Setting kde to true; Evaluation analysis needs to run KDE for PCA-Chosen parameter selection.")
-
-        # Set summary include to True if Evaluation is set to True
-        # When a PCA-chosen parameter set is chosen, summary statistics are used to resolve tiebreakers.
-        if self.analysis_include_evaluation and not self.analysis_include_summary:
-            self.analysis_include_summary = True
-            print("Setting summary include to true; Evaluation analysis needs to use summary statistics for PCA-Chosen parameter selection.")
-
 
     def process_config(self, raw_config: RawConfig):
         # Set up a few top-level config variables
@@ -295,4 +218,4 @@ class Config:
 
         self.process_datasets(raw_config)
         self.process_algorithms(raw_config)
-        self.process_analysis(raw_config)
+        self.process_analysis()

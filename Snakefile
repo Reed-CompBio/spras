@@ -20,13 +20,16 @@ wildcard_constraints:
 # without declaration!
 _config.init_global(config)
 
+def without_keys(d: dict, keys: list):
+    if set(keys) & set(d.keys()) != set(keys): raise RuntimeError(f"Keys {keys} not fully present in {list(d.keys())}!")
+    return {k: v for k, v in d.items() if k not in keys}
+
 out_dir = _config.config.out_dir
 algorithm_params = _config.config.algorithm_params
 algorithm_directed = _config.config.algorithm_directed
-pca_params = _config.config.pca_params
-hac_params = _config.config.hac_params
 container_settings = _config.config.container_settings
-include_aggregate_algo_eval = _config.config.analysis_include_evaluation_aggregate_algo
+pca_params = without_keys(vars(_config.config.analysis.pca), ["evaluation", "include", "aggregate_per_algorithm"])
+hac_params = without_keys(vars(_config.config.analysis.hac), ["evaluation", "include", "aggregate_per_algorithm"])
 
 # Return the dataset or gold_standard dictionary from the config file given the label
 def get_dataset(_datasets, label):
@@ -71,55 +74,76 @@ def write_dataset_log(dataset, logfile):
 def make_final_input(wildcards):
     final_input = []
 
-    if _config.config.analysis_include_summary:
+    if _config.config.analysis.summary.include:
         # add summary output file for each pathway
         # TODO: reuse in the future once we make summary work for mixed graphs. See https://github.com/Reed-CompBio/spras/issues/128
         # final_input.extend(expand('{out_dir}{sep}{dataset}-{algorithm_params}{sep}summary.txt',out_dir=out_dir,sep=SEP,dataset=dataset_labels,algorithm_params=algorithms_with_params))
         # add table summarizing all pathways for each dataset
         final_input.extend(expand('{out_dir}{sep}{dataset}-pathway-summary.txt',out_dir=out_dir,sep=SEP,dataset=dataset_labels))
 
-    if _config.config.analysis_include_cytoscape:
+    if _config.config.analysis.cytoscape.include:
         final_input.extend(expand('{out_dir}{sep}{dataset}-cytoscape.cys',out_dir=out_dir,sep=SEP,dataset=dataset_labels))
 
-    if _config.config.analysis_include_ml:
+    if _config.config.analysis.pca.include:
         final_input.extend(expand('{out_dir}{sep}{dataset}-ml{sep}pca.png',out_dir=out_dir,sep=SEP,dataset=dataset_labels,algorithm_params=algorithms_with_params))
         final_input.extend(expand('{out_dir}{sep}{dataset}-ml{sep}pca-variance.txt',out_dir=out_dir,sep=SEP,dataset=dataset_labels,algorithm_params=algorithms_with_params))
-        final_input.extend(expand('{out_dir}{sep}{dataset}-ml{sep}hac-vertical.png',out_dir=out_dir,sep=SEP,dataset=dataset_labels,algorithm_params=algorithms_with_params))
-        final_input.extend(expand('{out_dir}{sep}{dataset}-ml{sep}hac-clusters-vertical.txt',out_dir=out_dir,sep=SEP,dataset=dataset_labels,algorithm_params=algorithms_with_params))
         final_input.extend(expand('{out_dir}{sep}{dataset}-ml{sep}pca-coordinates.txt',out_dir=out_dir,sep=SEP,dataset=dataset_labels,algorithm_params=algorithms_with_params))
-        final_input.extend(expand('{out_dir}{sep}{dataset}-ml{sep}hac-horizontal.png',out_dir=out_dir,sep=SEP,dataset=dataset_labels,algorithm_params=algorithms_with_params))
-        final_input.extend(expand('{out_dir}{sep}{dataset}-ml{sep}hac-clusters-horizontal.txt',out_dir=out_dir,sep=SEP,dataset=dataset_labels,algorithm_params=algorithms_with_params))
-        final_input.extend(expand('{out_dir}{sep}{dataset}-ml{sep}ensemble-pathway.txt',out_dir=out_dir,sep=SEP,dataset=dataset_labels,algorithm_params=algorithms_with_params))
-        final_input.extend(expand('{out_dir}{sep}{dataset}-ml{sep}jaccard-matrix.txt',out_dir=out_dir,sep=SEP,dataset=dataset_labels,algorithm_params=algorithms_with_params))
-        final_input.extend(expand('{out_dir}{sep}{dataset}-ml{sep}jaccard-heatmap.png',out_dir=out_dir,sep=SEP,dataset=dataset_labels,algorithm_params=algorithms_with_params))
 
-    if _config.config.analysis_include_ml_aggregate_algo:
+    if _config.config.analysis.pca.aggregate_per_algorithm:
         final_input.extend(expand('{out_dir}{sep}{dataset}-ml{sep}{algorithm}-pca.png',out_dir=out_dir,sep=SEP,dataset=dataset_labels,algorithm=algorithms_mult_param_combos))
         final_input.extend(expand('{out_dir}{sep}{dataset}-ml{sep}{algorithm}-pca-variance.txt',out_dir=out_dir,sep=SEP,dataset=dataset_labels,algorithm=algorithms_mult_param_combos))
         final_input.extend(expand('{out_dir}{sep}{dataset}-ml{sep}{algorithm}-pca-coordinates.txt',out_dir=out_dir,sep=SEP,dataset=dataset_labels,algorithm=algorithms_mult_param_combos))
+
+    if _config.config.analysis.hac.include:
+        final_input.extend(expand('{out_dir}{sep}{dataset}-ml{sep}hac-vertical.png',out_dir=out_dir,sep=SEP,dataset=dataset_labels,algorithm_params=algorithms_with_params))
+        final_input.extend(expand('{out_dir}{sep}{dataset}-ml{sep}hac-clusters-vertical.txt',out_dir=out_dir,sep=SEP,dataset=dataset_labels,algorithm_params=algorithms_with_params))
+        final_input.extend(expand('{out_dir}{sep}{dataset}-ml{sep}hac-horizontal.png',out_dir=out_dir,sep=SEP,dataset=dataset_labels,algorithm_params=algorithms_with_params))
+        final_input.extend(expand('{out_dir}{sep}{dataset}-ml{sep}hac-clusters-horizontal.txt',out_dir=out_dir,sep=SEP,dataset=dataset_labels,algorithm_params=algorithms_with_params))
+
+    if _config.config.analysis.hac.aggregate_per_algorithm:
         final_input.extend(expand('{out_dir}{sep}{dataset}-ml{sep}{algorithm}-hac-vertical.png',out_dir=out_dir,sep=SEP,dataset=dataset_labels,algorithm=algorithms_mult_param_combos))
         final_input.extend(expand('{out_dir}{sep}{dataset}-ml{sep}{algorithm}-hac-clusters-vertical.txt',out_dir=out_dir,sep=SEP,dataset=dataset_labels,algorithm=algorithms_mult_param_combos))
         final_input.extend(expand('{out_dir}{sep}{dataset}-ml{sep}{algorithm}-hac-horizontal.png',out_dir=out_dir,sep=SEP,dataset=dataset_labels,algorithm=algorithms_mult_param_combos))
         final_input.extend(expand('{out_dir}{sep}{dataset}-ml{sep}{algorithm}-hac-clusters-horizontal.txt',out_dir=out_dir,sep=SEP,dataset=dataset_labels,algorithm=algorithms_mult_param_combos))
+
+    if _config.config.analysis.ensemble.include:
+        final_input.extend(expand('{out_dir}{sep}{dataset}-ml{sep}ensemble-pathway.txt',out_dir=out_dir,sep=SEP,dataset=dataset_labels,algorithm_params=algorithms_with_params))
+    
+    if _config.config.analysis.ensemble.aggregate_per_algorithm:
         final_input.extend(expand('{out_dir}{sep}{dataset}-ml{sep}{algorithm}-ensemble-pathway.txt',out_dir=out_dir,sep=SEP,dataset=dataset_labels,algorithm=algorithms))
+    
+    if _config.config.analysis.jaccard.include:
+        final_input.extend(expand('{out_dir}{sep}{dataset}-ml{sep}jaccard-matrix.txt',out_dir=out_dir,sep=SEP,dataset=dataset_labels,algorithm_params=algorithms_with_params))
+        final_input.extend(expand('{out_dir}{sep}{dataset}-ml{sep}jaccard-heatmap.png',out_dir=out_dir,sep=SEP,dataset=dataset_labels,algorithm_params=algorithms_with_params))
+
+    if _config.config.analysis.jaccard.aggregate_per_algorithm:
         final_input.extend(expand('{out_dir}{sep}{dataset}-ml{sep}{algorithm}-jaccard-matrix.txt',out_dir=out_dir,sep=SEP,dataset=dataset_labels,algorithm=algorithms))
         final_input.extend(expand('{out_dir}{sep}{dataset}-ml{sep}{algorithm}-jaccard-heatmap.png',out_dir=out_dir,sep=SEP,dataset=dataset_labels,algorithm=algorithms))
 
-    if _config.config.analysis_include_evaluation:
+    if _config.config.analysis.evaluation.include:
         final_input.extend(expand('{out_dir}{sep}{dataset_gold_standard_pair}-eval{sep}pr-per-pathway-nodes.txt',out_dir=out_dir,sep=SEP,dataset_gold_standard_pair=dataset_gold_standard_node_pairs,algorithm_params=algorithms_with_params))
         final_input.extend(expand('{out_dir}{sep}{dataset_gold_standard_pair}-eval{sep}pr-per-pathway-nodes.png',out_dir=out_dir,sep=SEP,dataset_gold_standard_pair=dataset_gold_standard_node_pairs))
-        final_input.extend(expand('{out_dir}{sep}{dataset_gold_standard_pair}-eval{sep}pr-pca-chosen-pathway-nodes.txt',out_dir=out_dir,sep=SEP,dataset_gold_standard_pair=dataset_gold_standard_node_pairs))
-        final_input.extend(expand('{out_dir}{sep}{dataset_gold_standard_pair}-eval{sep}pr-pca-chosen-pathway-nodes.png',out_dir=out_dir,sep=SEP,dataset_gold_standard_pair=dataset_gold_standard_node_pairs))
-        final_input.extend(expand('{out_dir}{sep}{dataset_gold_standard_pair}-eval{sep}pr-curve-ensemble-nodes.png',out_dir=out_dir,sep=SEP,dataset_gold_standard_pair=dataset_gold_standard_node_pairs))
-        final_input.extend(expand('{out_dir}{sep}{dataset_gold_standard_pair}-eval{sep}pr-curve-ensemble-nodes.txt',out_dir=out_dir,sep=SEP,dataset_gold_standard_pair=dataset_gold_standard_node_pairs))
+
         # dummy file
         final_input.extend(expand('{out_dir}{sep}{dataset_gold_standard_pair}-eval{sep}dummy-edge.txt',out_dir=out_dir,sep=SEP,dataset_gold_standard_pair=dataset_gold_standard_edge_pairs))
-    
-    if _config.config.analysis_include_evaluation_aggregate_algo:
+
+    if _config.config.analysis.evaluation.aggregate_per_algorithm:
         final_input.extend(expand('{out_dir}{sep}{dataset_gold_standard_pair}-eval{sep}pr-per-pathway-for-{algorithm}-nodes.txt',out_dir=out_dir,sep=SEP,dataset_gold_standard_pair=dataset_gold_standard_node_pairs,algorithm=algorithms))
         final_input.extend(expand('{out_dir}{sep}{dataset_gold_standard_pair}-eval{sep}pr-per-pathway-for-{algorithm}-nodes.png',out_dir=out_dir,sep=SEP,dataset_gold_standard_pair=dataset_gold_standard_node_pairs,algorithm=algorithms))
+    
+    if _config.config.analysis.pca.evaluation.include:
+        final_input.extend(expand('{out_dir}{sep}{dataset_gold_standard_pair}-eval{sep}pr-pca-chosen-pathway-nodes.txt',out_dir=out_dir,sep=SEP,dataset_gold_standard_pair=dataset_gold_standard_node_pairs))
+        final_input.extend(expand('{out_dir}{sep}{dataset_gold_standard_pair}-eval{sep}pr-pca-chosen-pathway-nodes.png',out_dir=out_dir,sep=SEP,dataset_gold_standard_pair=dataset_gold_standard_node_pairs))
+
+    if _config.config.analysis.pca.evaluation.aggregate_per_algorithm:
         final_input.extend(expand('{out_dir}{sep}{dataset_gold_standard_pair}-eval{sep}pr-pca-chosen-pathway-per-algorithm-nodes.txt',out_dir=out_dir,sep=SEP,dataset_gold_standard_pair=dataset_gold_standard_node_pairs))
         final_input.extend(expand('{out_dir}{sep}{dataset_gold_standard_pair}-eval{sep}pr-pca-chosen-pathway-per-algorithm-nodes.png',out_dir=out_dir,sep=SEP,dataset_gold_standard_pair=dataset_gold_standard_node_pairs))
+    
+    if _config.config.analysis.ensemble.evaluation.include:
+        final_input.extend(expand('{out_dir}{sep}{dataset_gold_standard_pair}-eval{sep}pr-curve-ensemble-nodes.png',out_dir=out_dir,sep=SEP,dataset_gold_standard_pair=dataset_gold_standard_node_pairs))
+        final_input.extend(expand('{out_dir}{sep}{dataset_gold_standard_pair}-eval{sep}pr-curve-ensemble-nodes.txt',out_dir=out_dir,sep=SEP,dataset_gold_standard_pair=dataset_gold_standard_node_pairs))
+
+    if _config.config.analysis.ensemble.evaluation.aggregate_per_algorithm:
         final_input.extend(expand('{out_dir}{sep}{dataset_gold_standard_pair}-eval{sep}pr-curve-ensemble-nodes-per-algorithm-nodes.png',out_dir=out_dir,sep=SEP,dataset_gold_standard_pair=dataset_gold_standard_node_pairs))
         final_input.extend(expand('{out_dir}{sep}{dataset_gold_standard_pair}-eval{sep}pr-curve-ensemble-nodes-per-algorithm-nodes.txt',out_dir=out_dir,sep=SEP,dataset_gold_standard_pair=dataset_gold_standard_node_pairs))
 
@@ -463,7 +487,7 @@ rule evaluation_per_algo_pr_per_pathways:
     run:
         node_table = Evaluation.from_file(input.node_gold_standard_file).node_table
         pr_df = Evaluation.node_precision_and_recall(input.pathways, node_table)
-        Evaluation.precision_and_recall_per_pathway(pr_df, output.node_pr_file, output.node_pr_png, include_aggregate_algo_eval)
+        Evaluation.precision_and_recall_per_pathway(pr_df, output.node_pr_file, output.node_pr_png, _config.config.analysis.evaluation.aggregate_per_algorithm)
 
 # Return pathway summary file per dataset
 def collect_summary_statistics_per_dataset(wildcards):
@@ -511,7 +535,7 @@ rule evaluation_per_algo_pca_chosen:
         node_table = Evaluation.from_file(input.node_gold_standard_file).node_table
         pca_chosen_pathways = Evaluation.pca_chosen_pathway(input.pca_coordinates_file, input.pathway_summary_file, out_dir)
         pr_df = Evaluation.node_precision_and_recall(pca_chosen_pathways, node_table)
-        Evaluation.precision_and_recall_pca_chosen_pathway(pr_df, output.node_pca_chosen_pr_file, output.node_pca_chosen_pr_png, include_aggregate_algo_eval)
+        Evaluation.precision_and_recall_pca_chosen_pathway(pr_df, output.node_pca_chosen_pr_file, output.node_pca_chosen_pr_png, _config.config.analysis.pca.evaluation.aggregate_per_algorithm)
 
 # Return the dataset pickle file for a specific dataset
 def get_dataset_pickle_file(wildcards):
@@ -554,7 +578,7 @@ rule evaluation_per_algo_ensemble_pr_curve:
     run:
         node_table = Evaluation.from_file(input.node_gold_standard_file).node_table
         node_ensembles_dict = Evaluation.edge_frequency_node_ensemble(node_table, input.ensemble_files, input.dataset_file)
-        Evaluation.precision_recall_curve_node_ensemble(node_ensembles_dict, node_table, output.node_pr_curve_png, output.node_pr_curve_file, include_aggregate_algo_eval)
+        Evaluation.precision_recall_curve_node_ensemble(node_ensembles_dict, node_table, output.node_pr_curve_png, output.node_pr_curve_file, _config.config.analysis.evaluation.aggregate_per_algorithm)
 
 rule evaluation_edge_dummy:
     input: 

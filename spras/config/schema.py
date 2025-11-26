@@ -11,9 +11,10 @@ We declare models using two classes here:
 """
 
 import re
+import warnings
 from typing import Annotated, Optional
 
-from pydantic import AfterValidator, BaseModel, ConfigDict
+from pydantic import AfterValidator, BaseModel, ConfigDict, model_validator
 
 from spras.config.container_schema import ContainerSettings
 from spras.config.util import CaseInsensitiveEnum
@@ -37,42 +38,65 @@ class CytoscapeAnalysis(BaseModel):
 # Note that CaseInsensitiveEnum is not pydantic: pydantic
 # has special support for enums, but we avoid the
 # pydantic-specific "model_config" key here for this reason.
-class MlLinkage(CaseInsensitiveEnum):
+class HacLinkage(CaseInsensitiveEnum):
     ward = 'ward'
     complete = 'complete'
     average = 'average'
     single = 'single'
 
-class MlMetric(CaseInsensitiveEnum):
+class HacMetric(CaseInsensitiveEnum):
     euclidean = 'euclidean'
     manhattan = 'manhattan'
     cosine = 'cosine'
 
-class MlAnalysis(BaseModel):
+class AggregateAnalysis(BaseModel):
     include: bool
     aggregate_per_algorithm: bool = False
+
+    model_config = ConfigDict(extra='forbid')
+
+    @model_validator(mode='after')
+    def check_aggregate_when_include(self):
+        if self.aggregate_per_algorithm and not self.include:
+            warnings.warn("aggregate_per_algorithm is set to True but include is set to False; setting aggregate_per_algorithm to False", stacklevel=2)
+            self.aggregate_per_algorithm = False
+        return self
+
+class EvaluationAnalysis(AggregateAnalysis): pass
+class AggregateEvaluationAnalysis(AggregateAnalysis):
+    evaluation: EvaluationAnalysis = EvaluationAnalysis(include=False)
+
+    @model_validator(mode='after')
+    def check_include_when_evaluation_include(self):
+        if self.evaluation.include and not self.include:
+            warnings.warn("evaluation.include is set to True but include is set to False; setting evaluation.include to False", stacklevel=2)
+            self.evaluation.include = False
+        return self
+
+class PcaAnalysis(AggregateEvaluationAnalysis):
     components: int = 2
     labels: bool = True
     kde: bool = False
     remove_empty_pathways: bool = False
-    linkage: MlLinkage = MlLinkage.ward
-    metric: MlMetric = MlMetric.euclidean
 
-    model_config = ConfigDict(extra='forbid')
+class HacAnalysis(AggregateEvaluationAnalysis):
+    linkage: HacLinkage = HacLinkage.ward
+    metric: HacMetric = HacMetric.euclidean
 
-class EvaluationAnalysis(BaseModel):
-    include: bool
-    aggregate_per_algorithm: bool = False
-
-    model_config = ConfigDict(extra='forbid')
+class EnsembleAnalysis(AggregateEvaluationAnalysis): pass
+class JaccardAnalysis(AggregateAnalysis): pass
 
 class Analysis(BaseModel):
     summary: SummaryAnalysis = SummaryAnalysis(include=False)
     cytoscape: CytoscapeAnalysis = CytoscapeAnalysis(include=False)
-    ml: MlAnalysis = MlAnalysis(include=False)
+    pca: PcaAnalysis = PcaAnalysis(include=False)
+    hac: HacAnalysis = HacAnalysis(include=False)
+    jaccard: JaccardAnalysis = JaccardAnalysis(include=False)
+    ensemble: EnsembleAnalysis = EnsembleAnalysis(include=False)
     evaluation: EvaluationAnalysis = EvaluationAnalysis(include=False)
+    """Enables PR curve evaluation."""
 
-    model_config = ConfigDict(extra='forbid')
+    model_config = ConfigDict(extra='forbid', use_attribute_docstrings=True)
 
 
 # The default length of the truncated hash used to identify parameter combinations
