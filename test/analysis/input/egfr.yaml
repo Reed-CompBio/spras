@@ -102,29 +102,29 @@ analysis:
   cytoscape:
     include: true
   pca:
-    include: true
-    aggregate_per_algorithm: true
+    include: false
+    aggregate_per_algorithm: false
     evaluation:
-      include: true
-      aggregate_per_algorithm: true
+      include: false
+      aggregate_per_algorithm: false
     components: 2
-    labels: true
-    kde: true
-    remove_empty_pathways: true
+    labels: false
+    kde: false
+    remove_empty_pathways: false
   hac:
-    include: true
-    aggregate_per_algorithm: true
+    include: false
+    aggregate_per_algorithm: false
     evaluation:
-      include: true
-      aggregate_per_algorithm: true
+      include: false
+      aggregate_per_algorithm: false
     linkage: 'ward'
     metric: 'euclidean'
   ensemble:
-    include: true
-    aggregate_per_algorithm: true
+    include: false
+    aggregate_per_algorithm: false
     evaluation:
-      include: true
-      aggregate_per_algorithm: true
+      include: false
+      aggregate_per_algorithm: false
   evaluation:
-    include: true
-    aggregate_per_algorithm: true
+    include: false
+    aggregate_per_algorithm: false
