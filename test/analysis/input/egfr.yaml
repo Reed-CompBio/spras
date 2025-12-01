@@ -114,9 +114,6 @@ analysis:
   hac:
     include: false
     aggregate_per_algorithm: false
-    evaluation:
-      include: false
-      aggregate_per_algorithm: false
     linkage: 'ward'
     metric: 'euclidean'
   ensemble:

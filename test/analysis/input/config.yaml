@@ -141,9 +141,6 @@ analysis:
   hac:
     include: false
     aggregate_per_algorithm: false
-    evaluation:
-      include: false
-      aggregate_per_algorithm: false
     # 'ward', 'complete', 'average', 'single'
     # if linkage: ward, must use metric: euclidean
     linkage: 'ward'

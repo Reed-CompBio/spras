@@ -114,10 +114,7 @@ def get_test_config():
             },
             "hac": {
                 "include": False,
-                "aggregate_per_algorithm": False,
-                "evaluation": {
-                    "include": False
-                }
+                "aggregate_per_algorithm": False
             },
             "ensemble": {
                 "include": False,
@@ -279,7 +276,7 @@ class TestConfig:
         (False, True, False, False),
         (False, False, False, False)
     ])
-    @pytest.mark.parametrize("analysis_type", ["pca", "hac", "ensemble"])
+    @pytest.mark.parametrize("analysis_type", ["pca", "ensemble"])
     def test_eval_pca_coupling(self, include, eval_include, expected_include, expected_eval, analysis_type):
         test_config = get_test_config()
         test_config["analysis"][analysis_type]["include"] = include
@@ -296,7 +293,7 @@ class TestConfig:
         (True,  True,  True,  True,  True,  True,  True,  True),
         (True,  False, False, False, True,  False, False, False),
     ])
-    @pytest.mark.parametrize("analysis_type", ["pca", "hac", "ensemble"])
+    @pytest.mark.parametrize("analysis_type", ["pca", "ensemble"])
     def test_eval_ml_agg_algo_coupling(self, ml_include, ml_agg, eval_include, eval_agg, expected_ml, expected_ml_agg,
                                        expected_eval, expected_eval_agg, analysis_type):
         # the value of pca include and pca aggregate_per_algorithm can affect the value of evaluation include and

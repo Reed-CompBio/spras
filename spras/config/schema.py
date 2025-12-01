@@ -82,7 +82,7 @@ class PcaAnalysis(AggregateEvaluationAnalysis):
     kde: bool = False
     remove_empty_pathways: bool = False
 
-class HacAnalysis(AggregateEvaluationAnalysis):
+class HacAnalysis(AggregateAnalysis):
     linkage: HacLinkage = HacLinkage.ward
     metric: HacMetric = HacMetric.euclidean
 
