@@ -51,7 +51,7 @@ class HacMetric(CaseInsensitiveEnum):
 
 def implies(source: bool, target: bool, source_str: str, target_str: str):
     if target and not source:
-        warnings.warn(f"{source_str} is set to True but {target_str} is set to False; setting {target_str} to False", stacklevel=2)
+        warnings.warn(f"{source_str} is False but {target_str} is True; setting {target_str} to False", stacklevel=2)
         return False
     return target
 
