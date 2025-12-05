@@ -1,0 +1,5 @@
+Interactor1	Interactor2	weight
+A	D	1
+D	F	1
+F	D	1
+F	B	0.5
