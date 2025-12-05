@@ -535,7 +535,7 @@ rule evaluation_per_algo_pca_chosen:
         node_table = Evaluation.from_file(input.node_gold_standard_file).node_table
         pca_chosen_pathways = Evaluation.pca_chosen_pathway(input.pca_coordinates_file, input.pathway_summary_file, out_dir)
         pr_df = Evaluation.node_precision_and_recall(pca_chosen_pathways, node_table)
-        Evaluation.precision_and_recall_pca_chosen_pathway(pr_df, output.node_pca_chosen_pr_file, output.node_pca_chosen_pr_png, _config.config.analysis.pca.evaluation.aggregate_per_algorithm)
+        Evaluation.precision_and_recall_pca_chosen_pathway(pr_df, output.node_pca_chosen_pr_file, output.node_pca_chosen_pr_png, _config.config.analysis.pca.pca_chosen.aggregate_per_algorithm)
 
 # Return the dataset pickle file for a specific dataset
 def get_dataset_pickle_file(wildcards):
