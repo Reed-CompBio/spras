@@ -28,7 +28,7 @@ out_dir = _config.config.out_dir
 algorithm_params = _config.config.algorithm_params
 algorithm_directed = _config.config.algorithm_directed
 container_settings = _config.config.container_settings
-pca_params = without_keys(vars(_config.config.analysis.pca), ["evaluation", "include", "aggregate_per_algorithm"])
+pca_params = without_keys(vars(_config.config.analysis.pca), ["pca_chosen", "include", "aggregate_per_algorithm"])
 hac_params = without_keys(vars(_config.config.analysis.hac), ["include", "aggregate_per_algorithm"])
 
 # Return the dataset or gold_standard dictionary from the config file given the label
