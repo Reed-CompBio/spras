@@ -67,3 +67,7 @@ datasets:
     other_files: []
     # Relative path from the spras directory
     data_dir: "test/generate-inputs/inputs"
+
+reconstruction_settings:
+  locations:
+    reconstruction_dir: "output"

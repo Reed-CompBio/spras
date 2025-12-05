@@ -3,6 +3,7 @@ from pathlib import Path
 import pandas as pd
 import pytest
 
+from spras.config.dataset import DatasetSchema
 from spras.dataset import Dataset
 from spras.interactome import (
     add_constant,
@@ -94,21 +95,23 @@ class TestInteractome:
         Test error is thrown when fourth column of edge file has an invalid value (not D or U)
         """
         with pytest.raises(ValueError):
-            dataset_info = {'label': 'test',
-                            'edge_files': ['test-network-invalid-value.txt'],
-                            'node_files': None,  # Will raise error before loading node table
-                            'data_dir': IN_DIR
-                            }
-            Dataset(dataset_info)
+            Dataset(DatasetSchema(
+                label='test',
+                edge_files=['test-network-invalid-value.txt'],
+                node_files=[],  # Will raise error before loading node table
+                data_dir=IN_DIR,
+                other_files=[]
+            ))
 
     def test_missing_value(self):
         """
         Test error is thrown when fourth column of edge file is missing
         """
         with pytest.raises(ValueError):
-            dataset_info = {'label': 'test',
-                            'edge_files': ['test-network-missing-value.txt'],
-                            'node_files': None,  # Will raise error before loading node table
-                            'data_dir': IN_DIR
-                            }
-            Dataset(dataset_info)
+            Dataset(DatasetSchema(
+                label='test',
+                edge_files=['test-network-missing-value.txt'],
+                node_files=[],  # Will raise error before loading node table
+                data_dir=IN_DIR,
+                other_files=[]
+            ))
