@@ -49,6 +49,12 @@ class HacMetric(CaseInsensitiveEnum):
     manhattan = 'manhattan'
     cosine = 'cosine'
 
+def implies(source: bool, target: bool, source_str: str, target_str: str):
+    if target and not source:
+        warnings.warn(f"{source_str} is set to True but {target_str} is set to False; setting {target_str} to False", stacklevel=2)
+        return False
+    return target
+
 class AggregateAnalysis(BaseModel):
     include: bool
     aggregate_per_algorithm: bool = False
@@ -57,36 +63,36 @@ class AggregateAnalysis(BaseModel):
 
     @model_validator(mode='after')
     def check_aggregate_when_include(self):
-        if self.aggregate_per_algorithm and not self.include:
-            warnings.warn("aggregate_per_algorithm is set to True but include is set to False; setting aggregate_per_algorithm to False", stacklevel=2)
-            self.aggregate_per_algorithm = False
+        self.aggregate_per_algorithm = implies(self.include, self.aggregate_per_algorithm, "include", "aggregate_per_algorithm")
         return self
 
 class EvaluationAnalysis(AggregateAnalysis): pass
-class AggregateEvaluationAnalysis(AggregateAnalysis):
-    evaluation: EvaluationAnalysis = EvaluationAnalysis(include=False)
 
-    @model_validator(mode='after')
-    def check_include_when_evaluation_include(self):
-        if self.evaluation.include and not self.include:
-            warnings.warn("evaluation.include is set to True but include is set to False; setting evaluation.include to False", stacklevel=2)
-            self.evaluation.include = False
-        if self.evaluation.aggregate_per_algorithm and not self.aggregate_per_algorithm:
-            warnings.warn("evaluation.aggregate_per_algorithm is set to True but aggregate_per_algorithm is set to False; setting evaluation.aggregate_per_algorithm to False", stacklevel=2)
-            self.evaluation.aggregate_per_algorithm = False
-        return self
-
-class PcaAnalysis(AggregateEvaluationAnalysis):
+class PcaAnalysis(AggregateAnalysis):
     components: int = 2
     labels: bool = True
     kde: bool = False
     remove_empty_pathways: bool = False
+    pca_chosen: EvaluationAnalysis = EvaluationAnalysis(include=False)
+
+    @model_validator(mode='after')
+    def check_include_when_evaluation_include(self):
+        self.pca_chosen.include = implies(self.include, self.pca_chosen.include, "include", "pca_chosen.include")
+        self.pca_chosen.aggregate_per_algorithm = implies(self.aggregate_per_algorithm, self.pca_chosen.aggregate_per_algorithm, "aggregate_per_algorithm", "pca_chosen.aggregate_per_algorithm")
+        return self
 
 class HacAnalysis(AggregateAnalysis):
     linkage: HacLinkage = HacLinkage.ward
     metric: HacMetric = HacMetric.euclidean
 
-class EnsembleAnalysis(AggregateEvaluationAnalysis): pass
+class EnsembleAnalysis(AggregateAnalysis):
+    evaluation: EvaluationAnalysis = EvaluationAnalysis(include=False)
+
+    @model_validator(mode='after')
+    def check_include_when_evaluation_include(self):
+        self.evaluation.include = implies(self.include, self.evaluation.include, "include", "evaluation.include")
+        self.evaluation.aggregate_per_algorithm = implies(self.aggregate_per_algorithm, self.evaluation.aggregate_per_algorithm, "aggregate_per_algorithm", "evaluation.aggregate_per_algorithm")
+        return self
 class JaccardAnalysis(AggregateAnalysis): pass
 
 class Analysis(BaseModel):

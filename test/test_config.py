@@ -108,7 +108,7 @@ def get_test_config():
             "pca": {
                 "include": False,
                 "aggregate_per_algorithm": False,
-                "evaluation": {
+                "pca_chosen": {
                     "include": False
                 }
             },
@@ -276,15 +276,18 @@ class TestConfig:
         (False, True, False, False),
         (False, False, False, False)
     ])
-    @pytest.mark.parametrize("analysis_type", ["pca", "ensemble"])
-    def test_eval_pca_coupling(self, include, eval_include, expected_include, expected_eval, analysis_type):
+    @pytest.mark.parametrize("analysis_type, evaluation_type", [
+        ("pca", "pca_chosen"),
+        ("ensemble", "evaluation")
+    ])
+    def test_eval_pca_coupling(self, include, eval_include, expected_include, expected_eval, analysis_type, evaluation_type):
         test_config = get_test_config()
         test_config["analysis"][analysis_type]["include"] = include
-        test_config["analysis"][analysis_type]["evaluation"]["include"] = eval_include
+        test_config["analysis"][analysis_type][evaluation_type]["include"] = eval_include
         config.init_global(test_config)
 
         assert vars(config.config.analysis)[analysis_type].include == expected_include
-        assert vars(config.config.analysis)[analysis_type].evaluation.include == expected_eval
+        assert vars(vars(config.config.analysis)[analysis_type])[evaluation_type].include == expected_eval
 
     @pytest.mark.parametrize("ml_include, ml_agg, eval_include, eval_agg, expected_ml, expected_ml_agg, expected_eval, expected_eval_agg", [
         (False, True,  True,  True,  False, False, False, False),
@@ -293,21 +296,24 @@ class TestConfig:
         (True,  True,  True,  True,  True,  True,  True,  True),
         (True,  False, False, False, True,  False, False, False),
     ])
-    @pytest.mark.parametrize("analysis_type", ["pca", "ensemble"])
+    @pytest.mark.parametrize("analysis_type, evaluation_type", [
+        ("pca", "pca_chosen"),
+        ("ensemble", "evaluation")
+    ])
     def test_eval_ml_agg_algo_coupling(self, ml_include, ml_agg, eval_include, eval_agg, expected_ml, expected_ml_agg,
-                                       expected_eval, expected_eval_agg, analysis_type):
+                                       expected_eval, expected_eval_agg, analysis_type, evaluation_type):
         # the value of pca include and pca aggregate_per_algorithm can affect the value of evaluation include and
         # evaluation aggregate_per_algorithm
         test_config = get_test_config()
 
         test_config["analysis"][analysis_type]["include"] = ml_include
         test_config["analysis"][analysis_type]["aggregate_per_algorithm"] = ml_agg
-        test_config["analysis"][analysis_type]["evaluation"]["include"] = eval_include
-        test_config["analysis"][analysis_type]["evaluation"]["aggregate_per_algorithm"] = eval_agg
+        test_config["analysis"][analysis_type][evaluation_type]["include"] = eval_include
+        test_config["analysis"][analysis_type][evaluation_type]["aggregate_per_algorithm"] = eval_agg
 
         config.init_global(test_config)
 
         assert vars(config.config.analysis)[analysis_type].include == expected_ml, f"Include was not {expected_ml}!"
         assert vars(config.config.analysis)[analysis_type].aggregate_per_algorithm == expected_ml_agg, f"Aggregate per algorithm was not {expected_ml_agg}!"
-        assert vars(config.config.analysis)[analysis_type].evaluation.include == expected_eval, f"evaluation include was not {expected_eval}!"
-        assert vars(config.config.analysis)[analysis_type].evaluation.aggregate_per_algorithm == expected_eval_agg, f"evaluation aggregate per algorithm was not {expected_eval_agg}!"
+        assert vars(vars(config.config.analysis)[analysis_type])[evaluation_type].include == expected_eval, f"evaluation include was not {expected_eval}!"
+        assert vars(vars(config.config.analysis)[analysis_type])[evaluation_type].aggregate_per_algorithm == expected_eval_agg, f"evaluation aggregate per algorithm was not {expected_eval_agg}!"

@@ -240,7 +240,7 @@ analysis:
   ensemble:
     include: true
     aggregate_per_algorithm: true
-    evaluation:
+    pca_chosen:
       include: true
       aggregate_per_algorithm: true
   # Jaccard pathway output

@@ -119,7 +119,7 @@ analysis:
   ensemble:
     include: false
     aggregate_per_algorithm: false
-    evaluation:
+    pca_chosen:
       include: false
       aggregate_per_algorithm: false
   evaluation:
