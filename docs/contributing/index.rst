@@ -360,6 +360,10 @@ Modify parse outputs:
    ``test/parse-outputs/test_parse_outputs.py``, with any parameters it
    needs.
 
+Finally, modify ``test/attribution`` to have an empty
+``localneighborhood.bib`` file, indicating that
+LocalNeighborhood cites nothing else.
+
 Step 6: Update documentation
 ----------------------------
 
