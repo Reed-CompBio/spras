@@ -1,13 +1,13 @@
 # Maximum Edge Orientation Docker image
 
-A Docker image for [Maximum Edge Orientation](https://github.com/agitter/meo/) that is available on [DockerHub](https://hub.docker.com/repository/docker/reedcompbio/meo).
+A Docker image for [Maximum Edge Orientation](https://github.com/agitter/meo/) that is available on the [GitHub Container Registry](https://github.com/orgs/Reed-CompBio/packages/container/package/meo).
 Only supports the Random orientation algorithm, not MINSAT or MAXCSP.
 
 ## Building the Docker image
 
 To create the Docker image run:
 ```
-docker build -t reedcompbio/meo -f Dockerfile .
+docker build -t reed-compbio/meo -f Dockerfile .
 ```
 from this directory.
 
@@ -24,5 +24,5 @@ The Docker wrapper can be tested with `pytest`.
 
 ## Versions
 
-- `v1`: Initial version
+- `v1`: Initial MEO container
 - `v2`: Use `amazoncorretto` alpine base image

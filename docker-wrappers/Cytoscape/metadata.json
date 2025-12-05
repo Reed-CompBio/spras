@@ -1,0 +1,4 @@
+{
+    "imageName": "py4cytoscape",
+    "architectures": ["linux/arm64", "linux/amd64"]
+}
