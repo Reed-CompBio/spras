@@ -5,7 +5,7 @@ import pytest
 
 import spras.config.config as config
 from spras.config.container_schema import ContainerFramework, ProcessedContainerSettings
-from spras.mincostflow import MinCostFlow
+from spras.mincostflow import MinCostFlow, MinCostFlowParams
 
 config.init_from_file("config/config.yaml")
 
@@ -22,9 +22,9 @@ class TestMinCostFlow:
         out_path = Path(OUT_FILE)
         out_path.unlink(missing_ok=True)
 
-        MinCostFlow.run(sources=TEST_DIR + 'input/' + graph + '/sources.txt',
-                        targets=TEST_DIR + 'input/' + graph + '/targets.txt',
-                        edges=TEST_DIR + 'input/' + graph + '/edges.txt',
+        MinCostFlow.run({"sources": TEST_DIR + 'input/' + graph + '/sources.txt',
+                         "targets": TEST_DIR + 'input/' + graph + '/targets.txt',
+                         "edges": TEST_DIR + 'input/' + graph + '/edges.txt'},
                         output_file=OUT_FILE)
         assert out_path.exists()
         # TODO: assert for the output .equals expected_output instead of only testing
@@ -35,11 +35,11 @@ class TestMinCostFlow:
         out_path = Path(OUT_FILE)
         out_path.unlink(missing_ok=True)
 
-        MinCostFlow.run(sources=TEST_DIR + 'input/' + graph + '/sources.txt',
-                        targets=TEST_DIR + 'input/' + graph + '/targets.txt',
-                        edges=TEST_DIR + 'input/' + graph + '/edges.txt',
+        MinCostFlow.run({"sources": TEST_DIR + 'input/' + graph + '/sources.txt',
+                         "targets": TEST_DIR + 'input/' + graph + '/targets.txt',
+                         "edges": TEST_DIR + 'input/' + graph + '/edges.txt'},
                         output_file=OUT_FILE,
-                        flow=1)
+                        args=MinCostFlowParams(flow=1))
         assert out_path.exists()
 
     @pytest.mark.parametrize('graph', ['graph1'])
@@ -47,11 +47,11 @@ class TestMinCostFlow:
         out_path = Path(OUT_FILE)
         out_path.unlink(missing_ok=True)
 
-        MinCostFlow.run(sources=TEST_DIR + 'input/' + graph + '/sources.txt',
-                        targets=TEST_DIR + 'input/' + graph + '/targets.txt',
-                        edges=TEST_DIR + 'input/' + graph + '/edges.txt',
+        MinCostFlow.run({"sources": TEST_DIR + 'input/' + graph + '/sources.txt',
+                         "targets": TEST_DIR + 'input/' + graph + '/targets.txt',
+                         "edges": TEST_DIR + 'input/' + graph + '/edges.txt'},
                         output_file=OUT_FILE,
-                        capacity=1)
+                        args=MinCostFlowParams(capacity=1))
         assert out_path.exists()
 
     @pytest.mark.parametrize('graph', ['graph1'])
@@ -60,24 +60,22 @@ class TestMinCostFlow:
         out_path.unlink(missing_ok=True)
 
         with pytest.raises(RuntimeError):
-            MinCostFlow.run(sources=TEST_DIR + 'input/' + graph + '/sources.txt',
-                            targets=TEST_DIR + 'input/' + graph + '/targets.txt',
-                            edges=TEST_DIR + 'input/' + graph + '/edges.txt',
+            MinCostFlow.run({"sources": TEST_DIR + 'input/' + graph + '/sources.txt',
+                             "targets": TEST_DIR + 'input/' + graph + '/targets.txt',
+                             "edges": TEST_DIR + 'input/' + graph + '/edges.txt'},
                             output_file=OUT_FILE,
-                            flow=50,
-                            capacity=1)
+                            args=MinCostFlowParams(flow=50, capacity=1))
 
     @pytest.mark.parametrize('graph', ['graph1'])
     def test_mincostflow_no_flow(self, graph):
         out_path = Path(OUT_FILE)
         out_path.unlink(missing_ok=True)
 
-        MinCostFlow.run(sources=TEST_DIR + 'input/' + graph + '/sources.txt',
-                        targets=TEST_DIR + 'input/' + graph + '/targets.txt',
-                        edges=TEST_DIR + 'input/' + graph + '/edges.txt',
+        MinCostFlow.run({"sources": TEST_DIR + 'input/' + graph + '/sources.txt',
+                         "targets": TEST_DIR + 'input/' + graph + '/targets.txt',
+                         "edges": TEST_DIR + 'input/' + graph + '/edges.txt'},
                         output_file=OUT_FILE,
-                        flow=0,
-                        capacity=1)
+                        args=MinCostFlowParams(flow=0, capacity=1))
         assert out_path.exists()
 
     @pytest.mark.parametrize('graph', ['graph1'])
@@ -85,20 +83,19 @@ class TestMinCostFlow:
         out_path = Path(OUT_FILE)
         out_path.unlink(missing_ok=True)
         # Include all optional arguments
-        MinCostFlow.run(sources=TEST_DIR + 'input/' + graph + '/sources.txt',
-                        targets=TEST_DIR + 'input/' + graph + '/targets.txt',
-                        edges=TEST_DIR + 'input/' + graph + '/edges.txt',
+        MinCostFlow.run({"sources": TEST_DIR + 'input/' + graph + '/sources.txt',
+                         "targets": TEST_DIR + 'input/' + graph + '/targets.txt',
+                         "edges": TEST_DIR + 'input/' + graph + '/edges.txt'},
                         output_file=OUT_FILE,
-                        flow=1,
-                        capacity=1)
+                        args=MinCostFlowParams(flow=1, capacity=1))
         assert out_path.exists()
 
     @pytest.mark.parametrize('graph', ['graph1'])
     def test_mincostflow_missing(self, graph):
         # Test the expected error is raised when required arguments are missing
         with pytest.raises(ValueError):
-            MinCostFlow.run(sources=TEST_DIR + 'input/' + graph + '/sources.txt',
-                            targets=TEST_DIR + 'input/' + graph + '/targets.txt',
+            MinCostFlow.run({"sources": TEST_DIR + 'input/' + graph + '/sources.txt',
+                             "targets": TEST_DIR + 'input/' + graph + '/targets.txt'},
                             output_file=OUT_FILE)
 
     @pytest.mark.parametrize('graph', ['graph1'])
@@ -107,12 +104,10 @@ class TestMinCostFlow:
         out_path = Path(OUT_FILE)
         out_path.unlink(missing_ok=True)
         # Include all optional arguments
-        MinCostFlow.run(sources=TEST_DIR + 'input/' + graph + '/sources.txt',
-                        targets=TEST_DIR + 'input/' + graph + '/targets.txt',
-                        edges=TEST_DIR + 'input/' + graph + '/edges.txt',
+        MinCostFlow.run({"sources": TEST_DIR + 'input/' + graph + '/sources.txt',
+                         "targets": TEST_DIR + 'input/' + graph + '/targets.txt',
+                         "edges": TEST_DIR + 'input/' + graph + '/edges.txt'},
                         output_file=OUT_FILE,
-                        flow=1,
-                        capacity=1,
+                        args=MinCostFlowParams(flow=1, capacity=1),
                         container_settings=ProcessedContainerSettings(framework=ContainerFramework.singularity))
         assert out_path.exists()
-

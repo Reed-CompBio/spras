@@ -6,7 +6,7 @@ import pytest
 
 import spras.config.config as config
 from spras.config.container_schema import ContainerFramework, ProcessedContainerSettings
-from spras.strwr import ST_RWR
+from spras.strwr import ST_RWR, ST_RWRParams
 
 config.init_from_file("config/config.yaml")
 
@@ -21,10 +21,10 @@ class TestSTRWR:
     """
     def test_strwr(self):
         OUT_FILE.unlink(missing_ok=True)
-        ST_RWR.run(network=Path(TEST_DIR, 'input', 'strwr-network.txt'),
-                   sources=Path(TEST_DIR, 'input', 'strwr-sources.txt'),
-                   targets=Path(TEST_DIR, 'input','strwr-targets.txt'),
-                   alpha=0.85,
+        ST_RWR.run({"network": Path(TEST_DIR, 'input', 'strwr-network.txt'),
+                    "sources": Path(TEST_DIR, 'input', 'strwr-sources.txt'),
+                    "targets": Path(TEST_DIR, 'input','strwr-targets.txt')},
+                   args=ST_RWRParams(alpha=0.85, threshold=200),
                    output_file=OUT_FILE)
         assert OUT_FILE.exists(), 'Output file was not written'
         expected_file = Path(TEST_DIR, 'expected_output', 'strwr-output.txt')
@@ -35,10 +35,10 @@ class TestSTRWR:
     """
     def test_missing_file(self):
         with pytest.raises(OSError):
-            ST_RWR.run(network=Path(TEST_DIR, 'input', 'missing.txt'),
-                       sources=Path(TEST_DIR, 'input', 'strwr-sources.txt'),
-                       targets=Path(TEST_DIR, 'input','strwr-targets.txt'),
-                       alpha=0.85,
+            ST_RWR.run({"network": Path(TEST_DIR, 'input', 'missing.txt'),
+                        "sources": Path(TEST_DIR, 'input', 'strwr-sources.txt'),
+                        "targets": Path(TEST_DIR, 'input','strwr-targets.txt')},
+                       args=ST_RWRParams(alpha=0.85, threshold=200),
                        output_file=OUT_FILE)
 
     """
@@ -46,10 +46,10 @@ class TestSTRWR:
     """
     def test_format_error(self):
         with pytest.raises(ValueError):
-            ST_RWR.run(network=Path(TEST_DIR, 'input', 'strwr-bad-network.txt'),
-                       sources=Path(TEST_DIR, 'input', 'strwr-sources.txt'),
-                       targets=Path(TEST_DIR, 'input','strwr-targets.txt'),
-                       alpha=0.85,
+            ST_RWR.run({"network": Path(TEST_DIR, 'input', 'strwr-bad-network.txt'),
+                        "sources": Path(TEST_DIR, 'input', 'strwr-sources.txt'),
+                        "targets": Path(TEST_DIR, 'input','strwr-targets.txt')},
+                       args=ST_RWRParams(alpha=0.85, threshold=200),
                        output_file=OUT_FILE)
 
     # Only run Singularity test if the binary is available on the system
@@ -58,10 +58,10 @@ class TestSTRWR:
     def test_strwr_singularity(self):
         OUT_FILE.unlink(missing_ok=True)
         # Only include required arguments and run with Singularity
-        ST_RWR.run(network=Path(TEST_DIR, 'input', 'strwr-network.txt'),
-                   sources=Path(TEST_DIR, 'input', 'strwr-sources.txt'),
-                   targets=Path(TEST_DIR, 'input','strwr-targets.txt'),
-                   alpha=0.85,
+        ST_RWR.run({"network": Path(TEST_DIR, 'input', 'strwr-network.txt'),
+                    "sources": Path(TEST_DIR, 'input', 'strwr-sources.txt'),
+                    "targets": Path(TEST_DIR, 'input','strwr-targets.txt')},
+                   args=ST_RWRParams(alpha=0.85, threshold=200),
                    output_file=OUT_FILE,
                    container_settings=ProcessedContainerSettings(framework=ContainerFramework.singularity))
         assert OUT_FILE.exists()

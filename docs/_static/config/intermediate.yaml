@@ -52,7 +52,7 @@ algorithms:
     params:
       include: true
       run1:
-        local_search: ["Yes", "No"]
+        local_search: [true, false]
         max_path_length: [2, 3]
         rand_restarts: 10
   - name: allpairs
