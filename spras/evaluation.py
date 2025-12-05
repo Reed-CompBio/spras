@@ -301,7 +301,7 @@ class Evaluation:
                 plt.close()
 
     @staticmethod
-    def pca_chosen_pathway(coordinates_files: list[Union[str, PathLike]], pathway_summary_file: str, output_dir: str):
+    def pca_chosen_pathway(coordinates_files: list[Union[str, PathLike]], pathway_summary_file: Union[str, PathLike], output_dir: Union[str, PathLike]):
         """
         Identifies the pathway closest to a specified highest kernel density estimated (KDE) peak based on PCA
         coordinates
