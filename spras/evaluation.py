@@ -317,7 +317,7 @@ class Evaluation:
             )
 
         pr_df.sort_values(by=['Algorithm', 'Gold_Standard_Type', 'Recall', 'Pathway'], axis=0, ascending=True, inplace=True)
-      
+
 
         gs_types = pr_df["Gold_Standard_Type"].unique().tolist()
         fig, axes = plt.subplots(1, len(gs_types), figsize=(6 * len(gs_types), 5))
