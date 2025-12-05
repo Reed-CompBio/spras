@@ -131,11 +131,11 @@ def make_final_input(wildcards):
         final_input.extend(expand('{out_dir}{sep}{dataset_gold_standard_pair}-eval{sep}pr-per-pathway-for-{algorithm}-nodes.txt',out_dir=out_dir,sep=SEP,dataset_gold_standard_pair=dataset_gold_standard_node_pairs,algorithm=algorithms))
         final_input.extend(expand('{out_dir}{sep}{dataset_gold_standard_pair}-eval{sep}pr-per-pathway-for-{algorithm}-nodes.png',out_dir=out_dir,sep=SEP,dataset_gold_standard_pair=dataset_gold_standard_node_pairs,algorithm=algorithms))
     
-    if _config.config.analysis.pca.evaluation.include:
+    if _config.config.analysis.pca.pca_chosen.include:
         final_input.extend(expand('{out_dir}{sep}{dataset_gold_standard_pair}-eval{sep}pr-pca-chosen-pathway-nodes.txt',out_dir=out_dir,sep=SEP,dataset_gold_standard_pair=dataset_gold_standard_node_pairs))
         final_input.extend(expand('{out_dir}{sep}{dataset_gold_standard_pair}-eval{sep}pr-pca-chosen-pathway-nodes.png',out_dir=out_dir,sep=SEP,dataset_gold_standard_pair=dataset_gold_standard_node_pairs))
 
-    if _config.config.analysis.pca.evaluation.aggregate_per_algorithm:
+    if _config.config.analysis.pca.pca_chosen.aggregate_per_algorithm:
         final_input.extend(expand('{out_dir}{sep}{dataset_gold_standard_pair}-eval{sep}pr-pca-chosen-pathway-per-algorithm-nodes.txt',out_dir=out_dir,sep=SEP,dataset_gold_standard_pair=dataset_gold_standard_node_pairs))
         final_input.extend(expand('{out_dir}{sep}{dataset_gold_standard_pair}-eval{sep}pr-pca-chosen-pathway-per-algorithm-nodes.png',out_dir=out_dir,sep=SEP,dataset_gold_standard_pair=dataset_gold_standard_node_pairs))
     
