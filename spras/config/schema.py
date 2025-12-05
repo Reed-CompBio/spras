@@ -11,7 +11,7 @@ We declare models using two classes here:
 """
 
 import re
-from typing import Annotated, Optional
+from typing import Annotated
 
 from pydantic import AfterValidator, BaseModel, ConfigDict
 
@@ -92,7 +92,6 @@ def label_validator(name: str):
 
 class AlgorithmParams(BaseModel):
     include: bool
-    directed: Optional[bool] = None
 
     # TODO: use array of runs instead. We currently rely on the
     # extra parameters here to extract the algorithm parameter information,
