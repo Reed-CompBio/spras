@@ -157,7 +157,7 @@ analysis:
   pca:
     include: true
     aggregate_per_algorithm: true
-    evaluation:
+    pca_chosen:
       include: true
       aggregate_per_algorithm: true
     components: 2
@@ -172,7 +172,7 @@ analysis:
   ensemble:
     include: true
     aggregate_per_algorithm: true
-    pca_chosen:
+    evaluation:
       include: true
       aggregate_per_algorithm: true
   jaccard:

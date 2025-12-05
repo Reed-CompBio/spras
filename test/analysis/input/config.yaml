@@ -123,7 +123,7 @@ analysis:
   pca:
     include: false
     aggregate_per_algorithm: false
-    evaluation:
+    pca_chosen:
       include: false
       aggregate_per_algorithm: false
     # specify how many principal components to calculate
@@ -150,7 +150,7 @@ analysis:
   ensemble:
     include: false
     aggregate_per_algorithm: true
-    pca_chosen:
+    evaluation:
       include: false
       aggregate_per_algorithm: false
   evaluation:
