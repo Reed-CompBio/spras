@@ -2,6 +2,7 @@ from pathlib import Path
 
 from spras.config.container_schema import ProcessedContainerSettings
 from spras.containers import prepare_volume, run_container_and_log
+from spras.dataset import Direction, GraphMultiplicity
 from spras.interactome import reinsert_direction_col_mixed
 from spras.prm import PRM
 from spras.util import add_rank_column, duplicate_edges, raw_pathway_df
@@ -52,6 +53,7 @@ class OmicsIntegrator1(PRM):
     """
     required_inputs = ['prizes', 'edges', 'dummy_nodes']
     dois = ["10.1371/journal.pcbi.1004879"]
+    interactome_properties = [Direction.MIXED, GraphMultiplicity.SIMPLE]
 
     @staticmethod
     def generate_inputs(data, filename_map):
@@ -78,7 +80,7 @@ class OmicsIntegrator1(PRM):
         node_df.to_csv(filename_map['prizes'],sep='\t',index=False,columns=['NODEID','prize'],header=['name','prize'])
 
         # Get network file
-        edges_df = data.get_interactome()
+        edges_df = data.get_interactome(OmicsIntegrator1.interactome_properties).df
 
         # Rename Direction column
         edges_df.to_csv(filename_map['edges'],sep='\t',index=False,
