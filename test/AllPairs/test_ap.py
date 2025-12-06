@@ -46,11 +46,10 @@ class TestAllPairs:
         out_path = OUT_DIR.joinpath('sample-out.txt')
         out_path.unlink(missing_ok=True)
         # Only include required arguments
-        AllPairs.run(
-            nodetypes=str(TEST_DIR / 'input' / 'sample-in-nodetypes.txt'),
-            network=str(TEST_DIR / 'input' / 'sample-in-net.txt'),
-            directed_flag=str(TEST_DIR / 'input' / 'directed-flag-false.txt'),
-            output_file=str(out_path)
+        AllPairs.run({"nodetypes": str(TEST_DIR / 'input' / 'sample-in-nodetypes.txt'),
+                      "network": str(TEST_DIR / 'input' / 'sample-in-net.txt'),
+                      "directed_flag": str(TEST_DIR / 'input' / 'directed-flag-false.txt')},
+                     output_file=str(out_path)
         )
         assert out_path.exists()
 
@@ -58,9 +57,8 @@ class TestAllPairs:
         # Test the expected error is raised when required arguments are missing
         with pytest.raises(ValueError):
             # No nodetypes
-            AllPairs.run(
-                network=str(TEST_DIR / 'input' / 'sample-in-net.txt'),
-                output_file=str(OUT_DIR / 'sample-out.txt'))
+            AllPairs.run({"network": str(TEST_DIR / 'input' / 'sample-in-net.txt')},
+                         output_file=str(OUT_DIR / 'sample-out.txt'))
 
     # Only run Singularity test if the binary is available on the system
     # spython is only available on Unix, but do not explicitly skip non-Unix platforms
@@ -69,24 +67,22 @@ class TestAllPairs:
         out_path = OUT_DIR / 'sample-out.txt'
         out_path.unlink(missing_ok=True)
         # Only include required arguments and run with Singularity
-        AllPairs.run(
-            nodetypes=str(TEST_DIR / 'input' / 'sample-in-nodetypes.txt'),
-            network=str(TEST_DIR / 'input' / 'sample-in-net.txt'),
-            directed_flag=str(TEST_DIR / 'input' / 'directed-flag-false.txt'),
-            output_file=str(out_path),
-            container_settings=ProcessedContainerSettings(framework=ContainerFramework.singularity))
+        AllPairs.run({"nodetypes": str(TEST_DIR / 'input' / 'sample-in-nodetypes.txt'),
+                      "network": str(TEST_DIR / 'input' / 'sample-in-net.txt'),
+                      "directed_flag": str(TEST_DIR / 'input' / 'directed-flag-false.txt')},
+                     output_file=str(out_path),
+                     container_settings=ProcessedContainerSettings(framework=ContainerFramework.singularity))
         assert out_path.exists()
 
     @pytest.mark.skipif(not shutil.which('singularity'), reason='Singularity not found on system')
     def test_allpairs_singularity_unpacked(self):
         out_path = OUT_DIR / 'sample-out-unpack.txt'
         out_path.unlink(missing_ok=True)
-        AllPairs.run(
-            nodetypes=str(TEST_DIR / 'input/sample-in-nodetypes.txt'),
-            network=str(TEST_DIR / 'input/sample-in-net.txt'),
-            directed_flag=str(TEST_DIR / 'input' / 'directed-flag-false.txt'),
-            output_file=str(out_path),
-            container_settings=ProcessedContainerSettings(framework=ContainerFramework.singularity, unpack_singularity=True))
+        AllPairs.run({"nodetypes": str(TEST_DIR / 'input/sample-in-nodetypes.txt'),
+                      "network": str(TEST_DIR / 'input/sample-in-net.txt'),
+                      "directed_flag": str(TEST_DIR / 'input' / 'directed-flag-false.txt')},
+                     output_file=str(out_path),
+                     container_settings=ProcessedContainerSettings(framework=ContainerFramework.singularity, unpack_singularity=True))
         assert out_path.exists()
 
     def test_allpairs_correctness(self):
@@ -102,12 +98,10 @@ class TestAllPairs:
         out_path = OUT_DIR / 'correctness-out.txt'
         out_path.unlink(missing_ok=True)
 
-        AllPairs.run(
-            nodetypes=str(TEST_DIR / 'input' / 'correctness-nodetypes.txt'),
-            network=str(TEST_DIR / 'input' / 'correctness-network.txt'),
-            directed_flag=str(TEST_DIR / 'input' / 'directed-flag-false.txt'),
-            output_file=str(OUT_DIR / 'correctness-out.txt')
-        )
+        AllPairs.run({"nodetypes": TEST_DIR / 'input' / 'correctness-nodetypes.txt',
+                      "network": TEST_DIR / 'input' / 'correctness-network.txt',
+                      "directed_flag": TEST_DIR / 'input' / 'directed-flag-false.txt'},
+                     output_file=OUT_DIR / 'correctness-out.txt')
 
         edge_equality_test_util(out_path, EXPECTED_DIR / 'correctness-expected.txt')
 
@@ -115,12 +109,10 @@ class TestAllPairs:
         out_path = OUT_DIR / 'directed-out.txt'
         out_path.unlink(missing_ok=True)
 
-        AllPairs.run(
-            nodetypes=str(TEST_DIR / 'input' / 'directed-nodetypes.txt'),
-            network=str(TEST_DIR / 'input' / 'directed-network.txt'),
-            directed_flag=str(TEST_DIR / 'input' / 'directed-flag-true.txt'),
-            output_file=str(OUT_DIR / 'directed-out.txt'),
-        )
+        AllPairs.run({"nodetypes": TEST_DIR / 'input' / 'directed-nodetypes.txt',
+                      "network": TEST_DIR / 'input' / 'directed-network.txt',
+                      "directed_flag": TEST_DIR / 'input' / 'directed-flag-true.txt'},
+                     output_file=OUT_DIR / 'directed-out.txt')
 
         edge_equality_test_util(out_path, EXPECTED_DIR.joinpath('directed-expected.txt'))
 
@@ -134,11 +126,10 @@ class TestAllPairs:
         out_path = OUT_DIR / 'zero-length-out.txt'
         out_path.unlink(missing_ok=True)
 
-        AllPairs.run(
-            nodetypes=TEST_DIR / 'input' / 'zero-length-nodetypes.txt',
-            network=TEST_DIR / 'input' / 'zero-length-network.txt',
-            directed_flag=str(TEST_DIR / 'input' / 'directed-flag-false.txt'),
-            output_file=OUT_DIR / 'zero-length-out.txt'
+        AllPairs.run({"nodetypes": TEST_DIR / 'input' / 'zero-length-nodetypes.txt',
+                      "network": TEST_DIR / 'input' / 'zero-length-network.txt',
+                      "directed_flag": TEST_DIR / 'input' / 'directed-flag-false.txt'},
+                     output_file=OUT_DIR / 'zero-length-out.txt'
         )
 
         assert filecmp.cmp(OUT_DIR / 'zero-length-out.txt', EXPECTED_DIR / 'zero-length-expected.txt', shallow=False)
