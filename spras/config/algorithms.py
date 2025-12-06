@@ -165,5 +165,5 @@ def construct_algorithm_model(name: str, model: type[BaseModel], model_default: 
     )
 
 algorithm_models: list[type[BaseModel]] = [construct_algorithm_model(name, model, model_default) for name, (_, model, model_default) in algorithms.items()]
-# name differentriates algorithms
+# name differentiates algorithms
 AlgorithmUnion = Annotated[Union[tuple(algorithm_models)], Field(discriminator='name')]
