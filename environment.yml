@@ -24,7 +24,7 @@ dependencies:
   - tabulate=0.9.0
 
   # toolchain deps
-  - pip=25.2
+  - pip=25.3
   # This should be the same as requires-python minus the >=.
   - python=3.11
 
