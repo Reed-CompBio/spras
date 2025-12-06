@@ -1,6 +1,6 @@
 [project]
 name = "spras"
-version = "0.5.0"
+version = "0.6.0"
 description = "Signaling Pathway Reconstruction Analysis Streamliner"
 authors = [
   { name = "Anthony Gitter", email = "gitter@biostat.wisc.edu" },
