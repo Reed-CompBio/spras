@@ -117,17 +117,13 @@ Step 2: Create a Local Neighborhood Docker image
 
 Complete the ``Dockerfile`` in the
 ``docker-wrappers/LocalNeighborhood``
-directory to create a Docker image. The PathLinker ``Dockerfile``
+directory to create a Docker image. The AllPairs ``Dockerfile``
 demonstrates how to begin with a Python image and copy files into the
 image with ``COPY``. Browse the official `Python
 images <https://hub.docker.com/_/python>`__ to select a recent version
-of Python based on Alpine Linux, a small Linux distribution. Note that
-the PathLinker example uses an old version of Python, but this Local
+of Python based on Alpine Linux, a small Linux distribution. This Local
 Neighborhood Docker image should be based on a more modern version of
-Python. In addition, not all pathway reconstruction algorithms are
-compatible with Alpine Linux, so the default Debian-based Python image
-is required. The ``Dockerfile`` does not need an ``ENTRYPOINT`` or
-``CMD`` line. It will be used to run a Python command.
+Python.
 
 Build the Docker image by running
 
@@ -176,7 +172,7 @@ Step 3: Write the Local Neighborhood wrapper functions
 
 Add a new Python file ``spras/local_neighborhood.py`` to implement the
 wrapper functions for the Local Neighborhood algorithm. Use
-``pathlinker.py`` as an example.
+``allpairs.py`` as an example.
 
 Call the new class within ``local_neighborhood.py``
 ``LocalNeighborhood`` and set ``__all__`` so the class can be
@@ -248,7 +244,7 @@ Implement the ``run`` function, following the AllPairs example. The
 ``prepare_volume`` utility function is needed to prepare the network and
 nodes input files to be mounted and used inside the container. It is
 also used to prepare the path for the output file, which is different
-from how the output is prepared in the PathLinker example. The
+from how the output is prepared in the AllPairs example. The
 functionality of ``prepare_volume`` is similar to how you had to
 manually specify paths relative to the container's file system when you
 interactive tested the container in Step 2. It is not necessary to
@@ -326,7 +322,7 @@ Add test functions to the test file ``test/test_ln.py``. This file
 already has existing tests to test the correctness of the Local
 Neighborhood implementation that was added to the Docker image. The new
 tests will test that the ``run`` function of the ``LocalNeighborhood``
-class works correctly. Use ``test_pathlinker.py`` as an example. There
+class works correctly. Use ``test_ap.py`` as an example. There
 are input files for testing in the
 ``test/LocalNeighborhood/input``
 directory. The new test functions will be automatically run as part of

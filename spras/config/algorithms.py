@@ -30,8 +30,8 @@ def is_numpy_friendly(type: type[Any] | None) -> bool:
 
 def python_evalish_coerce(value: Any) -> Any:
     """
-    Allows for using numpy and python calls. `range`, `np.linspace`, `np.arange`, and
-    `np.logspace` are expanded.
+    Allows for using numpy and python calls: specifically,
+    `range`, `np.linspace`, `np.arange`, and `np.logspace` are supported.
 
     **Safety Note**: This does not prevent availability attacks: this can still exhaust
     resources if wanted. This only prevents secret leakage.
@@ -69,7 +69,7 @@ def python_evalish_coerce(value: Any) -> Any:
     arguments = [ast.literal_eval(arg) for arg in value_ast.body.args]
 
     if function_name not in functions_dict:
-        raise ValueError(f"{function_name} is not an allowed function to be run!")
+        raise ValueError(f"{function_name} is not an allowed function to be run! Allowed functions: {list(functions_dict.keys())}")
 
     return functions_dict[function_name](arguments)
 
