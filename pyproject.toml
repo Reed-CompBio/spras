@@ -81,3 +81,16 @@ include = ["spras*"]
 
 # packages tells setuptools what the exported package is called (ie allows import spras)
 packages = ["spras", "spras.analysis", "spras.config"]
+
+[tool.pixi.project]
+channels = ["conda-forge", "bioconda"]
+platforms = ["linux-64", "osx-arm64", "osx-64", "win-64"]
+
+[tool.pixi.dependencies]
+# for yamlfmt
+go = ">=1.24.4,<2"
+# to force local usage of the oldest supported python ver.
+python = "3.11.*"
+
+[tool.pixi.environments]
+default = {features = ["dev"], solve-group = "default"}
