@@ -1,0 +1,2 @@
+test_A	-a>	B
+B	-a>	C

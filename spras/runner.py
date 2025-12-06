@@ -14,6 +14,7 @@ from spras.prm import PRM
 from spras.responsenet import ResponseNet
 from spras.rwr import RWR
 from spras.strwr import ST_RWR
+from spras.tiedie import TieDIE
 
 algorithms: dict[str, type[PRM]] = {
     "allpairs": AllPairs,
@@ -27,6 +28,7 @@ algorithms: dict[str, type[PRM]] = {
     "responsenet": ResponseNet,
     "rwr": RWR,
     "strwr": ST_RWR,
+    "tiedie": TieDIE
 }
 
 def get_algorithm(algorithm: str) -> type[PRM]:
