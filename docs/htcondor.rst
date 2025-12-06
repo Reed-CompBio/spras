@@ -49,14 +49,14 @@ Docker image with the following command:
 
    apptainer build <new image name>.sif docker://<name of container on DockerHub>
 
-For example, creating an Apptainer image for the ``v0.5.0`` SPRAS image
+For example, creating an Apptainer image for the ``v0.6.0`` SPRAS image
 might look like:
 
 .. code:: bash
 
-   apptainer build spras-v0.5.0.sif docker://reedcompbio/spras:v0.5.0
+   apptainer build spras-v0.6.0.sif docker://reedcompbio/spras:v0.6.0
 
-After running this command, a new file called ``spras-v0.5.0.sif`` will
+After running this command, a new file called ``spras-v0.6.0.sif`` will
 exist in the directory where the command was run.
 
 Submitting All Jobs to a Single EP
