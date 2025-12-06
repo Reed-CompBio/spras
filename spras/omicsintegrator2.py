@@ -26,6 +26,7 @@ class OmicsIntegrator2(PRM):
     # OI2 does not have a specific paper. Instead, we link to the OI1 paper.
     dois = ["10.1371/journal.pcbi.1004879"]
 
+    @staticmethod
     def generate_inputs(data: Dataset, filename_map):
         """
         Access fields from the dataset and write the required input files.
