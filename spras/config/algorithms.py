@@ -8,7 +8,7 @@ import copy
 from typing import Annotated, Any, Callable, Literal, Optional, Union, cast, get_args
 
 import numpy as np
-from pydantic import BaseModel, BeforeValidator, ConfigDict, Field, create_model
+from pydantic import BaseModel, BeforeValidator, ConfigDict, Field, ValidationError, create_model
 
 from spras.runner import algorithms
 
@@ -84,7 +84,7 @@ def list_coerce(value: Any) -> Any:
 
 # This is the most 'hacky' part of this code, but, thanks to pydantic, we avoid reflection
 # and preserve rich type information at runtime.
-def construct_algorithm_model(name: str, model: type[BaseModel], model_default: Optional[BaseModel]) -> type[BaseModel]:
+def construct_algorithm_model(name: str, model: type[BaseModel]) -> type[BaseModel]:
     """
     Dynamically constructs a parameter-combination model based on the original args model.
 
@@ -92,6 +92,13 @@ def construct_algorithm_model(name: str, model: type[BaseModel], model_default: 
     - Values can be passed as lists (1 -> [1])
     - Ranges and other convenient calls are expanded (see `python_evalish_coerce`)
     """
+
+    # Get the default model instance by trying to serialize the empty dictionary
+    try:
+        model_default = model.model_validate({})
+    except ValidationError:
+        model_default = None
+
     # First, we need to take our 'model' and coerce it to permit parameter combinations.
     # This assumes that all of the keys are flattened, so we only get a structure like so:
     # class AlgorithmParams(BaseModel):
@@ -164,6 +171,6 @@ def construct_algorithm_model(name: str, model: type[BaseModel], model_default: 
         __config__=ConfigDict(extra='forbid')
     )
 
-algorithm_models: list[type[BaseModel]] = [construct_algorithm_model(name, model, model_default) for name, (_, model, model_default) in algorithms.items()]
+algorithm_models: list[type[BaseModel]] = [construct_algorithm_model(name, model.get_params_generic()) for name, model in algorithms.items()]
 # name differentiates algorithms
 AlgorithmUnion = Annotated[Union[tuple(algorithm_models)], Field(discriminator='name')]

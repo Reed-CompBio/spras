@@ -1,42 +1,39 @@
-from typing import Any, Optional
-
-from pydantic import BaseModel
+from typing import Any
 
 # supported algorithm imports
 from spras.allpairs import AllPairs
 from spras.btb import BowTieBuilder
-from spras.config.util import Empty
 from spras.dataset import Dataset
-from spras.domino import DOMINO, DominoParams
-from spras.meo import MEO, MEOParams
-from spras.mincostflow import MinCostFlow, MinCostFlowParams
-from spras.omicsintegrator1 import OmicsIntegrator1, OmicsIntegrator1Params
-from spras.omicsintegrator2 import OmicsIntegrator2, OmicsIntegrator2Params
-from spras.pathlinker import PathLinker, PathLinkerParams
+from spras.domino import DOMINO
+from spras.meo import MEO
+from spras.mincostflow import MinCostFlow
+from spras.omicsintegrator1 import OmicsIntegrator1
+from spras.omicsintegrator2 import OmicsIntegrator2
+from spras.pathlinker import PathLinker
 from spras.prm import PRM
-from spras.responsenet import ResponseNet, ResponseNetParams
-from spras.rwr import RWR, RWRParams
-from spras.strwr import ST_RWR, ST_RWRParams
+from spras.responsenet import ResponseNet
+from spras.rwr import RWR
+from spras.strwr import ST_RWR
 
 # Algorithm names to a three-tuple of (PRM, BaseModel, default BaseModel or None if there are no good defaults).
 # This is used for the configuration and to fetch algorithms during reconstruction
-algorithms: dict[str, tuple[type[PRM], type[BaseModel], Optional[BaseModel]]] = {
-    "allpairs": (AllPairs, Empty, Empty()),
-    "bowtiebuilder": (BowTieBuilder, Empty, Empty()),
-    "domino": (DOMINO, DominoParams, DominoParams()),
-    "meo": (MEO, MEOParams, MEOParams()),
-    "mincostflow": (MinCostFlow, MinCostFlowParams, MinCostFlowParams()),
-    "omicsintegrator1": (OmicsIntegrator1, OmicsIntegrator1Params, None),
-    "omicsintegrator2": (OmicsIntegrator2, OmicsIntegrator2Params, OmicsIntegrator2Params()),
-    "pathlinker": (PathLinker, PathLinkerParams, PathLinkerParams()),
-    "responsenet": (ResponseNet, ResponseNetParams, ResponseNetParams()),
-    "rwr": (RWR, RWRParams, None),
-    "strwr": (ST_RWR, ST_RWRParams, None),
+algorithms: dict[str, type[PRM]] = {
+    "allpairs": AllPairs,
+    "bowtiebuilder": BowTieBuilder,
+    "domino": DOMINO,
+    "meo": MEO,
+    "mincostflow": MinCostFlow,
+    "omicsintegrator1": OmicsIntegrator1,
+    "omicsintegrator2": OmicsIntegrator2,
+    "pathlinker": PathLinker,
+    "responsenet": ResponseNet,
+    "rwr": RWR,
+    "strwr": ST_RWR,
 }
 
 def get_algorithm(algorithm: str) -> type[PRM]:
     try:
-        return algorithms[algorithm.lower()][0]
+        return algorithms[algorithm.lower()]
     except KeyError as exc:
         raise NotImplementedError(f'{algorithm} is not currently supported.') from exc
 

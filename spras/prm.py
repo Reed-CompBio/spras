@@ -42,6 +42,20 @@ class PRM(ABC, Generic[T]):
         """
         raise NotImplementedError
 
+    @classmethod
+    def get_params_generic(cls) -> type[T]:
+        """
+        Gets the class instance of the parameter type passed into T, allowing us to use the
+        underlying pydantic model associated to it.
+
+        For example, on `class PathLinker(PRM[PathLinkerParams])`,
+        calling `PathLinker.get_params_generic()` returns `PathLinkerParams`.
+        """
+        # TODO: use the type-safe get_original_bases when we bump to >= Python 3.12
+        # This is hacky reflection from https://stackoverflow.com/a/71720366/7589775
+        # which grabs the class of type T by the definition of `__orig_bases__`.
+        return get_args(cast(Any, cls).__orig_bases__[0])[0]
+
     # This is used in `runner.py` to avoid a dependency diamond when trying
     # to import the actual algorithm schema.
     @classmethod
@@ -49,11 +63,7 @@ class PRM(ABC, Generic[T]):
         """
         This is similar to PRA.run, but it does pydantic logic internally to re-validate argument parameters.
         """
-        # Gets the parameter type passed into T, allowing us to use the
-        # underlying pydantic model associated to it. (TODO: use get_original_bases when we bump to >= Python 3.12)
-        #   This is hacky reflection from https://stackoverflow.com/a/71720366/7589775
-        #   which grabs the class of type T
-        T_class: type[T] = get_args(cast(Any, cls).__orig_bases__[0])[0]
+        T_class = cls.get_params_generic()
 
         # Since we just used reflection, we provide a mountain-dewey error message here
         # to protect against any developer confusion.
