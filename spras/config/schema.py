@@ -11,10 +11,11 @@ We declare models using two classes here:
 """
 
 import re
-from typing import Annotated, Optional
+from typing import Annotated
 
 from pydantic import AfterValidator, BaseModel, ConfigDict
 
+from spras.config.algorithms import AlgorithmUnion
 from spras.config.container_schema import ContainerSettings
 from spras.config.util import CaseInsensitiveEnum
 
@@ -90,21 +91,6 @@ def label_validator(name: str):
         return label
     return validate
 
-class AlgorithmParams(BaseModel):
-    include: bool
-    directed: Optional[bool] = None
-
-    # TODO: use array of runs instead. We currently rely on the
-    # extra parameters here to extract the algorithm parameter information,
-    # which is why this deviates from the usual ConfigDict(extra='forbid').
-    model_config = ConfigDict(extra='allow')
-
-class Algorithm(BaseModel):
-    name: str
-    params: AlgorithmParams
-
-    model_config = ConfigDict(extra='forbid')
-
 class Dataset(BaseModel):
     # We prefer AfterValidator here to allow pydantic to run its own
     # validation & coercion logic before we check it against our own
@@ -143,7 +129,8 @@ class RawConfig(BaseModel):
     hash_length: int = DEFAULT_HASH_LENGTH
     "The length of the hash used to identify a parameter combination"
 
-    algorithms: list[Algorithm]
+    # See algorithms.py for more information about AlgorithmUnion
+    algorithms: list[AlgorithmUnion] # type: ignore - pydantic allows this.
     datasets: list[Dataset]
     gold_standards: list[GoldStandard] = []
     analysis: Analysis = Analysis()

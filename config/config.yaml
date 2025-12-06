@@ -3,6 +3,7 @@
 # The length of the hash used to identify a parameter combination
 hash_length: 7
 
+# Collection of container options
 containers:
   # Specify the container framework used by each PRM wrapper. Valid options include:
   # - docker (default if not specified)
@@ -60,14 +61,14 @@ containers:
 
 algorithms:
   - name: "pathlinker"
-    params:
-      include: true
+    include: true
+    runs:
       run1:
         k: range(100,201,100)
 
   - name: "omicsintegrator1"
-    params:
-      include: true
+    include: true
+    runs:
       run1:
         b: [5, 6]
         w: np.linspace(0,5,2)
@@ -75,8 +76,8 @@ algorithms:
         dummy_mode: "file" # Or "terminals", "all", "others"
 
   - name: "omicsintegrator2"
-    params:
-      include: true
+    include: true
+    runs:
       run1:
         b: 4
         g: 0
@@ -85,52 +86,50 @@ algorithms:
         g: 3
 
   - name: "meo"
-    params:
-      include: true
+    include: true
+    runs:
       run1:
         max_path_length: 3
-        local_search: "Yes"
+        local_search: true
         rand_restarts: 10
 
   - name: "mincostflow"
-    params:
-      include: true
+    include: true
+    runs:
       run1:
-        flow: 1 # The flow must be an int
+        flow: 1
         capacity: 1
 
   - name: "allpairs"
-    params:
-      include: true
+    include: true
 
   - name: "domino"
-    params:
-      include: true
+    include: true
+    runs:
       run1:
         slice_threshold: 0.3
         module_threshold: 0.05
 
   - name: "strwr"
-    params:
-      include: true
+    include: true
+    runs:
       run1:
         alpha: [0.85]
         threshold: [100, 200]
 
   - name: "rwr"
-    params:
-      include: true
+    include: true
+    runs:
       run1:
         alpha: [0.85]
         threshold: [100, 200]
 
   - name: "bowtiebuilder"
-    params:
-      include: true
+    include: true
 
   - name: "responsenet"
-    params:
-      include: true
+    include: true
+    runs:
       run1:
         gamma: [10]
 
