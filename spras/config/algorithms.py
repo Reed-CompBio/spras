@@ -60,7 +60,7 @@ def python_evalish_coerce(value: Any) -> Any:
 
     # This should always be an Expression whose body is Call (a function).
     if not isinstance(value_ast.body, ast.Call):
-        raise ValueError(f'The python code "{value}" should be calling a function directly. Is this meant to be python code?')
+        raise ValueError(f'This argument "{value}" was interpreted as a non-function-calling string: it should be a function call (e.g. range(100, 201, 50)), or an int or a float.')
 
     # We get the function name back as a string
     function_name = ast.unparse(value_ast.body.func)
