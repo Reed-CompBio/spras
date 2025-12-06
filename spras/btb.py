@@ -32,6 +32,14 @@ class BowTieBuilder(PRM[Empty]):
     #generate input taken from meo.py because they have same input requirements
     @staticmethod
     def generate_inputs(data, filename_map):
+        """
+        Access fields from the dataset and write the required input files
+        @param data: dataset
+        @param filename_map: a dict mapping file types in the required_inputs to the filename for that type. Associated files will be written with:
+        - sources: NODEID-headered list of sources
+        - targets: NODEID-headered list of targets
+        - edges: node pairs with associated edge weights
+        """
         BowTieBuilder.validate_required_inputs(filename_map)
 
         # Get sources and write to file, repeat for targets

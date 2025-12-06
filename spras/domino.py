@@ -44,6 +44,13 @@ class DOMINO(PRM[DominoParams]):
 
     @staticmethod
     def generate_inputs(data, filename_map):
+        """
+        Access fields from the dataset and write the required input files
+        @param data: dataset
+        @param filename_map: a dict mapping file types in the required_inputs to the filename for that type. Associated files will be written with:
+        - network: list of edges
+        - active_genes: list of active genes
+        """
         DOMINO.validate_required_inputs(filename_map)
 
         # Get active genes for node input file

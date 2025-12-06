@@ -31,6 +31,13 @@ class RWR(PRM[RWRParams]):
 
     @staticmethod
     def generate_inputs(data, filename_map):
+        """
+        Access fields from the dataset and write the required input files
+        @param data: dataset
+        @param filename_map: a dict mapping file types in the required_inputs to the filename for that type. Associated files will be written with:
+        - nodes: list of active nodes
+        - network: list of edges
+        """
         RWR.validate_required_inputs(filename_map)
 
         # Get sources and targets for node input file

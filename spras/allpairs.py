@@ -25,7 +25,10 @@ class AllPairs(PRM[Empty]):
         """
         Access fields from the dataset and write the required input files
         @param data: dataset
-        @param filename_map: a dict mapping file types in the required_inputs to the filename for that type
+        @param filename_map: a dict mapping file types in the required_inputs to the filename for that type. Associated files will be written with:
+        - nodetypes: node types with sources and targets
+        - network: network file containing edges and their weights
+        - directed_flag: contains `true` if `network` is fully directed.
         """
         AllPairs.validate_required_inputs(filename_map)
 

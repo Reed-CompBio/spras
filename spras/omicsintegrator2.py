@@ -69,10 +69,11 @@ class OmicsIntegrator2(PRM[OmicsIntegrator2Params]):
     @staticmethod
     def generate_inputs(data: Dataset, filename_map):
         """
-        Access fields from the dataset and write the required input files.
-        Automatically converts edge weights to edge costs.
+        Access fields from the dataset and write the required input files
         @param data: dataset
-        @param filename_map: a dict mapping file types in the required_inputs to the filename for that type
+        @param filename_map: a dict mapping file types in the required_inputs to the filename for that type. Associated files will be written with:
+        - prizes: list of nodes associated with their prize
+        - edges: list of edges associated with their cost
         """
         OmicsIntegrator2.validate_required_inputs(filename_map)
 

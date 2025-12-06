@@ -116,8 +116,10 @@ class OmicsIntegrator1(PRM[OmicsIntegrator1Params]):
         """
         Access fields from the dataset and write the required input files
         @param data: dataset
-        @param filename_map: a dict mapping file types in the required_inputs to the filename for that type
-        @return:
+        @param filename_map: a dict mapping file types in the required_inputs to the filename for that type. Associated files will be written with:
+        - prizes: list of nodes associated with their prize
+        - edges: list of edges associated with their weight and directionality
+        - dummy_nodes: list of dummy nodes
         """
         OmicsIntegrator1.validate_required_inputs(filename_map)
 

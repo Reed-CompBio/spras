@@ -111,8 +111,10 @@ class MEO(PRM[MEOParams]):
         """
         Access fields from the dataset and write the required input files
         @param data: dataset
-        @param filename_map: a dict mapping file types in the required_inputs to the filename for that type
-        @return:
+        @param filename_map: a dict mapping file types in the required_inputs to the filename for that type. Associated files will be written with:
+        - sources: list of sources
+        - targets: list of targets
+        - edges: list of edges
         """
         MEO.validate_required_inputs(filename_map)
 

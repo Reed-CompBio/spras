@@ -40,8 +40,9 @@ class PathLinker(PRM[PathLinkerParams]):
         """
         Access fields from the dataset and write the required input files
         @param data: dataset
-        @param filename_map: a dict mapping file types in the required_inputs to the filename for that type
-        @return:
+        @param filename_map: a dict mapping file types in the required_inputs to the filename for that type. Associated files will be written with:
+        - nodetypes: list of nodes tagged with whether they are a source or a target
+        - network: list of edges
         """
         PathLinker.validate_required_inputs(filename_map)
 

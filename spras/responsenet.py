@@ -41,7 +41,10 @@ class ResponseNet(PRM[ResponseNetParams]):
         """
         Access fields from the dataset and write the required input files
         @param data: dataset
-        @param filename_map: a dict mapping file types in the required_inputs to the filename for that type
+        @param filename_map: a dict mapping file types in the required_inputs to the filename for that type. Associated files will be written with:
+        - sources: list of sources
+        - targets: list of targets
+        - edges: list of edges
         """
         ResponseNet.validate_required_inputs(filename_map)
 

@@ -31,6 +31,14 @@ class ST_RWR(PRM[ST_RWRParams]):
 
     @staticmethod
     def generate_inputs(data, filename_map):
+        """
+        Access fields from the dataset and write the required input files
+        @param data: dataset
+        @param filename_map: a dict mapping file types in the required_inputs to the filename for that type. Associated files will be written with:
+        - sources: list of sources
+        - targets: list of targets
+        - network: list of edges
+        """
         ST_RWR.validate_required_inputs(filename_map)
 
         # Get separate source and target nodes for source and target files
