@@ -83,6 +83,9 @@ class PRM(ABC, Generic[T]):
         """
         Runs an algorithm with the specified inputs, algorithm params (T),
         the designated output_file, and the desired container_settings.
+
+        See the algorithm-specific `generate_inputs` and `parse_output`
+        for information about the input and output format.
         """
         raise NotImplementedError
 

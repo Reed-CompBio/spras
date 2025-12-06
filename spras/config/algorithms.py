@@ -5,10 +5,17 @@ and rather mainly contains validators and lower-level pydantic code.
 """
 import ast
 import copy
-from typing import Annotated, Any, Callable, Literal, Optional, Union, cast, get_args
+from typing import Annotated, Any, Callable, Literal, Union, cast, get_args
 
 import numpy as np
-from pydantic import BaseModel, BeforeValidator, ConfigDict, Field, ValidationError, create_model
+from pydantic import (
+    BaseModel,
+    BeforeValidator,
+    ConfigDict,
+    Field,
+    ValidationError,
+    create_model,
+)
 
 from spras.runner import algorithms
 
