@@ -49,10 +49,10 @@ class PRM(ABC, Generic[T]):
         """
         This is similar to PRA.run, but it does pydantic logic internally to re-validate argument parameters.
         """
-        # awful reflection here, unfortunately:
-        # https://stackoverflow.com/a/71720366/7589775
-        # alternatively, one could have a T_class parameter
-        # for PRA here, but this level of implicitness seems alright.
+        # Gets the parameter type passed into T, allowing us to use the
+        # underlying pydantic model associated to it. (TODO: use get_original_bases when we bump to >= Python 3.12)
+        #   This is hacky reflection from https://stackoverflow.com/a/71720366/7589775
+        #   which grabs the class of type T
         T_class: type[T] = get_args(cast(Any, cls).__orig_bases__[0])[0]
 
         # Since we just used reflection, we provide a mountain-dewey error message here
@@ -60,8 +60,9 @@ class PRM(ABC, Generic[T]):
         if not issubclass(T_class, BaseModel):
             raise RuntimeError("The generic passed into PRM is not a pydantic.BaseModel.")
 
-        # (and pydantic already provides nice error messages, so we don't need to worry about
-        # catching this.)
+        # Validates our untyped `args` parameter against our parameter class of type T
+        # using BaseModel.model_validate (https://docs.pydantic.dev/latest/api/base_model/#pydantic.BaseModel.model_validate)
+        # (Pydantic already provides nice error messages, so we don't need to worry about catching this.)
         T_parsed = T_class.model_validate(args)
 
         return cls.run(inputs, output_file, T_parsed, container_settings)
