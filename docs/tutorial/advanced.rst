@@ -177,6 +177,7 @@ The global workflow control section in the configuration file allows a user to s
 
 .. code-block:: yaml
 
-    container_framework: docker
+    containers:
+        framework: docker
 
 The frameworks include Docker, Apptainer/Singularity, or dsub
