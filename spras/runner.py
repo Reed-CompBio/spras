@@ -15,8 +15,6 @@ from spras.responsenet import ResponseNet
 from spras.rwr import RWR
 from spras.strwr import ST_RWR
 
-# Algorithm names to a three-tuple of (PRM, BaseModel, default BaseModel or None if there are no good defaults).
-# This is used for the configuration and to fetch algorithms during reconstruction
 algorithms: dict[str, type[PRM]] = {
     "allpairs": AllPairs,
     "bowtiebuilder": BowTieBuilder,
