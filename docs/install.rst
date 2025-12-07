@@ -32,10 +32,10 @@ the image from the GitHub Container Registry:
 
     docker pull ghcr.io/reed-compbio/spras:latest
 
-If you want to pull a specific version of spras, use the version for the image tag name. For example, to get spras v0.5.0:
+If you want to pull a specific version of spras, use the version for the image tag name. For example, to get spras v0.6.0:
 
 .. code-block:: bash
 
-    docker pull ghcr.io/reed-compbio/spras:0.5.0
+    docker pull ghcr.io/reed-compbio/spras:0.6.0
 
 .. _Download and Install Conda: https://conda-forge.org/download/
