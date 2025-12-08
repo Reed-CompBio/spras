@@ -32,7 +32,7 @@ dependencies = [
     "spython==0.3.14",
 
     # toolchain deps
-    "pip==25.2",
+    "pip==25.3",
 ]
 
 [project.optional-dependencies]
