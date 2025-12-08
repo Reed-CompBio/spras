@@ -115,12 +115,10 @@ class TestEvaluate:
         pr_df = Evaluation.node_precision_and_recall(pathway, GS_NODE_TABLE)
         Evaluation.precision_and_recall_pca_chosen_pathway(pr_df, output_file, output_png, True)
 
-        print(Path(output_file).read_text())
+        chosen = pd.read_csv(output_file, sep='\t', header=0).round(8).to_csv()
+        expected = pd.read_csv(EXPECT_DIR / 'expected-pr-per-pathway-pca-chosen.txt', sep='\t',  header=0).round(8).to_csv()
 
-        chosen = pd.read_csv(output_file, sep='\t', header=0).round(8)
-        expected = pd.read_csv(EXPECT_DIR / 'expected-pr-per-pathway-pca-chosen.txt', sep='\t',  header=0).round(8)
-
-        assert chosen.equals(expected)
+        assert chosen == expected
         assert output_png.exists()
 
     def test_node_ensemble(self):
