@@ -28,7 +28,7 @@ class TestDOMINO:
         # Only include required arguments
         OUT_FILE_DEFAULT.unlink(missing_ok=True)
         DOMINO.run(
-            network=TEST_DIR / 'input' / 'simple' / 'domino-network.txt',
+            network_sif=TEST_DIR / 'input' / 'simple' / 'domino-network.sif',
             active_genes=TEST_DIR / 'input' / 'simple' / 'domino-active-genes.txt',
             output_file=OUT_FILE_DEFAULT)
         # output_file should be empty
@@ -38,7 +38,7 @@ class TestDOMINO:
         # Include optional arguments
         OUT_FILE_OPTIONAL.unlink(missing_ok=True)
         DOMINO.run(
-            network=TEST_DIR / 'input' / 'simple' / 'domino-network.txt',
+            network_sif=TEST_DIR / 'input' / 'simple' / 'domino-network.sif',
             active_genes=TEST_DIR / 'input' / 'simple' / 'domino-active-genes.txt',
             output_file=OUT_FILE_OPTIONAL,
             slice_threshold=0.4,
@@ -51,7 +51,7 @@ class TestDOMINO:
         with pytest.raises(ValueError):
             # No active_genes
             DOMINO.run(
-                network=TEST_DIR / 'input' / 'simple' / 'domino-network.txt',
+                network_sif=TEST_DIR / 'input' / 'simple' / 'domino-network.sif',
                 output_file=OUT_FILE_DEFAULT)
 
     def test_domino_missing_network(self):
@@ -67,7 +67,7 @@ class TestDOMINO:
         # https://github.com/Reed-CompBio/spras/pull/103#issuecomment-1681526958
         OUT_FILE_DEFAULT.unlink(missing_ok=True)
         DOMINO.run(
-            network=TEST_DIR / 'input' / 'empty' / 'domino-network.txt',
+            network_sif=TEST_DIR / 'input' / 'empty' / 'domino-network.sif',
             active_genes=TEST_DIR / 'input' / 'empty' / 'domino-active-genes.txt',
             output_file=OUT_FILE_DEFAULT)
         assert OUT_FILE_DEFAULT.exists()
@@ -80,7 +80,7 @@ class TestDOMINO:
         OUT_FILE_DEFAULT.unlink(missing_ok=True)
         # Only include required arguments and run with Singularity
         DOMINO.run(
-            network=TEST_DIR / 'input' / 'simple' / 'domino-network.txt',
+            network_sif=TEST_DIR / 'input' / 'simple' / 'domino-network.sif',
             active_genes=TEST_DIR / 'input' / 'simple' / 'domino-active-genes.txt',
             output_file=OUT_FILE_DEFAULT,
             container_settings=ProcessedContainerSettings(framework=ContainerFramework.singularity))
