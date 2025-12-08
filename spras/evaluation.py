@@ -305,7 +305,7 @@ class Evaluation:
                 plt.close()
 
     @staticmethod
-    def pca_chosen_pathway(coordinates_files: Iterable[Union[str, PathLike]], pathway_summary_file: str, output_dir: str):
+    def pca_chosen_pathway(coordinates_files: Iterable[Union[str, PathLike]], pathway_summary_file: str | PathLike, output_dir: str | PathLike):
         """
         Identifies the pathway closest to a specified highest kernel density estimated (KDE) peak based on PCA
         coordinates
@@ -356,7 +356,7 @@ class Evaluation:
         return rep_pathways
 
     @staticmethod
-    def edge_frequency_node_ensemble(node_table: pd.DataFrame, ensemble_files: Iterable[Union[str, PathLike]], dataset_file: str) -> dict:
+    def edge_frequency_node_ensemble(node_table: pd.DataFrame, ensemble_files: Iterable[Union[str, PathLike]], dataset_file: str | PathLike) -> dict:
         """
         Generates a dictionary of node ensembles using edge frequency data from a list of ensemble files.
         A list of ensemble files can contain an aggregated ensemble or algorithm-specific ensembles per dataset
@@ -387,11 +387,11 @@ class Evaluation:
 
         if interactome.empty:
             raise ValueError(
-                f"Cannot compute PR curve or generate node ensemble. Input network for dataset \"{dataset_file.split('-')[0]}\" is empty."
+                f"Cannot compute PR curve or generate node ensemble. Input network for dataset \"{Path(dataset_file).name.split('-')[0]}\" is empty."
             )
         if node_table.empty:
             raise ValueError(
-                f"Cannot compute PR curve or generate node ensemble. Gold standard associated with dataset \"{dataset_file.split('-')[0]}\" is empty."
+                f"Cannot compute PR curve or generate node ensemble. Gold standard associated with dataset \"{Path(dataset_file).name.split('-')[0]}\" is empty."
             )
 
         # set the initial default frequencies to 0 for all interactome and gold standard nodes
