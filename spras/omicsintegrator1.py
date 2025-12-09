@@ -235,7 +235,7 @@ class OmicsIntegrator1(PRM):
             df.columns = ["Edge1", "InteractionType", "Edge2"]
             df = add_rank_column(df)
             df = reinsert_direction_col_mixed(df, "InteractionType", "pd", "pp")
-            df.drop(columns=['InteractionType'], inplace=True)
+            df = df.drop(columns=['InteractionType'])
             df.columns = ['Node1', 'Node2', 'Rank', 'Direction']
             df, has_duplicates = duplicate_edges(df)
             if has_duplicates:
