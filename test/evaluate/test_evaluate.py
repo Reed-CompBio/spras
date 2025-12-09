@@ -108,10 +108,14 @@ class TestEvaluate:
                       INPUT_DIR / 'data-test-params-789' / 'pathway.txt', INPUT_DIR / 'data-test-params-empty' / 'pathway.txt']
 
         dataframe = ml.summarize_networks(file_paths)
-        ml.pca(dataframe, OUT_DIR / 'pca.png', OUT_DIR / 'pca-variance.txt', str(output_coordinates), kde=True, remove_empty_pathways=True)
+        ml.pca(dataframe, OUT_DIR / 'pca.png', OUT_DIR / 'pca-variance.txt', output_coordinates, kde=True, remove_empty_pathways=True)
 
         pathways = Evaluation.pca_chosen_pathway([output_coordinates], SUMMARY_FILE, INPUT_DIR)
         assert len(pathways) == 1, f"There must only be one pathway, but got {len(pathways)} instead! ({pathways})"
+        pd.testing.assert_frame_equal(
+            pd.read_csv(output_coordinates, sep='\t', header=0),
+            pd.read_csv(EXPECT_DIR / 'expected-pca-coordinates.txt', sep='\t', header=0)
+        )
 
         pr_df = Evaluation.node_precision_and_recall(pathways, GS_NODE_TABLE)
         Evaluation.precision_and_recall_pca_chosen_pathway(pr_df, output_file, output_png, True)
