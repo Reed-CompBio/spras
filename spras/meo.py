@@ -215,7 +215,7 @@ class MEO(PRM):
             # Would need to load the paths output file to rank edges correctly
             df = add_rank_column(df)
             df = reinsert_direction_col_directed(df)
-            df.drop(columns=['Type', 'Oriented', 'Weight'], inplace=True)
+            df = df.drop(columns=['Type', 'Oriented', 'Weight'])
             df.columns = ['Node1', 'Node2', 'Rank', "Direction"]
             df, has_duplicates = duplicate_edges(df)
             if has_duplicates:
