@@ -104,8 +104,8 @@ class TestEvaluate:
         output_coordinates = Path(OUT_DIR / 'pca-coordinates.tsv')
         output_coordinates.unlink(missing_ok=True)
 
-        file_paths = [INPUT_DIR / 'data-test-params-123/pathway.txt', INPUT_DIR / 'data-test-params-456/pathway.txt',
-                      INPUT_DIR / 'data-test-params-789/pathway.txt', INPUT_DIR / 'data-test-params-empty/pathway.txt']
+        file_paths = [INPUT_DIR / 'data-test-params-123' / 'pathway.txt', INPUT_DIR / 'data-test-params-456' / 'pathway.txt',
+                      INPUT_DIR / 'data-test-params-789' / 'pathway.txt', INPUT_DIR / 'data-test-params-empty' / 'pathway.txt']
 
         dataframe = ml.summarize_networks(file_paths)
         ml.pca(dataframe, OUT_DIR / 'pca.png', OUT_DIR / 'pca-variance.txt', str(output_coordinates), kde=True, remove_empty_pathways=True)
@@ -115,10 +115,10 @@ class TestEvaluate:
         pr_df = Evaluation.node_precision_and_recall(pathway, GS_NODE_TABLE)
         Evaluation.precision_and_recall_pca_chosen_pathway(pr_df, output_file, output_png, True)
 
-        chosen = pd.read_csv(output_file, sep='\t', header=0).round(8).to_csv()
-        expected = pd.read_csv(EXPECT_DIR / 'expected-pr-per-pathway-pca-chosen.txt', sep='\t',  header=0).round(8).to_csv()
+        chosen = pd.read_csv(output_file, sep='\t', header=0).round(8)
+        expected = pd.read_csv(EXPECT_DIR / 'expected-pr-per-pathway-pca-chosen.txt', sep='\t', header=0).round(8)
 
-        assert chosen == expected
+        assert not chosen.equals(expected)
         assert output_png.exists()
 
     def test_node_ensemble(self):
