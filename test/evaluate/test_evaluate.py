@@ -118,7 +118,7 @@ class TestEvaluate:
         chosen = pd.read_csv(output_file, sep='\t', header=0).round(8)
         expected = pd.read_csv(EXPECT_DIR / 'expected-pr-per-pathway-pca-chosen.txt', sep='\t', header=0).round(8)
 
-        assert pd.testing.assert_frame_equal(chosen, expected)
+        pd.testing.assert_frame_equal(chosen, expected)
         assert output_png.exists()
 
     def test_node_ensemble(self):
