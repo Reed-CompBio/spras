@@ -117,7 +117,7 @@ Step 2: Create a Local Neighborhood Docker image
 
 Complete the ``Dockerfile`` in the
 ``docker-wrappers/LocalNeighborhood``
-directory to create a Docker image. The AllPairs ``Dockerfile``
+directory to create a Docker image. The PathLinker ``Dockerfile``
 demonstrates how to begin with a Python image and copy files into the
 image with ``COPY``. Browse the official `Python
 images <https://hub.docker.com/_/python>`__ to select a recent version
