@@ -73,7 +73,7 @@ class OmicsIntegrator2(PRM[OmicsIntegrator2Params]):
         @param data: dataset
         @param filename_map: a dict mapping file types in the required_inputs to the filename for that type. Associated files will be written with:
         - prizes: list of nodes associated with their prize
-        - edges: list of edges associated with their cost
+        - edges: list of edges associated with their cost (transformed from the original Dataset weights)
         """
         OmicsIntegrator2.validate_required_inputs(filename_map)
 
