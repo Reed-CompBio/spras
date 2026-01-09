@@ -5,6 +5,7 @@ import yaml
 from spras.dataset import Dataset
 from spras.evaluation import Evaluation
 from spras.analysis import ml, summary, cytoscape
+from spras.attribution import attribute_algorithms
 import spras.config.config as _config
 
 # Snakemake updated the behavior in the 6.5.0 release https://github.com/snakemake/snakemake/pull/1037
@@ -124,6 +125,10 @@ def make_final_input(wildcards):
 
     # Since (formatted) pathway files are interesting to the user, we preserve them.
     final_input.extend(expand('{out_dir}{sep}{dataset}-{algorithm_params}{sep}pathway.txt', out_dir=out_dir, sep=SEP, dataset=dataset_labels, algorithm_params=algorithms_with_params))
+
+    if _config.config.analysis_include_attribution:
+        final_input.extend(expand('{out_dir}{sep}attribution/{algorithm}.bib', out_dir=out_dir, sep=SEP, algorithm=algorithms))
+        final_input.extend(expand('{out_dir}{sep}attribution/all.bib', out_dir=out_dir, sep=SEP, ))
 
     # Create log files for the parameters and datasets
     final_input.extend(expand('{out_dir}{sep}logs{sep}parameters-{algorithm_params}.yaml', out_dir=out_dir, sep=SEP, algorithm_params=algorithms_with_params))
@@ -402,7 +407,7 @@ rule ensemble_per_algo:
 # Calculated Jaccard similarity between output pathways for each dataset per algorithm
 rule jaccard_similarity_per_algo:
     input:
-         pathways = collect_pathways_per_algo
+        pathways = collect_pathways_per_algo
     output:
         jaccard_similarity_matrix = SEP.join([out_dir, '{dataset}-ml', '{algorithm}-jaccard-matrix.txt']),
         jaccard_similarity_heatmap = SEP.join([out_dir, '{dataset}-ml', '{algorithm}-jaccard-heatmap.png'])
@@ -561,6 +566,13 @@ rule evaluation_edge_dummy:
         undirected_edge_table = Evaluation.from_file(input.edge_gold_standard_file).undirected_edge_table
         directed_edge_table = Evaluation.from_file(input.edge_gold_standard_file).directed_edge_table
         Evaluation.edge_dummy_function(mixed_edge_table, undirected_edge_table, directed_edge_table, output.dummy_file)
+
+rule attribution:
+    output:
+        attribution_all = SEP.join([out_dir, 'attribution', 'all.bib']),
+        attribution_algorithms = expand('{out_dir}{sep}attribution{sep}{algorithms}.bib', out_dir=out_dir, sep=SEP, algorithms=algorithms),
+    run:
+        attribute_algorithms(output.attribution_all, output.attribution_algorithms)
 
 # Remove the output directory
 rule clean:
