@@ -48,6 +48,11 @@ jobs:
     with:
       path: docker-wrappers/BowTieBuilder
       container: reedcompbio/bowtiebuilder
+  build-and-remove-must:
+    uses: "./.github/workflows/build-and-remove-template.yml"
+    with:
+      path: docker-wrappers/MuST
+      container: reedcompbio/must
   build-and-remove-cytoscape:
     uses: "./.github/workflows/build-and-remove-template.yml"
     with:
