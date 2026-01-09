@@ -294,7 +294,7 @@ through SPRAS with
 
 .. code:: bash
 
-   snakemake --cores 1 --configfile config/config.yaml
+   spras run --cores 1 --configfile config/config.yaml
 
 Make sure to run the command inside the ``spras`` conda environment.
 
