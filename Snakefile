@@ -210,7 +210,7 @@ checkpoint prepare_input:
         # and write the output files specified by required_inputs
         # The filename_map provides the output file path for each required input file type
         filename_map = {input_type: SEP.join([out_dir, 'prepared', f'{wildcards.dataset}-{wildcards.algorithm}-inputs', f'{input_type}.txt']) for input_type in runner.get_required_inputs(wildcards.algorithm)}
-        runner.prepare_inputs(wildcards.algorithm, input.dataset_file, filename_map)
+        runner.generate_inputs(wildcards.algorithm, input.dataset_file, filename_map)
 
 # Collect the prepared input files from the specified directory
 # If the directory does not exist for this dataset-algorithm pair, the checkpoint will detect that
@@ -219,7 +219,7 @@ checkpoint prepare_input:
 # run prepare_input
 # It only checks for the output of prepare_input, which is a directory
 # Therefore, manually remove the entire directory if any of the expected prepared input file are missing so that
-# prepare_inputs is run, the directory and prepared input files are re-generated, and the reconstruct rule is run again
+# generate_inputs is run, the directory and prepared input files are re-generated, and the reconstruct rule is run again
 # Modeled after https://evodify.com/snakemake-checkpoint-tutorial/
 def collect_prepared_input(wildcards):
     # Need to construct the path in advance because it is needed before it can be obtained from the output
