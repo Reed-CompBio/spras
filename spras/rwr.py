@@ -27,7 +27,9 @@ class RWRParams(BaseModel):
 
 class RWR(PRM[RWRParams]):
     required_inputs = ['network','nodes']
-    dois = []
+    # Paper relevant to biological applications of random walks,
+    # then the original personalized PageRank paper.
+    dois = ["10.1093/bioinformatics/btq680", "10.1145/511446.511513"]
 
     @staticmethod
     def generate_inputs(data, filename_map):
