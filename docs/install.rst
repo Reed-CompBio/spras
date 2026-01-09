@@ -3,17 +3,15 @@ Installing SPRAS
 
 SPRAS provides several convenient ways to use the package, depending on your needs
 
-Using a Conda Environment
+Using Pixi
 -------------------------
-If you want to run spras locally on your machine, you can use the provided `environment.yml` file to create a conda environment
-with all the necessary dependencies:
-1. `Download and Install Conda`_
-2. Build the `spras` conda environment and activate it:
+If you want to run spras locally on your machine, you can use ``pixi``:
+1. `Download and Install Pixi`_
+2. Activate the pixi environment
 
 .. code-block:: bash
 
-    conda env create -f environment.yml
-    conda activate spras
+    pixi shell
 
 Installing SPRAS with `pip`
 ---------------------------
@@ -38,4 +36,4 @@ If you want to pull a specific version of spras, use the version for the image t
 
     docker pull reedcompbio/spras:0.6.0
 
-.. _Download and Install Conda: https://conda-forge.org/download/
+.. _Download and Install Pixi: https://pixi.sh/latest/installation/

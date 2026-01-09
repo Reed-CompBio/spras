@@ -23,20 +23,14 @@ Visit the `SPRAS GitHub repository <https://github.com/Reed-CompBio/spras>`__ an
 0.2 Set up the SPRAS environment
 -------------------------------------
 
-From the root directory of the SPRAS repository, create and activate the Conda environment and install the SPRAS python package:
+From the root directory of the SPRAS repository, create and activate the Pixi environment and install the SPRAS python package:
 
 .. code:: bash
 
-    conda env create -f environment.yml
-    conda activate spras
-    python -m pip install .
+    pixi shell
 
 .. note::
-   The first command performs a one-time installation of the SPRAS dependencies by creating a Conda environment (an isolated space that keeps all required packages and versions separate from your system).
-
-   The second command activates the newly created environment so you can use these dependencies when running SPRAS; this step must be done each time you open a new terminal session.
-
-   The last command is a one-time installation of the SPRAS package into the environment.
+   This performs a one-time installation of the SPRAS dependencies by creating a Pixi environment (an isolated space that keeps all required packages and versions separate from your system).
 
 0.3 Test the installation
 -------------------------
