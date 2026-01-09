@@ -54,10 +54,11 @@ might look like:
 
 .. code:: bash
 
-   apptainer build spras-v0.6.0.sif docker://reedcompbio/spras:v0.6.0
+   apptainer build spras-v0.6.0.sif docker://reedcompbio/spras:0.6.0
 
 After running this command, a new file called ``spras-v0.6.0.sif`` will
-exist in the directory where the command was run.
+exist in the directory where the command was run. Note that the Docker
+image does not use a "v" in the tag.
 
 Submitting All Jobs to a Single EP
 ----------------------------------
