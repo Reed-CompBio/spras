@@ -17,6 +17,7 @@ from pydantic import AfterValidator, BaseModel, ConfigDict
 
 from spras.config.algorithms import AlgorithmUnion
 from spras.config.container_schema import ContainerSettings
+from spras.config.heuristics import GraphHeuristics
 from spras.config.util import CaseInsensitiveEnum
 
 # Most options here have an `include` property,
@@ -136,6 +137,8 @@ class RawConfig(BaseModel):
     analysis: Analysis = Analysis()
 
     reconstruction_settings: ReconstructionSettings
+
+    heuristics: GraphHeuristics = GraphHeuristics()
 
     # We include use_attribute_docstrings here to preserve the docstrings
     # after attributes at runtime (for future JSON schema generation)
