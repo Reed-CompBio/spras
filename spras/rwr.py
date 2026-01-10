@@ -1,6 +1,8 @@
 from pathlib import Path
+from typing import Optional
 
 import pandas as pd
+from pydantic import BaseModel, ConfigDict
 
 from spras.config.container_schema import ProcessedContainerSettings
 from spras.containers import prepare_volume, run_container_and_log
@@ -12,14 +14,33 @@ from spras.interactome import (
 from spras.prm import PRM
 from spras.util import add_rank_column, duplicate_edges, raw_pathway_df
 
-__all__ = ['RWR']
+__all__ = ['RWR', 'RWRParams']
 
-class RWR(PRM):
+class RWRParams(BaseModel):
+    threshold: int
+    "The number of nodes to return"
+
+    alpha: Optional[float] = None
+    "The chance of a restart during the random walk"
+
+    max_iter: Optional[int] = None
+    "The maximum amount of PageRank iterations."
+
+    model_config = ConfigDict(extra='forbid', use_attribute_docstrings=True)
+
+class RWR(PRM[RWRParams]):
     required_inputs = ['network','nodes']
     dois = []
 
     @staticmethod
     def generate_inputs(data, filename_map):
+        """
+        Access fields from the dataset and write the required input files
+        @param data: dataset
+        @param filename_map: a dict mapping file types in the required_inputs to the filename for that type. Associated files will be written with:
+        - nodes: list of active nodes
+        - network: list of edges
+        """
         RWR.validate_required_inputs(filename_map)
 
         # Get sources and targets for node input file
@@ -38,12 +59,11 @@ class RWR(PRM):
         edges.to_csv(filename_map['network'],sep='|',index=False,columns=['Interactor1','Interactor2'],header=False)
 
     @staticmethod
-    def run(network=None, nodes=None, alpha=None, max_iter=None, output_file=None, container_settings=None, threshold=None):
+    def run(inputs, output_file, args, container_settings=None):
         if not container_settings: container_settings = ProcessedContainerSettings()
-        if not nodes:
-            raise ValueError('Required RWR arguments are missing')
+        RWR.validate_required_run_args(inputs)
 
-        with Path(network).open() as network_f:
+        with Path(inputs["network"]).open() as network_f:
             for line in network_f:
                 line = line.strip()
                 endpoints = line.split("|")
@@ -54,10 +74,10 @@ class RWR(PRM):
         # Each volume is a tuple (src, dest)
         volumes = list()
 
-        bind_path, nodes_file = prepare_volume(nodes, work_dir, container_settings)
+        bind_path, nodes_file = prepare_volume(inputs["nodes"], work_dir, container_settings)
         volumes.append(bind_path)
 
-        bind_path, network_file = prepare_volume(network, work_dir, container_settings)
+        bind_path, network_file = prepare_volume(inputs["network"], work_dir, container_settings)
         volumes.append(bind_path)
 
         # RWR does not provide an argument to set the output directory
@@ -75,10 +95,10 @@ class RWR(PRM):
                    '--output', mapped_out_prefix]
 
         # Add optional arguments
-        if alpha is not None:
-            command.extend(['--alpha', str(alpha)])
-        if max_iter is not None:
-            command.extend(['--max-iter', str(max_iter)])
+        if args.alpha is not None:
+            command.extend(['--alpha', str(args.alpha)])
+        if args.max_iter is not None:
+            command.extend(['--max-iter', str(args.max_iter)])
 
         container_suffix = 'rwr:v2'
         run_container_and_log(
