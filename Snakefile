@@ -276,10 +276,7 @@ rule reconstruct:
         # Create a copy so that the updates are not written to the parameters logfile
         params = reconstruction_params(wildcards.algorithm, wildcards.params).copy()
         # Declare the input files as a dictionary.
-        inputs = dict(zip(
-            [inp.replace(".", "_") for inp in runner.get_required_inputs(wildcards.algorithm)],
-            *{input}, strict=True
-        ))
+        inputs = dict(zip(runner.get_required_inputs(wildcards.algorithm), *{input}, strict=True))
         # Remove the _spras_run_name parameter added for keeping track of the run name for parameters.yml
         if '_spras_run_name' in params:
             params.pop('_spras_run_name')
