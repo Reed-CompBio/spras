@@ -689,25 +689,31 @@ And the file ``egfr-omicsintegrator1-params-GUMLBDZ/pathway.txt`` contains the f
     MRE11_HUMAN	RAD50_HUMAN	1	U
 
 
-Step 3: Use ML post-analysis
+Step 3: Use ML-related post-analysis
 =============================
 
-3.1 Adding ML post-analysis to the intermediate configuration
+3.1 Adding ML-related post-analysis to the intermediate configuration
 -------------------------------------------------------------
 
-To enable the ML analysis, update the analysis section in your configuration file by setting ml to true. 
+To enable ML-related analysis, update the analysis section in your configuration file by setting your desired ML analyses to true. 
 Your analysis section in the configuration file should look like this:
 
 .. code-block:: yaml
 
     analysis:
-        ml:
+        pca:
+            include: true
+        hac:
+            include: true
+        ensembling:
+            include: true
+        jaccard:
             include: true
             ... (other parameters preset)
 
-``ml`` will perform unsupervised analyses such as principal component analysis (PCA), hierarchical agglomerative clustering (HAC), ensembling, and jaccard similarity comparisons of the pathways.
+These settings will perform principal component analysis (PCA), hierarchical agglomerative clustering (HAC), ensembling, and jaccard similarity comparisons of the pathways, respectively.
 
-- The  ``ml`` section includes configurable parameters that let you adjust the behavior of the analyses performed.
+- These sections includes configurable parameters that let you adjust the behavior of the analyses performed.
 
 With these updates, SPRAS will run the full set of unsupervised machine learning analyses across all outputs for a given dataset.
 
