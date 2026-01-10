@@ -9,7 +9,7 @@ from spras.mincostflow import MinCostFlow, MinCostFlowParams
 
 config.init_from_file("config/config.yaml")
 
-TEST_DIR = 'test/MinCostFlow/'
+TEST_DIR = 'test/algorithms/MinCostFlow/'
 OUT_FILE = TEST_DIR + 'output/mincostflow-output.txt'
 
 
