@@ -13,8 +13,11 @@ will grab the top level registry configuration option as it appears in the confi
 """
 
 import copy as copy
+import functools
+import importlib.metadata
 import itertools as it
 import os
+import subprocess
 import warnings
 from typing import Any
 
@@ -26,6 +29,24 @@ from spras.config.schema import RawConfig
 from spras.util import NpHashEncoder, hash_params_sha1_base32
 
 config = None
+
+@functools.cache
+def spras_revision() -> str:
+    """
+    Gets the revision of the current SPRAS repository.
+    If this file is inside a `.git` repository, this uses the revision hash.
+    Otherwise, this uses the package version.
+    """
+    # Check if we're inside a git repository
+    try:
+        return subprocess.check_output(["git", "rev-parse", "--short", "HEAD"], encoding='utf-8').strip()
+    except subprocess.CalledProcessError:
+        # Use the current package version instead
+        # https://stackoverflow.com/a/75100875/7589775
+        return f"v{importlib.metadata.version('spras').replace('.', '_')}"
+
+def attach_spras_revision(label: str) -> str:
+    return f"{label}_{spras_revision()}"
 
 # This will get called in the Snakefile, instantiating the singleton with the raw config
 def init_global(config_dict):
@@ -120,16 +141,16 @@ class Config:
             label = dataset.label
             if label.lower() in [key.lower() for key in self.datasets.keys()]:
                 raise ValueError(f"Datasets must have unique case-insensitive labels, but the label {label} appears at least twice.")
-            self.datasets[label] = dict(dataset)
+            self.datasets[attach_spras_revision(label)] = dict(dataset)
 
         # parse gold standard information
-        self.gold_standards = {gold_standard.label: dict(gold_standard) for gold_standard in raw_config.gold_standards}
+        self.gold_standards = {attach_spras_revision(gold_standard.label): dict(gold_standard) for gold_standard in raw_config.gold_standards}
 
         # check that all the dataset labels in the gold standards are existing datasets labels
         dataset_labels = set(self.datasets.keys())
         gold_standard_dataset_labels = {dataset_label for value in self.gold_standards.values() for dataset_label in value['dataset_labels']}
         for label in gold_standard_dataset_labels:
-            if label not in dataset_labels:
+            if attach_spras_revision(label) not in dataset_labels:
                 raise ValueError(f"Dataset label '{label}' provided in gold standards does not exist in the existing dataset labels.")
 
         # Code snipped from Snakefile that may be useful for assigning default labels
@@ -186,7 +207,10 @@ class Config:
                             run_dict[param] = float(value)
                         if isinstance(value, np.ndarray):
                             run_dict[param] = value.tolist()
-                    params_hash = hash_params_sha1_base32(run_dict, self.hash_length, cls=NpHashEncoder)
+                    # Incorporates the `spras_revision` into the hash
+                    hash_run_dict = copy.deepcopy(run_dict)
+                    hash_run_dict["_spras_rev"] = spras_revision()
+                    params_hash = hash_params_sha1_base32(hash_run_dict, self.hash_length, cls=NpHashEncoder)
                     if params_hash in prior_params_hashes:
                         raise ValueError(f'Parameter hash collision detected. Increase the hash_length in the config file '
                                         f'(current length {self.hash_length}).')
