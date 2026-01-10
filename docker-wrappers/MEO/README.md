@@ -21,4 +21,8 @@ The Docker wrapper can be tested with `pytest`.
 ## TODO
 - Attribute https://github.com/agitter/meo/
 - Document usage
-- Consider Alpine-based base image
+
+## Versions
+
+- `v1`: Initial version
+- `v2`: Use `amazoncorretto` alpine base image
