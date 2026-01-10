@@ -26,8 +26,6 @@ def without_keys(d: dict, keys: list):
 
 out_dir = _config.config.out_dir
 algorithm_params = _config.config.algorithm_params
-pca_params = _config.config.pca_params
-hac_params = _config.config.hac_params
 container_settings = _config.config.container_settings
 pca_params = without_keys(vars(_config.config.analysis.pca), ["pca_chosen", "include", "aggregate_per_algorithm"])
 hac_params = without_keys(vars(_config.config.analysis.hac), ["include", "aggregate_per_algorithm"])
