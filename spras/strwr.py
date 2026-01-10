@@ -1,4 +1,7 @@
 from pathlib import Path
+from typing import Optional
+
+from pydantic import BaseModel, ConfigDict
 
 from spras.config.container_schema import ProcessedContainerSettings
 from spras.containers import prepare_volume, run_container_and_log
@@ -10,15 +13,32 @@ from spras.interactome import (
 from spras.prm import PRM
 from spras.util import add_rank_column, duplicate_edges, raw_pathway_df
 
-__all__ = ['ST_RWR']
+__all__ = ['ST_RWR', 'ST_RWRParams']
+
+class ST_RWRParams(BaseModel):
+    threshold: int
+    "The number of nodes to return"
+
+    alpha: Optional[float] = None
+    "The chance of a restart during the random walk"
+
+    model_config = ConfigDict(extra='forbid', use_attribute_docstrings=True)
 
 # Note: This class is almost identical to the rwr.py file.
-class ST_RWR(PRM):
+class ST_RWR(PRM[ST_RWRParams]):
     required_inputs = ['network','sources','targets']
     dois = []
 
     @staticmethod
     def generate_inputs(data, filename_map):
+        """
+        Access fields from the dataset and write the required input files
+        @param data: dataset
+        @param filename_map: a dict mapping file types in the required_inputs to the filename for that type. Associated files will be written with:
+        - sources: list of sources
+        - targets: list of targets
+        - network: list of edges
+        """
         ST_RWR.validate_required_inputs(filename_map)
 
         # Get separate source and target nodes for source and target files
@@ -38,12 +58,11 @@ class ST_RWR(PRM):
         edges.to_csv(filename_map['network'],sep='|',index=False,columns=['Interactor1','Interactor2'],header=False)
 
     @staticmethod
-    def run(network=None, sources=None, targets=None, alpha=None, output_file=None, container_settings=None, threshold=None):
+    def run(inputs, output_file, args, container_settings=None):
         if not container_settings: container_settings = ProcessedContainerSettings()
-        if not sources or not targets or not network or not output_file:
-            raise ValueError('Required local_neighborhood arguments are missing')
+        ST_RWR.validate_required_run_args(inputs)
 
-        with Path(network).open() as network_f:
+        with Path(inputs["network"]).open() as network_f:
             for line in network_f:
                 line = line.strip()
                 endpoints = line.split("|")
@@ -55,13 +74,13 @@ class ST_RWR(PRM):
         # Each volume is a tuple (src, dest)
         volumes = list()
 
-        bind_path, source_file = prepare_volume(sources, work_dir, container_settings)
+        bind_path, source_file = prepare_volume(inputs["sources"], work_dir, container_settings)
         volumes.append(bind_path)
 
-        bind_path, target_file = prepare_volume(targets, work_dir, container_settings)
+        bind_path, target_file = prepare_volume(inputs["targets"], work_dir, container_settings)
         volumes.append(bind_path)
 
-        bind_path, network_file = prepare_volume(network, work_dir, container_settings)
+        bind_path, network_file = prepare_volume(inputs["network"], work_dir, container_settings)
         volumes.append(bind_path)
 
         # ST_RWR does not provide an argument to set the output directory
@@ -80,8 +99,8 @@ class ST_RWR(PRM):
                    '--output', mapped_out_prefix]
 
         # Add alpha as an optional argument
-        if alpha is not None:
-            command.extend(['--alpha', str(alpha)])
+        if args.alpha is not None:
+            command.extend(['--alpha', str(args.alpha)])
 
         container_suffix = 'st-rwr:v1'
         run_container_and_log(

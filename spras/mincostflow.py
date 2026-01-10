@@ -1,4 +1,7 @@
 from pathlib import Path
+from typing import Optional
+
+from pydantic import BaseModel, ConfigDict
 
 from spras.config.container_schema import ProcessedContainerSettings
 from spras.containers import prepare_volume, run_container_and_log
@@ -9,7 +12,16 @@ from spras.interactome import (
 from spras.prm import PRM
 from spras.util import add_rank_column, duplicate_edges, raw_pathway_df
 
-__all__ = ['MinCostFlow']
+__all__ = ['MinCostFlow', 'MinCostFlowParams']
+
+class MinCostFlowParams(BaseModel):
+    flow: Optional[int] = None
+    "amount of flow going through the graph"
+
+    capacity: Optional[int] = None
+    "amount of capacity allowed on each edge"
+
+    model_config = ConfigDict(extra='forbid', use_attribute_docstrings=True)
 
 """
 MinCostFlow deals with fully directed graphs
@@ -23,7 +35,7 @@ Interactor1  Interactor2   Weight
 - the expected raw input file should have node pairs in the 1st and 2nd columns, with the weight in the 3rd column
 - it can include repeated and bidirectional edges
 """
-class MinCostFlow(PRM):
+class MinCostFlow(PRM[MinCostFlowParams]):
     required_inputs = ['sources', 'targets', 'edges']
     # NOTE: This is the DOI for the ResponseNet paper.
     # This version of MinCostFlow is inspired by the ResponseNet paper, but does not have
@@ -35,7 +47,10 @@ class MinCostFlow(PRM):
         """
         Access fields from the dataset and write the required input files
         @param data: dataset
-        @param filename_map: a dict mapping file types in the required_inputs to the filename for that type
+        @param filename_map: a dict mapping file types in the required_inputs to the filename for that type. Associated files will be written with:
+        - sources: list of sources
+        - targets: list of targets
+        - edges: list of edges
         """
 
         MinCostFlow.validate_required_inputs(filename_map)
@@ -61,21 +76,10 @@ class MinCostFlow(PRM):
                      header=False)
 
     @staticmethod
-    def run(sources=None, targets=None, edges=None, output_file=None, flow=None, capacity=None, container_settings=None):
-        """
-        Run min cost flow with Docker (or singularity)
-        @param sources: input sources (required)
-        @param targets: input targets (required)
-        @param edges: input network file (required)
-        @param output_file: output file name (required)
-        @param flow: (int) amount of flow going through the graph (optional)
-        @param capacity: (float) amount of capacity allowed on each edge (optional)
-        @param container_settings: configure the container runtime
-        """
+    def run(inputs, output_file, args=None, container_settings=None):
         if not container_settings: container_settings = ProcessedContainerSettings()
-        # ensures that these parameters are required
-        if not sources or not targets or not edges or not output_file:
-            raise ValueError('Required MinCostFlow arguments are missing')
+        if not args: args = MinCostFlowParams()
+        MinCostFlow.validate_required_run_args(inputs)
 
         # the data files will be mapped within this directory within the container
         work_dir = '/mincostflow'
@@ -83,13 +87,13 @@ class MinCostFlow(PRM):
         # the tuple is for mapping the sources, targets, edges, and output
         volumes = list()
 
-        bind_path, sources_file = prepare_volume(sources, work_dir, container_settings)
+        bind_path, sources_file = prepare_volume(inputs["sources"], work_dir, container_settings)
         volumes.append(bind_path)
 
-        bind_path, targets_file = prepare_volume(targets, work_dir, container_settings)
+        bind_path, targets_file = prepare_volume(inputs["targets"], work_dir, container_settings)
         volumes.append(bind_path)
 
-        bind_path, edges_file = prepare_volume(edges, work_dir, container_settings)
+        bind_path, edges_file = prepare_volume(inputs["edges"], work_dir, container_settings)
         volumes.append(bind_path)
 
         # Create a prefix for the output filename and ensure the directory exists
@@ -108,10 +112,10 @@ class MinCostFlow(PRM):
                     '--output', mapped_out_prefix]
 
         # Optional arguments (extend the command if available)
-        if flow is not None:
-            command.extend(['--flow', str(flow)])
-        if capacity is not None:
-            command.extend(['--capacity', str(capacity)])
+        if args.flow is not None:
+            command.extend(['--flow', str(args.flow)])
+        if args.capacity is not None:
+            command.extend(['--capacity', str(args.capacity)])
 
         # choosing to run in docker or singularity container
         container_suffix = "mincostflow:v1"

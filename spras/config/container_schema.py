@@ -33,6 +33,8 @@ class ContainerRegistry(BaseModel):
 class ContainerSettings(BaseModel):
     framework: ContainerFramework = ContainerFramework.docker
     unpack_singularity: bool = False
+
+    model_config = ConfigDict(extra='forbid')
     enable_profiling: bool = False
     "A Boolean indicating whether to enable container runtime profiling (apptainer/singularity only)"
     registry: ContainerRegistry
