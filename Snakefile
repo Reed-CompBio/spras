@@ -26,7 +26,8 @@ def without_keys(d: dict, keys: list):
 
 out_dir = _config.config.out_dir
 algorithm_params = _config.config.algorithm_params
-algorithm_directed = _config.config.algorithm_directed
+pca_params = _config.config.pca_params
+hac_params = _config.config.hac_params
 container_settings = _config.config.container_settings
 pca_params = without_keys(vars(_config.config.analysis.pca), ["pca_chosen", "include", "aggregate_per_algorithm"])
 hac_params = without_keys(vars(_config.config.analysis.hac), ["include", "aggregate_per_algorithm"])
@@ -297,16 +298,12 @@ rule reconstruct:
     run:
         # Create a copy so that the updates are not written to the parameters logfile
         params = reconstruction_params(wildcards.algorithm, wildcards.params).copy()
-        # Add the input files
-        params.update(dict(zip(runner.get_required_inputs(wildcards.algorithm), *{input}, strict=True)))
-        # Add the output file
-        # All run functions can accept a relative path to the output file that should be written that is called 'output_file'
-        params['output_file'] = output.pathway_file
-        # Remove the default placeholder parameter added for algorithms that have no parameters
-        if 'spras_placeholder' in params:
-            params.pop('spras_placeholder')
-        params['container_settings'] = container_settings
-        runner.run(wildcards.algorithm, params)
+        # Declare the input files as a dictionary.
+        inputs = dict(zip(runner.get_required_inputs(wildcards.algorithm), *{input}, strict=True))
+        # Remove the _spras_run_name parameter added for keeping track of the run name for parameters.yml
+        if '_spras_run_name' in params:
+            params.pop('_spras_run_name')
+        runner.run(wildcards.algorithm, inputs, output.pathway_file, params, container_settings)
 
 # Original pathway reconstruction output to universal output
 # Use PRRunner as a wrapper to call the algorithm-specific parse_output
