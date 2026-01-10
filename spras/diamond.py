@@ -89,8 +89,8 @@ class DIAMOnD(PRM[DIAMOnDParams]):
                    '/DIAMOnD.py',
                    network_file,
                    seeds_file,
-                   args.n,
-                   args.alpha,
+                   str(args.n),
+                   str(args.alpha),
                    mapped_out_file]
 
         container_suffix = "diamond:latest"
