@@ -3,10 +3,8 @@ from pathlib import Path
 from spras.config.container_schema import ProcessedContainerSettings
 from spras.config.util import Empty
 from spras.containers import prepare_volume, run_container_and_log
-from spras.interactome import (
-    convert_undirected_to_directed,
-    reinsert_direction_col_directed,
-)
+from spras.dataset import Direction, GraphMultiplicity
+from spras.interactome import reinsert_direction_col_directed
 from spras.prm import PRM
 from spras.util import (
     add_rank_column,
@@ -28,6 +26,7 @@ Interactor1     Interactor2     Weight
 class BowTieBuilder(PRM[Empty]):
     required_inputs = ['sources', 'targets', 'edges']
     dois = ["10.1186/1752-0509-3-67"]
+    interactome_properties = [Direction.DIRECTED, GraphMultiplicity.SIMPLE]
 
     #generate input taken from meo.py because they have same input requirements
     @staticmethod
@@ -59,10 +58,7 @@ class BowTieBuilder(PRM[Empty]):
 
 
         # Create network file
-        edges = data.get_interactome()
-
-        # Format into directed graph (BTB uses the nx.DiGraph constructor internally)
-        edges = convert_undirected_to_directed(edges)
+        edges = data.get_interactome(BowTieBuilder.interactome_properties).df
 
         edges.to_csv(filename_map["edges"], sep="\t", index=False,
                                       columns=["Interactor1", "Interactor2", "Weight"],

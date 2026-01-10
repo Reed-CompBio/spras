@@ -6,6 +6,7 @@ from pydantic import BaseModel, ConfigDict
 
 from spras.config.container_schema import ProcessedContainerSettings
 from spras.containers import prepare_volume, run_container_and_log
+from spras.dataset import Direction, GraphDuals, GraphLoopiness, GraphMultiplicity
 from spras.interactome import (
     add_directionality_constant,
     reinsert_direction_col_directed,
@@ -105,6 +106,7 @@ Interactor1   pp/pd   Interactor2   Weight
 class MEO(PRM[MEOParams]):
     required_inputs = ['sources', 'targets', 'edges']
     dois = ["10.1093/nar/gkq1207"]
+    interactome_properties = [Direction.MIXED, GraphMultiplicity.SIMPLE, GraphLoopiness.NO_LOOPS, GraphDuals.NO_DUALS]
 
     @staticmethod
     def generate_inputs(data, filename_map):
@@ -133,7 +135,7 @@ class MEO(PRM[MEOParams]):
             nodes.to_csv(filename_map[node_type], index=False, columns=['NODEID'], header=False)
 
         # Create network file
-        edges = data.get_interactome()
+        edges = data.get_interactome(MEO.interactome_properties).df
 
         # Format network file
         edges = add_directionality_constant(edges, 'EdgeType', '(pd)', '(pp)')

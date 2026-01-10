@@ -4,7 +4,7 @@ from pathlib import Path
 from spras.config.container_schema import ProcessedContainerSettings
 from spras.config.util import Empty
 from spras.containers import prepare_volume, run_container_and_log
-from spras.dataset import Dataset
+from spras.dataset import Dataset, Direction, GraphMultiplicity
 from spras.interactome import (
     convert_undirected_to_directed,
     has_direction,
@@ -19,6 +19,9 @@ __all__ = ['AllPairs']
 class AllPairs(PRM[Empty]):
     required_inputs = ['nodetypes', 'network', 'directed_flag']
     dois = []
+    # while APSP doesn't care about the directionality column,
+    # it's nice to explicitly declare that it doesn't
+    interactome_properties = [Direction.MIXED, GraphMultiplicity.SIMPLE]
 
     @staticmethod
     def generate_inputs(data: Dataset, filename_map):
@@ -51,8 +54,7 @@ class AllPairs(PRM[Empty]):
 
         input_df.to_csv(filename_map["nodetypes"], sep="\t", index=False, columns=["#Node", "Node type"])
 
-        # Create network file
-        edges_df = data.get_interactome()
+        edges_df = data.get_interactome(AllPairs.interactome_properties).df
 
         if edges_df is None:
             raise ValueError("Dataset does not have an interactome.")

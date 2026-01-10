@@ -8,6 +8,7 @@ from pydantic import BaseModel, ConfigDict
 from spras.config.container_schema import ProcessedContainerSettings
 from spras.config.util import BaseModel
 from spras.containers import ContainerError, prepare_volume, run_container_and_log
+from spras.dataset import Direction, GraphMultiplicity
 from spras.interactome import (
     add_constant,
     reinsert_direction_col_undirected,
@@ -41,6 +42,7 @@ Interactor1     ppi     Interactor2
 class DOMINO(PRM[DominoParams]):
     required_inputs = ['network', 'active_genes']
     dois = ["10.15252/msb.20209593"]
+    interactome_properties = [Direction.UNDIRECTED, GraphMultiplicity.SIMPLE]
 
     @staticmethod
     def generate_inputs(data, filename_map):
@@ -67,12 +69,10 @@ class DOMINO(PRM[DominoParams]):
         # Create active_genes file
         node_df.to_csv(filename_map['active_genes'], sep='\t', index=False, columns=['NODEID'], header=False)
 
-        # Create network file
-        edges_df = data.get_interactome()
+        # Create network file - while DOMINO doesn't care about the directionality column,
+        # it's nice to explicitly declare that it doesn't
+        edges_df = data.get_interactome(DOMINO.interactome_properties).df
 
-        # Format network file
-        # edges_df = convert_directed_to_undirected(edges_df)
-        # - technically this can be called but since we don't use the column and based on what the function does, it is not truly needed
         edges_df = add_constant(edges_df, 'ppi', 'ppi')
 
         # Transform each node id with a prefix
