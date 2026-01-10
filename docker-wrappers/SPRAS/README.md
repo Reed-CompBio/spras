@@ -11,9 +11,9 @@ To create the Docker image locally, make sure you are in this repository's root 
 docker build -t <project name>/<image name>:<tag name> -f docker-wrappers/SPRAS/Dockerfile .
 ```
 
-For example, to build this image with the intent of pushing it to DockerHub as reedcompbio/spras:v0.5.0, you'd run:
+For example, to build this image with the intent of pushing it to DockerHub as reedcompbio/spras:v0.6.0, you'd run:
 ```bash
-docker build -t reedcompbio/spras:v0.5.0 -f docker-wrappers/SPRAS/Dockerfile .
+docker build -t reedcompbio/spras:v0.6.0 -f docker-wrappers/SPRAS/Dockerfile .
 ```
 
 This will copy the entire SPRAS repository into the container and install SPRAS with `pip`. As such, any changes you've made to the current SPRAS repository will be reflected in version of SPRAS installed in the container. Since SPRAS
@@ -38,9 +38,9 @@ Or to temporarily override your system's default during the build, prepend your 
 DOCKER_DEFAULT_PLATFORM=linux/amd64
 ```
 
-For example, to build reedcompbio/spras:v0.5.0 on Apple Silicon as a linux/amd64 container, you'd run:
+For example, to build reedcompbio/spras:v0.6.0 on Apple Silicon as a linux/amd64 container, you'd run:
 ```
-DOCKER_DEFAULT_PLATFORM=linux/amd64 docker build -t reedcompbio/spras:v0.5.0 -f docker-wrappers/SPRAS/Dockerfile .
+DOCKER_DEFAULT_PLATFORM=linux/amd64 docker build -t reedcompbio/spras:v0.6.0 -f docker-wrappers/SPRAS/Dockerfile .
 ```
 
 ## Running With HTCondor

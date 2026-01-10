@@ -10,13 +10,13 @@ containers:
 
 algorithms:
   - name: pathlinker
-    params:
-      include: true
+    include: true
+    runs:
       run1:
         k: [10, 20]
   - name: meo
-    params:
-      include: true
+    include: true
+    runs:
       run1:
         local_search: "Yes"
         max_path_length: 3
