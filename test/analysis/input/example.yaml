@@ -8,29 +8,28 @@ containers:
 
 algorithms:
   - name: "pathlinker"
-    params:
-      include: true
+    include: true
+    runs:
       run1:
         k: range(100,201,100)
 
   - name: "meo"
-    params:
-      include: true
+    include: true
+    runs:
       run1:
         max_path_length: [3]
         local_search: ["Yes"]
         rand_restarts: [10]
 
   - name: "mincostflow"
-    params:
-      include: true
+    include: true
+    runs:
       run1:
         flow: [1] # The flow must be an int
         capacity: [1]
 
   - name: "allpairs"
-    params:
-      include: true
+    include: true
 
 datasets:
   - label: data0
