@@ -1,0 +1,4 @@
+{
+    "imageName": "responsenet",
+    "architectures": ["linux/arm64", "linux/amd64"]
+}
