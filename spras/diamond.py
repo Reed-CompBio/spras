@@ -1,5 +1,8 @@
 from pathlib import Path
 
+from pydantic import BaseModel, ConfigDict
+
+from spras.config.container_schema import ProcessedContainerSettings
 from spras.containers import prepare_volume, run_container_and_log
 from spras.dataset import Dataset
 from spras.interactome import (
@@ -9,10 +12,18 @@ from spras.interactome import (
 from spras.prm import PRM
 from spras.util import duplicate_edges, raw_pathway_df, shrink_rank_column
 
-__all__ = ['DIAMOnD']
+__all__ = ['DIAMOnD', 'DIAMOnDParams']
 
+class DIAMOnDParams(BaseModel):
+    n: int
+    """The desired number of DIAMOnD genes to add."""
 
-class DIAMOnD(PRM):
+    alpha: int = 1
+    """Weight of the seeds"""
+
+    model_config = ConfigDict(extra='forbid', use_attribute_docstrings=True)
+
+class DIAMOnD(PRM[DIAMOnDParams]):
     """
     DIAMOnD is a disease module detection algorithm,
     which has been modified here, using actives as seeds, to act as a pathway reconstruction algorithm.
@@ -27,6 +38,8 @@ class DIAMOnD(PRM):
         Access fields from the dataset and write the required input files
         @param data: dataset
         @param filename_map: a dict mapping file types in the required_inputs to the filename for that type
+        - seeds: newline-delimited seeds file
+        - network: no-header two-column input directed network file
         """
         for input_type in DIAMOnD.required_inputs:
             if input_type not in filename_map:
@@ -46,50 +59,48 @@ class DIAMOnD(PRM):
         edges_df.to_csv(filename_map["network"], columns=["Interactor1", "Interactor2"], index=False, header=None, sep=',')
 
     @staticmethod
-    def run(seeds=None, network=None, output_file=None, n=200, alpha=1, container_framework="docker"):
+    def run(inputs, output_file, args, container_settings=None):
+        if not container_settings: container_settings = ProcessedContainerSettings()
+        DIAMOnD.validate_required_run_args(inputs)
         """
         Run DIAMOnD with Docker
         @param seeds: input seeds (required)
         @param network: input network file (required)
-        @param container_framework: choose the container runtime framework, currently supports "docker" or "singularity" (optional)
-        @param n: the desired number of DIAMOnD genes to add.
-        @param alpha: int representing weight of the seeds (default: 1)
-        @param output_file: path to the output pathway file (required)
         """
-        if not seeds or not network or not output_file:
-            raise ValueError('DIAMOnD arguments are missing')
 
         work_dir = '/apsp'
 
         # Each volume is a tuple (src, dest)
         volumes = list()
 
-        bind_path, seeds_file = prepare_volume(seeds, work_dir)
+        bind_path, seeds_file = prepare_volume(inputs["seeds"], work_dir, container_settings)
         volumes.append(bind_path)
 
-        bind_path, network_file = prepare_volume(network, work_dir)
+        bind_path, network_file = prepare_volume(inputs["network"], work_dir, container_settings)
         volumes.append(bind_path)
 
         # Create the parent directories for the output file if needed
-        Path(output_file).parent.mkdir(parents=True, exist_ok=True)
-        bind_path, mapped_out_file = prepare_volume(output_file, work_dir)
+        out_dir = Path(output_file).parent
+        out_dir.mkdir(parents=True, exist_ok=True)
+        bind_path, mapped_out_file = prepare_volume(output_file, work_dir, container_settings)
         volumes.append(bind_path)
 
         command = ['python',
                    '/DIAMOnD.py',
                    network_file,
                    seeds_file,
-                   str(n),
-                   str(alpha),
+                   args.n,
+                   args.alpha,
                    mapped_out_file]
 
         container_suffix = "diamond:latest"
         run_container_and_log('DIAMOND',
-                              container_framework,
                               container_suffix,
                               command,
                               volumes,
-                              work_dir)
+                              work_dir,
+                              out_dir,
+                              container_settings)
 
     @staticmethod
     def parse_output(raw_pathway_file, standardized_pathway_file, params):
