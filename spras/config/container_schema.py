@@ -33,15 +33,20 @@ class ContainerRegistry(BaseModel):
 class ContainerSettings(BaseModel):
     framework: ContainerFramework = ContainerFramework.docker
     unpack_singularity: bool = False
-    registry: ContainerRegistry
 
     model_config = ConfigDict(extra='forbid')
+    enable_profiling: bool = False
+    "A Boolean indicating whether to enable container runtime profiling (apptainer/singularity only)"
+    registry: ContainerRegistry
+
+    model_config = ConfigDict(extra='forbid', use_attribute_docstrings=True)
 
 @dataclass
 class ProcessedContainerSettings:
     framework: ContainerFramework = ContainerFramework.docker
     unpack_singularity: bool = False
     prefix: str = DEFAULT_CONTAINER_PREFIX
+    enable_profiling: bool = False
     hash_length: int = 7
     """
     The hash length for container-specific usage. This does not appear in
