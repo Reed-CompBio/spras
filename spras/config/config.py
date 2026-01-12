@@ -16,8 +16,9 @@ import copy as copy
 import itertools as it
 import os
 import warnings
-from typing import Any
+from typing import Any, Optional
 
+from pytimeparse import parse
 import numpy as np
 import yaml
 
@@ -73,6 +74,8 @@ class Config:
         self.container_settings = ProcessedContainerSettings.from_container_settings(parsed_raw_config.containers, self.hash_length)
         # The list of algorithms to run in the workflow. Each is a dict with 'name' as an expected key.
         self.algorithms = None
+        # Dictionary of algorithms to their respective timeout in seconds
+        self.algorithm_timeouts: dict[str, Optional[int]] = dict()
         # A nested dict mapping algorithm names to dicts that map parameter hashes to parameter combinations.
         # Only includes algorithms that are set to be run with 'include: true'.
         self.algorithm_params: dict[str, dict[str, Any]] = dict()
@@ -155,6 +158,12 @@ class Config:
             else:
                 # Do not parse the rest of the parameters for this algorithm if it is not included
                 continue
+
+            if alg.timeout:
+                # Coerce to an `int` if an int isn't possible.
+                timeout = parse(alg.timeout, granularity='seconds')
+                if not timeout: raise RuntimeError(f"Algorithm {alg} has unparsable timeout string {alg.timeout}.")
+                self.algorithm_timeouts[alg.name] = int(timeout)
 
             runs: dict[str, Any] = alg.runs
 

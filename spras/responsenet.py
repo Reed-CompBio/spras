@@ -68,7 +68,7 @@ class ResponseNet(PRM[ResponseNetParams]):
                      header=False)
 
     @staticmethod
-    def run(inputs, output_file, args=None, container_settings=None):
+    def run(inputs, output_file, timeout, args=None, container_settings=None):
         if not container_settings: container_settings = ProcessedContainerSettings()
         ResponseNet.validate_required_run_args(inputs)
         if not args: args = ResponseNetParams()
@@ -117,7 +117,8 @@ class ResponseNet(PRM[ResponseNetParams]):
             volumes,
             work_dir,
             out_dir,
-            container_settings)
+            container_settings,
+            timeout)
 
         # Rename the primary output file to match the desired output filename
         out_file_suffixed.rename(output_file)

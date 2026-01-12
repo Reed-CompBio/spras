@@ -274,10 +274,12 @@ rule reconstruct:
         params = reconstruction_params(wildcards.algorithm, wildcards.params).copy()
         # Declare the input files as a dictionary.
         inputs = dict(zip(runner.get_required_inputs(wildcards.algorithm), *{input}, strict=True))
+        # Get the timeout from the config
+        timeout = _config.config.algorithm_timeouts[wildcards.algorithm]
         # Remove the _spras_run_name parameter added for keeping track of the run name for parameters.yml
         if '_spras_run_name' in params:
             params.pop('_spras_run_name')
-        runner.run(wildcards.algorithm, inputs, output.pathway_file, params, container_settings)
+        runner.run(wildcards.algorithm, inputs, output.pathway_file, timeout, params, container_settings)
 
 # Original pathway reconstruction output to universal output
 # Use PRRunner as a wrapper to call the algorithm-specific parse_output

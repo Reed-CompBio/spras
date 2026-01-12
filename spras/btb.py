@@ -72,7 +72,7 @@ class BowTieBuilder(PRM[Empty]):
 
     # Skips parameter validation step
     @staticmethod
-    def run(inputs, output_file, args=None, container_settings=None):
+    def run(inputs, output_file, timeout, args=None, container_settings=None):
         if not container_settings: container_settings = ProcessedContainerSettings()
         BowTieBuilder.validate_required_run_args(inputs)
 
@@ -130,7 +130,8 @@ class BowTieBuilder(PRM[Empty]):
                               volumes,
                               work_dir,
                               out_dir,
-                              container_settings)
+                              container_settings,
+                              timeout)
         # Output is already written to raw-pathway.txt file
 
 

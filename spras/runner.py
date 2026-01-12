@@ -1,8 +1,10 @@
-from typing import Any
+from os import PathLike
+from typing import Any, Optional
 
 # supported algorithm imports
 from spras.allpairs import AllPairs
 from spras.btb import BowTieBuilder
+from spras.config.container_schema import ProcessedContainerSettings
 from spras.dataset import Dataset
 from spras.domino import DOMINO
 from spras.meo import MEO
@@ -35,14 +37,21 @@ def get_algorithm(algorithm: str) -> type[PRM]:
     except KeyError as exc:
         raise NotImplementedError(f'{algorithm} is not currently supported.') from exc
 
-def run(algorithm: str, inputs, output_file, args, container_settings):
+def run(
+    algorithm: str,
+    inputs: dict[str, str | PathLike],
+    output_file: str | PathLike,
+    timeout: Optional[int],
+    args: dict[str, Any],
+    container_settings: ProcessedContainerSettings
+):
     """
     A generic interface to the algorithm-specific run functions
     """
     algorithm_runner = get_algorithm(algorithm)
     # We can't use config.config here else we would get a cyclic dependency.
     # Since args is a dict here, we use the 'run_typeless' utility PRM function.
-    algorithm_runner.run_typeless(inputs, output_file, args, container_settings)
+    algorithm_runner.run_typeless(inputs, output_file, timeout, args, container_settings)
 
 
 def get_required_inputs(algorithm: str):

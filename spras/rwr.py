@@ -56,7 +56,7 @@ class RWR(PRM[RWRParams]):
         edges.to_csv(filename_map['network'],sep='|',index=False,columns=['Interactor1','Interactor2'],header=False)
 
     @staticmethod
-    def run(inputs, output_file, args, container_settings=None):
+    def run(inputs, output_file, timeout, args, container_settings=None):
         if not container_settings: container_settings = ProcessedContainerSettings()
         RWR.validate_required_run_args(inputs)
 
@@ -103,7 +103,8 @@ class RWR(PRM[RWRParams]):
             volumes,
             work_dir,
             out_dir,
-            container_settings)
+            container_settings,
+            timeout)
 
         # Rename the primary output file to match the desired output filename
         output_edges = Path(out_dir, 'output.txt')

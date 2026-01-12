@@ -158,7 +158,7 @@ class OmicsIntegrator1(PRM[OmicsIntegrator1Params]):
     # TODO add support for knockout argument
     # TODO add reasonable default values
     @staticmethod
-    def run(inputs, output_file, args, container_settings=None):
+    def run(inputs, output_file, timeout, args, container_settings=None):
         if not container_settings: container_settings = ProcessedContainerSettings()
         OmicsIntegrator1.validate_required_run_args(inputs, ["dummy_nodes"])
 
@@ -231,6 +231,7 @@ class OmicsIntegrator1(PRM[OmicsIntegrator1Params]):
                              work_dir,
                              out_dir,
                              container_settings,
+                             timeout,
                              {'TMPDIR': mapped_out_dir})
 
         conf_file_local.unlink(missing_ok=True)

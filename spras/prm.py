@@ -59,9 +59,10 @@ class PRM(ABC, Generic[T]):
     # This is used in `runner.py` to avoid a dependency diamond when trying
     # to import the actual algorithm schema.
     @classmethod
-    def run_typeless(cls, inputs: dict[str, str | os.PathLike], output_file: str | os.PathLike, args: dict[str, Any], container_settings: ProcessedContainerSettings):
+    def run_typeless(cls, inputs: dict[str, str | os.PathLike], output_file: str | os.PathLike, timeout: Optional[int], args: dict[str, Any], container_settings: ProcessedContainerSettings):
         """
-        This is similar to PRA.run, but it does pydantic logic internally to re-validate argument parameters.
+        This is similar to PRA.run, but `args` is a dictionary and not a pydantic structure.
+        However, this method still re-validates `args` against the associated pydantic PRM argument model.
         """
         T_class = cls.get_params_generic()
 
@@ -75,17 +76,23 @@ class PRM(ABC, Generic[T]):
         # (Pydantic already provides nice error messages, so we don't need to worry about catching this.)
         T_parsed = T_class.model_validate(args)
 
-        return cls.run(inputs, output_file, T_parsed, container_settings)
+        return cls.run(inputs, output_file, timeout, T_parsed, container_settings)
 
     @staticmethod
     @abstractmethod
-    def run(inputs: dict[str, str | os.PathLike], output_file: str | os.PathLike, args: T, container_settings: ProcessedContainerSettings):
+    def run(inputs: dict[str, str | os.PathLike], output_file: str | os.PathLike, timeout: Optional[int], args: T, container_settings: ProcessedContainerSettings):
         """
-        Runs an algorithm with the specified inputs, algorithm params (T),
-        the designated output_file, and the desired container_settings.
+        Runs an algorithm.
+        @param inputs: specified inputs
+        @param output_file: designated reconstructed pathway output
+        @param timeout: timeout in seconds to run the container with
+        @param args: (T) typed algorithm params
+        @param container_settings: what settings should be associated with the individual container.
 
-        See the algorithm-specific `generate_inputs` and `parse_output`
+        See the algorithm-specific `PRM.generate_inputs` and `PRM.parse_output`
         for information about the input and output format.
+
+        Also see `PRM.run_typeless` for the non-pydantic version of this method (where `args` is a dict).
         """
         raise NotImplementedError
 

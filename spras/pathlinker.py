@@ -75,7 +75,7 @@ class PathLinker(PRM[PathLinkerParams]):
                      header=["#Interactor1","Interactor2","Weight"])
 
     @staticmethod
-    def run(inputs, output_file, args=None, container_settings=None):
+    def run(inputs, output_file, timeout, args=None, container_settings=None):
         if not container_settings: container_settings = ProcessedContainerSettings()
         if not args: args = PathLinkerParams()
         PathLinker.validate_required_run_args(inputs)
@@ -115,7 +115,8 @@ class PathLinker(PRM[PathLinkerParams]):
                              volumes,
                              work_dir,
                              out_dir,
-                             container_settings)
+                             container_settings,
+                             timeout)
 
         # Rename the primary output file to match the desired output filename
         # Currently PathLinker only writes one output file so we do not need to delete others

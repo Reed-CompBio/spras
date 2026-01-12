@@ -76,7 +76,7 @@ class MinCostFlow(PRM[MinCostFlowParams]):
                      header=False)
 
     @staticmethod
-    def run(inputs, output_file, args=None, container_settings=None):
+    def run(inputs, output_file, timeout, args=None, container_settings=None):
         if not container_settings: container_settings = ProcessedContainerSettings()
         if not args: args = MinCostFlowParams()
         MinCostFlow.validate_required_run_args(inputs)
@@ -127,7 +127,8 @@ class MinCostFlow(PRM[MinCostFlowParams]):
                              volumes,
                              work_dir,
                              out_dir,
-                             container_settings)
+                             container_settings,
+                             timeout)
 
         # Check the output of the container
         out_dir_content = sorted(out_dir.glob('*.sif'))

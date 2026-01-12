@@ -143,10 +143,9 @@ class MEO(PRM[MEOParams]):
         edges.to_csv(filename_map['edges'], sep='\t', index=False,
                      columns=['Interactor1', 'EdgeType', 'Interactor2', 'Weight'], header=False)
 
-    # TODO add parameter validation
     # TODO document required arguments
     @staticmethod
-    def run(inputs, output_file=None, args=None, container_settings=None):
+    def run(inputs, output_file, timeout, args=None, container_settings=None):
         """
         Run Maximum Edge Orientation in the Docker image with the provided parameters.
         The properties file is generated from the provided arguments.
@@ -203,7 +202,8 @@ class MEO(PRM[MEOParams]):
                              volumes,
                              work_dir,
                              out_dir,
-                             container_settings)
+                             container_settings,
+                             timeout)
 
         properties_file_local.unlink(missing_ok=True)
 

@@ -74,7 +74,7 @@ class AllPairs(PRM[Empty]):
                                       header=["#Interactor1", "Interactor2", "Weight"])
 
     @staticmethod
-    def run(inputs, output_file, args=None, container_settings=None):
+    def run(inputs, output_file, timeout, args=None, container_settings=None):
         if not container_settings: container_settings = ProcessedContainerSettings()
         AllPairs.validate_required_run_args(inputs)
 
@@ -111,7 +111,8 @@ class AllPairs(PRM[Empty]):
             volumes,
             work_dir,
             out_dir,
-            container_settings)
+            container_settings,
+            timeout)
 
     @staticmethod
     def parse_output(raw_pathway_file, standardized_pathway_file, params):
