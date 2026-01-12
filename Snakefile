@@ -1,7 +1,10 @@
 import os
 from spras import runner
 import shutil
+import json
 import yaml
+from pathlib import Path
+from spras.containers import TimeoutError
 from spras.dataset import Dataset
 from spras.evaluation import Evaluation
 from spras.analysis import ml, summary, cytoscape
@@ -261,31 +264,52 @@ def collect_prepared_input(wildcards):
     return prepared_inputs
 
 # Run the pathway reconstruction algorithm
-rule reconstruct:
+checkpoint reconstruct:
     input: collect_prepared_input
     # Each reconstruct call should be in a separate output subdirectory that is unique for the parameter combination so
     # that multiple instances of the container can run simultaneously without overwriting the output files
     # Overwriting files can happen because the pathway reconstruction algorithms often generate output files with the
     # same name regardless of the inputs or parameters, and these aren't renamed until after the container command
     # terminates
-    output: pathway_file = SEP.join([out_dir, '{dataset}-{algorithm}-{params}', 'raw-pathway.txt'])
+    output:
+        pathway_file = SEP.join([out_dir, '{dataset}-{algorithm}-{params}', 'raw-pathway.txt'])
+    log:
+        resource_info = SEP.join([out_dir, '{dataset}-{algorithm}-{params}', 'resource-log.json'])
+    params:
+        # Get the timeout from the config and use it as an input.
+        # TODO: This has unexpected behavior when this rule succeeds but the timeout extends,
+        # making this rule run again.
+        timeout = lambda wildcards: _config.config.algorithm_timeouts[wildcards.algorithm]
     run:
         # Create a copy so that the updates are not written to the parameters logfile
-        params = reconstruction_params(wildcards.algorithm, wildcards.params).copy()
+        algorithm_params = reconstruction_params(wildcards.algorithm, wildcards.params).copy()
         # Declare the input files as a dictionary.
         inputs = dict(zip(runner.get_required_inputs(wildcards.algorithm), *{input}, strict=True))
-        # Get the timeout from the config
-        timeout = _config.config.algorithm_timeouts[wildcards.algorithm]
         # Remove the _spras_run_name parameter added for keeping track of the run name for parameters.yml
-        if '_spras_run_name' in params:
-            params.pop('_spras_run_name')
-        runner.run(wildcards.algorithm, inputs, output.pathway_file, timeout, params, container_settings)
+        if '_spras_run_name' in algorithm_params:
+            algorithm_params.pop('_spras_run_name')
+        try:
+            runner.run(wildcards.algorithm, inputs, output.pathway_file, params.timeout, algorithm_params, container_settings)
+            Path(log.resource_info).write_text(json.dumps({"status": "success"}))
+        except TimeoutError as err:
+            # We don't raise the error here (and use `--keep-going` to avoid re-running this rule [or others!] unnecessarily.)
+            Path(log.resource_info).write_text(json.dumps({"status": "error", "type": "timeout", "duration": params.timeout}))
+            # and we touch pathway_file still: Snakemake doesn't have optional files, so
+            # we'll filter the ones that didn't time out in collect_successful_reconstructions.
+            Path(output.pathway_file).touch()
+
+def collect_successful_reconstructions(wildcards):
+    reconstruct_checkpoint = checkpoints.reconstruct.get(**wildcards)
+    resource_info = json.loads(Path(reconstruct_checkpoint.log.resource_info).read_bytes())
+    if resource_info["status"] == "success":
+        return [reconstruct_checkpoint.output.pathway_file]
+    return []
 
 # Original pathway reconstruction output to universal output
 # Use PRRunner as a wrapper to call the algorithm-specific parse_output
 rule parse_output:
-    input: 
-        raw_file = SEP.join([out_dir, '{dataset}-{algorithm}-{params}', 'raw-pathway.txt']),
+    input:
+        raw_file = collect_successful_reconstructions,
         dataset_file = SEP.join([out_dir, 'dataset-{dataset}-merged.pickle'])
     output: standardized_file = SEP.join([out_dir, '{dataset}-{algorithm}-{params}', 'pathway.txt'])
     run:

@@ -164,6 +164,10 @@ class Config:
                 timeout = parse(alg.timeout, granularity='seconds')
                 if not timeout: raise RuntimeError(f"Algorithm {alg} has unparsable timeout string {alg.timeout}.")
                 self.algorithm_timeouts[alg.name] = int(timeout)
+            else:
+                # As per the type signature, we still want to say explicitly that this algorithm's timeout
+                # is uninhabited.
+                self.algorithm_timeouts[alg.name] = None
 
             runs: dict[str, Any] = alg.runs
 

@@ -178,6 +178,9 @@ class TimeoutError(RuntimeError):
 
         super(TimeoutError, self).__init__(timeout, *args)
 
+    def __str__(self):
+        return self.message
+
 def env_to_items(environment: dict[str, str]) -> Iterator[str]:
     """
     Turns an environment variable dictionary to KEY=VALUE pairs.
