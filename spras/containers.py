@@ -347,20 +347,21 @@ def run_container_docker(
 
     bind_paths = [f'{prepare_path_docker(src)}:{dest}' for src, dest in volumes]
 
-    container_obj = client.containers.create(
+    container_obj = client.containers.run(
         container,
         command,
         volumes=bind_paths,
         working_dir=working_dir,
         network_disabled=network_disabled,
-        environment=environment
+        environment=environment,
+        detach=True
     )
 
-    if timeout:
-        try:
-            container_obj.wait(timeout=timeout)
-        except requests.exceptions.ReadTimeout:
-            raise TimeoutError(timeout)
+    try:
+        container_obj.wait(timeout=timeout)
+    except requests.exceptions.ReadTimeout:
+        if timeout: raise TimeoutError(timeout)
+        else: raise RuntimeError("Timeout error but no timeout specified. Please file an issue with this error and stacktrace at https://github.com/Reed-CompBio/spras/issues/new.")
 
     out = container_obj.attach(stderr=True).decode('utf-8')
 

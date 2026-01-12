@@ -272,8 +272,8 @@ checkpoint reconstruct:
     # same name regardless of the inputs or parameters, and these aren't renamed until after the container command
     # terminates
     output:
-        pathway_file = SEP.join([out_dir, '{dataset}-{algorithm}-{params}', 'raw-pathway.txt'])
-    log:
+        pathway_file = SEP.join([out_dir, '{dataset}-{algorithm}-{params}', 'raw-pathway.txt']),
+        # Despite this being a 'log' file, we don't use the log directive as this rule doesn't actually throw errors.
         resource_info = SEP.join([out_dir, '{dataset}-{algorithm}-{params}', 'resource-log.json'])
     params:
         # Get the timeout from the config and use it as an input.
@@ -290,20 +290,20 @@ checkpoint reconstruct:
             algorithm_params.pop('_spras_run_name')
         try:
             runner.run(wildcards.algorithm, inputs, output.pathway_file, params.timeout, algorithm_params, container_settings)
-            Path(log.resource_info).write_text(json.dumps({"status": "success"}))
+            Path(output.resource_info).write_text(json.dumps({"status": "success"}))
         except TimeoutError as err:
             # We don't raise the error here (and use `--keep-going` to avoid re-running this rule [or others!] unnecessarily.)
-            Path(log.resource_info).write_text(json.dumps({"status": "error", "type": "timeout", "duration": params.timeout}))
+            Path(output.resource_info).write_text(json.dumps({"status": "error", "type": "timeout", "duration": params.timeout}))
             # and we touch pathway_file still: Snakemake doesn't have optional files, so
             # we'll filter the ones that didn't time out in collect_successful_reconstructions.
             Path(output.pathway_file).touch()
 
 def collect_successful_reconstructions(wildcards):
     reconstruct_checkpoint = checkpoints.reconstruct.get(**wildcards)
-    resource_info = json.loads(Path(reconstruct_checkpoint.log.resource_info).read_bytes())
+    resource_info = json.loads(Path(reconstruct_checkpoint.output.resource_info).read_bytes())
     if resource_info["status"] == "success":
-        return [reconstruct_checkpoint.output.pathway_file]
-    return []
+        return reconstruct_checkpoint.output.pathway_file
+    return None
 
 # Original pathway reconstruction output to universal output
 # Use PRRunner as a wrapper to call the algorithm-specific parse_output
