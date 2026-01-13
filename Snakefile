@@ -270,7 +270,8 @@ def mark_error(file, **details):
 def is_error(file):
     """Checks if a file was produced by mark_error."""
     try:
-        return json.loads(Path(file).read_bytes())["status"] == "error"
+        with open(file, 'r') as f:
+            json.load(f)["status"] == "error"
     except ValueError:
         return False
 
