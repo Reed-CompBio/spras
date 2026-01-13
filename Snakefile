@@ -315,7 +315,7 @@ for keys, values in statistics_computation.items():
     pythonic_name = 'generate_' + '_and_'.join([key.lower().replace(' ', '_') for key in keys])
     rule:
         name: pythonic_name
-        input: pathway_file = rules.reconstruct.output.pathway_file
+        input: pathway_file = rules.parse_output.output.standardized_file
         output: [SEP.join([out_dir, '{dataset}-{algorithm}-{params}', 'statistics', f'{key}.txt']) for key in keys]
         run:
             (Path(input.pathway_file).parent / 'statistics').mkdir(exist_ok=True)
