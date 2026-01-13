@@ -35,12 +35,14 @@ def get_algorithm(algorithm: str) -> type[PRM]:
     except KeyError as exc:
         raise NotImplementedError(f'{algorithm} is not currently supported.') from exc
 
-def run(algorithm: str, params):
+def run(algorithm: str, inputs, output_file, args, container_settings):
     """
     A generic interface to the algorithm-specific run functions
     """
     algorithm_runner = get_algorithm(algorithm)
-    algorithm_runner.run(**params)
+    # We can't use config.config here else we would get a cyclic dependency.
+    # Since args is a dict here, we use the 'run_typeless' utility PRM function.
+    algorithm_runner.run_typeless(inputs, output_file, args, container_settings)
 
 
 def get_required_inputs(algorithm: str):
