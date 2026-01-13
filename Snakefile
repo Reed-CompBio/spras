@@ -6,7 +6,7 @@ from spras.analysis import ml, summary, cytoscape
 import spras.config.config as _config
 from spras.dataset import Dataset
 from spras.evaluation import Evaluation
-from spras.statistics import from_edgelist, statistics_computation, statistics_options
+from spras.statistics import from_output_pathway, statistics_computation, statistics_options
 
 # Snakemake updated the behavior in the 6.5.0 release https://github.com/snakemake/snakemake/pull/1037
 # and using the wrong separator prevents Snakemake from matching filenames to the rules that can produce them
@@ -319,7 +319,7 @@ for keys, values in statistics_computation.items():
         output: [SEP.join([out_dir, '{dataset}-{algorithm}-{params}', 'statistics', f'{key}.txt']) for key in keys]
         run:
             (Path(input.pathway_file).parent / 'statistics').mkdir(exist_ok=True)
-            graph = from_edgelist(input.pathway_file)
+            graph = from_output_pathway(input.pathway_file)
             for computed, output in zip(values(graph), output):
                 Path(output).write_text(str(computed))
 

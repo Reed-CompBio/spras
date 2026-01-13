@@ -63,5 +63,8 @@ statistics_computation: dict[tuple[str, ...], Callable[[nx.DiGraph], tuple[float
 # All of the keys inside statistics_computation, flattened.
 statistics_options: list[str] = list(itertools.chain(*(list(key) for key in statistics_computation.keys())))
 
-def from_edgelist(lines) -> nx.Graph:
-    return nx.read_edgelist(lines, data=(('weight', float), ('Direction', str)))
+def from_output_pathway(lines) -> nx.Graph:
+    with open(lines, 'r') as f:
+        lines = f.readlines()[1:]
+    
+    return nx.read_edgelist(lines, data=(('Rank', int), ('Direction', str)))

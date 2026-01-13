@@ -4,7 +4,7 @@ from typing import Iterable
 
 import pandas as pd
 
-from spras.statistics import from_edgelist
+from spras.statistics import from_output_pathway
 
 
 def summarize_networks(file_paths: Iterable[Path], node_table: pd.DataFrame, algo_params: dict[str, dict],
@@ -40,11 +40,8 @@ def summarize_networks(file_paths: Iterable[Path], node_table: pd.DataFrame, alg
 
     # Iterate through each network file path
     for index, file_path in enumerate(sorted(file_paths)):
-        with open(file_path, 'r') as f:
-            lines = f.readlines()[1:]  # skip the header line
-
         # directed or mixed graphs are parsed and summarized as an undirected graph
-        nw = from_edgelist(lines)
+        nw = from_output_pathway(file_path)
 
         # Save the network name, number of nodes, number edges, and number of connected components
         nw_name = str(file_path)
