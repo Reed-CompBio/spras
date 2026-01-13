@@ -360,6 +360,8 @@ def run_container_docker(
     try:
         container_obj.wait(timeout=timeout)
     except requests.exceptions.ReadTimeout:
+        container_obj.stop()
+        client.close()
         if timeout: raise TimeoutError(timeout)
         else: raise RuntimeError("Timeout error but no timeout specified. Please file an issue with this error and stacktrace at https://github.com/Reed-CompBio/spras/issues/new.")
 
