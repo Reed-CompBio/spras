@@ -279,7 +279,7 @@ def filter_successful(files):
     return [file for file in files if not is_error(file)]
 
 # Run the pathway reconstruction algorithm
-checkpoint reconstruct:
+rule reconstruct:
     input: collect_prepared_input
     # Each reconstruct call should be in a separate output subdirectory that is unique for the parameter combination so
     # that multiple instances of the container can run simultaneously without overwriting the output files
