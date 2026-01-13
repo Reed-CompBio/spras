@@ -63,29 +63,5 @@ statistics_computation: dict[tuple[str, ...], Callable[[nx.DiGraph], tuple[float
 # All of the keys inside statistics_computation, flattened.
 statistics_options: list[str] = list(itertools.chain(*(list(key) for key in statistics_computation.keys())))
 
-def compute_statistics(graph: nx.DiGraph, statistics: list[str]) -> dict[str, float | int]:
-    """
-    Computes `statistics` for a graph corresponding to the top-level `statistics` dictionary
-    in this file.
-    """
-
-    # early-scan cutoff for statistics:
-    # we want to err as soon as possible
-    for stat in statistics:
-        if stat not in statistics_options:
-            raise RuntimeError(f"Statistic {stat} not a computable statistics! Available statistics: {statistics_options}")
-
-    # now, we can compute statistics only
-    computed_statistics: dict[str, float | int] = dict()
-    for statistic_tuple, compute in statistics_computation.items():
-        # when we want them
-        if not set(statistic_tuple).isdisjoint(set(statistics)):
-            computed_tuple = compute(graph)
-            assert len(statistic_tuple) == len(computed_tuple), f"bad tuple length for {statistic_tuple}"
-
-            current_computed_statistics = zip(statistic_tuple, computed_tuple, strict=True)
-            for stat, value in current_computed_statistics:
-                computed_statistics[stat] = value
-
-    # (and return only the statistics we wanted)
-    return {key: computed_statistics[key] for key in statistics}
+def from_edgelist(lines) -> nx.Graph:
+    return nx.read_edgelist(lines, data=(('weight', float), ('Direction', str)))

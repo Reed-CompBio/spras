@@ -1,14 +1,14 @@
+import ast
 from pathlib import Path
 from typing import Iterable
 
-import networkx as nx
 import pandas as pd
 
-from spras.statistics import compute_statistics, statistics_options
+from spras.statistics import from_edgelist
 
 
 def summarize_networks(file_paths: Iterable[Path], node_table: pd.DataFrame, algo_params: dict[str, dict],
-                       algo_with_params: list) -> pd.DataFrame:
+                       algo_with_params: list, statistics_files: list) -> pd.DataFrame:
     """
     Generate a table that aggregates summary information about networks in file_paths, including which nodes are present
     in node_table columns. Network directionality is ignored and all edges are treated as undirected. The order of the
@@ -44,15 +44,16 @@ def summarize_networks(file_paths: Iterable[Path], node_table: pd.DataFrame, alg
             lines = f.readlines()[1:]  # skip the header line
 
         # directed or mixed graphs are parsed and summarized as an undirected graph
-        nw = nx.read_edgelist(lines, data=(('weight', float), ('Direction', str)))
+        nw = from_edgelist(lines)
 
         # Save the network name, number of nodes, number edges, and number of connected components
         nw_name = str(file_path)
 
-        graph_statistics = compute_statistics(nw, statistics_options)
+        # We use literal_eval here to easily coerce to either ints or floats, depending.
+        graph_statistics = [ast.literal_eval(Path(file).read_text()) for file in statistics_files]
 
         # Initialize list to store current network information
-        cur_nw_info = [nw_name, *graph_statistics.values()]
+        cur_nw_info = [nw_name, *graph_statistics]
 
         # Iterate through each node property and save the intersection with the current network
         for node_list in nodes_by_col:
@@ -73,6 +74,8 @@ def summarize_networks(file_paths: Iterable[Path], node_table: pd.DataFrame, alg
         # Save the current network information to the network summary list
         nw_info.append(cur_nw_info)
 
+    # Get the list of statistic names by their file names
+    statistics_options = [Path(file).stem for file in statistics_files]
     # Prepare column names
     col_names = ['Name', *statistics_options]
     col_names.extend(nodes_by_col_labs)
