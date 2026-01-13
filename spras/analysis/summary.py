@@ -18,6 +18,7 @@ def summarize_networks(file_paths: Iterable[Path], node_table: pd.DataFrame, alg
     @param algo_params: a nested dict mapping algorithm names to dicts that map parameter hashes to parameter
     combinations.
     @param algo_with_params: a list of <algorithm>-params-<params_hash> combinations
+    @param statistics_files: a list of statistic files with the computed statistics.
     @return: pandas DataFrame with summary information
     """
     # Ensure that NODEID is the first column
