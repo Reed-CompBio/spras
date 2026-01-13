@@ -145,7 +145,7 @@ class MEO(PRM[MEOParams]):
 
     # TODO document required arguments
     @staticmethod
-    def run(inputs, output_file, timeout, args=None, container_settings=None):
+    def run(inputs, output_file, args=None, container_settings=None, timeout=None):
         """
         Run Maximum Edge Orientation in the Docker image with the provided parameters.
         The properties file is generated from the provided arguments.

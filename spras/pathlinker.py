@@ -75,7 +75,7 @@ class PathLinker(PRM[PathLinkerParams]):
                      header=["#Interactor1","Interactor2","Weight"])
 
     @staticmethod
-    def run(inputs, output_file, timeout, args=None, container_settings=None):
+    def run(inputs, output_file, args=None, container_settings=None, timeout=None):
         if not container_settings: container_settings = ProcessedContainerSettings()
         if not args: args = PathLinkerParams()
         PathLinker.validate_required_run_args(inputs)

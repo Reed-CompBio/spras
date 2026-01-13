@@ -1,7 +1,6 @@
 import os
 import platform
 import re
-import requests
 import subprocess
 import textwrap
 from pathlib import Path, PurePath, PurePosixPath
@@ -9,6 +8,7 @@ from typing import Iterator, List, Optional, Tuple, Union
 
 import docker
 import docker.errors
+import requests
 
 from spras.config.container_schema import ProcessedContainerSettings
 from spras.logging import indent
@@ -262,7 +262,7 @@ def run_container_and_log(
             volumes=volumes,
             working_dir=working_dir,
             out_dir=out_dir,
-            container_settings=container_settings, 
+            container_settings=container_settings,
             timeout=timeout,
             environment=environment,
             network_disabled=network_disabled
@@ -359,11 +359,11 @@ def run_container_docker(
 
     try:
         container_obj.wait(timeout=timeout)
-    except requests.exceptions.ReadTimeout:
+    except requests.exceptions.ReadTimeout as err:
         container_obj.stop()
         client.close()
-        if timeout: raise TimeoutError(timeout)
-        else: raise RuntimeError("Timeout error but no timeout specified. Please file an issue with this error and stacktrace at https://github.com/Reed-CompBio/spras/issues/new.")
+        if timeout: raise TimeoutError(timeout) from err
+        else: raise RuntimeError("Timeout error but no timeout specified. Please file an issue with this error and stacktrace at https://github.com/Reed-CompBio/spras/issues/new.") from None
 
     out = container_obj.attach(stderr=True).decode('utf-8')
 

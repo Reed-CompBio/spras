@@ -41,9 +41,9 @@ def run(
     algorithm: str,
     inputs: dict[str, str | PathLike],
     output_file: str | PathLike,
-    timeout: Optional[int],
     args: dict[str, Any],
-    container_settings: ProcessedContainerSettings
+    container_settings: ProcessedContainerSettings,
+    timeout: Optional[int]
 ):
     """
     A generic interface to the algorithm-specific run functions
@@ -51,7 +51,7 @@ def run(
     algorithm_runner = get_algorithm(algorithm)
     # We can't use config.config here else we would get a cyclic dependency.
     # Since args is a dict here, we use the 'run_typeless' utility PRM function.
-    algorithm_runner.run_typeless(inputs, output_file, timeout, args, container_settings)
+    algorithm_runner.run_typeless(inputs, output_file, args, container_settings, timeout)
 
 
 def get_required_inputs(algorithm: str):

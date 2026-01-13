@@ -304,7 +304,7 @@ checkpoint reconstruct:
         if '_spras_run_name' in algorithm_params:
             algorithm_params.pop('_spras_run_name')
         try:
-            runner.run(wildcards.algorithm, inputs, output.pathway_file, params.timeout, algorithm_params, container_settings)
+            runner.run(wildcards.algorithm, inputs, output.pathway_file, algorithm_params, container_settings, params.timeout)
             Path(output.resource_info).write_text(json.dumps({"status": "success"}))
         except TimeoutError as err:
             # We don't raise the error here (and use `--keep-going` to avoid re-running this rule [or others!] unnecessarily.)

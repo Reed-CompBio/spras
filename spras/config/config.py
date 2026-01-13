@@ -18,9 +18,9 @@ import os
 import warnings
 from typing import Any, Optional
 
-from pytimeparse import parse
 import numpy as np
 import yaml
+from pytimeparse import parse
 
 from spras.config.container_schema import ProcessedContainerSettings
 from spras.config.schema import RawConfig

@@ -5,7 +5,7 @@ and rather mainly contains validators and lower-level pydantic code.
 """
 import ast
 import copy
-from typing import Annotated, Any, Callable, Literal, Union, cast, get_args, Optional
+from typing import Annotated, Any, Callable, Literal, Optional, Union, cast, get_args
 
 import numpy as np
 from pydantic import (

@@ -158,7 +158,7 @@ class OmicsIntegrator1(PRM[OmicsIntegrator1Params]):
     # TODO add support for knockout argument
     # TODO add reasonable default values
     @staticmethod
-    def run(inputs, output_file, timeout, args, container_settings=None):
+    def run(inputs, output_file, args, container_settings=None, timeout=None):
         if not container_settings: container_settings = ProcessedContainerSettings()
         OmicsIntegrator1.validate_required_run_args(inputs, ["dummy_nodes"])
 

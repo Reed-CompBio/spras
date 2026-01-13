@@ -58,7 +58,7 @@ class ST_RWR(PRM[ST_RWRParams]):
         edges.to_csv(filename_map['network'],sep='|',index=False,columns=['Interactor1','Interactor2'],header=False)
 
     @staticmethod
-    def run(inputs, output_file, timeout, args, container_settings=None):
+    def run(inputs, output_file, args, container_settings=None, timeout=None):
         if not container_settings: container_settings = ProcessedContainerSettings()
         ST_RWR.validate_required_run_args(inputs)
 
