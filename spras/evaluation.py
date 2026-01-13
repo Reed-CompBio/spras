@@ -383,7 +383,7 @@ class Evaluation:
         node_ensembles_dict = dict()
 
         pickle = Evaluation.from_file(dataset_file)
-        interactome = pickle.get_interactome()
+        interactome = pickle.get_interactome([]).df
 
         if interactome.empty:
             raise ValueError(
