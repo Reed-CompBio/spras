@@ -49,14 +49,14 @@ Docker image with the following command:
 
    apptainer build <new image name>.sif docker://<name of container on DockerHub>
 
-For example, creating an Apptainer image for the ``v0.5.0`` SPRAS image
+For example, creating an Apptainer image for the ``v0.6.0`` SPRAS image
 might look like:
 
 .. code:: bash
 
-   apptainer build spras-v0.5.0.sif docker://reedcompbio/spras:v0.5.0
+   apptainer build spras-v0.6.0.sif docker://reedcompbio/spras:v0.6.0
 
-After running this command, a new file called ``spras-v0.5.0.sif`` will
+After running this command, a new file called ``spras-v0.6.0.sif`` will
 exist in the directory where the command was run.
 
 Submitting All Jobs to a Single EP
@@ -71,7 +71,7 @@ it uses the SPRAS apptainer image you created:
    container_image = < your spras image >.sif
 
 Make sure to modify the configuration file to have
-``unpack_singularity`` set to ``true``, and ``container_framework`` set
+``unpack_singularity`` set to ``true``, and ``containers.framework`` set
 to ``singularity``: else, the workflow will (likely) fail.
 
 Then run ``condor_submit spras.sub``, which will submit SPRAS to

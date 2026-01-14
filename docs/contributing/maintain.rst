@@ -2,9 +2,18 @@ Maintaining SPRAS
 =================
 
 Go dependency
------------------------
-The yamlfmt tool requires `Go <https://go.dev/doc/install>`__, which must
+-------------
+The ``yamlfmt`` tool requires `Go <https://go.dev/doc/install>`__, which must
 be installed manually.
+
+Naming conventions
+------------------
+SPRAS wrappers try to follow the naming conventions of the algorithms they wrap.
+This includes their name and their ``required_inputs``: when sensible, we preserve
+the file name of inputs required by the internal algorithm.
+
+For example, Maximum Edge Orientation calls a network ``edges``, while PathLinker
+calls a network ``network``. Therefore, we say ``edges`` in MEO when referring to a network.
 
 Reviewing pull requests
 -----------------------
