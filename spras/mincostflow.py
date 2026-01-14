@@ -56,7 +56,7 @@ class MinCostFlow(PRM[MinCostFlowParams]):
         MinCostFlow.validate_required_inputs(filename_map)
 
         # will take the sources and write them to files, and repeats with targets
-        for node_type, nodes in data.get_node_columns_separate(['sources', 'targets'], "MinCostFlow").items():
+        for node_type, nodes in data.get_node_columns_separate(['sources', 'targets']).items():
             # take nodes one column data frame, call sources/ target series
             nodes = nodes.loc[nodes[node_type]]
             # creates with the node type without headers

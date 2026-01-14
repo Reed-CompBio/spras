@@ -203,7 +203,7 @@ class Dataset:
             )
         return filtered_table
 
-    def get_node_columns_separate(self, col_names: list[str], scope: str) -> dict[str, pd.DataFrame]:
+    def get_node_columns_separate(self, col_names: list[str]) -> dict[str, pd.DataFrame]:
         """
         Get each `col_name` in `col_names` as a separate call to `get_node_columns`,
         allowing better column filtering for NODEIDs
