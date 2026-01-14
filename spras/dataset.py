@@ -6,12 +6,9 @@ from typing import Union
 import pandas as pd
 
 from spras.config.dataset import DatasetSchema
-from spras.util import FileLike, open_weak
+from spras.util import LoosePathLike
 
 """
-Author: Chris Magnano
-02/15/21
-
 Methods and intermediate state for loading data and putting it into pandas tables for use by pathway reconstruction algorithms.
 """
 
@@ -20,13 +17,13 @@ class Dataset:
     NODE_ID = "NODEID"
     warning_threshold = 0.05  # Threshold for scarcity of columns to warn user
 
-    def to_file(self, file: FileLike):
+    def to_file(self, file: LoosePathLike):
         """Saves dataset object to pickle file"""
-        with open_weak(file, "wb") as f:
+        with open(file, "wb") as f:
             pkl.dump(self, f)
 
     @classmethod
-    def from_file(cls, file: Union[FileLike, "Dataset"]):
+    def from_file(cls, file: Union[LoosePathLike, "Dataset"]):
         """
         Loads dataset object from a pickle file or another `Dataset` object.
         Usage: dataset = Dataset.from_file(pickle_file)
@@ -36,8 +33,8 @@ class Dataset:
             # `Dataset` objects in generate_inputs or parse_outputs.)
             return file
 
-        with open_weak(file, "rb") as file:
-            return pkl.load(file)
+        with open(file, "rb") as f:
+            return pkl.load(f)
 
     def __init__(self, dataset_params: DatasetSchema):
         """
