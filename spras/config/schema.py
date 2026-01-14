@@ -14,6 +14,7 @@ from typing import Annotated, Optional
 
 from pydantic import AfterValidator, BaseModel, ConfigDict
 
+from spras.config.algorithms import AlgorithmUnion
 from spras.config.container_schema import ContainerSettings
 from spras.config.dataset import DatasetSchema
 from spras.config.util import CaseInsensitiveEnum, label_validator
@@ -78,21 +79,6 @@ class Analysis(BaseModel):
 # The default length of the truncated hash used to identify parameter combinations
 DEFAULT_HASH_LENGTH = 7
 
-class AlgorithmParams(BaseModel):
-    include: bool
-    directed: Optional[bool] = None
-
-    # TODO: use array of runs instead. We currently rely on the
-    # extra parameters here to extract the algorithm parameter information,
-    # which is why this deviates from the usual ConfigDict(extra='forbid').
-    model_config = ConfigDict(extra='allow')
-
-class Algorithm(BaseModel):
-    name: str
-    params: AlgorithmParams
-
-    model_config = ConfigDict(extra='forbid')
-
 class GoldStandard(BaseModel):
     label: Annotated[str, AfterValidator(label_validator("Gold Standard"))]
     node_files: list[str] = []
@@ -119,7 +105,8 @@ class RawConfig(BaseModel):
     hash_length: int = DEFAULT_HASH_LENGTH
     "The length of the hash used to identify a parameter combination"
 
-    algorithms: list[Algorithm]
+    # See algorithms.py for more information about AlgorithmUnion
+    algorithms: list[AlgorithmUnion] # type: ignore - pydantic allows this.
     datasets: list[DatasetSchema]
     gold_standards: list[GoldStandard] = []
     analysis: Analysis = Analysis()

@@ -1,12 +1,16 @@
 from pathlib import Path
+from typing import Optional
+
+from pydantic import BaseModel, ConfigDict
 
 from spras.config.container_schema import ProcessedContainerSettings
+from spras.config.util import CaseInsensitiveEnum
 from spras.containers import prepare_volume, run_container_and_log
 from spras.interactome import reinsert_direction_col_mixed
 from spras.prm import PRM
 from spras.util import add_rank_column, duplicate_edges, raw_pathway_df
 
-__all__ = ['OmicsIntegrator1', 'write_conf']
+__all__ = ['DummyMode', 'OmicsIntegrator1', 'OmicsIntegrator1Params', 'write_conf']
 
 
 # TODO decide on default number of processes and threads
@@ -36,8 +40,62 @@ def write_conf(filename=Path('config.txt'), w=None, b=None, d=None, mu=None, noi
         f.write('processes = 1\n')
         f.write('threads = 1\n')
 
+class DummyMode(CaseInsensitiveEnum):
+    terminals = 'terminals'
+    "connect the dummy node to all nodes that have been assigned prizes"
+    all = 'all'
+    "connect the dummy node to all nodes in the interactome i.e. full set of nodes in graph"
+    others = 'others'
+    "connect the dummy node to all nodes that are not terminal nodes i.e. nodes w/o prizes"
+    file = 'file'
+    "connect the dummy node to a specific list of nodes provided in a file"
 
-class OmicsIntegrator1(PRM):
+    # To make sure that DummyMode prints as `terminals`, etc.. in JSON dictionaries
+    # (since they use object representation internally.)
+    def __repr__(self) -> str:
+        return f"'{self.name}'"
+
+class OmicsIntegrator1Params(BaseModel):
+    dummy_mode: Optional[DummyMode] = None
+    mu_squared: bool = False
+    exclude_terms: bool = False
+
+    noisy_edges: int = 0
+    "How many times you would like to add noise to the given edge values and re-run the algorithm."
+
+    shuffled_prizes: int = 0
+    "How many times the algorithm should shuffle the prizes and re-run"
+
+    random_terminals: int = 0
+    "How many times to apply the given prizes to random nodes in the interactome"
+
+    seed: Optional[int] = None
+    "The randomness seed to use."
+
+    w: float
+    "Float that affects the number of connected components, with higher values leading to more components"
+
+    b: float
+    "The trade-off between including more prizes and using less reliable edgess"
+
+    d: int
+    "Controls the maximum path-length from root to terminal nodes"
+
+    mu: float = 0.0
+    "Controls the degree-based negative prizes (default 0.0)"
+
+    noise: Optional[float] = None
+    "Standard Deviation of the gaussian noise added to edges in Noisy Edges Randomizations"
+
+    g: float = 0.001
+    "(gamma) msgsteiner reinforcement parameter that affects the convergence of the solution and runtime, with larger values leading to faster convergence but suboptimal results."
+
+    r: float = 0
+    "msgsteiner parameter that adds random noise to edges, which is rarely needed."
+
+    model_config = ConfigDict(extra='forbid', use_attribute_docstrings=True)
+
+class OmicsIntegrator1(PRM[OmicsIntegrator1Params]):
     """
     Omics Integrator 1 works with partially directed graphs
     - it takes in the universal input directly
@@ -58,8 +116,10 @@ class OmicsIntegrator1(PRM):
         """
         Access fields from the dataset and write the required input files
         @param data: dataset
-        @param filename_map: a dict mapping file types in the required_inputs to the filename for that type
-        @return:
+        @param filename_map: a dict mapping file types in the required_inputs to the filename for that type. Associated files will be written with:
+        - prizes: list of nodes associated with their prize
+        - edges: list of edges associated with their weight and directionality
+        - dummy_nodes: list of dummy nodes
         """
         OmicsIntegrator1.validate_required_inputs(filename_map)
 
@@ -95,62 +155,30 @@ class OmicsIntegrator1(PRM):
             with open(filename_map['dummy_nodes'], mode='w'):
                 pass
 
-    # TODO add parameter validation
     # TODO add support for knockout argument
     # TODO add reasonable default values
     @staticmethod
-    def run(edges=None, prizes=None, dummy_nodes=None, dummy_mode=None, mu_squared=None, exclude_terms=None,
-            output_file=None, noisy_edges=None, shuffled_prizes=None, random_terminals=None,
-            seed=None, w=None, b=None, d=None, mu=None, noise=None, g=None, r=None, container_settings=None):
-        """
-        Run Omics Integrator 1 in the Docker image with the provided parameters.
-        Does not support the garnet, cyto30, knockout, cv, or cv-reps arguments.
-        The configuration file is generated from the provided arguments.
-        Does not support the garnetBeta, processes, or threads configuration file parameters.
-        The msgpath is not required because msgsteiner is available in the Docker image.
-        Only the optimal forest sif file is retained.
-        All other output files are deleted.
-        @param output_file: the name of the output sif file for the optimal forest, which will overwrite any
-        existing file with this name
-        @param noisy_edges: How many times you would like to add noise to the given edge values and re-run the algorithm.
-        @param shuffled_prizes: How many times the algorithm should shuffle the prizes and re-run
-        @param random_terminals: How many times to apply the given prizes to random nodes in the interactome
-        @param seed: the randomness seed to use
-        @param w: float that affects the number of connected components, with higher values leading to more components
-        @param b: the trade-off between including more prizes and using less reliable edges
-        @param d: controls the maximum path-length from root to terminal nodes
-        @param mu: controls the degree-based negative prizes (default 0.0)
-        @param noise: Standard Deviation of the gaussian noise added to edges in Noisy Edges Randomizations
-        @param g: (gamma) msgsteiner reinforcement parameter that affects the convergence of the solution and runtime, with larger values leading to faster convergence but suboptimal results (default 0.001)
-        @param r: msgsteiner parameter that adds random noise to edges, which is rarely needed (default 0)
-        @param container_settings: configure the container runtime
-        """
+    def run(inputs, output_file, args, container_settings=None):
         if not container_settings: container_settings = ProcessedContainerSettings()
-        if edges is None or prizes is None or output_file is None or w is None or b is None or d is None:
-            raise ValueError('Required Omics Integrator 1 arguments are missing')
+        OmicsIntegrator1.validate_required_run_args(inputs, ["dummy_nodes"])
 
         work_dir = '/spras'
 
         # Each volume is a tuple (src, dest)
         volumes = list()
 
-        bind_path, edge_file = prepare_volume(edges, work_dir, container_settings)
+        bind_path, edge_file = prepare_volume(inputs["edges"], work_dir, container_settings)
         volumes.append(bind_path)
 
-        bind_path, prize_file = prepare_volume(prizes, work_dir, container_settings)
+        bind_path, prize_file = prepare_volume(inputs["prizes"], work_dir, container_settings)
         volumes.append(bind_path)
-
-        # 4 dummy mode possibilities:
-        #   1. terminals -> connect the dummy node to all nodes that have been assigned prizes
-        #   2. all ->  connect the dummy node to all nodes in the interactome i.e. full set of nodes in graph
-        #   3. others -> connect the dummy node to all nodes that are not terminal nodes i.e. nodes w/o prizes
-        #   4. file -> connect the dummy node to a specific list of nodes provided in a file
 
         # add dummy node file to the volume if dummy_mode is not None and it is 'file'
-        if dummy_mode == 'file':
-            if dummy_nodes is None:
+        dummy_file = None
+        if args.dummy_mode == DummyMode.file:
+            if "dummy_nodes" not in inputs:
                 raise ValueError("dummy_nodes file is required when dummy_mode is set to 'file'")
-            bind_path, dummy_file = prepare_volume(dummy_nodes, work_dir, container_settings)
+            bind_path, dummy_file = prepare_volume(inputs["dummy_nodes"], work_dir, container_settings)
             volumes.append(bind_path)
 
         out_dir = Path(output_file).parent
@@ -162,7 +190,8 @@ class OmicsIntegrator1(PRM):
         conf_file = 'oi1-configuration.txt'
         conf_file_local = Path(out_dir, conf_file)
         # Temporary file that will be deleted after running Omics Integrator 1
-        write_conf(conf_file_local, w=w, b=b, d=d, mu=mu, noise=noise, g=g, r=r)
+        write_conf(conf_file_local, w=args.w, b=args.b, d=args.d, mu=args.mu,
+                   noise=args.noise, g=args.g, r=args.r)
         bind_path, conf_file = prepare_volume(str(conf_file_local), work_dir, container_settings)
         volumes.append(bind_path)
 
@@ -175,27 +204,24 @@ class OmicsIntegrator1(PRM):
                    '--outlabel', 'oi1']
 
         # add the dummy mode argument
-        if dummy_mode is not None and dummy_mode:
+        if args.dummy_mode is not None:
             # for custom dummy modes, add the file
-            if dummy_mode == 'file':
+            if dummy_file:
                 command.extend(['--dummyMode', dummy_file])
             # else pass in the dummy_mode and let oi1 handle it
             else:
-                command.extend(['--dummyMode', dummy_mode])
+                command.extend(['--dummyMode', args.dummy_mode.value])
 
         # Add optional arguments
-        if mu_squared is not None and mu_squared:
+        if args.mu_squared:
             command.extend(['--musquared'])
-        if exclude_terms is not None and exclude_terms:
+        if args.exclude_terms:
             command.extend(['--excludeTerms'])
-        if noisy_edges is not None:
-            command.extend(['--noisyEdges', str(noisy_edges)])
-        if shuffled_prizes is not None:
-            command.extend(['--shuffledPrizes', str(shuffled_prizes)])
-        if random_terminals is not None:
-            command.extend(['--randomTerminals', str(random_terminals)])
-        if seed is not None:
-            command.extend(['--seed', str(seed)])
+        command.extend(['--noisyEdges', str(args.noisy_edges)])
+        command.extend(['--shuffledPrizes', str(args.shuffled_prizes)])
+        command.extend(['--randomTerminals', str(args.random_terminals)])
+        if args.seed is not None:
+            command.extend(['--seed', str(args.seed)])
 
         container_suffix = "omics-integrator-1:v2"
         run_container_and_log('Omics Integrator 1',

@@ -1,5 +1,7 @@
 from pathlib import Path
 
+from pydantic import BaseModel, ConfigDict
+
 from spras.config.container_schema import ProcessedContainerSettings
 from spras.containers import prepare_volume, run_container_and_log
 from spras.interactome import (
@@ -9,7 +11,16 @@ from spras.interactome import (
 from spras.prm import PRM
 from spras.util import add_rank_column, duplicate_edges, raw_pathway_df
 
-__all__ = ['ResponseNet']
+__all__ = ['ResponseNet', 'ResponseNetParams']
+
+class ResponseNetParams(BaseModel):
+    gamma: int = 10
+    """
+    The 'size' of the graph. The higher gamma is, the more flow
+    is encouraged to start from the source nodes.
+    """
+
+    model_config = ConfigDict(extra='forbid', use_attribute_docstrings=True)
 
 """
 ResponseNet will construct a fully directed graph from the provided input file
@@ -21,7 +32,7 @@ Interactor1   Interactor2   Weight
 - the expected raw input file should have node pairs in the 1st and 2nd columns, with a weight in the 3rd column
 - it can include bidirectional edges, but will only keep one copy of repeated edges
 """
-class ResponseNet(PRM):
+class ResponseNet(PRM[ResponseNetParams]):
     required_inputs = ['sources', 'targets', 'edges']
     dois = ["10.1038/ng.337"]
 
@@ -30,7 +41,10 @@ class ResponseNet(PRM):
         """
         Access fields from the dataset and write the required input files
         @param data: dataset
-        @param filename_map: a dict mapping file types in the required_inputs to the filename for that type
+        @param filename_map: a dict mapping file types in the required_inputs to the filename for that type. Associated files will be written with:
+        - sources: list of sources
+        - targets: list of targets
+        - edges: list of edges
         """
         ResponseNet.validate_required_inputs(filename_map)
 
@@ -54,21 +68,10 @@ class ResponseNet(PRM):
                      header=False)
 
     @staticmethod
-    def run(sources=None, targets=None, edges=None, output_file=None, gamma=10, container_settings=None):
-        """
-        Run ResponseNet with Docker (or singularity)
-        @param sources: input sources (required)
-        @param targets: input targets (required)
-        @param edges: input network file (required)
-        @param output_file: output file name (required)
-        @param gamma: integer representing gamma (optional, default is 10)
-        @param container_settings: configure the container runtime
-        """
+    def run(inputs, output_file, args=None, container_settings=None):
         if not container_settings: container_settings = ProcessedContainerSettings()
-
-        # ensures that these parameters are required
-        if not sources or not targets or not edges or not output_file:
-            raise ValueError('Required ResponseNet arguments are missing')
+        ResponseNet.validate_required_run_args(inputs)
+        if not args: args = ResponseNetParams()
 
         # the data files will be mapped within this directory within the container
         work_dir = '/ResponseNet'
@@ -76,13 +79,13 @@ class ResponseNet(PRM):
         # the tuple is for mapping the sources, targets, edges, and output
         volumes = list()
 
-        bind_path, sources_file = prepare_volume(sources, work_dir, container_settings)
+        bind_path, sources_file = prepare_volume(inputs["sources"], work_dir, container_settings)
         volumes.append(bind_path)
 
-        bind_path, targets_file = prepare_volume(targets, work_dir, container_settings)
+        bind_path, targets_file = prepare_volume(inputs["targets"], work_dir, container_settings)
         volumes.append(bind_path)
 
-        bind_path, edges_file = prepare_volume(edges, work_dir, container_settings)
+        bind_path, edges_file = prepare_volume(inputs["edges"], work_dir, container_settings)
         volumes.append(bind_path)
 
         # Create a prefix for the output filename and ensure the directory exists
@@ -92,7 +95,7 @@ class ResponseNet(PRM):
         volumes.append(bind_path)
 
         mapped_out_prefix = Path(mapped_out_dir)
-        out_file_suffixed = out_dir / f'output_gamma{str(gamma)}.txt'
+        out_file_suffixed = out_dir / f'output_gamma{str(args.gamma)}.txt'
 
         # Makes the Python command to run within in the container
         command = ['python',
@@ -101,7 +104,7 @@ class ResponseNet(PRM):
                     '--sources_file', sources_file,
                     '--targets_file', targets_file,
                     '--output', str(Path(mapped_out_prefix, 'output').as_posix()),
-                    '--gamma', str(gamma)]
+                    '--gamma', str(args.gamma)]
 
         # choosing to run in docker or singularity container
         container_suffix = "responsenet:v2"
