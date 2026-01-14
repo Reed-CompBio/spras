@@ -10,7 +10,7 @@ We declare models using two classes here:
 - `CaseInsensitiveEnum` (see ./util.py)
 """
 
-from typing import Annotated, Optional
+from typing import Annotated
 
 from pydantic import AfterValidator, BaseModel, ConfigDict
 

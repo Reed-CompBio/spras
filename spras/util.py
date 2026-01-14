@@ -7,7 +7,7 @@ import hashlib
 import json
 from os import PathLike
 from pathlib import Path
-from typing import IO, Any, Dict, Optional, TypeAlias, Union
+from typing import Any, Dict, Optional, Union
 
 import numpy as np
 import pandas as pd

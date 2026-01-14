@@ -1,7 +1,7 @@
 import os
 from abc import ABC, abstractmethod
 from pathlib import Path
-from typing import Any, Mapping, Generic, Optional, TypeVar, cast, get_args
+from typing import Any, Generic, Mapping, Optional, TypeVar, cast, get_args
 
 from pydantic import BaseModel
 
