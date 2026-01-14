@@ -16,12 +16,6 @@ class MissingDataError(RuntimeError):
     This is thrown by PRMs.
     """
 
-    scope: str
-    """
-    This is usually the name of the PRM throwing this error.
-    We generically call this 'scope'
-    """
-
     missing_message: list[str] | str
     """
     Either a list of some specific data is missing, or we provide a custom
@@ -33,13 +27,14 @@ class MissingDataError(RuntimeError):
     (If a list) {Scope} requires columns {message joined by ", "}
     """
 
-    def process_message(scope: str, missing_message: list[str] | str) -> str:
+    @staticmethod
+    def process_message(missing_message: list[str] | str) -> str:
         if isinstance(missing_message, str):
-            return f"{scope} is missing data: {missing_message}"
+            return f"Missing data: {missing_message}"
         else:
-            return "{} requires columns: {}".format(scope, ", ".join(missing_message))
+            return f"Requiring columns: {', '.join(missing_message)}"
 
-    def __init__(self, scope: str, missing_message: list[str] | str):
+    def __init__(self, missing_message: list[str] | str):
         """
         Constructs a new MissingDataError.
 
@@ -47,13 +42,12 @@ class MissingDataError(RuntimeError):
         See the `MissingDataError#missing_message` docstring for more info
         """
 
-        self.scope = scope
         self.missing_message = missing_message
 
-        super(MissingDataError, self).__init__(MissingDataError.process_message(scope, missing_message))
+        super(MissingDataError, self).__init__(MissingDataError.process_message(missing_message))
 
     def __str__(self):
-        return MissingDataError.process_message(self.algorithm, self.missing_message)
+        return MissingDataError.process_message(self.missing_message)
 
 
 class Dataset:
@@ -176,7 +170,7 @@ class Dataset:
         self.node_table.insert(0, "NODEID", self.node_table.pop("NODEID"))
         self.other_files = dataset_dict["other_files"]
 
-    def get_node_columns(self, col_names: list[str], scope: str) -> pd.DataFrame:
+    def get_node_columns(self, col_names: list[str]) -> pd.DataFrame:
         """
         @param scope: The name of the algorithm (or a more general 'scope' like SPRAS)
             to fail on if get_node_columns fails.
@@ -191,7 +185,7 @@ class Dataset:
 
         needed_columns = set(col_names).difference(self.node_table.columns)
         if len(needed_columns) != 0:
-            raise MissingDataError(scope, needed_columns)
+            raise MissingDataError(list(needed_columns))
 
         col_names.append(self.NODE_ID)
         filtered_table = self.node_table[col_names]
@@ -218,11 +212,11 @@ class Dataset:
         """
         needed_columns = set(col_names).difference(self.node_table.columns)
         if len(needed_columns) != 0:
-            raise MissingDataError(scope, needed_columns)
+            raise MissingDataError(list(needed_columns))
 
         result_dict: dict[str, pd.DataFrame] = dict()
         for name in col_names:
-            result_dict[name] = self.get_node_columns([name], scope)
+            result_dict[name] = self.get_node_columns([name])
 
         return result_dict
 

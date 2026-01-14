@@ -41,7 +41,7 @@ class DOMINO(PRM):
         DOMINO.validate_required_inputs(filename_map)
 
         # Get active genes for node input file
-        node_df = data.get_node_columns(['active'], 'DOMINO')
+        node_df = data.get_node_columns(['active'])
         node_df = node_df[node_df['active'] == True]
 
         # Transform each node id with a prefix

@@ -29,7 +29,7 @@ class AllPairs(PRM):
 
         # Get sources and targets for node input file
         # Borrowed code from pathlinker.py
-        sources_targets = data.get_node_columns(["sources", "targets"], "All Pairs Shortest Paths")
+        sources_targets = data.get_node_columns(["sources", "targets"])
 
         both_series = sources_targets.sources & sources_targets.targets
         for _index, row in sources_targets[both_series].iterrows():
