@@ -73,6 +73,8 @@ class Config:
         self.container_settings = ProcessedContainerSettings.from_container_settings(parsed_raw_config.containers, self.hash_length)
         # The list of algorithms to run in the workflow. Each is a dict with 'name' as an expected key.
         self.algorithms = None
+        # The heuristic handler
+        self.heuristics = parsed_raw_config.heuristics
         # A nested dict mapping algorithm names to dicts that map parameter hashes to parameter combinations.
         # Only includes algorithms that are set to be run with 'include: true'.
         self.algorithm_params: dict[str, dict[str, Any]] = dict()
