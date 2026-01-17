@@ -14,15 +14,15 @@ will grab the top level registry configuration option as it appears in the confi
 
 import copy as copy
 import functools
+import hashlib
 import importlib.metadata
 import itertools as it
 import os
 import subprocess
-import warnings
-from typing import Any
-from pathlib import Path
 import tomllib
-import hashlib
+import warnings
+from pathlib import Path
+from typing import Any
 
 import numpy as np
 import yaml
@@ -52,14 +52,14 @@ def spras_revision() -> str:
             cwd=Path(__file__).parent.resolve()
         ).strip()
 
-        # We check the pyproject.toml name attribute to confirm that this is the SPRAS project. This is suspectible
+        # We check the pyproject.toml name attribute to confirm that this is the SPRAS project. This is susceptible
         # to false negatives, but we use this as a preliminary check against bad SPRAS installs.
         pyproject_path = Path(project_directory, 'pyproject.toml')
         try:
             pyproject_toml = tomllib.loads(pyproject_path.read_text())
             if "project" not in pyproject_toml or "name" not in pyproject_toml["project"]:
                 raise RuntimeError(f"The git top-level `{pyproject_path}` does not have the expected attributes: {clone_tip}")
-            if pyproject_toml["project"]["name"] == "spras":
+            if pyproject_toml["project"]["name"] != "spras":
                 raise RuntimeError(f"The git top-level `{pyproject_path}` is not the SPRAS pyproject.toml: {clone_tip}")
 
             return subprocess.check_output(
