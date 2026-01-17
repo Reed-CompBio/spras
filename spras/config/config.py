@@ -58,9 +58,9 @@ def spras_revision() -> str:
         try:
             pyproject_toml = tomllib.loads(pyproject_path.read_text())
             if "project" not in pyproject_toml or "name" not in pyproject_toml["project"]:
-                raise RuntimeError(f"The git top-level `{pyproject_path}` does not have the expected attributes: {clone_tip}")
+                raise RuntimeError(f"The git top-level `{pyproject_path}` does not have the expected attributes. {clone_tip}")
             if pyproject_toml["project"]["name"] != "spras":
-                raise RuntimeError(f"The git top-level `{pyproject_path}` is not the SPRAS pyproject.toml: {clone_tip}")
+                raise RuntimeError(f"The git top-level `{pyproject_path}` is not the SPRAS pyproject.toml. {clone_tip}")
 
             return subprocess.check_output(
                 ["git", "rev-parse", "--short", "HEAD"],
@@ -69,9 +69,9 @@ def spras_revision() -> str:
             ).strip()
         except FileNotFoundError as err:
             # pyproject.toml wasn't found during the `read_text` call
-            raise RuntimeError(f"The git top-level {pyproject_path} wasn't found: {clone_tip}") from err
+            raise RuntimeError(f"The git top-level {pyproject_path} wasn't found. {clone_tip}") from err
         except tomllib.TOMLDecodeError as err:
-            raise RuntimeError(f"The git top-level {pyproject_path} is malformed: {clone_tip}") from err
+            raise RuntimeError(f"The git top-level {pyproject_path} is malformed. {clone_tip}") from err
     except subprocess.CalledProcessError:
         try:
             # `git` failed: use the truncated hash of the RECORD file in .dist-info instead.
