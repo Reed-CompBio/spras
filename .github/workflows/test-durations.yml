@@ -1,0 +1,40 @@
+name: Make .test_durations
+
+on: [workflow_dispatch]
+
+jobs:
+  test:
+    name: Make & artifact .test_durations
+    # The Docker images will be pulled in both the docker job and this test job
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+      - name: Install conda environment
+        uses: conda-incubator/setup-miniconda@v2
+        with:
+          activate-environment: spras
+          environment-file: environment.yml
+          auto-activate-base: false
+          miniconda-version: 'latest'
+      - name: Install spras in conda env
+        # Install spras in the environment using pip
+        shell: bash --login {0}
+        run: pip install .
+      - name: Install Apptainer
+        # Formerly used Singularity instead of Apptainer (see https://github.com/eWaterCycle/setup-singularity/issues/6)
+        uses: eWaterCycle/setup-apptainer@v2
+        with:
+          # Choose version from https://github.com/apptainer/apptainer/releases
+          apptainer-version: 1.3.6
+      - name: Run tests
+        shell: bash --login {0}
+        # Verbose output and disable stdout and stderr capturing
+        # and, for this CI, store test durations
+        run: pytest -vs --store-durations --durations-path=./.test_durations
+      - name: Archive .test_durations
+        uses: actions/upload-artifact@v4
+        with:
+          name: test-durations
+          path: |
+            .test_durations
