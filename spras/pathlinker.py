@@ -48,8 +48,6 @@ class PathLinker(PRM[PathLinkerParams]):
 
         # Get sources and targets for node input file
         sources_targets = data.get_node_columns(["sources", "targets"])
-        if sources_targets is None:
-            return False
         both_series = sources_targets.sources & sources_targets.targets
         for _index, row in sources_targets[both_series].iterrows():
             warn_msg = row.NODEID + " has been labeled as both a source and a target."
