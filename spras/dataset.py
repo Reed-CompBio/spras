@@ -22,6 +22,7 @@ class Dataset:
         with open(file, "wb") as f:
             pkl.dump(self, f)
 
+    # NOTE: When we bump to Python 3.13, we can use the reference Dataset instead of the literal "Dataset" for typing.
     @classmethod
     def from_file(cls, file: Union[LoosePathLike, "Dataset"]):
         """
