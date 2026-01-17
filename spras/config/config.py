@@ -39,9 +39,9 @@ def spras_revision() -> str:
     Gets the revision of the current SPRAS repository. This function is meant to be user-friendly to warn for bad SPRAS installs.
     1. If this file is inside the correct `.git` repository, we use the revision hash. This is for development in SPRAS as well as SPRAS installs via a cloned git repository.
     2. If SPRAS was installed via a PyPA-compliant package manager, we use the hash of the RECORD file (https://packaging.python.org/en/latest/specifications/recording-installed-packages/#the-record-file).
-        which contains the hashes of all installed files to the package
+        which contains the hashes of all installed files to the package.
     """
-    clone_tip = "Make sure SPRAS is installed through the installation instructions: https://spras.readthedocs.io/en/latest/install.html. "
+    clone_tip = "Make sure SPRAS is installed through the installation instructions: https://spras.readthedocs.io/en/latest/install.html."
 
     # Check if we're inside the right git repository
     try:
@@ -50,11 +50,10 @@ def spras_revision() -> str:
             encoding='utf-8',
             # In case the CWD is not inside the actual SPRAS directory
             cwd=Path(__file__).parent.resolve()
-        )
+        ).strip()
 
-        # Loose check for confirming that we are inside the SPRAS project. This is suspectible
-        # to false negatives, but we use this as a preliminary check
-        # to encourage the user to at least use a submodule version of SPRAS instead.
+        # We check the pyproject.toml name attribute to confirm that this is the SPRAS project. This is suspectible
+        # to false negatives, but we use this as a preliminary check against bad SPRAS installs.
         pyproject_path = Path(project_directory, 'pyproject.toml')
         try:
             pyproject_toml = tomllib.loads(pyproject_path.read_text())
