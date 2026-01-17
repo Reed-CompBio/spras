@@ -20,6 +20,9 @@ import os
 import subprocess
 import warnings
 from typing import Any
+from pathlib import Path
+import tomllib
+import hashlib
 
 import numpy as np
 import yaml
@@ -33,17 +36,53 @@ config = None
 @functools.cache
 def spras_revision() -> str:
     """
-    Gets the revision of the current SPRAS repository.
-    If this file is inside a `.git` repository, this uses the revision hash.
-    Otherwise, this uses the package version.
+    Gets the revision of the current SPRAS repository. This function is meant to be user-friendly to warn for bad SPRAS installs.
+    1. If this file is inside the correct `.git` repository, we use the revision hash. This is for development in SPRAS as well as SPRAS installs via a cloned git repository.
+    2. If SPRAS was installed via a PyPA-compliant package manager, we use the hash of the RECORD file (https://packaging.python.org/en/latest/specifications/recording-installed-packages/#the-record-file).
+        which contains the hashes of all installed files to the package
     """
-    # Check if we're inside a git repository
+    clone_tip = "Make sure SPRAS is installed through the installation instructions: https://spras.readthedocs.io/en/latest/install.html. "
+
+    # Check if we're inside the right git repository
     try:
-        return subprocess.check_output(["git", "rev-parse", "--short", "HEAD"], encoding='utf-8').strip()
+        project_directory = subprocess.check_output(
+            ["git", "rev-parse", "--show-toplevel"],
+            encoding='utf-8',
+            # In case the CWD is not inside the actual SPRAS directory
+            cwd=Path(__file__).parent.resolve()
+        )
+
+        # Loose check for confirming that we are inside the SPRAS project. This is suspectible
+        # to false negatives, but we use this as a preliminary check
+        # to encourage the user to at least use a submodule version of SPRAS instead.
+        pyproject_path = Path(project_directory, 'pyproject.toml')
+        try:
+            pyproject_toml = tomllib.loads(pyproject_path.read_text())
+            if "project" not in pyproject_toml or "name" not in pyproject_toml["project"]:
+                raise RuntimeError(f"The git top-level `{pyproject_path}` does not have the expected attributes: {clone_tip}")
+            if pyproject_toml["project"]["name"] == "spras":
+                raise RuntimeError(f"The git top-level `{pyproject_path}` is not the SPRAS pyproject.toml: {clone_tip}")
+
+            return subprocess.check_output(
+                ["git", "rev-parse", "--short", "HEAD"],
+                encoding='utf-8',
+                cwd=project_directory
+            ).strip()
+        except FileNotFoundError as err:
+            # pyproject.toml wasn't found during the `read_text` call
+            raise RuntimeError(f"The git top-level {pyproject_path} wasn't found: {clone_tip}") from err
+        except tomllib.TOMLDecodeError as err:
+            raise RuntimeError(f"The git top-level {pyproject_path} is malformed: {clone_tip}") from err
     except subprocess.CalledProcessError:
-        # Use the current package version instead
-        # https://stackoverflow.com/a/75100875/7589775
-        return f"v{importlib.metadata.version('spras').replace('.', '_')}"
+        try:
+            # `git` failed: use the truncated hash of the RECORD file in .dist-info instead.
+            record_path = str(importlib.metadata.distribution('spras').locate_file(f"spras-{importlib.metadata.version('spras')}.dist-info/RECORD"))
+            with open(record_path, 'rb', buffering=0) as f:
+                # Truncated to the magic value 8, the length of the short git revision.
+                return hashlib.file_digest(f, 'sha256').hexdigest()[:8]
+        except importlib.metadata.PackageNotFoundError as err:
+            # The metadata.distribution call failed.
+            raise RuntimeError(f"The spras package wasn't found: {clone_tip}") from err
 
 def attach_spras_revision(label: str) -> str:
     return f"{label}_{spras_revision()}"
