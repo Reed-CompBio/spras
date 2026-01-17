@@ -1,0 +1,64 @@
+hash_length: 7
+containers:
+  framework: docker
+  unpack_singularity: false
+  registry:
+    base_url: docker.io
+    owner: reedcompbio
+
+algorithms:
+  - name: "pathlinker"
+    include: true
+    runs:
+      run1:
+        k: range(100,201,100)
+
+  - name: "meo"
+    include: true
+    runs:
+      run1:
+        max_path_length: [3]
+        local_search: ["Yes"]
+        rand_restarts: [10]
+
+  - name: "mincostflow"
+    include: true
+    runs:
+      run1:
+        flow: [1] # The flow must be an int
+        capacity: [1]
+
+  - name: "allpairs"
+    include: true
+
+datasets:
+  - label: data0
+    node_files: ["node-prizes.txt", "sources.txt", "targets.txt"]
+    edge_files: ["network.txt"]
+    other_files: []
+    data_dir: "test/analysis/input"
+
+gold_standards:
+  - label: gs0
+    node_files: ["gs_nodes0.txt"]
+    data_dir: "test/analysis/input"
+    dataset_labels: ["data0"]
+
+reconstruction_settings:
+  locations:
+    reconstruction_dir: "test/analysis/input/run/example"
+
+analysis:
+  summary:
+    include: false
+  cytoscape:
+    include: false
+  ml:
+    include: false
+    aggregate_per_algorithm: true
+    components: 2
+    labels: true
+    linkage: 'ward'
+    metric: 'euclidean'
+  evaluation:
+    include: false
