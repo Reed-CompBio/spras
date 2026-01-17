@@ -1,0 +1,4 @@
+Pathway	Precision	Recall	Gold_Standard_Type
+test/evaluate/input/data-test-params-123/pathway.txt	0.0	0.0	directed
+test/evaluate/input/data-test-params-123/pathway.txt	0.5	0.5	mixed
+test/evaluate/input/data-test-params-123/pathway.txt	1.0	1.0	undirected
