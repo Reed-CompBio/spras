@@ -10,4 +10,4 @@ from pathlib import Path
 from spras.config.schema import RawConfig
 
 config_schema = RawConfig.model_json_schema()
-Path('config/schema.json').write_text(json.dumps(config_schema, indent=2))
+Path('config', 'schema.json').write_text(json.dumps(config_schema, indent=2))
