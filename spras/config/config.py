@@ -174,15 +174,21 @@ class Config:
         # Currently assumes all datasets have a label and the labels are unique
         # When Snakemake parses the config file it loads the datasets as OrderedDicts not dicts
         # Convert to dicts to simplify the yaml logging
+
+        for dataset in raw_config.datasets:
+            dataset.label = attach_spras_revision(dataset.label)
+        for gold_standard in raw_config.gold_standards:
+            gold_standard.label = attach_spras_revision(gold_standard.label)
+
         self.datasets = {}
         for dataset in raw_config.datasets:
             label = dataset.label
             if label.lower() in [key.lower() for key in self.datasets.keys()]:
                 raise ValueError(f"Datasets must have unique case-insensitive labels, but the label {label} appears at least twice.")
-            self.datasets[attach_spras_revision(label)] = dict(dataset)
+            self.datasets[label] = dict(dataset)
 
         # parse gold standard information
-        self.gold_standards = {attach_spras_revision(gold_standard.label): dict(gold_standard) for gold_standard in raw_config.gold_standards}
+        self.gold_standards = {gold_standard.label: dict(gold_standard) for gold_standard in raw_config.gold_standards}
 
         # check that all the dataset labels in the gold standards are existing datasets labels
         dataset_labels = set(self.datasets.keys())
@@ -190,6 +196,9 @@ class Config:
         for label in gold_standard_dataset_labels:
             if attach_spras_revision(label) not in dataset_labels:
                 raise ValueError(f"Dataset label '{label}' provided in gold standards does not exist in the existing dataset labels.")
+        # We attach the SPRAS revision to the individual dataset labels afterwards for a cleaner error message above.
+        for key, gold_standard in self.gold_standards.items():
+            self.gold_standards[key]["dataset_labels"] = map(attach_spras_revision, gold_standard["dataset_labels"])
 
         # Code snipped from Snakefile that may be useful for assigning default labels
         # dataset_labels = [dataset.get('label', f'dataset{index}') for index, dataset in enumerate(datasets)]
