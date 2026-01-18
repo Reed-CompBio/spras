@@ -20,7 +20,7 @@ default-resources:
   job_wrapper: "spras.sh"
   # If running in CHTC, this only works with apptainer images
   # Note requirement for quotes around the image name
-  container_image: "'spras-v0.5.0.sif'"
+  container_image: "'spras-v0.6.0.sif'"
   universe: "container"
   # The value for request_disk should be large enough to accommodate the runtime container
   # image, any additional PRM container images, and your input data.

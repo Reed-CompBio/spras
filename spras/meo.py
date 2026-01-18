@@ -111,21 +111,16 @@ class MEO(PRM[MEOParams]):
         """
         Access fields from the dataset and write the required input files
         @param data: dataset
-        @param filename_map: a dict mapping file types in the required_inputs to the filename for that type
-        @return:
+        @param filename_map: a dict mapping file types in the required_inputs to the filename for that type. Associated files will be written with:
+        - sources: list of sources
+        - targets: list of targets
+        - edges: list of edges
         """
         MEO.validate_required_inputs(filename_map)
 
         # Get sources and write to file, repeat for targets
         # Does not check whether a node is a source and a target
-        for node_type in ['sources', 'targets']:
-            nodes = data.get_node_columns([node_type])
-            if nodes is None:
-                raise ValueError(f'No {node_type} found in the node files')
-
-            # TODO test whether this selection is needed, what values could the column contain that we would want to
-            # include or exclude?
-            nodes = nodes.loc[nodes[node_type]]
+        for node_type, nodes in data.get_node_columns_separate(['sources', 'targets']).items():
             # replace _'s with underscore_replacement
             nodes['NODEID'] = nodes['NODEID'].str.replace('_', underscore_replacement)
             nodes.to_csv(filename_map[node_type], index=False, columns=['NODEID'], header=False)

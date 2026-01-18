@@ -5,10 +5,17 @@ and rather mainly contains validators and lower-level pydantic code.
 """
 import ast
 import copy
-from typing import Annotated, Any, Callable, Literal, Optional, Union, cast, get_args
+from typing import Annotated, Any, Callable, Literal, Union, cast, get_args
 
 import numpy as np
-from pydantic import BaseModel, BeforeValidator, ConfigDict, Field, create_model
+from pydantic import (
+    BaseModel,
+    BeforeValidator,
+    ConfigDict,
+    Field,
+    ValidationError,
+    create_model,
+)
 
 from spras.runner import algorithms
 
@@ -18,7 +25,9 @@ __all__ = ['AlgorithmUnion']
 def is_numpy_friendly(type: type[Any] | None) -> bool:
     """
     Whether the passed in type can have any numpy helpers.
-    This is mainly used to provide hints in the JSON schema.
+    This is used to provide hints in the JSON schema,
+    and to determine whether or not to allow for easy ranges using
+    `python_evalish_coerce`.
     """
     allowed_types = (int, float)
 
@@ -28,8 +37,8 @@ def is_numpy_friendly(type: type[Any] | None) -> bool:
 
 def python_evalish_coerce(value: Any) -> Any:
     """
-    Allows for using numpy and python calls. `range`, `np.linspace`, `np.arange`, and
-    `np.logspace` are expanded.
+    Allows for using numpy and python calls: specifically,
+    `range`, `np.linspace`, `np.arange`, and `np.logspace` are supported.
 
     **Safety Note**: This does not prevent availability attacks: this can still exhaust
     resources if wanted. This only prevents secret leakage.
@@ -58,7 +67,7 @@ def python_evalish_coerce(value: Any) -> Any:
 
     # This should always be an Expression whose body is Call (a function).
     if not isinstance(value_ast.body, ast.Call):
-        raise ValueError(f'The python code "{value}" should be calling a function directly. Is this meant to be python code?')
+        raise ValueError(f'This argument "{value}" was interpreted as a non-function-calling string: it should be a function call (e.g. range(100, 201, 50)), or an int or a float.')
 
     # We get the function name back as a string
     function_name = ast.unparse(value_ast.body.func)
@@ -67,7 +76,7 @@ def python_evalish_coerce(value: Any) -> Any:
     arguments = [ast.literal_eval(arg) for arg in value_ast.body.args]
 
     if function_name not in functions_dict:
-        raise ValueError(f"{function_name} is not an allowed function to be run!")
+        raise ValueError(f"{function_name} is not an allowed function to be run! Allowed functions: {list(functions_dict.keys())}")
 
     return functions_dict[function_name](arguments)
 
@@ -82,7 +91,7 @@ def list_coerce(value: Any) -> Any:
 
 # This is the most 'hacky' part of this code, but, thanks to pydantic, we avoid reflection
 # and preserve rich type information at runtime.
-def construct_algorithm_model(name: str, model: type[BaseModel], model_default: Optional[BaseModel]) -> type[BaseModel]:
+def construct_algorithm_model(name: str, model: type[BaseModel]) -> type[BaseModel]:
     """
     Dynamically constructs a parameter-combination model based on the original args model.
 
@@ -90,6 +99,13 @@ def construct_algorithm_model(name: str, model: type[BaseModel], model_default: 
     - Values can be passed as lists (1 -> [1])
     - Ranges and other convenient calls are expanded (see `python_evalish_coerce`)
     """
+
+    # Get the default model instance by trying to serialize the empty dictionary
+    try:
+        model_default = model.model_validate({})
+    except ValidationError:
+        model_default = None
+
     # First, we need to take our 'model' and coerce it to permit parameter combinations.
     # This assumes that all of the keys are flattened, so we only get a structure like so:
     # class AlgorithmParams(BaseModel):
@@ -162,6 +178,6 @@ def construct_algorithm_model(name: str, model: type[BaseModel], model_default: 
         __config__=ConfigDict(extra='forbid')
     )
 
-algorithm_models: list[type[BaseModel]] = [construct_algorithm_model(name, model, model_default) for name, (_, model, model_default) in algorithms.items()]
-# name differentriates algorithms
+algorithm_models: list[type[BaseModel]] = [construct_algorithm_model(name, model.get_params_generic()) for name, model in algorithms.items()]
+# name differentiates algorithms
 AlgorithmUnion = Annotated[Union[tuple(algorithm_models)], Field(discriminator='name')]

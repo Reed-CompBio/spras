@@ -25,15 +25,16 @@ class AllPairs(PRM[Empty]):
         """
         Access fields from the dataset and write the required input files
         @param data: dataset
-        @param filename_map: a dict mapping file types in the required_inputs to the filename for that type
+        @param filename_map: a dict mapping file types in the required_inputs to the filename for that type. Associated files will be written with:
+        - nodetypes: node types with sources and targets
+        - network: network file containing edges and their weights
+        - directed_flag: contains `true` if `network` is fully directed.
         """
         AllPairs.validate_required_inputs(filename_map)
 
         # Get sources and targets for node input file
         # Borrowed code from pathlinker.py
         sources_targets = data.get_node_columns(["sources", "targets"])
-        if sources_targets is None:
-            raise ValueError("All Pairs Shortest Paths requires sources and targets")
 
         both_series = sources_targets.sources & sources_targets.targets
         for _index, row in sources_targets[both_series].iterrows():

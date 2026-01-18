@@ -38,6 +38,6 @@ yaml.SafeDumper.add_multi_representer(
 class Empty(BaseModel):
     """
     The empty base model. Used for specifying that an algorithm takes no parameters,
-    yet are deterministic.
+    yet is deterministic.
     """
     model_config = ConfigDict(extra="forbid")

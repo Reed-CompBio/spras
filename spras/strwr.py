@@ -31,17 +31,19 @@ class ST_RWR(PRM[ST_RWRParams]):
 
     @staticmethod
     def generate_inputs(data, filename_map):
+        """
+        Access fields from the dataset and write the required input files
+        @param data: dataset
+        @param filename_map: a dict mapping file types in the required_inputs to the filename for that type. Associated files will be written with:
+        - sources: list of sources
+        - targets: list of targets
+        - network: list of edges
+        """
         ST_RWR.validate_required_inputs(filename_map)
 
         # Get separate source and target nodes for source and target files
-        if data.contains_node_columns(["sources","targets"]):
-            sources = data.get_node_columns(["sources"])
-            sources.to_csv(filename_map['sources'],sep='\t',index=False,columns=['NODEID'],header=False)
-
-            targets = data.get_node_columns(["targets"])
-            targets.to_csv(filename_map['targets'],sep='\t',index=False,columns=['NODEID'],header=False)
-        else:
-            raise ValueError("Invalid node data")
+        for node_type, nodes in data.get_node_columns_separate(["sources", "targets"]).items():
+            nodes.to_csv(filename_map[node_type],sep='\t',index=False,columns=['NODEID'],header=False)
 
         # Get edge data for network file
         edges = data.get_interactome()

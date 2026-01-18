@@ -164,6 +164,7 @@ class Config:
 
                 # We create the product of all param combinations for each run
                 param_name_list = []
+                # We convert our run parameters to a dictionary, allowing us to iterate over it
                 run_subscriptable = vars(runs[run_name])
                 for param in run_subscriptable:
                     param_name_list.append(param)

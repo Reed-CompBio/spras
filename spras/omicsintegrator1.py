@@ -6,6 +6,7 @@ from pydantic import BaseModel, ConfigDict
 from spras.config.container_schema import ProcessedContainerSettings
 from spras.config.util import CaseInsensitiveEnum
 from spras.containers import prepare_volume, run_container_and_log
+from spras.dataset import MissingDataError
 from spras.interactome import reinsert_direction_col_mixed
 from spras.prm import PRM
 from spras.util import add_rank_column, duplicate_edges, raw_pathway_df
@@ -116,8 +117,10 @@ class OmicsIntegrator1(PRM[OmicsIntegrator1Params]):
         """
         Access fields from the dataset and write the required input files
         @param data: dataset
-        @param filename_map: a dict mapping file types in the required_inputs to the filename for that type
-        @return:
+        @param filename_map: a dict mapping file types in the required_inputs to the filename for that type. Associated files will be written with:
+        - prizes: list of nodes associated with their prize
+        - edges: list of edges associated with their weight and directionality
+        - dummy_nodes: list of dummy nodes
         """
         OmicsIntegrator1.validate_required_inputs(filename_map)
 
@@ -126,11 +129,11 @@ class OmicsIntegrator1(PRM[OmicsIntegrator1Params]):
             node_df = data.get_node_columns(['prize'])
         elif data.contains_node_columns(['sources', 'targets']):
             # If there aren't prizes but are sources and targets, make prizes based on them
-            node_df = data.get_node_columns(['sources','targets'])
+            node_df = data.get_node_columns(['sources', 'targets'])
             node_df.loc[node_df['sources']==True, 'prize'] = 1.0
             node_df.loc[node_df['targets']==True, 'prize'] = 1.0
         else:
-            raise ValueError("Omics Integrator 1 requires node prizes or sources and targets")
+            raise MissingDataError("(node prizes) or (sources and targets)")
 
         # Omics Integrator already gives warnings for strange prize values, so we won't here
         node_df.to_csv(filename_map['prizes'],sep='\t',index=False,columns=['NODEID','prize'],header=['name','prize'])

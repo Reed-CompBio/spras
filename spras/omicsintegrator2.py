@@ -7,7 +7,7 @@ from pydantic import BaseModel, ConfigDict
 from spras.config.container_schema import ProcessedContainerSettings
 from spras.config.util import CaseInsensitiveEnum
 from spras.containers import prepare_volume, run_container_and_log
-from spras.dataset import Dataset
+from spras.dataset import Dataset, MissingDataError
 from spras.interactome import reinsert_direction_col_undirected
 from spras.prm import PRM
 from spras.util import add_rank_column, duplicate_edges
@@ -69,10 +69,11 @@ class OmicsIntegrator2(PRM[OmicsIntegrator2Params]):
     @staticmethod
     def generate_inputs(data: Dataset, filename_map):
         """
-        Access fields from the dataset and write the required input files.
-        Automatically converts edge weights to edge costs.
+        Access fields from the dataset and write the required input files
         @param data: dataset
-        @param filename_map: a dict mapping file types in the required_inputs to the filename for that type
+        @param filename_map: a dict mapping file types in the required_inputs to the filename for that type. Associated files will be written with:
+        - prizes: list of nodes associated with their prize
+        - edges: list of edges associated with their cost (transformed from the original Dataset weights)
         """
         OmicsIntegrator2.validate_required_inputs(filename_map)
 
@@ -85,7 +86,7 @@ class OmicsIntegrator2(PRM[OmicsIntegrator2Params]):
             node_df.loc[node_df['sources']==True, 'prize'] = 1.0
             node_df.loc[node_df['targets']==True, 'prize'] = 1.0
         else:
-            raise ValueError("Omics Integrator 2 requires node prizes or sources and targets")
+            raise MissingDataError("(node prizes) or (sources and targets)")
 
         # Omics Integrator already gives warnings for strange prize values, so we won't here
         node_df.to_csv(filename_map['prizes'], sep='\t', index=False, columns=['NODEID', 'prize'], header=['name','prize'])

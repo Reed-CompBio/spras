@@ -42,6 +42,20 @@ class PRM(ABC, Generic[T]):
         """
         raise NotImplementedError
 
+    @classmethod
+    def get_params_generic(cls) -> type[T]:
+        """
+        Gets the class instance of the parameter type passed into T, allowing us to use the
+        underlying pydantic model associated to it.
+
+        For example, on `class PathLinker(PRM[PathLinkerParams])`,
+        calling `PathLinker.get_params_generic()` returns `PathLinkerParams`.
+        """
+        # TODO: use the type-safe get_original_bases when we bump to >= Python 3.12
+        # This is hacky reflection from https://stackoverflow.com/a/71720366/7589775
+        # which grabs the class of type T by the definition of `__orig_bases__`.
+        return get_args(cast(Any, cls).__orig_bases__[0])[0]
+
     # This is used in `runner.py` to avoid a dependency diamond when trying
     # to import the actual algorithm schema.
     @classmethod
@@ -49,19 +63,16 @@ class PRM(ABC, Generic[T]):
         """
         This is similar to PRA.run, but it does pydantic logic internally to re-validate argument parameters.
         """
-        # awful reflection here, unfortunately:
-        # https://stackoverflow.com/a/71720366/7589775
-        # alternatively, one could have a T_class parameter
-        # for PRA here, but this level of implicitness seems alright.
-        T_class: type[T] = get_args(cast(Any, cls).__orig_bases__[0])[0]
+        T_class = cls.get_params_generic()
 
         # Since we just used reflection, we provide a mountain-dewey error message here
         # to protect against any developer confusion.
         if not issubclass(T_class, BaseModel):
             raise RuntimeError("The generic passed into PRM is not a pydantic.BaseModel.")
 
-        # (and pydantic already provides nice error messages, so we don't need to worry about
-        # catching this.)
+        # Validates our untyped `args` parameter against our parameter class of type T
+        # using BaseModel.model_validate (https://docs.pydantic.dev/latest/api/base_model/#pydantic.BaseModel.model_validate)
+        # (Pydantic already provides nice error messages, so we don't need to worry about catching this.)
         T_parsed = T_class.model_validate(args)
 
         return cls.run(inputs, output_file, T_parsed, container_settings)
@@ -72,6 +83,9 @@ class PRM(ABC, Generic[T]):
         """
         Runs an algorithm with the specified inputs, algorithm params (T),
         the designated output_file, and the desired container_settings.
+
+        See the algorithm-specific `generate_inputs` and `parse_output`
+        for information about the input and output format.
         """
         raise NotImplementedError
 
