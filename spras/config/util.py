@@ -4,12 +4,25 @@ that should be imported by algorithms, and algorithms should
 only import this config file.
 """
 
+import re
 from enum import Enum
 from typing import Any
 
 import yaml
 from pydantic import BaseModel, ConfigDict
 
+
+def label_validator(name: str):
+    """
+    A validator takes in a label
+    and ensures that it contains only letters, numbers, or underscores.
+    """
+    label_pattern = r'^\w+$'
+    def validate(label: str):
+        if not bool(re.match(label_pattern, label)):
+            raise ValueError(f"{name} label '{label}' contains invalid values. {name} labels can only contain letters, numbers, or underscores.")
+        return label
+    return validate
 
 # https://stackoverflow.com/a/76883868/7589775
 class CaseInsensitiveEnum(str, Enum):
