@@ -13,7 +13,7 @@ from spras.config.container_schema import ContainerFramework, ProcessedContainer
 # like setting hash length behaviors, container registries, etc.
 config.init_from_file("config/config.yaml")
 
-TEST_DIR = Path('test/AllPairs/')
+TEST_DIR = Path('test/algorithms/AllPairs/')
 OUT_DIR = TEST_DIR / 'output'
 EXPECTED_DIR = TEST_DIR / 'expected'
 
