@@ -1,6 +1,7 @@
 import os
 import pickle as pkl
 import warnings
+from typing import TypedDict
 
 import pandas as pd
 
@@ -49,13 +50,23 @@ class MissingDataError(RuntimeError):
     def __str__(self):
         return MissingDataError.process_message(self.missing_message)
 
+class DatasetDict(TypedDict):
+    """
+    Type class containing a collection of information pertaining to creating a Dataset
+    object. This layout is replicated directly in SPRAS configuration files.
+    """
+    label: str
+    node_files: list[str | os.PathLike]
+    edge_files: list[str | os.PathLike]
+    other_files: list[str | os.PathLike]
+    data_dir: str | os.PathLike
 
 class Dataset:
 
     NODE_ID = "NODEID"
     warning_threshold = 0.05  # Threshold for scarcity of columns to warn user
 
-    def __init__(self, dataset_dict):
+    def __init__(self, dataset_dict: DatasetDict):
         self.label = None
         self.interactome = None
         self.node_table = None
@@ -85,7 +96,7 @@ class Dataset:
         with open(file_name, "rb") as f:
             return pkl.load(f)
 
-    def load_files_from_dict(self, dataset_dict):
+    def load_files_from_dict(self, dataset_dict: DatasetDict):
         """
         Loads data files from dataset_dict, which is one dataset dictionary from the list
         in the config file with the fields in the config file.
@@ -148,14 +159,14 @@ class Dataset:
         # Load generic node tables
         self.node_table = pd.DataFrame(node_set, columns=[self.NODE_ID])
         for node_file in node_data_files:
-            single_node_table = pd.read_table(os.path.join(data_loc, node_file))
+            single_node_table = pd.read_table(os.path.join(data_loc, node_file), index_col=False)
             # If we have only 1 column, assume this is an indicator variable
             if len(single_node_table.columns) == 1:
                 single_node_table = pd.read_table(
                     os.path.join(data_loc, node_file), header=None
                 )
                 single_node_table.columns = [self.NODE_ID]
-                new_col_name = node_file.split(".")[0]
+                new_col_name = str(node_file).split(".")[0]
                 single_node_table[new_col_name] = True
 
             # Use only keys from the existing node table so that nodes that are not in the interactome are ignored
