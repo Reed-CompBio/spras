@@ -12,9 +12,9 @@ from spras.dataset import Dataset
 # - 'NODEID' is required as the first column label in the node table
 # - file_paths must be an iterable, even if a single file path is passed
 
-INPUT_DIR = 'test/analysis/input/'
-OUT_DIR = 'test/analysis/output/'
-EXPECT_DIR = 'test/analysis/expected_output/'
+INPUT_DIR = Path('test', 'analysis', 'input')
+OUT_DIR = Path('test', 'analysis', 'output')
+EXPECT_DIR = Path('test', 'analysis', 'expected_output')
 
 
 class TestSummary:
@@ -35,14 +35,14 @@ class TestSummary:
                         }
         example_dataset = Dataset(example_dict)
         example_node_table = example_dataset.node_table
-        config.init_from_file(INPUT_DIR + "config.yaml")
+        config.init_from_file(INPUT_DIR / "config.yaml")
         algorithm_params = config.config.algorithm_params
         algorithms_with_params = [f'{algorithm}-params-{params_hash}' for algorithm, param_combos in
                                   algorithm_params.items() for params_hash in param_combos.keys()]
 
-        example_network_files = Path(INPUT_DIR + "example").glob("*.txt")  # must be path to use .glob()
+        example_network_files = Path(INPUT_DIR, "example").glob("*.txt")
 
-        out_path = Path(OUT_DIR + "test_example_summary.txt")
+        out_path = Path(OUT_DIR, "test_example_summary.txt")
         out_path.unlink(missing_ok=True)
         summarize_example = summarize_networks(example_network_files, example_node_table, algorithm_params,
                                                algorithms_with_params)
@@ -51,7 +51,7 @@ class TestSummary:
 
         # Comparing the dataframes directly with equals does not match because of how the parameter
         # combinations column is loaded from disk. Therefore, write both to disk and compare the files.
-        assert filecmp.cmp(out_path, EXPECT_DIR + "expected_example_summary.txt", shallow=False)
+        assert filecmp.cmp(out_path, EXPECT_DIR / "expected_example_summary.txt", shallow=False)
 
     def test_egfr_networks(self):
         """Test data from EGFR workflow"""
@@ -64,14 +64,14 @@ class TestSummary:
 
         egfr_dataset = Dataset(egfr_dict)
         egfr_node_table = egfr_dataset.node_table
-        config.init_from_file(INPUT_DIR + "egfr.yaml")
+        config.init_from_file(INPUT_DIR / "egfr.yaml")
         algorithm_params = config.config.algorithm_params
         algorithms_with_params = [f'{algorithm}-params-{params_hash}' for algorithm, param_combos in
                                   algorithm_params.items() for params_hash in param_combos.keys()]
 
-        egfr_network_files = Path(INPUT_DIR + "egfr").glob("*.txt")  # must be path to use .glob()
+        egfr_network_files = Path(INPUT_DIR, "egfr").glob("*.txt")  # must be path to use .glob()
 
-        out_path = Path(OUT_DIR + "test_egfr_summary.txt")
+        out_path = Path(OUT_DIR, "test_egfr_summary.txt")
         out_path.unlink(missing_ok=True)
         summarize_egfr = summarize_networks(egfr_network_files, egfr_node_table, algorithm_params,
                                             algorithms_with_params)
@@ -80,7 +80,7 @@ class TestSummary:
 
         # Comparing the dataframes directly with equals does not match because of how the parameter
         # combinations column is loaded from disk. Therefore, write both to disk and compare the files.
-        assert filecmp.cmp(out_path, EXPECT_DIR + "expected_egfr_summary.txt", shallow=False)
+        assert filecmp.cmp(out_path, EXPECT_DIR / "expected_egfr_summary.txt", shallow=False)
 
     def test_load_dataset_dict(self):
         """Test loading files from dataset_dict"""
@@ -95,7 +95,7 @@ class TestSummary:
 
         # node_table contents are not generated consistently in the same order,
         # so we will check that the contents are the same, but row order doesn't matter
-        expected_node_table = pd.read_csv((EXPECT_DIR + "expected_node_table.txt"), sep="\t")
+        expected_node_table = pd.read_csv((EXPECT_DIR / "expected_node_table.txt"), sep="\t")
 
         # ignore 'NODEID' column because this changes each time upon new generation
         cols_to_compare = [col for col in example_node_table.columns if col != "NODEID"]
