@@ -106,6 +106,13 @@ When gold standards are provided and evaluation is enabled (``include: true``), 
     analysis:
         evaluation:
             include: true
+        # One could also enable
+        # evaluation for PCA and HAC, and ensembling.
+        # For example,
+        jaccard:
+            include: true
+            evaluation:
+                include: true
 
 A gold standard dataset must include the following types of keys and files:
 
