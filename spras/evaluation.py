@@ -183,8 +183,9 @@ class Evaluation:
         pr_df = pd.DataFrame(results)
         return pr_df
 
+
     @staticmethod
-    def visualize_precision_and_recall_plot(pr_df: pd.DataFrame, output_file: str | PathLike, output_png: str | PathLike, title: str):
+    def nodes_visualize_precision_and_recall_plot(pr_df: pd.DataFrame, output_file: str | PathLike, output_png: str | PathLike, title: str):
         """
         Generates a scatter plot of precision and recall values for each pathway and saves both
         the plot and the data.
@@ -204,6 +205,8 @@ class Evaluation:
                 "Column 'Algorithm' not found in DataFrame. "
                 "The input DataFrame must include a preprocessed 'Algorithm' column to calculate precision and recall per pathway file."
             )
+
+        pr_df.sort_values(by=['Algorithm', 'Recall', 'Pathway'], axis=0, ascending=True, inplace=True)
 
         # save figure
         plt.figure(figsize=(10, 7))
@@ -235,11 +238,131 @@ class Evaluation:
         pr_df.to_csv(output_file, sep='\t', index=False)
 
     @staticmethod
+    def edge_precision_and_recall(file_paths: Iterable[Union[str, PathLike]], mixed_edge_table: pd.DataFrame, directed_edge_table: pd.DataFrame, undirected_edge_table: pd.DataFrame) -> pd.DataFrame:
+        """
+        Computes edge-level precision and recall for each pathway reconstruction output file against three edge gold standard tables.
+
+        This function takes a list of file paths corresponding to pathway reconstruction algorithm outputs,
+        each formatted as a tab-separated file with columns 'Node1', 'Node2', 'Rank', and 'Direction'.
+        It compares the set of predicted edges to the three provided gold standard edge tables and computes precision and recall per file.
+
+        @param file_paths: list of file paths of pathway reconstruction algorithm outputs
+        @param mixed_edge_table: the gold standard edges that includes directed and undirected edges
+        @param directed_edge_table: the gold standard edges that only includes directed edges
+        @param undirected_edge_table: the gold standard edges that only includes undirected edges
+        @return: A DataFrame with the following columns:
+                - 'Pathway': Path object corresponding to each pathway file
+                - 'Precision': Precision of predicted nodes vs. gold standard nodes
+                - 'Recall': Recall of predicted nodes vs. gold standard nodes
+                - 'Gold_Standard_Type': Which gold standard was used to calculate the precision and recall
+        """
+
+        y_true_mixed = set(map(tuple, mixed_edge_table[['Interactor1', 'Interactor2', 'Direction']].values))
+        y_true_directed = set(map(tuple, directed_edge_table[['Interactor1', 'Interactor2', 'Direction']].values))
+        y_true_undirected =  set(map(tuple, undirected_edge_table[['Interactor1', 'Interactor2', 'Direction']].values))
+
+        results = []
+        for f in file_paths:
+            df = pd.read_table(f, sep='\t', header=0)
+            y_pred =  set(map(tuple, df[['Node1', 'Node2', 'Direction']].values))
+
+            all_edges_mixed = y_true_mixed.union(y_pred)
+            y_true_mixed_binary = [1 if edge in y_true_mixed else 0 for edge in all_edges_mixed]
+            y_pred_mixed_binary = [1 if edge in y_pred else 0 for edge in all_edges_mixed]
+            # default to 0.0 if there is a divide by 0 error
+            # not using precision_recall_curve because thresholds are binary (0 or 1); rather we are directly
+            # calculating precision and recall per pathway
+            precision_mixed = precision_score(y_true_mixed_binary, y_pred_mixed_binary, zero_division=0.0)
+            recall_mixed = recall_score(y_true_mixed_binary, y_pred_mixed_binary, zero_division=0.0)
+            results.append({'Pathway': f, 'Precision': precision_mixed, 'Recall': recall_mixed, 'Gold_Standard_Type': "mixed"})
+
+            all_edges_directed = y_true_directed.union(y_pred)
+            y_true_directed_binary = [1 if edge in y_true_directed else 0 for edge in all_edges_directed]
+            y_pred_directed_binary = [1 if edge in y_pred else 0 for edge in all_edges_directed]
+            precision_directed = precision_score(y_true_directed_binary, y_pred_directed_binary, zero_division=0.0)
+            recall_directed = recall_score(y_true_directed_binary, y_pred_directed_binary, zero_division=0.0)
+            results.append({'Pathway': f, 'Precision': precision_directed, 'Recall': recall_directed, 'Gold_Standard_Type': "directed"})
+
+            all_edges_undirected = y_true_undirected.union(y_pred)
+            y_true_undirected_binary = [1 if edge in y_true_undirected else 0 for edge in all_edges_undirected]
+            y_pred_undirected_binary = [1 if edge in y_pred else 0 for edge in all_edges_undirected]
+            precision_undirected = precision_score(y_true_undirected_binary, y_pred_undirected_binary, zero_division=0.0)
+            recall_undirected = recall_score(y_true_undirected_binary, y_pred_undirected_binary, zero_division=0.0)
+            results.append({'Pathway': f, 'Precision': precision_undirected, 'Recall': recall_undirected, 'Gold_Standard_Type': "undirected"})
+
+        pr_df = pd.DataFrame(results)
+        return pr_df
+
+    @staticmethod
+    def edges_visualize_precision_and_recall_plot(pr_df: pd.DataFrame, output_file: str | PathLike, output_png: str | PathLike, title: str):
+        """
+        Generates three scatter subplots showing edge precision and recall values for each pathway across the three edge gold standard types,
+        and saves both the resulting plots and the corresponding data.
+
+        This function is intended for visualizing how different pathway reconstructions perform,
+        showing the precision and recall of each parameter combination for each algorithm across
+        each edge gold standard dataset (not a precision-recall curve).
+
+        @param pr_df: Dataframe of calculated precision and recall for each pathway file per edge gold standard.
+                      Must include a preprocessed 'Algorithm' column and 'Gold_Standard_Type" column
+        @param output_file: the filename to save the precision and recall of each pathway per gold standard type
+        @param output_png: the filename to plot the precision and recall of each pathway (not a PRC) per gold standard type
+        @param title: The title to use for the plot
+        """
+        if 'Algorithm' not in pr_df.columns:
+            raise ValueError(
+                "Column 'Algorithm' not found in DataFrame. "
+                "The input DataFrame must include a preprocessed 'Algorithm' column to visulize a precision and recall per pathway file per gold standard type."
+            )
+        if 'Gold_Standard_Type' not in pr_df.columns:
+            raise ValueError(
+                "Column 'Gold_Standard_Type' not found in DataFrame. "
+                "The input DataFrame must include a preprocessed 'Gold_Standard_Type' column indicating the edge directionality used for the gold standard, which is required to visualize precision and recall for each pathway file per gold standard type."
+            )
+
+        pr_df.sort_values(by=['Algorithm', 'Gold_Standard_Type', 'Recall', 'Pathway'], axis=0, ascending=True, inplace=True)
+
+
+        gs_types = pr_df["Gold_Standard_Type"].unique().tolist()
+        fig, axes = plt.subplots(1, len(gs_types), figsize=(6 * len(gs_types), 5))
+        color_palette = create_palette(pr_df['Algorithm'].tolist())
+
+        for ax, gs_type in zip(axes, gs_types, strict=True):
+            df_gs_type = pr_df[pr_df["Gold_Standard_Type"] == gs_type]
+            for algorithm, subset in df_gs_type.groupby('Algorithm'):
+                if not subset.empty:
+                    ax.plot(
+                        subset['Recall'],
+                        subset['Precision'],
+                        color=color_palette[algorithm],
+                        marker='o',
+                        linestyle='',
+                        label=algorithm.capitalize()
+                    )
+            ax.set_title(gs_type.capitalize())
+            ax.set_xlim(-0.05, 1.05)
+            ax.set_ylim(-0.05, 1.05)
+            ax.grid(True)
+
+        fig.supxlabel("Recall")
+        fig.supylabel("Precision")
+        fig.suptitle(title)
+        handles, labels = axes[0].get_legend_handles_labels()
+        fig.legend(handles, labels, loc="upper right")
+        plt.savefig(output_png)
+        plt.close(fig)
+
+        # save dataframe
+        pr_df.drop(columns=['Algorithm'], inplace=True)
+        pr_df.to_csv(output_file, sep='\t', index=False)
+
+    @staticmethod
     def precision_and_recall_per_pathway(pr_df: pd.DataFrame, output_file: str | PathLike, output_png: str | PathLike, aggregate_per_algorithm: bool = False):
         """
         Function for visualizing per pathway precision and recall across all algorithms. Each point in the plot represents
-        a single pathway reconstruction. If `aggregate_per_algorithm` is set to True, the plot is restricted to a single
-        algorithm and titled accordingly.
+        a single pathway reconstruction.
+
+        If `aggregate_per_algorithm` is set to True, each plot is restricted to a single algorithm and titled accordingly.
 
         @param pr_df: Dataframe of calculated precision and recall for each pathway file
         @param output_file: the filename to save the precision and recall of each pathway
@@ -248,7 +371,6 @@ class Evaluation:
         """
         if not pr_df.empty:
             pr_df['Algorithm'] = pr_df['Pathway'].apply(lambda p: Path(p).parent.name.split('-')[1])
-            pr_df.sort_values(by=['Recall', 'Pathway'], axis=0, ascending=True, inplace=True)
 
             if aggregate_per_algorithm:
                 # Guaranteed to only have one algorithm in Algorithm column
@@ -256,7 +378,7 @@ class Evaluation:
             else:
                 title = "Precision and Recall Plot Per Pathway Per Algorithm"
 
-            Evaluation.visualize_precision_and_recall_plot(pr_df, output_file, output_png, title)
+            Evaluation.nodes_visualize_precision_and_recall_plot(pr_df, output_file, output_png, title)
 
         else:
             # this block should never be reached — having 0 pathways implies that no algorithms or parameter combinations were run,
@@ -264,31 +386,45 @@ class Evaluation:
             raise ValueError("No pathways were provided to evaluate and visulize on. This likely means no algorithms or parameter combinations were run.")
 
     @staticmethod
-    def precision_and_recall_pca_chosen_pathway(pr_df: pd.DataFrame, output_file: str | PathLike, output_png: str | PathLike, aggregate_per_algorithm: bool = False):
+    def precision_and_recall_pca_chosen_pathway(pr_df: pd.DataFrame, output_file: str | PathLike, output_png: str | PathLike, aggregate_per_algorithm: bool = False, edge_evaluation: bool = False):
         """
 
         Function for visualizing the precision and recall of the single parameter combination selected via PCA,
         either for each algorithm individually or one combination shared across all algorithms. Each point represents
-        a pathway reconstruction corresponding to the PCA-selected parameter combination. If `aggregate_per_algorithm`
-        is True, the plot includes a pca chosen pathway per algorithm and titled accordingly.
+        a pathway reconstruction corresponding to the PCA-selected parameter combination.
+
+        If `aggregate_per_algorithm` is True, the output_png includes a pca chosen pathway per algorithm and titled accordingly.
+
+        If `edge_evaluation` is True, the output PNG shows performance across all three edge gold standards;
+        if False, the output PNG shows evaluation for the single node gold standard.
 
         @param pr_df: Dataframe of calculated precision and recall for each pathway file
         @param output_file: the filename to save the precision and recall of each pathway
         @param output_png: the filename to plot the precision and recall of each pathway (not a PRC)
-        @param aggregate_per_algorithm: Boolean indicating if function is used per algorithm (Default False)
+        @param aggregate_per_algorithm: Boolean indicating if this function is used per algorithm (Default False)
+        @param edge_evaluation: Boolean indicating if this function is used for creating edge_evaluation plots (Default False)
         """
         # TODO update to add in the pathways for the algorithms that do not provide a pca chosen pathway https://github.com/Reed-CompBio/spras/issues/341
 
         if not pr_df.empty:
             pr_df['Algorithm'] = pr_df['Pathway'].apply(lambda p: Path(p).parent.name.split('-')[1])
-            pr_df.sort_values(by=['Recall', 'Pathway'], axis=0, ascending=True, inplace=True)
 
-            if aggregate_per_algorithm:
-                title = "PCA-Chosen Pathway Per Algorithm Precision and Recall Plot"
+            if not edge_evaluation:
+                if aggregate_per_algorithm:
+                    title = "Node Evaluation PCA-Chosen Pathway Per Algorithm Precision and Recall Plot"
+                else:
+                    title = "Node Evaluation PCA-Chosen Pathway Across all Algorithms Precision and Recall Plot"
+
+                Evaluation.nodes_visualize_precision_and_recall_plot(pr_df, output_file, output_png, title)
+
             else:
-                title = "PCA-Chosen Pathway Across All Algorithms Precision and Recall Plot"
+                if aggregate_per_algorithm :
+                    title = "Edge Evaluation PCA-Chosen Pathway Per Algorithm Precision and Recall Plot"
+                else:
+                    title = "Edge Evaluation PCA-Chosen Pathway Across all Algorithms Precision and Recall Plot"
 
-            Evaluation.visualize_precision_and_recall_plot(pr_df, output_file, output_png, title)
+                Evaluation.edges_visualize_precision_and_recall_plot(pr_df, output_file, output_png, title)
+
 
         else:
             # Edge case: if all algorithms chosen use only 1 parameter combination
@@ -519,24 +655,4 @@ class Evaluation:
         complete_df.loc[not_last_rows, ['Average_Precision', 'Baseline']] = None
         complete_df.to_csv(output_file, index=False, sep='\t')
 
-    @staticmethod
-    def edge_dummy_function(mixed_edge_table: pd.DataFrame, undirected_edge_table: pd.DataFrame, directed_edge_table: pd.DataFrame, dummy_file: str):
-        """
-        Temporary function to test edge file implementation.
-        Will be removed from SPRAS's evaluation code in the future.
 
-        Takes in the different edge table versions (mixed, fully directed, fully undirected)
-        for a specific edge gold standard dataset and writes them to a file.
-
-        @param mixed_edge_table: Edge gold standard treated as mixed directionality.
-        @param undirected_edge_table: Edge gold standard treated as fully undirected.
-        @param directed_edge_table: Edge gold standard treated as fully directed.
-        @param dummy_file: Filename to save the edge tables.
-        """
-        with open(dummy_file, "w") as f:
-            f.write("Mixed Edge Table\n")
-            mixed_edge_table.to_csv(f, index=False)
-            f.write("\n\nUndirected Edge Table\n")
-            undirected_edge_table.to_csv(f, index=False)
-            f.write("\n\nDirected Edge Table\n")
-            directed_edge_table.to_csv(f, index=False)
