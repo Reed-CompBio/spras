@@ -1,0 +1,2 @@
+gene_or_protein,study_bias_score
+test_A,0.5

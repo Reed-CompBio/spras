@@ -12,6 +12,7 @@ from spras.omicsintegrator2 import OmicsIntegrator2
 from spras.pathlinker import PathLinker
 from spras.prm import PRM
 from spras.responsenet import ResponseNet
+from spras.robust import ROBUST
 from spras.rwr import RWR
 from spras.strwr import ST_RWR
 
@@ -25,6 +26,7 @@ algorithms: dict[str, type[PRM]] = {
     "omicsintegrator2": OmicsIntegrator2,
     "pathlinker": PathLinker,
     "responsenet": ResponseNet,
+    "robust": ROBUST,
     "rwr": RWR,
     "strwr": ST_RWR,
 }
