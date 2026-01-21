@@ -109,7 +109,7 @@ class DOMINO(PRM[DominoParams]):
                           '--network_file', network_file,
                           '--output_file', mapped_slices_file]
 
-        container_suffix = "domino"
+        container_suffix = "domino:v1"
         try:
             run_container_and_log('slicer',
                                 container_suffix,
