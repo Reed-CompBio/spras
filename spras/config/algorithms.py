@@ -5,7 +5,7 @@ and rather mainly contains validators and lower-level pydantic code.
 """
 import ast
 import copy
-from typing import Annotated, Any, Callable, Literal, Union, cast, get_args
+from typing import Annotated, Any, Callable, Literal, Optional, Union, cast, get_args
 
 import numpy as np
 from pydantic import (
@@ -167,6 +167,7 @@ def construct_algorithm_model(name: str, model: type[BaseModel]) -> type[BaseMod
     return create_model(
         f'{name}Model',
         name=Literal[name],
+        timeout=(Optional[str], None),
         include=bool,
         # For algorithms that have a default parameter config, we allow arbitrarily running an algorithm
         # if no runs are specified. For example, the following config
