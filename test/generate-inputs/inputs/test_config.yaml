@@ -1,9 +1,10 @@
 hash_length: 7
-container_framework: docker
-unpack_singularity: false
-container_registry:
-  base_url: docker.io
-  owner: reedcompbio
+containers:
+  framework: docker
+  unpack_singularity: false
+  registry:
+    base_url: docker.io
+    owner: reedcompbio
 
 algorithms:
   - name: "pathlinker"
@@ -35,7 +36,7 @@ algorithms:
       include: true
       run1:
         max_path_length: [3]
-        local_search: ["Yes"]
+        local_search: [true]
         rand_restarts: [10]
 
   - name: "mincostflow"
