@@ -1,6 +1,8 @@
 import warnings
 from pathlib import Path
 
+from pydantic import BaseModel, ConfigDict
+
 from spras.config.container_schema import ProcessedContainerSettings
 from spras.containers import prepare_volume, run_container_and_log
 from spras.dataset import Dataset
@@ -11,7 +13,13 @@ from spras.interactome import (
 from spras.prm import PRM
 from spras.util import duplicate_edges, raw_pathway_df
 
-__all__ = ['PathLinker']
+__all__ = ['PathLinker', 'PathLinkerParams']
+
+class PathLinkerParams(BaseModel):
+    k: int = 100
+    "Number of paths"
+
+    model_config = ConfigDict(extra='forbid', use_attribute_docstrings=True)
 
 """
 Pathlinker will construct a fully directed graph from the provided input file
@@ -23,7 +31,7 @@ Interactor1   Interactor2   Weight
 - the expected raw input file should have node pairs in the 1st and 2nd columns, with a weight in the 3rd column
 - it can include repeated and bidirectional edges
 """
-class PathLinker(PRM):
+class PathLinker(PRM[PathLinkerParams]):
     required_inputs = ['nodetypes', 'network']
     dois = ["10.1038/npjsba.2016.2", "10.1089/cmb.2012.0274"]
 
@@ -32,8 +40,9 @@ class PathLinker(PRM):
         """
         Access fields from the dataset and write the required input files
         @param data: dataset
-        @param filename_map: a dict mapping file types in the required_inputs to the filename for that type
-        @return:
+        @param filename_map: a dict mapping file types in the required_inputs to the filename for that type. Associated files will be written with:
+        - nodetypes: list of nodes tagged with whether they are a source or a target
+        - network: list of edges
         """
         PathLinker.validate_required_inputs(filename_map)
 
@@ -65,34 +74,21 @@ class PathLinker(PRM):
         edges.to_csv(filename_map["network"],sep="\t",index=False,columns=["Interactor1","Interactor2","Weight"],
                      header=["#Interactor1","Interactor2","Weight"])
 
-    # Skips parameter validation step
     @staticmethod
-    def run(nodetypes=None, network=None, output_file=None, k=None, container_settings=None):
-        """
-        Run PathLinker with Docker
-        @param nodetypes:  input node types with sources and targets (required)
-        @param network:  input network file (required)
-        @param output_file: path to the output pathway file (required)
-        @param k: path length (optional)
-        @param container_settings: configure the container runtime
-        """
+    def run(inputs, output_file, args=None, container_settings=None):
         if not container_settings: container_settings = ProcessedContainerSettings()
-        # Add additional parameter validation
-        # Do not require k
-        # Use the PathLinker default
-        # Could consider setting the default here instead
-        if not nodetypes or not network or not output_file:
-            raise ValueError('Required PathLinker arguments are missing')
+        if not args: args = PathLinkerParams()
+        PathLinker.validate_required_run_args(inputs)
 
         work_dir = '/spras'
 
         # Each volume is a tuple (src, dest)
         volumes = list()
 
-        bind_path, node_file = prepare_volume(nodetypes, work_dir, container_settings)
+        bind_path, node_file = prepare_volume(inputs["nodetypes"], work_dir, container_settings)
         volumes.append(bind_path)
 
-        bind_path, network_file = prepare_volume(network, work_dir, container_settings)
+        bind_path, network_file = prepare_volume(inputs["network"], work_dir, container_settings)
         volumes.append(bind_path)
 
         # PathLinker does not provide an argument to set the output directory
@@ -110,9 +106,7 @@ class PathLinker(PRM):
                    node_file,
                    '--output', mapped_out_prefix]
 
-        # Add optional argument
-        if k is not None:
-            command.extend(['-k', str(k)])
+        command.extend(['-k', str(args.k)])
 
         container_suffix = "pathlinker:v2"
         run_container_and_log('PathLinker',

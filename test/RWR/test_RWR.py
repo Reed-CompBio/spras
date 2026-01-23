@@ -6,7 +6,7 @@ import pytest
 
 import spras.config.config as config
 from spras.config.container_schema import ContainerFramework, ProcessedContainerSettings
-from spras.rwr import RWR
+from spras.rwr import RWR, RWRParams
 
 config.init_from_file("config/config.yaml")
 
@@ -20,9 +20,9 @@ class TestRWR:
     """
     def test_rwr(self):
         OUT_FILE.unlink(missing_ok=True)
-        RWR.run(network=Path(TEST_DIR, 'input', 'rwr-network.txt'),
-                nodes=Path(TEST_DIR, 'input','rwr-nodes.txt'),
-                alpha=0.85,
+        RWR.run({"network": Path(TEST_DIR, 'input', 'rwr-network.txt'),
+                 "nodes": Path(TEST_DIR, 'input','rwr-nodes.txt')},
+                args=RWRParams(alpha=0.85, threshold=200),
                 output_file=OUT_FILE)
         assert OUT_FILE.exists(), 'Output file was not written'
         expected_file = Path(TEST_DIR, 'expected_output', 'rwr-output.txt')
@@ -33,9 +33,9 @@ class TestRWR:
     """
     def test_missing_file(self):
         with pytest.raises(OSError):
-            RWR.run(network=Path(TEST_DIR, 'input', 'missing.txt'),
-                    nodes=Path(TEST_DIR, 'input','rwr-nodes.txt'),
-                    alpha=0.85,
+            RWR.run({"network": Path(TEST_DIR, 'input', 'missing.txt'),
+                     "nodes": Path(TEST_DIR, 'input','rwr-nodes.txt')},
+                    args=RWRParams(alpha=0.85, threshold=200),
                     output_file=OUT_FILE)
 
     """
@@ -43,9 +43,9 @@ class TestRWR:
     """
     def test_format_error(self):
         with pytest.raises(ValueError):
-            RWR.run(network=Path(TEST_DIR, 'input', 'rwr-bad-network.txt'),
-                    nodes=Path(TEST_DIR, 'input','rwr-nodes.txt'),
-                    alpha=0.85,
+            RWR.run({"network": Path(TEST_DIR, 'input', 'rwr-bad-network.txt'),
+                     "nodes": Path(TEST_DIR, 'input','rwr-nodes.txt')},
+                    args=RWRParams(alpha=0.85, threshold=200),
                     output_file=OUT_FILE)
 
     # Only run Singularity test if the binary is available on the system
@@ -54,9 +54,9 @@ class TestRWR:
     def test_rwr_singularity(self):
         OUT_FILE.unlink(missing_ok=True)
         # Only include required arguments and run with Singularity
-        RWR.run(network=Path(TEST_DIR, 'input', 'rwr-network.txt'),
-                nodes=Path(TEST_DIR, 'input','rwr-nodes.txt'),
-                alpha=0.85,
+        RWR.run({"network": Path(TEST_DIR, 'input', 'rwr-network.txt'),
+                 "nodes": Path(TEST_DIR, 'input','rwr-nodes.txt')},
+                args=RWRParams(alpha=0.85, threshold=200),
                 output_file=OUT_FILE,
                 container_settings=ProcessedContainerSettings(framework=ContainerFramework.singularity))
         assert OUT_FILE.exists()
