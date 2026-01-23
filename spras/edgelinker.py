@@ -1,7 +1,10 @@
 import warnings
 from pathlib import Path
 
-from spras.containers import prepare_volume, run_container
+from pydantic import BaseModel, ConfigDict
+
+from spras.config.container_schema import ProcessedContainerSettings
+from spras.containers import prepare_volume, run_container, run_container_and_log
 from spras.interactome import (
     convert_undirected_to_directed,
     reinsert_direction_col_directed,
@@ -9,10 +12,15 @@ from spras.interactome import (
 from spras.prm import PRM
 from spras.util import add_rank_column, duplicate_edges, raw_pathway_df
 
-__all__ = ['EdgeLinker']
+__all__ = ['EdgeLinker', 'EdgeLinkerParams']
+
+class EdgeLinkerParams(BaseModel):
+    k: int = 100
+
+    model_config = ConfigDict(extra='forbid', use_attribute_docstrings=True)
 
 
-class EdgeLinker(PRM):
+class EdgeLinker(PRM[EdgeLinkerParams]):
     required_inputs = ['network', 'sources', 'targets']
 
     @staticmethod
@@ -21,6 +29,9 @@ class EdgeLinker(PRM):
         Access fields from the dataset and write the required input files
         @param data: dataset
         @param filename_map: a dict mapping file types in the required_inputs to the filename for that type
+        - network: input network file (required)
+        - sources: source nodes (required)
+        - targets: target nodes (required)
         """
         for input_type in EdgeLinker.required_inputs:
             if input_type not in filename_map:
@@ -28,7 +39,7 @@ class EdgeLinker(PRM):
 
         # Handle sources and targets (from MCF - TODO: deduplicate this?)
         for node_type in ['sources', 'targets']:
-            nodes = data.request_node_columns([node_type])
+            nodes = data.get_node_columns([node_type])
             if nodes is None:
                 raise ValueError(f'No {node_type} found in the node files.')
             nodes = nodes.loc[nodes[node_type]]
@@ -41,35 +52,28 @@ class EdgeLinker(PRM):
                      header=False)
 
     @staticmethod
-    def run(network=None, sources=None, targets=None, output_file=None, k=100, container_framework="docker"):
-        """
-        Run EdgeLinker with Docker
-        @param network: input network file (required)
-        @param sources: source nodes (required)
-        @param targets: target nodes (required)
-        @param container_framework: choose the container runtime framework, currently supports "docker" or "singularity" (optional)
-        @param output_file: path to the output pathway file (required)
-        """
-        if not network or not sources or not targets or not output_file:
-            raise ValueError('Required EdgeLinker arguments are missing')
+    def run(inputs, output_file, args=None, container_settings=None):
+        if not container_settings: container_settings = ProcessedContainerSettings()
+        if not args: args = EdgeLinkerParams()
 
         work_dir = '/EdgeLinker'
 
         # Each volume is a tuple (src, dest)
         volumes = list()
 
-        bind_path, network_file = prepare_volume(network, work_dir)
+        bind_path, network_file = prepare_volume(inputs["network"], work_dir, container_settings)
         volumes.append(bind_path)
 
-        bind_path, sources_file = prepare_volume(sources, work_dir)
+        bind_path, sources_file = prepare_volume(inputs["sources"], work_dir, container_settings)
         volumes.append(bind_path)
 
-        bind_path, targets_file = prepare_volume(targets, work_dir)
+        bind_path, targets_file = prepare_volume(inputs["targets"], work_dir, container_settings)
         volumes.append(bind_path)
 
         # Create the parent directories for the output file if needed
-        Path(output_file).parent.mkdir(parents=True, exist_ok=True)
-        bind_path, mapped_out_file = prepare_volume(output_file, work_dir)
+        out_dir = Path(output_file).parent
+        out_dir.mkdir(parents=True, exist_ok=True)
+        bind_path, mapped_out_file = prepare_volume(output_file, work_dir, container_settings)
         volumes.append(bind_path)
 
         command = ['python',
@@ -77,22 +81,22 @@ class EdgeLinker(PRM):
                    '--network', network_file,
                    '--sources', sources_file,
                    '--targets', targets_file,
-                   '-k', str(k),
+                   '-k', str(args.k),
                    '--output', mapped_out_file]
 
         print('Running EdgeLinker with arguments: {}'.format(' '.join(command)), flush=True)
 
         container_suffix = "edgelinker:latest"
-        out = run_container(
-                            container_framework,
-                            container_suffix,
-                            command,
-                            volumes,
-                            work_dir)
-        print(out)
+        run_container_and_log('EdgeLinker',
+                              container_suffix,
+                              command,
+                              volumes,
+                              work_dir,
+                              out_dir,
+                              container_settings)
 
     @staticmethod
-    def parse_output(raw_pathway_file, standardized_pathway_file):
+    def parse_output(raw_pathway_file, standardized_pathway_file, params):
         """
         Convert a predicted pathway into the universal format
         @param raw_pathway_file: pathway file produced by an algorithm's run function
