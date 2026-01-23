@@ -3,6 +3,7 @@ from typing import Optional
 
 from pydantic import BaseModel, ConfigDict
 
+from spras.config.container_schema import ProcessedContainerSettings
 from spras.containers import prepare_volume, run_container_and_log
 from spras.dataset import Dataset
 from spras.interactome import (
@@ -55,6 +56,8 @@ class MuST(PRM):
 
     @staticmethod
     def run(inputs, output_file, args=None, container_settings=None):
+        if not args: args = MuSTParams()
+        if not container_settings: container_settings = ProcessedContainerSettings()
         # We don't use the flags multiple or trees, because we do not support multiple results yet.
 
         work_dir = '/apsp'
