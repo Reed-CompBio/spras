@@ -100,7 +100,7 @@ def top_main():
 
     # Make sure we have a value for the log directory and that the directory exists.
     if args.htcondor_jobdir is None:
-        args.htcondor_jobdir = pathlib.Path(os.getcwd()) / "snakemake-long-logs"
+        args.htcondor_jobdir = pathlib.Path(os.getcwd()) / "htcondor" / "logs"
         if not os.path.exists(args.htcondor_jobdir):
             os.makedirs(args.htcondor_jobdir)
     else:
