@@ -1,6 +1,8 @@
 import warnings
 from pathlib import Path
 
+from spras.config.container_schema import ProcessedContainerSettings
+from spras.config.util import Empty
 from spras.containers import prepare_volume, run_container_and_log
 from spras.dataset import Dataset
 from spras.interactome import (
@@ -14,7 +16,7 @@ from spras.util import add_rank_column, duplicate_edges, raw_pathway_df
 __all__ = ['AllPairs']
 
 
-class AllPairs(PRM):
+class AllPairs(PRM[Empty]):
     required_inputs = ['nodetypes', 'network', 'directed_flag']
     dois = []
 
@@ -23,7 +25,10 @@ class AllPairs(PRM):
         """
         Access fields from the dataset and write the required input files
         @param data: dataset
-        @param filename_map: a dict mapping file types in the required_inputs to the filename for that type
+        @param filename_map: a dict mapping file types in the required_inputs to the filename for that type. Associated files will be written with:
+        - nodetypes: node types with sources and targets
+        - network: network file containing edges and their weights
+        - directed_flag: contains `true` if `network` is fully directed.
         """
         AllPairs.validate_required_inputs(filename_map)
 
@@ -69,31 +74,25 @@ class AllPairs(PRM):
                                       header=["#Interactor1", "Interactor2", "Weight"])
 
     @staticmethod
-    def run(nodetypes=None, network=None, directed_flag=None, output_file=None, container_framework="docker"):
-        """
-        Run All Pairs Shortest Paths with Docker
-        @param nodetypes: input node types with sources and targets (required)
-        @param network: input network file (required)
-        @param container_framework: choose the container runtime framework, currently supports "docker" or "singularity" (optional)
-        @param output_file: path to the output pathway file (required)
-        """
-        if not nodetypes or not network or not output_file or not directed_flag:
-            raise ValueError('Required All Pairs Shortest Paths arguments are missing')
+    def run(inputs, output_file, args=None, container_settings=None):
+        if not container_settings: container_settings = ProcessedContainerSettings()
+        AllPairs.validate_required_run_args(inputs)
 
         work_dir = '/apsp'
 
         # Each volume is a tuple (src, dest)
         volumes = list()
 
-        bind_path, node_file = prepare_volume(nodetypes, work_dir)
+        bind_path, node_file = prepare_volume(inputs["nodetypes"], work_dir, container_settings)
         volumes.append(bind_path)
 
-        bind_path, network_file = prepare_volume(network, work_dir)
+        bind_path, network_file = prepare_volume(inputs["network"], work_dir, container_settings)
         volumes.append(bind_path)
 
         # Create the parent directories for the output file if needed
-        Path(output_file).parent.mkdir(parents=True, exist_ok=True)
-        bind_path, mapped_out_file = prepare_volume(output_file, work_dir)
+        out_dir = Path(output_file).parent
+        out_dir.mkdir(parents=True, exist_ok=True)
+        bind_path, mapped_out_file = prepare_volume(output_file, work_dir, container_settings)
         volumes.append(bind_path)
 
         command = ['python',
@@ -101,17 +100,18 @@ class AllPairs(PRM):
                    '--network', network_file,
                    '--nodes', node_file,
                    '--output', mapped_out_file]
-        if Path(directed_flag).read_text().strip() == "true":
+        if Path(inputs["directed_flag"]).read_text().strip() == "true":
             command.append("--directed")
 
         container_suffix = "allpairs:v4"
         run_container_and_log(
             'All Pairs Shortest Paths',
-            container_framework,
             container_suffix,
             command,
             volumes,
-            work_dir)
+            work_dir,
+            out_dir,
+            container_settings)
 
     @staticmethod
     def parse_output(raw_pathway_file, standardized_pathway_file, params):
