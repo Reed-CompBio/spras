@@ -9,6 +9,7 @@ runs the actual snakemake executable.
 import argparse
 import os
 import pathlib
+import shlex
 import subprocess
 import sys
 import time
@@ -47,9 +48,10 @@ def submit_local(snakefile, profile, htcondor_jobdir, verbose=False, env_manager
     script_location = pathlib.Path(__file__).resolve()
 
     # Build arguments string, including optional flags
-    args_str = f"long --snakefile {snakefile} --profile {profile} --htcondor-jobdir {htcondor_jobdir} --env-manager {env_manager}"
+    args_list = ["long", "--snakefile", snakefile, "--profile", profile, "--htcondor-jobdir", htcondor_jobdir, "--env-manager", env_manager]
     if verbose:
-        args_str += " --verbose"
+        args_list.append("--verbose")
+    args_str = " ".join(shlex.quote(str(arg)) for arg in args_list)
 
     submit_description = htcondor.Submit({
         "executable":              script_location,
@@ -101,11 +103,7 @@ def top_main():
     # Make sure we have a value for the log directory and that the directory exists.
     if args.htcondor_jobdir is None:
         args.htcondor_jobdir = pathlib.Path(os.getcwd()) / "htcondor" / "logs"
-        if not os.path.exists(args.htcondor_jobdir):
-            os.makedirs(args.htcondor_jobdir)
-    else:
-        if not os.path.exists(args.htcondor_jobdir):
-            os.makedirs(args.htcondor_jobdir)
+    args.htcondor_jobdir.mkdir(exist_ok=True)
 
     try:
         submit_local(args.snakefile, args.profile, args.htcondor_jobdir, args.verbose, args.env_manager)
