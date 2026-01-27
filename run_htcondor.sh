@@ -1,4 +1,4 @@
-#!/bin/bash
+#!/usr/bin/env bash
 
 # Example helper script to submit a SPRAS workflow to HTCondor with full parallelization
 #
