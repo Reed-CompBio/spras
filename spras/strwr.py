@@ -42,14 +42,8 @@ class ST_RWR(PRM[ST_RWRParams]):
         ST_RWR.validate_required_inputs(filename_map)
 
         # Get separate source and target nodes for source and target files
-        if data.contains_node_columns(["sources","targets"]):
-            sources = data.get_node_columns(["sources"])
-            sources.to_csv(filename_map['sources'],sep='\t',index=False,columns=['NODEID'],header=False)
-
-            targets = data.get_node_columns(["targets"])
-            targets.to_csv(filename_map['targets'],sep='\t',index=False,columns=['NODEID'],header=False)
-        else:
-            raise ValueError("Invalid node data")
+        for node_type, nodes in data.get_node_columns_separate(["sources", "targets"]).items():
+            nodes.to_csv(filename_map[node_type],sep='\t',index=False,columns=['NODEID'],header=False)
 
         # Get edge data for network file
         edges = data.get_interactome()

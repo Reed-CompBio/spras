@@ -2,10 +2,9 @@ import filecmp
 import os
 from pathlib import Path
 
-import yaml
-
 from spras import runner
 from spras.util import extend_filename
+from spras.config.config import Config
 
 OUTDIR = Path("test", "generate-inputs", "output")
 EXPDIR = Path("test", "generate-inputs", "expected")
@@ -34,13 +33,13 @@ class TestGenerateInputs:
         OUTDIR.mkdir(parents=True, exist_ok=True)
 
     def test_prepare_inputs_networks(self):
-        config_loc = os.path.join("test", "generate-inputs", "inputs", "test_config.yaml")
+        config_loc = Path("test", "generate-inputs", "inputs", "test_config.yaml")
 
-        with open(config_loc) as config_file:
-            config = yaml.load(config_file, Loader=yaml.FullLoader)
-        test_file = "test/generate-inputs/output/test_pickled_dataset.pkl"
+        config = Config.from_file(config_loc)
+        test_file = Path("test", "generate-inputs", "output", "test_pickled_dataset.pkl")
 
-        test_dataset = next((ds for ds in config["datasets"] if ds["label"] == "test_data"), None)
+        assert len(config.datasets) == 1
+        test_dataset = list(config.datasets.values())[0]
         runner.merge_input(test_dataset, test_file)
 
         for algo in algo_exp_file.keys():
