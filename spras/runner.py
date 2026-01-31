@@ -5,6 +5,7 @@ from spras.allpairs import AllPairs
 from spras.btb import BowTieBuilder
 from spras.dataset import Dataset, DatasetSchema
 from spras.domino import DOMINO
+from spras.edgelinker import EdgeLinker
 from spras.meo import MEO
 from spras.mincostflow import MinCostFlow
 from spras.omicsintegrator1 import OmicsIntegrator1
@@ -20,6 +21,7 @@ algorithms: dict[str, type[PRM]] = {
     "allpairs": AllPairs,
     "bowtiebuilder": BowTieBuilder,
     "domino": DOMINO,
+    "edgelinker": EdgeLinker,
     "meo": MEO,
     "mincostflow": MinCostFlow,
     "omicsintegrator1": OmicsIntegrator1,

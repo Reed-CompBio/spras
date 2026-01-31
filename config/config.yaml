@@ -132,6 +132,12 @@ algorithms:
     runs:
       run1:
         gamma: [10]
+  
+  - name: "edgelinker"
+    params:
+      include: true
+      run1:
+        k: [150, 175]
 
 # Here we specify which pathways to run and other file location information.
 # DataLoader.py can currently only load a single dataset
