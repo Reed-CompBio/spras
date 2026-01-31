@@ -7,12 +7,19 @@ spras_version = '0.6.0'
 # All of this was modified from https://stackoverflow.com/a/77001804/7589775.
 current_directory = Path(__file__).parent.resolve()
 
-commit_version = subprocess.check_output(
-    ["git", "rev-parse", "--short", "HEAD"],
-    encoding='utf-8',
-     # In case the CWD is not inside the actual SPRAS directory
-    cwd=Path(__file__).parent.resolve()
-).strip()
+try:
+    commit_version = subprocess.check_output(
+        ["git", "rev-parse", "--short", "HEAD"],
+        encoding='utf-8',
+        # In case the CWD is not inside the actual SPRAS directory
+        cwd=Path(__file__).parent.resolve()
+    ).strip()
+except FileNotFoundError:
+    # git wasn't found. As to be expected!
+    commit_version = None
+except subprocess.CalledProcessError:
+    # no git repository was found. This is also fine!
+    commit_version = None
 
 setup(
     # Versions must be in semantic commit format: we dynamically change the version to be
