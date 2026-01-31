@@ -1,27 +1,12 @@
 import filecmp
-import os
+import shutil
 from pathlib import Path
 
-from spras import runner
 from spras.config.config import Config
+from spras.runner import algorithms, get_required_inputs, merge_input, prepare_inputs
 
-OUTDIR = "test/generate-inputs/output/"
-EXPDIR = "test/generate-inputs/expected/"
-
-algo_exp_file = {
-    'mincostflow': 'edges',
-    'meo': 'edges',
-    'omicsintegrator1': 'edges',
-    'omicsintegrator2': 'edges',
-    'domino': 'network',
-    'pathlinker': 'network',
-    'allpairs': 'network',
-    'bowtiebuilder': 'edges',
-    'strwr': 'network',
-    'rwr': 'network',
-    'responsenet': 'edges'
-}
-
+OUTDIR = Path("test", "generate-inputs", "output")
+EXPDIR = Path("test", "generate-inputs", "expected")
 
 class TestGenerateInputs:
     @classmethod
@@ -29,7 +14,9 @@ class TestGenerateInputs:
         """
         Create the expected output directory
         """
-        Path(OUTDIR).mkdir(parents=True, exist_ok=True)
+        if OUTDIR.exists():
+            shutil.rmtree(OUTDIR)
+        OUTDIR.mkdir(parents=True, exist_ok=True)
 
     def test_prepare_inputs_networks(self):
         config_loc = Path("test", "generate-inputs", "inputs", "test_config.yaml")
@@ -37,18 +24,16 @@ class TestGenerateInputs:
         config = Config.from_file(config_loc)
         test_file = Path("test", "generate-inputs", "output", "test_pickled_dataset.pkl")
 
-        assert len(config.datasets) == 1
-        test_dataset = list(config.datasets.values())[0]
-        runner.merge_input(test_dataset, test_file)
+        test_dataset = next((ds for ds in config.datasets.values() if ds.label == "test_data"), None)
+        assert test_dataset is not None
+        merge_input(test_dataset, test_file)
 
-        for algo in algo_exp_file.keys():
-            inputs = runner.get_required_inputs(algo)
-            filename_map = {input_str: os.path.join("test", "generate-inputs", "output", f"{algo}-{input_str}.txt")
-                            for input_str in inputs}
-            runner.prepare_inputs(algo, test_file, filename_map)
-            exp_file_name = algo_exp_file[algo]
-            assert filecmp.cmp(OUTDIR + f"{algo}-{exp_file_name}.txt", EXPDIR + f"{algo}-{exp_file_name}-expected.txt",
-                            shallow=False)
-
-            for file in filename_map.values():
-                assert Path(file).exists()
+        for algo in algorithms.keys():
+            inputs = get_required_inputs(algo)
+            (OUTDIR / algo).mkdir(exist_ok=True)
+            filename_map = {input_str: str(OUTDIR / algo / f"{algo}-{input_str}.txt") for input_str in inputs}
+            prepare_inputs(algo, test_file, filename_map)
+            required_inputs = algorithms[algo].required_inputs
+            for exp_file_name in required_inputs:
+                assert filecmp.cmp(OUTDIR / algo / f"{algo}-{exp_file_name}.txt", EXPDIR / algo / f"{algo}-{exp_file_name}-expected.txt",
+                                   shallow=False), f"{algo} for {exp_file_name}.txt does not match up!"
