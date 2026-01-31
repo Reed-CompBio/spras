@@ -35,7 +35,6 @@ def get_dataset(_datasets, label):
 algorithms = list(algorithm_params)
 algorithms_with_params = [f'{algorithm}-params-{params_hash}' for algorithm, param_combos in algorithm_params.items() for params_hash in param_combos.keys()]
 dataset_labels = list(_config.config.datasets.keys())
-
 dataset_gold_standard_node_pairs = [f"{dataset}-{gs['label']}" for gs in _config.config.gold_standards.values() if gs['node_files'] for dataset in gs['dataset_labels']]
 dataset_gold_standard_edge_pairs = [f"{dataset}-{gs['label']}" for gs in _config.config.gold_standards.values() if gs['edge_files'] for dataset in gs['dataset_labels']]
 
@@ -62,10 +61,10 @@ def write_parameter_log(algorithm, param_label, logfile):
 def write_dataset_log(dataset, logfile):
     dataset_contents = get_dataset(_config.config.datasets,dataset)
 
-    # safe_dump gives RepresenterError for an OrderedDict
-    # config file has to convert the dataset from OrderedDict to dict to avoid this
-    with open(logfile,'w') as f:
-        yaml.safe_dump(dataset_contents,f)
+    # safe_dump gives RepresenterError for a DatasetSchema
+    # config file has to convert the dataset to a dict to avoid this
+    with open(logfile, 'w') as f:
+        yaml.safe_dump(dict(dataset_contents), f)
 
 # Choose the final files expected according to the config file options.
 def make_final_input(wildcards):
@@ -156,9 +155,9 @@ rule log_datasets:
 # Input preparation needs to be rerun if these files are modified
 def get_dataset_dependencies(wildcards):
     dataset = _config.config.datasets[wildcards.dataset]
-    all_files = dataset["node_files"] + dataset["edge_files"] + dataset["other_files"]
+    all_files = dataset.node_files + dataset.edge_files + dataset.other_files
     # Add the relative file path
-    all_files = [dataset["data_dir"] + SEP + data_file for data_file in all_files]
+    all_files = [dataset.data_dir + SEP + data_file for data_file in all_files]
 
     return all_files
 
@@ -283,7 +282,7 @@ rule reconstruct:
 # Original pathway reconstruction output to universal output
 # Use PRRunner as a wrapper to call the algorithm-specific parse_output
 rule parse_output:
-    input: 
+    input:
         raw_file = SEP.join([out_dir, '{dataset}-{algorithm}-{params}', 'raw-pathway.txt']),
         dataset_file = SEP.join([out_dir, 'dataset-{dataset}-merged.pickle'])
     output: standardized_file = SEP.join([out_dir, '{dataset}-{algorithm}-{params}', 'pathway.txt'])

@@ -8,7 +8,7 @@ from spras.statistics import from_output_pathway
 
 
 def summarize_networks(file_paths: Iterable[Path], node_table: pd.DataFrame, algo_params: dict[str, dict],
-                       algo_with_params: list, statistics_files: list) -> pd.DataFrame:
+                       algo_with_params: list[str], statistics_files: list) -> pd.DataFrame:
     """
     Generate a table that aggregates summary information about networks in file_paths, including which nodes are present
     in node_table columns. Network directionality is ignored and all edges are treated as undirected. The order of the

@@ -1,10 +1,14 @@
 import filecmp
+import shutil
+import subprocess
 from pathlib import Path
 
 import pandas as pd
+import pytest
 
 import spras.config.config as config
 from spras.analysis.summary import summarize_networks
+from spras.config.dataset import DatasetSchema
 from spras.dataset import Dataset
 
 # Notes:
@@ -16,6 +20,19 @@ INPUT_DIR = Path('test', 'analysis', 'input')
 OUT_DIR = Path('test', 'analysis', 'output')
 EXPECT_DIR = Path('test', 'analysis', 'expected_output')
 
+@pytest.fixture(params=[
+    "example", "egfr"
+])
+def snakemake_output(request):
+    """
+    This returns the paramaterized input,
+    along with a guarantee (doubling as an integration test)
+    that the files will exist.
+    """
+    request = request.param
+    subprocess.run(["snakemake", "--cores", "1", "--configfile", f"test/analysis/input/{request}.yaml"])
+    yield request
+    shutil.rmtree(f"test/analysis/input/run/{request}")
 
 class TestSummary:
     @classmethod
@@ -25,77 +42,51 @@ class TestSummary:
         """
         Path(OUT_DIR).mkdir(parents=True, exist_ok=True)
 
-    def test_example_networks(self):
-        """Test data from example workflow"""
-        example_dict = {"label": "data0",
-                        "edge_files": ["network.txt"],
-                        "node_files": ["node-prizes.txt", "sources.txt", "targets.txt"],
-                        "data_dir": "input",
-                        "other_files": []
-                        }
-        example_dataset = Dataset(example_dict)
+    def test_example_networks(self, snakemake_output):
+        """Test data from provided workflow.
+
+        This also has the double purpose as serving as a light integration test
+        for Snakemake, using summary analysis as the correctness check.
+        """
+
+        config.init_from_file(INPUT_DIR / f"{snakemake_output}.yaml")
+        example_dataset = Dataset(list(config.config.datasets.values())[0])
         example_node_table = example_dataset.node_table
-        config.init_from_file(INPUT_DIR / "config.yaml")
         algorithm_params = config.config.algorithm_params
         algorithms_with_params = [f'{algorithm}-params-{params_hash}' for algorithm, param_combos in
                                   algorithm_params.items() for params_hash in param_combos.keys()]
 
-        example_network_files = Path(INPUT_DIR, "example").glob("*.txt")
+        example_network_files = (INPUT_DIR / "run" / snakemake_output).rglob("pathway.txt")
 
-        out_path = Path(OUT_DIR, "test_example_summary.txt")
+        out_path = Path(OUT_DIR, f"test_{snakemake_output}_summary.txt")
         out_path.unlink(missing_ok=True)
-        summarize_example = summarize_networks(example_network_files, example_node_table, algorithm_params,
+        summarize_out = summarize_networks(example_network_files, example_node_table, algorithm_params,
                                                algorithms_with_params)
-        summarize_example["Name"] = summarize_example["Name"].map(convert_path_posix)
-        summarize_example.to_csv(out_path, sep='\t', index=False)
+        # We do some post-processing to ensure that we get a stable summarize_out, since the attached hash
+        # is subject to variation (especially in testing) whenever the SPRAS commit revision gets changed
+        summarize_out["Parameter combination"] = summarize_out["Parameter combination"].astype(str)
+        summarize_out = summarize_out.drop(columns=["Name"])
+        summarize_out = summarize_out.sort_values(by=["Parameter combination"])
+        summarize_out.to_csv(out_path, sep='\t', index=False)
 
         # Comparing the dataframes directly with equals does not match because of how the parameter
         # combinations column is loaded from disk. Therefore, write both to disk and compare the files.
-        assert filecmp.cmp(out_path, EXPECT_DIR / "expected_example_summary.txt", shallow=False)
-
-    def test_egfr_networks(self):
-        """Test data from EGFR workflow"""
-        egfr_dict = {"label": "tps_egfr",
-                     "edge_files": ["phosphosite-irefindex13.0-uniprot.txt"],
-                     "node_files": ["tps-egfr-prizes.txt"],
-                     "data_dir": "input",
-                     "other_files": []
-                     }
-
-        egfr_dataset = Dataset(egfr_dict)
-        egfr_node_table = egfr_dataset.node_table
-        config.init_from_file(INPUT_DIR / "egfr.yaml")
-        algorithm_params = config.config.algorithm_params
-        algorithms_with_params = [f'{algorithm}-params-{params_hash}' for algorithm, param_combos in
-                                  algorithm_params.items() for params_hash in param_combos.keys()]
-
-        egfr_network_files = Path(INPUT_DIR, "egfr").glob("*.txt")  # must be path to use .glob()
-
-        out_path = Path(OUT_DIR, "test_egfr_summary.txt")
-        out_path.unlink(missing_ok=True)
-        summarize_egfr = summarize_networks(egfr_network_files, egfr_node_table, algorithm_params,
-                                            algorithms_with_params)
-        summarize_egfr["Name"] = summarize_egfr["Name"].map(convert_path_posix)
-        summarize_egfr.to_csv(out_path, sep="\t", index=False)
-
-        # Comparing the dataframes directly with equals does not match because of how the parameter
-        # combinations column is loaded from disk. Therefore, write both to disk and compare the files.
-        assert filecmp.cmp(out_path, EXPECT_DIR / "expected_egfr_summary.txt", shallow=False)
+        assert filecmp.cmp(out_path, EXPECT_DIR / f"expected_{snakemake_output}_summary.txt", shallow=False)
 
     def test_load_dataset_dict(self):
         """Test loading files from dataset_dict"""
-        example_dict = {"label": "data0",
-                        "edge_files": ["network.txt"],
-                        "node_files": ["node-prizes.txt", "sources.txt", "targets.txt"],
-                        "data_dir": "input",
-                        "other_files": []
-                        }
-        example_dataset = Dataset(example_dict)
+        example_dataset = Dataset(DatasetSchema(
+            label="data0",
+            edge_files=["network.txt"],
+            node_files=["node-prizes.txt", "sources.txt", "targets.txt"],
+            data_dir="input",
+            other_files=[]
+        ))
         example_node_table = example_dataset.node_table
 
         # node_table contents are not generated consistently in the same order,
         # so we will check that the contents are the same, but row order doesn't matter
-        expected_node_table = pd.read_csv((EXPECT_DIR / "expected_node_table.txt"), sep="\t")
+        expected_node_table = pd.read_csv(EXPECT_DIR / "expected_node_table.txt", sep="\t")
 
         # ignore 'NODEID' column because this changes each time upon new generation
         cols_to_compare = [col for col in example_node_table.columns if col != "NODEID"]
