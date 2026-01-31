@@ -3,6 +3,7 @@ from glob import glob
 from pathlib import Path
 
 from spras import runner
+from spras.config.dataset import DatasetSchema
 from spras.dataset import Dataset
 
 INDIR = Path("test", "parse-outputs", "input")
@@ -27,23 +28,23 @@ algorithms = {
     'tiedie': {},
     'strwr': {
         'threshold': 3,
-        'dataset': Dataset({
-            'label': 'test_dataset',
-            'node_files': ['strwr-dataset-prizes.txt', 'strwr-dataset-sources.txt', 'strwr-dataset-targets.txt'],
-            'edge_files': ['strwr-dataset-network.txt'],
-            'other_files': [],
-            'data_dir': INDIR / 'dataset' / 'strwr'
-        })
+        'dataset': Dataset(dataset_params=DatasetSchema(
+            label='test_dataset',
+            node_files=['strwr-dataset-prizes.txt', 'strwr-dataset-sources.txt', 'strwr-dataset-targets.txt'],
+            edge_files=['strwr-dataset-network.txt'],
+            other_files=[],
+            data_dir=INDIR / 'dataset' / 'strwr'
+        ))
     },
     'rwr': {
         'threshold': 2,
-        'dataset': Dataset({
-            'label': 'test_dataset',
-            'node_files': ['rwr-dataset-prizes.txt', 'rwr-dataset-sources.txt', 'rwr-dataset-targets.txt'],
-            'edge_files': ['rwr-dataset-network.txt'],
-            'other_files': [],
-            'data_dir': INDIR / 'dataset' / 'rwr'
-        })
+        'dataset': Dataset(dataset_params=DatasetSchema(
+            label= 'test_dataset',
+            node_files= ['rwr-dataset-prizes.txt', 'rwr-dataset-sources.txt', 'rwr-dataset-targets.txt'],
+            edge_files= ['rwr-dataset-network.txt'],
+            other_files= [],
+            data_dir= INDIR / 'dataset' / 'rwr'
+        ))
     }
 }
 

@@ -459,8 +459,11 @@ def jaccard_similarity_eval(summary_df: pd.DataFrame, output_file: str | PathLik
     ax.set_yticklabels(algorithms)
     plt.colorbar(cax, ax=ax)
     # annotate each cell with the corresponding similarity value
+    # where we set the precision to be lower as the number of algorithms increases
+    n = 2
+    if len(algorithms) > 10: n = 1
     for i in range(len(algorithms)):
         for j in range(len(algorithms)):
-            ax.text(j, i, f'{jaccard_matrix.values[i, j]:.2f}', ha='center', va='center', color='white')
+            ax.text(j, i, f'{jaccard_matrix.values[i, j]:.{n}f}', ha='center', va='center', color='white')
     plt.savefig(output_png, bbox_inches="tight", dpi=DPI)
     plt.close()
