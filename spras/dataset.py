@@ -1,68 +1,85 @@
 import os
 import pickle as pkl
 import warnings
-from typing import TypedDict
+from typing import Union
 
 import pandas as pd
 
-"""
-Author: Chris Magnano
-02/15/21
+from spras.config.dataset import DatasetSchema
+from spras.util import LoosePathLike
 
+"""
 Methods and intermediate state for loading data and putting it into pandas tables for use by pathway reconstruction algorithms.
 """
+class MissingDataError(RuntimeError):
+    """
+    Raises when there is missing data from the input dataframe, for `generate_input`.
+    This is thrown by PRMs.
+    """
 
-class DatasetDict(TypedDict):
+    missing_message: list[str] | str
     """
-    Type class containing a collection of information pertaining to creating a Dataset
-    object. This layout is replicated directly in SPRAS configuration files.
+    Either a list of some specific data is missing, or we provide a custom
+    error message.
+
+    This is in the format:
+
+    (If a string) {Scope} is missing data: {message}
+    (If a list) {Scope} requires columns {message joined by ", "}
     """
-    label: str
-    node_files: list[str | os.PathLike]
-    edge_files: list[str | os.PathLike]
-    other_files: list[str | os.PathLike]
-    data_dir: str | os.PathLike
+
+    @staticmethod
+    def process_message(missing_message: list[str] | str) -> str:
+        if isinstance(missing_message, str):
+            return f"Missing data: {missing_message}"
+        else:
+            return f"Requiring columns: {', '.join(missing_message)}"
+
+    def __init__(self, missing_message: list[str] | str):
+        """
+        Constructs a new MissingDataError.
+
+        @param message: The message or missing columns to let the user know about.
+        See the `MissingDataError#missing_message` docstring for more info
+        """
+
+        self.missing_message = missing_message
+
+        super(MissingDataError, self).__init__(MissingDataError.process_message(missing_message))
+
+    def __str__(self):
+        return MissingDataError.process_message(self.missing_message)
 
 class Dataset:
 
     NODE_ID = "NODEID"
     warning_threshold = 0.05  # Threshold for scarcity of columns to warn user
 
-    def __init__(self, dataset_dict: DatasetDict):
-        self.label = None
-        self.interactome = None
-        self.node_table = None
-        self.node_set = set()
-        self.other_files = []
-        self.load_files_from_dict(dataset_dict)
-        return
-
-    def to_file(self, file_name: str):
-        """
-        Saves dataset object to pickle file
-        """
-        with open(file_name, "wb") as f:
+    def to_file(self, file: LoosePathLike):
+        """Saves dataset object to pickle file"""
+        with open(file, "wb") as f:
             pkl.dump(self, f)
 
+    # NOTE: When we bump to Python 3.13, we can use the reference Dataset instead of the literal "Dataset" for typing.
     @classmethod
-    def from_file(cls, file_name: str):
+    def from_file(cls, file: Union[LoosePathLike, "Dataset"]):
         """
-        Loads dataset object from a pickle file.
+        Loads dataset object from a pickle file or another `Dataset` object.
         Usage: dataset = Dataset.from_file(pickle_file)
         """
-        if isinstance(file_name, Dataset):
-            # No work to be done
-            # (this use-case is useful for testing.)
-            return file_name
+        if isinstance(file, Dataset):
+            # No work to be done (this use-case is used when processing
+            # `Dataset` objects in generate_inputs or parse_outputs.)
+            return file
 
-        with open(file_name, "rb") as f:
+        with open(file, "rb") as f:
             return pkl.load(f)
 
-    def load_files_from_dict(self, dataset_dict: DatasetDict):
+    def __init__(self, dataset_params: DatasetSchema):
         """
-        Loads data files from dataset_dict, which is one dataset dictionary from the list
-        in the config file with the fields in the config file.
-        Populates node_table and interactome.
+        Loads data files from dataset_params, which is one dataset schema object
+        from the list in the config file with the fields in the config file.
+        Creates a new `Dataset` instance.
 
         node_table is a single merged pandas table.
 
@@ -73,18 +90,16 @@ class Dataset:
         We might want to eventually add an additional "algs" argument so only
         subsets of the entire config file are loaded, alternatively this could
         be handled outside this class.
-
-        returns: none
         """
 
-        self.label = dataset_dict["label"]
+        self.label = dataset_params.label
 
         # Get file paths from config
         # TODO support multiple edge files
-        interactome_loc = dataset_dict["edge_files"][0]
-        node_data_files = dataset_dict["node_files"]
+        interactome_loc = dataset_params.edge_files[0]
+        node_data_files = dataset_params.node_files
         # edge_data_files = [""]  # Currently None
-        data_loc = dataset_dict["data_dir"]
+        data_loc = dataset_params.data_dir
 
         # Load everything as pandas tables
         self.interactome = pd.read_table(
@@ -141,15 +156,24 @@ class Dataset:
             ).filter(regex="^(?!.*DROP)")
         # Ensure that the NODEID column always appears first, which is required for some downstream analyses
         self.node_table.insert(0, "NODEID", self.node_table.pop("NODEID"))
-        self.other_files = dataset_dict["other_files"]
+        self.other_files = dataset_params.other_files
 
     def get_node_columns(self, col_names: list[str]) -> pd.DataFrame:
         """
-        returns: A table containing the requested column names and node IDs
+        @param scope: The name of the algorithm (or a more general 'scope' like SPRAS)
+            to fail on if get_node_columns fails.
+        @returns: A table containing the requested column names and node IDs
         for all nodes with at least 1 of the requested values being non-empty
         """
+        # Don't mutate the input col_names
+        col_names = col_names.copy()
+
         if self.node_table is None:
             raise ValueError("node_table is None: can't request node columns of an empty dataset.")
+
+        needed_columns = set(col_names).difference(self.node_table.columns)
+        if len(needed_columns) != 0:
+            raise MissingDataError(list(needed_columns))
 
         col_names.append(self.NODE_ID)
         filtered_table = self.node_table[col_names]
@@ -166,6 +190,23 @@ class Dataset:
                 stacklevel=1,
             )
         return filtered_table
+
+    def get_node_columns_separate(self, col_names: list[str]) -> dict[str, pd.DataFrame]:
+        """
+        Get each `col_name` in `col_names` as a separate call to `get_node_columns`,
+        allowing better column filtering for NODEIDs
+
+        This is useful for making separate node lists of specific column names.
+        """
+        needed_columns = set(col_names).difference(self.node_table.columns)
+        if len(needed_columns) != 0:
+            raise MissingDataError(list(needed_columns))
+
+        result_dict: dict[str, pd.DataFrame] = dict()
+        for name in col_names:
+            result_dict[name] = self.get_node_columns([name])
+
+        return result_dict
 
     def contains_node_columns(self, col_names: list[str] | str):
         if self.node_table is None:

@@ -1,9 +1,13 @@
 import json
 from pathlib import Path
+from typing import Optional
 
 import pandas as pd
+from pydantic import BaseModel, ConfigDict
 
-from spras.containers import prepare_volume, run_container_and_log
+from spras.config.container_schema import ProcessedContainerSettings
+from spras.config.util import BaseModel
+from spras.containers import ContainerError, prepare_volume, run_container_and_log
 from spras.interactome import (
     add_constant,
     reinsert_direction_col_undirected,
@@ -11,11 +15,19 @@ from spras.interactome import (
 from spras.prm import PRM
 from spras.util import duplicate_edges
 
-__all__ = ['DOMINO', 'pre_domino_id_transform', 'post_domino_id_transform']
+__all__ = ['DOMINO', 'DominoParams', 'pre_domino_id_transform', 'post_domino_id_transform']
 
 ID_PREFIX = 'ENSG0'
 ID_PREFIX_LEN = len(ID_PREFIX)
 
+class DominoParams(BaseModel):
+    module_threshold: Optional[float] = None
+    "the p-value threshold for considering a slice as relevant (optional)"
+
+    slice_threshold: Optional[float] = None
+    "the p-value threshold for considering a putative module as final module (optional)"
+
+    model_config = ConfigDict(extra='forbid', use_attribute_docstrings=True)
 
 """
 DOMINO will construct a fully undirected graph from the provided input file
@@ -26,7 +38,7 @@ Interactor1     ppi     Interactor2
 - the expected raw input file should have node pairs in the 1st and 3rd columns, with a 'ppi' in the 2nd column
 - it can include repeated and bidirectional edges
 """
-class DOMINO(PRM):
+class DOMINO(PRM[DominoParams]):
     required_inputs = ['network', 'active_genes']
     dois = ["10.15252/msb.20209593"]
 
@@ -35,17 +47,14 @@ class DOMINO(PRM):
         """
         Access fields from the dataset and write the required input files
         @param data: dataset
-        @param filename_map: a dict mapping file types in the required_inputs to the filename for that type
-        @return:
+        @param filename_map: a dict mapping file types in the required_inputs to the filename for that type. Associated files will be written with:
+        - network: list of edges
+        - active_genes: list of active genes
         """
         DOMINO.validate_required_inputs(filename_map)
 
         # Get active genes for node input file
-        if data.contains_node_columns('active'):
-            # NODEID is always included in the node table
-            node_df = data.get_node_columns(['active'])
-        else:
-            raise ValueError('DOMINO requires active genes')
+        node_df = data.get_node_columns(['active'])
         node_df = node_df[node_df['active'] == True]
 
         # Transform each node id with a prefix
@@ -70,40 +79,29 @@ class DOMINO(PRM):
                         header=['ID_interactor_A', 'ppi', 'ID_interactor_B'])
 
     @staticmethod
-    def run(network=None, active_genes=None, output_file=None, slice_threshold=None, module_threshold=None, container_framework="docker"):
-        """
-        Run DOMINO with Docker.
-        Let visualization be always true, parallelization be always 1 thread, and use_cache be always false.
-        DOMINO produces multiple output module files in an HTML format. SPRAS concatenates these files into one file.
-        @param network: input network file (required)
-        @param active_genes: input active genes (required)
-        @param output_file: path to the output pathway file (required)
-        @param slice_threshold: the p-value threshold for considering a slice as relevant (optional)
-        @param module_threshold: the p-value threshold for considering a putative module as final module (optional)
-        @param container_framework: choose the container runtime framework, currently supports "docker" or "singularity" (optional)
-        """
-
-        if not network or not active_genes or not output_file:
-            raise ValueError('Required DOMINO arguments are missing')
+    def run(inputs, output_file, args=None, container_settings=None):
+        if not container_settings: container_settings = ProcessedContainerSettings()
+        if not args: args = DominoParams()
+        DOMINO.validate_required_run_args(inputs)
 
         work_dir = '/spras'
 
         # Each volume is a tuple (source, destination)
         volumes = list()
 
-        bind_path, network_file = prepare_volume(network, work_dir)
+        bind_path, network_file = prepare_volume(inputs["network"], work_dir, container_settings)
         volumes.append(bind_path)
 
-        bind_path, node_file = prepare_volume(active_genes, work_dir)
+        bind_path, node_file = prepare_volume(inputs["active_genes"], work_dir, container_settings)
         volumes.append(bind_path)
 
         out_dir = Path(output_file).parent
         out_dir.mkdir(parents=True, exist_ok=True)
-        bind_path, mapped_out_dir = prepare_volume(str(out_dir), work_dir)
+        bind_path, mapped_out_dir = prepare_volume(str(out_dir), work_dir, container_settings)
         volumes.append(bind_path)
 
         slices_file = Path(out_dir, 'slices.txt')
-        bind_path, mapped_slices_file = prepare_volume(str(slices_file), work_dir)
+        bind_path, mapped_slices_file = prepare_volume(str(slices_file), work_dir, container_settings)
         volumes.append(bind_path)
 
         # Make the Python command to run within the container
@@ -112,14 +110,24 @@ class DOMINO(PRM):
                           '--output_file', mapped_slices_file]
 
         container_suffix = "domino"
-        run_container_and_log('slicer',
-                             container_framework,
-                             container_suffix,
-                             slicer_command,
-                             volumes,
-                             work_dir)
+        try:
+            run_container_and_log('slicer',
+                                container_suffix,
+                                slicer_command,
+                                volumes,
+                                work_dir,
+                                out_dir,
+                                container_settings)
+        except ContainerError as err:
+            # Occurs when DOMINO gets passed some empty dataframe from network_file.
+            # This counts as an empty input, so we return an empty output.
+            if err.streams_contain("pandas.errors.EmptyDataError: No columns to parse from file"):
+                pass
+            else:
+                raise err
 
         # Make the Python command to run within the container
+        # Let visualization be always true, parallelization be always 1 thread, and use_cache be always false.
         domino_command = ['domino',
                           '--active_genes_files', node_file,
                           '--network_file', network_file,
@@ -130,18 +138,32 @@ class DOMINO(PRM):
                           '--visualization', 'true']
 
         # Add optional arguments
-        if slice_threshold is not None:
+        if args.slice_threshold is not None:
             # DOMINO readme has the wrong argument https://github.com/Shamir-Lab/DOMINO/issues/12
-            domino_command.extend(['--slice_threshold', str(slice_threshold)])
-        if module_threshold is not None:
-            domino_command.extend(['--module_threshold', str(module_threshold)])
+            domino_command.extend(['--slice_threshold', str(args.slice_threshold)])
+        if args.module_threshold is not None:
+            domino_command.extend(['--module_threshold', str(args.module_threshold)])
 
-        run_container_and_log('DOMINO',
-                             container_framework,
-                             container_suffix,
-                             domino_command,
-                             volumes,
-                             work_dir)
+        try:
+            run_container_and_log('DOMINO',
+                                  container_suffix,
+                                  domino_command,
+                                  volumes,
+                                  work_dir,
+                                  out_dir,
+                                  container_settings)
+        except ContainerError as err:
+            # Occurs when DOMINO gets passed some empty dataframe from network_file.
+            # This counts as an empty input, so we return an empty output.
+            if err.streams_contain("pandas.errors.EmptyDataError: No columns to parse from file"):
+                pass
+            # Here, DOMINO
+            # still outputs to our output folder with a still viable HTML output.
+            # https://github.com/Reed-CompBio/spras/pull/103#issuecomment-1681526958
+            elif err.streams_contain("ValueError: cannot apply union_all to an empty list"):
+                pass
+            else:
+                raise err
 
         # DOMINO creates a new folder in out_dir to output its modules HTML files into called active_genes
         # The filename is determined by the input active_genes and cannot be configured
@@ -157,7 +179,7 @@ class DOMINO(PRM):
         # Clean up DOMINO intermediate and pickle files
         slices_file.unlink(missing_ok=True)
         Path(out_dir, 'network.slices.pkl').unlink(missing_ok=True)
-        Path(network + '.pkl').unlink(missing_ok=True)
+        Path(str(inputs['network']) + '.pkl').unlink(missing_ok=True)
 
     @staticmethod
     def parse_output(raw_pathway_file, standardized_pathway_file, params):

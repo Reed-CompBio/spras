@@ -1,6 +1,6 @@
 [project]
 name = "spras"
-version = "0.5.0"
+version = "0.6.0"
 description = "Signaling Pathway Reconstruction Analysis Streamliner"
 authors = [
   { name = "Anthony Gitter", email = "gitter@biostat.wisc.edu" },
@@ -32,7 +32,7 @@ dependencies = [
     "spython==0.3.14",
 
     # toolchain deps
-    "pip==25.2",
+    "pip==25.3",
 ]
 
 [project.optional-dependencies]
@@ -40,6 +40,7 @@ dev = [
    # Only required for development
     "pre-commit==4.2.0",
     "pytest==8.4.1",
+    "pytest-split==0.10.0",
 ]
 
 [project.urls]
@@ -70,8 +71,13 @@ select = [
     "W292", # missing-newline-at-end-of-file
 ]
 
-[tool.setuptools]
-# py-modules tells setuptools which directory is our actual module
-py-modules = ["spras"]
+[tool.setuptools.packages.find]
+where = ["."]
+include = ["spras*"]
+
+# Include non-python executables
+[tool.setuptools.package-data]
+"spras" = ["cgroup_wrapper.sh"]
+
 # packages tells setuptools what the exported package is called (ie allows import spras)
 packages = ["spras", "spras.analysis", "spras.config"]

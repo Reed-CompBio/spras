@@ -2,7 +2,7 @@ import os
 import pickle as pkl
 from os import PathLike
 from pathlib import Path
-from typing import Dict, Iterable, Union
+from typing import Iterable, TypedDict, Union
 
 import matplotlib.pyplot as plt
 import numpy as np
@@ -15,20 +15,32 @@ from sklearn.metrics import (
 )
 
 from spras.analysis.ml import create_palette
+from spras.interactome import (
+    convert_directed_to_undirected,
+    convert_undirected_to_directed,
+    sort_and_deduplicate_undirected,
+)
 
+
+class GoldStandardDict(TypedDict):
+    label: str
+    node_files: list[str]
+    edge_files: list[str]
+    data_dir: str
+    dataset_labels: list[str]
 
 class Evaluation:
     NODE_ID = 'NODEID'
 
-    def __init__(self, gold_standard_dict: Dict):
-        self.label = None
-        self.datasets = None
-        self.node_table = None
-        self.load_files_from_dict(gold_standard_dict)
-        return
+    label: str
+    datasets: list[str]
+    node_table: pd.DataFrame
+    mixed_edge_table: pd.DataFrame
+    undirected_edge_table: pd.DataFrame
+    directed_edge_table: pd.DataFrame
 
     @staticmethod
-    def merge_gold_standard_input(gs_dict, gs_file):
+    def merge_gold_standard_input(gs_dict: GoldStandardDict, gs_file: str | os.PathLike):
         """
         Merge files listed for this gold standard dataset and write the dataset to disk
         @param gs_dict: gold standard dataset to process
@@ -37,7 +49,7 @@ class Evaluation:
         gs_dataset = Evaluation(gs_dict)
         gs_dataset.to_file(gs_file)
 
-    def to_file(self, file_name):
+    def to_file(self, file_name: str | os.PathLike):
         """
         Saves gold standard object to pickle file
         """
@@ -45,7 +57,7 @@ class Evaluation:
             pkl.dump(self, f)
 
     @staticmethod
-    def from_file(file_name):
+    def from_file(file_name: str | os.PathLike):
         """
         Loads gold standard object from a pickle file.
         Usage: gold_standard = Evaluation.from_file(pickle_file)
@@ -53,32 +65,88 @@ class Evaluation:
         with open(file_name, 'rb') as f:
             return pkl.load(f)
 
-    def load_files_from_dict(self, gold_standard_dict: Dict):
+    def __init__(self, gold_standard_dict: GoldStandardDict):
         """
         Loads gold standard files from gold_standard_dict, which is one gold standard dataset
         dictionary from the list in the config file with the fields in the config file.
         Populates node_table.
 
         node_table is a single column of nodes pandas table.
-
-        returns: none
         """
         self.label = gold_standard_dict['label']  # cannot be empty, will break with a NoneType exception
         self.datasets = gold_standard_dict['dataset_labels']  # can be empty, snakemake will not run evaluation due to dataset_gold_standard_pairs in snakemake file
 
-        # cannot be empty, snakemake will run evaluation even if empty
-        node_data_files = gold_standard_dict['node_files'][0]  # TODO: single file for now
-
         data_loc = gold_standard_dict['data_dir']
 
-        single_node_table = pd.read_table(os.path.join(data_loc, node_data_files), header=None)
-        single_node_table.columns = [self.NODE_ID]
-        self.node_table = single_node_table
+        # cannot be empty, snakemake will run evaluation even if empty
+        node_files = gold_standard_dict["node_files"]
+        edge_files = gold_standard_dict["edge_files"]
 
-        # TODO: are we allowing multiple node files or single in node_files for gs
-        # if yes, a for loop is needed
+        # exactly one gold standard file kind can be present in a gold standard dataset
+        has_node_files = len(node_files) > 0
+        has_edge_files = len(edge_files) > 0
 
-        # TODO: later iteration - chose between node and edge file, or allow both
+        if has_node_files and has_edge_files:
+            raise ValueError(
+                f"Gold standard '{self.label}': both node_files and edge_files provided. "
+                "Only one type is allowed in a gold standard dataset."
+            )
+        if not has_node_files and not has_edge_files:
+            raise ValueError(
+                f"Gold standard '{self.label}': neither node_files nor edge_files provided."
+            )
+
+        if has_node_files:
+            node_tables = []
+
+            for node_file in node_files:
+                node_table = pd.read_table(os.path.join(data_loc, node_file), header=0)
+                if node_table.shape[1] != 1:
+                    raise ValueError(
+                        f"Gold standard '{self.label}': each node_file provided must have exactly 1 column of nodes."
+                    )
+                node_table.columns = [self.NODE_ID]
+                node_tables.append(node_table)
+
+            merged_node_table = pd.concat(node_tables, ignore_index=True)
+            merged_node_table = merged_node_table.drop_duplicates()
+            self.node_table = merged_node_table
+
+        if has_edge_files:
+            edge_tables = []
+
+            for edge_file in edge_files:
+                edge_table = pd.read_table(os.path.join(data_loc, edge_file), header=None)
+
+                if edge_table.shape[1] == 2:
+                    # When no direction is specified, default to undirected edges
+                    edge_table["Direction"] = "U"
+
+                if edge_table.shape[1] != 3:
+                    raise ValueError(
+                        f"Gold standard '{self.label}': the provided edge_file must have 2 or 3 columns that represent Interactor1, Interactor2, and optionally Direction."
+                    )
+
+                edge_table.columns = ['Interactor1', 'Interactor2', 'Direction']
+                edge_tables.append(edge_table)
+
+            merged_edge_table = pd.concat(edge_tables, ignore_index=True)
+
+            mixed = merged_edge_table.copy()
+            mixed = sort_and_deduplicate_undirected(mixed)
+            self.mixed_edge_table = mixed
+
+            undirected = convert_directed_to_undirected(merged_edge_table.copy())
+            undirected = sort_and_deduplicate_undirected(undirected)
+            self.undirected_edge_table = undirected
+
+            directed = convert_undirected_to_directed(merged_edge_table.copy())
+            directed = directed.drop_duplicates()
+            self.directed_edge_table = directed
+
+            # TODO: later iteration - update to make a self.node_table from the edge table
+            # the node and edge files will go under the same dataset-gs pair folder
+
 
     @staticmethod
     def node_precision_and_recall(file_paths: Iterable[Union[str, PathLike]], node_table: pd.DataFrame) -> pd.DataFrame:
@@ -237,7 +305,7 @@ class Evaluation:
                 plt.close()
 
     @staticmethod
-    def pca_chosen_pathway(coordinates_files: list[Union[str, PathLike]], pathway_summary_file: str, output_dir: str):
+    def pca_chosen_pathway(coordinates_files: Iterable[Union[str, PathLike]], pathway_summary_file: str, output_dir: str):
         """
         Identifies the pathway closest to a specified highest kernel density estimated (KDE) peak based on PCA
         coordinates
@@ -288,7 +356,7 @@ class Evaluation:
         return rep_pathways
 
     @staticmethod
-    def edge_frequency_node_ensemble(node_table: pd.DataFrame, ensemble_files: list[Union[str, PathLike]], dataset_file: str) -> dict:
+    def edge_frequency_node_ensemble(node_table: pd.DataFrame, ensemble_files: Iterable[Union[str, PathLike]], dataset_file: str) -> dict:
         """
         Generates a dictionary of node ensembles using edge frequency data from a list of ensemble files.
         A list of ensemble files can contain an aggregated ensemble or algorithm-specific ensembles per dataset
@@ -450,3 +518,25 @@ class Evaluation:
         not_last_rows = complete_df.duplicated(subset='Ensemble_Source', keep='first')
         complete_df.loc[not_last_rows, ['Average_Precision', 'Baseline']] = None
         complete_df.to_csv(output_file, index=False, sep='\t')
+
+    @staticmethod
+    def edge_dummy_function(mixed_edge_table: pd.DataFrame, undirected_edge_table: pd.DataFrame, directed_edge_table: pd.DataFrame, dummy_file: str):
+        """
+        Temporary function to test edge file implementation.
+        Will be removed from SPRAS's evaluation code in the future.
+
+        Takes in the different edge table versions (mixed, fully directed, fully undirected)
+        for a specific edge gold standard dataset and writes them to a file.
+
+        @param mixed_edge_table: Edge gold standard treated as mixed directionality.
+        @param undirected_edge_table: Edge gold standard treated as fully undirected.
+        @param directed_edge_table: Edge gold standard treated as fully directed.
+        @param dummy_file: Filename to save the edge tables.
+        """
+        with open(dummy_file, "w") as f:
+            f.write("Mixed Edge Table\n")
+            mixed_edge_table.to_csv(f, index=False)
+            f.write("\n\nUndirected Edge Table\n")
+            undirected_edge_table.to_csv(f, index=False)
+            f.write("\n\nDirected Edge Table\n")
+            directed_edge_table.to_csv(f, index=False)

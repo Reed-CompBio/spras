@@ -1,5 +1,7 @@
 from pathlib import Path
 
+from spras.config.container_schema import ProcessedContainerSettings
+from spras.config.util import Empty
 from spras.containers import prepare_volume, run_container_and_log
 from spras.interactome import (
     convert_undirected_to_directed,
@@ -23,7 +25,7 @@ Expected raw edge file format:
 Interactor1     Interactor2     Weight
 """
 
-class BowTieBuilder(PRM):
+class BowTieBuilder(PRM[Empty]):
     required_inputs = ['sources', 'targets', 'edges']
     dois = ["10.1186/1752-0509-3-67"]
 
@@ -33,26 +35,17 @@ class BowTieBuilder(PRM):
         """
         Access fields from the dataset and write the required input files
         @param data: dataset
-        @param filename_map: a dict mapping file types in the required_inputs to the filename for that type
-        @return:
+        @param filename_map: a dict mapping file types in the required_inputs to the filename for that type. Associated files will be written with:
+        - sources: NODEID-headered list of sources
+        - targets: NODEID-headered list of targets
+        - edges: node pairs with associated edge weights
         """
         BowTieBuilder.validate_required_inputs(filename_map)
 
         # Get sources and write to file, repeat for targets
         # Does not check whether a node is a source and a target
-        for node_type in ['sources', 'targets']:
-            nodes = data.get_node_columns([node_type])
-            if nodes is None:
-                raise ValueError(f'No {node_type} found in the node files')
-
-            # TODO test whether this selection is needed, what values could the column contain that we would want to
-            # include or exclude?
-            nodes = nodes.loc[nodes[node_type]]
-            if node_type == "sources":
-                nodes.to_csv(filename_map["sources"], sep= '\t', index=False, columns=['NODEID'], header=False)
-            elif node_type == "targets":
-                nodes.to_csv(filename_map["targets"], sep= '\t', index=False, columns=['NODEID'], header=False)
-
+        for node_type, nodes in data.get_node_columns_separate(['sources', 'targets']).items():
+            nodes.to_csv(filename_map[node_type], sep='\t', index=False, columns=['NODEID'], header=False)
 
         # Create network file
         edges = data.get_interactome()
@@ -68,30 +61,17 @@ class BowTieBuilder(PRM):
 
     # Skips parameter validation step
     @staticmethod
-    def run(sources=None, targets=None, edges=None, output_file=None, container_framework="docker"):
-        """
-        Run BTB with Docker
-        @param sources:  input source file (required)
-        @param targets:  input target file (required)
-        @param edges:    input edge file (required)
-        @param output_file: path to the output pathway file (required)
-        @param container_framework: choose the container runtime framework, currently supports "docker" or "singularity" (optional)
-        """
+    def run(inputs, output_file, args=None, container_settings=None):
+        if not container_settings: container_settings = ProcessedContainerSettings()
+        BowTieBuilder.validate_required_run_args(inputs)
 
         # Tests for pytest (docker container also runs this)
         # Testing out here avoids the trouble that container errors provide
-
-        if not sources or not targets or not edges or not output_file:
-            raise ValueError('Required BowTieBuilder arguments are missing')
-
-        if not Path(sources).exists() or not Path(targets).exists() or not Path(edges).exists():
-            raise ValueError('Missing input file')
-
         # Testing for btb index errors
         # TODO: This error will never actually occur if the inputs are passed through
         # `generate_inputs`. See the discussion about removing this or making this a habit at
         # https://github.com/Reed-CompBio/spras/issues/306.
-        with open(edges, 'r') as edge_file:
+        with open(inputs["edges"], 'r') as edge_file:
             try:
                 for line in edge_file:
                     line = line.strip().split('\t')[2]
@@ -105,19 +85,19 @@ class BowTieBuilder(PRM):
         # Each volume is a tuple (src, dest)
         volumes = list()
 
-        bind_path, source_file = prepare_volume(sources, work_dir)
+        bind_path, source_file = prepare_volume(inputs["sources"], work_dir, container_settings)
         volumes.append(bind_path)
 
-        bind_path, target_file = prepare_volume(targets, work_dir)
+        bind_path, target_file = prepare_volume(inputs["targets"], work_dir, container_settings)
         volumes.append(bind_path)
 
-        bind_path, edges_file = prepare_volume(edges, work_dir)
+        bind_path, edges_file = prepare_volume(inputs["edges"], work_dir, container_settings)
         volumes.append(bind_path)
 
         # Use its --output argument to set the output file prefix to specify an absolute path and prefix
         out_dir = Path(output_file).parent
         out_dir.mkdir(parents=True, exist_ok=True)
-        bind_path, mapped_out_dir = prepare_volume(str(out_dir), work_dir)
+        bind_path, mapped_out_dir = prepare_volume(str(out_dir), work_dir, container_settings)
         volumes.append(bind_path)
         mapped_out_prefix = mapped_out_dir + '/raw-pathway.txt'  # Use posix path inside the container
 
@@ -134,11 +114,12 @@ class BowTieBuilder(PRM):
 
         container_suffix = "bowtiebuilder:v2"
         run_container_and_log('BowTieBuilder',
-                              container_framework,
                               container_suffix,
                               command,
                               volumes,
-                              work_dir)
+                              work_dir,
+                              out_dir,
+                              container_settings)
         # Output is already written to raw-pathway.txt file
 
 
