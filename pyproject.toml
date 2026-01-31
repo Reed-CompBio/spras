@@ -1,6 +1,6 @@
 [project]
 name = "spras"
-dynamic = ["version"] # update spras_version in setup.py!
+version = "0.6.0"
 description = "Signaling Pathway Reconstruction Analysis Streamliner"
 authors = [
   { name = "Anthony Gitter", email = "gitter@biostat.wisc.edu" },

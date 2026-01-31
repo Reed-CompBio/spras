@@ -17,8 +17,6 @@ import functools
 import hashlib
 import importlib.metadata
 import itertools as it
-import subprocess
-import tomllib
 import warnings
 from pathlib import Path
 from typing import Any
@@ -36,11 +34,18 @@ config = None
 def spras_revision() -> str:
     """
     Gets the current revision of SPRAS.
-    
-    Note that the SPRAS package version is dynamically dependent on setup.py.
-    """
-    return importlib.metadata.version('spras')
 
+    Note that this is not dependent on the SPRAS version nor the git commit, but rather solely on the PyPA RECORD file,
+    (https://packaging.python.org/en/latest/specifications/recording-installed-packages/#the-record-file), which contains
+    hashes of all files associated with the package distribution [other than itself], and is also included in the package distribution.
+    """
+    try:
+        record_path = str(importlib.metadata.distribution('spras').locate_file(f"spras-{importlib.metadata.version('spras')}.dist-info/RECORD"))
+        with open(record_path, 'rb', buffering=0) as f:
+            # Truncated to the magic value 8, the length of the short git revision.
+            return hashlib.file_digest(f, 'sha256').hexdigest()[:8]
+    except importlib.metadata.PackageNotFoundError as err:
+        raise RuntimeError('spras is not an installed pip-module: did you forget to install SPRAS as a module?') from err
 def attach_spras_revision(label: str) -> str:
     return f"{label}_{spras_revision()}"
 
