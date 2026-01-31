@@ -177,14 +177,16 @@ class Config:
         # Convert to dicts to simplify the yaml logging
 
         for dataset in raw_config.datasets:
-            label = dataset.label
-            if label.lower() in [key.lower() for key in self.datasets.keys()]:
-                raise ValueError(f"Datasets must have unique case-insensitive labels, but the label {label} appears at least twice.")
             dataset.label = attach_spras_revision(dataset.label)
         for gold_standard in raw_config.gold_standards:
             gold_standard.label = attach_spras_revision(gold_standard.label)
 
         self.datasets = {}
+        for dataset in raw_config.datasets:
+            label = dataset.label
+            if label.lower() in [key.lower() for key in self.datasets.keys()]:
+                raise ValueError(f"Datasets must have unique case-insensitive labels, but the label {label} appears at least twice.")
+            self.datasets[label] = dataset
 
         # parse gold standard information
         self.gold_standards = {gold_standard.label: dict(gold_standard) for gold_standard in raw_config.gold_standards}
