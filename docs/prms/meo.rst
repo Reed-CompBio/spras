@@ -12,3 +12,16 @@ MEO takes in three optional parameters:
 * local_search: a boolean parameter that enables MEO's local search functionality. See "Improving approximations with local search" in
   the associated paper for more information. This should almost always be true.
 * rand_restarts: the number (int) of random restarts to use.
+
+Dataset Usage
+-------------
+
+MEO uses ``sources``, ``targets``, and edge weights. MEO also uses
+edge direction information, and the output sub-network is directed.
+
+Implementation Details
+----------------------
+
+Internally, MEO only accepts directed interactomes.
+SPRAS will automatically convert edges to directed edges as necessary.
+For more information, see the section on :ref:`algorithm directionality <directionality>`.
