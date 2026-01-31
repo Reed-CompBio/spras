@@ -116,7 +116,7 @@ def create_palette(column_names):
     label_color_map = {label: color for label, color in zip(unique_column_names, custom_palette, strict=True)}
     return label_color_map
 
-def pca(dataframe: pd.DataFrame, output_png: str, output_var: str, output_coord: str, components: int = 2, labels: bool = True,
+def pca(dataframe: pd.DataFrame, output_png: str | PathLike, output_var: str | PathLike, output_coord: str | PathLike, components: int = 2, labels: bool = True,
         kde: bool = False, remove_empty_pathways: bool = False):
     """
     Performs PCA on the data and creates a scatterplot of the top two principal components.
@@ -297,7 +297,7 @@ def plot_dendrogram(model, **kwargs):
     dendrogram(linkage_matrix, **kwargs)
 
 
-def hac_vertical(dataframe: pd.DataFrame, output_png: str, output_file: str, linkage: str = 'ward', metric: str = 'euclidean'):
+def hac_vertical(dataframe: pd.DataFrame, output_png: str | PathLike, output_file: str | PathLike, linkage: str = 'ward', metric: str = 'euclidean'):
     """
     Performs hierarchical agglomerative clustering on the dataframe,
     creates a dendrogram of the resulting tree using seaborn and scipy for the cluster groups,
@@ -356,7 +356,7 @@ def hac_vertical(dataframe: pd.DataFrame, output_png: str, output_file: str, lin
     plt.savefig(output_png, bbox_inches="tight", dpi=DPI)
 
 
-def hac_horizontal(dataframe: pd.DataFrame, output_png: str, output_file: str, linkage: str = 'ward', metric: str = 'euclidean'):
+def hac_horizontal(dataframe: pd.DataFrame, output_png: str | PathLike, output_file: str | PathLike, linkage: str = 'ward', metric: str = 'euclidean'):
     """
     Performs hierarchical agglomerative clustering on the dataframe,
     creates a dendrogram of the resulting tree using sckit learn and makes cluster groups scipy,
@@ -402,7 +402,7 @@ def hac_horizontal(dataframe: pd.DataFrame, output_png: str, output_file: str, l
     plt.savefig(output_png, bbox_inches="tight", dpi=DPI)
 
 
-def ensemble_network(dataframe: pd.DataFrame, output_file: str):
+def ensemble_network(dataframe: pd.DataFrame, output_file: str | PathLike):
     """
     Calculates the mean of the binary values in the provided dataframe to create an ensemble pathway.
     Counts the number of times an edge appears in a set of pathways and divides by the total number of pathways.
@@ -429,7 +429,7 @@ def ensemble_network(dataframe: pd.DataFrame, output_file: str):
     row_means[['Node1', 'Node2', 'Frequency', "Direction"]].to_csv(output_file, sep='\t', index=False, header=True)
 
 
-def jaccard_similarity_eval(summary_df: pd.DataFrame, output_file: str, output_png: str):
+def jaccard_similarity_eval(summary_df: pd.DataFrame, output_file: str | PathLike, output_png: str | PathLike):
     """
     Calculates the pairwise Jaccard similarity matrix from the binary representation of `summary_df`.
     Save the resulting similarity matrix as a tab-delimited file and generates and save a heatmap
@@ -459,8 +459,11 @@ def jaccard_similarity_eval(summary_df: pd.DataFrame, output_file: str, output_p
     ax.set_yticklabels(algorithms)
     plt.colorbar(cax, ax=ax)
     # annotate each cell with the corresponding similarity value
+    # where we set the precision to be lower as the number of algorithms increases
+    n = 2
+    if len(algorithms) > 10: n = 1
     for i in range(len(algorithms)):
         for j in range(len(algorithms)):
-            ax.text(j, i, f'{jaccard_matrix.values[i, j]:.2f}', ha='center', va='center', color='white')
+            ax.text(j, i, f'{jaccard_matrix.values[i, j]:.{n}f}', ha='center', va='center', color='white')
     plt.savefig(output_png, bbox_inches="tight", dpi=DPI)
     plt.close()

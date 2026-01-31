@@ -14,21 +14,18 @@ will grab the top level registry configuration option as it appears in the confi
 
 import copy as copy
 import itertools as it
-import os
 import warnings
-from collections.abc import Iterable
+from pathlib import Path
 from typing import Any
 
 import numpy as np
 import yaml
 
 from spras.config.container_schema import ProcessedContainerSettings
-from spras.config.schema import RawConfig
-from spras.util import NpHashEncoder, hash_params_sha1_base32
+from spras.config.schema import DatasetSchema, RawConfig
+from spras.util import LoosePathLike, NpHashEncoder, hash_params_sha1_base32
 
 config = None
-
-DEFAULT_CONTAINER_PREFIX = "docker.io/reedcompbio"
 
 # This will get called in the Snakefile, instantiating the singleton with the raw config
 def init_global(config_dict):
@@ -37,19 +34,7 @@ def init_global(config_dict):
 
 def init_from_file(filepath):
     global config
-
-    # Handle opening the file and parsing the yaml
-    filepath = os.path.abspath(filepath)
-    try:
-        with open(filepath, 'r') as yaml_file:
-            config_dict = yaml.safe_load(yaml_file)
-    except FileNotFoundError as e:
-        raise RuntimeError(f"Error: The specified config '{filepath}' could not be found.") from e
-    except yaml.YAMLError as e:
-        raise RuntimeError(f"Error: Failed to parse config '{filepath}'") from e
-
-    # And finally, initialize
-    config = Config(config_dict)
+    config = Config.from_file(filepath)
 
 
 class Config:
@@ -66,10 +51,8 @@ class Config:
 
         # Directory used for storing output
         self.out_dir = parsed_raw_config.reconstruction_settings.locations.reconstruction_dir
-        # A Boolean indicating whether to enable container runtime profiling (apptainer/singularity only)
-        self.enable_profiling = False
         # A dictionary to store configured datasets against which SPRAS will be run
-        self.datasets = None
+        self.datasets: dict[str, DatasetSchema] = {}
         # A dictionary to store configured gold standard data against output of SPRAS runs
         self.gold_standards = None
         # The hash length SPRAS will use to identify parameter combinations.
@@ -80,9 +63,7 @@ class Config:
         self.algorithms = None
         # A nested dict mapping algorithm names to dicts that map parameter hashes to parameter combinations.
         # Only includes algorithms that are set to be run with 'include: true'.
-        self.algorithm_params = None
-        # Deprecated. Previously a dict mapping algorithm names to a Boolean tracking whether they used directed graphs.
-        self.algorithm_directed = None
+        self.algorithm_params: dict[str, dict[str, Any]] = dict()
         # A dict with the analysis settings
         self.analysis_params = parsed_raw_config.analysis
         # A dict with the evaluation settings
@@ -110,6 +91,20 @@ class Config:
 
         self.process_config(parsed_raw_config)
 
+    @classmethod
+    def from_file(cls, filepath: LoosePathLike):
+        # Handle opening the file and parsing the yaml
+        filepath = Path(filepath).absolute()
+        try:
+            with open(filepath, 'r') as yaml_file:
+                config_dict = yaml.safe_load(yaml_file)
+        except FileNotFoundError as e:
+            raise RuntimeError(f"Error: The specified config '{filepath}' could not be found.") from e
+        except yaml.YAMLError as e:
+            raise RuntimeError(f"Error: Failed to parse config '{filepath}'") from e
+
+        return cls(config_dict)
+
     def process_datasets(self, raw_config: RawConfig):
         """
         Parse dataset information
@@ -122,12 +117,11 @@ class Config:
         # Currently assumes all datasets have a label and the labels are unique
         # When Snakemake parses the config file it loads the datasets as OrderedDicts not dicts
         # Convert to dicts to simplify the yaml logging
-        self.datasets = {}
         for dataset in raw_config.datasets:
             label = dataset.label
             if label.lower() in [key.lower() for key in self.datasets.keys()]:
                 raise ValueError(f"Datasets must have unique case-insensitive labels, but the label {label} appears at least twice.")
-            self.datasets[label] = dict(dataset)
+            self.datasets[label] = dataset
 
         # parse gold standard information
         self.gold_standards = {gold_standard.label: dict(gold_standard) for gold_standard in raw_config.gold_standards}
@@ -154,58 +148,30 @@ class Config:
         """
         prior_params_hashes = set()
         self.algorithm_params = dict()
-        self.algorithm_directed = dict()
         self.algorithms = raw_config.algorithms
         for alg in self.algorithms:
-            cur_params = alg.params
-            if cur_params.include:
+            if alg.include:
                 # This dict maps from parameter combinations hashes to parameter combination dictionaries
                 self.algorithm_params[alg.name] = dict()
             else:
                 # Do not parse the rest of the parameters for this algorithm if it is not included
                 continue
 
-            if cur_params.directed is not None:
-                warnings.warn("UPDATE: we no longer use the directed key in the config file", stacklevel=2)
-
-            cur_params = cur_params.__pydantic_extra__
-            if cur_params is None:
-                raise RuntimeError("An internal error occurred: ConfigDict extra should be set on AlgorithmParams.")
-
-            # The algorithm has no named arguments so create a default placeholder
-            if len(cur_params.keys()) == 0:
-                cur_params["run1"] = {"spras_placeholder": ["no parameters"]}
+            runs: dict[str, Any] = alg.runs
 
             # Each set of runs should be 1 level down in the config file
-            for run_params in cur_params:
+            for run_name in runs.keys():
                 all_runs = []
 
                 # We create the product of all param combinations for each run
                 param_name_list = []
-                if cur_params[run_params]:
-                    for p in cur_params[run_params]:
-                        param_name_list.append(p)
-                        obj = str(cur_params[run_params][p])
-                        try:
-                            obj = [int(obj)]
-                        except ValueError:
-                            try:
-                                obj = [float(obj)]
-                            except ValueError:
-                                # Handles arrays and special evaluation types
-                                # TODO: do we want to explicitly bar `eval` if we may use untrusted user inputs later?
-                                if obj.startswith(("range", "np.linspace", "np.arange", "np.logspace", "[")):
-                                    obj = eval(obj)
-                                elif obj.lower() == "true":
-                                    obj = [True]
-                                elif obj.lower() == "false":
-                                    obj = [False]
-                                else:
-                                    # Catch-all for strings
-                                    obj = [obj]
-                            if not isinstance(obj, Iterable):
-                                raise ValueError(f"The object `{obj}` in algorithm {alg.name} at key '{p}' in run '{run_params}' is not iterable!") from None
-                        all_runs.append(obj)
+                # We convert our run parameters to a dictionary, allowing us to iterate over it
+                run_subscriptable = vars(runs[run_name])
+                for param in run_subscriptable:
+                    param_name_list.append(param)
+                    # this is guaranteed to be list[Any] by algorithms.py
+                    param_values: list[Any] = run_subscriptable[param]
+                    all_runs.append(param_values)
                 run_list_tuples = list(it.product(*all_runs))
                 param_name_tuple = tuple(param_name_list)
                 for r in run_list_tuples:
@@ -225,6 +191,11 @@ class Config:
                     if params_hash in prior_params_hashes:
                         raise ValueError(f'Parameter hash collision detected. Increase the hash_length in the config file '
                                         f'(current length {self.hash_length}).')
+
+                    # We preserve the run name as it carries useful information for the parameter log,
+                    # and is useful for configuration testing.
+                    run_dict["_spras_run_name"] = run_name
+
                     self.algorithm_params[alg.name][params_hash] = run_dict
 
     def process_analysis(self, raw_config: RawConfig):
@@ -289,12 +260,10 @@ class Config:
 
 
     def process_config(self, raw_config: RawConfig):
-        # Set up a few top-level config variables
         self.out_dir = raw_config.reconstruction_settings.locations.reconstruction_dir
 
-        if raw_config.enable_profiling and raw_config.containers.framework not in ["singularity", "apptainer"]:
+        if raw_config.containers.enable_profiling and raw_config.containers.framework not in ["singularity", "apptainer"]:
             warnings.warn("enable_profiling is set to true, but the container framework is not singularity/apptainer. This setting will have no effect.", stacklevel=2)
-        self.enable_profiling = raw_config.enable_profiling
 
         self.process_datasets(raw_config)
         self.process_algorithms(raw_config)

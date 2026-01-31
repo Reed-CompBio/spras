@@ -1,10 +1,8 @@
 import filecmp
-import os
 import shutil
 from pathlib import Path
 
-import yaml
-
+from spras.config.config import Config
 from spras.runner import algorithms, get_required_inputs, merge_input, prepare_inputs
 
 OUTDIR = Path("test", "generate-inputs", "output")
@@ -21,13 +19,13 @@ class TestGenerateInputs:
         OUTDIR.mkdir(parents=True, exist_ok=True)
 
     def test_prepare_inputs_networks(self):
-        config_loc = os.path.join("test", "generate-inputs", "inputs", "test_config.yaml")
+        config_loc = Path("test", "generate-inputs", "inputs", "test_config.yaml")
 
-        with open(config_loc) as config_file:
-            config = yaml.load(config_file, Loader=yaml.FullLoader)
-        test_file = "test/generate-inputs/output/test_pickled_dataset.pkl"
+        config = Config.from_file(config_loc)
+        test_file = Path("test", "generate-inputs", "output", "test_pickled_dataset.pkl")
 
-        test_dataset = next((ds for ds in config["datasets"] if ds["label"] == "test_data"), None)
+        test_dataset = next((ds for ds in config.datasets.values() if ds.label == "test_data"), None)
+        assert test_dataset is not None
         merge_input(test_dataset, test_file)
 
         for algo in algorithms.keys():
@@ -39,4 +37,3 @@ class TestGenerateInputs:
             for exp_file_name in required_inputs:
                 assert filecmp.cmp(OUTDIR / algo / f"{algo}-{exp_file_name}.txt", EXPDIR / algo / f"{algo}-{exp_file_name}-expected.txt",
                                    shallow=False), f"{algo} for {exp_file_name}.txt does not match up!"
-

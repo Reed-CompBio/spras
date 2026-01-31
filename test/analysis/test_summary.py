@@ -5,6 +5,7 @@ import pandas as pd
 
 import spras.config.config as config
 from spras.analysis.summary import summarize_networks
+from spras.config.dataset import DatasetSchema
 from spras.dataset import Dataset
 
 # Notes:
@@ -27,13 +28,13 @@ class TestSummary:
 
     def test_example_networks(self):
         """Test data from example workflow"""
-        example_dict = {"label": "data0",
-                        "edge_files": ["network.txt"],
-                        "node_files": ["node-prizes.txt", "sources.txt", "targets.txt"],
-                        "data_dir": "input",
-                        "other_files": []
-                        }
-        example_dataset = Dataset(example_dict)
+        example_dataset = Dataset(DatasetSchema(
+            label="data0",
+            edge_files=["network.txt"],
+            node_files=["node-prizes.txt", "sources.txt", "targets.txt"],
+            data_dir="input",
+            other_files=[]
+        ))
         example_node_table = example_dataset.node_table
         config.init_from_file(INPUT_DIR + "config.yaml")
         algorithm_params = config.config.algorithm_params
@@ -55,14 +56,13 @@ class TestSummary:
 
     def test_egfr_networks(self):
         """Test data from EGFR workflow"""
-        egfr_dict = {"label": "tps_egfr",
-                     "edge_files": ["phosphosite-irefindex13.0-uniprot.txt"],
-                     "node_files": ["tps-egfr-prizes.txt"],
-                     "data_dir": "input",
-                     "other_files": []
-                     }
-
-        egfr_dataset = Dataset(egfr_dict)
+        egfr_dataset = Dataset(DatasetSchema(
+            label="tps_egfr",
+            edge_files=["phosphosite-irefindex13.0-uniprot.txt"],
+            node_files=["tps-egfr-prizes.txt"],
+            data_dir="input",
+            other_files=[]
+        ))
         egfr_node_table = egfr_dataset.node_table
         config.init_from_file(INPUT_DIR + "egfr.yaml")
         algorithm_params = config.config.algorithm_params
@@ -84,13 +84,13 @@ class TestSummary:
 
     def test_load_dataset_dict(self):
         """Test loading files from dataset_dict"""
-        example_dict = {"label": "data0",
-                        "edge_files": ["network.txt"],
-                        "node_files": ["node-prizes.txt", "sources.txt", "targets.txt"],
-                        "data_dir": "input",
-                        "other_files": []
-                        }
-        example_dataset = Dataset(example_dict)
+        example_dataset = Dataset(DatasetSchema(
+            label="data0",
+            edge_files=["network.txt"],
+            node_files=["node-prizes.txt", "sources.txt", "targets.txt"],
+            data_dir="input",
+            other_files=[]
+        ))
         example_node_table = example_dataset.node_table
 
         # node_table contents are not generated consistently in the same order,
