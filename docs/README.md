@@ -45,10 +45,10 @@ these helpful tutorials that will prime you with some basics:
 
 ## Editing SPRAS Documentation
 
-The `spras` conda environment currently comes pre-bundled with the tools you
+The `spras` pixi environment currently comes pre-bundled with the tools you
 need to edit and build SPRAS's docs website, so the first step is making sure
 you have an active spras environment. If you don't, refer to this repo's
-[root README.md](../README.md) for instructions on installing conda and
+[root README.md](../README.md) for instructions on installing pixi and
 building/activating the `spras` env.
 
 ### Building And Viewing Your Changes
