@@ -20,6 +20,7 @@ import itertools as it
 import warnings
 from pathlib import Path
 from typing import Any
+import sysconfig
 
 import numpy as np
 import yaml
@@ -34,13 +35,19 @@ config = None
 def spras_revision() -> str:
     """
     Gets the current revision of SPRAS.
-
-    Note that this is not dependent on the SPRAS version nor the git commit, but rather solely on the PyPA RECORD file,
+    
+    A few notes:
+    - This is not dependent on the SPRAS version nor the git commit, but rather solely on the PyPA RECORD file,
     (https://packaging.python.org/en/latest/specifications/recording-installed-packages/#the-record-file), which contains
     hashes of all files associated with the package distribution [other than itself], and is also included in the package distribution.
+    - This means that, when developing SPRAS, spras_revision will be updated when spras is initially installed, but not during the middle
+    of development.
     """
     try:
-        record_path = str(importlib.metadata.distribution('spras').locate_file(f"spras-{importlib.metadata.version('spras')}.dist-info/RECORD"))
+        record_path = Path(
+            # The directory for site-packages, where .dist-info is located.
+            sysconfig.get_path("purelib"),
+            str(importlib.metadata.distribution('spras').locate_file(f"spras-{importlib.metadata.version('spras')}.dist-info/RECORD")))
         with open(record_path, 'rb', buffering=0) as f:
             # Truncated to the magic value 8, the length of the short git revision.
             return hashlib.file_digest(f, 'sha256').hexdigest()[:8]
