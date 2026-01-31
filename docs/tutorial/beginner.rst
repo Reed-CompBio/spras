@@ -199,7 +199,7 @@ Analysis
         include: true
     cytoscape:
         include: true
-    ml:
+    pca:
         include: true
    
 
