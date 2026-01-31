@@ -181,7 +181,6 @@ class Config:
         for gold_standard in raw_config.gold_standards:
             gold_standard.label = attach_spras_revision(gold_standard.label)
 
-        self.datasets = {}
         for dataset in raw_config.datasets:
             label = dataset.label
             if label.lower() in [key.lower() for key in self.datasets.keys()]:
