@@ -1,11 +1,11 @@
 from os import PathLike
-from typing import Any, Optional
+from typing import Any, Mapping, Optional
 
 # supported algorithm imports
 from spras.allpairs import AllPairs
 from spras.btb import BowTieBuilder
 from spras.config.container_schema import ProcessedContainerSettings
-from spras.dataset import Dataset
+from spras.dataset import Dataset, DatasetSchema
 from spras.domino import DOMINO
 from spras.meo import MEO
 from spras.mincostflow import MinCostFlow
@@ -16,6 +16,7 @@ from spras.prm import PRM
 from spras.responsenet import ResponseNet
 from spras.rwr import RWR
 from spras.strwr import ST_RWR
+from spras.util import LoosePathLike
 
 algorithms: dict[str, type[PRM]] = {
     "allpairs": AllPairs,
@@ -64,17 +65,17 @@ def get_required_inputs(algorithm: str):
     return algorithm_runner.required_inputs
 
 
-def merge_input(dataset_dict, dataset_file: str):
+def merge_input(dataset_data: DatasetSchema, dataset_output: LoosePathLike):
     """
     Merge files listed for this dataset and write the dataset to disk
     @param dataset_dict: dataset to process
     @param dataset_file: output filename
     """
-    dataset = Dataset(dataset_dict)
-    dataset.to_file(dataset_file)
+    dataset = Dataset(dataset_data)
+    dataset.to_file(dataset_output)
 
 
-def prepare_inputs(algorithm: str, data_file: str, filename_map: dict[str, str]):
+def prepare_inputs(algorithm: str, data_file: LoosePathLike, filename_map: Mapping[str, LoosePathLike]):
     """
     Prepare general dataset files for this algorithm
     @param algorithm: algorithm name
@@ -87,7 +88,8 @@ def prepare_inputs(algorithm: str, data_file: str, filename_map: dict[str, str])
     return algorithm_runner.generate_inputs(dataset, filename_map)
 
 
-def parse_output(algorithm: str, raw_pathway_file: str, standardized_pathway_file: str, params: dict[str, Any]):
+# TODO: make raw_pathway_file and standardized_pathway_file LoosePathLike
+def parse_output(algorithm: str, raw_pathway_file: str, standardized_pathway_file: str, params: Mapping[str, Any]):
     """
     Convert a predicted pathway into the universal format
     @param algorithm: algorithm name
