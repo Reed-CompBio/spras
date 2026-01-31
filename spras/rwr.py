@@ -49,7 +49,7 @@ class RWR(PRM[RWRParams]):
         edges = data.get_interactome()
         edges = convert_undirected_to_directed(edges)
 
-        edges.to_csv(filename_map['network'],sep='|',index=False,columns=['Interactor1','Interactor2'],header=False)
+        edges.to_csv(filename_map['network'],sep='|',index=False,columns=['Interactor1', 'Interactor2', 'Weight'],header=False)
 
     @staticmethod
     def run(inputs, output_file, args, container_settings=None):
@@ -60,8 +60,8 @@ class RWR(PRM[RWRParams]):
             for line in network_f:
                 line = line.strip()
                 endpoints = line.split("|")
-                if len(endpoints) != 2:
-                    raise ValueError(f"Edge {line} does not contain 2 nodes separated by '|'")
+                if len(endpoints) != 3:
+                    raise ValueError(f"Edge {line} does not contain 2 nodes and 1 weight separated by '|'")
         work_dir = '/spras'
 
         # Each volume is a tuple (src, dest)
