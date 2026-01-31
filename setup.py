@@ -24,5 +24,6 @@ except subprocess.CalledProcessError:
 setup(
     # Versions must be in semantic commit format: we dynamically change the version to be
     # a faux dev version (which triggers during git-based pip installs, submodule clones, and SPRAS development.)
+    # (Note that git commit hashes are in hex, so this cast is safe)
     version=f"0.0.{int(commit_version, 16)}" if commit_version else f"{spras_version}"
 )
