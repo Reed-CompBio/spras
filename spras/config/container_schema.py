@@ -13,7 +13,7 @@ from pydantic import BaseModel, ConfigDict
 
 from spras.config.util import CaseInsensitiveEnum
 
-DEFAULT_CONTAINER_PREFIX = "docker.io/reedcompbio"
+DEFAULT_CONTAINER_PREFIX = "ghcr.io/reed-compbio"
 
 class ContainerFramework(CaseInsensitiveEnum):
     docker = 'docker'
@@ -69,7 +69,7 @@ class ProcessedContainerSettings:
             warnings.warn("unpack_singularity is set to True, but the container framework is not singularity. This setting will have no effect.", stacklevel=2)
         unpack_singularity = settings.unpack_singularity
 
-        # Grab registry from the config, and if none is provided default to docker
+        # Grab registry from the config, and if none is provided default to GHCR
         container_prefix = DEFAULT_CONTAINER_PREFIX
         if settings.registry and settings.registry.base_url != "" and settings.registry.owner != "":
             container_prefix = settings.registry.base_url + "/" + settings.registry.owner

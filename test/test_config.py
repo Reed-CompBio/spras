@@ -27,8 +27,8 @@ def get_test_config():
         "containers": {
             "framework": "singularity",
             "registry": {
-                "base_url": "docker.io",
-                "owner": "reedcompbio",
+                "base_url": "ghcr.io",
+                "owner": "reed-compbio",
             },
         },
         "hash_length": 7,
@@ -203,6 +203,7 @@ class TestConfig:
 
     def test_config_container_registry(self):
         test_config = get_test_config()
+        # docker.io/reedcompbio was our old container registry.
         test_config["containers"]["registry"]["base_url"] = "docker.io"
         test_config["containers"]["registry"]["owner"] = "reedcompbio"
         config.init_global(test_config)

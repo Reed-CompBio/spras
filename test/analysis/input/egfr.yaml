@@ -22,10 +22,10 @@ containers:
   # Note that this assumes container names are consistent across registries, and that the
   # registry being passed doesn't require authentication for pull actions
   registry:
-    base_url: docker.io
+    base_url: ghcr.io
     # The owner or project of the registry
-    # For example, "reedcompbio" if the image is available as docker.io/reedcompbio/allpairs
-    owner: reedcompbio
+    # For example, "reed-compbio" if the image is available as ghcr.io/reed-compbio/allpairs
+    owner: reed-compbio
 
 algorithms:
   - name: pathlinker

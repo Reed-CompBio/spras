@@ -1,6 +1,6 @@
 # Omics Integrator 1 Docker image
 
-A Docker image for [Omics Integrator](https://github.com/fraenkel-lab/OmicsIntegrator) that is available on [DockerHub](https://hub.docker.com/repository/docker/reedcompbio/omics-integrator-1).
+A Docker image for [Omics Integrator](https://github.com/fraenkel-lab/OmicsIntegrator) that is available on the [GitHub Container Registry](https://github.com/Reed-CompBio/spras/pkgs/container/omics-integrator-1).
 
 ## Building and testing
 

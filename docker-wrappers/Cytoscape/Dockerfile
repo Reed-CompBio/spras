@@ -2,6 +2,7 @@
 # https://github.com/cytoscape/docker-cytoscape-desktop/blob/173ab46b4b5e5c148113ad0c9960a6af3fc50432/py4cytoscape/Dockerfile
 # by Kozo Nishida
 FROM python:3.9.13
+LABEL org.opencontainers.image.source=https://github.com/Reed-CompBio/spras
 
 # Versions
 ENV CYTOSCAPE_VERSION=3.9.1

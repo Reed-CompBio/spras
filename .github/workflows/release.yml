@@ -19,25 +19,12 @@ jobs:
       - name: Set up Docker Buildx
         uses: docker/setup-buildx-action@v3
 
-      - name: Log in to Docker Hub
+      - name: Login to GitHub Container Registry
         uses: docker/login-action@v3
         with:
-          username: ${{ secrets.DOCKER_USERNAME }}
-          # Passwords are set up through the GitHub control panel. The docs for
-          # the login action are explicit about never using a real password, and
-          # instead setting up a DockerHub personal access token:
-          # https://github.com/docker/login-action?tab=readme-ov-file#docker-hub
-          password: ${{ secrets.DOCKER_PASSWORD }}
+          registry: ghcr.io
+          username: ${{ github.actor }}
+          password: ${{ secrets.GITHUB_TOKEN }}
 
       - name: Build and push Docker image
-        uses: docker/build-push-action@v6
-        with:
-          context: ./
-          file: docker-wrappers/SPRAS/Dockerfile
-          tags: |
-            reedcompbio/spras:${{ github.ref_name }}
-            reedcompbio/spras:latest
-          # Use the previous latest for the build cache, assuming they're probably
-          # relatively similar
-          cache-from: type=registry,ref=reedcompbio/spras:latest
-          push: true
+        run: python3 docker-wrappers/build.py --dir SPRAS --version ${{ github.ref_name }} --yes

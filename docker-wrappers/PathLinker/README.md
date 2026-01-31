@@ -1,16 +1,16 @@
 # PathLinker Docker image
 
-A Docker image for [PathLinker](https://github.com/Murali-group/PathLinker) that is available on [DockerHub](https://hub.docker.com/repository/docker/reedcompbio/pathlinker).
+A Docker image for [PathLinker](https://github.com/Murali-group/PathLinker) that is available on the [GitHub Container Registry](https://github.com/orgs/Reed-CompBio/packages/container/package/pathlinker).
 
 To create the Docker image run:
 ```
-docker build -t reedcompbio/pathlinker -f Dockerfile .
+docker build -t reed-compbio/pathlinker -f Dockerfile .
 ```
 from this directory.
 
 To inspect the installed Python packages:
 ```
-winpty docker run reedcompbio/pathlinker pip list
+winpty docker run reed-compbio/pathlinker pip list
 ```
 The `winpty` prefix is only needed on Windows.
 
@@ -21,7 +21,7 @@ The Docker wrapper can be tested with `pytest`.
 
 Alternatively, to test the Docker image directly, run the following command from the root of the `spras` repository
 ```
-docker run -w /data --mount type=bind,source=/${PWD},target=/data reedcompbio/pathlinker python /PathLinker/run.py \
+docker run -w /data --mount type=bind,source=/${PWD},target=/data reed-compbio/pathlinker python /PathLinker/run.py \
   /data/test/PathLinker/input/sample-in-net.txt /data/test/PathLinker/input/sample-in-nodetypes.txt -k 5 --write-paths
 ```
 This will run PathLinker on the test input files and write the output files to the root of the `spras` repository.
