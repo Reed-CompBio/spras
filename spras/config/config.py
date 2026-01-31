@@ -17,10 +17,10 @@ import functools
 import hashlib
 import importlib.metadata
 import itertools as it
+import sysconfig
 import warnings
 from pathlib import Path
 from typing import Any
-import sysconfig
 
 import numpy as np
 import yaml
@@ -35,7 +35,7 @@ config = None
 def spras_revision() -> str:
     """
     Gets the current revision of SPRAS.
-    
+
     A few notes:
     - This is not dependent on the SPRAS version nor the git commit, but rather solely on the PyPA RECORD file,
     (https://packaging.python.org/en/latest/specifications/recording-installed-packages/#the-record-file), which contains
