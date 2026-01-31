@@ -1,6 +1,10 @@
 import os
 from pathlib import Path
+from typing import Optional
 
+from pydantic import BaseModel, ConfigDict
+
+from spras.config.container_schema import ProcessedContainerSettings
 from spras.containers import prepare_volume, run_container_and_log
 from spras.interactome import (
     add_directionality_constant,
@@ -9,7 +13,7 @@ from spras.interactome import (
 from spras.prm import PRM
 from spras.util import add_rank_column, duplicate_edges, raw_pathway_df
 
-__all__ = ['MEO', 'write_properties']
+__all__ = ['MEO', 'MEOParams', 'write_properties']
 
 # replaces all underscores in the node names with unicode separator
 # MEO keeps only the substring up to the first underscore when parsing node names
@@ -56,7 +60,8 @@ def write_properties(filename=Path('properties.txt'), edges=None, sources=None, 
         if max_path_length is not None:
             f.write(f'max.path.length = {max_path_length}\n')
         if local_search is not None:
-            f.write(f'local.search = {local_search}\n')
+            # Yes/No for this parameter.
+            f.write(f'local.search = {"Yes" if local_search else "No"}\n')
         if rand_restarts is not None:
             f.write(f'rand.restarts = {rand_restarts}\n')
 
@@ -65,6 +70,21 @@ def write_properties(filename=Path('properties.txt'), edges=None, sources=None, 
 
         # Do not need csp.phase, csp.gen.file, or csp.sol.file because MAXCSP is not supported
 
+class MEOParams(BaseModel):
+    max_path_length: Optional[int] = None
+    "the maximal length of a path from sources and targets to orient."
+
+    local_search: Optional[bool] = None
+    """
+    a boolean parameter that enables MEO's local search functionality.
+    See "Improving approximations with local search" in the associated paper
+    for more information.
+    """
+
+    rand_restarts: Optional[int] = None
+    "The number of random restarts to use."
+
+    model_config = ConfigDict(extra='forbid', use_attribute_docstrings=True)
 
 """
 MEO can support partially directed graphs
@@ -82,7 +102,7 @@ Interactor1   pp/pd   Interactor2   Weight
 """
 
 
-class MEO(PRM):
+class MEO(PRM[MEOParams]):
     required_inputs = ['sources', 'targets', 'edges']
     dois = ["10.1093/nar/gkq1207"]
 
@@ -91,21 +111,16 @@ class MEO(PRM):
         """
         Access fields from the dataset and write the required input files
         @param data: dataset
-        @param filename_map: a dict mapping file types in the required_inputs to the filename for that type
-        @return:
+        @param filename_map: a dict mapping file types in the required_inputs to the filename for that type. Associated files will be written with:
+        - sources: list of sources
+        - targets: list of targets
+        - edges: list of edges
         """
         MEO.validate_required_inputs(filename_map)
 
         # Get sources and write to file, repeat for targets
         # Does not check whether a node is a source and a target
-        for node_type in ['sources', 'targets']:
-            nodes = data.get_node_columns([node_type])
-            if nodes is None:
-                raise ValueError(f'No {node_type} found in the node files')
-
-            # TODO test whether this selection is needed, what values could the column contain that we would want to
-            # include or exclude?
-            nodes = nodes.loc[nodes[node_type]]
+        for node_type, nodes in data.get_node_columns_separate(['sources', 'targets']).items():
             # replace _'s with underscore_replacement
             nodes['NODEID'] = nodes['NODEID'].str.replace('_', underscore_replacement)
             nodes.to_csv(filename_map[node_type], index=False, columns=['NODEID'], header=False)
@@ -124,8 +139,7 @@ class MEO(PRM):
     # TODO add parameter validation
     # TODO document required arguments
     @staticmethod
-    def run(edges=None, sources=None, targets=None, output_file=None, max_path_length=None, local_search=None,
-            rand_restarts=None, container_framework="docker"):
+    def run(inputs, output_file=None, args=None, container_settings=None):
         """
         Run Maximum Edge Orientation in the Docker image with the provided parameters.
         The properties file is generated from the provided arguments.
@@ -133,58 +147,56 @@ class MEO(PRM):
         Does not support MINSAT or MAXCSP.
         Only the edge output file is retained.
         All other output files are deleted.
-        @param output_file: the name of the output edge file, which will overwrite any existing file with this name
-        @param max_path_length: the maximal length of a path from sources and targets to orient.
-        @param local_search: a "Yes"/"No" parameter that enables MEO's local search functionality. See "Improving approximations with local search" in the associated paper for more information.
-        @param rand_restarts: The (int) of random restarts to use.
-        @param container_framework: choose the container runtime framework, currently supports "docker" or "singularity" (optional)
         """
-        if edges is None or sources is None or targets is None or output_file is None:
-            raise ValueError('Required Maximum Edge Orientation arguments are missing')
+        if not container_settings: container_settings = ProcessedContainerSettings()
+        if not args: args = MEOParams()
+        MEO.validate_required_run_args(inputs)
 
         work_dir = '/spras'
 
         # Each volume is a tuple (src, dest)
         volumes = list()
 
-        bind_path, edge_file = prepare_volume(edges, work_dir)
+        bind_path, edge_file = prepare_volume(inputs["edges"], work_dir, container_settings)
         volumes.append(bind_path)
 
-        bind_path, source_file = prepare_volume(sources, work_dir)
+        bind_path, source_file = prepare_volume(inputs["sources"], work_dir, container_settings)
         volumes.append(bind_path)
 
-        bind_path, target_file = prepare_volume(targets, work_dir)
+        bind_path, target_file = prepare_volume(inputs["targets"], work_dir, container_settings)
         volumes.append(bind_path)
 
         out_dir = Path(output_file).parent
         # Maximum Edge Orientation requires that the output directory exist
         out_dir.mkdir(parents=True, exist_ok=True)
 
-        bind_path, mapped_output_file = prepare_volume(str(output_file), work_dir)
+        bind_path, mapped_output_file = prepare_volume(str(output_file), work_dir, container_settings)
         volumes.append(bind_path)
 
         # Hard code the path output filename, which will be deleted
         path_output_file = Path(out_dir, 'path-output.txt')
-        bind_path, mapped_path_output = prepare_volume(str(path_output_file), work_dir)
+        bind_path, mapped_path_output = prepare_volume(str(path_output_file), work_dir, container_settings)
         volumes.append(bind_path)
 
         properties_file = 'meo-properties.txt'
         properties_file_local = Path(out_dir, properties_file)
         write_properties(filename=properties_file_local, edges=edge_file, sources=source_file, targets=target_file,
                          edge_output=mapped_output_file, path_output=mapped_path_output,
-                         max_path_length=max_path_length, local_search=local_search, rand_restarts=rand_restarts, framework=container_framework)
-        bind_path, properties_file = prepare_volume(str(properties_file_local), work_dir)
+                         max_path_length=args.max_path_length, local_search=args.local_search, rand_restarts=args.rand_restarts,
+                         framework=container_settings.framework)
+        bind_path, properties_file = prepare_volume(str(properties_file_local), work_dir, container_settings)
         volumes.append(bind_path)
 
         command = ['java', '-jar', '/meo/EOMain.jar', properties_file]
 
-        container_suffix = "meo"
+        container_suffix = "meo:v2"
         run_container_and_log('Maximum Edge Orientation',
-                             container_framework,
                              container_suffix,
                              command,
                              volumes,
-                             work_dir)
+                             work_dir,
+                             out_dir,
+                             container_settings)
 
         properties_file_local.unlink(missing_ok=True)
 

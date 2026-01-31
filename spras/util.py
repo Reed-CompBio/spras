@@ -5,12 +5,15 @@ Utility functions for pathway reconstruction
 import base64
 import hashlib
 import json
+from os import PathLike
 from pathlib import Path
-from typing import Any, Dict, Optional
+from typing import Any, Dict, Optional, Union
 
 import numpy as np
 import pandas as pd
 
+"""Represents a file that points to some location."""
+LoosePathLike = Union[str, PathLike[str]]
 
 # https://stackoverflow.com/a/57915246/7589775
 # numpy variables are not, by default, encodable by python's JSONEncoder.
@@ -55,7 +58,7 @@ def hash_params_sha1_base32(params_dict: Dict[str, Any], length: Optional[int] =
         return params_base32[:length]
 
 
-def hash_filename(filename: str, length: Optional[int] = None) -> str:
+def hash_filename(filename: LoosePathLike, length: Optional[int] = None) -> str:
     """
     Hash of a filename using hash_params_sha1_base32
     @param filename: filename to hash
@@ -65,7 +68,7 @@ def hash_filename(filename: str, length: Optional[int] = None) -> str:
     return hash_params_sha1_base32({'filename': filename}, length)
 
 
-def make_required_dirs(path: str):
+def make_required_dirs(path: LoosePathLike):
     """
     Create the directory and parent directories required before an output file can be written to the specified path.
     Existing directories will not raise an error.
@@ -84,7 +87,7 @@ def add_rank_column(df: pd.DataFrame) -> pd.DataFrame:
     return df
 
 
-def raw_pathway_df(raw_pathway_file: str, sep: str = '\t', header: int = None) -> pd.DataFrame:
+def raw_pathway_df(raw_pathway_file: LoosePathLike, sep: str = '\t', header: int = None) -> pd.DataFrame:
     """
     Creates dataframe from contents in raw pathway file,
     otherwise returns an empty dataframe with standard output column names

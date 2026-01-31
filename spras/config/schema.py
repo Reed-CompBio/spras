@@ -10,12 +10,14 @@ We declare models using two classes here:
 - `CaseInsensitiveEnum` (see ./util.py)
 """
 
-import re
-from typing import Annotated, Optional
+from typing import Annotated
 
-from pydantic import AfterValidator, BaseModel, ConfigDict, Field
+from pydantic import AfterValidator, BaseModel, ConfigDict
 
-from spras.config.util import CaseInsensitiveEnum
+from spras.config.algorithms import AlgorithmUnion
+from spras.config.container_schema import ContainerSettings
+from spras.config.dataset import DatasetSchema
+from spras.config.util import CaseInsensitiveEnum, label_validator
 
 # Most options here have an `include` property,
 # which is meant to make disabling parts of the configuration easier.
@@ -77,59 +79,6 @@ class Analysis(BaseModel):
 # The default length of the truncated hash used to identify parameter combinations
 DEFAULT_HASH_LENGTH = 7
 
-def label_validator(name: str):
-    """
-    A validator takes in a label
-    and ensures that it contains only letters, numbers, or underscores.
-    """
-    label_pattern = r'^\w+$'
-    def validate(label: str):
-        if not bool(re.match(label_pattern, label)):
-            raise ValueError(f"{name} label '{label}' contains invalid values. {name} labels can only contain letters, numbers, or underscores.")
-        return label
-    return validate
-
-class ContainerFramework(CaseInsensitiveEnum):
-    docker = 'docker'
-    # TODO: add apptainer variant once #260 gets merged
-    singularity = 'singularity'
-    dsub = 'dsub'
-
-class ContainerRegistry(BaseModel):
-    base_url: str
-    owner: str = Field(description="The owner or project of the registry")
-
-    model_config = ConfigDict(extra='forbid')
-
-class AlgorithmParams(BaseModel):
-    include: bool
-    directed: Optional[bool] = None
-
-    # TODO: use array of runs instead. We currently rely on the
-    # extra parameters here to extract the algorithm parameter information,
-    # which is why this deviates from the usual ConfigDict(extra='forbid').
-    model_config = ConfigDict(extra='allow')
-
-class Algorithm(BaseModel):
-    name: str
-    params: AlgorithmParams
-
-    model_config = ConfigDict(extra='forbid')
-
-class Dataset(BaseModel):
-    # We prefer AfterValidator here to allow pydantic to run its own
-    # validation & coercion logic before we check it against our own
-    # requirements
-    label: Annotated[str, AfterValidator(label_validator("Dataset"))]
-    category: Optional[str] = None
-    "The dataset category, for working with dataset collections in the configuration."
-    node_files: list[str]
-    edge_files: list[str]
-    other_files: list[str]
-    data_dir: str
-
-    model_config = ConfigDict(extra='forbid', use_attribute_docstrings=True)
-
 class GoldStandard(BaseModel):
     label: Annotated[str, AfterValidator(label_validator("Gold Standard"))]
     node_files: list[str] = []
@@ -151,16 +100,14 @@ class ReconstructionSettings(BaseModel):
     model_config = ConfigDict(extra='forbid')
 
 class RawConfig(BaseModel):
-    # TODO: move these container values to a nested container key
-    container_framework: ContainerFramework = ContainerFramework.docker
-    unpack_singularity: bool = False
-    container_registry: ContainerRegistry
+    containers: ContainerSettings
 
     hash_length: int = DEFAULT_HASH_LENGTH
     "The length of the hash used to identify a parameter combination"
 
-    algorithms: list[Algorithm]
-    datasets: list[Dataset]
+    # See algorithms.py for more information about AlgorithmUnion
+    algorithms: list[AlgorithmUnion] # type: ignore - pydantic allows this.
+    datasets: list[DatasetSchema]
     gold_standards: list[GoldStandard] = []
     analysis: Analysis = Analysis()
 
