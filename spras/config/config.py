@@ -13,7 +13,11 @@ will grab the top level registry configuration option as it appears in the confi
 """
 
 import copy as copy
+import functools
+import hashlib
+import importlib.metadata
 import itertools as it
+import sysconfig
 import warnings
 from pathlib import Path
 from typing import Any
@@ -26,6 +30,31 @@ from spras.config.schema import DatasetSchema, RawConfig
 from spras.util import LoosePathLike, NpHashEncoder, hash_params_sha1_base32
 
 config = None
+
+@functools.cache
+def spras_revision() -> str:
+    """
+    Gets the current revision of SPRAS.
+
+    A few notes:
+    - This is not dependent on the SPRAS version nor the git commit, but rather solely on the PyPA RECORD file,
+    (https://packaging.python.org/en/latest/specifications/recording-installed-packages/#the-record-file), which contains
+    hashes of all files associated with the package distribution [other than itself], and is also included in the package distribution.
+    - This means that, when developing SPRAS, spras_revision will be updated when spras is initially installed, but not during the middle
+    of development.
+    """
+    try:
+        record_path = Path(
+            # The directory for site-packages, where .dist-info is located.
+            sysconfig.get_path("purelib"),
+            str(importlib.metadata.distribution('spras').locate_file(f"spras-{importlib.metadata.version('spras')}.dist-info/RECORD")))
+        with open(record_path, 'rb', buffering=0) as f:
+            # Truncated to the magic value 8, the length of the short git revision.
+            return hashlib.file_digest(f, 'sha256').hexdigest()[:8]
+    except importlib.metadata.PackageNotFoundError as err:
+        raise RuntimeError('spras is not an installed pip-module: did you forget to install SPRAS as a module?') from err
+def attach_spras_revision(label: str) -> str:
+    return f"{label}_{spras_revision()}"
 
 # This will get called in the Snakefile, instantiating the singleton with the raw config
 def init_global(config_dict):
@@ -117,6 +146,12 @@ class Config:
         # Currently assumes all datasets have a label and the labels are unique
         # When Snakemake parses the config file it loads the datasets as OrderedDicts not dicts
         # Convert to dicts to simplify the yaml logging
+
+        for dataset in raw_config.datasets:
+            dataset.label = attach_spras_revision(dataset.label)
+        for gold_standard in raw_config.gold_standards:
+            gold_standard.label = attach_spras_revision(gold_standard.label)
+
         for dataset in raw_config.datasets:
             label = dataset.label
             if label.lower() in [key.lower() for key in self.datasets.keys()]:
@@ -130,8 +165,11 @@ class Config:
         dataset_labels = set(self.datasets.keys())
         gold_standard_dataset_labels = {dataset_label for value in self.gold_standards.values() for dataset_label in value['dataset_labels']}
         for label in gold_standard_dataset_labels:
-            if label not in dataset_labels:
+            if attach_spras_revision(label) not in dataset_labels:
                 raise ValueError(f"Dataset label '{label}' provided in gold standards does not exist in the existing dataset labels.")
+        # We attach the SPRAS revision to the individual dataset labels afterwards for a cleaner error message above.
+        for key, gold_standard in self.gold_standards.items():
+            self.gold_standards[key]["dataset_labels"] = map(attach_spras_revision, gold_standard["dataset_labels"])
 
         # Code snipped from Snakefile that may be useful for assigning default labels
         # dataset_labels = [dataset.get('label', f'dataset{index}') for index, dataset in enumerate(datasets)]
@@ -187,7 +225,10 @@ class Config:
                             run_dict[param] = float(value)
                         if isinstance(value, np.ndarray):
                             run_dict[param] = value.tolist()
-                    params_hash = hash_params_sha1_base32(run_dict, self.hash_length, cls=NpHashEncoder)
+                    # Incorporates the `spras_revision` into the hash
+                    hash_run_dict = copy.deepcopy(run_dict)
+                    hash_run_dict["_spras_rev"] = spras_revision()
+                    params_hash = hash_params_sha1_base32(hash_run_dict, self.hash_length, cls=NpHashEncoder)
                     if params_hash in prior_params_hashes:
                         raise ValueError(f'Parameter hash collision detected. Increase the hash_length in the config file '
                                         f'(current length {self.hash_length}).')
