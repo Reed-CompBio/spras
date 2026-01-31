@@ -8,6 +8,7 @@ import pytest
 
 import spras.config.config as config
 from spras.analysis.summary import summarize_networks
+from spras.config.dataset import DatasetSchema
 from spras.dataset import Dataset
 
 # Notes:
@@ -49,7 +50,13 @@ class TestSummary:
         """
 
         config.init_from_file(INPUT_DIR + f"{snakemake_output}.yaml")
-        example_dataset = Dataset(list(config.config.datasets.values())[0])
+        example_dataset = Dataset(DatasetSchema(
+            label="data0",
+            edge_files=["network.txt"],
+            node_files=["node-prizes.txt", "sources.txt", "targets.txt"],
+            data_dir="input",
+            other_files=[]
+        ))
         example_node_table = example_dataset.node_table
         algorithm_params = config.config.algorithm_params
         algorithms_with_params = [f'{algorithm}-params-{params_hash}' for algorithm, param_combos in
@@ -74,13 +81,13 @@ class TestSummary:
 
     def test_load_dataset_dict(self):
         """Test loading files from dataset_dict"""
-        example_dict = {"label": "data0",
-                        "edge_files": ["network.txt"],
-                        "node_files": ["node-prizes.txt", "sources.txt", "targets.txt"],
-                        "data_dir": "input",
-                        "other_files": []
-                        }
-        example_dataset = Dataset(example_dict)
+        example_dataset = Dataset(DatasetSchema(
+            label="data0",
+            edge_files=["network.txt"],
+            node_files=["node-prizes.txt", "sources.txt", "targets.txt"],
+            data_dir="input",
+            other_files=[]
+        ))
         example_node_table = example_dataset.node_table
 
         # node_table contents are not generated consistently in the same order,

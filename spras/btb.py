@@ -44,19 +44,8 @@ class BowTieBuilder(PRM[Empty]):
 
         # Get sources and write to file, repeat for targets
         # Does not check whether a node is a source and a target
-        for node_type in ['sources', 'targets']:
-            nodes = data.get_node_columns([node_type])
-            if nodes is None:
-                raise ValueError(f'No {node_type} found in the node files')
-
-            # TODO test whether this selection is needed, what values could the column contain that we would want to
-            # include or exclude?
-            nodes = nodes.loc[nodes[node_type]]
-            if node_type == "sources":
-                nodes.to_csv(filename_map["sources"], sep= '\t', index=False, columns=['NODEID'], header=False)
-            elif node_type == "targets":
-                nodes.to_csv(filename_map["targets"], sep= '\t', index=False, columns=['NODEID'], header=False)
-
+        for node_type, nodes in data.get_node_columns_separate(['sources', 'targets']).items():
+            nodes.to_csv(filename_map[node_type], sep='\t', index=False, columns=['NODEID'], header=False)
 
         # Create network file
         edges = data.get_interactome()

@@ -17,7 +17,6 @@ import functools
 import hashlib
 import importlib.metadata
 import itertools as it
-import os
 import subprocess
 import tomllib
 import warnings
@@ -28,8 +27,8 @@ import numpy as np
 import yaml
 
 from spras.config.container_schema import ProcessedContainerSettings
-from spras.config.schema import RawConfig
-from spras.util import NpHashEncoder, hash_params_sha1_base32
+from spras.config.schema import DatasetSchema, RawConfig
+from spras.util import LoosePathLike, NpHashEncoder, hash_params_sha1_base32
 
 config = None
 
@@ -93,19 +92,7 @@ def init_global(config_dict):
 
 def init_from_file(filepath):
     global config
-
-    # Handle opening the file and parsing the yaml
-    filepath = os.path.abspath(filepath)
-    try:
-        with open(filepath, 'r') as yaml_file:
-            config_dict = yaml.safe_load(yaml_file)
-    except FileNotFoundError as e:
-        raise RuntimeError(f"Error: The specified config '{filepath}' could not be found.") from e
-    except yaml.YAMLError as e:
-        raise RuntimeError(f"Error: Failed to parse config '{filepath}'") from e
-
-    # And finally, initialize
-    config = Config(config_dict)
+    config = Config.from_file(filepath)
 
 
 class Config:
@@ -123,7 +110,7 @@ class Config:
         # Directory used for storing output
         self.out_dir = parsed_raw_config.reconstruction_settings.locations.reconstruction_dir
         # A dictionary to store configured datasets against which SPRAS will be run
-        self.datasets = None
+        self.datasets: dict[str, DatasetSchema] = {}
         # A dictionary to store configured gold standard data against output of SPRAS runs
         self.gold_standards = None
         # The hash length SPRAS will use to identify parameter combinations.
@@ -162,6 +149,20 @@ class Config:
 
         self.process_config(parsed_raw_config)
 
+    @classmethod
+    def from_file(cls, filepath: LoosePathLike):
+        # Handle opening the file and parsing the yaml
+        filepath = Path(filepath).absolute()
+        try:
+            with open(filepath, 'r') as yaml_file:
+                config_dict = yaml.safe_load(yaml_file)
+        except FileNotFoundError as e:
+            raise RuntimeError(f"Error: The specified config '{filepath}' could not be found.") from e
+        except yaml.YAMLError as e:
+            raise RuntimeError(f"Error: Failed to parse config '{filepath}'") from e
+
+        return cls(config_dict)
+
     def process_datasets(self, raw_config: RawConfig):
         """
         Parse dataset information
@@ -176,16 +177,14 @@ class Config:
         # Convert to dicts to simplify the yaml logging
 
         for dataset in raw_config.datasets:
+            label = dataset.label
+            if label.lower() in [key.lower() for key in self.datasets.keys()]:
+                raise ValueError(f"Datasets must have unique case-insensitive labels, but the label {label} appears at least twice.")
             dataset.label = attach_spras_revision(dataset.label)
         for gold_standard in raw_config.gold_standards:
             gold_standard.label = attach_spras_revision(gold_standard.label)
 
         self.datasets = {}
-        for dataset in raw_config.datasets:
-            label = dataset.label
-            if label.lower() in [key.lower() for key in self.datasets.keys()]:
-                raise ValueError(f"Datasets must have unique case-insensitive labels, but the label {label} appears at least twice.")
-            self.datasets[label] = dict(dataset)
 
         # parse gold standard information
         self.gold_standards = {gold_standard.label: dict(gold_standard) for gold_standard in raw_config.gold_standards}

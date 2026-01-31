@@ -60,10 +60,10 @@ def write_parameter_log(algorithm, param_label, logfile):
 def write_dataset_log(dataset, logfile):
     dataset_contents = get_dataset(_config.config.datasets,dataset)
 
-    # safe_dump gives RepresenterError for an OrderedDict
-    # config file has to convert the dataset from OrderedDict to dict to avoid this
-    with open(logfile,'w') as f:
-        yaml.safe_dump(dataset_contents,f)
+    # safe_dump gives RepresenterError for a DatasetSchema
+    # config file has to convert the dataset to a dict to avoid this
+    with open(logfile, 'w') as f:
+        yaml.safe_dump(dict(dataset_contents), f)
 
 # Choose the final files expected according to the config file options.
 def make_final_input(wildcards):
@@ -154,9 +154,9 @@ rule log_datasets:
 # Input preparation needs to be rerun if these files are modified
 def get_dataset_dependencies(wildcards):
     dataset = _config.config.datasets[wildcards.dataset]
-    all_files = dataset["node_files"] + dataset["edge_files"] + dataset["other_files"]
+    all_files = dataset.node_files + dataset.edge_files + dataset.other_files
     # Add the relative file path
-    all_files = [dataset["data_dir"] + SEP + data_file for data_file in all_files]
+    all_files = [dataset.data_dir + SEP + data_file for data_file in all_files]
 
     return all_files
 
