@@ -14,6 +14,7 @@ from spras.prm import PRM
 from spras.responsenet import ResponseNet
 from spras.rwr import RWR
 from spras.strwr import ST_RWR
+from spras.tiedie import TieDIE
 from spras.util import LoosePathLike
 
 algorithms: dict[str, type[PRM]] = {
@@ -28,6 +29,7 @@ algorithms: dict[str, type[PRM]] = {
     "responsenet": ResponseNet,
     "rwr": RWR,
     "strwr": ST_RWR,
+    "tiedie": TieDIE
 }
 
 def get_algorithm(algorithm: str) -> type[PRM]:
