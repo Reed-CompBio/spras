@@ -101,7 +101,8 @@ def shrink_rank_column(df: pd.DataFrame) -> pd.DataFrame:
 
     df = df.sort_values(['Rank'], ascending=True, inplace=False)
     df = df.reset_index(drop=True, inplace=False)
-    # https://stackoverflow.com/a/34856727/7589775
+    # https://stackoverflow.com/a/34856727/7589775 to update the Rank values one-by-one, we create
+    # a secondary column.
     df['NewRank'] = int(1)
     df['NewRank'] = df['NewRank'].astype('Int64')
     for i in range(1, len(df)):
