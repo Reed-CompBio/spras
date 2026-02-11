@@ -185,7 +185,7 @@ class Config:
         # We attach the SPRAS revision to the individual dataset labels afterwards for a cleaner error message above.
         for key, gold_standard in self.gold_standards.items():
             self.gold_standards[key]["dataset_labels"] = map(
-                functools.partial(attach_spras_revision, osdf_immutable=self.osdf_immutable),
+                functools.partial(attach_spras_revision, self.osdf_immutable),
                 gold_standard["dataset_labels"]
             )
 
@@ -243,9 +243,10 @@ class Config:
                             run_dict[param] = float(value)
                         if isinstance(value, np.ndarray):
                             run_dict[param] = value.tolist()
-                    # Incorporates the `spras_revision` into the hash
                     hash_run_dict = copy.deepcopy(run_dict)
-                    hash_run_dict["_spras_rev"] = spras_revision()
+                    if self.osdf_immutable:
+                        # Incorporates the `spras_revision` into the hash
+                        hash_run_dict["_spras_rev"] = spras_revision()
                     params_hash = hash_params_sha1_base32(hash_run_dict, self.hash_length, cls=NpHashEncoder)
                     if params_hash in prior_params_hashes:
                         raise ValueError(f'Parameter hash collision detected. Increase the hash_length in the config file '
