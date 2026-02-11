@@ -44,6 +44,7 @@ def spras_revision() -> str:
     of development.
     """
     try:
+        print(sysconfig.get_path("purelib"))
         record_path = Path(
             # The directory for site-packages, where .dist-info is located.
             sysconfig.get_path("purelib"),

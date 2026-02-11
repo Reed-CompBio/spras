@@ -107,6 +107,8 @@ class RawConfig(BaseModel):
     Most files do not have a specific version, and by default, this will be the hash of
     all the SPRAS files in the PyPA installation. This option will not work if SPRAS was not installed
     in a PyPA-compliant manner (PyPA-compliant installations include but are not limited to pip, poetry, uv, conda, pixi.)
+
+    By default, this is disabled, as it can make output file names confusing.
     """
 
     hash_length: int = DEFAULT_HASH_LENGTH
