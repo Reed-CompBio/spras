@@ -101,6 +101,13 @@ class ReconstructionSettings(BaseModel):
 
 class RawConfig(BaseModel):
     containers: ContainerSettings
+    osdf_immutable: bool = False
+    """
+    If enabled, this tags all files with their local file version.
+    Most files do not have a specific version, and by default, this will be the hash of
+    all the SPRAS files in the PyPA installation. This option will not work if SPRAS was not installed
+    in a PyPA-compliant manner (PyPA-compliant installations include but are not limited to pip, poetry, uv, conda, pixi.)
+    """
 
     hash_length: int = DEFAULT_HASH_LENGTH
     "The length of the hash used to identify a parameter combination"
