@@ -62,11 +62,6 @@ class DIAMOnD(PRM[DIAMOnDParams]):
     def run(inputs, output_file, args, container_settings=None):
         if not container_settings: container_settings = ProcessedContainerSettings()
         DIAMOnD.validate_required_run_args(inputs)
-        """
-        Run DIAMOnD with Docker
-        @param seeds: input seeds (required)
-        @param network: input network file (required)
-        """
 
         work_dir = '/apsp'
 
