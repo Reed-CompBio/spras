@@ -44,15 +44,13 @@ def spras_revision() -> str:
     of development.
     """
     try:
-        print("----")
-        print(sysconfig.get_path("purelib"))
-        print(str(importlib.metadata.distribution('spras').locate_file(f"spras-{importlib.metadata.version('spras')}.dist-info/RECORD")))
+        site_packages_path = sysconfig.get_path("purelib") # where .dist-info is located.
+
         record_path = Path(
-            # The directory for site-packages, where .dist-info is located.
-            sysconfig.get_path("purelib"),
-            str(importlib.metadata.distribution('spras').locate_file(f"spras-{importlib.metadata.version('spras')}.dist-info/RECORD")))
-        print(record_path)
-        print("[[[[[[]]]]]]")
+            site_packages_path,
+            f"spras-{importlib.metadata.version('spras')}.dist-info",
+            "RECORD"
+        )
         with open(record_path, 'rb', buffering=0) as f:
             # Truncated to the magic value 8, the length of the short git revision.
             return hashlib.file_digest(f, 'sha256').hexdigest()[:8]
