@@ -47,7 +47,8 @@ def summarize_networks(file_paths: Iterable[Path], node_table: pd.DataFrame, alg
         # Save the network name, number of nodes, number edges, and number of connected components
         nw_name = str(file_path)
 
-        # We use literal_eval here to easily coerce to either ints or floats, depending.
+        # We use ast.literal_eval here to convert statistic file outputs to ints or floats depending on their string representation.
+        # (e.g. "5.0" -> float(5.0), while "5" -> int(5).)
         graph_statistics = [ast.literal_eval(Path(file).read_text()) for file in statistics_files]
 
         # Initialize list to store current network information
@@ -89,65 +90,4 @@ def summarize_networks(file_paths: Iterable[Path], node_table: pd.DataFrame, alg
     return nw_info
 
 
-def degree(g):
-    return dict(g.degree)
-
-# TODO: redo .run code to work on mixed graphs
-# stats is just a list of functions to apply to the graph.
-# They should take as input a networkx graph or digraph but may have any output.
-# stats = [degree, nx.clustering, nx.betweenness_centrality]
-
-
-# def produce_statistics(g: nx.Graph, s=None) -> dict:
-#     global stats
-#     if s is not None:
-#         stats = s
-#     d = dict()
-#     for s in stats:
-#         sname = s.__name__
-#         d[sname] = s(g)
-#     return d
-
-
-# def load_graph(path: str) -> nx.Graph:
-#     g = nx.read_edgelist(path, data=(('weight', float), ('Direction',str)))
-#     return g
-
-
-# def save(data, pth):
-#     fout = open(pth, 'w')
-#     fout.write('#node\t%s\n' % '\t'.join([s.__name__ for s in stats]))
-#     for node in data[stats[0].__name__]:
-#         row = [data[s.__name__][node] for s in stats]
-#         fout.write('%s\t%s\n' % (node, '\t'.join([str(d) for d in row])))
-#     fout.close()
-
-
-# def run(infile: str, outfile: str) -> None:
-#     """
-#     run function that wraps above functions.
-#     """
-#     # if output directory doesn't exist, make it.
-#     outdir = os.path.dirname(outfile)
-#     if not os.path.exists(outdir):
-#         os.makedirs(outdir)
-
-#     # load graph, produce stats, and write to human-readable file.
-#     g = load_graph(infile)
-#     dat = produce_statistics(g)
-#     save(dat, outfile)
-
-
-# def main(argv):
-#     """
-#     for testing
-#     """
-#     g = load_graph(argv[1])
-#     print(g.nodes)
-#     dat = produce_statistics(g)
-#     print(dat)
-#     save(dat, argv[2])
-
-
-# if __name__ == '__main__':
-#     main(sys.argv)
+# TODO: redo the above code to work on mixed graphs

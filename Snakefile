@@ -310,9 +310,12 @@ rule viz_cytoscape:
     run:
         cytoscape.run_cytoscape(input.pathways, output.session, container_settings)
 
+# We generate new Snakemake rules for every statistic
+# to allow parallel and lazy computation of individual statistics
 for keys, values in statistics_computation.items():
     pythonic_name = 'generate_' + '_and_'.join([key.lower().replace(' ', '_') for key in keys])
     rule:
+        # (See https://snakemake.readthedocs.io/en/stable/snakefiles/rules.html#procedural-rule-definition)
         name: pythonic_name
         input: pathway_file = rules.parse_output.output.standardized_file
         output: [SEP.join([out_dir, '{dataset}-{algorithm}-{params}', 'statistics', f'{key}.txt']) for key in keys]

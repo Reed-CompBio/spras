@@ -4,6 +4,10 @@ Graph statistics, used to power summary.py.
 We allow for arbitrary computation of any specific statistic on some graph,
 computing more than necessary if we have dependencies. See the top level
 `statistics_computation` dictionary for usage.
+
+To make the statistics allow directed graph input, they will always take 
+in a networkx.DiGraph, which contains even more information, even though
+the underlying graph may be just as easily represented by networkx.Graph.
 """
 
 import itertools
@@ -25,6 +29,9 @@ def compute_degree(graph: nx.DiGraph) -> tuple[int, float]:
         return max(degrees), median(degrees)
 
 def compute_on_cc(directed_graph: nx.DiGraph) -> tuple[int, float]:
+    # We convert our directed_graph to an undirected graph as networkx (reasonably) does
+    # not allow for computing the connected components of a directed graph, but the connected
+    # component count still is a useful statistic for us.
     graph: nx.Graph = directed_graph.to_undirected()
     cc = list(nx.connected_components(graph))
     # Save the max diameter
@@ -49,13 +56,12 @@ def compute_on_cc(directed_graph: nx.DiGraph) -> tuple[int, float]:
 
     return max_diameter, avg_path_len
 
-# The type signature on here is quite bad. I would like to say that an n-tuple has n-outputs.
+# The type signature here is meant to be 'an n-tuple has n-outputs.'
 statistics_computation: dict[tuple[str, ...], Callable[[nx.DiGraph], tuple[float | int, ...]]] = {
     ('Number of nodes',): lambda graph : (graph.number_of_nodes(),),
     ('Number of edges',): lambda graph : (graph.number_of_edges(),),
     ('Number of connected components',): lambda graph : (nx.number_connected_components(graph.to_undirected()),),
     ('Density',): lambda graph : (nx.density(graph),),
-
     ('Max degree', 'Median degree'): compute_degree,
     ('Max diameter', 'Average path length'): compute_on_cc,
 }
