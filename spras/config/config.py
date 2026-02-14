@@ -17,8 +17,7 @@ import functools
 import hashlib
 import importlib.metadata
 import itertools as it
-import subprocess
-import tomllib
+import sysconfig
 import warnings
 from pathlib import Path
 from typing import Any
@@ -35,54 +34,41 @@ config = None
 @functools.cache
 def spras_revision() -> str:
     """
-    Gets the revision of the current SPRAS repository. This function is meant to be user-friendly to warn for bad SPRAS installs.
-    1. If this file is inside the correct `.git` repository, we use the revision hash. This is for development in SPRAS as well as SPRAS installs via a cloned git repository.
-    2. If SPRAS was installed via a PyPA-compliant package manager, we use the hash of the RECORD file (https://packaging.python.org/en/latest/specifications/recording-installed-packages/#the-record-file).
-        which contains the hashes of all installed files to the package.
+    Gets the current revision of SPRAS.
+
+    Note: This is not dependent on the SPRAS release version number nor the git commit, but rather solely on the PyPA RECORD file,
+    (https://packaging.python.org/en/latest/specifications/recording-installed-packages/#the-record-file), which contains
+    hashes of all of the installed SPRAS files [excluding RECORD itself], and is also included in the package distribution.
+    This means that, when developing SPRAS, `spras_revision` will be updated when spras is initially installed. However, for editable
+    pip installs (such as the pip installation used when developing spras), the `spras_revision` will not be updated.
     """
-    clone_tip = "Make sure SPRAS is installed through the installation instructions: https://spras.readthedocs.io/en/latest/install.html."
-
-    # Check if we're inside the right git repository
     try:
-        project_directory = subprocess.check_output(
-            ["git", "rev-parse", "--show-toplevel"],
-            encoding='utf-8',
-            # In case the CWD is not inside the actual SPRAS directory
-            cwd=Path(__file__).parent.resolve()
-        ).strip()
+        site_packages_path = sysconfig.get_path("purelib") # where .dist-info is located.
 
-        # We check the pyproject.toml name attribute to confirm that this is the SPRAS project. This is susceptible
-        # to false negatives, but we use this as a preliminary check against bad SPRAS installs.
-        pyproject_path = Path(project_directory, 'pyproject.toml')
-        try:
-            pyproject_toml = tomllib.loads(pyproject_path.read_text())
-            if "project" not in pyproject_toml or "name" not in pyproject_toml["project"]:
-                raise RuntimeError(f"The git top-level `{pyproject_path}` does not have the expected attributes. {clone_tip}")
-            if pyproject_toml["project"]["name"] != "spras":
-                raise RuntimeError(f"The git top-level `{pyproject_path}` is not the SPRAS pyproject.toml. {clone_tip}")
+        record_path = Path(
+            site_packages_path,
+            f"spras-{importlib.metadata.version('spras')}.dist-info",
+            "RECORD"
+        )
+        with open(record_path, 'rb', buffering=0) as f:
+            # Truncated to the magic value 8, the length of the short git revision.
+            return hashlib.file_digest(f, 'sha256').hexdigest()[:8]
+    except importlib.metadata.PackageNotFoundError as err:
+        raise RuntimeError('spras is not an installed pip-module: did you forget to install SPRAS as a module?') from err
 
-            return subprocess.check_output(
-                ["git", "rev-parse", "--short", "HEAD"],
-                encoding='utf-8',
-                cwd=project_directory
-            ).strip()
-        except FileNotFoundError as err:
-            # pyproject.toml wasn't found during the `read_text` call
-            raise RuntimeError(f"The git top-level {pyproject_path} wasn't found. {clone_tip}") from err
-        except tomllib.TOMLDecodeError as err:
-            raise RuntimeError(f"The git top-level {pyproject_path} is malformed. {clone_tip}") from err
-    except subprocess.CalledProcessError:
-        try:
-            # `git` failed: use the truncated hash of the RECORD file in .dist-info instead.
-            record_path = str(importlib.metadata.distribution('spras').locate_file(f"spras-{importlib.metadata.version('spras')}.dist-info/RECORD"))
-            with open(record_path, 'rb', buffering=0) as f:
-                # Truncated to the magic value 8, the length of the short git revision.
-                return hashlib.file_digest(f, 'sha256').hexdigest()[:8]
-        except importlib.metadata.PackageNotFoundError as err:
-            # The metadata.distribution call failed.
-            raise RuntimeError(f"The spras package wasn't found: {clone_tip}") from err
 
-def attach_spras_revision(label: str) -> str:
+def attach_spras_revision(immutable_files: bool, label: str) -> str:
+    """
+    Attaches the SPRAS revision to a label.
+    This function signature may become more complex as specific labels get versioned.
+
+    @param label: The label to attach the SPRAS revision to.
+    @param immutable_files: if False, this function is equivalent to `id`.
+    """
+    if immutable_files is False: return label
+    # We use the `_` separator here instead of `-` as summary, analysis, and gold standard parts of the
+    # Snakemake workflow process file names by splitting on hyphens to produce new jobs.
+    # If this was separated with a hyphen, we would mess with that string manipulation logic.
     return f"{label}_{spras_revision()}"
 
 # This will get called in the Snakefile, instantiating the singleton with the raw config
@@ -146,6 +132,8 @@ class Config:
         self.analysis_include_ml_aggregate_algo = None
         # A Boolean specifying whether to run the evaluation per algorithm analysis
         self.analysis_include_evaluation_aggregate_algo = None
+        # Specifies whether the files should be OSDF-immutable (i.e. the file names change when the file itself changes)
+        self.immutable_files = parsed_raw_config.immutable_files
 
         self.process_config(parsed_raw_config)
 
@@ -177,9 +165,9 @@ class Config:
         # Convert to dicts to simplify the yaml logging
 
         for dataset in raw_config.datasets:
-            dataset.label = attach_spras_revision(dataset.label)
+            dataset.label = attach_spras_revision(self.immutable_files, dataset.label)
         for gold_standard in raw_config.gold_standards:
-            gold_standard.label = attach_spras_revision(gold_standard.label)
+            gold_standard.label = attach_spras_revision(self.immutable_files, gold_standard.label)
 
         for dataset in raw_config.datasets:
             label = dataset.label
@@ -194,11 +182,14 @@ class Config:
         dataset_labels = set(self.datasets.keys())
         gold_standard_dataset_labels = {dataset_label for value in self.gold_standards.values() for dataset_label in value['dataset_labels']}
         for label in gold_standard_dataset_labels:
-            if attach_spras_revision(label) not in dataset_labels:
+            if attach_spras_revision(self.immutable_files, label) not in dataset_labels:
                 raise ValueError(f"Dataset label '{label}' provided in gold standards does not exist in the existing dataset labels.")
         # We attach the SPRAS revision to the individual dataset labels afterwards for a cleaner error message above.
         for key, gold_standard in self.gold_standards.items():
-            self.gold_standards[key]["dataset_labels"] = map(attach_spras_revision, gold_standard["dataset_labels"])
+            self.gold_standards[key]["dataset_labels"] = map(
+                functools.partial(attach_spras_revision, self.immutable_files),
+                gold_standard["dataset_labels"]
+            )
 
         # Code snipped from Snakefile that may be useful for assigning default labels
         # dataset_labels = [dataset.get('label', f'dataset{index}') for index, dataset in enumerate(datasets)]
@@ -254,9 +245,10 @@ class Config:
                             run_dict[param] = float(value)
                         if isinstance(value, np.ndarray):
                             run_dict[param] = value.tolist()
-                    # Incorporates the `spras_revision` into the hash
                     hash_run_dict = copy.deepcopy(run_dict)
-                    hash_run_dict["_spras_rev"] = spras_revision()
+                    if self.immutable_files:
+                        # Incorporates the `spras_revision` into the hash
+                        hash_run_dict["_spras_rev"] = spras_revision()
                     params_hash = hash_params_sha1_base32(hash_run_dict, self.hash_length, cls=NpHashEncoder)
                     if params_hash in prior_params_hashes:
                         raise ValueError(f'Parameter hash collision detected. Increase the hash_length in the config file '

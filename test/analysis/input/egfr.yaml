@@ -1,5 +1,5 @@
 hash_length: 7
-
+immutable_files: true
 containers:
   framework: docker
   unpack_singularity: false

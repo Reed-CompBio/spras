@@ -29,10 +29,10 @@ def snakemake_output(request):
     along with a guarantee (doubling as an integration test)
     that the files will exist.
     """
-    request = request.param
-    subprocess.run(["snakemake", "--cores", "1", "--configfile", f"test/analysis/input/{request}.yaml"])
-    yield request
-    shutil.rmtree(f"test/analysis/input/run/{request}")
+    param = request.param
+    subprocess.run(["snakemake", "--cores", "1", "--configfile", f"test/analysis/input/{param}.yaml"])
+    yield param # this runs the test itself: once this is passed, we go to test cleanup.
+    shutil.rmtree(f"test/analysis/input/run/{param}")
 
 class TestSummary:
     @classmethod
