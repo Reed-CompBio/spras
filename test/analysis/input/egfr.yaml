@@ -1,30 +1,10 @@
-# The length of the hash used to identify a parameter combination
 hash_length: 7
-
+immutable_files: true
 containers:
-  # Specify the container framework used by each PRM wrapper. Valid options include:
-  # - docker (default if not specified)
-  # - singularity -- Also known as apptainer, useful in HPC/HTC environments where docker isn't allowed
-  # - dsub -- experimental with limited support, used for running on Google Cloud with the All of Us cloud environment.
-  #   - There is no support for other environments at the moment.
   framework: docker
-
-  # Only used if container_framework is set to singularity, this will unpack the singularity containers
-  # to the local filesystem. This is useful when PRM containers need to run inside another container,
-  # such as would be the case in an HTCondor/OSPool environment.
-  # NOTE: This unpacks singularity containers to the local filesystem, which will take up space in a way
-  # that persists after the workflow is complete. To clean up the unpacked containers, the user must
-  # manually delete them. For convenience, these unpacked files will exist in the current working directory
-  # under `unpacked`.
   unpack_singularity: false
-
-  # Allow the user to configure which container registry containers should be pulled from
-  # Note that this assumes container names are consistent across registries, and that the
-  # registry being passed doesn't require authentication for pull actions
   registry:
     base_url: docker.io
-    # The owner or project of the registry
-    # For example, "reedcompbio" if the image is available as docker.io/reedcompbio/allpairs
     owner: reedcompbio
 
 algorithms:
@@ -32,61 +12,16 @@ algorithms:
     include: true
     runs:
       run1:
-        k:
-          - 10
-          - 20
-  - name: omicsintegrator1
-    include: true
-    runs:
-      run1:
-        b:
-          - 0.55
-          - 2
-          - 10
-        d:
-          - 10
-        g:
-          - 1e-3
-        r:
-          - 0.01
-        w:
-          - 0.1
-        mu:
-          - 0.008
-        dummy_mode: ["file"]
-  - name: omicsintegrator2
-    include: true
-    runs:
-      run1:
-        b:
-          - 4
-        g:
-          - 0
-      run2:
-        b:
-          - 2
-        g:
-          - 3
+        k: [10, 20]
   - name: meo
     include: true
     runs:
       run1:
-        local_search:
-          - true
-        max_path_length:
-          - 3
-        rand_restarts:
-          - 10
-  - name: domino
-    include: true
-    runs:
-      run1:
-        slice_threshold:
-          - 0.3
-        module_threshold:
-          - 0.05
+        local_search: true
+        max_path_length: 3
+        rand_restarts: 10
 datasets:
-  - data_dir: input
+  - data_dir: "input"
     edge_files:
       - phosphosite-irefindex13.0-uniprot.txt
     label: tps_egfr
@@ -95,12 +30,12 @@ datasets:
     other_files: []
 reconstruction_settings:
   locations:
-    reconstruction_dir: output/egfr
+    reconstruction_dir: "test/analysis/input/run/egfr"
 analysis:
   cytoscape:
-    include: true
+    include: false
   summary:
-    include: true
+    include: false
   ml:
     include: false
   evaluation:
