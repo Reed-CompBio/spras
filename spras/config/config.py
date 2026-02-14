@@ -37,11 +37,11 @@ def spras_revision() -> str:
     Gets the current revision of SPRAS.
 
     A few notes:
-    - This is not dependent on the SPRAS version nor the git commit, but rather solely on the PyPA RECORD file,
+    - This is not dependent on the SPRAS release version number nor the git commit, but rather solely on the PyPA RECORD file,
     (https://packaging.python.org/en/latest/specifications/recording-installed-packages/#the-record-file), which contains
     hashes of all files associated with the package distribution [other than itself], and is also included in the package distribution.
-    - This means that, when developing SPRAS, spras_revision will be updated when spras is initially installed, but not during the middle
-    of development.
+    - This means that, when developing SPRAS, `spras_revision` will be updated when spras is initially installed. However, for editable
+    pip installs (such as the pip installation used when developing spras), the `spras_revision` will not be updated.
     """
     try:
         site_packages_path = sysconfig.get_path("purelib") # where .dist-info is located.
