@@ -36,11 +36,10 @@ def spras_revision() -> str:
     """
     Gets the current revision of SPRAS.
 
-    A few notes:
-    - This is not dependent on the SPRAS release version number nor the git commit, but rather solely on the PyPA RECORD file,
+    Note: This is not dependent on the SPRAS release version number nor the git commit, but rather solely on the PyPA RECORD file,
     (https://packaging.python.org/en/latest/specifications/recording-installed-packages/#the-record-file), which contains
-    hashes of all files associated with the package distribution [other than itself], and is also included in the package distribution.
-    - This means that, when developing SPRAS, `spras_revision` will be updated when spras is initially installed. However, for editable
+    hashes of all of the installed SPRAS files [excluding RECORD itself], and is also included in the package distribution.
+    This means that, when developing SPRAS, `spras_revision` will be updated when spras is initially installed. However, for editable
     pip installs (such as the pip installation used when developing spras), the `spras_revision` will not be updated.
     """
     try:
@@ -67,6 +66,9 @@ def attach_spras_revision(immutable_files: bool, label: str) -> str:
     @param immutable_files: if False, this function is equivalent to `id`.
     """
     if immutable_files is False: return label
+    # We use the `_` separator here instead of `-` as summary, analysis, and gold standard parts of the
+    # Snakemake workflow process file names by splitting on hyphens to produce new jobs.
+    # If this was separated with a hyphen, we would mess with that string manipulation logic.
     return f"{label}_{spras_revision()}"
 
 # This will get called in the Snakefile, instantiating the singleton with the raw config
