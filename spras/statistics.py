@@ -5,7 +5,7 @@ We allow for arbitrary computation of any specific statistic on some graph,
 computing more than necessary if we have dependencies. See the top level
 `statistics_computation` dictionary for usage.
 
-To make the statistics allow directed graph input, they will always take 
+To make the statistics allow directed graph input, they will always take
 in a networkx.DiGraph, which contains even more information, even though
 the underlying graph may be just as easily represented by networkx.Graph.
 """
