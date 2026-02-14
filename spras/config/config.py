@@ -58,15 +58,15 @@ def spras_revision() -> str:
         raise RuntimeError('spras is not an installed pip-module: did you forget to install SPRAS as a module?') from err
 
 
-def attach_spras_revision(osdf_immutable: bool, label: str) -> str:
+def attach_spras_revision(immutable_files: bool, label: str) -> str:
     """
     Attaches the SPRAS revision to a label.
     This function signature may become more complex as specific labels get versioned.
 
     @param label: The label to attach the SPRAS revision to.
-    @param osdf_immutable: if False, this function is equivalent to `id`.
+    @param immutable_files: if False, this function is equivalent to `id`.
     """
-    if osdf_immutable is False: return label
+    if immutable_files is False: return label
     return f"{label}_{spras_revision()}"
 
 # This will get called in the Snakefile, instantiating the singleton with the raw config
@@ -131,7 +131,7 @@ class Config:
         # A Boolean specifying whether to run the evaluation per algorithm analysis
         self.analysis_include_evaluation_aggregate_algo = None
         # Specifies whether the files should be OSDF-immutable (i.e. the file names change when the file itself changes)
-        self.osdf_immutable = parsed_raw_config.osdf_immutable
+        self.immutable_files = parsed_raw_config.immutable_files
 
         self.process_config(parsed_raw_config)
 
@@ -163,9 +163,9 @@ class Config:
         # Convert to dicts to simplify the yaml logging
 
         for dataset in raw_config.datasets:
-            dataset.label = attach_spras_revision(self.osdf_immutable, dataset.label)
+            dataset.label = attach_spras_revision(self.immutable_files, dataset.label)
         for gold_standard in raw_config.gold_standards:
-            gold_standard.label = attach_spras_revision(self.osdf_immutable, gold_standard.label)
+            gold_standard.label = attach_spras_revision(self.immutable_files, gold_standard.label)
 
         for dataset in raw_config.datasets:
             label = dataset.label
@@ -180,12 +180,12 @@ class Config:
         dataset_labels = set(self.datasets.keys())
         gold_standard_dataset_labels = {dataset_label for value in self.gold_standards.values() for dataset_label in value['dataset_labels']}
         for label in gold_standard_dataset_labels:
-            if attach_spras_revision(self.osdf_immutable, label) not in dataset_labels:
+            if attach_spras_revision(self.immutable_files, label) not in dataset_labels:
                 raise ValueError(f"Dataset label '{label}' provided in gold standards does not exist in the existing dataset labels.")
         # We attach the SPRAS revision to the individual dataset labels afterwards for a cleaner error message above.
         for key, gold_standard in self.gold_standards.items():
             self.gold_standards[key]["dataset_labels"] = map(
-                functools.partial(attach_spras_revision, self.osdf_immutable),
+                functools.partial(attach_spras_revision, self.immutable_files),
                 gold_standard["dataset_labels"]
             )
 
@@ -244,7 +244,7 @@ class Config:
                         if isinstance(value, np.ndarray):
                             run_dict[param] = value.tolist()
                     hash_run_dict = copy.deepcopy(run_dict)
-                    if self.osdf_immutable:
+                    if self.immutable_files:
                         # Incorporates the `spras_revision` into the hash
                         hash_run_dict["_spras_rev"] = spras_revision()
                     params_hash = hash_params_sha1_base32(hash_run_dict, self.hash_length, cls=NpHashEncoder)

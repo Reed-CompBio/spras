@@ -101,7 +101,7 @@ class ReconstructionSettings(BaseModel):
 
 class RawConfig(BaseModel):
     containers: ContainerSettings
-    osdf_immutable: bool = False
+    immutable_files: bool = False
     """
     If enabled, this tags all files with their local file version.
     Most files do not have a specific version, and by default, this will be the hash of

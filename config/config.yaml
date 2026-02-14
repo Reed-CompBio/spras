@@ -3,14 +3,14 @@
 # The length of the hash used to identify a parameter combination
 hash_length: 7
 
-# If enabled, this tags all files with their local file version.
-# Most files do not have a specific version, and by default, this will be the hash of
-# all the SPRAS files in the PyPA installation. This option will not work if SPRAS was not installed
+# If enabled, this tags all output files with a SPRAS 'revision version'.
+# By default, this will be the hash of all the SPRAS files in the PyPA installation. This option will not work if SPRAS was not installed
 # in a PyPA-compliant manner (PyPA-compliant installations include but are not limited to pip, poetry, uv, conda, pixi.)
+# For some files, the 'SPRAS revision' may be tied to the specific format version that file is on.
 #
 # By default, this is disabled, as it can make output file names confusing. Here, it's set to true since we use this
 # configuration file for testing.
-osdf_immutable: true
+immutable_files: true
 
 # Collection of container options
 containers:
