@@ -3,8 +3,8 @@ import os
 from pathlib import Path
 
 from spras import runner
-from spras.util import extend_filename
 from spras.config.config import Config
+from spras.util import extend_filename
 
 OUTDIR = Path("test", "generate-inputs", "output")
 EXPDIR = Path("test", "generate-inputs", "expected")
