@@ -63,7 +63,7 @@ class DIAMOnD(PRM[DIAMOnDParams]):
         if not container_settings: container_settings = ProcessedContainerSettings()
         DIAMOnD.validate_required_run_args(inputs)
 
-        work_dir = '/apsp'
+        work_dir = '/diamond'
 
         # Each volume is a tuple (src, dest)
         volumes = list()
