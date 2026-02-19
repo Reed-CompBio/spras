@@ -5,7 +5,7 @@ Utility functions for pathway reconstruction
 import base64
 import hashlib
 import json
-from os import PathLike
+import os
 from pathlib import Path
 from typing import Any, Dict, Optional, Union
 
@@ -13,7 +13,7 @@ import numpy as np
 import pandas as pd
 
 """Represents a file that points to some location."""
-LoosePathLike = Union[str, PathLike[str]]
+LoosePathLike = Union[str, os.PathLike[str]]
 
 # https://stackoverflow.com/a/57915246/7589775
 # numpy variables are not, by default, encodable by python's JSONEncoder.
