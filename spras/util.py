@@ -5,7 +5,7 @@ Utility functions for pathway reconstruction
 import base64
 import hashlib
 import json
-from os import PathLike
+import os
 from pathlib import Path
 from typing import Any, Dict, Optional, Union
 
@@ -13,7 +13,7 @@ import numpy as np
 import pandas as pd
 
 """Represents a file that points to some location."""
-LoosePathLike = Union[str, PathLike[str]]
+LoosePathLike = Union[str, os.PathLike[str]]
 
 # https://stackoverflow.com/a/57915246/7589775
 # numpy variables are not, by default, encodable by python's JSONEncoder.
@@ -133,3 +133,13 @@ def duplicate_edges(df: pd.DataFrame) -> tuple[pd.DataFrame, bool]:
     unique_edges_df = df_sorted.drop_duplicates(subset=["Node1", "Node2", "Direction"], keep="first", ignore_index=True)
 
     return unique_edges_df, not unique_edges_df.equals(df)
+
+# https://stackoverflow.com/a/49689414/7589775
+def extend_filename(file_name: str, extension=".txt") -> str:
+    """
+    Adds a default file extension if none is provided.
+    """
+    root, ext = os.path.splitext(file_name)
+    if not ext:
+        ext = extension
+    return f'{root}{ext}'

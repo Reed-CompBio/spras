@@ -6,6 +6,7 @@ from spras.dataset import Dataset
 from spras.evaluation import Evaluation
 from spras.analysis import ml, summary, cytoscape
 import spras.config.config as _config
+from spras.util import extend_filename
 
 # Snakemake updated the behavior in the 6.5.0 release https://github.com/snakemake/snakemake/pull/1037
 # and using the wrong separator prevents Snakemake from matching filenames to the rules that can produce them
@@ -209,7 +210,9 @@ checkpoint prepare_input:
         # Use the algorithm's generate_inputs function to load the merged dataset, extract the relevant columns,
         # and write the output files specified by required_inputs
         # The filename_map provides the output file path for each required input file type
-        filename_map = {input_type: SEP.join([out_dir, 'prepared', f'{wildcards.dataset}-{wildcards.algorithm}-inputs', f'{input_type}.txt']) for input_type in runner.get_required_inputs(wildcards.algorithm)}
+        filename_map = {input_type: SEP.join(
+            [out_dir, 'prepared', f'{wildcards.dataset}-{wildcards.algorithm}-inputs', extend_filename(input_type)]
+        ) for input_type in runner.get_required_inputs(wildcards.algorithm)}
         runner.prepare_inputs(wildcards.algorithm, input.dataset_file, filename_map)
 
 # Collect the prepared input files from the specified directory
@@ -227,7 +230,7 @@ def collect_prepared_input(wildcards):
     prepared_dir = SEP.join([out_dir, 'prepared', f'{wildcards.dataset}-{wildcards.algorithm}-inputs'])
 
     # Construct the list of expected prepared input files for the reconstruction algorithm
-    prepared_inputs = expand(f'{prepared_dir}{SEP}{{type}}.txt',type=runner.get_required_inputs(algorithm=wildcards.algorithm))
+    prepared_inputs = expand(f'{prepared_dir}{SEP}{{type}}',type=map(extend_filename, runner.get_required_inputs(algorithm=wildcards.algorithm)))
     # If the directory is missing, do nothing because the missing output triggers running prepare_input
     if os.path.isdir(prepared_dir):
         # First, check if .snakemake_timestamp, the last written file in a directory rule,
