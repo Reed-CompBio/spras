@@ -114,15 +114,17 @@ algorithms:
     include: true
     runs:
       run1:
-        alpha: [0.85]
+        alpha: [0.85, 0.9]
         threshold: [100, 200]
+        max_iters: 10000
 
   - name: "rwr"
     include: true
     runs:
       run1:
-        alpha: [0.85]
+        alpha: [0.85, 0.9]
         threshold: [100, 200]
+        max_iters: 10000
 
   - name: "bowtiebuilder"
     include: true

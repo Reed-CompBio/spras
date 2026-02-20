@@ -63,6 +63,16 @@ jobs:
     with:
       path: docker-wrappers/ResponseNet
       container: reedcompbio/responsenet
+  build-and-remove-rwr:
+    uses: "./.github/workflows/build-and-remove-template.yml"
+    with:
+      path: docker-wrappers/RWR
+      container: reedcompbio/rwr
+  build-and-remove-strwr:
+    uses: "./.github/workflows/build-and-remove-template.yml"
+    with:
+      path: docker-wrappers/ST_RWR
+      container: reedcompbio/st-rwr
   build-and-remove-spras:
     uses: "./.github/workflows/build-and-remove-template.yml"
     with:
