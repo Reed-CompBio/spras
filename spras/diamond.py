@@ -3,7 +3,7 @@ from pathlib import Path
 from pydantic import BaseModel, ConfigDict
 
 from spras.config.container_schema import ProcessedContainerSettings
-from spras.containers import prepare_volume, run_container_and_log
+from spras.containers import ContainerError, prepare_volume, run_container_and_log
 from spras.dataset import Dataset
 from spras.interactome import (
     convert_directed_to_undirected,
@@ -93,13 +93,21 @@ class DIAMOnD(PRM[DIAMOnDParams]):
                    mapped_out_file]
 
         container_suffix = "diamond:v1"
-        run_container_and_log('DIAMOND',
-                              container_suffix,
-                              command,
-                              volumes,
-                              work_dir,
-                              out_dir,
-                              container_settings)
+        try:
+            run_container_and_log('DIAMOND',
+                                container_suffix,
+                                command,
+                                volumes,
+                                work_dir,
+                                out_dir,
+                                container_settings)
+        except ContainerError as err:
+            if err.streams_contain("KeyError: 'nix'"):
+                raise RuntimeError(f"{err.stderr}\n" + \
+                                   f"DIAMOnD had too many iterations ({args.n}) with a small network! " + \
+                                   f"As seen in the above stacktrace, this is expressed by DIAMOnD by " + \
+                                   f"a 'nix' KeyError:") from err
+            raise err # Miscellaneous error we don't know how to handle yet.
 
     @staticmethod
     def parse_output(raw_pathway_file, standardized_pathway_file, params):
@@ -109,7 +117,7 @@ class DIAMOnD(PRM[DIAMOnDParams]):
             df = df.drop(columns=["p_hyper"])
             df.columns = ["Rank", "Node"]
 
-            original_dataset: Dataset = params['dataset']
+            original_dataset: Dataset = Dataset.from_file(params['dataset'])
             interactome = original_dataset.get_interactome().get(['Interactor1','Interactor2'])
             interactome = interactome[interactome['Interactor1'].isin(df['Node'])
                                       & interactome['Interactor2'].isin(df['Node'])]
