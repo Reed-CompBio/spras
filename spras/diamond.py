@@ -16,7 +16,7 @@ __all__ = ['DIAMOnD', 'DIAMOnDParams']
 
 class DIAMOnDParams(BaseModel):
     n: int
-    """The desired number of DIAMOnD genes to add."""
+    """The desired number of DIAMOnD genes to add. For very small networks, this can error."""
 
     alpha: int = 1
     """
