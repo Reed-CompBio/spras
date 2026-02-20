@@ -97,11 +97,31 @@ reconstruction_settings:
   locations:
     reconstruction_dir: output/egfr
 analysis:
-  cytoscape:
-    include: true
   summary:
     include: true
-  ml:
+  cytoscape:
+    include: true
+  pca:
     include: false
+    aggregate_per_algorithm: false
+    pca_chosen:
+      include: false
+      aggregate_per_algorithm: false
+    components: 2
+    labels: false
+    kde: false
+    remove_empty_pathways: false
+  hac:
+    include: false
+    aggregate_per_algorithm: false
+    linkage: 'ward'
+    metric: 'euclidean'
+  ensemble:
+    include: false
+    aggregate_per_algorithm: false
+    evaluation:
+      include: false
+      aggregate_per_algorithm: false
   evaluation:
     include: false
+    aggregate_per_algorithm: false

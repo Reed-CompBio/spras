@@ -10,9 +10,10 @@ We declare models using two classes here:
 - `CaseInsensitiveEnum` (see ./util.py)
 """
 
+import warnings
 from typing import Annotated
 
-from pydantic import AfterValidator, BaseModel, ConfigDict
+from pydantic import AfterValidator, BaseModel, ConfigDict, model_validator
 
 from spras.config.algorithms import AlgorithmUnion
 from spras.config.container_schema import ContainerSettings
@@ -38,42 +39,74 @@ class CytoscapeAnalysis(BaseModel):
 # Note that CaseInsensitiveEnum is not pydantic: pydantic
 # has special support for enums, but we avoid the
 # pydantic-specific "model_config" key here for this reason.
-class MlLinkage(CaseInsensitiveEnum):
+class HacLinkage(CaseInsensitiveEnum):
     ward = 'ward'
     complete = 'complete'
     average = 'average'
     single = 'single'
 
-class MlMetric(CaseInsensitiveEnum):
+class HacMetric(CaseInsensitiveEnum):
     euclidean = 'euclidean'
     manhattan = 'manhattan'
     cosine = 'cosine'
 
-class MlAnalysis(BaseModel):
+def implies(source: bool, target: bool, source_str: str, target_str: str):
+    if target and not source:
+        warnings.warn(f"{source_str} is False but {target_str} is True; setting {target_str} to False", stacklevel=2)
+        return False
+    return target
+
+class AggregateAnalysis(BaseModel):
     include: bool
     aggregate_per_algorithm: bool = False
+
+    model_config = ConfigDict(extra='forbid')
+
+    @model_validator(mode='after')
+    def check_aggregate_when_include(self):
+        self.aggregate_per_algorithm = implies(self.include, self.aggregate_per_algorithm, "include", "aggregate_per_algorithm")
+        return self
+
+class EvaluationAnalysis(AggregateAnalysis): pass
+
+class PcaAnalysis(AggregateAnalysis):
     components: int = 2
     labels: bool = True
     kde: bool = False
     remove_empty_pathways: bool = False
-    linkage: MlLinkage = MlLinkage.ward
-    metric: MlMetric = MlMetric.euclidean
+    pca_chosen: EvaluationAnalysis = EvaluationAnalysis(include=False)
 
-    model_config = ConfigDict(extra='forbid')
+    @model_validator(mode='after')
+    def check_include_when_evaluation_include(self):
+        self.pca_chosen.include = implies(self.include, self.pca_chosen.include, "include", "pca_chosen.include")
+        self.pca_chosen.aggregate_per_algorithm = implies(self.aggregate_per_algorithm, self.pca_chosen.aggregate_per_algorithm, "aggregate_per_algorithm", "pca_chosen.aggregate_per_algorithm")
+        return self
 
-class EvaluationAnalysis(BaseModel):
-    include: bool
-    aggregate_per_algorithm: bool = False
+class HacAnalysis(AggregateAnalysis):
+    linkage: HacLinkage = HacLinkage.ward
+    metric: HacMetric = HacMetric.euclidean
 
-    model_config = ConfigDict(extra='forbid')
+class EnsembleAnalysis(AggregateAnalysis):
+    evaluation: EvaluationAnalysis = EvaluationAnalysis(include=False)
+
+    @model_validator(mode='after')
+    def check_include_when_evaluation_include(self):
+        self.evaluation.include = implies(self.include, self.evaluation.include, "include", "evaluation.include")
+        self.evaluation.aggregate_per_algorithm = implies(self.aggregate_per_algorithm, self.evaluation.aggregate_per_algorithm, "aggregate_per_algorithm", "evaluation.aggregate_per_algorithm")
+        return self
+class JaccardAnalysis(AggregateAnalysis): pass
 
 class Analysis(BaseModel):
     summary: SummaryAnalysis = SummaryAnalysis(include=False)
     cytoscape: CytoscapeAnalysis = CytoscapeAnalysis(include=False)
-    ml: MlAnalysis = MlAnalysis(include=False)
+    pca: PcaAnalysis = PcaAnalysis(include=False)
+    hac: HacAnalysis = HacAnalysis(include=False)
+    jaccard: JaccardAnalysis = JaccardAnalysis(include=False)
+    ensemble: EnsembleAnalysis = EnsembleAnalysis(include=False)
     evaluation: EvaluationAnalysis = EvaluationAnalysis(include=False)
+    """Enables PR curve evaluation."""
 
-    model_config = ConfigDict(extra='forbid')
+    model_config = ConfigDict(extra='forbid', use_attribute_docstrings=True)
 
 
 # The default length of the truncated hash used to identify parameter combinations
