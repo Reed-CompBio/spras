@@ -8,6 +8,7 @@ from spras.diamond import DIAMOnD
 from spras.domino import DOMINO
 from spras.meo import MEO
 from spras.mincostflow import MinCostFlow
+from spras.must import MuST as must
 from spras.omicsintegrator1 import OmicsIntegrator1
 from spras.omicsintegrator2 import OmicsIntegrator2
 from spras.pathlinker import PathLinker
@@ -24,6 +25,7 @@ algorithms: dict[str, type[PRM]] = {
     "domino": DOMINO,
     "meo": MEO,
     "mincostflow": MinCostFlow,
+    "must": must,
     "omicsintegrator1": OmicsIntegrator1,
     "omicsintegrator2": OmicsIntegrator2,
     "pathlinker": PathLinker,
