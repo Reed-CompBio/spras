@@ -239,3 +239,7 @@ analysis:
     # adds evaluation per algorithm per dataset-goldstandard pair
     # evaluation per algorithm will not run unless ml include and ml aggregate_per_algorithm are set to true
     aggregate_per_algorithm: true
+  attribution:
+    # Include generated bibtex citations at OUT_DIR/attribution/*.bib, for every included algorithm,
+    # including an aggregated attribution/all.bib
+    include: true
