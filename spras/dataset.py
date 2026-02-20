@@ -136,7 +136,7 @@ class Dataset:
         # Load generic node tables
         self.node_table = pd.DataFrame(node_set, columns=[self.NODE_ID])
         for node_file in node_data_files:
-            single_node_table = pd.read_table(os.path.join(data_loc, node_file))
+            single_node_table = pd.read_table(os.path.join(data_loc, node_file), index_col=False)
             # If we have only 1 column, assume this is an indicator variable
             if len(single_node_table.columns) == 1:
                 single_node_table = pd.read_table(
