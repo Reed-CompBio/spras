@@ -9,8 +9,15 @@ DOMINO has two optional parameters:
 * slice_threshold: the p-value threshold for considering a slice as relevant
 * module_threshold: the p-value threshold for considering a putative module as final module
 
-Wrapper Details
-===============
+Dataset Usage
+-------------
+
+DOMINO requires the `active` column to be set. DOMINO does not consider edge weights,
+nor graph directionality: directed edges are treated as undirected edges, and DOMINO
+returns an undirected subnetwork.
+
+Implementation Details
+----------------------
 
 If the input dataframe is empty or too 'small' (where no modules are found),
 SPRAS will instead emit an empty output file.
