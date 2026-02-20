@@ -213,9 +213,9 @@ Also test the functions available in the ``Dataset`` class.
    0    True      A
 
 Note: If you get a 'no module named' error, make sure that you are
-running your interactive python session inside the SPRAS conda
+running your interactive python session inside the SPRAS pixi
 environment (your terminal should begin with ``(spras)`` instead of
-``(base)``, which can be done through ``conda activate spras``), and
+``(base)``, which can be done through ``pixi shell``), and
 your editor's interpreter is set to using the SPRAS environment over the
 base environment (on VSCode and IntelliJ editors, this should be in the
 bottom right.)
@@ -296,15 +296,7 @@ through SPRAS with
 
    snakemake --cores 1 --configfile config/config.yaml
 
-Make sure to run the command inside the ``spras`` conda environment.
-
-If installing via ``pip`` instead of using conda, install with the
-``-e .[dev]`` options (the full command to run from the repo root is
-``python -m pip install -e .[dev]``) so that Python picks up any changes
-you make and installs all optional development packages. Omitting the
-``-e`` flag will prevent your changes from being reflected unless you
-force re-install, and omitting ``.[dev]`` will prevent pip from
-installing ``pre-commit`` and ``pytest``.
+Make sure to run the command inside the ``spras`` pixi environment.
 
 As a workflow manager, Snakemake will consider the work described in the
 configuration file to be completed once the necessary output files have
@@ -469,9 +461,8 @@ tests are run automatically on every commit through the GitHub Actions.
 However, developers will benefit from setting up their environment to
 run the same tests locally while they modify the SPRAS source.
 
-The ``pre-commit`` package is installed as part of the conda environment
-in ``environment.yml``, or when installing SPRAS with
-``python -m pip install -e .[dev]``. From there, the pre-commit `quick
+The ``pre-commit`` package is installed as part of the pixi environment
+in ``environment.yml``. From there, the pre-commit `quick
 start <https://pre-commit.com/#quick-start>`__ guide explains two
 primary ways to use it locally:
 

@@ -144,3 +144,12 @@ TempMat.mat
 
 # Singularity cache
 unpacked
+
+# pixi environments
+.pixi
+pixi.lock
+*.egg-info
+
+# pixi environments
+.pixi
+*.egg-info

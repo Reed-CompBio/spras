@@ -92,14 +92,14 @@ Submitting Parallel Jobs
 
 Parallelizing SPRAS workflows with HTCondor requires the same setup as
 the previous section, but with two additions. First, it requires an
-activated SPRAS conda environment with a ``pip install``-ed version of
+activated SPRAS pixi environment with a ``pip install``-ed version of
 the SPRAS module (via ``pip install .`` inside the SPRAS directory).
 
 Second, it requires an experimental executor for HTCondor that has been
 forked from the upstream `HTCondor Snakemake
 executor <https://github.com/htcondor/snakemake-executor-plugin-htcondor>`__.
 
-After activating your ``spras`` conda environment and ``pip``-installing
+After activating your ``spras`` pixi environment and ``pip``-installing
 SPRAS, you can install the HTCondor Snakemake executor with the
 following:
 
@@ -185,7 +185,7 @@ jobs where they left off.
 
 **Note**: If you encounter an error that says
 ``No module named 'spras'``, make sure you've ``pip install``-ed the
-SPRAS module into your conda environment.
+SPRAS module into your pixi environment.
 
 Job Monitoring
 --------------
@@ -247,9 +247,9 @@ containing:
    raise CredsError("Credentials not found for this workflow")
 
 it indicates you must upgrade the version of the HTCondor Snakemake
-executor bundled with your conda environment.
+executor bundled with your pixi environment.
 
-To upgrade, from your activated ``spras`` conda environment run:
+To upgrade, from your activated ``spras`` pixi environment run:
 
 .. code:: bash
 
@@ -275,4 +275,4 @@ repository <https://github.com/htcondor/snakemake-executor-plugin-htcondor>`__
 and inspecting the commit history.
 
 If the preceding steps did not update the installed version, you may
-need to delete and rebuild your ``spras`` conda environment.
+need to delete and rebuild your ``spras`` pixi environment.

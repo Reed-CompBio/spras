@@ -8,7 +8,7 @@ __all__ = [basename(f)[:-3] for f in modules if isfile(f) and not f.endswith('__
 
 # Import version info from package metadata, which is populated from pyproject.toml
 # Note that this version will only be populated correctly in source code if the `spras` module
-# is installed (as opposed to operating solely from a conda env).
+# is installed (as opposed to operating solely from a pixi env).
 try:
     __version__ = version("spras")
 except PackageNotFoundError:
