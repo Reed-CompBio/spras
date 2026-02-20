@@ -151,9 +151,12 @@ class Dataset:
             # will be ignored
             # TODO may want to warn about duplicate before removing them, for instance, if a user loads two files that
             #  both have prizes
-            self.node_table = self.node_table.merge(
-                single_node_table, how="left", on=self.NODE_ID, suffixes=(None, "_DROP")
-            ).filter(regex="^(?!.*DROP)")
+            try:
+                self.node_table = self.node_table.merge(
+                    single_node_table, how="left", on=self.NODE_ID, suffixes=(None, "_DROP")
+                ).filter(regex="^(?!.*DROP)")
+            except ValueError as error:
+                raise ValueError(f"An error occurred when trying to merge {node_file} with the rest of the node files.") from error
         # Ensure that the NODEID column always appears first, which is required for some downstream analyses
         self.node_table.insert(0, "NODEID", self.node_table.pop("NODEID"))
         self.other_files = dataset_params.other_files
@@ -230,3 +233,4 @@ class Dataset:
         if self.interactome is None:
             raise ValueError("interactome is None: can't copy a non-existent interactome.")
         return self.interactome.copy(deep = True)
+

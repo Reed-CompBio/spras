@@ -132,6 +132,11 @@ algorithms:
     runs:
       run1:
         gamma: [10]
+  - name: "diamond"
+    include: true
+    runs:
+      run1:
+        n: 1
 
 # Here we specify which pathways to run and other file location information.
 # DataLoader.py can currently only load a single dataset

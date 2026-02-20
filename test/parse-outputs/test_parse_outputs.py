@@ -38,11 +38,20 @@ algorithms = {
     'rwr': {
         'threshold': 2,
         'dataset': Dataset(dataset_params=DatasetSchema(
-            label= 'test_dataset',
-            node_files= ['rwr-dataset-prizes.txt', 'rwr-dataset-sources.txt', 'rwr-dataset-targets.txt'],
-            edge_files= ['rwr-dataset-network.txt'],
-            other_files= [],
-            data_dir= INDIR / 'dataset' / 'rwr'
+            label='test_dataset',
+            node_files=['rwr-dataset-prizes.txt', 'rwr-dataset-sources.txt', 'rwr-dataset-targets.txt'],
+            edge_files=['rwr-dataset-network.txt'],
+            other_files=[],
+            data_dir=INDIR / 'dataset' / 'rwr'
+        ))
+    },
+    'diamond': {
+        'dataset': Dataset(dataset_params=DatasetSchema(
+            label='test_dataset',
+            node_files=['diamond-dataset-prizes.txt', 'diamond-dataset-sources.txt', 'diamond-dataset-targets.txt'],
+            edge_files=['diamond-dataset-network.txt'],
+            other_files=[],
+            data_dir=INDIR / 'dataset' / 'diamond'
         ))
     }
 }
