@@ -231,7 +231,7 @@ class Evaluation:
         plt.close()
 
         # save dataframe
-        pr_df.drop(columns=['Algorithm'], inplace=True)
+        pr_df = pr_df.drop(columns=['Algorithm'])
         pr_df.to_csv(output_file, sep='\t', index=False)
 
     @staticmethod
@@ -248,7 +248,7 @@ class Evaluation:
         """
         if not pr_df.empty:
             pr_df['Algorithm'] = pr_df['Pathway'].apply(lambda p: Path(p).parent.name.split('-')[1])
-            pr_df.sort_values(by=['Recall', 'Pathway'], axis=0, ascending=True, inplace=True)
+            pr_df = pr_df.sort_values(by=['Recall', 'Pathway'], axis=0, ascending=True)
 
             if aggregate_per_algorithm:
                 # Guaranteed to only have one algorithm in Algorithm column
@@ -281,7 +281,7 @@ class Evaluation:
 
         if not pr_df.empty:
             pr_df['Algorithm'] = pr_df['Pathway'].apply(lambda p: Path(p).parent.name.split('-')[1])
-            pr_df.sort_values(by=['Recall', 'Pathway'], axis=0, ascending=True, inplace=True)
+            pr_df = pr_df.sort_values(by=['Recall', 'Pathway'], axis=0, ascending=True)
 
             if aggregate_per_algorithm:
                 title = "PCA-Chosen Pathway Per Algorithm Precision and Recall Plot"
@@ -305,7 +305,7 @@ class Evaluation:
                 plt.close()
 
     @staticmethod
-    def pca_chosen_pathway(coordinates_files: Iterable[Union[str, PathLike]], pathway_summary_file: str, output_dir: str):
+    def pca_chosen_pathway(coordinates_files: Iterable[Union[str, PathLike]], pathway_summary_file: str | PathLike, output_dir: str | PathLike) -> list[str]:
         """
         Identifies the pathway closest to a specified highest kernel density estimated (KDE) peak based on PCA
         coordinates
@@ -323,7 +323,7 @@ class Evaluation:
         """
          # TODO update to add in the pathways for the algorithms that do not provide a pca chosen pathway https://github.com/Reed-CompBio/spras/issues/341
 
-        rep_pathways = []
+        rep_pathways: list[str] = []
 
         for coordinates_file in coordinates_files:
             coord_df = pd.read_csv(coordinates_file, delimiter='\t', header=0)
@@ -356,7 +356,7 @@ class Evaluation:
         return rep_pathways
 
     @staticmethod
-    def edge_frequency_node_ensemble(node_table: pd.DataFrame, ensemble_files: Iterable[Union[str, PathLike]], dataset_file: str) -> dict:
+    def edge_frequency_node_ensemble(node_table: pd.DataFrame, ensemble_files: Iterable[Union[str, PathLike]], dataset_file: str | PathLike) -> dict:
         """
         Generates a dictionary of node ensembles using edge frequency data from a list of ensemble files.
         A list of ensemble files can contain an aggregated ensemble or algorithm-specific ensembles per dataset
@@ -387,11 +387,11 @@ class Evaluation:
 
         if interactome.empty:
             raise ValueError(
-                f"Cannot compute PR curve or generate node ensemble. Input network for dataset \"{dataset_file.split('-')[0]}\" is empty."
+                f"Cannot compute PR curve or generate node ensemble. Input network for dataset \"{Path(dataset_file).name.split('-')[0]}\" is empty."
             )
         if node_table.empty:
             raise ValueError(
-                f"Cannot compute PR curve or generate node ensemble. Gold standard associated with dataset \"{dataset_file.split('-')[0]}\" is empty."
+                f"Cannot compute PR curve or generate node ensemble. Gold standard associated with dataset \"{Path(dataset_file).name.split('-')[0]}\" is empty."
             )
 
         # set the initial default frequencies to 0 for all interactome and gold standard nodes
