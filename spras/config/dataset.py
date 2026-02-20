@@ -1,4 +1,4 @@
-from typing import Annotated
+from typing import Annotated, Optional
 
 from pydantic import AfterValidator, BaseModel, ConfigDict
 
@@ -19,5 +19,7 @@ class DatasetSchema(BaseModel):
     edge_files: list[LoosePathLike]
     other_files: list[LoosePathLike]
     data_dir: LoosePathLike
+    category: Optional[str] = None
+    "The dataset category, for working with dataset collections in the configuration."
 
     model_config = ConfigDict(extra='forbid')
