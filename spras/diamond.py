@@ -19,7 +19,11 @@ class DIAMOnDParams(BaseModel):
     """The desired number of DIAMOnD genes to add."""
 
     alpha: int = 1
-    """Weight of the seeds"""
+    """
+    Weight of the seeds. This does nothing if alpha is equal to one.
+    Higher values of alpha prioritize seed nodes during DIAMOnD's
+    several rounds of disease module identification.
+    """
 
     model_config = ConfigDict(extra='forbid', use_attribute_docstrings=True)
 
@@ -88,7 +92,7 @@ class DIAMOnD(PRM[DIAMOnDParams]):
                    str(args.alpha),
                    mapped_out_file]
 
-        container_suffix = "diamond:latest"
+        container_suffix = "diamond:v1"
         run_container_and_log('DIAMOND',
                               container_suffix,
                               command,
