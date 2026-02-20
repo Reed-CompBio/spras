@@ -9,7 +9,7 @@ from spras.config.container_schema import ContainerFramework, ProcessedContainer
 
 config.init_from_file("config/config.yaml")
 
-TEST_DIR = Path('test', 'BowTieBuilder/')
+TEST_DIR = Path('test', 'algorithms', 'BowTieBuilder/')
 OUT_FILE_DEFAULT = Path(TEST_DIR, 'output', 'raw-pathway.txt')
 
 
