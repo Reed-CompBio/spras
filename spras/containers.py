@@ -8,6 +8,7 @@ from typing import Iterator, List, Optional, Tuple, Union
 
 import docker
 import docker.errors
+import requests
 
 from spras.config.container_schema import ProcessedContainerSettings
 from spras.logging import indent
@@ -166,6 +167,20 @@ class ContainerError(RuntimeError):
     def __str__(self):
         return self.message
 
+class TimeoutError(RuntimeError):
+    """Raises when a function times out."""
+    timeout: int
+    message: str
+
+    def __init__(self, timeout: int, *args):
+        self.timeout = timeout
+        self.message = f"Timed out after {timeout}s."
+
+        super(TimeoutError, self).__init__(timeout, *args)
+
+    def __str__(self):
+        return self.message
+
 def env_to_items(environment: dict[str, str]) -> Iterator[str]:
     """
     Turns an environment variable dictionary to KEY=VALUE pairs.
@@ -176,7 +191,17 @@ def env_to_items(environment: dict[str, str]) -> Iterator[str]:
 # TODO consider a better default environment variable
 # Follow docker-py's naming conventions (https://docker-py.readthedocs.io/en/stable/containers.html)
 # Technically the argument is an image, not a container, but we use container here.
-def run_container(container_suffix: str, command: List[str], volumes: List[Tuple[PurePath, PurePath]], working_dir: str, out_dir: str | os.PathLike, container_settings: ProcessedContainerSettings, environment: Optional[dict[str, str]] = None, network_disabled = False):
+def run_container(
+        container_suffix: str,
+        command: List[str],
+        volumes: List[Tuple[PurePath, PurePath]],
+        working_dir: str,
+        out_dir: str | os.PathLike,
+        container_settings: ProcessedContainerSettings,
+        timeout: Optional[int],
+        environment: Optional[dict[str, str]] = None,
+        network_disabled = False
+):
     """
     Runs a command in the container using Singularity or Docker
     @param container_suffix: name of the DockerHub container without the 'docker://' prefix
@@ -185,6 +210,7 @@ def run_container(container_suffix: str, command: List[str], volumes: List[Tuple
     @param working_dir: the working directory in the container
     @param container_settings: the settings to use to run the container
     @param out_dir: output directory for the rule's artifacts. Only passed into run_container_singularity for the purpose of profiling.
+    @param timeout: the timeout (in seconds), throwing a TimeoutException if the timeout is reached.
     @param environment: environment variables to set in the container
     @param network_disabled: Disables the network on the container. Only works for docker for now. This acts as a 'runtime assertion' that a container works w/o networking.
     @return: output from Singularity execute or Docker run
@@ -193,7 +219,7 @@ def run_container(container_suffix: str, command: List[str], volumes: List[Tuple
 
     container = container_settings.prefix + "/" + container_suffix
     if normalized_framework == 'docker':
-        return run_container_docker(container, command, volumes, working_dir, environment, network_disabled)
+        return run_container_docker(container, command, volumes, working_dir, environment, timeout, network_disabled)
     elif normalized_framework == 'singularity' or normalized_framework == "apptainer":
         return run_container_singularity(container, command, volumes, working_dir, out_dir, container_settings, environment)
     elif normalized_framework == 'dsub':
@@ -201,7 +227,17 @@ def run_container(container_suffix: str, command: List[str], volumes: List[Tuple
     else:
         raise ValueError(f'{container_settings.framework} is not a recognized container framework. Choose "docker", "dsub", "apptainer", or "singularity".')
 
-def run_container_and_log(name: str, container_suffix: str, command: List[str], volumes: List[Tuple[PurePath, PurePath]], working_dir: str, out_dir: str | os.PathLike, container_settings: ProcessedContainerSettings, environment: Optional[dict[str, str]] = None, network_disabled=False):
+def run_container_and_log(
+        name: str,
+        container_suffix: str,
+        command: List[str],
+        volumes: List[Tuple[PurePath, PurePath]],
+        working_dir: str, out_dir: str | os.PathLike,
+        container_settings: ProcessedContainerSettings,
+        timeout: Optional[int],
+        environment: Optional[dict[str, str]] = None,
+        network_disabled=False
+):
     """
     Runs a command in the container using Singularity or Docker with associated pretty printed messages.
     @param name: the display name of the running container for logging purposes
@@ -210,6 +246,7 @@ def run_container_and_log(name: str, container_suffix: str, command: List[str], 
     @param volumes: a list of volumes to mount where each item is a (source, destination) tuple
     @param working_dir: the working directory in the container
     @param container_settings: the container settings to use
+    @param timeout: the timeout (in seconds), throwing a TimeoutException if the timeout is reached.
     @param environment: environment variables to set in the container
     @param network_disabled: Disables the network on the container. Only works for docker for now. This acts as a 'runtime assertion' that a container works w/o networking.
     @return: output from Singularity execute or Docker run
@@ -219,7 +256,17 @@ def run_container_and_log(name: str, container_suffix: str, command: List[str], 
 
     print('Running {} on container framework "{}" on env {} with command: {}'.format(name, container_settings.framework, list(env_to_items(environment)), ' '.join(command)), flush=True)
     try:
-        out = run_container(container_suffix=container_suffix, command=command, volumes=volumes, working_dir=working_dir, out_dir=out_dir, container_settings=container_settings, environment=environment, network_disabled=network_disabled)
+        out = run_container(
+            container_suffix=container_suffix,
+            command=command,
+            volumes=volumes,
+            working_dir=working_dir,
+            out_dir=out_dir,
+            container_settings=container_settings,
+            timeout=timeout,
+            environment=environment,
+            network_disabled=network_disabled
+        )
         if out is not None:
             if isinstance(out, list):
                 out = ''.join(out)
@@ -250,7 +297,15 @@ def run_container_and_log(name: str, container_suffix: str, command: List[str], 
         raise ContainerError(message, err.exit_status, stdout, stderr) from None
 
 # TODO any issue with creating a new client each time inside this function?
-def run_container_docker(container: str, command: List[str], volumes: List[Tuple[PurePath, PurePath]], working_dir: str, environment: Optional[dict[str, str]] = None, network_disabled=False):
+def run_container_docker(
+        container: str,
+        command: List[str],
+        volumes: List[Tuple[PurePath, PurePath]],
+        working_dir: str,
+        environment: Optional[dict[str, str]] = None,
+        timeout: Optional[int] = None,
+        network_disabled=False
+):
     """
     Runs a command in the container using Docker.
     Attempts to automatically correct file owner and group for new files created by the container, setting them to the
@@ -261,6 +316,8 @@ def run_container_docker(container: str, command: List[str], volumes: List[Tuple
     @param volumes: a list of volumes to mount where each item is a (source, destination) tuple
     @param working_dir: the working directory in the container
     @param environment: environment variables to set in the container
+    @param timeout: the timeout (in seconds), throwing a TimeoutException if the timeout is reached.
+    @param network_disabled: if enabled, disables the underlying network: useful when containers don't fetch any online resources.
     @return: output from Docker run, or will error if the container errored.
     """
 
@@ -290,13 +347,25 @@ def run_container_docker(container: str, command: List[str], volumes: List[Tuple
 
     bind_paths = [f'{prepare_path_docker(src)}:{dest}' for src, dest in volumes]
 
-    out = client.containers.run(container,
-                                command,
-                                stderr=True,
-                                volumes=bind_paths,
-                                working_dir=working_dir,
-                                network_disabled=network_disabled,
-                                environment=environment).decode('utf-8')
+    container_obj = client.containers.run(
+        container,
+        command,
+        volumes=bind_paths,
+        working_dir=working_dir,
+        network_disabled=network_disabled,
+        environment=environment,
+        detach=True
+    )
+
+    try:
+        container_obj.wait(timeout=timeout)
+    except requests.exceptions.ReadTimeout as err:
+        container_obj.stop()
+        client.close()
+        if timeout: raise TimeoutError(timeout) from err
+        else: raise RuntimeError("Timeout error but no timeout specified. Please file an issue with this error and stacktrace at https://github.com/Reed-CompBio/spras/issues/new.") from None
+
+    out = container_obj.attach(stderr=True).decode('utf-8')
 
     # TODO does this cleanup need to still run even if there was an error in the above run command?
     # On Unix, files written by the above Docker run command will be owned by root and cannot be modified
@@ -345,7 +414,7 @@ def run_container_docker(container: str, command: List[str], volumes: List[Tuple
     return out
 
 
-def run_container_singularity(container: str, command: List[str], volumes: List[Tuple[PurePath, PurePath]], working_dir: str, out_dir: str, config: ProcessedContainerSettings, environment: Optional[dict[str, str]] = None):
+def run_container_singularity(container: str, command: List[str], volumes: List[Tuple[PurePath, PurePath]], working_dir: str, out_dir: str | os.PathLike, config: ProcessedContainerSettings, environment: Optional[dict[str, str]] = None):
     """
     Runs a command in the container using Singularity.
     Only available on Linux.
@@ -427,7 +496,7 @@ def run_container_singularity(container: str, command: List[str], volumes: List[
         for bind in bind_paths:
             singularity_cmd.extend(["--bind", bind])
         singularity_cmd.extend(singularity_options)
-        singularity_cmd.append(image_to_run)
+        singularity_cmd.append(str(image_to_run))
         singularity_cmd.extend(command)
 
         my_cgroup = create_peer_cgroup()
@@ -438,7 +507,7 @@ def run_container_singularity(container: str, command: List[str], volumes: List[
         proc = subprocess.run(cmd, capture_output=True, text=True, stderr=subprocess.STDOUT)
 
         print("Reading memory and CPU stats from cgroup")
-        create_apptainer_container_stats(my_cgroup, out_dir)
+        create_apptainer_container_stats(my_cgroup, str(out_dir))
 
         result = proc.stdout
     else:
