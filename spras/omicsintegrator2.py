@@ -193,7 +193,8 @@ class OmicsIntegrator2(PRM[OmicsIntegrator2Params]):
                 df = reinsert_direction_col_undirected(df)
                 df.columns = ['Node1', 'Node2', 'Rank', "Direction"]
             else:
-                # We get protein1, protein2, and cost if no edges were inside the solution,
+                # We get protein1, protein2, and cost if no edges were inside the solution (as networkx
+                # does not have any edges in the solution to loop over, and therefore never makes the column)
                 # and we get protein1, protein2 if no edges were present in the augmented forest at all:
                 # both of these outcomes should be treated as an empty network.
                 df = pd.DataFrame(columns=['Node1', 'Node2', 'Rank', 'Direction'])
