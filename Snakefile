@@ -5,6 +5,7 @@ import yaml
 from spras.dataset import Dataset
 from spras.evaluation import Evaluation
 from spras.analysis import ml, summary, cytoscape
+from spras.config.revision import detach_spras_revision
 import spras.config.config as _config
 
 # Snakemake updated the behavior in the 6.5.0 release https://github.com/snakemake/snakemake/pull/1037
@@ -208,8 +209,8 @@ checkpoint prepare_input:
         # Use the algorithm's generate_inputs function to load the merged dataset, extract the relevant columns,
         # and write the output files specified by required_inputs
         # The filename_map provides the output file path for each required input file type
-        filename_map = {input_type: SEP.join([out_dir, 'prepared', f'{wildcards.dataset}-{wildcards.algorithm}-inputs', f'{input_type}.txt']) for input_type in runner.get_required_inputs(wildcards.algorithm)}
-        runner.prepare_inputs(wildcards.algorithm, input.dataset_file, filename_map)
+        filename_map = {input_type: SEP.join([out_dir, 'prepared', f'{wildcards.dataset}-{wildcards.algorithm}-inputs', f'{input_type}.txt']) for input_type in runner.get_required_inputs(detach_spras_revision(_config.config.immutable_files, wildcards.algorithm))}
+        runner.prepare_inputs(detach_spras_revision(_config.config.immutable_files, wildcards.algorithm), input.dataset_file, filename_map)
 
 # Collect the prepared input files from the specified directory
 # If the directory does not exist for this dataset-algorithm pair, the checkpoint will detect that
@@ -226,7 +227,7 @@ def collect_prepared_input(wildcards):
     prepared_dir = SEP.join([out_dir, 'prepared', f'{wildcards.dataset}-{wildcards.algorithm}-inputs'])
 
     # Construct the list of expected prepared input files for the reconstruction algorithm
-    prepared_inputs = expand(f'{prepared_dir}{SEP}{{type}}.txt',type=runner.get_required_inputs(algorithm=wildcards.algorithm))
+    prepared_inputs = expand(f'{prepared_dir}{SEP}{{type}}.txt',type=runner.get_required_inputs(algorithm=detach_spras_revision(_config.config.immutable_files, wildcards.algorithm)))
     # If the directory is missing, do nothing because the missing output triggers running prepare_input
     if os.path.isdir(prepared_dir):
         # First, check if .snakemake_timestamp, the last written file in a directory rule,
@@ -272,11 +273,11 @@ rule reconstruct:
         # Create a copy so that the updates are not written to the parameters logfile
         params = reconstruction_params(wildcards.algorithm, wildcards.params).copy()
         # Declare the input files as a dictionary.
-        inputs = dict(zip(runner.get_required_inputs(wildcards.algorithm), *{input}, strict=True))
+        inputs = dict(zip(runner.get_required_inputs(detach_spras_revision(_config.config.immutable_files, wildcards.algorithm)), *{input}, strict=True))
         # Remove the _spras_run_name parameter added for keeping track of the run name for parameters.yml
         if '_spras_run_name' in params:
             params.pop('_spras_run_name')
-        runner.run(wildcards.algorithm, inputs, output.pathway_file, params, container_settings)
+        runner.run(detach_spras_revision(_config.config.immutable_files, wildcards.algorithm), inputs, output.pathway_file, params, container_settings)
 
 # Original pathway reconstruction output to universal output
 # Use PRRunner as a wrapper to call the algorithm-specific parse_output
@@ -288,7 +289,7 @@ rule parse_output:
     run:
         params = reconstruction_params(wildcards.algorithm, wildcards.params).copy()
         params['dataset'] = input.dataset_file
-        runner.parse_output(wildcards.algorithm, input.raw_file, output.standardized_file, params)
+        runner.parse_output(detach_spras_revision(_config.config.immutable_files, wildcards.algorithm), input.raw_file, output.standardized_file, params)
 
 # TODO: reuse in the future once we make summary work for mixed graphs. See https://github.com/Reed-CompBio/spras/issues/128
 # Collect summary statistics for a single pathway

@@ -14,10 +14,7 @@ will grab the top level registry configuration option as it appears in the confi
 
 import copy as copy
 import functools
-import hashlib
-import importlib.metadata
 import itertools as it
-import sysconfig
 import warnings
 from pathlib import Path
 from typing import Any
@@ -26,50 +23,11 @@ import numpy as np
 import yaml
 
 from spras.config.container_schema import ProcessedContainerSettings
+from spras.config.revision import attach_spras_revision, spras_revision
 from spras.config.schema import DatasetSchema, RawConfig
 from spras.util import LoosePathLike, NpHashEncoder, hash_params_sha1_base32
 
 config = None
-
-@functools.cache
-def spras_revision() -> str:
-    """
-    Gets the current revision of SPRAS.
-
-    Note: This is not dependent on the SPRAS release version number nor the git commit, but rather solely on the PyPA RECORD file,
-    (https://packaging.python.org/en/latest/specifications/recording-installed-packages/#the-record-file), which contains
-    hashes of all of the installed SPRAS files [excluding RECORD itself], and is also included in the package distribution.
-    This means that, when developing SPRAS, `spras_revision` will be updated when spras is initially installed. However, for editable
-    pip installs (such as the pip installation used when developing spras), the `spras_revision` will not be updated.
-    """
-    try:
-        site_packages_path = sysconfig.get_path("purelib") # where .dist-info is located.
-
-        record_path = Path(
-            site_packages_path,
-            f"spras-{importlib.metadata.version('spras')}.dist-info",
-            "RECORD"
-        )
-        with open(record_path, 'rb', buffering=0) as f:
-            # Truncated to the magic value 8, the length of the short git revision.
-            return hashlib.file_digest(f, 'sha256').hexdigest()[:8]
-    except importlib.metadata.PackageNotFoundError as err:
-        raise RuntimeError('spras is not an installed pip-module: did you forget to install SPRAS as a module?') from err
-
-
-def attach_spras_revision(immutable_files: bool, label: str) -> str:
-    """
-    Attaches the SPRAS revision to a label.
-    This function signature may become more complex as specific labels get versioned.
-
-    @param label: The label to attach the SPRAS revision to.
-    @param immutable_files: if False, this function is equivalent to `id`.
-    """
-    if immutable_files is False: return label
-    # We use the `_` separator here instead of `-` as summary, analysis, and gold standard parts of the
-    # Snakemake workflow process file names by splitting on hyphens to produce new jobs.
-    # If this was separated with a hyphen, we would mess with that string manipulation logic.
-    return f"{label}_{spras_revision()}"
 
 # This will get called in the Snakefile, instantiating the singleton with the raw config
 def init_global(config_dict):
@@ -103,8 +61,6 @@ class Config:
         self.hash_length = parsed_raw_config.hash_length
         # Container settings used by PRMs.
         self.container_settings = ProcessedContainerSettings.from_container_settings(parsed_raw_config.containers, self.hash_length)
-        # The list of algorithms to run in the workflow. Each is a dict with 'name' as an expected key.
-        self.algorithms = None
         # A nested dict mapping algorithm names to dicts that map parameter hashes to parameter combinations.
         # Only includes algorithms that are set to be run with 'include: true'.
         self.algorithm_params: dict[str, dict[str, Any]] = dict()
@@ -206,8 +162,10 @@ class Config:
         """
         prior_params_hashes = set()
         self.algorithm_params = dict()
-        self.algorithms = raw_config.algorithms
-        for alg in self.algorithms:
+        # We copy raw_config.algorithms to avoid mutating the original config
+        # when we attach the SPRAS revision to algorithm names later.
+        for alg in raw_config.algorithms[:]:
+            alg.name = attach_spras_revision(self.immutable_files, alg.name)
             if alg.include:
                 # This dict maps from parameter combinations hashes to parameter combination dictionaries
                 self.algorithm_params[alg.name] = dict()
