@@ -13,15 +13,16 @@ Reed-CompBio/spras-benchmarking repository.
 This is an optional feature, as the `spras_revision` function below is dependent on a RECORD file
 (described in the docstring associated with `spras_revision`.)
 
-We provide the convenient attach_spras_revision used in ./config.py, and `detatch_spras_revision` used to get
+We provide the convenient attach_spras_revision used in ./config.py, and `detach_spras_revision` used to get
 rid of the revision for algorithms specifically.
 """
 
 import functools
 import hashlib
 import importlib.metadata
-from pathlib import Path
 import sysconfig
+from pathlib import Path
+
 
 @functools.cache
 def spras_revision() -> str:
@@ -63,8 +64,8 @@ def attach_spras_revision(immutable_files: bool, label: str) -> str:
     # If this was separated with a hyphen, we would mess with that string manipulation logic.
     return f"{label}_{spras_revision()}"
 
-def detatch_spras_revision(immutable_files: bool, attached_label: str) -> str:
+def detach_spras_revision(immutable_files: bool, attached_label: str) -> str:
     """The inverse of `attach_spras_revision`."""
     if immutable_files is False: return attached_label
-    # `rpartition` starts at the end: detatch_spras_revision(b, attach_spras_revision(b, s)) = s for all b, s.
+    # `rpartition` starts at the end: detach_spras_revision(b, attach_spras_revision(b, s)) = s for all b, s.
     return attached_label.rpartition("_")[0]
