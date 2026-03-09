@@ -216,7 +216,8 @@ checkpoint prepare_input:
 # If the directory does not exist for this dataset-algorithm pair, the checkpoint will detect that
 # prepare_input needs to be run and will then automatically re-rerun downstream rules like reconstruct
 # If the directory does exist but some of the required input files are missing, Snakemake will not automatically
-# run prepare_input
+# run prepare_inputs
+
 # It only checks for the output of prepare_input, which is a directory
 # Therefore, manually remove the entire directory if any of the expected prepared input file are missing so that
 # prepare_inputs is run, the directory and prepared input files are re-generated, and the reconstruct rule is run again

@@ -33,7 +33,8 @@ def spras_revision() -> str:
     (https://packaging.python.org/en/latest/specifications/recording-installed-packages/#the-record-file), which contains
     hashes of all of the installed SPRAS files [excluding RECORD itself], and is also included in the package distribution.
     This means that, when developing SPRAS, `spras_revision` will be updated when spras is initially installed. However, for editable
-    pip installs (such as the pip installation used when developing spras), the `spras_revision` will not be updated.
+    pip installs (e.g. from `pip install -e .`), the `spras_revision` will not be updated,
+    as the RECORD file only contains metadata: https://setuptools.pypa.io/en/latest/userguide/development_mode.html.
     """
     try:
         site_packages_path = sysconfig.get_path("purelib") # where .dist-info is located.
