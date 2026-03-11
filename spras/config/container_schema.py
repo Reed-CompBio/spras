@@ -22,6 +22,11 @@ class ContainerFramework(CaseInsensitiveEnum):
     apptainer = 'apptainer'
     dsub = 'dsub'
 
+    @property
+    def is_singularity_family(self) -> bool:
+        """True for both 'singularity' and 'apptainer', which are treated as synonyms."""
+        return self in (ContainerFramework.singularity, ContainerFramework.apptainer)
+
 class ContainerRegistry(BaseModel):
     base_url: str = "docker.io"
     "The domain of the registry"
@@ -72,8 +77,8 @@ class ProcessedContainerSettings:
         container_framework = settings.framework
 
         # Unpack settings for running in singularity mode. Needed when running PRM containers if already in a container.
-        if settings.unpack_singularity and container_framework != "singularity":
-            warnings.warn("unpack_singularity is set to True, but the container framework is not singularity. This setting will have no effect.", stacklevel=2)
+        if settings.unpack_singularity and not container_framework.is_singularity_family:
+            warnings.warn("unpack_singularity is set to True, but the container framework is not singularity or apptainer. This setting will have no effect.", stacklevel=2)
         unpack_singularity = settings.unpack_singularity
 
         # Grab registry from the config, and if none is provided default to docker

@@ -10,7 +10,7 @@ from typing import Iterator, List, Optional, Tuple, Union
 import docker
 import docker.errors
 
-from spras.config.container_schema import ProcessedContainerSettings
+from spras.config.container_schema import ContainerFramework, ProcessedContainerSettings
 from spras.logging import indent
 from spras.profiling import create_apptainer_container_stats, create_peer_cgroup
 from spras.util import hash_filename
@@ -190,8 +190,6 @@ def run_container(container_suffix: str, command: List[str], volumes: List[Tuple
     @param network_disabled: Disables the network on the container. Only works for docker for now. This acts as a 'runtime assertion' that a container works w/o networking.
     @return: output from Singularity execute or Docker run
     """
-    normalized_framework = container_settings.framework.casefold()
-
     image_override = getattr(container_settings, 'image_override', None)
 
     # Default: combine registry prefix with the algorithm's container suffix
@@ -201,7 +199,7 @@ def run_container(container_suffix: str, command: List[str], volumes: List[Tuple
         # .sif overrides are only meaningful for apptainer/singularity;
         # _resolve_singularity_image handles the actual .sif path.
         # For other frameworks, warn and keep the default.
-        if normalized_framework not in ('singularity', 'apptainer'):
+        if not container_settings.framework.is_singularity_family:
             warnings.warn(
                 f"Image override '{image_override}' is a .sif file, but the container framework is "
                 f"'{container_settings.framework}'. .sif overrides are only supported with "
@@ -222,11 +220,11 @@ def run_container(container_suffix: str, command: List[str], volumes: List[Tuple
     else:
         print(f'Container image: {container}', flush=True)
 
-    if normalized_framework == 'docker':
+    if container_settings.framework == ContainerFramework.docker:
         return run_container_docker(container, command, volumes, working_dir, environment, network_disabled)
-    elif normalized_framework == 'singularity' or normalized_framework == "apptainer":
+    elif container_settings.framework.is_singularity_family:
         return run_container_singularity(container, command, volumes, working_dir, out_dir, container_settings, environment)
-    elif normalized_framework == 'dsub':
+    elif container_settings.framework == ContainerFramework.dsub:
         return run_container_dsub(container, command, volumes, working_dir, environment)
     else:
         raise ValueError(f'{container_settings.framework} is not a recognized container framework. Choose "docker", "dsub", "apptainer", or "singularity".')
