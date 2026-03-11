@@ -208,6 +208,8 @@ def run_container(container_suffix: str, command: List[str], volumes: List[Tuple
                 f"apptainer/singularity. Falling back to default image.",
                 stacklevel=2
             )
+        else:
+            print(f'Container image override (local .sif): {image_override}', flush=True)
     elif image_override:
         # Image reference override (different tag or full registry reference)
         if '/' in image_override:
@@ -216,6 +218,9 @@ def run_container(container_suffix: str, command: List[str], volumes: List[Tuple
         else:
             # Suffix-style like "pathlinker:v3" — prepend registry prefix
             container = container_settings.prefix + "/" + image_override
+        print(f'Container image override: {container}', flush=True)
+    else:
+        print(f'Container image: {container}', flush=True)
 
     if normalized_framework == 'docker':
         return run_container_docker(container, command, volumes, working_dir, environment, network_disabled)
@@ -415,14 +420,18 @@ def _resolve_singularity_image(container: str, config: ProcessedContainerSetting
         # Here, we expand the sif image from `image_path` to a directory indicated by `base_cont_path`
         if not base_cont_path.exists():
             Client.build(recipe=image_path, image=str(base_cont_path), sandbox=True, sudo=False)
+        print(f'Resolved singularity image to sandbox: {base_cont_path}', flush=True)
         return base_cont_path  # sandbox directory
 
     if is_local_sif:
         # Local .sif without unpacking — use directly
+        print(f'Resolved singularity image to local .sif: {image_override}', flush=True)
         return image_override
 
     # No override, no unpacking — apptainer pulls and converts the Docker image at runtime
-    return "docker://" + container
+    resolved = "docker://" + container
+    print(f'Resolved singularity image: {resolved}', flush=True)
+    return resolved
 
 
 def run_container_singularity(container: str, command: List[str], volumes: List[Tuple[PurePath, PurePath]], working_dir: str, out_dir: str, config: ProcessedContainerSettings, environment: Optional[dict[str, str]] = None):
