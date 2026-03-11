@@ -8,18 +8,24 @@ from unittest.mock import patch
 
 import pytest
 
-from spras.config.container_schema import ProcessedContainerSettings
+from spras.config.container_schema import ContainerFramework, ProcessedContainerSettings
 
 
 def make_settings(**overrides):
-    """Create a ProcessedContainerSettings with sensible defaults, then apply overrides."""
+    """Create a ProcessedContainerSettings with sensible defaults, then apply overrides.
+
+    Accepts either ContainerFramework enum values or plain strings for 'framework';
+    strings are resolved to their enum member so the property helpers work.
+    """
     defaults = dict(
-        framework="docker",
+        framework=ContainerFramework.docker,
         unpack_singularity=False,
         prefix="docker.io/reedcompbio",
         hash_length=7,
     )
     defaults.update(overrides)
+    if isinstance(defaults["framework"], str):
+        defaults["framework"] = ContainerFramework(defaults["framework"])
     return ProcessedContainerSettings(**defaults)
 
 
