@@ -10,14 +10,14 @@ We declare models using two classes here:
 - `CaseInsensitiveEnum` (see ./util.py)
 """
 
-import re
 from typing import Annotated
 
 from pydantic import AfterValidator, BaseModel, ConfigDict
 
 from spras.config.algorithms import AlgorithmUnion
 from spras.config.container_schema import ContainerSettings
-from spras.config.util import CaseInsensitiveEnum
+from spras.config.dataset import DatasetSchema
+from spras.config.util import CaseInsensitiveEnum, label_validator
 
 # Most options here have an `include` property,
 # which is meant to make disabling parts of the configuration easier.
@@ -79,30 +79,6 @@ class Analysis(BaseModel):
 # The default length of the truncated hash used to identify parameter combinations
 DEFAULT_HASH_LENGTH = 7
 
-def label_validator(name: str):
-    """
-    A validator takes in a label
-    and ensures that it contains only letters, numbers, or underscores.
-    """
-    label_pattern = r'^\w+$'
-    def validate(label: str):
-        if not bool(re.match(label_pattern, label)):
-            raise ValueError(f"{name} label '{label}' contains invalid values. {name} labels can only contain letters, numbers, or underscores.")
-        return label
-    return validate
-
-class Dataset(BaseModel):
-    # We prefer AfterValidator here to allow pydantic to run its own
-    # validation & coercion logic before we check it against our own
-    # requirements
-    label: Annotated[str, AfterValidator(label_validator("Dataset"))]
-    node_files: list[str]
-    edge_files: list[str]
-    other_files: list[str]
-    data_dir: str
-
-    model_config = ConfigDict(extra='forbid')
-
 class GoldStandard(BaseModel):
     label: Annotated[str, AfterValidator(label_validator("Gold Standard"))]
     node_files: list[str] = []
@@ -131,7 +107,7 @@ class RawConfig(BaseModel):
 
     # See algorithms.py for more information about AlgorithmUnion
     algorithms: list[AlgorithmUnion] # type: ignore - pydantic allows this.
-    datasets: list[Dataset]
+    datasets: list[DatasetSchema]
     gold_standards: list[GoldStandard] = []
     analysis: Analysis = Analysis()
 
