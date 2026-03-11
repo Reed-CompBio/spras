@@ -7,7 +7,8 @@ this subsection of the configuration.
 """
 
 import warnings
-from dataclasses import dataclass
+from dataclasses import dataclass, field
+from typing import Optional
 
 from pydantic import BaseModel, ConfigDict
 
@@ -34,10 +35,12 @@ class ContainerSettings(BaseModel):
     framework: ContainerFramework = ContainerFramework.docker
     unpack_singularity: bool = False
 
-    model_config = ConfigDict(extra='forbid')
     enable_profiling: bool = False
     "A Boolean indicating whether to enable container runtime profiling (apptainer/singularity only)"
     registry: ContainerRegistry
+
+    images: dict[str, str] = {}
+    "Per-algorithm container image overrides. Keys are algorithm names; values are image references or local .sif file paths."
 
     model_config = ConfigDict(extra='forbid', use_attribute_docstrings=True)
 
@@ -57,6 +60,10 @@ class ProcessedContainerSettings:
     We prefer this `hash_length` in our container-running logic to
     avoid a (future) dependency diamond.
     """
+    images: dict[str, str] = field(default_factory=dict)
+    """Per-algorithm container image overrides from config."""
+    image_override: Optional[str] = None
+    """Resolved image override for the current algorithm. Set at runtime by runner.run()."""
 
     @staticmethod
     def from_container_settings(settings: ContainerSettings, hash_length: int) -> "ProcessedContainerSettings":
@@ -78,5 +85,6 @@ class ProcessedContainerSettings:
             framework=container_framework,
             unpack_singularity=unpack_singularity,
             prefix=container_prefix,
-            hash_length=hash_length
+            hash_length=hash_length,
+            images=dict(settings.images),
         )
