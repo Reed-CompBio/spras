@@ -20,6 +20,7 @@ def make_settings(**overrides):
     defaults = dict(
         framework=ContainerFramework.docker,
         unpack_singularity=False,
+        base_url="docker.io",
         prefix="docker.io/reedcompbio",
         hash_length=7,
     )
@@ -77,6 +78,16 @@ class TestRunContainerImageResolution:
         run_container(CONTAINER_SUFFIX, DUMMY_COMMAND, DUMMY_VOLUMES, DUMMY_WORKDIR, DUMMY_OUTDIR, settings)
         container_arg = mock_docker.call_args[0][0]
         assert container_arg == "ghcr.io/myorg/pathlinker:v1234"
+
+    @patch("spras.containers.run_container_docker", return_value="ok")
+    def test_owner_image_override_prepends_base_url(self, mock_docker):
+        """Owner/image override like 'someowner/oi2:latest' --> prepend base_url only."""
+        settings = make_settings(framework="docker", image_override="someowner/oi2:latest")
+        from spras.containers import run_container
+
+        run_container(CONTAINER_SUFFIX, DUMMY_COMMAND, DUMMY_VOLUMES, DUMMY_WORKDIR, DUMMY_OUTDIR, settings)
+        container_arg = mock_docker.call_args[0][0]
+        assert container_arg == "docker.io/someowner/oi2:latest"
 
     @patch("spras.containers.run_container_docker", return_value="ok")
     def test_sif_override_with_docker_warns_and_falls_back(self, mock_docker):
