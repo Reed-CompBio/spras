@@ -209,12 +209,19 @@ def run_container(container_suffix: str, command: List[str], volumes: List[Tuple
         else:
             print(f'Container image override (local .sif): {image_override}', flush=True)
     elif image_override:
-        # Image reference override (different tag or full registry reference)
+        # Image reference override — determine how much of the URI is specified.
+        # Uses Docker's convention: if the first path component contains '.' or ':',
+        # it's a registry hostname and the reference is fully qualified.
         if '/' in image_override:
-            # Full reference like "ghcr.io/myorg/image:tag" — use as-is
-            container = image_override
+            first_component = image_override.split('/')[0]
+            if '.' in first_component or ':' in first_component:
+                # Full registry reference like "ghcr.io/myorg/image:tag" — use as-is
+                container = image_override
+            else:
+                # Owner/image like "some-other-owner/oi2:latest" — prepend base_url only
+                container = container_settings.base_url + "/" + image_override
         else:
-            # Suffix-style like "pathlinker:v3" — prepend registry prefix
+            # Image name only like "pathlinker:v1234" — prepend full prefix (base_url/owner)
             container = container_settings.prefix + "/" + image_override
         print(f'Container image override: {container}', flush=True)
     else:

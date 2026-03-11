@@ -53,6 +53,7 @@ class ContainerSettings(BaseModel):
 class ProcessedContainerSettings:
     framework: ContainerFramework = ContainerFramework.docker
     unpack_singularity: bool = False
+    base_url: str = "docker.io"
     prefix: str = DEFAULT_CONTAINER_PREFIX
     enable_profiling: bool = False
     hash_length: int = 7
@@ -82,13 +83,17 @@ class ProcessedContainerSettings:
         unpack_singularity = settings.unpack_singularity
 
         # Grab registry from the config, and if none is provided default to docker
+        container_base_url = "docker.io"
         container_prefix = DEFAULT_CONTAINER_PREFIX
+        if settings.registry and settings.registry.base_url != "":
+            container_base_url = settings.registry.base_url
         if settings.registry and settings.registry.base_url != "" and settings.registry.owner != "":
             container_prefix = settings.registry.base_url + "/" + settings.registry.owner
 
         return ProcessedContainerSettings(
             framework=container_framework,
             unpack_singularity=unpack_singularity,
+            base_url=container_base_url,
             prefix=container_prefix,
             hash_length=hash_length,
             images=dict(settings.images),
