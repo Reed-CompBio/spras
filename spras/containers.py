@@ -3,6 +3,7 @@ import platform
 import re
 import subprocess
 import textwrap
+import warnings
 from pathlib import Path, PurePath, PurePosixPath
 from typing import Iterator, List, Optional, Tuple, Union
 
@@ -191,7 +192,31 @@ def run_container(container_suffix: str, command: List[str], volumes: List[Tuple
     """
     normalized_framework = container_settings.framework.casefold()
 
+    image_override = getattr(container_settings, 'image_override', None)
+
+    # Default: combine registry prefix with the algorithm's container suffix
     container = container_settings.prefix + "/" + container_suffix
+
+    if image_override and image_override.endswith('.sif'):
+        # .sif overrides are only meaningful for apptainer/singularity;
+        # _resolve_singularity_image handles the actual .sif path.
+        # For other frameworks, warn and keep the default.
+        if normalized_framework not in ('singularity', 'apptainer'):
+            warnings.warn(
+                f"Image override '{image_override}' is a .sif file, but the container framework is "
+                f"'{container_settings.framework}'. .sif overrides are only supported with "
+                f"apptainer/singularity. Falling back to default image.",
+                stacklevel=2
+            )
+    elif image_override:
+        # Image reference override (different tag or full registry reference)
+        if '/' in image_override:
+            # Full reference like "ghcr.io/myorg/image:tag" — use as-is
+            container = image_override
+        else:
+            # Suffix-style like "pathlinker:v3" — prepend registry prefix
+            container = container_settings.prefix + "/" + image_override
+
     if normalized_framework == 'docker':
         return run_container_docker(container, command, volumes, working_dir, environment, network_disabled)
     elif normalized_framework == 'singularity' or normalized_framework == "apptainer":
@@ -345,6 +370,61 @@ def run_container_docker(container: str, command: List[str], volumes: List[Tuple
     return out
 
 
+def _resolve_singularity_image(container: str, config: ProcessedContainerSettings):
+    """
+    Determine the image that apptainer/singularity should run.
+
+    Returns a path or URI suitable for Client.execute() or the profiling command.
+    The four cases are:
+      1. unpack + local .sif   --> unpack the .sif into a sandbox, return sandbox path
+      2. unpack + registry     --> pull .sif from registry, unpack into sandbox, return sandbox path
+      3. local .sif, no unpack --> return the .sif path directly
+      4. registry, no unpack   --> return "docker://<container>" so apptainer pulls at runtime
+    """
+    from spython.main import Client
+
+    image_override = getattr(config, 'image_override', None)
+    is_local_sif = image_override and image_override.endswith('.sif')
+
+    if config.unpack_singularity:
+        unpacked_dir = Path("unpacked")
+        unpacked_dir.mkdir(exist_ok=True)
+
+        if is_local_sif:
+            # Use pre-built .sif directly, skip pulling from registry
+            image_path = image_override
+            base_cont = Path(image_override).stem
+        else:
+            # The incoming image string is of the format <repository>/<owner>/<image name>:<tag> e.g.
+            # hub.docker.com/reedcompbio/spras:latest
+            # Here we first produce a .sif image using the image name and tag (base_cont)
+            # and then expand that image into a sandbox directory. For example,
+            # hub.docker.com/reedcompbio/spras:latest --> spras_latest.sif --> ./spras_latest/
+            path_elements = container.split("/")
+            base_cont = path_elements[-1]
+            base_cont = base_cont.replace(":", "_").split(":")[0]
+            sif_file = base_cont + ".sif"
+
+            # Adding 'docker://' to the container indicates this is a Docker image Singularity must convert
+            image_path = Client.pull('docker://' + container, name=str(unpacked_dir / sif_file))
+
+        base_cont_path = unpacked_dir / Path(base_cont)
+
+        # Check whether the directory for base_cont_path already exists. When running concurrent jobs, it's possible
+        # something else has already pulled/unpacked the container.
+        # Here, we expand the sif image from `image_path` to a directory indicated by `base_cont_path`
+        if not base_cont_path.exists():
+            Client.build(recipe=image_path, image=str(base_cont_path), sandbox=True, sudo=False)
+        return base_cont_path  # sandbox directory
+
+    if is_local_sif:
+        # Local .sif without unpacking — use directly
+        return image_override
+
+    # No override, no unpacking — apptainer pulls and converts the Docker image at runtime
+    return "docker://" + container
+
+
 def run_container_singularity(container: str, command: List[str], volumes: List[Tuple[PurePath, PurePath]], working_dir: str, out_dir: str, config: ProcessedContainerSettings, environment: Optional[dict[str, str]] = None):
     """
     Runs a command in the container using Singularity.
@@ -384,39 +464,8 @@ def run_container_singularity(container: str, command: List[str], volumes: List[
     # https://docs.sylabs.io/guides/3.7/user-guide/environment_and_metadata.html#env-option
     singularity_options.extend(['--env', ",".join(env_to_items(environment))])
 
-    # Handle unpacking singularity image if needed. Potentially needed for running nested unprivileged containers
-    expanded_image = None
-    if config.unpack_singularity:
-        # The incoming image string is of the format <repository>/<owner>/<image name>:<tag> e.g.
-        # hub.docker.com/reedcompbio/spras:latest
-        # Here we first produce a .sif image using the image name and tag (base_cont)
-        # and then expand that image into a sandbox directory. For example,
-        # hub.docker.com/reedcompbio/spras:latest --> spras_latest.sif --> ./spras_latest/
-        path_elements = container.split("/")
-        base_cont = path_elements[-1]
-        base_cont = base_cont.replace(":", "_").split(":")[0]
-        sif_file = base_cont + ".sif"
+    image_to_run = _resolve_singularity_image(container, config)
 
-        # To allow caching unpacked singularity images without polluting git on local runs,
-        # we move all of the unpacked image files into a `.gitignore`d folder.
-        unpacked_dir = Path("unpacked")
-        unpacked_dir.mkdir(exist_ok=True)
-
-        # Adding 'docker://' to the container indicates this is a Docker image Singularity must convert
-        image_path = Client.pull('docker://' + container, name=str(unpacked_dir / sif_file))
-
-        base_cont_path = unpacked_dir / Path(base_cont)
-
-        # Check whether the directory for base_cont_path already exists. When running concurrent jobs, it's possible
-        # something else has already pulled/unpacked the container.
-        # Here, we expand the sif image from `image_path` to a directory indicated by `base_cont_path`
-        if not base_cont_path.exists():
-            Client.build(recipe=image_path, image=str(base_cont_path), sandbox=True, sudo=False)
-        expanded_image = base_cont_path  # This is the sandbox directory
-
-    # If not using the expanded sandbox image, we still need to prepend the docker:// prefix
-    # so apptainer knows to pull and convert the image format from docker to apptainer.
-    image_to_run = expanded_image if expanded_image else "docker://" + container
     if config.enable_profiling:
         # We won't end up using the spython client if profiling is enabled because
         # we need to run everything manually to set up the cgroup
