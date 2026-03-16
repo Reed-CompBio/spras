@@ -80,6 +80,8 @@ class Config:
         self.analysis_include_summary = None
         # A Boolean specifying whether to run the Cytoscape analysis
         self.analysis_include_cytoscape = None
+        # A Boolean specifying whether to run the visjs analysis
+        self.analysis_include_visjs = None
         # A Boolean specifying whether to run the ML analysis
         self.analysis_include_ml = None
         # A Boolean specifying whether to run the Evaluation analysis
@@ -217,6 +219,7 @@ class Config:
 
         self.analysis_include_summary = raw_config.analysis.summary.include
         self.analysis_include_cytoscape = raw_config.analysis.cytoscape.include
+        self.analysis_include_visjs = raw_config.analysis.visjs.include
         self.analysis_include_ml = raw_config.analysis.ml.include
         self.analysis_include_evaluation = raw_config.analysis.evaluation.include
 
