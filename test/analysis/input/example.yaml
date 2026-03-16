@@ -48,18 +48,3 @@ gold_standards:
 reconstruction_settings:
   locations:
     reconstruction_dir: "test/analysis/input/run/example"
-
-analysis:
-  summary:
-    include: false
-  cytoscape:
-    include: false
-  ml:
-    include: false
-    aggregate_per_algorithm: true
-    components: 2
-    labels: true
-    linkage: 'ward'
-    metric: 'euclidean'
-  evaluation:
-    include: false
