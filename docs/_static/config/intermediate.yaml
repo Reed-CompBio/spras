@@ -1,9 +1,10 @@
 hash_length: 7
-container_framework: docker
-unpack_singularity: false
-container_registry:
-  base_url: docker.io
-  owner: reedcompbio
+containers:
+  framework: docker
+  unpack_singularity: false
+  registry:
+    base_url: docker.io
+    owner: reedcompbio
 
 # Each algorithm has an 'include' parameter. By toggling 'include' to true/false the user can change
 # which algorithms are run in a given experiment.
@@ -22,15 +23,15 @@ container_registry:
 
 algorithms:
   - name: "pathlinker"
-    params:
-      include: true
+    include: true
+    runs:
       run1:
         k: 1
       run2:
         k: [10, 100]
   - name: omicsintegrator1
-    params:
-      include: true
+    include: true
+    runs:
       run1:
         b: [0.55, 2, 10]
         d: 10
@@ -39,8 +40,8 @@ algorithms:
         w: 0.1
         mu: 0.008
   - name: omicsintegrator2
-    params:
-      include: true
+    include: true
+    runs:
       run1:
         b: 4
         g: 0
@@ -48,24 +49,23 @@ algorithms:
         b: 2
         g: 3
   - name: meo
-    params:
-      include: true
+    include: true
+    runs:
       run1:
-        local_search: ["Yes", "No"]
+        local_search: [true, false]
         max_path_length: [2, 3]
         rand_restarts: 10
   - name: allpairs
-    params:
-      include: true
+    include: true
   - name: domino
-    params:
-      include: true
+    include: true
+    runs:
       run1:
         slice_threshold: 0.3
         module_threshold: 0.05
   - name: mincostflow
-    params:
-      include: true
+    include: true
+    runs:
       run1:
         capacity: 15
         flow: 80
@@ -76,14 +76,14 @@ algorithms:
         capacity: 5
         flow: 60
   - name: "strwr"
-    params:
-      include: true
+    include: true
+    runs:
       run1:
         alpha: [0.85]
         threshold: [100, 200]
   - name: "rwr"
-    params:
-      include: true
+    include: true
+    runs:
       run1:
         alpha: [0.85]
         threshold: [100, 200]
