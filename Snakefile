@@ -209,8 +209,9 @@ checkpoint prepare_input:
         # Use the algorithm's generate_inputs function to load the merged dataset, extract the relevant columns,
         # and write the output files specified by required_inputs
         # The filename_map provides the output file path for each required input file type
-        filename_map = {input_type: SEP.join([out_dir, 'prepared', f'{wildcards.dataset}-{wildcards.algorithm}-inputs', f'{input_type}.txt']) for input_type in runner.get_required_inputs(detach_spras_revision(_config.config.immutable_files, wildcards.algorithm))}
-        runner.prepare_inputs(detach_spras_revision(_config.config.immutable_files, wildcards.algorithm), input.dataset_file, filename_map)
+        algorithm = detach_spras_revision(_config.config.immutable_files, wildcards.algorithm)
+        filename_map = {input_type: SEP.join([out_dir, 'prepared', f'{wildcards.dataset}-{wildcards.algorithm}-inputs', f'{input_type}.txt']) for input_type in runner.get_required_inputs(algorithm)}
+        runner.prepare_inputs(algorithm, input.dataset_file, filename_map)
 
 # Collect the prepared input files from the specified directory
 # If the directory does not exist for this dataset-algorithm pair, the checkpoint will detect that
