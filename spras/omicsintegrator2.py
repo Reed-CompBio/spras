@@ -108,7 +108,7 @@ class OmicsIntegrator2(PRM[OmicsIntegrator2Params]):
 
     # TODO add reasonable default values
     @staticmethod
-    def run(inputs, output_file, args=None, container_settings=None):
+    def run(inputs, output_file, args=None, container_settings=None, timeout=None):
         if not container_settings: container_settings = ProcessedContainerSettings()
         if not args: args = OmicsIntegrator2Params()
         OmicsIntegrator2.validate_required_run_args(inputs)
@@ -160,6 +160,7 @@ class OmicsIntegrator2(PRM[OmicsIntegrator2Params]):
                              work_dir,
                              out_dir,
                              container_settings,
+                             timeout,
                              network_disabled=True)
 
         # TODO do we want to retain other output files?

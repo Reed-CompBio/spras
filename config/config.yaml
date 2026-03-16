@@ -102,6 +102,7 @@ algorithms:
 
   - name: "allpairs"
     include: true
+    timeout: 1d
 
   - name: "domino"
     include: true
