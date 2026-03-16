@@ -20,8 +20,8 @@ repos:
         types_or: [markdown, python, yaml]
         # Skip this Markdown file, which has an example of an input text file within it.
         exclude: input/README.md
-  - repo: https://github.com/charliermarsh/ruff-pre-commit
-    rev: 'v0.0.269'
+  - repo: https://github.com/astral-sh/ruff-pre-commit
+    rev: 'v0.15.4'
     hooks:
       - id: ruff
   - repo: https://github.com/google/yamlfmt

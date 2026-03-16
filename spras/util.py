@@ -5,13 +5,15 @@ Utility functions for pathway reconstruction
 import base64
 import hashlib
 import json
-import os
+from os import PathLike
 from pathlib import Path
-from typing import Any, Dict, Optional
+from typing import Any, Dict, Optional, Union
 
 import numpy as np
 import pandas as pd
 
+"""Represents a file that points to some location."""
+LoosePathLike = Union[str, PathLike[str]]
 
 # https://stackoverflow.com/a/57915246/7589775
 # numpy variables are not, by default, encodable by python's JSONEncoder.
@@ -56,7 +58,7 @@ def hash_params_sha1_base32(params_dict: Dict[str, Any], length: Optional[int] =
         return params_base32[:length]
 
 
-def hash_filename(filename: str | os.PathLike, length: Optional[int] = None) -> str:
+def hash_filename(filename: LoosePathLike, length: Optional[int] = None) -> str:
     """
     Hash of a filename using hash_params_sha1_base32
     @param filename: filename to hash
@@ -66,7 +68,7 @@ def hash_filename(filename: str | os.PathLike, length: Optional[int] = None) -> 
     return hash_params_sha1_base32({'filename': filename}, length)
 
 
-def make_required_dirs(path: str | os.PathLike):
+def make_required_dirs(path: LoosePathLike):
     """
     Create the directory and parent directories required before an output file can be written to the specified path.
     Existing directories will not raise an error.
@@ -84,8 +86,38 @@ def add_rank_column(df: pd.DataFrame) -> pd.DataFrame:
     df['Rank'] = 1
     return df
 
+def shrink_rank_column(df: pd.DataFrame) -> pd.DataFrame:
+    """
+    Takes the df `Rank` column (e.g. [11, 2, 4, 2, 9]),
+    sorts it ([2, 2, 4, 9, 11])
+    and removes the numeric gaps from it
+    [1, 1, 2, 3, 4].
 
-def raw_pathway_df(raw_pathway_file: str, sep: str = '\t', header: int = None) -> pd.DataFrame:
+    This will sort the original pandas dataframe by rank.
+    """
+    # We need at least one beginning value
+    if df.empty:
+        return df
+
+    df = df.sort_values(['Rank'], ascending=True, inplace=False)
+    df = df.reset_index(drop=True, inplace=False)
+    # https://stackoverflow.com/a/34856727/7589775 to update the Rank values one-by-one, we create
+    # a secondary column.
+    df['NewRank'] = int(1)
+    df['NewRank'] = df['NewRank'].astype('Int64')
+    for i in range(1, len(df)):
+        prev_rank = df.loc[i-1, 'Rank']
+        curr_rank = df.loc[i, 'Rank']
+
+        rank_inc = df.loc[i-1, 'NewRank']
+        df.loc[i, 'NewRank'] = rank_inc if prev_rank == curr_rank else (int(rank_inc) + 1)
+
+    df = df.drop(columns=['Rank'])
+    df = df.rename(columns={'NewRank': 'Rank'})
+
+    return df
+
+def raw_pathway_df(raw_pathway_file: LoosePathLike, sep: str = '\t', header: int = None) -> pd.DataFrame:
     """
     Creates dataframe from contents in raw pathway file,
     otherwise returns an empty dataframe with standard output column names
