@@ -24,7 +24,7 @@ processes that data in-code.
 In implementation, this version hash is the hash of the `RECORD
 <https://packaging.python.org/en/latest/specifications/recording-installed-packages/#the-record-file>`__ file,
 which contains hashes of all 'installed' files. When SPRAS is not installed
-in development mode (i.e. without the ``-editable`` flag), the ``RECORD`` file
+in development mode (i.e. without the ``--editable`` flag), the ``RECORD`` file
 hashes all Python source files, leading to the desired effect that
 the version hash changes when the source code changes. In development mode,
 the ``RECORD`` file does not change when source code is changed.
