@@ -13,7 +13,7 @@ During benchmarking runs, SPRAS data is uploaded to the `Open Science
 Data Federation <https://osg-htc.org/services/osdf>`__, which uses an
 immutable file structure, where files can never be deleted or rewritten.
 By default, SPRAS does not have immutable files. However, in SPRAS
-configurations, the ``osdf_immutable`` parameter can be enabled to make
+configurations, the ``immutable_files`` parameter can be enabled to make
 files fully immutable where no file with the same file name will be
 written with different data.
 
