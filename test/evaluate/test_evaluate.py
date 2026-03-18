@@ -14,6 +14,9 @@ INPUT_DIR = 'test/evaluate/input/'
 OUT_DIR = 'test/evaluate/output/'
 EXPECT_DIR = 'test/evaluate/expected/'
 GS_NODE_TABLE = pd.read_csv(INPUT_DIR + 'gs_node_table.csv', header=0)
+GS_MIXED_EDGE_TABLE  = pd.read_csv(INPUT_DIR + 'gs_mixed_edge_table.csv', names=["Interactor1", "Interactor2", "Direction"], sep="\t")
+GS_DIRECTED_EDGE_TABLE  = pd.read_csv(INPUT_DIR + 'gs_directed_edge_table.csv', names=["Interactor1", "Interactor2", "Direction"], sep="\t")
+GS_UNDIRECTED_EDGE_TABLE  = pd.read_csv(INPUT_DIR + 'gs_undirected_edge_table.csv', names=["Interactor1", "Interactor2", "Direction"], sep="\t")
 SUMMARY_FILE = INPUT_DIR + 'example_summary.txt'
 
 
@@ -82,26 +85,43 @@ class TestEvaluate:
             Evaluation.precision_and_recall_per_pathway(pr_df, output_file, output_png)
 
     def test_node_precision_recall_pca_chosen_pathway_not_provided(self):
-        output_file = Path( OUT_DIR + 'pr-per-pathway-pca-chosen-not-provided.txt')
-        output_file.unlink(missing_ok=True)
-        output_png = Path(OUT_DIR + 'pr-per-pathway-pca-chosen-not-provided.png')
-        output_png.unlink(missing_ok=True)
+        node_output_file = Path( OUT_DIR + 'pr-per-pathway-pca-chosen-not-provided_nodes.txt')
+        node_output_file.unlink(missing_ok=True)
+        node_output_png = Path(OUT_DIR + 'pr-per-pathway-pca-chosen-not-provided_nodes.png')
+        node_output_png.unlink(missing_ok=True)
+
         file_paths = []
 
         pr_df = Evaluation.node_precision_and_recall(file_paths, GS_NODE_TABLE)
-        Evaluation.precision_and_recall_pca_chosen_pathway(pr_df, output_file, output_png)
+        Evaluation.precision_and_recall_pca_chosen_pathway(pr_df, node_output_file, node_output_png)
 
-        output = pd.read_csv(output_file, sep='\t', header=0).round(8)
+        node_output = pd.read_csv(node_output_file, sep='\t', header=0).round(8)
         expected = pd.read_csv(EXPECT_DIR + 'expected-pr-pca-chosen-not-provided.txt', sep='\t',  header=0).round(8)
 
-        assert output.equals(expected)
-        assert output_png.exists()
+        assert node_output.equals(expected)
+        assert node_output_png.exists()
+
+    def test_edge_precision_recall_pca_chosen_pathway_not_provided(self):
+        edge_output_file = Path( OUT_DIR + 'pr-per-pathway-pca-chosen-not-provided_edges.txt')
+        edge_output_file.unlink(missing_ok=True)
+        edge_output_png = Path(OUT_DIR + 'pr-per-pathway-pca-chosen-not-provided_edges.png')
+        edge_output_png.unlink(missing_ok=True)
+
+        file_paths = []
+
+        pr_df = Evaluation.edge_precision_and_recall(file_paths, GS_MIXED_EDGE_TABLE, GS_DIRECTED_EDGE_TABLE, GS_UNDIRECTED_EDGE_TABLE)
+        Evaluation.precision_and_recall_pca_chosen_pathway(pr_df, edge_output_file, edge_output_png)
+        edge_output = pd.read_csv(edge_output_file, sep='\t', header=0).round(8)
+        expected = pd.read_csv(EXPECT_DIR + 'expected-pr-pca-chosen-not-provided.txt', sep='\t',  header=0).round(8)
+
+        assert edge_output.equals(expected)
+        assert edge_output_png.exists()
 
     def test_node_precision_recall_pca_chosen_pathway(self):
-        output_file = Path(OUT_DIR + 'pr-per-pathway-pca-chosen.txt')
-        output_file.unlink(missing_ok=True)
-        output_png = Path(OUT_DIR + 'pr-per-pathway-pca-chosen.png')
-        output_png.unlink(missing_ok=True)
+        node_output_file = Path(OUT_DIR + 'pr-per-pathway-pca-chosen_nodes.txt')
+        node_output_file.unlink(missing_ok=True)
+        node_output_png = Path(OUT_DIR + 'pr-per-pathway-pca-chosen_nodes.png')
+        node_output_png.unlink(missing_ok=True)
         output_coordinates = Path(OUT_DIR + 'pca-coordinates.tsv')
         output_coordinates.unlink(missing_ok=True)
 
@@ -112,16 +132,38 @@ class TestEvaluate:
         ml.pca(dataframe, OUT_DIR + 'pca.png', OUT_DIR + 'pca-variance.txt', str(output_coordinates), kde=True, remove_empty_pathways=True)
 
         pathway = Evaluation.pca_chosen_pathway([output_coordinates], SUMMARY_FILE, INPUT_DIR)
-
         pr_df = Evaluation.node_precision_and_recall(pathway, GS_NODE_TABLE)
-        Evaluation.precision_and_recall_pca_chosen_pathway(pr_df, output_file, output_png, True)
+        Evaluation.precision_and_recall_pca_chosen_pathway(pr_df, node_output_file, node_output_png, True)
 
-
-        chosen = pd.read_csv(output_file, sep='\t', header=0).round(8)
-        expected = pd.read_csv(EXPECT_DIR + 'expected-pr-per-pathway-pca-chosen.txt', sep='\t',  header=0).round(8)
+        chosen = pd.read_csv(node_output_file, sep='\t', header=0).round(8)
+        expected = pd.read_csv(EXPECT_DIR + 'expected-pr-per-pathway-pca-chosen-nodes.txt', sep='\t',  header=0).round(8)
 
         assert chosen.equals(expected)
-        assert output_png.exists()
+        assert node_output_png.exists()
+
+    def test_edge_precision_recall_pca_chosen_pathway(self):
+        edge_output_file = Path(OUT_DIR + 'pr-per-pathway-pca-chosen_edges.txt')
+        edge_output_file.unlink(missing_ok=True)
+        edge_output_png = Path(OUT_DIR + 'pr-per-pathway-pca-chosen_edges.png')
+        edge_output_png.unlink(missing_ok=True)
+        output_coordinates = Path(OUT_DIR + 'pca-coordinates.tsv')
+        output_coordinates.unlink(missing_ok=True)
+
+        file_paths = [INPUT_DIR + 'data-test-params-123/pathway.txt', INPUT_DIR + 'data-test-params-456/pathway.txt',
+                      INPUT_DIR + 'data-test-params-789/pathway.txt',  INPUT_DIR + 'data-test-params-empty/pathway.txt']
+
+        dataframe = ml.summarize_networks(file_paths)
+        ml.pca(dataframe, OUT_DIR + 'pca.png', OUT_DIR + 'pca-variance.txt', str(output_coordinates), kde=True, remove_empty_pathways=True)
+
+        pathway = Evaluation.pca_chosen_pathway([output_coordinates], SUMMARY_FILE, INPUT_DIR)
+        pr_df = Evaluation.edge_precision_and_recall(pathway, GS_MIXED_EDGE_TABLE, GS_DIRECTED_EDGE_TABLE, GS_UNDIRECTED_EDGE_TABLE)
+        Evaluation.precision_and_recall_pca_chosen_pathway(pr_df, edge_output_file, edge_output_png, True, True)
+
+        chosen = pd.read_csv(edge_output_file, sep='\t', header=0).round(8)
+        expected = pd.read_csv(EXPECT_DIR + 'expected-pr-per-pathway-pca-chosen-edges.txt', sep='\t',  header=0).round(8)
+
+        assert chosen.equals(expected)
+        assert edge_output_png.exists()
 
     def test_node_ensemble(self):
         out_path_file = Path(OUT_DIR + 'node-ensemble.csv')
