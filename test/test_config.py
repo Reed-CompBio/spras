@@ -218,6 +218,33 @@ class TestConfig:
         config.init_global(test_config)
         assert (config.config.container_settings.prefix == DEFAULT_CONTAINER_PREFIX)
 
+    def test_config_container_images(self):
+        test_config = get_test_config()
+
+        # Default: no images key --> empty dict, image_override is None
+        config.init_global(test_config)
+        assert config.config.container_settings.images == {}
+        assert config.config.container_settings.image_override is None
+
+        # Local .sif paths are stored as-is and signal HTCondor transfer via get_algorithm_image
+        test_config["containers"]["images"] = {
+            "pathlinker": "images/foo.sif",
+            "omicsintegrator1": "images/bar.sif",
+        }
+        config.init_global(test_config)
+        assert config.config.container_settings.images == {
+            "pathlinker": "images/foo.sif",
+            "omicsintegrator1": "images/bar.sif",
+        }
+        # Unconfigured algorithm → no .sif override, get_algorithm_image returns None
+        assert not config.config.container_settings.images.get("responsenet", "").endswith(".sif")
+
+        # Non .sif image reference override (e.g. pinning a different tag) is stored as-is
+        test_config["containers"]["images"] = {"pathlinker": "pathlinker:v1234"}
+        config.init_global(test_config)
+        images = config.config.container_settings.images
+        assert images.get("pathlinker") == "pathlinker:v1234"
+
     def test_error_dataset_label(self):
         test_config = get_test_config()
         error_test_dicts = [{"label": "test$"}, {"label": "@test'"}, {"label": "[test]"}, {"label": "test-test"},
