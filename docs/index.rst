@@ -57,6 +57,7 @@ methods (PRMs) to omics data.
    contributing/index
    contributing/maintain
    contributing/patching
+   contributing/design
 
 .. toctree::
    :maxdepth: 1
