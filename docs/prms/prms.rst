@@ -20,6 +20,12 @@ Pathway Reconstruction Methods
 
 .. toctree::
    :maxdepth: 1
+   :caption: DIAMOnD
+
+   diamond
+
+.. toctree::
+   :maxdepth: 1
    :caption: DOMINO
 
    domino

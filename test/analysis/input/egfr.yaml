@@ -31,12 +31,3 @@ datasets:
 reconstruction_settings:
   locations:
     reconstruction_dir: "test/analysis/input/run/egfr"
-analysis:
-  cytoscape:
-    include: false
-  summary:
-    include: false
-  ml:
-    include: false
-  evaluation:
-    include: false
