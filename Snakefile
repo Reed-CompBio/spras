@@ -2,11 +2,12 @@ import os
 from spras import runner
 import shutil
 import yaml
-from spras.dataset import Dataset
-from spras.evaluation import Evaluation
 from spras.analysis import ml, summary, cytoscape
 from spras.config.revision import detach_spras_revision
 import spras.config.config as _config
+from spras.dataset import Dataset
+from spras.evaluation import Evaluation
+from spras.statistics import from_output_pathway, statistics_computation, statistics_options
 
 # Snakemake updated the behavior in the 6.5.0 release https://github.com/snakemake/snakemake/pull/1037
 # and using the wrong separator prevents Snakemake from matching filenames to the rules that can produce them
@@ -312,18 +313,36 @@ rule viz_cytoscape:
     run:
         cytoscape.run_cytoscape(input.pathways, output.session, container_settings)
 
+# We generate new Snakemake rules for every statistic
+# to allow parallel and lazy computation of individual statistics
+for keys, values in statistics_computation.items():
+    pythonic_name = 'generate_' + '_and_'.join([key.lower().replace(' ', '_') for key in keys])
+    rule:
+        # (See https://snakemake.readthedocs.io/en/stable/snakefiles/rules.html#procedural-rule-definition)
+        name: pythonic_name
+        input: pathway_file = rules.parse_output.output.standardized_file
+        output: [SEP.join([out_dir, '{dataset}-{algorithm}-{params}', 'statistics', f'{key}.txt']) for key in keys]
+        run:
+            (Path(input.pathway_file).parent / 'statistics').mkdir(exist_ok=True)
+            graph = from_output_pathway(input.pathway_file)
+            for computed, output in zip(values(graph), output):
+                Path(output).write_text(str(computed))
 
 # Write a single summary table for all pathways for each dataset
 rule summary_table:
     input:
         # Collect all pathways generated for the dataset
         pathways = expand('{out_dir}{sep}{{dataset}}-{algorithm_params}{sep}pathway.txt', out_dir=out_dir, sep=SEP, algorithm_params=algorithms_with_params),
-        dataset_file = SEP.join([out_dir, 'dataset-{dataset}-merged.pickle'])
+        dataset_file = SEP.join([out_dir, 'dataset-{dataset}-merged.pickle']),
+        # Collect all possible options
+        statistics = expand(
+            '{out_dir}{sep}{{dataset}}-{algorithm_params}{sep}statistics{sep}{statistic}.txt',
+            out_dir=out_dir, sep=SEP, algorithm_params=algorithms_with_params, statistic=statistics_options)
     output: summary_table = SEP.join([out_dir, '{dataset}-pathway-summary.txt'])
     run:
         # Load the node table from the pickled dataset file
         node_table = Dataset.from_file(input.dataset_file).node_table
-        summary_df = summary.summarize_networks(input.pathways, node_table, algorithm_params, algorithms_with_params)
+        summary_df = summary.summarize_networks(input.pathways, node_table, algorithm_params, algorithms_with_params, input.statistics)
         summary_df.to_csv(output.summary_table, sep='\t', index=False)
 
 # Cluster the output pathways for each dataset
