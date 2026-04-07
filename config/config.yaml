@@ -62,8 +62,9 @@ containers:
   #
   # Local .sif file path (e.g., "images/pathlinker_v2.sif"):
   #   Apptainer/Singularity only. Skips pulling from registry and uses the
-  #   pre-built .sif directly. When running via HTCondor with shared-fs-usage: none,
-  #   .sif paths listed here are automatically included in htcondor_transfer_input_files.
+  #   pre-built .sif directly. When running via HTCondor with shared-fs-usage: none (set
+  #   via the spras_profile config when running SPRAS against HTCondor), .sif paths listed
+  #   here are automatically included in htcondor_transfer_input_files.
   #   Ignored with a warning if the framework is Docker.
   #
   # Example (one of each type):
