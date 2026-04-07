@@ -1,42 +1,32 @@
 import copy
+import importlib
 from typing import Any, Mapping
 
-# supported algorithm imports
-from spras.allpairs import AllPairs
-from spras.btb import BowTieBuilder
-from spras.dataset import Dataset, DatasetSchema
-from spras.diamond import DIAMOnD
-from spras.domino import DOMINO
-from spras.meo import MEO
-from spras.mincostflow import MinCostFlow
-from spras.omicsintegrator1 import OmicsIntegrator1
-from spras.omicsintegrator2 import OmicsIntegrator2
-from spras.pathlinker import PathLinker
+from spras.config.dataset import DatasetSchema
+from spras.config.util import ALGORITHM_REGISTRY, AlgorithmName
+from spras.dataset import Dataset
 from spras.prm import PRM
-from spras.responsenet import ResponseNet
-from spras.rwr import RWR
-from spras.strwr import ST_RWR
 from spras.util import LoosePathLike
 
-algorithms: dict[str, type[PRM]] = {
-    "allpairs": AllPairs,
-    "bowtiebuilder": BowTieBuilder,
-    "diamond": DIAMOnD,
-    "domino": DOMINO,
-    "meo": MEO,
-    "mincostflow": MinCostFlow,
-    "omicsintegrator1": OmicsIntegrator1,
-    "omicsintegrator2": OmicsIntegrator2,
-    "pathlinker": PathLinker,
-    "responsenet": ResponseNet,
-    "rwr": RWR,
-    "strwr": ST_RWR,
-}
+
+def _load_algorithms() -> dict[AlgorithmName, type[PRM]]:
+    """Load all algorithm classes from ALGORITHM_REGISTRY via importlib."""
+    result = {}
+    for name, (module_path, class_name) in ALGORITHM_REGISTRY.items():
+        mod = importlib.import_module(module_path)
+        result[AlgorithmName(name)] = getattr(mod, class_name)
+    return result
+
+
+# Eagerly load all algorithm classes once at import time so every call to
+# get_algorithm() is a cheap dict lookup rather than a repeated importlib call.
+algorithms = _load_algorithms()
 
 def get_algorithm(algorithm: str) -> type[PRM]:
     try:
-        return algorithms[algorithm.lower()]
-    except KeyError as exc:
+        algo_enum = AlgorithmName(algorithm)
+        return algorithms[algo_enum]
+    except (ValueError, KeyError) as exc:
         raise NotImplementedError(f'{algorithm} is not currently supported.') from exc
 
 def run(algorithm: str, inputs, output_file, args, container_settings):
