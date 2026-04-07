@@ -285,14 +285,24 @@ U``.
  Step 4: Make the Local Neighborhood wrapper accessible through SPRAS
 **********************************************************************
 
-Import the new class ``LocalNeighborhood`` in ``spras/runner.py`` and
-add it to the ``algorithms`` dictionary so the wrapper functions can be
-accessed. Add an entry for Local Neighborhood to the configuration file
-``config/config.yaml`` and set ``include: true``. As a convention,
-algorithm names are written in all lowercase without special characters.
-Local Neighborhood has no other parameters. Optionally set ``include:
-false`` for the other pathway reconstruction algorithms to make testing
-faster.
+Register the new algorithm by adding a single entry to the
+``ALGORITHM_REGISTRY`` dictionary in ``spras/config/util.py``. The entry
+maps the algorithm's lowercase name to a ``(module_path, class_name)``
+tuple that ``runner.py`` will load via ``importlib`` at startup:
+
+.. code:: python
+
+   ALGORITHM_REGISTRY: dict[str, tuple[str, str]] = {
+       ...
+       "localneighborhood": ("spras.local_neighborhood", "LocalNeighborhood"),
+   }
+
+As a convention, algorithm names are written in all lowercase without
+special characters. The same name is used as the key in the config file
+``config/config.yaml``. Add an entry for Local Neighborhood there and
+set ``include: true``. Local Neighborhood has no other parameters.
+Optionally set ``include: false`` for the other pathway reconstruction
+algorithms to make testing faster.
 
 The config file has an option ``owner`` under the
 ``containers.registry`` settings that controls which Docker Hub account
@@ -448,8 +458,10 @@ of the main SPRAS repository.
    ``required_input`` files and the ``generate_inputs``, ``run``, and
    ``parse_output`` functions
 
-#. Import the new class in ``spras/runner.py`` and add it to the
-   ``algorithms`` dictionary so the wrapper functions can be accessed
+#. Register the new algorithm in ``ALGORITHM_REGISTRY`` in
+   ``spras/config/util.py`` by adding one entry
+   ``"<name>": ("spras.<module>", "<ClassName>")``;  no changes to
+   ``spras/runner.py`` are needed
 
 #. Document the usage of the Docker wrapper and the assumptions made
    when implementing the wrapper
