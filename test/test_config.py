@@ -245,6 +245,12 @@ class TestConfig:
         images = config.config.container_settings.images
         assert images.get("pathlinker") == "pathlinker:v1234"
 
+    def test_config_container_images_invalid_algorithm(self):
+        test_config = get_test_config()
+        test_config["containers"]["images"] = {"typo_algo": "some:image"}
+        with pytest.raises(ValueError, match="Unknown algorithm name 'typo_algo'"):
+            config.init_global(test_config)
+
     def test_error_dataset_label(self):
         test_config = get_test_config()
         error_test_dicts = [{"label": "test$"}, {"label": "@test'"}, {"label": "[test]"}, {"label": "test-test"},
