@@ -50,3 +50,4 @@ html_context = {
     "github_version": "main/docs/",
 }
 html_static_path = ['_static']
+html_js_files = ['open-external-links.js']
