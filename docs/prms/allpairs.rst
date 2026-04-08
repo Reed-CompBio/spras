@@ -1,10 +1,12 @@
-All Pairs
-=========
+###########
+ All Pairs
+###########
 
-All Pairs Shortest Paths is an algorithm which, given a weighted interactome,
-will return the induced edge subnetwork of the interactome consisting
-of all of the shortest paths from every single source to every single target
-with respect to a cartesian product.
+All Pairs Shortest Paths is an algorithm which, given a weighted
+interactome, will return the induced edge subnetwork of the interactome
+consisting of all of the shortest paths from every single source to
+every single target with respect to a cartesian product.
 
-All Pairs does not take any arguments. Its source code is at https://github.com/Reed-CompBio/all-pairs-shortest-paths
-licensed under MIT.
+All Pairs does not take any arguments. Its source code is at
+https://github.com/Reed-CompBio/all-pairs-shortest-paths licensed under
+MIT.
