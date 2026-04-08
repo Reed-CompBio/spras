@@ -9,12 +9,12 @@ from spras.prm import PRM
 from spras.util import LoosePathLike
 
 
-def _load_algorithms() -> dict[AlgorithmName, type[PRM]]:
+def _load_algorithms() -> dict[str, type[PRM]]:
     """Load all algorithm classes from ALGORITHM_REGISTRY via importlib."""
     result = {}
     for name, (module_path, class_name) in ALGORITHM_REGISTRY.items():
         mod = importlib.import_module(module_path)
-        result[AlgorithmName(name)] = getattr(mod, class_name)
+        result[name] = getattr(mod, class_name)
     return result
 
 
@@ -25,7 +25,7 @@ algorithms = _load_algorithms()
 def get_algorithm(algorithm: str) -> type[PRM]:
     try:
         algo_enum = AlgorithmName(algorithm)
-        return algorithms[algo_enum]
+        return algorithms[algo_enum.value]
     except (ValueError, KeyError) as exc:
         raise NotImplementedError(f'{algorithm} is not currently supported.') from exc
 
