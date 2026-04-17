@@ -9,7 +9,7 @@ from spras.meo import MEO, MEOParams, write_properties
 
 config.init_from_file("config/config.yaml")
 
-TEST_DIR = 'test/MEO/'
+TEST_DIR = 'test/algorithms/MEO/'
 OUT_FILE = TEST_DIR + 'output/edges.txt'
 
 
