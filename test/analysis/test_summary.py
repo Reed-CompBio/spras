@@ -32,7 +32,7 @@ def snakemake_output(request):
     param = request.param
     subprocess.run(["snakemake", "--cores", "1", "--configfile", f"test/analysis/input/{param}.yaml"])
     yield param # this runs the test itself: once this is passed, we go to test cleanup.
-    shutil.rmtree(f"test/analysis/input/run/{param}")
+    # shutil.rmtree(f"test/analysis/input/run/{param}")
 
 class TestSummary:
     @classmethod
@@ -56,11 +56,12 @@ class TestSummary:
         algorithms_with_params = [f'{algorithm}-params-{params_hash}' for algorithm, param_combos in
                                   algorithm_params.items() for params_hash in param_combos.keys()]
 
-        example_network_files = (INPUT_DIR / "run" / snakemake_output).rglob("pathway.txt")
+        network_files = (INPUT_DIR / "run" / snakemake_output).rglob("pathway.txt")
+        statistics_files = (INPUT_DIR / "run" / snakemake_output).rglob("**/statistics/**")
 
         out_path = Path(OUT_DIR, f"test_{snakemake_output}_summary.txt")
         out_path.unlink(missing_ok=True)
-        summarize_out = summarize_networks(example_network_files, example_node_table, algorithm_params,
+        summarize_out = summarize_networks(network_files, example_node_table, algorithm_params,
                                                algorithms_with_params)
         # We do some post-processing to ensure that we get a stable summarize_out, since the attached hash
         # is subject to variation (especially in testing) whenever the SPRAS commit revision gets changed

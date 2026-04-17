@@ -1,5 +1,6 @@
 import ast
 import json
+import os
 from pathlib import Path
 from typing import Iterable
 
@@ -9,7 +10,7 @@ from spras.statistics import from_output_pathway
 
 
 def summarize_networks(file_paths: Iterable[Path], node_table: pd.DataFrame, algo_params: dict[str, dict],
-                       algo_with_params: list[str], statistics_files: list) -> pd.DataFrame:
+                       algo_with_params: list[str], statistics_files: list[str | os.PathLike]) -> pd.DataFrame:
     """
     Generate a table that aggregates summary information about networks in file_paths, including which nodes are present
     in node_table columns. Network directionality is ignored and all edges are treated as undirected. The order of the
@@ -90,6 +91,3 @@ def summarize_networks(file_paths: Iterable[Path], node_table: pd.DataFrame, alg
     )
 
     return nw_info
-
-
-# TODO: redo the above code to work on mixed graphs

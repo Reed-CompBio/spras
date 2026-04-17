@@ -31,3 +31,6 @@ datasets:
 reconstruction_settings:
   locations:
     reconstruction_dir: "test/analysis/input/run/egfr"
+analysis:
+  summary:
+    include: true

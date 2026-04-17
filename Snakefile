@@ -334,7 +334,7 @@ rule summary_table:
         # Collect all pathways generated for the dataset
         pathways = expand('{out_dir}{sep}{{dataset}}-{algorithm_params}{sep}pathway.txt', out_dir=out_dir, sep=SEP, algorithm_params=algorithms_with_params),
         dataset_file = SEP.join([out_dir, 'dataset-{dataset}-merged.pickle']),
-        # Collect all possible options
+        # Collect all possible statistics into a dictionary
         statistics = expand(
             '{out_dir}{sep}{{dataset}}-{algorithm_params}{sep}statistics{sep}{statistic}.txt',
             out_dir=out_dir, sep=SEP, algorithm_params=algorithms_with_params, statistic=statistics_options)
