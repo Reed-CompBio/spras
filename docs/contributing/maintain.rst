@@ -2,9 +2,9 @@
  Maintaining SPRAS
 ###################
 
-************************
- precommit dependencies
-************************
+*************************
+ pre-commit dependencies
+*************************
 
 The ``yamlfmt`` tool requires `Go <https://go.dev/doc/install>`__, which
 must be installed manually. The ``rstfmt`` format tools must be able to
