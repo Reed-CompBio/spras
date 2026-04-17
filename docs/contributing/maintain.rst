@@ -2,12 +2,14 @@
  Maintaining SPRAS
 ###################
 
-***************
- Go dependency
-***************
+************************
+ precommit dependencies
+************************
 
 The ``yamlfmt`` tool requires `Go <https://go.dev/doc/install>`__, which
-must be installed manually.
+must be installed manually. The ``rstfmt`` format tools must be able to
+read UTF-8 encoded text, which requires manually setting the environment
+variable ``PYTHONUTF8`` to ``1`` on Windows.
 
 ********************
  Naming conventions
