@@ -100,6 +100,8 @@ datasets: # TODO update this based on the dataset that I set up
     # Relative path from the spras directory where these files live
     data_dir: "input"
 
+# TODO: add the gold standard for egfr tutorial; already in SPRAS
+
 reconstruction_settings:
 
   # Set where everything is saved
@@ -111,9 +113,10 @@ analysis:
   ml:
     # ml analysis per dataset
     include: false # set to true for step 3
+    # TODO: can I remove some of these arguments?
     # adds ml analysis per algorithm output
     # only runs for algorithms with multiple parameter combinations chosen
-    aggregate_per_algorithm: false
+    aggregate_per_algorithm: false # set to true for step 4??? Look at todo below
     # specify how many principal components to calculate
     components: 2
     # boolean to show the labels on the pca graph
@@ -127,6 +130,16 @@ analysis:
     # the coordinates of the KDE maximum (kde_peak) are also saved to the PCA coordinates output file.
     # KDE needs to be run in order to select a parameter combination with PCA because the maximum kernel density is used
     # to pick the 'best' parameter combination.
-    kde: false
+    kde: false # set to true for step 4
+    # TODO: double check that if I run step 3 without kde, then set it true in step 4 that pca is rerun
     # removes empty pathways from consideration in ml analysis (pca only)
-    remove_empty_pathways: false
+    remove_empty_pathways: false # set to true for step 4
+    # TODO: double check why this was needed for pca
+
+  evaluation:
+    # evaluation per dataset-goldstandard pair
+    # evaluation will not run unless ml include is set to true
+    include: false # set to true for step 4
+    # adds evaluation per algorithm per dataset-goldstandard pair
+    # evaluation per algorithm will not run unless ml include and ml aggregate_per_algorithm are set to true
+    aggregate_per_algorithm: false # set to true for step 4 ???  TODO: decide if it is better to demonstrate what it looks like per algorithm
