@@ -308,7 +308,7 @@ rule reconstruct:
             runner.run(wildcards.algorithm, inputs, output.pathway_file, algorithm_params, container_settings, params.timeout)
             Path(output.resource_info).write_text(json.dumps({"status": "success"}))
         except TimeoutError as err:
-            # We don't raise the error here (and use `--keep-going` to avoid re-running this rule [or others!] unnecessarily.)
+            # We don't raise the error here (analogous to `--keep-going`, except we avoid unnecessarily re-running this rule.)
             Path(output.resource_info).write_text(json.dumps({"status": "error", "type": "timeout", "duration": params.timeout}))
             # and we touch pathway_file still: Snakemake doesn't have optional files, so
             # we'll filter the ones that didn't time out by passing around empty files.
