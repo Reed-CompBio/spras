@@ -50,6 +50,13 @@ Conda environment and install the SPRAS python package:
    The last command is a one-time installation of the SPRAS package into
    the environment.
 
+# The problem was that the participant downloaded the beginner config
+file into the wrong directory and then the snakemake command failed #
+They put it into the spras directory in the conda environment that was
+created after the spras package is installed, may need to watch for that
+# add a note about the folder called spras within the larger spras
+folder
+
 0.3 Test the installation
 =========================
 
@@ -74,6 +81,9 @@ Launch Docker Desktop and wait until it says "Docker is running".
    reconstruction algorithms and certain post-analysis steps within
    isolated containers. These containers include all the necessary
    dependencies to run each algorithm or post analysis.
+
+# Confusion about why Docker is followed by conda. Need to explain the
+interaction between these pieces. # add this as a note
 
 *****************************
  Step 1: Configuration files
