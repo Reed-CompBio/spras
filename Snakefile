@@ -309,9 +309,10 @@ rule reconstruct:
             Path(output.resource_info).write_text(json.dumps({"status": "success"}))
         except TimeoutError as err:
             # We don't raise the error here (analogous to `--keep-going`, except we avoid unnecessarily re-running this rule.)
-            Path(output.resource_info).write_text(json.dumps({"status": "error", "type": "timeout", "duration": params.timeout}))
-            # and we touch pathway_file still: Snakemake doesn't have optional files, so
-            # we'll filter the ones that didn't time out by passing around empty files.
+            mark_error(output.resource_info, type="timeout", duration=params.timeout)
+            # and we touch pathway_file still: Snakemake doesn't have optional files, so we output a 'resource info' file,
+            # which contains the status (success/failure) of specific Snakemake jobs.
+            # We filter for the successful files (such as ones that didn't time out) with the `filter_successful` fucntion.  
             Path(output.pathway_file).touch()
 
 # Original pathway reconstruction output to universal output
@@ -319,12 +320,13 @@ rule reconstruct:
 rule parse_output:
     input:
         raw_file = rules.reconstruct.output.pathway_file,
+        
+        # We propagate up the resource_info error if it exists.
         resource_info = rules.reconstruct.output.resource_info,
         dataset_file = SEP.join([out_dir, 'dataset-{dataset}-merged.pickle'])
     output: standardized_file = SEP.join([out_dir, '{dataset}-{algorithm}-{params}', 'pathway.txt'])
     run:
-        resource_info = json.loads(Path(input.resource_info).read_bytes())
-        if resource_info["status"] != "success":
+        if is_error(input.resource_info):
             mark_error(output.standardized_file)
             return
 
