@@ -314,7 +314,7 @@ rule reconstruct:
             mark_error(output.resource_info, type="timeout", duration=params.timeout)
             # and we touch pathway_file still: Snakemake doesn't have optional files, so we output a 'resource info' file,
             # which contains the status (success/failure) of specific Snakemake jobs.
-            # We filter for the successful files (such as ones that didn't time out) with the `filter_successful` fucntion.  
+            # We filter for the successful files (such as ones that didn't time out) with the `filter_successful` function.  
             Path(output.pathway_file).touch()
 
 # Original pathway reconstruction output to universal output
