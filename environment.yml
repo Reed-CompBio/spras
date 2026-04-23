@@ -33,6 +33,8 @@ dependencies:
   - pre-commit=4.2.0
   - pytest=8.4.1
   - pytest-split=0.10.0
+  - sphinx=7.4.7
+  - sphinx-rtd-theme=2.0.0
 
   - pip:
       - dsub==0.4.13

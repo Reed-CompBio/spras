@@ -51,11 +51,6 @@ class DummyMode(CaseInsensitiveEnum):
     file = 'file'
     "connect the dummy node to a specific list of nodes provided in a file"
 
-    # To make sure that DummyMode prints as `terminals`, etc.. in JSON dictionaries
-    # (since they use object representation internally.)
-    def __repr__(self) -> str:
-        return f"'{self.name}'"
-
 class OmicsIntegrator1Params(BaseModel):
     dummy_mode: Optional[DummyMode] = None
     mu_squared: bool = False

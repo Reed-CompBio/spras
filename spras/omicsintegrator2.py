@@ -16,8 +16,11 @@ __all__ = ['DummyMode', 'OmicsIntegrator2', 'OmicsIntegrator2Params']
 
 class DummyMode(CaseInsensitiveEnum):
     terminals = 'terminals'
+    "Connect to all terminals."
     others = 'others'
+    "Connect to all nodes except for terminals."
     all = 'all'
+    "Connect to all nodes in the interactome."
 
 class OmicsIntegrator2Params(BaseModel):
     w: float = 5
@@ -29,22 +32,17 @@ class OmicsIntegrator2Params(BaseModel):
     g: float = 3
     "Gamma: multiplicative edge penalty from degree of endpoints"
 
-    noise: Optional[float] = None
+    noise: float = 0.1
     "Standard Deviation of the gaussian noise added to edges in Noisy Edges Randomizations."
 
-    noisy_edges: Optional[int] = None
+    noisy_edges: int = 0
     "An integer specifying how many times to add noise to the given edge values and re-run."
 
-    random_terminals: Optional[int] = None
+    random_terminals: int = 0
     "An integer specifying how many times to apply your given prizes to random nodes in the interactome and re-run"
 
-    dummy_mode: Optional[DummyMode] = None
-    """
-    Tells the program which nodes in the interactome to connect the dummy node to. (default: terminals)
-        "terminals" = connect to all terminals
-        "others" = connect to all nodes except for terminals
-        "all" = connect to all nodes in the interactome.
-    """
+    dummy_mode: DummyMode = DummyMode.terminals
+    "Tells the program which nodes in the interactome to connect the dummy node to."
 
     seed: Optional[int] = None
     "The random seed to use for this run."
@@ -106,7 +104,6 @@ class OmicsIntegrator2(PRM[OmicsIntegrator2Params]):
         edges_df.to_csv(filename_map['edges'], sep='\t', index=False, columns=['Interactor1', 'Interactor2', 'cost'],
                         header=['protein1', 'protein2', 'cost'])
 
-    # TODO add reasonable default values
     @staticmethod
     def run(inputs, output_file, args=None, container_settings=None, timeout=None):
         if not container_settings: container_settings = ProcessedContainerSettings()
@@ -196,7 +193,11 @@ class OmicsIntegrator2(PRM[OmicsIntegrator2Params]):
                 df = add_rank_column(df)
                 df = reinsert_direction_col_undirected(df)
                 df.columns = ['Node1', 'Node2', 'Rank', "Direction"]
-            else: # corrupted data
+            else:
+                # We get protein1, protein2, and cost if no edges were inside the solution (as networkx
+                # does not have any edges in the solution to loop over, and therefore never makes the column)
+                # and we get protein1, protein2 if no edges were present in the augmented forest at all:
+                # both of these outcomes should be treated as an empty network.
                 df = pd.DataFrame(columns=['Node1', 'Node2', 'Rank', 'Direction'])
 
             df, has_duplicates = duplicate_edges(df)

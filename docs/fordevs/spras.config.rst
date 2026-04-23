@@ -1,35 +1,41 @@
-spras.config package
-====================
+######################
+ spras.config package
+######################
 
-Submodules
-----------
+************
+ Submodules
+************
 
-spras.config.config module
---------------------------
+****************************
+ spras.config.config module
+****************************
 
 .. automodule:: spras.config.config
    :members:
    :undoc-members:
    :show-inheritance:
 
-spras.config.schema module
---------------------------
+****************************
+ spras.config.schema module
+****************************
 
 .. automodule:: spras.config.schema
    :members:
    :undoc-members:
    :show-inheritance:
 
-spras.config.util module
-------------------------
+**************************
+ spras.config.util module
+**************************
 
 .. automodule:: spras.config.util
    :members:
    :undoc-members:
    :show-inheritance:
 
-Module contents
----------------
+*****************
+ Module contents
+*****************
 
 .. automodule:: spras.config
    :members:
