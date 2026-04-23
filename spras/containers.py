@@ -347,6 +347,9 @@ def run_container_docker(
 
     bind_paths = [f'{prepare_path_docker(src)}:{dest}' for src, dest in volumes]
 
+    # We detach the container, allowing dockerpy to return a
+    # `Container` object for our further use. This is currently only
+    # to set docker-based container timeouts.
     container_obj = client.containers.run(
         container,
         command,
