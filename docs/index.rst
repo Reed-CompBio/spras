@@ -37,6 +37,7 @@ methods (PRMs) to omics data.
 
    output
    htcondor
+   timeout
 
 .. toctree::
    :maxdepth: 1
