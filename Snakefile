@@ -307,7 +307,7 @@ rule reconstruct:
         if '_spras_run_name' in algorithm_params:
             algorithm_params.pop('_spras_run_name')
         try:
-            runner.run(detach_spras_revision(_config.config.immutable_files, wildcards.algorithm), inputs, output.pathway_file, params, container_settings, params.timeout)
+            runner.run(detach_spras_revision(_config.config.immutable_files, wildcards.algorithm), inputs, output.pathway_file, algorithm_params, container_settings, params.timeout)
             Path(output.resource_info).write_text(json.dumps({"status": "success"}))
         except TimeoutError as err:
             # We don't raise the error here (analogous to `--keep-going`, except we avoid unnecessarily re-running this rule.)
