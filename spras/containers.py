@@ -499,6 +499,7 @@ def run_container_singularity(
     # If not using the expanded sandbox image, we still need to prepend the docker:// prefix
     # so apptainer knows to pull and convert the image format from docker to apptainer.
     image_to_run = expanded_image if expanded_image else "docker://" + container
+
     # We won't end up using the spython client if profiling or timeout is enabled because
     # we need to run everything manually to set up the cgroup and add the timeout command as a prefix.
     # Build the apptainer run command, which gets passed to the cgroup wrapper script
@@ -520,7 +521,7 @@ def run_container_singularity(
         cmd = [wrapper, my_cgroup] + cmd
     if timeout is not None:
         cmd = ["timeout", f"{timeout}s"] + cmd
-    proc = subprocess.run(cmd, capture_output=True, text=True, stderr=subprocess.STDOUT)
+    proc = subprocess.run(cmd, text=True, stdout=subprocess.PIPE, stderr=subprocess.STDOUT)
 
     # As per unix `timeout`, this is the status if the command times out and --preserve-status is not initially specified
     # (where the latter above holds).
