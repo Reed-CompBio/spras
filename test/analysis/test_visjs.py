@@ -1,4 +1,3 @@
-import filecmp
 from pathlib import Path
 
 from spras.analysis.visjs import visualize
