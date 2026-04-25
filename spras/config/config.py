@@ -13,6 +13,7 @@ will grab the top level registry configuration option as it appears in the confi
 """
 
 import copy as copy
+import functools
 import itertools as it
 import warnings
 from pathlib import Path
@@ -22,6 +23,7 @@ import numpy as np
 import yaml
 
 from spras.config.container_schema import ProcessedContainerSettings
+from spras.config.revision import attach_spras_revision, spras_revision
 from spras.config.schema import DatasetSchema, RawConfig
 from spras.util import LoosePathLike, NpHashEncoder, hash_params_sha1_base32
 
@@ -59,8 +61,6 @@ class Config:
         self.hash_length = parsed_raw_config.hash_length
         # Container settings used by PRMs.
         self.container_settings = ProcessedContainerSettings.from_container_settings(parsed_raw_config.containers, self.hash_length)
-        # The list of algorithms to run in the workflow. Each is a dict with 'name' as an expected key.
-        self.algorithms = None
         # A nested dict mapping algorithm names to dicts that map parameter hashes to parameter combinations.
         # Only includes algorithms that are set to be run with 'include: true'.
         self.algorithm_params: dict[str, dict[str, Any]] = dict()
@@ -88,6 +88,8 @@ class Config:
         self.analysis_include_ml_aggregate_algo = None
         # A Boolean specifying whether to run the evaluation per algorithm analysis
         self.analysis_include_evaluation_aggregate_algo = None
+        # Specifies whether the files should be OSDF-immutable (i.e. the file names change when the file itself changes)
+        self.immutable_files = parsed_raw_config.immutable_files
 
         self.process_config(parsed_raw_config)
 
@@ -117,6 +119,12 @@ class Config:
         # Currently assumes all datasets have a label and the labels are unique
         # When Snakemake parses the config file it loads the datasets as OrderedDicts not dicts
         # Convert to dicts to simplify the yaml logging
+
+        for dataset in raw_config.datasets:
+            dataset.label = attach_spras_revision(self.immutable_files, dataset.label)
+        for gold_standard in raw_config.gold_standards:
+            gold_standard.label = attach_spras_revision(self.immutable_files, gold_standard.label)
+
         for dataset in raw_config.datasets:
             label = dataset.label
             if label.lower() in [key.lower() for key in self.datasets.keys()]:
@@ -130,8 +138,14 @@ class Config:
         dataset_labels = set(self.datasets.keys())
         gold_standard_dataset_labels = {dataset_label for value in self.gold_standards.values() for dataset_label in value['dataset_labels']}
         for label in gold_standard_dataset_labels:
-            if label not in dataset_labels:
+            if attach_spras_revision(self.immutable_files, label) not in dataset_labels:
                 raise ValueError(f"Dataset label '{label}' provided in gold standards does not exist in the existing dataset labels.")
+        # We attach the SPRAS revision to the individual dataset labels afterwards for a cleaner error message above.
+        for key, gold_standard in self.gold_standards.items():
+            self.gold_standards[key]["dataset_labels"] = map(
+                functools.partial(attach_spras_revision, self.immutable_files),
+                gold_standard["dataset_labels"]
+            )
 
         # Code snipped from Snakefile that may be useful for assigning default labels
         # dataset_labels = [dataset.get('label', f'dataset{index}') for index, dataset in enumerate(datasets)]
@@ -148,8 +162,10 @@ class Config:
         """
         prior_params_hashes = set()
         self.algorithm_params = dict()
-        self.algorithms = raw_config.algorithms
-        for alg in self.algorithms:
+        # We copy raw_config.algorithms to avoid mutating the original config
+        # when we attach the SPRAS revision to algorithm names later.
+        for alg in raw_config.algorithms[:]:
+            alg.name = attach_spras_revision(self.immutable_files, alg.name)
             if alg.include:
                 # This dict maps from parameter combinations hashes to parameter combination dictionaries
                 self.algorithm_params[alg.name] = dict()
@@ -187,7 +203,11 @@ class Config:
                             run_dict[param] = float(value)
                         if isinstance(value, np.ndarray):
                             run_dict[param] = value.tolist()
-                    params_hash = hash_params_sha1_base32(run_dict, self.hash_length, cls=NpHashEncoder)
+                    hash_run_dict = copy.deepcopy(run_dict)
+                    if self.immutable_files:
+                        # Incorporates the `spras_revision` into the hash
+                        hash_run_dict["_spras_rev"] = spras_revision()
+                    params_hash = hash_params_sha1_base32(hash_run_dict, self.hash_length, cls=NpHashEncoder)
                     if params_hash in prior_params_hashes:
                         raise ValueError(f'Parameter hash collision detected. Increase the hash_length in the config file '
                                         f'(current length {self.hash_length}).')
