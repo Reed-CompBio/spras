@@ -4,9 +4,10 @@ from pathlib import Path
 
 from spras import runner
 from spras.config.config import Config
+from spras.util import extend_filename
 
-OUTDIR = "test/generate-inputs/output/"
-EXPDIR = "test/generate-inputs/expected/"
+OUTDIR = Path("test", "generate-inputs", "output")
+EXPDIR = Path("test", "generate-inputs", "expected")
 
 algo_exp_file = {
     'mincostflow': 'edges',
@@ -14,7 +15,7 @@ algo_exp_file = {
     'omicsintegrator1': 'edges',
     'omicsintegrator2': 'edges',
     'diamond': 'network',
-    'domino': 'network',
+    'domino': 'network.sif',
     'pathlinker': 'network',
     'allpairs': 'network',
     'bowtiebuilder': 'edges',
@@ -30,7 +31,7 @@ class TestGenerateInputs:
         """
         Create the expected output directory
         """
-        Path(OUTDIR).mkdir(parents=True, exist_ok=True)
+        OUTDIR.mkdir(parents=True, exist_ok=True)
 
     def test_prepare_inputs_networks(self):
         config_loc = Path("test", "generate-inputs", "inputs", "test_config.yaml")
@@ -44,12 +45,18 @@ class TestGenerateInputs:
 
         for algo in algo_exp_file.keys():
             inputs = runner.get_required_inputs(algo)
-            filename_map = {input_str: os.path.join("test", "generate-inputs", "output", f"{algo}-{input_str}.txt")
+            filename_map = {input_str: os.path.join("test", "generate-inputs", "output", f"{algo}-{extend_filename(input_str)}")
                             for input_str in inputs}
+
+            exp_file_name = extend_filename(algo_exp_file[algo])
+            out_file = (OUTDIR / exp_file_name).with_stem(f"{algo}-{Path(exp_file_name).stem}")
+            expected_file = (EXPDIR / exp_file_name).with_stem(f"{algo}-{Path(exp_file_name).stem}-expected")
+
+            out_file.unlink(missing_ok=True)
+
             runner.prepare_inputs(algo, test_file, filename_map)
-            exp_file_name = algo_exp_file[algo]
-            assert filecmp.cmp(OUTDIR + f"{algo}-{exp_file_name}.txt", EXPDIR + f"{algo}-{exp_file_name}-expected.txt",
-                            shallow=False)
+
+            assert filecmp.cmp(out_file, expected_file, shallow=False)
 
             for file in filename_map.values():
                 assert Path(file).exists()
