@@ -321,11 +321,9 @@ rule reconstruct:
 # Use PRRunner as a wrapper to call the algorithm-specific parse_output
 rule parse_output:
     input:
-        raw_file = rules.reconstruct.output.pathway_file,
-        
         # We propagate up the resource_info error if it exists.
         resource_info = rules.reconstruct.output.resource_info,
-        raw_file = SEP.join([out_dir, '{dataset}-{algorithm}-{params}', 'raw-pathway.txt']),
+        raw_file = rules.reconstruct.output.pathway_file,
         dataset_file = SEP.join([out_dir, 'dataset-{dataset}-merged.pickle'])
     output: standardized_file = SEP.join([out_dir, '{dataset}-{algorithm}-{params}', 'pathway.txt'])
     run:

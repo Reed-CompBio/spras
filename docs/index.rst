@@ -63,7 +63,6 @@ reconstruction methods (PRMs) to omics data.
    contributing/patching
    contributing/design
 
-
 .. toctree::
    :maxdepth: 1
    :caption: Internal Designs
