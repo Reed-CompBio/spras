@@ -8,54 +8,53 @@ containers:
 
 algorithms:
   - name: "pathlinker"
-    params:
-      include: true
+    include: true
+    runs:
       run1:
         k: range(100,201,100)
 
   - name: "omicsintegrator1"
-    params:
-      include: true
+    include: true
+    runs:
       run1:
         b: [5, 6]
         w: np.linspace(0,5,2)
-        d: [10]
+        d: 10
 
   - name: "omicsintegrator2"
-    params:
-      include: true
+    include: true
+    runs:
       run1:
-        b: [4]
-        g: [0]
+        b: 4
+        g: 0
       run2:
-        b: [2]
-        g: [3]
+        b: 2
+        g: 3
 
   - name: "meo"
-    params:
-      include: true
+    include: true
+    runs:
       run1:
-        max_path_length: [3]
-        local_search: ["Yes"]
-        rand_restarts: [10]
+        max_path_length: 3
+        local_search: true
+        rand_restarts: 10
 
   - name: "mincostflow"
-    params:
-      include: true
+    include: true
+    runs:
       run1:
-        flow: [1] # The flow must be an int
-        capacity: [1]
+        flow: 1 # The flow must be an int
+        capacity: 1
 
   - name: "allpairs"
-    params:
-      include: true
+    include: true
 
   - name: "domino"
-    params:
-      include: true
+    include: true
+    runs:
       run1:
-        slice_threshold: [0.3]
-        module_threshold: [0.05]
+        slice_threshold: 0.3
+        module_threshold: 0.05
 
 datasets:
   - # Labels can only contain letters, numbers, or underscores
@@ -67,3 +66,7 @@ datasets:
     other_files: []
     # Relative path from the spras directory
     data_dir: "test/generate-inputs/inputs"
+
+reconstruction_settings:
+  locations:
+    reconstruction_dir: "output"

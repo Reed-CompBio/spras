@@ -4,6 +4,10 @@ Graph statistics, used to power summary.py.
 We allow for arbitrary computation of any specific statistic on some graph,
 computing more than necessary if we have dependencies. See the top level
 `statistics_computation` dictionary for usage.
+
+To make the statistics allow directed graph input, they will always take
+in a networkx.DiGraph, which contains even more information, even though
+the underlying graph may be just as easily represented by networkx.Graph.
 """
 
 import itertools
@@ -25,6 +29,9 @@ def compute_degree(graph: nx.DiGraph) -> tuple[int, float]:
         return max(degrees), median(degrees)
 
 def compute_on_cc(directed_graph: nx.DiGraph) -> tuple[int, float]:
+    # We convert our directed_graph to an undirected graph as networkx (reasonably) does
+    # not allow for computing the connected components of a directed graph, but the connected
+    # component count still is a useful statistic for us.
     graph: nx.Graph = directed_graph.to_undirected()
     cc = list(nx.connected_components(graph))
     # Save the max diameter
@@ -49,13 +56,12 @@ def compute_on_cc(directed_graph: nx.DiGraph) -> tuple[int, float]:
 
     return max_diameter, avg_path_len
 
-# The type signature on here is quite bad. I would like to say that an n-tuple has n-outputs.
+# The type signature here is meant to be 'an n-tuple has n-outputs.'
 statistics_computation: dict[tuple[str, ...], Callable[[nx.DiGraph], tuple[float | int, ...]]] = {
     ('Number of nodes',): lambda graph : (graph.number_of_nodes(),),
     ('Number of edges',): lambda graph : (graph.number_of_edges(),),
     ('Number of connected components',): lambda graph : (nx.number_connected_components(graph.to_undirected()),),
     ('Density',): lambda graph : (nx.density(graph),),
-
     ('Max degree', 'Median degree'): compute_degree,
     ('Max diameter', 'Average path length'): compute_on_cc,
 }
@@ -63,29 +69,7 @@ statistics_computation: dict[tuple[str, ...], Callable[[nx.DiGraph], tuple[float
 # All of the keys inside statistics_computation, flattened.
 statistics_options: list[str] = list(itertools.chain(*(list(key) for key in statistics_computation.keys())))
 
-def compute_statistics(graph: nx.DiGraph, statistics: list[str]) -> dict[str, float | int]:
-    """
-    Computes `statistics` for a graph corresponding to the top-level `statistics` dictionary
-    in this file.
-    """
-
-    # early-scan cutoff for statistics:
-    # we want to err as soon as possible
-    for stat in statistics:
-        if stat not in statistics_options:
-            raise RuntimeError(f"Statistic {stat} not a computable statistics! Available statistics: {statistics_options}")
-
-    # now, we can compute statistics only
-    computed_statistics: dict[str, float | int] = dict()
-    for statistic_tuple, compute in statistics_computation.items():
-        # when we want them
-        if not set(statistic_tuple).isdisjoint(set(statistics)):
-            computed_tuple = compute(graph)
-            assert len(statistic_tuple) == len(computed_tuple), f"bad tuple length for {statistic_tuple}"
-
-            current_computed_statistics = zip(statistic_tuple, computed_tuple, strict=True)
-            for stat, value in current_computed_statistics:
-                computed_statistics[stat] = value
-
-    # (and return only the statistics we wanted)
-    return {key: computed_statistics[key] for key in statistics}
+def from_output_pathway(lines) -> nx.Graph:
+    with open(lines, 'r') as f:
+        next(f) # skip the header line
+        return nx.read_edgelist(f, data=(('Rank', int), ('Direction', str)), delimiter='\t')

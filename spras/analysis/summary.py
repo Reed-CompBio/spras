@@ -1,14 +1,17 @@
+import ast
+import itertools
+import json
+import os
 from pathlib import Path
-from typing import Iterable
+from typing import Iterable, Mapping
 
-import networkx as nx
 import pandas as pd
 
-from spras.statistics import compute_statistics, statistics_options
+from spras.statistics import from_output_pathway, statistics_options
 
 
 def summarize_networks(file_paths: Iterable[Path], node_table: pd.DataFrame, algo_params: dict[str, dict],
-                       algo_with_params: list) -> pd.DataFrame:
+                       algo_with_params: list[str], statistics_files: Mapping[str, Iterable[str | os.PathLike]]) -> pd.DataFrame:
     """
     Generate a table that aggregates summary information about networks in file_paths, including which nodes are present
     in node_table columns. Network directionality is ignored and all edges are treated as undirected. The order of the
@@ -18,6 +21,7 @@ def summarize_networks(file_paths: Iterable[Path], node_table: pd.DataFrame, alg
     @param algo_params: a nested dict mapping algorithm names to dicts that map parameter hashes to parameter
     combinations.
     @param algo_with_params: a list of <algorithm>-params-<params_hash> combinations
+    @param statistics_files: a dictionary from algo_with_params to lists of statistic files with the computed statistics.
     @return: pandas DataFrame with summary information
     """
     # Ensure that NODEID is the first column
@@ -40,19 +44,22 @@ def summarize_networks(file_paths: Iterable[Path], node_table: pd.DataFrame, alg
 
     # Iterate through each network file path
     for index, file_path in enumerate(sorted(file_paths)):
-        with open(file_path, 'r') as f:
-            lines = f.readlines()[1:]  # skip the header line
-
         # directed or mixed graphs are parsed and summarized as an undirected graph
-        nw = nx.read_edgelist(lines, data=(('weight', float), ('Direction', str)))
+        nw = from_output_pathway(file_path)
 
         # Save the network name, number of nodes, number edges, and number of connected components
         nw_name = str(file_path)
 
-        graph_statistics = compute_statistics(nw, statistics_options)
+        # We use ast.literal_eval here to convert statistic file outputs to ints or floats depending on their string representation.
+        # (e.g. "5.0" -> float(5.0), while "5" -> int(5).)
+        graph_statistics = [
+            ast.literal_eval(Path(file).read_text()) for file in
+            # along with sorting to keep the output stable (this happens again)
+            sorted(statistics_files[algo_with_params[index]], key=lambda x: statistics_options.index(Path(x).stem))
+        ]
 
         # Initialize list to store current network information
-        cur_nw_info = [nw_name, *graph_statistics.values()]
+        cur_nw_info = [nw_name, *graph_statistics]
 
         # Iterate through each node property and save the intersection with the current network
         for node_list in nodes_by_col:
@@ -66,13 +73,21 @@ def summarize_networks(file_paths: Iterable[Path], node_table: pd.DataFrame, alg
 
         # Algorithm parameters have format { algo : { hashcode : { parameter combos } } }
         param_combo = algo_params[algo][hashcode]
-        cur_nw_info.append(param_combo)
+        del param_combo['_spras_run_name']
+        # We use json.dumps to properly serialize enums as strings,
+        # and sort parameters to provide stable summary table output.
+        cur_nw_info.append(json.dumps(param_combo, sort_keys=True))
 
         # Save the current network information to the network summary list
         nw_info.append(cur_nw_info)
 
+    # Get the list of statistic names by their file names (via finding all requested statistics in the provided files)
+    current_statistics_options = sorted(
+        set(Path(file).stem for file in itertools.chain(*statistics_files.values())),
+        key=lambda x: statistics_options.index(x)
+    )
     # Prepare column names
-    col_names = ['Name', *statistics_options]
+    col_names = ['Name', *current_statistics_options]
     col_names.extend(nodes_by_col_labs)
     col_names.append('Parameter combination')
 
@@ -84,67 +99,3 @@ def summarize_networks(file_paths: Iterable[Path], node_table: pd.DataFrame, alg
     )
 
     return nw_info
-
-
-def degree(g):
-    return dict(g.degree)
-
-# TODO: redo .run code to work on mixed graphs
-# stats is just a list of functions to apply to the graph.
-# They should take as input a networkx graph or digraph but may have any output.
-# stats = [degree, nx.clustering, nx.betweenness_centrality]
-
-
-# def produce_statistics(g: nx.Graph, s=None) -> dict:
-#     global stats
-#     if s is not None:
-#         stats = s
-#     d = dict()
-#     for s in stats:
-#         sname = s.__name__
-#         d[sname] = s(g)
-#     return d
-
-
-# def load_graph(path: str) -> nx.Graph:
-#     g = nx.read_edgelist(path, data=(('weight', float), ('Direction',str)))
-#     return g
-
-
-# def save(data, pth):
-#     fout = open(pth, 'w')
-#     fout.write('#node\t%s\n' % '\t'.join([s.__name__ for s in stats]))
-#     for node in data[stats[0].__name__]:
-#         row = [data[s.__name__][node] for s in stats]
-#         fout.write('%s\t%s\n' % (node, '\t'.join([str(d) for d in row])))
-#     fout.close()
-
-
-# def run(infile: str, outfile: str) -> None:
-#     """
-#     run function that wraps above functions.
-#     """
-#     # if output directory doesn't exist, make it.
-#     outdir = os.path.dirname(outfile)
-#     if not os.path.exists(outdir):
-#         os.makedirs(outdir)
-
-#     # load graph, produce stats, and write to human-readable file.
-#     g = load_graph(infile)
-#     dat = produce_statistics(g)
-#     save(dat, outfile)
-
-
-# def main(argv):
-#     """
-#     for testing
-#     """
-#     g = load_graph(argv[1])
-#     print(g.nodes)
-#     dat = produce_statistics(g)
-#     print(dat)
-#     save(dat, argv[2])
-
-
-# if __name__ == '__main__':
-#     main(sys.argv)
