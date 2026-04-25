@@ -1,3 +1,4 @@
+import json
 from pathlib import Path
 from statistics import median
 from typing import Iterable
@@ -7,7 +8,7 @@ import pandas as pd
 
 
 def summarize_networks(file_paths: Iterable[Path], node_table: pd.DataFrame, algo_params: dict[str, dict],
-                       algo_with_params: list) -> pd.DataFrame:
+                       algo_with_params: list[str]) -> pd.DataFrame:
     """
     Generate a table that aggregates summary information about networks in file_paths, including which nodes are present
     in node_table columns. Network directionality is ignored and all edges are treated as undirected. The order of the
@@ -98,7 +99,10 @@ def summarize_networks(file_paths: Iterable[Path], node_table: pd.DataFrame, alg
 
         # Algorithm parameters have format { algo : { hashcode : { parameter combos } } }
         param_combo = algo_params[algo][hashcode]
-        cur_nw_info.append(param_combo)
+        del param_combo['_spras_run_name']
+        # We use json.dumps to properly serialize enums as strings,
+        # and sort parameters to provide stable summary table output.
+        cur_nw_info.append(json.dumps(param_combo, sort_keys=True))
 
         # Save the current network information to the network summary list
         nw_info.append(cur_nw_info)

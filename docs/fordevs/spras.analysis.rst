@@ -1,35 +1,41 @@
-spras.analysis package
-======================
+########################
+ spras.analysis package
+########################
 
-Submodules
-----------
+************
+ Submodules
+************
 
-spras.analysis.cytoscape module
--------------------------------
+*********************************
+ spras.analysis.cytoscape module
+*********************************
 
 .. automodule:: spras.analysis.cytoscape
    :members:
    :undoc-members:
    :show-inheritance:
 
-spras.analysis.ml module
-------------------------
+**************************
+ spras.analysis.ml module
+**************************
 
 .. automodule:: spras.analysis.ml
    :members:
    :undoc-members:
    :show-inheritance:
 
-spras.analysis.summary module
------------------------------
+*******************************
+ spras.analysis.summary module
+*******************************
 
 .. automodule:: spras.analysis.summary
    :members:
    :undoc-members:
    :show-inheritance:
 
-Module contents
----------------
+*****************
+ Module contents
+*****************
 
 .. automodule:: spras.analysis
    :members:
