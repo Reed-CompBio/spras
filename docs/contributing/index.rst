@@ -225,9 +225,9 @@ Also test the functions available in the ``Dataset`` class.
 Note: If you get a 'no module named' error, make sure that you are
 running your interactive python session inside the SPRAS pixi
 environment (your terminal should begin with ``(spras)`` instead of
-``(base)``, which can be done through ``pixi shell``), and
-your editor's interpreter is set to using the SPRAS environment over the
-base environment (on VSCode and IntelliJ editors, this should be in the
+``(base)``, which can be done through ``pixi shell``), and your editor's
+interpreter is set to using the SPRAS environment over the base
+environment (on VSCode and IntelliJ editors, this should be in the
 bottom right.)
 
 Note the behaviors of the ``get_node_columns`` function when there are
@@ -491,9 +491,9 @@ developers will benefit from setting up their environment to run the
 same tests locally while they modify the SPRAS source.
 
 The ``pre-commit`` package is installed as part of the pixi environment
-in ``pyproject.toml``. From there, the pre-commit `quick
-start <https://pre-commit.com/#quick-start>`__ guide explains two
-primary ways to use it locally:
+in ``pyproject.toml``. From there, the pre-commit `quick start
+<https://pre-commit.com/#quick-start>`__ guide explains two primary ways
+to use it locally:
 
 -  run against all source files with ``pre-commit run --all-files`` to
    identify errors and automatically fix them when possible

@@ -190,8 +190,8 @@ jobs, but the workflow can use Snakemake's checkpointing to pick up any
 jobs where they left off.
 
 **Note**: If you encounter an error that says ``No module named
-'spras'``, make sure you've enabled the ``pixi`` environment with
-``pixi shell``.
+'spras'``, make sure you've enabled the ``pixi`` environment with ``pixi
+shell``.
 
 ****************
  Job Monitoring

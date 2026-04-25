@@ -9,8 +9,9 @@ your needs
  Using Pixi
 ************
 
-If you want to run spras locally on your machine, you can use the provided `pyproject.toml` file to create
-a `pixi` environment with all the necessary dependencies: 1. `Download and Install Pixi`_ 2. Activate
+If you want to run spras locally on your machine, you can use the
+provided `pyproject.toml` file to create a `pixi` environment with all
+the necessary dependencies: 1. `Download and Install Pixi`_ 2. Activate
 the pixi environment:
 
 .. code:: bash
@@ -47,4 +48,4 @@ image tag name. For example, to get spras v0.6.0:
 
    docker pull reedcompbio/spras:0.6.0
 
-.. _Download and Install Pixi: https://pixi.sh/latest/installation/
+.. _download and install pixi: https://pixi.sh/latest/installation/

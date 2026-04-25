@@ -28,14 +28,18 @@ Visit the `SPRAS GitHub repository
 0.2 Set up the SPRAS environment
 ================================
 
-From the root directory of the SPRAS repository, create and activate the Pixi environment and install the SPRAS python package:
+From the root directory of the SPRAS repository, create and activate the
+Pixi environment and install the SPRAS python package:
 
 .. code:: bash
 
-    pixi shell
+   pixi shell
 
 .. note::
-   This performs a one-time installation of the SPRAS dependencies by creating a Pixi environment (an isolated space that keeps all required packages and versions separate from your system).
+
+   This performs a one-time installation of the SPRAS dependencies by
+   creating a Pixi environment (an isolated space that keeps all
+   required packages and versions separate from your system).
 
 0.3 Test the installation
 =========================
