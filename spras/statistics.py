@@ -71,6 +71,5 @@ statistics_options: list[str] = list(itertools.chain(*(list(key) for key in stat
 
 def from_output_pathway(lines) -> nx.Graph:
     with open(lines, 'r') as f:
-        lines = f.readlines()[1:]
-
-    return nx.read_edgelist(lines, data=(('Rank', int), ('Direction', str)))
+        next(f) # skip the header line
+        return nx.read_edgelist(f, data=(('Rank', int), ('Direction', str)), delimiter='\t')

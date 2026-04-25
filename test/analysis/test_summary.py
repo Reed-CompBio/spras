@@ -1,5 +1,4 @@
 import filecmp
-import shutil
 import subprocess
 from pathlib import Path
 
@@ -57,12 +56,14 @@ class TestSummary:
                                   algorithm_params.items() for params_hash in param_combos.keys()]
 
         network_files = (INPUT_DIR / "run" / snakemake_output).rglob("pathway.txt")
-        statistics_files = (INPUT_DIR / "run" / snakemake_output).rglob("**/statistics/**")
+        statistics_folders = [Path(file) for file in (INPUT_DIR / "run" / snakemake_output).rglob("**/statistics") if Path(file).name == "statistics"]
+        # We do some string fiddling here to make sure the folder matches up with algorithms_with_params. This may be susceptible to a good refactor.
+        statistics_files = {"-".join(folder.parent.stem.split("-")[1:]): list(folder.glob("*.txt")) for folder in statistics_folders}
 
         out_path = Path(OUT_DIR, f"test_{snakemake_output}_summary.txt")
         out_path.unlink(missing_ok=True)
         summarize_out = summarize_networks(network_files, example_node_table, algorithm_params,
-                                               algorithms_with_params)
+                                               algorithms_with_params, statistics_files)
         # We do some post-processing to ensure that we get a stable summarize_out, since the attached hash
         # is subject to variation (especially in testing) whenever the SPRAS commit revision gets changed
         summarize_out["Parameter combination"] = summarize_out["Parameter combination"].astype(str)

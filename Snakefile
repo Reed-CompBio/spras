@@ -315,18 +315,32 @@ rule viz_cytoscape:
 
 # We generate new Snakemake rules for every statistic
 # to allow parallel and lazy computation of individual statistics
-for keys, values in statistics_computation.items():
+for keys in statistics_computation.keys():
     pythonic_name = 'generate_' + '_and_'.join([key.lower().replace(' ', '_') for key in keys])
     rule:
         # (See https://snakemake.readthedocs.io/en/stable/snakefiles/rules.html#procedural-rule-definition)
         name: pythonic_name
         input: pathway_file = rules.parse_output.output.standardized_file
         output: [SEP.join([out_dir, '{dataset}-{algorithm}-{params}', 'statistics', f'{key}.txt']) for key in keys]
+        # It is very tempting to use `.items()` instead of `.keys()` above, but
+        # We instead need to pass keys in via parameters, else the job would use the latest values in the statistics_computation.
+        # More info is in the procedural rule link ab
+        params: statistics_names=keys
         run:
             (Path(input.pathway_file).parent / 'statistics').mkdir(exist_ok=True)
             graph = from_output_pathway(input.pathway_file)
-            for computed, output in zip(values(graph), output):
+            for computed, output in zip(statistics_computation[params.statistics_names](graph), output):
                 Path(output).write_text(str(computed))
+
+# We isolate this to a separate input function, as we want to preserve the dictionary structure
+def summary_files(wildcards):
+    return {
+        algorithm_param: expand(
+            '{out_dir}{sep}{dataset}-{algorithm_param}{sep}statistics{sep}{statistic}.txt',
+            out_dir=out_dir, sep=SEP, algorithm_param=algorithm_param, statistic=statistics_options,
+            dataset=wildcards.dataset
+        ) for algorithm_param in algorithms_with_params
+    }
 
 # Write a single summary table for all pathways for each dataset
 rule summary_table:
@@ -334,15 +348,13 @@ rule summary_table:
         # Collect all pathways generated for the dataset
         pathways = expand('{out_dir}{sep}{{dataset}}-{algorithm_params}{sep}pathway.txt', out_dir=out_dir, sep=SEP, algorithm_params=algorithms_with_params),
         dataset_file = SEP.join([out_dir, 'dataset-{dataset}-merged.pickle']),
-        # Collect all possible statistics into a dictionary
-        statistics = expand(
-            '{out_dir}{sep}{{dataset}}-{algorithm_params}{sep}statistics{sep}{statistic}.txt',
-            out_dir=out_dir, sep=SEP, algorithm_params=algorithms_with_params, statistic=statistics_options)
+        # Collect all possible statistics from the `summary_files` dictionary-based input function
+        statistics = lambda wildcards: flatten(list(summary_files(wildcards).values()))
     output: summary_table = SEP.join([out_dir, '{dataset}-pathway-summary.txt'])
     run:
         # Load the node table from the pickled dataset file
         node_table = Dataset.from_file(input.dataset_file).node_table
-        summary_df = summary.summarize_networks(input.pathways, node_table, algorithm_params, algorithms_with_params, input.statistics)
+        summary_df = summary.summarize_networks(input.pathways, node_table, algorithm_params, algorithms_with_params, summary_files(wildcards))
         summary_df.to_csv(output.summary_table, sep='\t', index=False)
 
 # Cluster the output pathways for each dataset

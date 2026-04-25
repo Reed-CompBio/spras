@@ -1,16 +1,17 @@
 import ast
+import itertools
 import json
 import os
 from pathlib import Path
-from typing import Iterable
+from typing import Iterable, Mapping
 
 import pandas as pd
 
-from spras.statistics import from_output_pathway
+from spras.statistics import from_output_pathway, statistics_options
 
 
 def summarize_networks(file_paths: Iterable[Path], node_table: pd.DataFrame, algo_params: dict[str, dict],
-                       algo_with_params: list[str], statistics_files: list[str | os.PathLike]) -> pd.DataFrame:
+                       algo_with_params: list[str], statistics_files: Mapping[str, Iterable[str | os.PathLike]]) -> pd.DataFrame:
     """
     Generate a table that aggregates summary information about networks in file_paths, including which nodes are present
     in node_table columns. Network directionality is ignored and all edges are treated as undirected. The order of the
@@ -20,7 +21,7 @@ def summarize_networks(file_paths: Iterable[Path], node_table: pd.DataFrame, alg
     @param algo_params: a nested dict mapping algorithm names to dicts that map parameter hashes to parameter
     combinations.
     @param algo_with_params: a list of <algorithm>-params-<params_hash> combinations
-    @param statistics_files: a list of statistic files with the computed statistics.
+    @param statistics_files: a dictionary from algo_with_params to lists of statistic files with the computed statistics.
     @return: pandas DataFrame with summary information
     """
     # Ensure that NODEID is the first column
@@ -51,7 +52,11 @@ def summarize_networks(file_paths: Iterable[Path], node_table: pd.DataFrame, alg
 
         # We use ast.literal_eval here to convert statistic file outputs to ints or floats depending on their string representation.
         # (e.g. "5.0" -> float(5.0), while "5" -> int(5).)
-        graph_statistics = [ast.literal_eval(Path(file).read_text()) for file in statistics_files]
+        graph_statistics = [
+            ast.literal_eval(Path(file).read_text()) for file in
+            # along with sorting to keep the output stable (this happens again)
+            sorted(statistics_files[algo_with_params[index]], key=lambda x: statistics_options.index(Path(x).stem))
+        ]
 
         # Initialize list to store current network information
         cur_nw_info = [nw_name, *graph_statistics]
@@ -76,10 +81,13 @@ def summarize_networks(file_paths: Iterable[Path], node_table: pd.DataFrame, alg
         # Save the current network information to the network summary list
         nw_info.append(cur_nw_info)
 
-    # Get the list of statistic names by their file names
-    statistics_options = [Path(file).stem for file in statistics_files]
+    # Get the list of statistic names by their file names (via finding all requested statistics in the provided files)
+    current_statistics_options = sorted(
+        set(Path(file).stem for file in itertools.chain(*statistics_files.values())),
+        key=lambda x: statistics_options.index(x)
+    )
     # Prepare column names
-    col_names = ['Name', *statistics_options]
+    col_names = ['Name', *current_statistics_options]
     col_names.extend(nodes_by_col_labs)
     col_names.append('Parameter combination')
 
