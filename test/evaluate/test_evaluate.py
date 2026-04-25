@@ -6,6 +6,7 @@ import pandas as pd
 import pytest
 
 import spras.analysis.ml as ml
+from spras.config.dataset import DatasetSchema
 from spras.dataset import Dataset
 from spras.evaluation import Evaluation
 
@@ -27,13 +28,13 @@ class TestEvaluate:
         out_dataset = Path(OUT_DIR, 'data.pickle')
         out_dataset.unlink(missing_ok=True)
 
-        dataset = Dataset({
-            'label': 'toy',
-            'edge_files': ['input-interactome.txt'],
-            'node_files': ['input-nodes.txt'],
-            'data_dir': INPUT_DIR,
-            'other_files': []
-        })
+        dataset = Dataset(DatasetSchema(
+            label='toy',
+            edge_files=['input-interactome.txt'],
+            node_files=['input-nodes.txt'],
+            data_dir=INPUT_DIR,
+            other_files=[]
+        ))
 
         with open(out_dataset, 'wb') as f:
             pickle.dump(dataset, f)

@@ -1,139 +1,195 @@
-spras package
-=============
+###############
+ spras package
+###############
 
-Subpackages
------------
+*************
+ Subpackages
+*************
 
 .. toctree::
    :maxdepth: 4
 
    spras.analysis
+   spras.config
 
-Submodules
-----------
+************
+ Submodules
+************
 
-spras.allpairs module
----------------------
+***********************
+ spras.allpairs module
+***********************
 
 .. automodule:: spras.allpairs
    :members:
    :undoc-members:
    :show-inheritance:
 
-spras.config module
--------------------
+******************
+ spras.btb module
+******************
 
-.. automodule:: spras.config
+.. automodule:: spras.btb
    :members:
    :undoc-members:
    :show-inheritance:
 
-spras.containers module
------------------------
+*************************
+ spras.containers module
+*************************
 
 .. automodule:: spras.containers
    :members:
    :undoc-members:
    :show-inheritance:
 
-spras.dataset module
---------------------
+**********************
+ spras.dataset module
+**********************
 
 .. automodule:: spras.dataset
    :members:
    :undoc-members:
    :show-inheritance:
 
-spras.domino module
--------------------
+*********************
+ spras.domino module
+*********************
 
 .. automodule:: spras.domino
    :members:
    :undoc-members:
    :show-inheritance:
 
-spras.evaluation module
------------------------
+*************************
+ spras.evaluation module
+*************************
 
 .. automodule:: spras.evaluation
    :members:
    :undoc-members:
    :show-inheritance:
 
-spras.interactome module
-------------------------
+**************************
+ spras.interactome module
+**************************
 
 .. automodule:: spras.interactome
    :members:
    :undoc-members:
    :show-inheritance:
 
-spras.meo module
-----------------
+**********************
+ spras.logging module
+**********************
+
+.. automodule:: spras.logging
+   :members:
+   :undoc-members:
+   :show-inheritance:
+
+******************
+ spras.meo module
+******************
 
 .. automodule:: spras.meo
    :members:
    :undoc-members:
    :show-inheritance:
 
-spras.mincostflow module
-------------------------
+**************************
+ spras.mincostflow module
+**************************
 
 .. automodule:: spras.mincostflow
    :members:
    :undoc-members:
    :show-inheritance:
 
-spras.omicsintegrator1 module
------------------------------
+*******************************
+ spras.omicsintegrator1 module
+*******************************
 
 .. automodule:: spras.omicsintegrator1
    :members:
    :undoc-members:
    :show-inheritance:
 
-spras.omicsintegrator2 module
------------------------------
+*******************************
+ spras.omicsintegrator2 module
+*******************************
 
 .. automodule:: spras.omicsintegrator2
    :members:
    :undoc-members:
    :show-inheritance:
 
-spras.pathlinker module
------------------------
+*************************
+ spras.pathlinker module
+*************************
 
 .. automodule:: spras.pathlinker
    :members:
    :undoc-members:
    :show-inheritance:
 
-spras.prm module
-----------------
+******************
+ spras.prm module
+******************
 
 .. automodule:: spras.prm
    :members:
    :undoc-members:
    :show-inheritance:
 
-spras.runner module
--------------------
+**************************
+ spras.responsenet module
+**************************
+
+.. automodule:: spras.responsenet
+   :members:
+   :undoc-members:
+   :show-inheritance:
+
+*********************
+ spras.runner module
+*********************
 
 .. automodule:: spras.runner
    :members:
    :undoc-members:
    :show-inheritance:
 
-spras.util module
------------------
+******************
+ spras.rwr module
+******************
+
+.. automodule:: spras.rwr
+   :members:
+   :undoc-members:
+   :show-inheritance:
+
+********************
+ spras.strwr module
+********************
+
+.. automodule:: spras.strwr
+   :members:
+   :undoc-members:
+   :show-inheritance:
+
+*******************
+ spras.util module
+*******************
 
 .. automodule:: spras.util
    :members:
    :undoc-members:
    :show-inheritance:
 
-Module contents
----------------
+*****************
+ Module contents
+*****************
 
 .. automodule:: spras
    :members:
