@@ -375,8 +375,8 @@ Modify parse outputs:
    needs.
 
 Finally, modify ``test/attribution`` to have an empty
-``localneighborhood.bib`` file, indicating that
-LocalNeighborhood cites nothing else.
+``localneighborhood.bib`` file, indicating that LocalNeighborhood cites
+nothing else.
 
 ******************************
  Step 6: Update documentation
