@@ -1,5 +1,6 @@
-Contributing a new pathway reconstruction algorithm
-===================================================
+#####################################################
+ Contributing a new pathway reconstruction algorithm
+#####################################################
 
 The SPRAS maintainers welcome external contributions. Code contributions
 will be licensed using the project's MIT license.
@@ -8,38 +9,47 @@ This guide walks new contributors through the process of adding a new
 pathway reconstruction algorithm to SPRAS. It follows the checklist
 below step-by-step to add a simple algorithm called Local Neighborhood.
 
-Prerequisites
--------------
+***************
+ Prerequisites
+***************
 
 SPRAS builds on multiple technologies to run pathway reconstruction in a
 Snakemake workflow. Before following this guide, a contributor will need
 
-- Familiarity with Python (`Carpentries
-  introduction <https://swcarpentry.github.io/python-novice-inflammation/>`__)
-- Familiarity with Git and GitHub (`Carpentries
-  introduction <https://swcarpentry.github.io/git-novice/>`__)
-- Familiarity with Docker and Dockerfiles to create images (`Carpentries
-  introduction <https://carpentries-incubator.github.io/docker-introduction/>`__)
-- A `Docker Hub <https://hub.docker.com/>`__ account
+-  Familiarity with Python (`Carpentries introduction
+   <https://swcarpentry.github.io/python-novice-inflammation/>`__)
+
+-  Familiarity with Git and GitHub (`Carpentries introduction
+   <https://swcarpentry.github.io/git-novice/>`__)
+
+-  Familiarity with Docker and Dockerfiles to create images
+   (`Carpentries introduction
+   <https://carpentries-incubator.github.io/docker-introduction/>`__)
+
+-  A `Docker Hub <https://hub.docker.com/>`__ account
 
 It is not necessary to have experience with Snakemake, Python testing,
 or pandas before getting started, but it may help with more complex
 SPRAS contributions:
 
-- Snakemake `Carpentries
-  introduction <https://carpentries-incubator.github.io/workflows-snakemake/>`__
-  or `beginner's
-  guide <http://ivory.idyll.org/blog/2023-snakemake-slithering-section-1.html>`__
-- pytest `getting
-  started <https://docs.pytest.org/en/7.1.x/getting-started.html>`__ and
-  `how-to guides <https://docs.pytest.org/en/7.1.x/how-to/index.html>`__
-- pandas `Carpentries
-  introduction <https://datacarpentry.org/python-ecology-lesson/02-starting-with-data.html>`__
-  or `10 minutes to
-  pandas <https://pandas.pydata.org/pandas-docs/stable/user_guide/10min.html>`__
+-  Snakemake `Carpentries introduction
+   <https://carpentries-incubator.github.io/workflows-snakemake/>`__ or
+   `beginner's guide
+   <http://ivory.idyll.org/blog/2023-snakemake-slithering-section-1.html>`__
 
-Step 0: Fork the repository and create a branch
------------------------------------------------
+-  pytest `getting started
+   <https://docs.pytest.org/en/7.1.x/getting-started.html>`__ and
+   `how-to guides
+   <https://docs.pytest.org/en/7.1.x/how-to/index.html>`__
+
+-  pandas `Carpentries introduction
+   <https://datacarpentry.org/python-ecology-lesson/02-starting-with-data.html>`__
+   or `10 minutes to pandas
+   <https://pandas.pydata.org/pandas-docs/stable/user_guide/10min.html>`__
+
+*************************************************
+ Step 0: Fork the repository and create a branch
+*************************************************
 
 From the `SPRAS repository <https://github.com/Reed-CompBio/spras>`__,
 click the "Fork" button in the upper right corner to create a copy of
@@ -97,37 +107,36 @@ different name.
 
    git push agitter local-neighborhood
 
-Step 1: Practice with the Local Neighborhood algorithm
-------------------------------------------------------
+********************************************************
+ Step 1: Practice with the Local Neighborhood algorithm
+********************************************************
 
 The Local Neighborhood pathway reconstruction is implemented and
-described in the
-``docker-wrappers/LocalNeighborhood``
-directory. The readme in that directory describes the usage and the
-three required arguments. This algorithm does not require any
-third-party packages, only Python 3.x. Run ``local_neighborhood_alg.py``
-from the command line. There are example input files ``ln-network.txt``
-and ``ln-nodes.txt`` in
-``test/LocalNeighborhood/input`.
-Copy them to the ``LocalNeighborhood`` directory for testing. Confirm
-that the output file matches expectations.
+described in the ``docker-wrappers/LocalNeighborhood`` directory. The
+readme in that directory describes the usage and the three required
+arguments. This algorithm does not require any third-party packages,
+only Python 3.x. Run ``local_neighborhood_alg.py`` from the command
+line. There are example input files ``ln-network.txt`` and
+``ln-nodes.txt`` in ``test/LocalNeighborhood/input`. Copy them to the
+``LocalNeighborhood`` directory for testing. Confirm that the output
+file matches expectations.
 
-Step 2: Create a Local Neighborhood Docker image
-------------------------------------------------
+**************************************************
+ Step 2: Create a Local Neighborhood Docker image
+**************************************************
 
-Complete the ``Dockerfile`` in the
-``docker-wrappers/LocalNeighborhood``
+Complete the ``Dockerfile`` in the ``docker-wrappers/LocalNeighborhood``
 directory to create a Docker image. The PathLinker ``Dockerfile``
 demonstrates how to begin with a Python image and copy files into the
-image with ``COPY``. Browse the official `Python
-images <https://hub.docker.com/_/python>`__ to select a recent version
-of Python based on Alpine Linux, a small Linux distribution. This Local
+image with ``COPY``. Browse the official `Python images
+<https://hub.docker.com/_/python>`__ to select a recent version of
+Python based on Alpine Linux, a small Linux distribution. This Local
 Neighborhood Docker image should be based on a more modern version of
 Python.
 
 Build the Docker image by running
 
-::
+.. code::
 
    docker build -t <username>/local-neighborhood -f Dockerfile .
 
@@ -137,7 +146,7 @@ executing this command.
 
 Test the image by running it with the example input files
 
-::
+.. code::
 
    docker run -w /data --mount type=bind,source=/${PWD},target=/data \
      <username>/local-neighborhood python local_neighborhood_alg.py \
@@ -160,27 +169,28 @@ users may need to escape the absolute paths so that ``/data`` becomes
 
 Push the new image to Docker Hub:
 
-::
+.. code::
 
    docker push <username>/local-neighborhood
 
 Pushing an image requires being logged in, so run ``docker login`` first
 if needed using your Docker Hub username and password.
 
-Step 3: Write the Local Neighborhood wrapper functions
-------------------------------------------------------
+********************************************************
+ Step 3: Write the Local Neighborhood wrapper functions
+********************************************************
 
 Add a new Python file ``spras/local_neighborhood.py`` to implement the
 wrapper functions for the Local Neighborhood algorithm. Use
 ``allpairs.py`` as an example.
 
 Call the new class within ``local_neighborhood.py``
-``LocalNeighborhood`` and set ``__all__`` so the class can be
-`imported <https://docs.python.org/3/tutorial/modules.html#importing-from-a-package>`__.
-Make sure to specify the type of parameters passed in to ``LocalNeighborhood`` as ``Empty``
-(see ``AllPairs`` for an example of this.)
-Specify the list of ``required_input`` files to be ``network`` and
-``nodes``, and set the ``dois`` property to be an empty list. These
+``LocalNeighborhood`` and set ``__all__`` so the class can be `imported
+<https://docs.python.org/3/tutorial/modules.html#importing-from-a-package>`__.
+Make sure to specify the type of parameters passed in to
+``LocalNeighborhood`` as ``Empty`` (see ``AllPairs`` for an example of
+this.) Specify the list of ``required_input`` files to be ``network``
+and ``nodes``, and set the ``dois`` property to be an empty list. These
 entries are used to tell Snakemake what input files should be present
 before running the Local Neighborhood algorithm.
 
@@ -220,8 +230,8 @@ your editor's interpreter is set to using the SPRAS environment over the
 base environment (on VSCode and IntelliJ editors, this should be in the
 bottom right.)
 
-Note the behaviors of the ``get_node_columns`` function when there
-are missing values in that column of the node table and when multiple
+Note the behaviors of the ``get_node_columns`` function when there are
+missing values in that column of the node table and when multiple
 columns are requested. ``get_node_columns`` always returns the
 ``NODEID`` column in addition to the requested columns.
 
@@ -268,26 +278,28 @@ and ``reinsert_direction_col_undirected`` function in
 that there are no duplicate edges in the output pathway using the
 ``spras.util.py`` function ``duplicate_edges``. Make sure header = True
 with column names: ['Node1', 'Node2', 'Rank', 'Direction'] when the file
-is created. The output should have the format
-``<vertex1> <vertex2> 1 U``.
+is created. The output should have the format ``<vertex1> <vertex2> 1
+U``.
 
-Step 4: Make the Local Neighborhood wrapper accessible through SPRAS
---------------------------------------------------------------------
+**********************************************************************
+ Step 4: Make the Local Neighborhood wrapper accessible through SPRAS
+**********************************************************************
 
 Import the new class ``LocalNeighborhood`` in ``spras/runner.py`` and
 add it to the ``algorithms`` dictionary so the wrapper functions can be
 accessed. Add an entry for Local Neighborhood to the configuration file
 ``config/config.yaml`` and set ``include: true``. As a convention,
 algorithm names are written in all lowercase without special characters.
-Local Neighborhood has no other parameters. Optionally set
-``include: false`` for the other pathway reconstruction algorithms to
-make testing faster.
+Local Neighborhood has no other parameters. Optionally set ``include:
+false`` for the other pathway reconstruction algorithms to make testing
+faster.
 
-The config file has an option ``owner`` under the ``containers.registry``
-settings that controls which Docker Hub account will be used when
-pulling Docker images. The same Docker Hub account will be used for all
-images and cannot currently be set different for each algorithm. Set the
-``owner`` to match your Docker Hub username from Step 2.
+The config file has an option ``owner`` under the
+``containers.registry`` settings that controls which Docker Hub account
+will be used when pulling Docker images. The same Docker Hub account
+will be used for all images and cannot currently be set different for
+each algorithm. Set the ``owner`` to match your Docker Hub username from
+Step 2.
 
 After completing this step, try running the Local Neighborhood algorithm
 through SPRAS with
@@ -298,13 +310,13 @@ through SPRAS with
 
 Make sure to run the command inside the ``spras`` conda environment.
 
-If installing via ``pip`` instead of using conda, install with the
-``-e .[dev]`` options (the full command to run from the repo root is
-``python -m pip install -e .[dev]``) so that Python picks up any changes
-you make and installs all optional development packages. Omitting the
-``-e`` flag will prevent your changes from being reflected unless you
-force re-install, and omitting ``.[dev]`` will prevent pip from
-installing ``pre-commit`` and ``pytest``.
+If installing via ``pip`` instead of using conda, install with the ``-e
+.[dev]`` options (the full command to run from the repo root is ``python
+-m pip install -e .[dev]``) so that Python picks up any changes you make
+and installs all optional development packages. Omitting the ``-e`` flag
+will prevent your changes from being reflected unless you force
+re-install, and omitting ``.[dev]`` will prevent pip from installing
+``pre-commit`` and ``pytest``.
 
 As a workflow manager, Snakemake will consider the work described in the
 configuration file to be completed once the necessary output files have
@@ -315,18 +327,18 @@ the output files already exist. To iteratively update code and test the
 workflow, you typically have to remove the output directory or all of
 its contents before rerunning the Snakemake command.
 
-Step 5: Add Local Neighborhood to the tests
--------------------------------------------
+*********************************************
+ Step 5: Add Local Neighborhood to the tests
+*********************************************
 
 Add test functions to the test file ``test/test_ln.py``. This file
 already has existing tests to test the correctness of the Local
 Neighborhood implementation that was added to the Docker image. The new
 tests will test that the ``run`` function of the ``LocalNeighborhood``
-class works correctly. Use ``test_ap.py`` as an example. There
-are input files for testing in the
-``test/LocalNeighborhood/input``
-directory. The new test functions will be automatically run as part of
-the pytest testing.
+class works correctly. Use ``test_ap.py`` as an example. There are input
+files for testing in the ``test/LocalNeighborhood/input`` directory. The
+new test functions will be automatically run as part of the pytest
+testing.
 
 Extend ``.github/workflows/build-containers.yml`` to pull and build the
 new Docker image. Follow the example for any of the other pathway
@@ -336,28 +348,36 @@ image using the ``Dockerfile`` that was completed in Step 2.
 
 Modify generate inputs:
 
-1. Obtain the expected network and nodes file from the workflow,
-   manually confirm it is correct, and save it to ``test/generate-inputs/expected``.
-   Name it as ``{algorithm_name}-{network_file_name}-expected.txt``.
+#. Include a key-value pair in the algo_exp_file dictionary that links
+   the specific algorithm to its expected network file.
+
+#. Obtain the expected network and nodes file from the workflow,
+   manually confirm it is correct, and save it to
+   ``test/generate-inputs/expected``. Name it as
+   ``{algorithm_name}-{network_file_name}-expected.txt``.
 
 Modify parse outputs:
 
-1. Obtain the raw-pathway output (e.g. from the run function in your
+#. Obtain the raw-pathway output (e.g. from the run function in your
    wrapper by running the Snakemake workflow) and save it to
    ``test/parse-outputs/input``. Name it as
    ``{algorithm_name}-raw-pathway.txt``.
-2. Obtain the expected universal output from the workflow, manually
+
+#. Obtain the expected universal output from the workflow, manually
    confirm it is correct, and save it to ``test/parse-outputs/expected``
    directory. Name it as ``{algorithm_name}-pathway-expected.txt``.
-3. Add an ``{algorithm-name}-empty-raw-pathway.txt`` file inside
+
+#. Add an ``{algorithm-name}-empty-raw-pathway.txt`` file inside
    ``test/parse-outputs/input/empty`` containing all output files
    associated with an empty subnetwork for the algorithm.
-4. Add the new algorithm's name to the algorithms dict in
+
+#. Add the new algorithm's name to the algorithms dict in
    ``test/parse-outputs/test_parse_outputs.py``, with any parameters it
    needs.
 
-Step 6: Update documentation
-----------------------------
+******************************
+ Step 6: Update documentation
+******************************
 
 SPRAS uses ``sphinx`` and "Read The Docs" for building and hosting
 documentation. To include your new reconstruction algorithm in this
@@ -388,8 +408,9 @@ add something like the following to ``docs/prms/prms.rst``:
    you're adding, and the ``my-alg`` section after it must be the name
    of your new file without the ``.rst`` extension.
 
-Step 7: Work with SPRAS maintainers to revise the pull request
---------------------------------------------------------------
+****************************************************************
+ Step 7: Work with SPRAS maintainers to revise the pull request
+****************************************************************
 
 Step 0 previously described how to create a ``local-neighborhood``
 branch and create a pull request. Make sure to commit all of the new and
@@ -398,48 +419,58 @@ your fork.
 
 The SPRAS maintainers will review the pull request and provide feedback
 and suggested changes. If you are not already in communication with
-them, you can open a `GitHub
-issue <https://github.com/Reed-CompBio/spras/issues/new/choose>`__ to
-request feedback. However, once the pull request has been approved, it
-will **not** be merged as usual. The pull request will be closed so that
-the ``main`` branch of the fork stays synchronized with the ``main``
-branch of the main SPRAS repository.
+them, you can open a `GitHub issue
+<https://github.com/Reed-CompBio/spras/issues/new/choose>`__ to request
+feedback. However, once the pull request has been approved, it will
+**not** be merged as usual. The pull request will be closed so that the
+``main`` branch of the fork stays synchronized with the ``main`` branch
+of the main SPRAS repository.
 
-General steps for contributing a new pathway reconstruction algorithm
----------------------------------------------------------------------
+***********************************************************************
+ General steps for contributing a new pathway reconstruction algorithm
+***********************************************************************
 
-1.  Open a `GitHub
-    issue <https://github.com/Reed-CompBio/spras/issues/new/choose>`__
-    to propose adding a new algorithm and discuss it with the SPRAS
-    maintainers
-2.  Add a new subdirectory to ``docker-wrappers`` with the name
-    ``<algorithm>``, write a ``Dockerfile`` to build an image for
-    ``<algorithm>``, and include any other files required to build that
-    image in the subdirectory
-3.  Build and push the Docker image to the
-    `reedcompbio <https://hub.docker.com/orgs/reedcompbio>`__ Docker
-    organization (SPRAS maintainer required)
-4.  Add a new Python file ``spras/<algorithm>.py`` to implement the
-    wrapper functions for ``<algorithm>``: specify the list of
-    ``required_input`` files and the ``generate_inputs``, ``run``, and
-    ``parse_output`` functions
-5.  Import the new class in ``spras/runner.py`` and add it to the
-    ``algorithms`` dictionary so the wrapper functions can be accessed
-6.  Document the usage of the Docker wrapper and the assumptions made
-    when implementing the wrapper
-7.  Add example usage for the new algorithm and its parameters to the
-    template config file
-8.  Write test functions and provide example input data in a new test
-    subdirectory ``test/<algorithm>``. Provide example data and
-    algorithm/expected files names to lists or dicts in
-    ``test/generate-inputs`` and ``test/parse-outputs``. Use the full
-    path with the names of the test files.
-9.  Extend ``.github/workflows/build-containers.yml`` to pull and build
-    the new Docker image
-10. Update SPRAS's online "Read The Docs" documentation by adding a new
-    restructured text page at ``docs/prms/{new-alg}.rst`` (replacing
-    ``{new-alg}`` with a sensible name for the algorithm) and linking to
-    it in ``docs/prms/prms.rst``
+#. Open a `GitHub issue
+   <https://github.com/Reed-CompBio/spras/issues/new/choose>`__ to
+   propose adding a new algorithm and discuss it with the SPRAS
+   maintainers
+
+#. Add a new subdirectory to ``docker-wrappers`` with the name
+   ``<algorithm>``, write a ``Dockerfile`` to build an image for
+   ``<algorithm>``, and include any other files required to build that
+   image in the subdirectory
+
+#. Build and push the Docker image to the `reedcompbio
+   <https://hub.docker.com/orgs/reedcompbio>`__ Docker organization
+   (SPRAS maintainer required)
+
+#. Add a new Python file ``spras/<algorithm>.py`` to implement the
+   wrapper functions for ``<algorithm>``: specify the list of
+   ``required_input`` files and the ``generate_inputs``, ``run``, and
+   ``parse_output`` functions
+
+#. Import the new class in ``spras/runner.py`` and add it to the
+   ``algorithms`` dictionary so the wrapper functions can be accessed
+
+#. Document the usage of the Docker wrapper and the assumptions made
+   when implementing the wrapper
+
+#. Add example usage for the new algorithm and its parameters to the
+   template config file
+
+#. Write test functions and provide example input data in a new test
+   subdirectory ``test/<algorithm>``. Provide example data and
+   algorithm/expected files names to lists or dicts in
+   ``test/generate-inputs`` and ``test/parse-outputs``. Use the full
+   path with the names of the test files.
+
+#. Extend ``.github/workflows/build-containers.yml`` to pull and build
+   the new Docker image
+
+#. Update SPRAS's online "Read The Docs" documentation by adding a new
+   restructured text page at ``docs/prms/{new-alg}.rst`` (replacing
+   ``{new-alg}`` with a sensible name for the algorithm) and linking to
+   it in ``docs/prms/prms.rst``
 
 When adding new algorithms, there are many other considerations that are
 not relevant with the simple Local Neighborhood example. Most algorithms
@@ -455,33 +486,36 @@ the Docker image. See the ``MinCostFlow`` example. Note that when
 downloading code directly from GitHub that does not have versioned
 releases, it is recommended to specify a git commit hash.
 
-Pre-commit hooks
-----------------
+******************
+ Pre-commit hooks
+******************
 
-SPRAS uses `pre-commit
-hooks <https://github.com/pre-commit/pre-commit-hooks>`__ to
-automatically catch certain types of formatting and programming errors
-in source files. Example errors include a yaml file that cannot be
-parsed or a local variable that is referenced before assignment. These
-tests are run automatically on every commit through the GitHub Actions.
-However, developers will benefit from setting up their environment to
-run the same tests locally while they modify the SPRAS source.
+SPRAS uses `pre-commit hooks
+<https://github.com/pre-commit/pre-commit-hooks>`__ to automatically
+catch certain types of formatting and programming errors in source
+files. Example errors include a yaml file that cannot be parsed or a
+local variable that is referenced before assignment. These tests are run
+automatically on every commit through the GitHub Actions. However,
+developers will benefit from setting up their environment to run the
+same tests locally while they modify the SPRAS source.
 
 The ``pre-commit`` package is installed as part of the conda environment
-in ``environment.yml``, or when installing SPRAS with
-``python -m pip install -e .[dev]``. From there, the pre-commit `quick
-start <https://pre-commit.com/#quick-start>`__ guide explains two
-primary ways to use it locally:
+in ``environment.yml``, or when installing SPRAS with ``python -m pip
+install -e .[dev]``. From there, the pre-commit `quick start
+<https://pre-commit.com/#quick-start>`__ guide explains two primary ways
+to use it locally:
 
-- run against all source files with ``pre-commit run --all-files`` to
-  identify errors and automatically fix them when possible
-- configure ``git`` to run the hooks before every ``git commit`` so that
-  a commit will only succeed if the tests pass, ensuring new errors are
-  not introduced
+-  run against all source files with ``pre-commit run --all-files`` to
+   identify errors and automatically fix them when possible
+
+-  configure ``git`` to run the hooks before every ``git commit`` so
+   that a commit will only succeed if the tests pass, ensuring new
+   errors are not introduced
 
 Currently, SPRAS only enforces a small number of Python formatting
 conventions and runs a small number of tests. Additional hooks are
-`available <https://github.com/pre-commit/pre-commit-hooks#hooks-available>`__.
+`available
+<https://github.com/pre-commit/pre-commit-hooks#hooks-available>`__.
 These are configured in ``.pre-commit-config.yaml``. SPRAS also runs
 `ruff <https://github.com/charliermarsh/ruff>`__ as part of the
 pre-commit hooks to perform the Python code analysis, which supports
