@@ -14,6 +14,7 @@ algo_exp_file = {
     'meo': 'edges',
     'omicsintegrator1': 'edges',
     'omicsintegrator2': 'edges',
+    'diamond': 'network',
     'domino': 'network.sif',
     'pathlinker': 'network',
     'allpairs': 'network',
