@@ -417,7 +417,16 @@ def run_container_docker(
     return out
 
 
-def run_container_singularity(container: str, command: List[str], volumes: List[Tuple[PurePath, PurePath]], working_dir: str, out_dir: str | os.PathLike, config: ProcessedContainerSettings, environment: Optional[dict[str, str]] = None):
+def run_container_singularity(
+        container: str,
+        command: List[str],
+        volumes: List[Tuple[PurePath, PurePath]],
+        working_dir: str,
+        out_dir: str | os.PathLike,
+        config: ProcessedContainerSettings,
+        environment: Optional[dict[str, str]] = None,
+        timeout: Optional[int] = None,
+):
     """
     Runs a command in the container using Singularity.
     Only available on Linux.
@@ -427,6 +436,7 @@ def run_container_singularity(container: str, command: List[str], volumes: List[
     @param working_dir: the working directory in the container
     @param out_dir: output directory for the rule's artifacts -- used here to store profiling data
     @param environment: environment variable to set in the container
+    @param timeout: the timeout (in seconds), throwing a TimeoutException if the timeout is reached.
     @return: output from Singularity execute
     """
 
@@ -489,37 +499,43 @@ def run_container_singularity(container: str, command: List[str], volumes: List[
     # If not using the expanded sandbox image, we still need to prepend the docker:// prefix
     # so apptainer knows to pull and convert the image format from docker to apptainer.
     image_to_run = expanded_image if expanded_image else "docker://" + container
-    if config.enable_profiling:
-        # We won't end up using the spython client if profiling is enabled because
-        # we need to run everything manually to set up the cgroup
-        # Build the apptainer run command, which gets passed to the cgroup wrapper script
-        singularity_cmd = [
-            "apptainer", "exec"
-        ]
-        for bind in bind_paths:
-            singularity_cmd.extend(["--bind", bind])
-        singularity_cmd.extend(singularity_options)
-        singularity_cmd.append(str(image_to_run))
-        singularity_cmd.extend(command)
+    # We won't end up using the spython client if profiling or timeout is enabled because
+    # we need to run everything manually to set up the cgroup and add the timeout command as a prefix.
+    # Build the apptainer run command, which gets passed to the cgroup wrapper script
+    cmd = [
+        "apptainer", "exec"
+    ]
+    for bind in bind_paths:
+        cmd.extend(["--bind", bind])
+    cmd.extend(singularity_options)
+    cmd.append(str(image_to_run))
+    cmd.extend(command)
 
+    my_cgroup: Optional[str] = None
+    if config.enable_profiling:
         my_cgroup = create_peer_cgroup()
         # The wrapper script is packaged with spras, and should be located in the same directory
         # as `containers.py`.
         wrapper = os.path.join(os.path.dirname(__file__), "cgroup_wrapper.sh")
-        cmd = [wrapper, my_cgroup] + singularity_cmd
-        proc = subprocess.run(cmd, capture_output=True, text=True, stderr=subprocess.STDOUT)
+        cmd = [wrapper, my_cgroup] + cmd
+    if timeout is not None:
+        cmd = ["timeout", f"{timeout}s"] + cmd
+    proc = subprocess.run(cmd, capture_output=True, text=True, stderr=subprocess.STDOUT)
 
+    # As per unix `timeout`, this is the status if the command times out and --preserve-status is not initially specified
+    # (where the latter above holds).
+    if proc.returncode == 124:
+        if timeout is not None:
+            raise TimeoutError(timeout)
+        else:
+            raise RuntimeError("Timeout return code occurred, yet `timeout` wasn't specified. " + \
+                                "Please file an issue with this error and stacktrace at https://github.com/Reed-CompBio/spras/issues/new.")
+
+    if my_cgroup is not None:
         print("Reading memory and CPU stats from cgroup")
         create_apptainer_container_stats(my_cgroup, str(out_dir))
 
-        result = proc.stdout
-    else:
-        result = Client.execute(
-            image=image_to_run,
-            command=command,
-            options=singularity_options,
-            bind=bind_paths
-        )
+    result = proc.stdout
 
     return result
 
