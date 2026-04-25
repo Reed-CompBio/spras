@@ -1,39 +1,50 @@
-Installing SPRAS
-================
+##################
+ Installing SPRAS
+##################
 
-SPRAS provides several convenient ways to use the package, depending on your needs
+SPRAS provides several convenient ways to use the package, depending on
+your needs
 
-Using Pixi
--------------------------
-If you want to run spras locally on your machine, you can use ``pixi``:
-1. `Download and Install Pixi`_
-2. Activate the pixi environment
+************
+ Using Pixi
+************
 
-.. code-block:: bash
+If you want to run spras locally on your machine, you can use the provided `pyproject.toml` file to create
+a `pixi` environment with all the necessary dependencies: 1. `Download and Install Pixi`_ 2. Activate
+the pixi environment:
 
-    pixi shell
+.. code:: bash
 
-Installing SPRAS with `pip`
----------------------------
-You can also install SPRAS as a package using `pip` directly from the github repository:
+   pixi shell
 
-.. code-block:: bash
+*****************************
+ Installing SPRAS with `pip`
+*****************************
 
-    pip install git+https://github.com/Reed-CompBio/spras.git
+You can also install SPRAS as a package using `pip` directly from the
+github repository:
 
-Getting the SPRAS Docker Image
-------------------------------
-SPRAS also publishes a Docker image that already holds all the necessary dependencies. Assuming you have Docker installed, you can pull
-the image from Docker Hub:
+.. code:: bash
 
-.. code-block:: bash
+   pip install git+https://github.com/Reed-CompBio/spras.git
 
-    docker pull reedcompbio/spras:latest
+********************************
+ Getting the SPRAS Docker Image
+********************************
 
-If you want to pull a specific version of spras, use the version for the image tag name. For example, to get spras v0.6.0:
+SPRAS also publishes a Docker image that already holds all the necessary
+dependencies. Assuming you have Docker installed, you can pull the image
+from Docker Hub:
 
-.. code-block:: bash
+.. code:: bash
 
-    docker pull reedcompbio/spras:0.6.0
+   docker pull reedcompbio/spras:latest
+
+If you want to pull a specific version of spras, use the version for the
+image tag name. For example, to get spras v0.6.0:
+
+.. code:: bash
+
+   docker pull reedcompbio/spras:0.6.0
 
 .. _Download and Install Pixi: https://pixi.sh/latest/installation/

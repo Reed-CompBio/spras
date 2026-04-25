@@ -1,10 +1,12 @@
-File formats
-============
+##############
+ File formats
+##############
 
 All SPRAS file formats are tab-separated values.
 
-Node file
----------
+***********
+ Node file
+***********
 
 Node files include a header row and rows providing attributes for each
 node. One column is for the node identifier and must have the header
@@ -29,8 +31,9 @@ A secondary format provides only a list of node identifiers and uses the
 filename as the node attribute, as in the example ``sources.txt``. This
 format may be deprecated.
 
-Edge file
----------
+***********
+ Edge file
+***********
 
 Edge files do not include a header row. Each row lists the two nodes
 that are connected with an edge, the weight for that edge, and,
@@ -57,11 +60,12 @@ or
 | B | C | 0.77 |
 +---+---+------+
 
-Gold Standard
--------------
+***************
+ Gold Standard
+***************
 
 Nodes
-~~~~~
+=====
 
 Gold standard node files are txt files and do not include a header row.
 
@@ -72,24 +76,24 @@ the biological pathway of interest.
 
 For example:
 
-::
+.. code::
 
    A
    B
    C
 
-Pathway output format
----------------------
+***********************
+ Pathway output format
+***********************
 
 Output pathway files in the standard SPRAS format include a header row
-and rows providing attributes for each edge. The header row is
-``Node1    Node2   Rank    Direction``. Each row lists the two nodes
-that are connected with an edge, the rank for that edge, and a
-directionality column to indicate whether the edge is directed or
-undirected. The directionality values are either a 'U' for an undirected
-edge or a 'D' for a directed edge, where the direction is from Node1 to
-Node2. Pathways that do not contain ranked edges can output all 1s in
-the Rank column.
+and rows providing attributes for each edge. The header row is ``Node1
+Node2 Rank Direction``. Each row lists the two nodes that are connected
+with an edge, the rank for that edge, and a directionality column to
+indicate whether the edge is directed or undirected. The directionality
+values are either a 'U' for an undirected edge or a 'D' for a directed
+edge, where the direction is from Node1 to Node2. Pathways that do not
+contain ranked edges can output all 1s in the Rank column.
 
 For example:
 
