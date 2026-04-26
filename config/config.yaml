@@ -10,7 +10,7 @@
 # For example, adding the redhat.vscode-yaml extension to Visual Studio Code enables this.
 #
 # yaml-language-server: $schema=schema.json
-# Remove the # hashtag from the following line to enable a non-local schema
+# Remove the line before, then remove the # hashtag from the following line to use a versioned schema instead of a locally specified one.
 # # yaml-language-server: $schema=https://raw.githubusercontent.com/Reed-CompBio/spras/refs/tags/0.6.0/config/schena.json
 
 # The length of the hash used to identify a parameter combination
