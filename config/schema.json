@@ -110,8 +110,9 @@
       "title": "CytoscapeAnalysis",
       "type": "object"
     },
-    "Dataset": {
+    "DatasetSchema": {
       "additionalProperties": false,
+      "description": "Collection of information related to `Dataset` objects in the configuration.",
       "properties": {
         "label": {
           "title": "Label",
@@ -119,28 +120,60 @@
         },
         "node_files": {
           "items": {
-            "type": "string"
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "format": "path",
+                "type": "string"
+              }
+            ]
           },
           "title": "Node Files",
           "type": "array"
         },
         "edge_files": {
           "items": {
-            "type": "string"
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "format": "path",
+                "type": "string"
+              }
+            ]
           },
           "title": "Edge Files",
           "type": "array"
         },
         "other_files": {
           "items": {
-            "type": "string"
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "format": "path",
+                "type": "string"
+              }
+            ]
           },
           "title": "Other Files",
           "type": "array"
         },
         "data_dir": {
-          "title": "Data Dir",
-          "type": "string"
+          "anyOf": [
+            {
+              "type": "string"
+            },
+            {
+              "format": "path",
+              "type": "string"
+            }
+          ],
+          "title": "Data Dir"
         }
       },
       "required": [
@@ -150,7 +183,7 @@
         "other_files",
         "data_dir"
       ],
-      "title": "Dataset",
+      "title": "DatasetSchema",
       "type": "object"
     },
     "EvaluationAnalysis": {
@@ -392,6 +425,81 @@
       "additionalProperties": false,
       "properties": {},
       "title": "bowtiebuilderRunModel",
+      "type": "object"
+    },
+    "diamondModel": {
+      "additionalProperties": false,
+      "properties": {
+        "name": {
+          "const": "diamond",
+          "title": "Name",
+          "type": "string"
+        },
+        "include": {
+          "title": "Include",
+          "type": "boolean"
+        },
+        "runs": {
+          "additionalProperties": {
+            "$ref": "#/$defs/diamondRunModel"
+          },
+          "title": "Runs",
+          "type": "object"
+        }
+      },
+      "required": [
+        "name",
+        "include",
+        "runs"
+      ],
+      "title": "diamondModel",
+      "type": "object"
+    },
+    "diamondRunModel": {
+      "additionalProperties": false,
+      "properties": {
+        "n": {
+          "anyOf": [
+            {
+              "type": "integer"
+            },
+            {
+              "items": {
+                "type": "integer"
+              },
+              "type": "array"
+            },
+            {
+              "type": "string"
+            }
+          ],
+          "description": "The desired number of DIAMOnD genes to add. For very small networks, this can error.",
+          "title": "N"
+        },
+        "alpha": {
+          "anyOf": [
+            {
+              "type": "integer"
+            },
+            {
+              "items": {
+                "type": "integer"
+              },
+              "type": "array"
+            },
+            {
+              "type": "string"
+            }
+          ],
+          "default": 1,
+          "description": "Weight of the seeds. This does nothing if alpha is equal to one.\nHigher values of alpha prioritize seed nodes during DIAMOnD's\nseveral rounds of disease module identification.",
+          "title": "Alpha"
+        }
+      },
+      "required": [
+        "n"
+      ],
+      "title": "diamondRunModel",
       "type": "object"
     },
     "dominoModel": {
@@ -1057,10 +1165,10 @@
               "w": 5.0,
               "b": 1.0,
               "g": 3.0,
-              "noise": null,
-              "noisy_edges": null,
-              "random_terminals": null,
-              "dummy_mode": null,
+              "noise": 0.1,
+              "noisy_edges": 0,
+              "random_terminals": 0,
+              "dummy_mode": "terminals",
               "seed": null
             }
           },
@@ -1142,25 +1250,15 @@
             },
             {
               "items": {
-                "anyOf": [
-                  {
-                    "type": "number"
-                  },
-                  {
-                    "type": "null"
-                  }
-                ]
+                "type": "number"
               },
               "type": "array"
             },
             {
               "type": "string"
-            },
-            {
-              "type": "null"
             }
           ],
-          "default": null,
+          "default": 0.1,
           "description": "Standard Deviation of the gaussian noise added to edges in Noisy Edges Randomizations.",
           "title": "Noise"
         },
@@ -1171,25 +1269,15 @@
             },
             {
               "items": {
-                "anyOf": [
-                  {
-                    "type": "integer"
-                  },
-                  {
-                    "type": "null"
-                  }
-                ]
+                "type": "integer"
               },
               "type": "array"
             },
             {
               "type": "string"
-            },
-            {
-              "type": "null"
             }
           ],
-          "default": null,
+          "default": 0,
           "description": "An integer specifying how many times to add noise to the given edge values and re-run.",
           "title": "Noisy Edges"
         },
@@ -1200,25 +1288,15 @@
             },
             {
               "items": {
-                "anyOf": [
-                  {
-                    "type": "integer"
-                  },
-                  {
-                    "type": "null"
-                  }
-                ]
+                "type": "integer"
               },
               "type": "array"
             },
             {
               "type": "string"
-            },
-            {
-              "type": "null"
             }
           ],
-          "default": null,
+          "default": 0,
           "description": "An integer specifying how many times to apply your given prizes to random nodes in the interactome and re-run",
           "title": "Random Terminals"
         },
@@ -1229,23 +1307,13 @@
             },
             {
               "items": {
-                "anyOf": [
-                  {
-                    "$ref": "#/$defs/spras__omicsintegrator2__DummyMode"
-                  },
-                  {
-                    "type": "null"
-                  }
-                ]
+                "$ref": "#/$defs/spras__omicsintegrator2__DummyMode"
               },
               "type": "array"
-            },
-            {
-              "type": "null"
             }
           ],
-          "default": null,
-          "description": "Tells the program which nodes in the interactome to connect the dummy node to. (default: terminals)\n    \"terminals\" = connect to all terminals\n    \"others\" = connect to all nodes except for terminals\n    \"all\" = connect to all nodes in the interactome.",
+          "default": "terminals",
+          "description": "Tells the program which nodes in the interactome to connect the dummy node to.",
           "title": "Dummy Mode"
         },
         "seed": {
@@ -1592,6 +1660,12 @@
     "containers": {
       "$ref": "#/$defs/ContainerSettings"
     },
+    "immutable_files": {
+      "default": false,
+      "description": "If enabled, this tags all files with their local file version.\nMost files do not have a specific version, and by default, this will be the hash of\nall the SPRAS files in the PyPA installation. This option will not work if SPRAS was not installed\nin a PyPA-compliant manner (PyPA-compliant installations include but are not limited to pip, poetry, uv, conda, pixi.)\n\nBy default, this is disabled, as it can make output file names confusing.",
+      "title": "Immutable Files",
+      "type": "boolean"
+    },
     "hash_length": {
       "default": 7,
       "description": "The length of the hash used to identify a parameter combination",
@@ -1604,6 +1678,7 @@
           "mapping": {
             "allpairs": "#/$defs/allpairsModel",
             "bowtiebuilder": "#/$defs/bowtiebuilderModel",
+            "diamond": "#/$defs/diamondModel",
             "domino": "#/$defs/dominoModel",
             "meo": "#/$defs/meoModel",
             "mincostflow": "#/$defs/mincostflowModel",
@@ -1622,6 +1697,9 @@
           },
           {
             "$ref": "#/$defs/bowtiebuilderModel"
+          },
+          {
+            "$ref": "#/$defs/diamondModel"
           },
           {
             "$ref": "#/$defs/dominoModel"
@@ -1657,7 +1735,7 @@
     },
     "datasets": {
       "items": {
-        "$ref": "#/$defs/Dataset"
+        "$ref": "#/$defs/DatasetSchema"
       },
       "title": "Datasets",
       "type": "array"
