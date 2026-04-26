@@ -42,4 +42,5 @@ repos:
         entry: python3 ./util/update_schema.py
         language: unsupported
         always_run: true
+        files: ./config/schema.yaml
         pass_filenames: false
