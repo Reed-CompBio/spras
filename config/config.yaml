@@ -1,7 +1,17 @@
-# Specify the schema:
-# yaml-language-server: $schema=schema.json
-
 # Global workflow control
+#
+# This is the primary place to configure SPRAS workflows. This configuration serves two purposes:
+# 1. To act as a testbed for SPRAS.
+# 2. As documentation by example.
+# More detailed information about the SPRAS config can be found at our ReadTheDocs: https://spras.readthedocs.io/en/latest/.
+# The comments after the dashed break are about for an associated schema which provides IntelliSense for our configs.
+# ---
+# YAML does not officially support JSON schemas, but many editors have extensions that support them.
+# For example, adding the redhat.vscode-yaml extension to Visual Studio Code enables this.
+#
+# yaml-language-server: $schema=schema.json
+# Remove the # hashtag from the following line to enable a non-local schema
+# # yaml-language-server: $schema=https://raw.githubusercontent.com/Reed-CompBio/spras/refs/tags/0.6.0/config/schena.json
 
 # The length of the hash used to identify a parameter combination
 hash_length: 7
