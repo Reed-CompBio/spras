@@ -2,16 +2,18 @@ from pathlib import Path, PurePath
 from shutil import rmtree
 from typing import List, Union
 
+from spras.config.container_schema import ProcessedContainerSettings
 from spras.containers import prepare_volume, run_container_and_log
 
 
-def run_cytoscape(pathways: List[Union[str, PurePath]], output_file: str, container_framework="docker") -> None:
+def run_cytoscape(pathways: List[Union[str, PurePath]], output_file: str, container_settings=None) -> None:
     """
     Create a Cytoscape session file with visualizations of each of the provided pathways
     @param pathways: a list of pathways to visualize
     @param output_file: the output Cytoscape session file
-    @param container_framework: choose the container runtime framework, currently supports "docker" or "singularity" (optional)
+    @param container_settings: configure the container runtime
     """
+    if not container_settings: container_settings = ProcessedContainerSettings()
     work_dir = '/spras'
 
     # To work with Singularity, /spras must be mapped to a writeable location because that directory is fixed as
@@ -33,7 +35,7 @@ def run_cytoscape(pathways: List[Union[str, PurePath]], output_file: str, contai
     volumes.append((cytoscape_output_dir, PurePath(work_dir, 'CytoscapeConfiguration')))
 
     # Map the output file
-    bind_path, mapped_output = prepare_volume(output_file, work_dir)
+    bind_path, mapped_output = prepare_volume(output_file, work_dir, container_settings)
     volumes.append(bind_path)
 
     # Create the initial Python command to run inside the container
@@ -41,17 +43,20 @@ def run_cytoscape(pathways: List[Union[str, PurePath]], output_file: str, contai
 
     # Map the pathway filenames and add them to the Python command
     for pathway in pathways:
-        bind_path, mapped_pathway = prepare_volume(pathway, work_dir)
+        bind_path, mapped_pathway = prepare_volume(pathway, work_dir, container_settings)
         volumes.append(bind_path)
         # Provided the mapped pathway file path and the original file path as the label Cytoscape
         command.extend(['--pathway', f'{mapped_pathway}|{pathway}'])
 
     container_suffix = "py4cytoscape:v3"
     run_container_and_log('Cytoscape',
-                         container_framework,
                          container_suffix,
                          command,
                          volumes,
                          work_dir,
+                         # TODO: doesn't work on Singularity
+                         # (https://github.com/Reed-CompBio/spras/pull/390/files#r2485100875)
+                         None,
+                         container_settings,
                          env)
     rmtree(cytoscape_output_dir)

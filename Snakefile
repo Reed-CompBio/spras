@@ -5,6 +5,7 @@ import yaml
 from spras.dataset import Dataset
 from spras.evaluation import Evaluation
 from spras.analysis import ml, summary, cytoscape
+from spras.config.revision import detach_spras_revision
 import spras.config.config as _config
 
 # Snakemake updated the behavior in the 6.5.0 release https://github.com/snakemake/snakemake/pull/1037
@@ -22,10 +23,9 @@ _config.init_global(config)
 
 out_dir = _config.config.out_dir
 algorithm_params = _config.config.algorithm_params
-algorithm_directed = _config.config.algorithm_directed
 pca_params = _config.config.pca_params
 hac_params = _config.config.hac_params
-FRAMEWORK = _config.config.container_framework
+container_settings = _config.config.container_settings
 include_aggregate_algo_eval = _config.config.analysis_include_evaluation_aggregate_algo
 
 # Return the dataset or gold_standard dictionary from the config file given the label
@@ -35,7 +35,6 @@ def get_dataset(_datasets, label):
 algorithms = list(algorithm_params)
 algorithms_with_params = [f'{algorithm}-params-{params_hash}' for algorithm, param_combos in algorithm_params.items() for params_hash in param_combos.keys()]
 dataset_labels = list(_config.config.datasets.keys())
-
 dataset_gold_standard_node_pairs = [f"{dataset}-{gs['label']}" for gs in _config.config.gold_standards.values() if gs['node_files'] for dataset in gs['dataset_labels']]
 dataset_gold_standard_edge_pairs = [f"{dataset}-{gs['label']}" for gs in _config.config.gold_standards.values() if gs['edge_files'] for dataset in gs['dataset_labels']]
 
@@ -62,10 +61,10 @@ def write_parameter_log(algorithm, param_label, logfile):
 def write_dataset_log(dataset, logfile):
     dataset_contents = get_dataset(_config.config.datasets,dataset)
 
-    # safe_dump gives RepresenterError for an OrderedDict
-    # config file has to convert the dataset from OrderedDict to dict to avoid this
-    with open(logfile,'w') as f:
-        yaml.safe_dump(dataset_contents,f)
+    # safe_dump gives RepresenterError for a DatasetSchema
+    # config file has to convert the dataset to a dict to avoid this
+    with open(logfile, 'w') as f:
+        yaml.safe_dump(dict(dataset_contents), f)
 
 # Choose the final files expected according to the config file options.
 def make_final_input(wildcards):
@@ -156,9 +155,9 @@ rule log_datasets:
 # Input preparation needs to be rerun if these files are modified
 def get_dataset_dependencies(wildcards):
     dataset = _config.config.datasets[wildcards.dataset]
-    all_files = dataset["node_files"] + dataset["edge_files"] + dataset["other_files"]
+    all_files = dataset.node_files + dataset.edge_files + dataset.other_files
     # Add the relative file path
-    all_files = [dataset["data_dir"] + SEP + data_file for data_file in all_files]
+    all_files = [dataset.data_dir + SEP + data_file for data_file in all_files]
 
     return all_files
 
@@ -210,14 +209,16 @@ checkpoint prepare_input:
         # Use the algorithm's generate_inputs function to load the merged dataset, extract the relevant columns,
         # and write the output files specified by required_inputs
         # The filename_map provides the output file path for each required input file type
-        filename_map = {input_type: SEP.join([out_dir, 'prepared', f'{wildcards.dataset}-{wildcards.algorithm}-inputs', f'{input_type}.txt']) for input_type in runner.get_required_inputs(wildcards.algorithm)}
-        runner.prepare_inputs(wildcards.algorithm, input.dataset_file, filename_map)
+        algorithm = detach_spras_revision(_config.config.immutable_files, wildcards.algorithm)
+        filename_map = {input_type: SEP.join([out_dir, 'prepared', f'{wildcards.dataset}-{wildcards.algorithm}-inputs', f'{input_type}.txt']) for input_type in runner.get_required_inputs(algorithm)}
+        runner.prepare_inputs(algorithm, input.dataset_file, filename_map)
 
 # Collect the prepared input files from the specified directory
 # If the directory does not exist for this dataset-algorithm pair, the checkpoint will detect that
 # prepare_input needs to be run and will then automatically re-rerun downstream rules like reconstruct
 # If the directory does exist but some of the required input files are missing, Snakemake will not automatically
-# run prepare_input
+# run prepare_inputs
+
 # It only checks for the output of prepare_input, which is a directory
 # Therefore, manually remove the entire directory if any of the expected prepared input file are missing so that
 # prepare_inputs is run, the directory and prepared input files are re-generated, and the reconstruct rule is run again
@@ -228,7 +229,7 @@ def collect_prepared_input(wildcards):
     prepared_dir = SEP.join([out_dir, 'prepared', f'{wildcards.dataset}-{wildcards.algorithm}-inputs'])
 
     # Construct the list of expected prepared input files for the reconstruction algorithm
-    prepared_inputs = expand(f'{prepared_dir}{SEP}{{type}}.txt',type=runner.get_required_inputs(algorithm=wildcards.algorithm))
+    prepared_inputs = expand(f'{prepared_dir}{SEP}{{type}}.txt',type=runner.get_required_inputs(algorithm=detach_spras_revision(_config.config.immutable_files, wildcards.algorithm)))
     # If the directory is missing, do nothing because the missing output triggers running prepare_input
     if os.path.isdir(prepared_dir):
         # First, check if .snakemake_timestamp, the last written file in a directory rule,
@@ -273,28 +274,24 @@ rule reconstruct:
     run:
         # Create a copy so that the updates are not written to the parameters logfile
         params = reconstruction_params(wildcards.algorithm, wildcards.params).copy()
-        # Add the input files
-        params.update(dict(zip(runner.get_required_inputs(wildcards.algorithm), *{input}, strict=True)))
-        # Add the output file
-        # All run functions can accept a relative path to the output file that should be written that is called 'output_file'
-        params['output_file'] = output.pathway_file
-        # Remove the default placeholder parameter added for algorithms that have no parameters
-        if 'spras_placeholder' in params:
-            params.pop('spras_placeholder')
-        params['container_framework'] = FRAMEWORK
-        runner.run(wildcards.algorithm, params)
+        # Declare the input files as a dictionary.
+        inputs = dict(zip(runner.get_required_inputs(detach_spras_revision(_config.config.immutable_files, wildcards.algorithm)), *{input}, strict=True))
+        # Remove the _spras_run_name parameter added for keeping track of the run name for parameters.yml
+        if '_spras_run_name' in params:
+            params.pop('_spras_run_name')
+        runner.run(detach_spras_revision(_config.config.immutable_files, wildcards.algorithm), inputs, output.pathway_file, params, container_settings)
 
 # Original pathway reconstruction output to universal output
 # Use PRRunner as a wrapper to call the algorithm-specific parse_output
 rule parse_output:
-    input: 
+    input:
         raw_file = SEP.join([out_dir, '{dataset}-{algorithm}-{params}', 'raw-pathway.txt']),
         dataset_file = SEP.join([out_dir, 'dataset-{dataset}-merged.pickle'])
     output: standardized_file = SEP.join([out_dir, '{dataset}-{algorithm}-{params}', 'pathway.txt'])
     run:
         params = reconstruction_params(wildcards.algorithm, wildcards.params).copy()
         params['dataset'] = input.dataset_file
-        runner.parse_output(wildcards.algorithm, input.raw_file, output.standardized_file, params)
+        runner.parse_output(detach_spras_revision(_config.config.immutable_files, wildcards.algorithm), input.raw_file, output.standardized_file, params)
 
 # TODO: reuse in the future once we make summary work for mixed graphs. See https://github.com/Reed-CompBio/spras/issues/128
 # Collect summary statistics for a single pathway
@@ -313,7 +310,7 @@ rule viz_cytoscape:
     output: 
         session = SEP.join([out_dir, '{dataset}-cytoscape.cys'])
     run:
-        cytoscape.run_cytoscape(input.pathways, output.session, FRAMEWORK)
+        cytoscape.run_cytoscape(input.pathways, output.session, container_settings)
 
 
 # Write a single summary table for all pathways for each dataset

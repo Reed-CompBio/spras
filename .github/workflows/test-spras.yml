@@ -36,9 +36,18 @@ jobs:
         # (with the max specified by `--splits 2`), to save CI time by parallelization
         test_group: [1, 2]
         os: [ubuntu-latest]
+      # we want all tests to run, even if some fail.
+      fail-fast: false
     steps:
       - name: Checkout repository
         uses: actions/checkout@v4
+      - name: "node-cleanup"
+        # Frees up space for https://github.com/Reed-CompBio/spras/issues/448
+        # removing dotnet, android, and leftover docker images as per https://carlosbecker.com/posts/github-actions-disk-space/.
+        run: |
+          sudo rm -rf /usr/share/dotnet /usr/local/lib/android
+          sudo docker image prune --all --force
+          sudo docker builder prune -a
       - name: Install conda environment
         uses: conda-incubator/setup-miniconda@v2
         with:

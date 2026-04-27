@@ -4,7 +4,8 @@ from pathlib import Path
 import pytest
 
 import spras.config.config as config
-from spras.meo import MEO, write_properties
+from spras.config.container_schema import ContainerFramework, ProcessedContainerSettings
+from spras.meo import MEO, MEOParams, write_properties
 
 config.init_from_file("config/config.yaml")
 
@@ -20,9 +21,9 @@ class TestMaximumEdgeOrientation:
         out_path = Path(OUT_FILE)
         out_path.unlink(missing_ok=True)
         # Only include required arguments
-        MEO.run(edges=TEST_DIR + 'input/meo-edges.txt',
-                sources=TEST_DIR + 'input/meo-sources.txt',
-                targets=TEST_DIR + 'input/meo-targets.txt',
+        MEO.run({"edges": TEST_DIR + 'input/meo-edges.txt',
+                 "sources": TEST_DIR + 'input/meo-sources.txt',
+                 "targets": TEST_DIR + 'input/meo-targets.txt'},
                 output_file=OUT_FILE)
         assert out_path.exists()
 
@@ -30,21 +31,19 @@ class TestMaximumEdgeOrientation:
         out_path = Path(OUT_FILE)
         out_path.unlink(missing_ok=True)
         # Include all optional arguments
-        MEO.run(edges=TEST_DIR + 'input/meo-edges.txt',
-                sources=TEST_DIR + 'input/meo-sources.txt',
-                targets=TEST_DIR + 'input/meo-targets.txt',
-                output_file=OUT_FILE,
-                max_path_length=3,
-                local_search='No',
-                rand_restarts=10)
+        MEO.run({"edges": TEST_DIR + 'input/meo-edges.txt',
+                 "sources": TEST_DIR + 'input/meo-sources.txt',
+                 "targets": TEST_DIR + 'input/meo-targets.txt'},
+                args=MEOParams(max_path_length=3, local_search=False, rand_restarts=10),
+                output_file=OUT_FILE)
         assert out_path.exists()
 
     def test_meo_missing(self):
         # Test the expected error is raised when required arguments are missing
         with pytest.raises(ValueError):
             # No edges
-            MEO.run(sources=TEST_DIR + 'input/meo-sources.txt',
-                    targets=TEST_DIR + 'input/meo-targets.txt',
+            MEO.run({"sources": TEST_DIR + 'input/meo-sources.txt',
+                     "targets": TEST_DIR + 'input/meo-targets.txt'},
                     output_file=OUT_FILE)
 
         with pytest.raises(ValueError):
@@ -62,9 +61,9 @@ class TestMaximumEdgeOrientation:
         out_path = Path(OUT_FILE)
         out_path.unlink(missing_ok=True)
         # Only include required arguments and run with Singularity
-        MEO.run(edges=TEST_DIR + 'input/meo-edges.txt',
-                sources=TEST_DIR + 'input/meo-sources.txt',
-                targets=TEST_DIR + 'input/meo-targets.txt',
+        MEO.run({"edges": TEST_DIR + 'input/meo-edges.txt',
+                 "sources": TEST_DIR + 'input/meo-sources.txt',
+                 "targets": TEST_DIR + 'input/meo-targets.txt'},
                 output_file=OUT_FILE,
-                container_framework="singularity")
+                container_settings=ProcessedContainerSettings(framework=ContainerFramework.singularity))
         assert out_path.exists()

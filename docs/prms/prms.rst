@@ -1,10 +1,14 @@
-Pathway Reconstruction Methods
-=====================================
+################################
+ Pathway Reconstruction Methods
+################################
 
 .. note::
-   While every algorithm here is broadly labelled as a pathway reconstruction method,
-   there are other sub-types of algorithms that have more specialized capabilities than the rest.
-   Currently, SPRAS also supports edge orientation algorithms (e.g. MEO) and active module identifiers/disease module mining methods (e.g. DOMINO).
+
+   While every algorithm here is broadly labelled as a pathway
+   reconstruction method, there are other sub-types of algorithms that
+   have more specialized capabilities than the rest. Currently, SPRAS
+   also supports edge orientation algorithms (e.g. MEO) and active
+   module identifiers/disease module mining methods (e.g. DOMINO).
 
 This is the list of SPRAS's supported pathway reconstruction methods. Each subpage comes with a description of the algorithm,
 its source code and associated paper (if one exists), and its 'dataset usage,' or parts of a dataset that it will utilize when
@@ -40,6 +44,12 @@ will be converted into two directed edges pointing opposite of one another.
    :caption: BowTieBuilder
 
    bowtiebuilder
+
+.. toctree::
+   :maxdepth: 1
+   :caption: DIAMOnD
+
+   diamond
 
 .. toctree::
    :maxdepth: 1
