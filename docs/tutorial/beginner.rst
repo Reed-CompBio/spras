@@ -250,7 +250,7 @@ Analysis
        include: true
    cytoscape:
        include: true
-   ml:
+   pca:
        include: true
 
 SPRAS includes multiple downstream analyses that can be toggled on or
