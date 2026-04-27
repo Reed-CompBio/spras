@@ -252,7 +252,6 @@ Analysis
        include: true
    pca:
        include: true
-   
 
 SPRAS includes multiple downstream analyses that can be toggled on or
 off directly in the configuration file. When enabled, these analyses are
