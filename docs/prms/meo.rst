@@ -21,15 +21,18 @@ MEO takes in three optional parameters:
 
 -  rand_restarts: the number (int) of random restarts to use.
 
-Dataset Usage
--------------
+***************
+ Dataset Usage
+***************
 
-MEO uses ``sources``, ``targets``, and edge weights. MEO also uses
-edge direction information, and the output sub-network is directed.
+MEO uses ``sources``, ``targets``, and edge weights. MEO also uses edge
+direction information, and the output sub-network is directed.
 
-Implementation Details
-----------------------
+************************
+ Implementation Details
+************************
 
-Internally, MEO only accepts directed interactomes.
-SPRAS will automatically convert edges to directed edges as necessary.
-For more information, see the section on :ref:`algorithm directionality <directionality>`.
+Internally, MEO only accepts directed interactomes. SPRAS will
+automatically convert edges to directed edges as necessary. For more
+information, see the section on :ref:`algorithm directionality
+<directionality>`.

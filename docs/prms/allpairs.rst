@@ -7,19 +7,24 @@ interactome, will return the induced edge subnetwork of the interactome
 consisting of all of the shortest paths from every single source to
 every single target with respect to a cartesian product.
 
-All Pairs does not take any arguments. Its source code is at https://github.com/Reed-CompBio/all-pairs-shortest-paths
-licensed under MIT.
+All Pairs does not take any arguments. Its source code is at
+https://github.com/Reed-CompBio/all-pairs-shortest-paths licensed under
+MIT.
 
-Dataset Usage
--------------
+***************
+ Dataset Usage
+***************
 
-All Pairs Shortest Paths uses ``sources``, ``targets``, and edge weights.
-All Pairs Shortest Paths uses edge direction information.
-However, All Pairs Shortest Paths always returns an undirected subnetwork.
+All Pairs Shortest Paths uses ``sources``, ``targets``, and edge
+weights. All Pairs Shortest Paths uses edge direction information.
+However, All Pairs Shortest Paths always returns an undirected
+subnetwork.
 
-Implementation Details
-----------------------
+************************
+ Implementation Details
+************************
 
-Internally, All Pairs Shortest Paths only accepts fully undirected or directed graphs.
-SPRAS will automatically convert edges to directed edges as necessary.
-For more information, see the section on :ref:`algorithm directionality <directionality>`.
+Internally, All Pairs Shortest Paths only accepts fully undirected or
+directed graphs. SPRAS will automatically convert edges to directed
+edges as necessary. For more information, see the section on
+:ref:`algorithm directionality <directionality>`.

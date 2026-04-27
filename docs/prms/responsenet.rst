@@ -13,15 +13,18 @@ ResponseNet takes one optional parameter:
 -  gamma: (int) controls the size of the output graph: more gamma means
    more 'flow' gets passed along starting from the sources.
 
-Dataset Usage
--------------
+***************
+ Dataset Usage
+***************
 
 ResponseNet uses ``sources``, ``targets``, and edge weights. ResponseNet
 uses edge direction information, but returns an undirected subnetwork.
 
-Implementation Details
-----------------------
+************************
+ Implementation Details
+************************
 
-Internally, ResponseNet only takes in directed graphs.
-SPRAS will automatically convert edges to directed edges as necessary.
-For more information, see the section on :ref:`algorithm directionality <directionality>`.
+Internally, ResponseNet only takes in directed graphs. SPRAS will
+automatically convert edges to directed edges as necessary. For more
+information, see the section on :ref:`algorithm directionality
+<directionality>`.

@@ -10,22 +10,24 @@ PathLinker takes one optional argument:
 
 -  k: The number of paths to find (*k* shortest paths).
 
-Dataset Usage
--------------
+***************
+ Dataset Usage
+***************
 
 PathLinker uses ``sources``, ``targets``, and edge weights. PathLinker
 uses edge direction information.
 
-Implementation Details
-----------------------
+************************
+ Implementation Details
+************************
 
-Internally, PathLinker only takes in directed graphs.
-SPRAS will automatically convert edges to directed edges as necessary.
-For more information, see the section on :ref:`algorithm directionality <directionality>`.
+Internally, PathLinker only takes in directed graphs. SPRAS will
+automatically convert edges to directed edges as necessary. For more
+information, see the section on :ref:`algorithm directionality
+<directionality>`.
 
-****************
- External links
-****************
+External links
+==============
 
 -  Source code: https://github.com/Murali-group/PathLinker
 -  Associated papers: https://doi.org/10.1038/npjsba.2016.2 and

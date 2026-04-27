@@ -13,22 +13,24 @@ MinCostFlow takes two optional parameters:
 -  flow: (int) the amount of flow going through the graph
 -  capacity: the (float) max capacity for edges
 
-Dataset Usage
--------------
+***************
+ Dataset Usage
+***************
 
-MinCostFlow uses the input's ``sources``, ``targets``, and edge weights. MinCostFlow also
-edge direction information.
+MinCostFlow uses the input's ``sources``, ``targets``, and edge weights.
+MinCostFlow also edge direction information.
 
-Implementation Details
-----------------------
+************************
+ Implementation Details
+************************
 
-MinCostFlow's internal implementation only accepts directed interactomes.
-SPRAS will automatically convert edges to directed edges as necessary.
-For more information, see the section on :ref:`algorithm directionality <directionality>`.
+MinCostFlow's internal implementation only accepts directed
+interactomes. SPRAS will automatically convert edges to directed edges
+as necessary. For more information, see the section on :ref:`algorithm
+directionality <directionality>`.
 
-****************
- External links
-****************
+External links
+==============
 
 -  Repository: https://github.com/gitter-lab/min-cost-flow/
 -  MinCostFlow implementation paper:

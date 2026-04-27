@@ -18,19 +18,22 @@ targets, see STRWR. RWR takes in two parameters:
 
 RWR is implemented at https://github.com/reed-compbio/rwr.
 
-Dataset Usage
--------------
+***************
+ Dataset Usage
+***************
 
-RWR considers the union of ``sources`` and ``targets`` as the
-input active nodes. Input interactome directionality is considered, and the
+RWR considers the union of ``sources`` and ``targets`` as the input
+active nodes. Input interactome directionality is considered, and the
 output subnetwork is also directed.
 
-Implementation Details
-----------------------
+************************
+ Implementation Details
+************************
 
 RWR returns a ranked list of nodes: SPRAS returns the induced subgraph
-from the number of nodes corresponding to the user-specified ``threshold``.
+from the number of nodes corresponding to the user-specified
+``threshold``.
 
-Internally, RWR only takes in directed graphs.
-SPRAS will automatically convert edges to directed edges as necessary.
-For more information, see the section on :ref:`algorithm directionality <directionality>`.
+Internally, RWR only takes in directed graphs. SPRAS will automatically
+convert edges to directed edges as necessary. For more information, see
+the section on :ref:`algorithm directionality <directionality>`.
