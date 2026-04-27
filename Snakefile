@@ -324,7 +324,7 @@ for keys in statistics_computation.keys():
         output: [SEP.join([out_dir, '{dataset}-{algorithm}-{params}', 'statistics', f'{key}.txt']) for key in keys]
         # It is very tempting to use `.items()` instead of `.keys()` above, but
         # We instead need to pass keys in via parameters, else the job would use the latest values in the statistics_computation.
-        # More info is in the procedural rule link ab
+        # More info is in the procedural rule link above
         params: statistics_names=keys
         run:
             (Path(input.pathway_file).parent / 'statistics').mkdir(exist_ok=True)

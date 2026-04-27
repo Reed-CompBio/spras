@@ -54,7 +54,7 @@ def summarize_networks(file_paths: Iterable[Path], node_table: pd.DataFrame, alg
         # (e.g. "5.0" -> float(5.0), while "5" -> int(5).)
         graph_statistics = [
             ast.literal_eval(Path(file).read_text()) for file in
-            # along with sorting to keep the output stable (this happens again)
+            # along with sorting to keep the output stable (we do this same sorting procedure once more in this function)
             sorted(statistics_files[algo_with_params[index]], key=lambda x: statistics_options.index(Path(x).stem))
         ]
 
