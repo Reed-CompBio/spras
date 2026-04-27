@@ -14,6 +14,14 @@ DOMINO has two optional parameters:
 -  module_threshold: the p-value threshold for considering a putative
    module as final module
 
+***************
+ Dataset Usage
+***************
+
+DOMINO requires the `active` column to be set. DOMINO does not consider
+edge weights, nor graph directionality: directed edges are treated as
+undirected edges, and DOMINO returns an undirected subnetwork.
+
 #################
  Wrapper Details
 #################
