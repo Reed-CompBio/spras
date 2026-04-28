@@ -15,7 +15,7 @@ def gurobi() -> Optional[Path]:
     """
     gurobi_str = config.config.secrets['gurobi']
     if not gurobi_str: return None
-    
+
     gurobi_license = Path(gurobi_str)
     if not gurobi_license.exists(): return None
 

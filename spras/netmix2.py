@@ -1,13 +1,27 @@
 from pathlib import Path
+from typing import Optional
+
+from pydantic import BaseModel
 
 from spras.containers import prepare_volume, run_container_and_log
 from spras.dataset import Dataset
-from spras.interactome import convert_directed_to_undirected, reinsert_direction_col_undirected
+from spras.interactome import (
+    convert_directed_to_undirected,
+    reinsert_direction_col_undirected,
+)
 from spras.prm import PRM
 from spras.secrets import gurobi
 from spras.util import add_rank_column, duplicate_edges
 
 __all__ = ['NetMix2']
+
+class NetMix2Params(BaseModel):
+    delta: Optional[float] = None
+    """The similarity threshold (optional)."""
+    num_edges: int = 175000
+    """The number of edges in similarity threshold graph."""
+    density: float = 0.05
+    """The minimum edge density of the altered subnetwork."""
 
 class NetMix2(PRM):
     required_inputs = ['network', 'scores']
@@ -24,7 +38,7 @@ class NetMix2(PRM):
                 raise ValueError(f"{input_type} filename is missing")
 
         if data.contains_node_columns('prize'):
-            node_df = data.request_node_columns(['prize'])
+            node_df = data.get_node_columns(['prize'])
         else:
             raise ValueError("Node prizes are required for NetMix2.")
         node_df.to_csv(filename_map['scores'], index=False, columns=['prize', 'NODEID'], header=False, sep='\t')
@@ -34,20 +48,7 @@ class NetMix2(PRM):
         edges_df.to_csv(filename_map['network'], index=False, sep='\t', columns=['Interactor1', 'Interactor2'], header=False)
 
     @staticmethod
-    def run(network=None, scores=None, output_file=None, delta=None, num_edges=None, density=None,
-            container_framework="docker"):
-        """
-        Run NetMix2 with Docker
-        @param network: input network file (required)
-        @param scores: scores file (required)
-        @param output_file: path to the output pathway file (required)
-        @param delta: The similarity threshold (optional).
-        @param num_edges: The number of edges in similarity threshold graph (optional). Default: 175000
-        @param density: The minimum edge density of the altered subnetwork (optional). Default: 0.05
-        """
-        if not network or not scores or not output_file:
-            raise ValueError('Required NetMix2 arguments are missing')
-
+    def run(inputs, output_file, args, container_settings=None):
         gurobi_path = gurobi()
         if not gurobi_path:
             raise RuntimeError("gurobi license path is not present.\n" + \
@@ -57,19 +58,19 @@ class NetMix2(PRM):
 
         volumes = list()
 
-        bind_path, network_file = prepare_volume(network, work_dir)
+        bind_path, network_file = prepare_volume(inputs["network"], work_dir, container_settings)
         volumes.append(bind_path)
 
-        bind_path, scores_file = prepare_volume(scores, work_dir)
+        bind_path, scores_file = prepare_volume(inputs["scores"], work_dir, container_settings)
         volumes.append(bind_path)
 
-        bind_path, license_file = prepare_volume(gurobi_path, work_dir)
+        bind_path, license_file = prepare_volume(inputs["gurobi_path"], work_dir, container_settings)
         volumes.append(bind_path)
 
         out_dir = Path(output_file).parent
         out_dir.mkdir(parents=True, exist_ok=True)
 
-        bind_path, mapped_out_dir = prepare_volume(str(out_dir), work_dir)
+        bind_path, mapped_out_dir = prepare_volume(out_dir, work_dir, container_settings)
         volumes.append(bind_path)
 
         command = ['python',
@@ -81,20 +82,19 @@ class NetMix2(PRM):
                    '-o', mapped_out_dir]
 
         # Add optional arguments
-        if delta is not None:
-            command.extend(['--delta', str(delta)])
-        if num_edges is not None:
-            command.extend(['--num_edges', str(num_edges)])
-        if density is not None:
-            command.extend(['--density', str(density)])
+        if args.delta is not None:
+            command.extend(['--delta', str(args.delta)])
+        command.extend(['--num_edges', str(args.num_edges)])
+        command.extend(['--density', str(args.density)])
 
         container_suffix = "netmix2"
         run_container_and_log('NetMix2',
-                              container_framework,
                               container_suffix,
                               command,
                               volumes,
                               work_dir,
+                              out_dir,
+                              container_settings,
                               environment={'SPRAS': 'True',
                                            'GRB_LICENSE_FILE': license_file})
 
