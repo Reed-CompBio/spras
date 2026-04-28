@@ -10,7 +10,7 @@ We declare models using two classes here:
 - `CaseInsensitiveEnum` (see ./util.py)
 """
 
-from typing import Annotated
+from typing import Annotated, Optional
 
 from pydantic import AfterValidator, BaseModel, ConfigDict
 
@@ -88,6 +88,9 @@ class GoldStandard(BaseModel):
 
     model_config = ConfigDict(extra='forbid')
 
+class Secrets(BaseModel):
+    gurobi: Optional[str] = None
+
 class Locations(BaseModel):
     reconstruction_dir: str
 
@@ -119,6 +122,7 @@ class RawConfig(BaseModel):
     datasets: list[DatasetSchema]
     gold_standards: list[GoldStandard] = []
     analysis: Analysis = Analysis()
+    secrets: Secrets = Secrets()
 
     reconstruction_settings: ReconstructionSettings
 
