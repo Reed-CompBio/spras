@@ -217,6 +217,7 @@ class TestResolveContainerImage:
         assert result.is_local_sif == expected_is_sif
 
 
+@pytest.mark.skipif(platform.system() != 'Linux', reason="_prepare_singularity_image imports spython which requires Linux")
 class TestPrepareSingularityImage:
     """Test _prepare_singularity_image(), the helper that prepares the image
     that apptainer/singularity should run.

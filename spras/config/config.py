@@ -71,7 +71,7 @@ class Config:
                     AlgorithmName(key)
                 except ValueError as err:
                     raise ValueError(
-                        f"Unknown algorithm name '{key}' in configured containers.images. Is there a typo?"
+                        f"Unknown algorithm name '{key}' in configured containers.images. Is there a typo? "
                         f"Valid algorithm names are: {sorted(valid_names)}"
                     ) from err
 
