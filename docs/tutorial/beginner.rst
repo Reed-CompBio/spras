@@ -285,7 +285,7 @@ From the root directory, run the command below from the command line:
 
 .. code:: bash
 
-   snakemake --cores 1 --configfile config/beginner.yaml
+   spras run --cores 1 --configfile config/beginner.yaml
 
 This command starts the workflow manager that automates all steps
 defined by SPRAS. It tells Snakemake to use one CPU core and to load
@@ -430,7 +430,7 @@ After saving the changes, rerun with:
 
 .. code:: bash
 
-   snakemake --cores 1 --configfile config/beginner.yaml
+   spras run --cores 1 --configfile config/beginner.yaml
 
 What happens when you run this command
 --------------------------------------
@@ -600,7 +600,7 @@ After saving the changes, rerun with:
 
 .. code:: bash
 
-   snakemake --cores 1 --configfile config/beginner.yaml
+   spras run --cores 1 --configfile config/beginner.yaml
 
 What happens when you run this command
 --------------------------------------
