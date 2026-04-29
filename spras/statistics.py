@@ -28,10 +28,11 @@ def compute_degree(graph: nx.DiGraph) -> tuple[int, float]:
         degrees = [deg for _, deg in graph.degree()]
         return max(degrees), median(degrees)
 
-def compute_on_cc(directed_graph: nx.DiGraph) -> tuple[int, float]:
+def compute_max_diameter(directed_graph: nx.DiGraph) -> tuple[int,]:
     # We convert our directed_graph to an undirected graph as networkx (reasonably) does
     # not allow for computing the connected components of a directed graph, but the connected
     # component count still is a useful statistic for us.
+    # We do this a few more times throughout the file.
     graph: nx.Graph = directed_graph.to_undirected()
     cc = list(nx.connected_components(graph))
     # Save the max diameter
@@ -40,12 +41,15 @@ def compute_on_cc(directed_graph: nx.DiGraph) -> tuple[int, float]:
         nx.diameter(graph.subgraph(c).copy()) if len(c) > 1 else 0
         for c in cc
     ]
-    max_diameter = max(diameters, default=0)
+    return (max(diameters, default=0),)
 
+def compute_avg_path_lengths(directed_graph: nx.DiGraph) -> tuple[float,]:
+    graph: nx.Graph = directed_graph.to_undirected()
+    cc = list(nx.connected_components(graph))
     # Save the average path lengths
     # Compute average shortest path length only for components with ≥2 nodes (undefined for singletons, set to 0.0)
     avg_path_lengths = [
-        nx.average_shortest_path_length(graph.subgraph(c).copy()) if len(c) > 1 else 0.0
+        nx.average_shortest_path_length(directed_graph.subgraph(c).copy()) if len(c) > 1 else 0.0
         for c in cc
     ]
 
@@ -54,16 +58,17 @@ def compute_on_cc(directed_graph: nx.DiGraph) -> tuple[int, float]:
     else:
         avg_path_len = 0.0
 
-    return max_diameter, avg_path_len
+    return (avg_path_len,)
 
-# The type signature here is meant to be 'an n-tuple has n-outputs.'
+# The type signature here is meant to be 'an n-tuple has n outputs.'
 statistics_computation: dict[tuple[str, ...], Callable[[nx.DiGraph], tuple[float | int, ...]]] = {
     ('Number of nodes',): lambda graph : (graph.number_of_nodes(),),
     ('Number of edges',): lambda graph : (graph.number_of_edges(),),
     ('Number of connected components',): lambda graph : (nx.number_connected_components(graph.to_undirected()),),
     ('Density',): lambda graph : (nx.density(graph),),
     ('Max degree', 'Median degree'): compute_degree,
-    ('Max diameter', 'Average path length'): compute_on_cc,
+    ('Max diameter',): compute_max_diameter,
+    ('Average path length',): compute_avg_path_lengths,
 }
 
 # All of the keys inside statistics_computation, flattened.
