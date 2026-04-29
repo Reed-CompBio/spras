@@ -459,8 +459,8 @@ of the main SPRAS repository.
    ``parse_output`` functions
 
 #. Register the new algorithm in ``ALGORITHM_REGISTRY`` in
-   ``spras/config/util.py`` by adding one entry
-   ``"<name>": ("spras.<module>", "<ClassName>")``;  no changes to
+   ``spras/config/util.py`` by adding one entry ``"<name>":
+   ("spras.<module>", "<ClassName>")``; no changes to
    ``spras/runner.py`` are needed
 
 #. Document the usage of the Docker wrapper and the assumptions made
