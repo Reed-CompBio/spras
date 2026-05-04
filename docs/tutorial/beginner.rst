@@ -161,13 +161,15 @@ Algorithms
      params:
         include: true
         run1:
-           b: 0.1
-           d: 10
-           g: 1e-3
+           params:
+              b: 0.1
+              d: 10
+              g: 1e-3
         run2:
-           b: [0.55, 2, 10]
-           d: [10, 20]
-           g: 1e-3
+           params:
+              b: [0.55, 2, 10]
+              d: [10, 20]
+              g: 1e-3
 
 When defining an algorithm in the configuration file, its name must
 match one of the supported SPRAS algorithms. Each algorithm includes an

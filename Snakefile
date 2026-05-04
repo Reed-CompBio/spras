@@ -286,7 +286,7 @@ rule reconstruct:
         # Get the timeout from the config and use it as an input.
         # TODO: This has unexpected behavior when this rule succeeds but the timeout extends,
         # making this rule run again.
-        timeout = lambda wildcards: _config.config.algorithm_timeouts[wildcards.algorithm]
+        timeout = lambda wildcards: _config.config.algorithm_param_timeouts[wildcards.params.split("-")[1]]
     run:
         # Create a copy so that the updates are not written to the parameters logfile
         algorithm_params = reconstruction_params(wildcards.algorithm, wildcards.params).copy()
