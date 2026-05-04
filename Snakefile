@@ -48,11 +48,14 @@ def algo_has_mult_param_combos(algo):
 
 algorithms_mult_param_combos = [algo for algo in algorithms if algo_has_mult_param_combos(algo)]
 
+# Gets the associated parameter hash out of a params wildcard
+def params_index(params_hash):
+    return params_hash.replace('params-', '')
+
 # Get the parameter dictionary for the specified
 # algorithm and parameter combination hash
 def reconstruction_params(algorithm, params_hash):
-    index = params_hash.replace('params-', '')
-    return algorithm_params[algorithm][index]
+    return algorithm_params[algorithm][params_index(params_hash)]
 
 # Log the parameter dictionary for this parameter configuration in a yaml file
 def write_parameter_log(algorithm, param_label, logfile):
@@ -286,7 +289,7 @@ rule reconstruct:
         # Get the timeout from the config and use it as an input.
         # TODO: This has unexpected behavior when this rule succeeds but the timeout extends,
         # making this rule run again.
-        timeout = lambda wildcards: _config.config.algorithm_param_timeouts[wildcards.params.split("-")[1]]
+        timeout = lambda wildcards: _config.config.algorithm_param_timeouts[params_index(wildcards.params)]
     run:
         # Create a copy so that the updates are not written to the parameters logfile
         algorithm_params = reconstruction_params(wildcards.algorithm, wildcards.params).copy()
