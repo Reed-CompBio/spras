@@ -23,8 +23,10 @@ from spras.runner import algorithms
 __all__ = ['AlgorithmUnion']
 
 class RunSettings(BaseModel):
-    """The associated timeout with a run, parsed with `pytimeparse`."""
+    """All of the non-parameter settings associated with a run."""
+
     timeout: Optional[str] = None
+    """The associated timeout with a run, parsed with `pytimeparse`."""
 
     model_config = ConfigDict(extra='forbid', use_attribute_docstrings=True)
 
