@@ -60,12 +60,10 @@ class PRM(ABC, Generic[T]):
         assert len(original_bases) == 1, "There were several generics passed into PRM, when precisely one is required."
         T_class = original_bases[0]
 
-        if not issubclass(T_class, BaseModel):
+        if not issubclass(BaseModel, T_class):
             raise RuntimeError("The generic passed into PRM is not a pydantic.BaseModel.")
 
-        # We finalize with a cast, since issubclass does an over-eager casting to
-        # its specified type.
-        return cast(type[T], T_class)
+        return T_class
 
     # This is used in `runner.py` to avoid a dependency diamond when trying
     # to import the actual algorithm schema.
