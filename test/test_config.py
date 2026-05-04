@@ -66,27 +66,27 @@ def get_test_config():
                 "name": "omicsintegrator2",
                 "include": True,
                 "runs": {
-                    "strings": {"dummy_mode": ["terminals", "others"], "b": 3},
+                    "strings": {"params": {"dummy_mode": ["terminals", "others"], "b": 3}},
                     # spacing in np.linspace is on purpose
-                    "singleton_string_np_linspace": {"dummy_mode": "terminals", "b": "np.linspace(0,    5,2,)"},
-                    "str_array_np_logspace": {"dummy_mode": ["others", "all"], "g": "np.logspace(1,1)"}
+                    "singleton_string_np_linspace": {"params": {"dummy_mode": "terminals", "b": "np.linspace(0,    5,2,)"}},
+                    "str_array_np_logspace": {"params": {"dummy_mode": ["others", "all"], "g": "np.logspace(1,1)"}}
                 }
             },
             {
                 "name": "meo",
                 "include": True,
                 "runs": {
-                    "numbersAndBoolsDuplicate": {"max_path_length": 1, "rand_restarts": [float(2.0), 3], "local_search": [True, False]},
-                    "numbersAndBool": {"max_path_length": 2, "rand_restarts": [float(2.0), 3], "local_search": [True]},
-                    "numbersAndBools": {"max_path_length": 1, "rand_restarts": [float(2.0), 3], "local_search": [True, False]},
-                    "boolArrTest": {"local_search": [True, False], "max_path_length": "range(1, 3)"}
+                    "numbersAndBoolsDuplicate": {"params": {"max_path_length": 1, "rand_restarts": [float(2.0), 3], "local_search": [True, False]}},
+                    "numbersAndBool": {"params": {"max_path_length": 2, "rand_restarts": [float(2.0), 3], "local_search": [True]}},
+                    "numbersAndBools": {"params": {"max_path_length": 1, "rand_restarts": [float(2.0), 3], "local_search": [True, False]}},
+                    "boolArrTest": {"params": {"local_search": [True, False], "max_path_length": "range(1, 3)"}}
                 }
             },
             {
                 "name": "mincostflow",
                 "include": True,
                 "runs": {
-                    "int64artifact": {"flow": "np.arange(5, 7)", "capacity": [2, 3]}
+                    "int64artifact": {"params": {"flow": "np.arange(5, 7)", "capacity": [2, 3]}}
                 }
             },
         ],
