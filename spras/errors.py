@@ -17,6 +17,7 @@ from pydantic import BaseModel, Field, TypeAdapter
 
 from spras.util import LoosePathLike
 
+
 class TimeoutArtifactError(BaseModel):
     # We can't use the key `type` without some extra pydantic aliasing.
     error_type: Literal['timeout'] = 'timeout'
