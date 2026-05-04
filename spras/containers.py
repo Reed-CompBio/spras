@@ -1,3 +1,4 @@
+import datetime
 import os
 import platform
 import re
@@ -174,7 +175,7 @@ class TimeoutError(RuntimeError):
 
     def __init__(self, timeout: int, *args):
         self.timeout = timeout
-        self.message = f"Timed out after {timeout}s."
+        self.message = f"Timed out after {datetime.timedelta(seconds=timeout)}."
 
         super(TimeoutError, self).__init__(timeout, *args)
 

@@ -10,6 +10,7 @@ from spras.evaluation import Evaluation
 from spras.analysis import ml, summary, cytoscape
 from spras.config.revision import detach_spras_revision
 import spras.config.config as _config
+from spras.errors import mark_error, mark_success, is_error, TimeoutArtifactError
 
 # Snakemake updated the behavior in the 6.5.0 release https://github.com/snakemake/snakemake/pull/1037
 # and using the wrong separator prevents Snakemake from matching filenames to the rules that can produce them
@@ -265,18 +266,6 @@ def collect_prepared_input(wildcards):
 
     return prepared_inputs
 
-def mark_error(file, **details):
-    """Marks a file as an error with associated details."""
-    Path(file).write_text(json.dumps({"status": "error", **details}))
-
-def is_error(file):
-    """Checks if a file was produced by mark_error."""
-    try:
-        with open(file, 'r') as f:
-            json.load(f)["status"] == "error"
-    except ValueError:
-        return False
-
 def filter_successful(files):
     """Convenient function for filtering iterators by whether or not their items are error files."""
     return [file for file in files if not is_error(file)]
@@ -292,7 +281,7 @@ rule reconstruct:
     output:
         pathway_file = SEP.join([out_dir, '{dataset}-{algorithm}-{params}', 'raw-pathway.txt']),
         # Despite this being a 'log' file, we don't use the log directive as this rule doesn't actually throw errors.
-        resource_info = SEP.join([out_dir, '{dataset}-{algorithm}-{params}', 'resource-log.json'])
+        artifact_info = SEP.join([out_dir, '{dataset}-{algorithm}-{params}', 'artifact-log.json'])
     params:
         # Get the timeout from the config and use it as an input.
         # TODO: This has unexpected behavior when this rule succeeds but the timeout extends,
@@ -308,11 +297,11 @@ rule reconstruct:
             algorithm_params.pop('_spras_run_name')
         try:
             runner.run(detach_spras_revision(_config.config.immutable_files, wildcards.algorithm), inputs, output.pathway_file, algorithm_params, container_settings, params.timeout)
-            Path(output.resource_info).write_text(json.dumps({"status": "success"}))
+            mark_success(output.artifact_info)
         except TimeoutError as err:
             # We don't raise the error here (analogous to `--keep-going`, except we avoid unnecessarily re-running this rule.)
-            mark_error(output.resource_info, type="timeout", duration=params.timeout)
-            # and we touch pathway_file still: Snakemake doesn't have optional files, so we output a 'resource info' file,
+            mark_error(output.artifact_info, TimeoutArtifactError(duration=params.timeout))
+            # and we touch pathway_file still: Snakemake doesn't have optional files, so we output a 'artifact info' file,
             # which contains the status (success/failure) of specific Snakemake jobs.
             # We filter for the successful files (such as ones that didn't time out) with the `filter_successful` function.  
             Path(output.pathway_file).touch()
@@ -321,13 +310,13 @@ rule reconstruct:
 # Use PRRunner as a wrapper to call the algorithm-specific parse_output
 rule parse_output:
     input:
-        # We propagate up the resource_info error if it exists.
-        resource_info = rules.reconstruct.output.resource_info,
+        # We propagate up the artifact_info error if it exists.
+        artifact_info = rules.reconstruct.output.artifact_info,
         raw_file = rules.reconstruct.output.pathway_file,
         dataset_file = SEP.join([out_dir, 'dataset-{dataset}-merged.pickle'])
     output: standardized_file = SEP.join([out_dir, '{dataset}-{algorithm}-{params}', 'pathway.txt'])
     run:
-        if is_error(input.resource_info):
+        if is_error(input.artifact_info):
             mark_error(output.standardized_file)
             return
 
