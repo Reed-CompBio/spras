@@ -39,5 +39,5 @@ With the above schema, we detail the ``details`` key below.
 Timeout
 =======
 
-Timeout has ``type: timeout``, with a single key ``duration``, which
+Timeout has ``type: "timeout"``, with a single key ``duration``, which
 describes the ``timeout`` value associated to that run.
