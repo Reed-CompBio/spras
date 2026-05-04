@@ -52,11 +52,29 @@
    :undoc-members:
    :show-inheritance:
 
+**********************
+ spras.diamond module
+**********************
+
+.. automodule:: spras.diamond
+   :members:
+   :undoc-members:
+   :show-inheritance:
+
 *********************
  spras.domino module
 *********************
 
 .. automodule:: spras.domino
+   :members:
+   :undoc-members:
+   :show-inheritance:
+
+*********************
+ spras.errors module
+*********************
+
+.. automodule:: spras.errors
    :members:
    :undoc-members:
    :show-inheritance:
@@ -138,6 +156,15 @@
 ******************
 
 .. automodule:: spras.prm
+   :members:
+   :undoc-members:
+   :show-inheritance:
+
+************************
+ spras.profiling module
+************************
+
+.. automodule:: spras.profiling
    :members:
    :undoc-members:
    :show-inheritance:

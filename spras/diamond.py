@@ -63,7 +63,7 @@ class DIAMOnD(PRM[DIAMOnDParams]):
         edges_df.to_csv(filename_map["network"], columns=["Interactor1", "Interactor2"], index=False, header=None, sep=',')
 
     @staticmethod
-    def run(inputs, output_file, args, container_settings=None):
+    def run(inputs, output_file, args, container_settings=None, timeout=None):
         if not container_settings: container_settings = ProcessedContainerSettings()
         DIAMOnD.validate_required_run_args(inputs)
 
@@ -100,7 +100,8 @@ class DIAMOnD(PRM[DIAMOnDParams]):
                                 volumes,
                                 work_dir,
                                 out_dir,
-                                container_settings)
+                                container_settings,
+                                timeout)
         except ContainerError as err:
             if err.streams_contain("KeyError: 'nix'"):
                 raise RuntimeError(f"{err.stderr}\n" + \

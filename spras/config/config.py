@@ -17,10 +17,11 @@ import functools
 import itertools as it
 import warnings
 from pathlib import Path
-from typing import Any
+from typing import Any, Optional
 
 import numpy as np
 import yaml
+from pytimeparse import parse
 
 from spras.config.container_schema import ProcessedContainerSettings
 from spras.config.revision import attach_spras_revision, spras_revision
@@ -61,6 +62,8 @@ class Config:
         self.hash_length = parsed_raw_config.hash_length
         # Container settings used by PRMs.
         self.container_settings = ProcessedContainerSettings.from_container_settings(parsed_raw_config.containers, self.hash_length)
+        # Dictionary of parameter hashes to their respective timeout in seconds
+        self.algorithm_param_timeouts: dict[str, Optional[int]] = dict()
         # A nested dict mapping algorithm names to dicts that map parameter hashes to parameter combinations.
         # Only includes algorithms that are set to be run with 'include: true'.
         self.algorithm_params: dict[str, dict[str, Any]] = dict()
@@ -182,7 +185,7 @@ class Config:
                 # We create the product of all param combinations for each run
                 param_name_list = []
                 # We convert our run parameters to a dictionary, allowing us to iterate over it
-                run_subscriptable = vars(runs[run_name])
+                run_subscriptable = vars(runs[run_name].params)
                 for param in run_subscriptable:
                     param_name_list.append(param)
                     # this is guaranteed to be list[Any] by algorithms.py
@@ -217,6 +220,19 @@ class Config:
                     run_dict["_spras_run_name"] = run_name
 
                     self.algorithm_params[alg.name][params_hash] = run_dict
+
+                    # We finalize by handling any associated information to each parameter hash.
+                    # At the time, this is only timeouts:
+                    timeout = runs[run_name].timeout or alg.timeout
+                    if timeout:
+                        # Coerce to an `int` if an int isn't possible.
+                        parsed_timeout = parse(timeout, granularity='seconds')
+                        if not parsed_timeout: raise RuntimeError(f"Algorithm {alg} has unparsable timeout string '{parsed_timeout}'.")
+                        self.algorithm_param_timeouts[params_hash] = int(parsed_timeout)
+                    else:
+                        # As per the type signature, we still want to say explicitly that this algorithm's timeout
+                        # is uninhabited.
+                        self.algorithm_param_timeouts[params_hash] = None
 
     def process_analysis(self, raw_config: RawConfig):
         if not raw_config.analysis:

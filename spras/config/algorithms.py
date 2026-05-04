@@ -5,7 +5,7 @@ and rather mainly contains validators and lower-level pydantic code.
 """
 import ast
 import copy
-from typing import Annotated, Any, Callable, Literal, Union, cast, get_args
+from typing import Annotated, Any, Callable, Literal, Optional, Union, cast, get_args
 
 import numpy as np
 from pydantic import (
@@ -21,6 +21,14 @@ from spras.runner import algorithms
 
 # This contains the dynamically generated algorithm schema for use in `schema.py`
 __all__ = ['AlgorithmUnion']
+
+class RunSettings(BaseModel):
+    """All of the non-parameter settings associated with a run."""
+
+    timeout: Optional[str] = None
+    """The associated timeout with a run, parsed with `pytimeparse`."""
+
+    model_config = ConfigDict(extra='forbid', use_attribute_docstrings=True)
 
 def is_numpy_friendly(type: type[Any] | None) -> bool:
     """
@@ -100,12 +108,6 @@ def construct_algorithm_model(name: str, model: type[BaseModel]) -> type[BaseMod
     - Ranges and other convenient calls are expanded (see `python_evalish_coerce`)
     """
 
-    # Get the default model instance by trying to serialize the empty dictionary
-    try:
-        model_default = model.model_validate({})
-    except ValidationError:
-        model_default = None
-
     # First, we need to take our 'model' and coerce it to permit parameter combinations.
     # This assumes that all of the keys are flattened, so we only get a structure like so:
     # class AlgorithmParams(BaseModel):
@@ -151,11 +153,29 @@ def construct_algorithm_model(name: str, model: type[BaseModel]) -> type[BaseMod
     # Pass this as kwargs to create_model, which usually takes in parameters field_name=type.
     # We do need to cast create_model, since otherwise the type-checker complains that we may
     # have had a key that starts with __ in mapped_list_fields. The above assertion prevents this.
-    run_model = (cast(Any, create_model))(
-        f'{name}RunModel',
+    params_model = (cast(Any, create_model))(
+        f'{name}ParamModel',
         __config__=ConfigDict(extra='forbid'),
         **mapped_list_field
     )
+
+    # Get the default model instance by trying to serialize the empty dictionary
+    try:
+        params_model_default = params_model.model_validate({})
+    except ValidationError:
+        params_model_default = None
+
+    # Then, we create a wrapping `run_model` which contains our params_model,
+    # as well as any associated options with an individual run.
+    run_model = create_model(
+        f'{name}RunModel',
+        params=(params_model, params_model_default),
+        __base__=RunSettings,
+        __config__=ConfigDict(extra='forbid')
+    )
+
+    # We use `model_validate` instead of the `run_model` constructor since `run_model` is based off of `RunSettings`
+    run_model_default = None if params_model_default is None else run_model.model_validate({"params": params_model_default})
 
     # Here is an example of how this would look like inside config.yaml
     # name: pathlinker
@@ -174,8 +194,11 @@ def construct_algorithm_model(name: str, model: type[BaseModel]) -> type[BaseMod
         #   include: true
         # will run, despite there being no entries in `runs`.
         # (create_model entries take in either a type or (type, default)).
-        runs=dict[str, run_model] if model_default is None else (dict[str, run_model], {"default": model_default}),
-        __config__=ConfigDict(extra='forbid')
+        runs=dict[str, run_model] if run_model_default is None else (dict[str, run_model], {"default": run_model_default}),
+        __config__=ConfigDict(extra='forbid'),
+        # Note that both entire algorithms and their runs inherit from `RunSettings`, to allow default runs such as
+        # `allpairs` to have run-specific settings (e.g. allpairs with timeout.)
+        __base__=RunSettings
     )
 
 algorithm_models: list[type[BaseModel]] = [construct_algorithm_model(name, model.get_params_generic()) for name, model in algorithms.items()]

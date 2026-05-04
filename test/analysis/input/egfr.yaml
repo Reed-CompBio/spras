@@ -12,14 +12,16 @@ algorithms:
     include: true
     runs:
       run1:
-        k: [10, 20]
+        params:
+          k: [10, 20]
   - name: meo
     include: true
     runs:
       run1:
-        local_search: true
-        max_path_length: 3
-        rand_restarts: 10
+        params:
+          local_search: true
+          max_path_length: 3
+          rand_restarts: 10
 datasets:
   - data_dir: "input"
     edge_files:
