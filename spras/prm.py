@@ -1,7 +1,8 @@
 import os
 from abc import ABC, abstractmethod
 from pathlib import Path
-from typing import Any, Generic, Mapping, Optional, TypeVar, cast, get_args
+from types import get_original_bases
+from typing import Any, Generic, Mapping, Optional, TypeVar, cast
 
 from pydantic import BaseModel
 
@@ -52,10 +53,19 @@ class PRM(ABC, Generic[T]):
         For example, on `class PathLinker(PRM[PathLinkerParams])`,
         calling `PathLinker.get_params_generic()` returns `PathLinkerParams`.
         """
-        # TODO: use the type-safe get_original_bases when we bump to >= Python 3.12
-        # This is hacky reflection from https://stackoverflow.com/a/71720366/7589775
-        # which grabs the class of type T by the definition of `__orig_bases__`.
-        return get_args(cast(Any, cls).__orig_bases__[0])[0]
+        original_bases = get_original_bases(cls)
+
+        # Since we just used reflection, we provide a few mountain-dewey error messages here
+        # to protect against any developer confusion.
+        assert len(original_bases) == 1, "There were several generics passed into PRM, when precisely one is required."
+        T_class = original_bases[0]
+
+        if not issubclass(T_class, BaseModel):
+            raise RuntimeError("The generic passed into PRM is not a pydantic.BaseModel.")
+
+        # We finalize with a cast, since issubclass does an over-eager casting to
+        # its specified type.
+        return cast(type[T], T_class)
 
     # This is used in `runner.py` to avoid a dependency diamond when trying
     # to import the actual algorithm schema.
@@ -65,11 +75,6 @@ class PRM(ABC, Generic[T]):
         This is similar to PRA.run, but it does pydantic logic internally to re-validate argument parameters.
         """
         T_class = cls.get_params_generic()
-
-        # Since we just used reflection, we provide a mountain-dewey error message here
-        # to protect against any developer confusion.
-        if not issubclass(T_class, BaseModel):
-            raise RuntimeError("The generic passed into PRM is not a pydantic.BaseModel.")
 
         # Validates our untyped `args` parameter against our parameter class of type T
         # using BaseModel.model_validate (https://docs.pydantic.dev/latest/api/base_model/#pydantic.BaseModel.model_validate)
