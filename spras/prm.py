@@ -2,7 +2,7 @@ import os
 from abc import ABC, abstractmethod
 from pathlib import Path
 from types import get_original_bases
-from typing import Any, Generic, Mapping, Optional, TypeVar, cast
+from typing import Any, Generic, Mapping, Optional, TypeVar, cast, get_args
 
 from pydantic import BaseModel
 
@@ -53,17 +53,22 @@ class PRM(ABC, Generic[T]):
         For example, on `class PathLinker(PRM[PathLinkerParams])`,
         calling `PathLinker.get_params_generic()` returns `PathLinkerParams`.
         """
+        # This gives us (PRM[PathLinkerParams], )
         original_bases = get_original_bases(cls)
 
         # Since we just used reflection, we provide a few mountain-dewey error messages here
         # to protect against any developer confusion.
-        assert len(original_bases) == 1, "There were several generics passed into PRM, when precisely one is required."
-        T_class = original_bases[0]
+        assert len(original_bases) == 1, f"{cls} inherits from several classes, when precisely one is required."
+        original_bases_args = get_args(original_bases[0])
+        assert len(original_bases_args) == 1, "There were several generics passed into PRM, when precisely one is required."
+        T_class, = original_bases_args
 
-        if not issubclass(BaseModel, T_class):
+        if not issubclass(T_class, BaseModel):
             raise RuntimeError("The generic passed into PRM is not a pydantic.BaseModel.")
 
-        return T_class
+        # Finally, we cast, since issubclass overeagerly restricts T_class to type[BaseModel]
+        # instead of type[T] without imposing the restriction that T inherits from BaseModel
+        return cast(type[T], T_class)
 
     # This is used in `runner.py` to avoid a dependency diamond when trying
     # to import the actual algorithm schema.
