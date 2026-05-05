@@ -12,13 +12,13 @@ jobs:
         os: [macos-latest, windows-latest]
     steps:
       - name: Checkout repository
-        uses: actions/checkout@v2
+        uses: actions/checkout@v4
       - name: Install conda environment
-        uses: conda-incubator/setup-miniconda@v2
+        uses: conda-incubator/setup-miniconda@v4
         with:
           activate-environment: spras
           environment-file: environment.yml
-          auto-activate-base: false
+          auto-activate: false
           miniconda-version: 'latest'
       - name: Log conda environment
         # Log conda environment contents
@@ -49,11 +49,11 @@ jobs:
           sudo docker image prune --all --force
           sudo docker builder prune -a
       - name: Install conda environment
-        uses: conda-incubator/setup-miniconda@v2
+        uses: conda-incubator/setup-miniconda@v4
         with:
           activate-environment: spras
           environment-file: environment.yml
-          auto-activate-base: false
+          auto-activate: false
           miniconda-version: 'latest'
       - name: Install spras in conda env
         # Install spras in the environment using pip
@@ -85,11 +85,11 @@ jobs:
       - name: Checkout repository
         uses: actions/checkout@v4
       - name: Install conda environment
-        uses: conda-incubator/setup-miniconda@v2
+        uses: conda-incubator/setup-miniconda@v4
         with:
           activate-environment: spras
           environment-file: environment.yml
-          auto-activate-base: false
+          auto-activate: false
           miniconda-version: 'latest'
       # Install spras in the environment using pip
       - name: Install spras in conda env
@@ -110,11 +110,11 @@ jobs:
       - name: Checkout repository
         uses: actions/checkout@v3
       - name: Install conda environment
-        uses: conda-incubator/setup-miniconda@v2
+        uses: conda-incubator/setup-miniconda@v4
         with:
           activate-environment: spras
           environment-file: environment.yml
-          auto-activate-base: false
+          auto-activate: false
           miniconda-version: 'latest'
       - name: Run pre-commit
         shell: bash --login {0}
