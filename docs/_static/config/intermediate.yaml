@@ -100,7 +100,13 @@ datasets: # TODO update this based on the dataset that I set up
     # Relative path from the spras directory where these files live
     data_dir: "input"
 
-# TODO: add the gold standard for egfr tutorial; already in SPRAS
+gold_standards:
+  - # Labels can only contain letters, numbers, or underscores
+    label: gs_egfr
+    node_files: ["gs-egfr.txt"]
+    data_dir: "input"
+    # List of dataset labels to compare with the specific gold standard dataset
+    dataset_labels: ["egfr"]
 
 reconstruction_settings:
 

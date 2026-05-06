@@ -538,6 +538,75 @@ In the ``intermediate.yaml`` configuration file, it is set up to have
 SPRAS run multiple algorithms with multiple parameter settings on a
 single dataset.
 
+.. code:: yaml
+
+   algorithms:
+   - name: "pathlinker"
+      include: true
+      runs:
+         run1:
+         k: 1
+         run2:
+         k: [10, 100]
+   - name: omicsintegrator1
+      include: true
+      runs:
+         run1:
+         b: [0.55, 2, 10]
+         d: 10
+         g: 1e-3
+         r: 0.01
+         w: 0.1
+         mu: 0.008
+   - name: omicsintegrator2
+      include: true
+      runs:
+         run1:
+         b: 4
+         g: 0
+         run2:
+         b: 2
+         g: 3
+   - name: meo
+      include: true
+      runs:
+         run1:
+         local_search: [true, false]
+         max_path_length: [2, 3]
+         rand_restarts: 10
+   - name: allpairs
+      include: true
+   - name: domino
+      include: true
+      runs:
+         run1:
+         slice_threshold: 0.3
+         module_threshold: 0.05
+   - name: mincostflow
+      include: true
+      runs:
+         run1:
+         capacity: 15
+         flow: 80
+         run2:
+         capacity: 1
+         flow: 6
+         run3:
+         capacity: 5
+         flow: 60
+   - name: "strwr"
+      include: true
+      runs:
+         run1:
+         alpha: [0.85]
+         threshold: [100, 200]
+   - name: "rwr"
+      include: true
+      runs:
+         run1:
+         alpha: [0.85]
+         threshold: [100, 200]
+
 From the root directory, run the command below from the command line:
 
 .. code:: bash
@@ -1145,9 +1214,10 @@ selection + pr or prcs
 4.1 Adding evaluation post-analysis to the intermediate configuration
 =====================================================================
 
-To enable the evaluation, update the analysis section in your
-configuration file by setting evaluation to true. TODO ALSO UPDATE THE
-OTHER THINGS TOO
+To enable evaluation, update the analysis section of your configuration
+file. In the evaluation section, set include and aggregate_per_algorithm
+to true. Also, in the ml section, set kde, remove_empty_pathways, and
+aggregate_per_algorithm to true.
 
 Your analysis section in the configuration file should look like this:
 
@@ -1165,6 +1235,15 @@ Your analysis section in the configuration file should look like this:
          include: true
          aggregate_per_algorithm: true
 
+Setting ``aggregate_per_algorithm`` to true will additionally groups
+post-analysis and evaluations by algorithm per dataset. Without this,
+outputs from all algorithm per dataset are aggregated together for
+post-analysis rather than broken out per algorithm.
+
+Within ``ml``, ``remove_empty_pathways`` excludes pathways with no nodes
+or edges from the PCA post analysis. The ``kde`` creates a kernel
+density estimate over the PCA plots.
+
 EXPLAIN WHY WE do each of these - kde we explain in parameter selection
 so skip - remove_empty_pathways we do because we don't want to
 cluster/kda and choose empty pathways that are the representative, want
@@ -1173,57 +1252,18 @@ individual algorithm does on the evaluation instead of the # 1 best or
 all outputs treated the same, we want to see how each algorithm is
 performing
 
-What do gold standard datasets look like in a configuration?
-------------------------------------------------------------
-
-In the configuration file, users can specify one or more gold standard
-datasets to evaluate the subnetworks reconstructed from each dataset.
-When gold standards are provided and evaluation is enabled (``include:
-true``), SPRAS will automatically compare the reconstructed subnetworks
-for a specific dataset against the corresponding gold standards.
+The intermediate configuration also includes a gold standard for the
+EGFR dataset, which is already set up in SPRAS and does not require any
+changes:
 
 .. code:: yaml
 
    gold_standards:
-       -
-       label: gs1
-       node_files: ["gs_nodes0.txt", "gs_nodes1.txt"]
-       data_dir: "input"
-       dataset_labels: ["data0"]
-       -
-       label: gs2
-       edge_files: ["gs_edges0.txt"]
-       data_dir: "input"
-       dataset_labels: ["data0", "data1"]
-
-   analysis:
-       evaluation:
-           include: true
-
-A gold standard dataset must include the following types of keys and
-files:
-
--  ``label``: a name that uniquely identifies a gold standard dataset
-   throughout the SPRAS workflow and outputs.
--  ``node_file`` or ``edge_file``: A list of node or edge files. Only
-   one of these can be defined per gold standard dataset.
--  ``data_dir``: The file path of the directory where the input gold
-   standard dataset files are located.
--  ``dataset_labels``: a list of dataset labels indicating which
-   datasets this gold standard dataset should be evaluated against.
-
-# add a note that gold standard datasets must be defined as nodes or
-edges (double check that if the edges are only added if it will run node
-and edge)
-
-add the code thing of what the gold standard looks like for the one we
-will be using config
-
-When evaluation is enabled, SPRAS will automatically run its built-in
-evaluation analysis on each defined dataset-gold standard pair. This
-evaluation computes metrics such as precision, recall, and
-precision-recall curves, depending on the parameter selection method
-used.
+   -
+      label: gs_egfr
+      node_files: ["gs-egfr.txt"]
+      data_dir: "input"
+      dataset_labels: ["egfr"]
 
 4.2 What is parameter selection?
 ================================

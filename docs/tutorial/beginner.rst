@@ -164,20 +164,24 @@ folder.
 Algorithms
 ----------
 
+# TODO: update the code for the params/config that matches what the new
+structure of the config file is
+
 .. code:: yaml
 
    algorithms:
    - name: omicsintegrator1
      params:
         include: true
-        run1:
-           b: 0.1
-           d: 10
-           g: 1e-3
-        run2:
-           b: [0.55, 2, 10]
-           d: [10, 20]
-           g: 1e-3
+        runs:
+         run1:
+            b: 0.1
+            d: 10
+            g: 1e-3
+         run2:
+            b: [0.55, 2, 10]
+            d: [10, 20]
+            g: 1e-3
 
 When defining an algorithm in the configuration file, its name must
 match one of the supported SPRAS algorithms. Each algorithm includes an
@@ -193,12 +197,13 @@ lists within a run block, SPRAS generates all possible combinations
 single-value parameters in the same run block. Each unique combination
 runs once per algorithm.
 
-Each algorithm exposes its own set of parameters that control its
-optimization strategy. Some algorithms have no adjustable parameters,
-while others include multiple tunable settings that influence how
-subnetworks are created. These parameters vary widely between algorithms
-and reflect the unique optimization techniques each method employs under
-the hood.
+# TODO: add what a parameter is (maybe move this to a different section
+in intermediate.rst) Each algorithm exposes its own set of parameters
+that control its optimization strategy. Some algorithms have no
+adjustable parameters, while others include multiple tunable settings
+that influence how subnetworks are created. These parameters vary widely
+between algorithms and reflect the unique optimization techniques each
+method employs under the hood.
 
 (See :doc:`Pathway Reconstruction Methods <../prms/prms>` for
 information about algorithms and their parameters).
@@ -210,7 +215,7 @@ Datasets
 
    datasets:
    -
-       label: egfr
+       label: data1
        node_files: ["prizes.txt", "sources-targets.txt"]
        edge_files: ["interactome.txt"]
        other_files: []
@@ -237,6 +242,47 @@ A dataset must include the following types of keys and files:
    connecting two molecules. An interactome is a large network of
    possible interactions that defines many edges connecting molecules.
 
+Gold standard datasets
+----------------------
+
+.. code:: yaml
+
+   gold_standards:
+       -
+       label: gs1
+       node_files: ["gs_nodes0.txt", "gs_nodes1.txt"]
+       data_dir: "input"
+       dataset_labels: ["data0"]
+       -
+       label: gs2
+       edge_files: ["gs_edges0.txt"]
+       data_dir: "input"
+       dataset_labels: ["data0", "data1"]
+
+In the configuration file, users can specify one or more gold standard
+datasets to evaluate the subnetworks reconstructed from each dataset.
+When gold standards are provided and evaluation is enabled (``include:
+true``), SPRAS will automatically compare the reconstructed subnetworks
+for a specific dataset against the corresponding gold standards.
+
+A gold standard dataset must include the following types of keys and
+files:
+
+-  ``label``: a name that uniquely identifies a gold standard dataset
+   throughout the SPRAS workflow and outputs.
+-  ``node_file`` or ``edge_file``: A list of node or edge files. Only
+   one of these can be defined per gold standard dataset.
+-  ``data_dir``: The file path of the directory where the input gold
+   standard dataset files are located.
+-  ``dataset_labels``: a list of dataset labels indicating which
+   datasets this gold standard dataset should be evaluated against.
+
+When evaluation is enabled, SPRAS will automatically run its built-in
+evaluation analysis on each defined dataset-gold standard pair. This
+evaluation computes metrics such as precision, recall, and
+precision-recall curves, depending on the parameter selection method
+used.
+
 Reconstruction settings
 -----------------------
 
@@ -256,17 +302,19 @@ Analysis
 .. code:: yaml
 
    analysis:
-   summary:
-       include: true
-   cytoscape:
-       include: true
-   ml:
-       include: true
+      summary:
+         include: true
+      cytoscape:
+         include: true
+      ml:
+         include: true
+      evaluation:
+         include: true
 
 SPRAS includes multiple downstream analyses that can be toggled on or
 off directly in the configuration file. When enabled, these analyses are
-performed per dataset and produce summaries or visualizations of the
-results from all enabled algorithms for that dataset.
+performed per dataset and produce summaries, visualizations, or
+evaluations of the results from all enabled algorithms for that dataset.
 
 .. note::
 

@@ -23,13 +23,12 @@ containers:
 
 algorithms:
   - name: "pathlinker"
-    params:
-      include: true
+    include: true
+    runs:
       run1:
-        k: 1
-
-      # run2: # uncomment for step 3.2
-      #   k: [10, 100] # uncomment for step 3.2
+        k: range(100,201,100)
+        # run2: # uncomment for step 3.2
+        #   k: [10, 100] # uncomment for step 3.2
 
 # Here we specify which pathways to run and other file location information.
 # Assume that if a dataset label does not change, the lists of associated input files do not change
