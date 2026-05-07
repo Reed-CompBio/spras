@@ -13,7 +13,8 @@ timeout:
      runs:
        run1:
          timeout: 1d
-         k: 200
+         params:
+           k: 200
 
 The timeout string parsing is delegated to `pytimeparse
 <https://pypi.org/project/pytimeparse/>`__ (examples linked here). This
@@ -42,10 +43,12 @@ default unless otherwise specified in a specific run.
        run1:
          # this uses timeout: 2d
          timeout: 2d
-         k: 200
+         params:
+           k: 200
        run2:
          # this uses timeout: 1d
-         k: 100
+         params:
+           k: 100
 
 This is also useful for algorithms which take in no parameters, such as
 ``allpairs``:
