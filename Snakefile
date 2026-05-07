@@ -10,7 +10,7 @@ from spras.evaluation import Evaluation
 from spras.analysis import ml, summary, cytoscape
 from spras.config.revision import detach_spras_revision
 import spras.config.config as _config
-from spras.errors import mark_error, mark_success, is_error, TimeoutArtifactError
+from spras.errors import mark_error, mark_success, is_error, TimeoutArtifactError, FailedDependencyError
 
 # Snakemake updated the behavior in the 6.5.0 release https://github.com/snakemake/snakemake/pull/1037
 # and using the wrong separator prevents Snakemake from matching filenames to the rules that can produce them
@@ -269,13 +269,27 @@ def collect_prepared_input(wildcards):
 
     return prepared_inputs
 
+def collect_dependent_artifact_info(wildcards):
+    # Get the associated runs that this run depends on
+    dependent_runs = _config.config.conditional_run_dependencies[params_index(wildcards.params)]
+    return [
+        SEP.join([out_dir, f'{wildcards.dataset}-{wildcards.algorithm}-params-{params}', 'artifact-log.json'])
+        for params in dependent_runs
+    ]
+
 def filter_successful(files):
     """Convenient function for filtering iterators by whether or not their items are error files."""
     return [file for file in files if not is_error(file)]
 
+def filter_error(files):
+    """This function is precisely described as the list difference of `files` and `filter_successful(files)`"""
+    return [file for file in files if is_error(file)]
+
 # Run the pathway reconstruction algorithm
 rule reconstruct:
-    input: collect_prepared_input
+    input:
+        prepared_files=collect_prepared_input,
+        required_artifact_info=collect_dependent_artifact_info
     # Each reconstruct call should be in a separate output subdirectory that is unique for the parameter combination so
     # that multiple instances of the container can run simultaneously without overwriting the output files
     # Overwriting files can happen because the pathway reconstruction algorithms often generate output files with the
@@ -291,10 +305,21 @@ rule reconstruct:
         # making this rule run again.
         timeout = lambda wildcards: _config.config.algorithm_param_timeouts[params_index(wildcards.params)]
     run:
+        successful_runs = filter_successful(input.required_artifact_info)
+        errorful_runs = filter_error(input.required_artifact_info)
+        # NOTE: conditionals happen as a big OR statement, so we are looking for at least one success.
+        if len(successful_runs) == 0 and len(errorful_runs) != 0:
+            # We don't raise the error here (analogous to `--keep-going`, except we avoid unnecessarily re-running this rule.)
+            mark_error(output.artifact_info, FailedDependencyError(failing_dependencies=errorful_runs))
+            # and we touch pathway_file still: Snakemake doesn't have optional files, so we output a 'artifact info' file,
+            # which contains the status (success/failure) of specific Snakemake jobs.
+            # We filter for the successful files (such as ones that didn't time out) with the `filter_successful` function.  
+            Path(output.pathway_file).touch()
+
         # Create a copy so that the updates are not written to the parameters logfile
         algorithm_params = reconstruction_params(wildcards.algorithm, wildcards.params).copy()
         # Declare the input files as a dictionary.
-        inputs = dict(zip(runner.get_required_inputs(detach_spras_revision(_config.config.immutable_files, wildcards.algorithm)), *{input}, strict=True))
+        inputs = dict(zip(runner.get_required_inputs(detach_spras_revision(_config.config.immutable_files, wildcards.algorithm)), *{input.prepared_files}, strict=True))
         # Remove the _spras_run_name parameter added for keeping track of the run name for parameters.yml
         if '_spras_run_name' in algorithm_params:
             algorithm_params.pop('_spras_run_name')
@@ -302,11 +327,8 @@ rule reconstruct:
             runner.run(detach_spras_revision(_config.config.immutable_files, wildcards.algorithm), inputs, output.pathway_file, algorithm_params, container_settings, params.timeout)
             mark_success(output.artifact_info)
         except TimeoutError as err:
-            # We don't raise the error here (analogous to `--keep-going`, except we avoid unnecessarily re-running this rule.)
+            # See the above notes on conditional runs for precisely why we write this as is.
             mark_error(output.artifact_info, TimeoutArtifactError(duration=params.timeout))
-            # and we touch pathway_file still: Snakemake doesn't have optional files, so we output a 'artifact info' file,
-            # which contains the status (success/failure) of specific Snakemake jobs.
-            # We filter for the successful files (such as ones that didn't time out) with the `filter_successful` function.  
             Path(output.pathway_file).touch()
 
 # Original pathway reconstruction output to universal output

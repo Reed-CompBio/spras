@@ -23,9 +23,12 @@ class TimeoutArtifactError(BaseModel):
     error_type: Literal['timeout'] = 'timeout'
     duration: int
 
-# NOTE: when we have several errors, replace this with Union[TimeoutError, <OtherError>, ...]
+class FailedDependencyError(BaseModel):
+    error_type: Literal['depended'] = 'depended'
+    failing_dependencies: list[str]
+
 """All possible distinguished errors."""
-ArtifactErrorOptions = TimeoutArtifactError
+ArtifactErrorOptions = Union[TimeoutArtifactError, FailedDependencyError]
 
 class ArtifactError(BaseModel):
     """

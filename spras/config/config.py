@@ -64,6 +64,8 @@ class Config:
         self.container_settings = ProcessedContainerSettings.from_container_settings(parsed_raw_config.containers, self.hash_length)
         # Dictionary of parameter hashes to their respective timeout in seconds
         self.algorithm_param_timeouts: dict[str, Optional[int]] = dict()
+        # Dictionary of algorithm runs with their associated conditional requirements
+        self.conditional_run_dependencies: dict[str, set[str]] = dict()
         # A nested dict mapping algorithm names to dicts that map parameter hashes to parameter combinations.
         # Only includes algorithms that are set to be run with 'include: true'.
         self.algorithm_params: dict[str, dict[str, Any]] = dict()
@@ -168,6 +170,12 @@ class Config:
         # We copy raw_config.algorithms to avoid mutating the original config
         # when we attach the SPRAS revision to algorithm names later.
         for alg in raw_config.algorithms[:]:
+            # We later use these dictionary to build up our conditional runs dictionary,
+            # choosing to handle it in the algorithms loop to avoid having to handle run name
+            # conflicts throughout separate algorithms.
+            unexpanded_conditional_run_dependencies: dict[str, set[str]] = dict()
+            run_name_hashes: dict[str, set[str]] = dict()
+
             alg.name = attach_spras_revision(self.immutable_files, alg.name)
             if alg.include:
                 # This dict maps from parameter combinations hashes to parameter combination dictionaries
@@ -181,6 +189,9 @@ class Config:
             # Each set of runs should be 1 level down in the config file
             for run_name in runs.keys():
                 all_runs = []
+
+                # Since we have to build up our runs first, we save the dictionary expansion until after we loop through all runs.
+                unexpanded_conditional_run_dependencies[run_name] = set(runs[run_name].conditionals).union(set(alg.conditionals))
 
                 # We create the product of all param combinations for each run
                 param_name_list = []
@@ -221,6 +232,9 @@ class Config:
 
                     self.algorithm_params[alg.name][params_hash] = run_dict
 
+                    run_name_hashes.setdefault(run_name, set())
+                    run_name_hashes[run_name].add(params_hash)
+
                     # We finalize by handling any associated information to each parameter hash.
                     # At the time, this is only timeouts:
                     timeout = runs[run_name].timeout or alg.timeout
@@ -233,6 +247,13 @@ class Config:
                         # As per the type signature, we still want to say explicitly that this algorithm's timeout
                         # is uninhabited.
                         self.algorithm_param_timeouts[params_hash] = None
+
+            for key, values in unexpanded_conditional_run_dependencies.items():
+                for key_run_hash in run_name_hashes[key]:
+                    self.conditional_run_dependencies.setdefault(key_run_hash, set())
+                    for value in values:
+                        for value_run_hash in run_name_hashes[value]:
+                            self.conditional_run_dependencies[key_run_hash].add(value_run_hash)
 
     def process_analysis(self, raw_config: RawConfig):
         if not raw_config.analysis:
