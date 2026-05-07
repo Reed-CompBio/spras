@@ -1,11 +1,14 @@
 from typing import Annotated, Optional
 
 from pydantic import BaseModel, BeforeValidator, ConfigDict
+from pytimeparse import parse
 
 
 def validate_duration(value):
-    parsed_duration = value(value, granularity='seconds')
+    if isinstance(value, int): return value
+    parsed_duration = parse(value, granularity='seconds')
     if not parsed_duration: raise RuntimeError(f"Encountered unparsable duration string '{value}'.")
+    return parsed_duration
 
 PyDateTimeDuration = Annotated[
     int,
