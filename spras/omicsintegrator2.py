@@ -4,6 +4,7 @@ from typing import Optional
 import pandas as pd
 from pydantic import BaseModel, ConfigDict
 
+from spras.config.algorithms import RunSettings
 from spras.config.container_schema import ProcessedContainerSettings
 from spras.config.util import CaseInsensitiveEnum
 from spras.containers import prepare_volume, run_container_and_log
@@ -105,9 +106,10 @@ class OmicsIntegrator2(PRM[OmicsIntegrator2Params]):
                         header=['protein1', 'protein2', 'cost'])
 
     @staticmethod
-    def run(inputs, output_file, args=None, container_settings=None, timeout=None):
-        if not container_settings: container_settings = ProcessedContainerSettings()
+    def run(inputs, output_file, args=None, container_settings=None, run_settings=None):
         if not args: args = OmicsIntegrator2Params()
+        if not container_settings: container_settings = ProcessedContainerSettings()
+        if not run_settings: run_settings = RunSettings()
         OmicsIntegrator2.validate_required_run_args(inputs)
 
         work_dir = '/spras'
@@ -157,7 +159,7 @@ class OmicsIntegrator2(PRM[OmicsIntegrator2Params]):
                              work_dir,
                              out_dir,
                              container_settings,
-                             timeout,
+                             run_settings.timeout,
                              network_disabled=True)
 
         # TODO do we want to retain other output files?

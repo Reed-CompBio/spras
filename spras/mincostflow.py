@@ -3,6 +3,7 @@ from typing import Optional
 
 from pydantic import BaseModel, ConfigDict
 
+from spras.config.algorithms import RunSettings
 from spras.config.container_schema import ProcessedContainerSettings
 from spras.containers import prepare_volume, run_container_and_log
 from spras.interactome import (
@@ -71,9 +72,10 @@ class MinCostFlow(PRM[MinCostFlowParams]):
                      header=False)
 
     @staticmethod
-    def run(inputs, output_file, args=None, container_settings=None, timeout=None):
-        if not container_settings: container_settings = ProcessedContainerSettings()
+    def run(inputs, output_file, args=None, container_settings=None, run_settings=None):
         if not args: args = MinCostFlowParams()
+        if not container_settings: container_settings = ProcessedContainerSettings()
+        if not run_settings: run_settings = RunSettings()
         MinCostFlow.validate_required_run_args(inputs)
 
         # the data files will be mapped within this directory within the container
@@ -123,7 +125,7 @@ class MinCostFlow(PRM[MinCostFlowParams]):
                              work_dir,
                              out_dir,
                              container_settings,
-                             timeout)
+                             run_settings.timeout)
 
         # Check the output of the container
         out_dir_content = sorted(out_dir.glob('*.sif'))

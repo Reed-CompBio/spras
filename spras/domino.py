@@ -5,6 +5,7 @@ from typing import Optional
 import pandas as pd
 from pydantic import BaseModel, ConfigDict
 
+from spras.config.algorithms import RunSettings
 from spras.config.container_schema import ProcessedContainerSettings
 from spras.config.util import BaseModel
 from spras.containers import ContainerError, prepare_volume, run_container_and_log
@@ -79,9 +80,10 @@ class DOMINO(PRM[DominoParams]):
                         header=['ID_interactor_A', 'ppi', 'ID_interactor_B'])
 
     @staticmethod
-    def run(inputs, output_file, args=None, container_settings=None, timeout=None):
-        if not container_settings: container_settings = ProcessedContainerSettings()
+    def run(inputs, output_file, args=None, container_settings=None, run_settings=None):
         if not args: args = DominoParams()
+        if not container_settings: container_settings = ProcessedContainerSettings()
+        if not run_settings: run_settings = RunSettings()
         DOMINO.validate_required_run_args(inputs)
 
         work_dir = '/spras'
@@ -118,7 +120,7 @@ class DOMINO(PRM[DominoParams]):
                                 work_dir,
                                 out_dir,
                                 container_settings,
-                                timeout)
+                                run_settings.timeout)
         except ContainerError as err:
             # Occurs when DOMINO gets passed some empty dataframe from network_file.
             # This counts as an empty input, so we return an empty output.
@@ -153,7 +155,7 @@ class DOMINO(PRM[DominoParams]):
                                   work_dir,
                                   out_dir,
                                   container_settings,
-                                  timeout)
+                                  run_settings.timeout)
         except ContainerError as err:
             # Occurs when DOMINO gets passed some empty dataframe from network_file.
             # This counts as an empty input, so we return an empty output.

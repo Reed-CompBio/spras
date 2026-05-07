@@ -3,6 +3,7 @@ from pathlib import Path
 
 from pydantic import BaseModel, ConfigDict
 
+from spras.config.algorithms import RunSettings
 from spras.config.container_schema import ProcessedContainerSettings
 from spras.containers import prepare_volume, run_container_and_log
 from spras.dataset import Dataset
@@ -73,9 +74,10 @@ class PathLinker(PRM[PathLinkerParams]):
                      header=["#Interactor1","Interactor2","Weight"])
 
     @staticmethod
-    def run(inputs, output_file, args=None, container_settings=None, timeout=None):
-        if not container_settings: container_settings = ProcessedContainerSettings()
+    def run(inputs, output_file, args=None, container_settings=None, run_settings=None):
         if not args: args = PathLinkerParams()
+        if not run_settings: run_settings = RunSettings()
+        if not container_settings: container_settings = ProcessedContainerSettings()
         PathLinker.validate_required_run_args(inputs)
 
         work_dir = '/spras'
@@ -114,7 +116,7 @@ class PathLinker(PRM[PathLinkerParams]):
                              work_dir,
                              out_dir,
                              container_settings,
-                             timeout)
+                             run_settings.timeout)
 
         # Rename the primary output file to match the desired output filename
         # Currently PathLinker only writes one output file so we do not need to delete others
