@@ -4,8 +4,8 @@ from typing import Any, Mapping
 # supported algorithm imports
 from spras.allpairs import AllPairs
 from spras.btb import BowTieBuilder
-from spras.config.algorithms import RunSettings
 from spras.config.container_schema import ProcessedContainerSettings
+from spras.config.runs import RunSettings
 from spras.dataset import Dataset, DatasetSchema
 from spras.diamond import DIAMOnD
 from spras.domino import DOMINO

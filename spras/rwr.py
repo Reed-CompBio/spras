@@ -4,8 +4,8 @@ from typing import Optional
 import pandas as pd
 from pydantic import BaseModel, ConfigDict
 
-from spras.config.algorithms import RunSettings
 from spras.config.container_schema import ProcessedContainerSettings
+from spras.config.runs import RunSettings
 from spras.containers import prepare_volume, run_container_and_log
 from spras.dataset import Dataset
 from spras.interactome import (

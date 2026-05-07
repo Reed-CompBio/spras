@@ -22,9 +22,9 @@ from typing import Any
 import numpy as np
 import yaml
 
-from spras.config.algorithms import RunSettings
 from spras.config.container_schema import ProcessedContainerSettings
 from spras.config.revision import attach_spras_revision, spras_revision
+from spras.config.runs import RunSettings
 from spras.config.schema import DatasetSchema, RawConfig
 from spras.util import LoosePathLike, NpHashEncoder, hash_params_sha1_base32
 

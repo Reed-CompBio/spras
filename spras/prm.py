@@ -5,8 +5,8 @@ from typing import Any, Generic, Mapping, Optional, TypeVar, cast, get_args
 
 from pydantic import BaseModel
 
-from spras.config.algorithms import RunSettings
 from spras.config.container_schema import ProcessedContainerSettings
+from spras.config.runs import RunSettings
 from spras.dataset import Dataset
 from spras.util import LoosePathLike
 
