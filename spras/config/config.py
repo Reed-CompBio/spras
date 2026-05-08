@@ -17,14 +17,14 @@ import functools
 import itertools as it
 import warnings
 from pathlib import Path
-from typing import Any, Optional
+from typing import Any
 
 import numpy as np
 import yaml
-from pytimeparse import parse
 
 from spras.config.container_schema import ProcessedContainerSettings
 from spras.config.revision import attach_spras_revision, spras_revision
+from spras.config.runs import RunSettings
 from spras.config.schema import DatasetSchema, RawConfig
 from spras.util import LoosePathLike, NpHashEncoder, hash_params_sha1_base32
 
@@ -62,10 +62,10 @@ class Config:
         self.hash_length = parsed_raw_config.hash_length
         # Container settings used by PRMs.
         self.container_settings = ProcessedContainerSettings.from_container_settings(parsed_raw_config.containers, self.hash_length)
-        # Dictionary of parameter hashes to their respective timeout in seconds
-        self.algorithm_param_timeouts: dict[str, Optional[int]] = dict()
         # Dictionary of algorithm runs with their associated conditional requirements
         self.conditional_run_dependencies: dict[str, set[str]] = dict()
+        # Dictionary of parameter hashes to their respective run settings
+        self.algorithm_param_run_settings: dict[str, RunSettings] = dict()
         # A nested dict mapping algorithm names to dicts that map parameter hashes to parameter combinations.
         # Only includes algorithms that are set to be run with 'include: true'.
         self.algorithm_params: dict[str, dict[str, Any]] = dict()
@@ -236,17 +236,9 @@ class Config:
                     run_name_hashes[run_name].add(params_hash)
 
                     # We finalize by handling any associated information to each parameter hash.
-                    # At the time, this is only timeouts:
-                    timeout = runs[run_name].timeout or alg.timeout
-                    if timeout:
-                        # Coerce to an `int` if an int isn't possible.
-                        parsed_timeout = parse(timeout, granularity='seconds')
-                        if not parsed_timeout: raise RuntimeError(f"Algorithm {alg} has unparsable timeout string '{parsed_timeout}'.")
-                        self.algorithm_param_timeouts[params_hash] = int(parsed_timeout)
-                    else:
-                        # As per the type signature, we still want to say explicitly that this algorithm's timeout
-                        # is uninhabited.
-                        self.algorithm_param_timeouts[params_hash] = None
+                    self.algorithm_param_run_settings[params_hash] = RunSettings(
+                        timeout=runs[run_name].timeout or alg.timeout
+                    )
 
             for key, values in unexpanded_conditional_run_dependencies.items():
                 for key_run_hash in run_name_hashes[key]:

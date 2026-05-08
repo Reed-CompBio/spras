@@ -5,7 +5,7 @@ and rather mainly contains validators and lower-level pydantic code.
 """
 import ast
 import copy
-from typing import Annotated, Any, Callable, Literal, Optional, Union, cast, get_args
+from typing import Annotated, Any, Callable, Literal, Union, cast, get_args
 
 import numpy as np
 from pydantic import (
@@ -17,25 +17,11 @@ from pydantic import (
     create_model,
 )
 
+from spras.config.runs import RunSettings
 from spras.runner import algorithms
 
 # This contains the dynamically generated algorithm schema for use in `schema.py`
 __all__ = ['AlgorithmUnion']
-
-class RunSettings(BaseModel):
-    """All of the non-parameter settings associated with a run."""
-
-    timeout: Optional[str] = None
-    """The associated timeout with a run, parsed with `pytimeparse`."""
-
-    conditionals: list[str] = Field(alias="if", default_factory=lambda: [])
-    """
-    If any of the specified runs in this list succeed, then this run itself is permitted to run.
-    We refer to these as 'conditional runs,' and since Python reserves the `if` keyword, we call
-    them "conditionals" for short in-code, but users interface with this using `if`.
-    """
-
-    model_config = ConfigDict(extra='forbid', use_attribute_docstrings=True)
 
 def is_numpy_friendly(type: type[Any] | None) -> bool:
     """
