@@ -68,7 +68,7 @@ class TestDataset:
     # Note that the input-nodes file has more tabs than the original fixture.
     def test_372(self):
         dataset = Dataset(DatasetSchema(
-            label='toy-372',
+            label='toy_372',
             edge_files=['input-interactome.txt'],
             node_files=['input-nodes.txt'],
             data_dir=FIXTURES_PATH / 'toy-372',
