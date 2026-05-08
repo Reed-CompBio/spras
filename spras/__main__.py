@@ -1,3 +1,3 @@
 if __name__ == "__main__":
-    from spras.cli import run
+    from spras.cli.cli import run
     run()
