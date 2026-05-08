@@ -542,7 +542,7 @@ From the root directory, run the command below from the command line:
 
 .. code:: bash
 
-   snakemake --cores 4 --configfile config/intermediate.yaml
+   spras run --cores 4 --configfile config/intermediate.yaml
 
 What happens when you run this command
 --------------------------------------
@@ -836,7 +836,7 @@ After saving the changes in the configuration file, rerun with:
 
 .. code:: bash
 
-   snakemake --cores 4 --configfile config/intermediate.yaml
+   spras run --cores 4 --configfile config/intermediate.yaml
 
 What happens when you run this command
 --------------------------------------
