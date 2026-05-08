@@ -1,10 +1,11 @@
 from os import PathLike
-from typing import Any, Mapping, Optional
+from typing import Any, Mapping
 
 # supported algorithm imports
 from spras.allpairs import AllPairs
 from spras.btb import BowTieBuilder
 from spras.config.container_schema import ProcessedContainerSettings
+from spras.config.runs import RunSettings
 from spras.dataset import Dataset, DatasetSchema
 from spras.diamond import DIAMOnD
 from spras.domino import DOMINO
@@ -46,7 +47,7 @@ def run(
     output_file: str | PathLike,
     args: dict[str, Any],
     container_settings: ProcessedContainerSettings,
-    timeout: Optional[int]
+    run_settings: RunSettings
 ):
     """
     A generic interface to the algorithm-specific run functions
@@ -54,7 +55,7 @@ def run(
     algorithm_runner = get_algorithm(algorithm)
     # We can't use config.config here else we would get a cyclic dependency.
     # Since args is a dict here, we use the 'run_typeless' utility PRM function.
-    algorithm_runner.run_typeless(inputs, output_file, args, container_settings, timeout)
+    algorithm_runner.run_typeless(inputs, output_file, args, container_settings, run_settings)
 
 
 def get_required_inputs(algorithm: str):

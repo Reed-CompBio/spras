@@ -303,7 +303,7 @@ rule reconstruct:
         # Get the timeout from the config and use it as an input.
         # TODO: This has unexpected behavior when this rule succeeds but the timeout extends,
         # making this rule run again.
-        timeout = lambda wildcards: _config.config.algorithm_param_timeouts[params_index(wildcards.params)]
+        timeout = lambda wildcards: _config.config.algorithm_param_run_settings[params_index(wildcards.params)].timeout
     run:
         successful_runs = filter_successful(input.required_artifact_info)
         errorful_runs = filter_error(input.required_artifact_info)

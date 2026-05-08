@@ -3,6 +3,7 @@ from pathlib import Path
 from pydantic import BaseModel, ConfigDict
 
 from spras.config.container_schema import ProcessedContainerSettings
+from spras.config.runs import RunSettings
 from spras.containers import prepare_volume, run_container_and_log
 from spras.interactome import (
     convert_undirected_to_directed,
@@ -63,10 +64,11 @@ class ResponseNet(PRM[ResponseNetParams]):
                      header=False)
 
     @staticmethod
-    def run(inputs, output_file, args=None, container_settings=None, timeout=None):
+    def run(inputs, output_file, args=None, container_settings=None, run_settings=None):
+        if not args: args = ResponseNetParams()
+        if not run_settings: run_settings = RunSettings()
         if not container_settings: container_settings = ProcessedContainerSettings()
         ResponseNet.validate_required_run_args(inputs)
-        if not args: args = ResponseNetParams()
 
         # the data files will be mapped within this directory within the container
         work_dir = '/ResponseNet'
@@ -113,7 +115,7 @@ class ResponseNet(PRM[ResponseNetParams]):
             work_dir,
             out_dir,
             container_settings,
-            timeout)
+            run_settings.timeout)
 
         # Rename the primary output file to match the desired output filename
         out_file_suffixed.rename(output_file)
