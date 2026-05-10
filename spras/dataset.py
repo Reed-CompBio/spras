@@ -1,7 +1,7 @@
 import os
 import pickle as pkl
 import warnings
-from typing import Union
+from typing import Self, Union
 
 import pandas as pd
 
@@ -60,9 +60,8 @@ class Dataset:
         with open(file, "wb") as f:
             pkl.dump(self, f)
 
-    # NOTE: When we bump to Python 3.13, we can use the reference Dataset instead of the literal "Dataset" for typing.
     @classmethod
-    def from_file(cls, file: Union[LoosePathLike, "Dataset"]):
+    def from_file(cls, file: Union[LoosePathLike, Self]):
         """
         Loads dataset object from a pickle file or another `Dataset` object.
         Usage: dataset = Dataset.from_file(pickle_file)
