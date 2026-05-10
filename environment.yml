@@ -3,7 +3,7 @@ channels:
   - conda-forge
 dependencies:
   - adjusttext=1.3.0
-  - bioconda::snakemake-minimal=9.19.0
+  - bioconda::snakemake-minimal=9.20.0
   # Conda refers to pypi/docker as docker-py.
   - docker-py=7.1.0
   - matplotlib=3.10.9
