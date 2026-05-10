@@ -142,5 +142,10 @@ TempMat.mat
 # OSX-specific stuff
 **/.DS_Store
 
+# SPRAS singularity container
+spras.sif
+
+# Secrets and Licenses
+licenses
 # Singularity cache
 unpacked

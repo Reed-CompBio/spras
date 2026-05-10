@@ -1,0 +1,5 @@
+NODEID	prize	active	dummy
+A	2	true	true
+B	2	true	true
+C	2	true	true
+D	2	true	true

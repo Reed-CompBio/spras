@@ -88,6 +88,8 @@ class Config:
         self.analysis_include_ml_aggregate_algo = None
         # A Boolean specifying whether to run the evaluation per algorithm analysis
         self.analysis_include_evaluation_aggregate_algo = None
+        # A dict with secret file paths (e.g. licenses)
+        self.secrets = { "gurobi": parsed_raw_config.secrets.gurobi }
         # Specifies whether the files should be OSDF-immutable (i.e. the file names change when the file itself changes)
         self.immutable_files = parsed_raw_config.immutable_files
 
