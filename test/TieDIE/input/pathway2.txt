@@ -1,0 +1,6 @@
+A	-a>	D
+B	-a>	D
+C	-a>	D
+D	-a>	E
+D	-a>	F
+D	-a>	G
