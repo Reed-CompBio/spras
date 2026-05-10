@@ -10,7 +10,7 @@ To read more about the specific pathway reconstruction algorithms that may be su
 This repository is very much a work in progress and is not yet stable enough for real data analysis.
 The latest features can be found on various development branches.
 The instructions below support running SPRAS with a fixed configuration on example data to demonstrate its functionality.
-Open a [GitHub issue](https://github.com/Reed-CompBio/spras/issues) or contact [Anthony Gitter](https://www.biostat.wisc.edu/~gitter/) or [Anna Ritz](https://www.reed.edu/biology/ritz/) to provide feedback on this early version of SPRAS.
+Open a [GitHub issue](https://github.com/Reed-CompBio/spras/issues) or contact [Anthony Gitter](https://gitterlab.org/) or [Anna Ritz](https://www.reed.edu/biology/ritz/) to provide feedback on this early version of SPRAS.
 
 SPRAS is inspired by tools for single-cell transcriptomics such as [BEELINE](https://github.com/Murali-group/Beeline) and [dynverse](https://github.com/dynverse) that provide a unified interface to many related algorithms.
 
