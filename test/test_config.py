@@ -110,7 +110,7 @@ def get_test_config():
 
     return test_raw_config
 
-def value_test_util(alg: str, run_name: str, param_type: type[BaseModel], configurations: Iterable[BaseModel]):
+def value_test_util[T: BaseModel](alg: str, run_name: str, param_type: type[T], configurations: Iterable[T]):
     """
     Utility test function to be able to test against certain named runs
     under algorithms. This is, unfortunately, a very holistic function that depends

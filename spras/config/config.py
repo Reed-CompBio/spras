@@ -19,7 +19,6 @@ import warnings
 from pathlib import Path
 from typing import Any
 
-import numpy as np
 import yaml
 
 from spras.config.container_schema import ProcessedContainerSettings
@@ -197,26 +196,14 @@ class Config:
                 param_name_list = []
                 # We convert our run parameters to a dictionary, allowing us to iterate over it
                 run_subscriptable = vars(runs[run_name].params)
-                for param in run_subscriptable:
+                # `param_values` is guaranteed to be `Tunable[Any]` by algorithms.py
+                for param, param_values in run_subscriptable.items():
                     param_name_list.append(param)
-                    # this is guaranteed to be list[Any] by algorithms.py
-                    param_values: list[Any] = run_subscriptable[param]
-                    all_runs.append(param_values)
+                    all_runs.append(param_values.to_list())
                 run_list_tuples = list(it.product(*all_runs))
                 param_name_tuple = tuple(param_name_list)
                 for r in run_list_tuples:
                     run_dict = dict(zip(param_name_tuple, r, strict=True))
-                    # TODO: Workaround for yaml.safe_dump in Snakefile write_parameter_log.
-                    # We would like to preserve np info for larger floats and integers on the config,
-                    # but this isn't strictly necessary for the pretty yaml logging that's happening - if we
-                    # want to preserve the precision, we need to output this into yaml as strings.
-                    for param, value in run_dict.copy().items():
-                        if isinstance(value, np.integer):
-                            run_dict[param] = int(value)
-                        if isinstance(value, np.floating):
-                            run_dict[param] = float(value)
-                        if isinstance(value, np.ndarray):
-                            run_dict[param] = value.tolist()
                     hash_run_dict = copy.deepcopy(run_dict)
                     if self.immutable_files:
                         # Incorporates the `spras_revision` into the hash
