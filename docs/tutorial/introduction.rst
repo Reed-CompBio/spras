@@ -41,6 +41,11 @@ Required software:
 -  (Optional) `Cytoscape <https://cytoscape.org/>`__ for visualizing
    networks (download locally, the web version will not suffice)
 
+.. note::
+
+   Mac users who experience performance issues with Docker Desktop can
+   try `OrbStack <https://orbstack.dev/>`_ as an alternative.
+
 Required knowledge:
 
 -  Ability to run command line operations and modify YAML files.

@@ -21,6 +21,7 @@ containers:
 # then myAlg will be run on (a=1,b=0.5),(a=1,b=0.75),(a=2,b=0.5), and (a=2,b=0,75). Pretty neat, but be
 # careful: too many parameters might make your runs take a long time.
 
+# TODO: get rid of the algorithms that will take too long to run
 algorithms:
   - name: "pathlinker"
     include: true
@@ -48,13 +49,13 @@ algorithms:
       run2:
         b: 2
         g: 3
-  - name: meo
-    include: true
-    runs:
-      run1:
-        local_search: [true, false]
-        max_path_length: [2, 3]
-        rand_restarts: 10
+  # - name: meo
+  #   include: true
+  #   runs:
+  #     run1:
+  #       local_search: [true, false]
+  #       max_path_length: [2, 3]
+  #       rand_restarts: 10
   - name: allpairs
     include: true
   - name: domino

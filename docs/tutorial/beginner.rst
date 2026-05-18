@@ -50,13 +50,6 @@ Conda environment and install the SPRAS python package:
    The last command is a one-time installation of the SPRAS package into
    the environment.
 
-# The problem was that the participant downloaded the beginner config
-file into the wrong directory and then the snakemake command failed #
-They put it into the spras directory in the conda environment that was
-created after the spras package is installed, may need to watch for that
-# add a note about the folder called spras within the larger spras
-folder
-
 0.3 Test the installation
 =========================
 
@@ -81,9 +74,6 @@ Launch Docker Desktop and wait until it says "Docker is running".
    reconstruction algorithms and certain post-analysis steps within
    isolated containers. These containers include all the necessary
    dependencies to run each algorithm or post analysis.
-
-# Confusion about why Docker is followed by conda. Need to explain the
-interaction between these pieces. # add this as a note
 
 *****************************
  Step 1: Configuration files
@@ -134,6 +124,15 @@ After adding this file, your directory structure will look like this
    │   ├── tps-egfr-prizes.txt # pre-defined in SPRAS already, used by the beginner.yaml file
    │   └── ... other input data ...
 
+.. note::
+
+   There is a nested ``spras`` folder within the larger ``spras``
+   repository.
+
+   When downloading the beginner config file, place it in your working
+   ``spras`` directory under ``spras/config``, not in the
+   ``spras/spras`` directory.
+
 config/
 -------
 
@@ -164,9 +163,6 @@ folder.
 Algorithms
 ----------
 
-# TODO: update the code for the params/config that matches what the new
-structure of the config file is
-
 .. code:: yaml
 
    algorithms:
@@ -188,6 +184,18 @@ match one of the supported SPRAS algorithms. Each algorithm includes an
 include flag, which you set to true to have Snakemake run it, or false
 to disable it.
 
+A parameter is a configurable value, or set of values, that controls an
+algorithm's behavior. Parameters govern algorithm-specific behavior that
+shapes how an output subnetwork is constructed, so changing them
+produces different subnetworks from the same input data.
+
+Each algorithm exposes its own set of parameters that control its
+optimization strategy. Some algorithms have no adjustable parameters,
+while others include multiple tunable settings that influence how
+subnetworks are created. These parameters vary widely between algorithms
+and reflect the unique optimization techniques each method employs under
+the hood.
+
 Algorithm parameters can be organized into one or more run blocks (e.g.,
 run1, run2, …), with each block containing key-value pairs. When
 defining a parameter, it can be passed as a single value or passed by
@@ -196,14 +204,6 @@ lists within a run block, SPRAS generates all possible combinations
 (Cartesian product) of those list values together with any fixed
 single-value parameters in the same run block. Each unique combination
 runs once per algorithm.
-
-# TODO: add what a parameter is (maybe move this to a different section
-in intermediate.rst) Each algorithm exposes its own set of parameters
-that control its optimization strategy. Some algorithms have no
-adjustable parameters, while others include multiple tunable settings
-that influence how subnetworks are created. These parameters vary widely
-between algorithms and reflect the unique optimization techniques each
-method employs under the hood.
 
 (See :doc:`Pathway Reconstruction Methods <../prms/prms>` for
 information about algorithms and their parameters).
@@ -259,11 +259,11 @@ Gold standard datasets
        data_dir: "input"
        dataset_labels: ["data0", "data1"]
 
-In the configuration file, users can specify one or more gold standard
-datasets to evaluate the subnetworks reconstructed from each dataset.
-When gold standards are provided and evaluation is enabled (``include:
-true``), SPRAS will automatically compare the reconstructed subnetworks
-for a specific dataset against the corresponding gold standards.
+Users can specify one or more gold standard datasets in the
+configuration file to evaluate the subnetworks reconstructed from each
+dataset. When gold standards are provided and evaluation is enabled
+(shown below), SPRAS compares the output subnetworks for a given dataset
+against the gold standards listed in its ``dataset_labels`` field.
 
 A gold standard dataset must include the following types of keys and
 files:
@@ -276,12 +276,6 @@ files:
    standard dataset files are located.
 -  ``dataset_labels``: a list of dataset labels indicating which
    datasets this gold standard dataset should be evaluated against.
-
-When evaluation is enabled, SPRAS will automatically run its built-in
-evaluation analysis on each defined dataset-gold standard pair. This
-evaluation computes metrics such as precision, recall, and
-precision-recall curves, depending on the parameter selection method
-used.
 
 Reconstruction settings
 -----------------------
@@ -477,8 +471,24 @@ under pathlinker so it looks like:
 
 .. code:: yaml
 
-   run2:
-       k: [10, 100]
+   - name: "pathlinker"
+    include: true
+    runs:
+      run1:
+         k: 1
+      run2:
+         k: [10, 100]
+
+.. note::
+
+   YAML is indentation-sensitive. The ``run1`` and ``run2`` keys must be
+   aligned at the same indentation level, and their ``k`` parameters
+   must also be aligned with each other. Misaligned indentation will
+   cause the configuration file to fail to parse.
+
+   Tools like `YAML Prettifier
+   <https://onlineyamltools.com/prettify-yaml>`_ can help format and
+   validate your configuration file.
 
 With this update, the ``beginner.yaml`` configuration file is set up
 have SPRAS run a single algorithm with multiple parameter settings on
@@ -628,6 +638,11 @@ Your analysis section in the configuration file should look like this:
            include: true
        cytoscape:
            include: true
+
+.. note::
+
+   The Cytoscape analysis step will take noticeably longer to run than
+   the other analysis options.
 
 ``summary`` generates graph topological summary statistics for each
 algorithm's parameter combination output, generating a summary file for
