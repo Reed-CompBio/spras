@@ -580,60 +580,41 @@ single dataset.
 
 .. code:: yaml
 
-    algorithms:
-   - name: "pathlinker"
-     include: true
-     runs:
-       run1:
-         k: 100
+   algorithms:
+    - name: "pathlinker"
+      include: true
+      runs:
+        run1:
+          k: [1, 10, 100, 1000]
 
-   - name: omicsintegrator1
-     include: true
-     runs:
-       run1:
-         b: 10
-         d: 10
-         r: 0.01
-         w: 0.1
-         mu: 0.008
+    - name: omicsintegrator2
+      include: true
+      runs:
+        run1:
+          b: [4, 10]
+          g: [0, 3]
+          w: [0.25, 6]
 
-   - name: omicsintegrator2
-     include: true
-     runs:
-       run1:
-         b: 4
-         g: 0
+    - name: mincostflow
+      include: true
+      runs:
+        run1:
+          capacity: [15, 30]
+          flow: [80, 15]
 
-   - name: allpairs
-     include: true
+    - name: "strwr"
+      include: true
+      runs:
+        run1:
+          alpha: 0.85
+          threshold: [100, 200]
 
-   - name: domino
-     include: true
-     runs:
-       run1:
-         slice_threshold: 0.3
-         module_threshold: 0.05
-
-   - name: mincostflow
-     include: true
-     runs:
-       run1:
-         capacity: 15
-         flow: 80
-
-   - name: "strwr"
-     include: true
-     runs:
-       run1:
-         alpha: 0.85
-         threshold: 100
-
-   - name: "rwr"
-     include: true
-     runs:
-       run1:
-         alpha: 0.85
-         threshold: 100
+    - name: "rwr"
+      include: true
+      runs:
+        run1:
+          alpha: 0.85
+          threshold: [100, 200]
 
 .. note::
 
@@ -777,7 +758,6 @@ What your directory structure should like after this run:
    │       ├── egfr-pathlinker-params-VQL7BDZ/
    │       │   ├── pathway.txt
    │       │   └── raw-pathway.txt
-   │       ├── egfr-pathway-summary.txt
    │       ├── egfr-rwr-params-34NN6EK/
    │       │   ├── pathway.txt
    │       │   └── raw-pathway.txt
@@ -1036,7 +1016,6 @@ What your directory structure should like after this run:
    │       ├── egfr-pathlinker-params-VQL7BDZ/
    │       │   ├── pathway.txt
    │       │   └── raw-pathway.txt
-   │       ├── egfr-pathway-summary.txt
    │       ├── egfr-rwr-params-34NN6EK/
    │       │   ├── pathway.txt
    │       │   └── raw-pathway.txt
@@ -1251,6 +1230,8 @@ Your analysis section in the configuration file should look like this:
 .. code:: yaml
 
    analysis:
+      summary:
+         include: true
       ml:
          include: true
          aggregate_per_algorithm: true
@@ -1261,10 +1242,23 @@ Your analysis section in the configuration file should look like this:
          include: true
          aggregate_per_algorithm: true
 
-# TODO: add a command to remove the ml folder and we will rerun it with
-new commands on what happens to the ml stuff - doing this because we are
-customizing the ml stuff and need to rerun them (doesn't happen
-automatically but work in progress to do that)
+Since we added customized ML settings, we need to delete the existing
+``egfr-ml/`` folder before rerunning SPRAS so that Snakemake regenerates
+the ML outputs with the new configuration. Run this command from the
+root directory:
+
+.. code:: bash
+
+   rm -rf output/intermediate/egfr-ml/
+
+.. note::
+
+   Snakemake skips steps whose output files already exist, so changes to
+   ML configuration parameters will not trigger a rerun unless the
+   existing ML outputs are removed first.
+
+   Automatic re-execution on config changes is a known limitation and is
+   being addressed in ongoing SPRAS development.
 
 Setting ``aggregate_per_algorithm`` to true will additionally groups
 post-analysis and evaluations by algorithm per dataset. Without this,
@@ -1274,6 +1268,9 @@ post-analysis rather than broken out per algorithm.
 Within ``ml``, ``remove_empty_pathways`` excludes pathways with no nodes
 or edges from the PCA post analysis. The ``kde`` creates a kernel
 density estimate over the PCA plots.
+
+``summary`` is enabled because evaluation uses summary statistics to
+break ties between pathways.
 
 The intermediate configuration also includes a gold standard for the
 EGFR dataset, which is already set up in SPRAS and does not require any
