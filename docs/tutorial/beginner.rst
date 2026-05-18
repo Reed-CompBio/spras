@@ -131,7 +131,7 @@ After adding this file, your directory structure will look like this
 
    When downloading the beginner config file, place it in your working
    ``spras`` directory under ``spras/config``, not in the
-   ``spras/spras`` directory.
+   ``spras/spras/config`` directory.
 
 config/
 -------

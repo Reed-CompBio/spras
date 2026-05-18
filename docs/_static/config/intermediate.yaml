@@ -27,71 +27,59 @@ algorithms:
     include: true
     runs:
       run1:
-        k: 1
-      run2:
-        k: [10, 100]
+        k: 100
+
   - name: omicsintegrator1
     include: true
     runs:
       run1:
-        b: [0.55, 2, 10]
+        b: 10
         d: 10
-        g: 1e-3
         r: 0.01
         w: 0.1
         mu: 0.008
+
   - name: omicsintegrator2
     include: true
     runs:
       run1:
         b: 4
         g: 0
-      run2:
-        b: 2
-        g: 3
-  # - name: meo
-  #   include: true
-  #   runs:
-  #     run1:
-  #       local_search: [true, false]
-  #       max_path_length: [2, 3]
-  #       rand_restarts: 10
+
   - name: allpairs
     include: true
+
   - name: domino
     include: true
     runs:
       run1:
         slice_threshold: 0.3
         module_threshold: 0.05
+
   - name: mincostflow
     include: true
     runs:
       run1:
         capacity: 15
         flow: 80
-      run2:
-        capacity: 1
-        flow: 6
-      run3:
-        capacity: 5
-        flow: 60
+
   - name: "strwr"
     include: true
     runs:
       run1:
-        alpha: [0.85]
-        threshold: [100, 200]
+        alpha: 0.85
+        threshold: 100
+
   - name: "rwr"
     include: true
     runs:
       run1:
-        alpha: [0.85]
-        threshold: [100, 200]
+        alpha: 0.85
+        threshold: 100
 
 # Here we specify which pathways to run and other file location information.
 # Assume that if a dataset label does not change, the lists of associated input files do not change
-datasets: # TODO update this based on the dataset that I set up
+datasets:
   - # Labels can only contain letters, numbers, or underscores
     label: egfr
     node_files: ["tps-egfr-prizes.txt"] # the input nodes
@@ -119,34 +107,22 @@ analysis:
   # Machine learning analysis (e.g. clustering) of the pathway output files for each dataset
   ml:
     # ml analysis per dataset
-    include: false # set to true for step 3
-    # TODO: can I remove some of these arguments?
+    include: true # set to true for step 3
+
+    # set all below to true for step 4??
     # adds ml analysis per algorithm output
     # only runs for algorithms with multiple parameter combinations chosen
     aggregate_per_algorithm: false # set to true for step 4??? Look at todo below
-    # specify how many principal components to calculate
-    components: 2
-    # boolean to show the labels on the pca graph
-    labels: true
-    # 'ward', 'complete', 'average', 'single'
-    # if linkage: ward, must use metric: euclidean
-    linkage: 'ward'
-    # 'euclidean', 'manhattan', 'cosine'
-    metric: 'euclidean'
-    # controls whether kernel density estimation (KDE) is computed and visualized on top of PCA plots.
-    # the coordinates of the KDE maximum (kde_peak) are also saved to the PCA coordinates output file.
-    # KDE needs to be run in order to select a parameter combination with PCA because the maximum kernel density is used
-    # to pick the 'best' parameter combination.
     kde: false # set to true for step 4
     # TODO: double check that if I run step 3 without kde, then set it true in step 4 that pca is rerun
     # removes empty pathways from consideration in ml analysis (pca only)
-    remove_empty_pathways: false # set to true for step 4
+    remove_empty_pathways: false # set to true for step 4???
     # TODO: double check why this was needed for pca
 
   evaluation:
     # evaluation per dataset-goldstandard pair
     # evaluation will not run unless ml include is set to true
-    include: false # set to true for step 4
+    include: false # set to true for step 4 ???
     # adds evaluation per algorithm per dataset-goldstandard pair
     # evaluation per algorithm will not run unless ml include and ml aggregate_per_algorithm are set to true
     aggregate_per_algorithm: false # set to true for step 4 ???  TODO: decide if it is better to demonstrate what it looks like per algorithm

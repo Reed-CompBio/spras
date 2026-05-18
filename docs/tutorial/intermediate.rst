@@ -582,84 +582,72 @@ single dataset.
 
 .. code:: yaml
 
-   algorithms:
+    algorithms:
    - name: "pathlinker"
-      include: true
-      runs:
-         run1:
-         k: 1
-         run2:
-         k: [10, 100]
+     include: true
+     runs:
+       run1:
+         k: 100
+
    - name: omicsintegrator1
-      include: true
-      runs:
-         run1:
-         b: [0.55, 2, 10]
+     include: true
+     runs:
+       run1:
+         b: 10
          d: 10
-         g: 1e-3
          r: 0.01
          w: 0.1
          mu: 0.008
+
    - name: omicsintegrator2
-      include: true
-      runs:
-         run1:
+     include: true
+     runs:
+       run1:
          b: 4
          g: 0
-         run2:
-         b: 2
-         g: 3
-   - name: meo
-      include: true
-      runs:
-         run1:
-         local_search: [true, false]
-         max_path_length: [2, 3]
-         rand_restarts: 10
+
    - name: allpairs
-      include: true
+     include: true
+
    - name: domino
-      include: true
-      runs:
-         run1:
+     include: true
+     runs:
+       run1:
          slice_threshold: 0.3
          module_threshold: 0.05
+
    - name: mincostflow
-      include: true
-      runs:
-         run1:
+     include: true
+     runs:
+       run1:
          capacity: 15
          flow: 80
-         run2:
-         capacity: 1
-         flow: 6
-         run3:
-         capacity: 5
-         flow: 60
+
    - name: "strwr"
-      include: true
-      runs:
-         run1:
-         alpha: [0.85]
-         threshold: [100, 200]
+     include: true
+     runs:
+       run1:
+         alpha: 0.85
+         threshold: 100
+
    - name: "rwr"
-      include: true
-      runs:
-         run1:
-         alpha: [0.85]
-         threshold: [100, 200]
+     include: true
+     runs:
+       run1:
+         alpha: 0.85
+         threshold: 100
 
 .. note::
 
-   TODO: The full suite of algorithms is described :doc:`Pathway
-   Reconstruction Methods <../prms/prms>`. for this part of the tutorial
-   will only be running on a subset of them.
+   The full suite of algorithms is described in :doc:`Pathway
+   Reconstruction Methods <../prms/prms>`. This part of the tutorial
+   uses only a subset.
 
 From the root directory, run the command below from the command line:
 
 .. code:: bash
 
-   snakemake --cores 4 --configfile config/intermediate.yaml
+   snakemake --cores 8 --configfile config/intermediate.yaml
 
 What happens when you run this command
 --------------------------------------
@@ -670,7 +658,7 @@ configuration.
 Similar automated steps from the previous tutorial runs behind the
 scenes for ``intermediate.yaml``. However, this configuration now runs
 multiple algorithms with different parameter combinations, which takes
-longer to complete. By increasing the number of cores to 4, it allows
+longer to complete. By increasing the number of cores to 8, it allows
 Snakemake to parallelize the work locally, speeding up execution when
 possible. (See :doc:`Using SPRAS <../usage>` for more information on
 SPRAS's parallelization.)
@@ -741,60 +729,27 @@ What your directory structure should like after this run:
    │   ├── phosphosite-irefindex13.0-uniprot.txt
    │   └── tps-egfr-prizes.txt
    ├── outputs/
-   │   └── basic/
+   │   └── intermediate/
    │       └── dataset-egfr-merged.pickle
-   │       └── egfr-meo-params-FJBHHNE
+   │       └── egfr-allpairs-params-X4Q2T2H
    │            └── pathway.txt
    │            └── raw-pathway.txt
-   │       └── egfr-meo-params-GKEDDFZ
-   │            └── pathway.txt
-   │            └── raw-pathway.txt
-   │       └── egfr-meo-params-JQ4DL7K
-   │            └── pathway.txt
-   │            └── raw-pathway.txt
-   │       └── egfr-meo-params-OXXIFMZ
+   │       └── egfr-domino-params-V3X4RW7
    │            └── pathway.txt
    │            └── raw-pathway.txt
    │       └── egfr-mincostflow-params-42UBTQI
    │            └── pathway.txt
    │            └── raw-pathway.txt
-   │       └── egfr-mincostflow-params-4G2PQRB
+   │       └── egfr-omicsintegrator1-params-YYFFQV4
    │            └── pathway.txt
    │            └── raw-pathway.txt
-   │       └── egfr-omicsintegrator1-params-FZI2OGW
-   │            └── pathway.txt
-   │            └── raw-pathway.txt
-   │       └── egfr-omicsintegrator1-params-GUMLBDZ
-   │            └── pathway.txt
-   │            └── raw-pathway.txt
-   │       └── egfr-omicsintegrator1-params-PCWFPQW
-   │            └── pathway.txt
-   │            └── raw-pathway.txt
-   │       └── egfr-omicsintegrator2-params-EHHWPMD
-   │            └── pathway.txt
-   │            └── raw-pathway.txt
-   │       └── egfr-omicsintegrator2-params-IV3IPCJ
-   │            └── pathway.txt
-   │            └── raw-pathway.txt
-   │       └── egfr-pathlinker-params-4YXABT7
-   │            └── pathway.txt
-   │            └── raw-pathway.txt
-   │       └── egfr-pathlinker-params-7S4SLU6
-   │            └── pathway.txt
-   │            └── raw-pathway.txt
-   │       └── egfr-pathlinker-params-D4TUKMX
+   │       └── egfr-omicsintegrator2-params-FLDAMA4
    │            └── pathway.txt
    │            └── raw-pathway.txt
    │       └── egfr-pathlinker-params-VQL7BDZ
    │            └── pathway.txt
    │            └── raw-pathway.txt
-   │       └── egfr-rwr-params-34NN6EK
-   │            └── pathway.txt
-   │            └── raw-pathway.txt
    │       └── egfr-rwr-params-GGZCZBU
-   │            └── pathway.txt
-   │            └── raw-pathway.txt
-   │       └── egfr-strwr-params-34NN6EK
    │            └── pathway.txt
    │            └── raw-pathway.txt
    │       └── egfr-strwr-params-GGZCZBU
@@ -802,36 +757,22 @@ What your directory structure should like after this run:
    │            └── raw-pathway.txt
    │       └── logs
    │            └── datasets-egfr.yaml
-   │            └── parameters-allpairs-params-BEH6YB2.yaml
+   │            └── parameters-allpairs-params-X4Q2T2H.yaml
    │            └── parameters-domino-params-V3X4RW7.yaml
-   │            └── parameters-meo-params-FJBHHNE.yaml
-   │            └── parameters-meo-params-GKEDDFZ.yaml
-   │            └── parameters-meo-params-JQ4DL7K.yaml
-   │            └── parameters-meo-params-OXXIFMZ.yaml
    │            └── parameters-mincostflow-params-42UBTQI.yaml
-   │            └── parameters-mincostflow-params-4G2PQRB.yaml
-   │            └── parameters-mincostflow-params-GGT4CVE.yaml
-   │            └── parameters-omicsintegrator1-params-FZI2OGW.yaml
-   │            └── parameters-omicsintegrator1-params-GUMLBDZ.yaml
-   │            └── parameters-omicsintegrator1-params-PCWFPQW.yaml
-   │            └── parameters-omicsintegrator2-params-EHHWPMD.yaml
-   │            └── parameters-omicsintegrator2-params-IV3IPCJ.yaml
-   │            └── parameters-pathlinker-params-4YXABT7.yaml
-   │            └── parameters-pathlinker-params-7S4SLU6.yaml
-   │            └── parameters-pathlinker-params-D4TUKMX.yaml
+   │            └── parameters-omicsintegrator1-params-YYFFQV4.yaml
+   │            └── parameters-omicsintegrator2-params-FLDAMA4.yaml
    │            └── parameters-pathlinker-params-VQL7BDZ.yaml
-   │            └── parameters-rwr-params-34NN6EK.yaml
    │            └── parameters-rwr-params-GGZCZBU.yaml
-   │            └── parameters-strwr-params-34NN6EK.yaml
    │            └── parameters-strwr-params-GGZCZBU.yaml
    │       └── prepared
+   │            └── egfr-allpairs-inputs
+   │                ├── directed_flag.txt
+   │                ├── network.txt
+   │                └── nodetypes.txt
    │            └── egfr-domino-inputs
    │                ├── active_genes.txt
    │                └── network.txt
-   │            └── egfr-meo-inputs
-   │                ├── edges.txt
-   │                ├── sources.txt
-   │                └── targets.txt
    │            └── egfr-mincostflow-inputs
    │                ├── edges.txt
    │                ├── sources.txt
@@ -845,7 +786,7 @@ What your directory structure should like after this run:
    │                └── prizes.txt
    │            └── egfr-pathlinker-inputs
    │                ├── network.txt
-   │                ── nodetypes.txt
+   │                └── nodetypes.txt
    │            └── egfr-rwr-inputs
    │                ├── network.txt
    │                └── nodes.txt
@@ -881,7 +822,7 @@ contains the following reconstructed subnetwork:
 
 .. code:: text
 
-   Node1       Node2   Rank    Direction
+   Node1       Node2    Rank     Direction
    CBL_HUMAN   EGFR_HUMAN      1       U
    EGFR_HUMAN  EGF_HUMAN       1       U
    EMD_HUMAN   LMNA_HUMAN      1       U
@@ -894,32 +835,43 @@ contains the following reconstructed subnetwork:
    EGF_HUMAN   S10A4_HUMAN     1       U
    EMD_HUMAN   SRC_HUMAN       1       U
 
-And the file ``egfr-omicsintegrator1-params-GUMLBDZ/pathway.txt``
+And the file ``egfr-omicsintegrator1-params-YYFFQV4/pathway.txt``
 contains the following reconstructed subnetwork:
 
 .. code:: text
 
-   Node1       Node2   Rank    Direction
-   CBLB_HUMAN  EGFR_HUMAN      1       U
-   CBL_HUMAN   CD2AP_HUMAN     1       U
-   CBL_HUMAN   CRKL_HUMAN      1       U
-   CBL_HUMAN   EGFR_HUMAN      1       U
-   CBL_HUMAN   PLCG1_HUMAN     1       U
-   CDK1_HUMAN  NPM_HUMAN       1       D
-   CHD4_HUMAN  HDAC2_HUMAN     1       U
-   EGFR_HUMAN  EGF_HUMAN       1       U
-   EGFR_HUMAN  GRB2_HUMAN      1       U
-   EIF3B_HUMAN EIF3G_HUMAN     1       U
-   FAK1_HUMAN  PAXI_HUMAN      1       U
-   GAB1_HUMAN  PTN11_HUMAN     1       U
-   GRB2_HUMAN  PTN11_HUMAN     1       U
-   GRB2_HUMAN  SHC1_HUMAN      1       U
-   HDAC2_HUMAN SIN3A_HUMAN     1       U
-   HGS_HUMAN   STAM2_HUMAN     1       U
-   KS6A1_HUMAN MK01_HUMAN      1       U
-   MK01_HUMAN  ABI1_HUMAN      1       D
-   MK01_HUMAN  ERF_HUMAN       1       D
-   MRE11_HUMAN RAD50_HUMAN     1       U
+   Node1        Node2      Rank    Direction
+   CBLB_HUMAN   EGFR_HUMAN      1       U
+   CBL_HUMAN    CD2AP_HUMAN     1       U
+   CBL_HUMAN    CRKL_HUMAN      1       U
+   CBL_HUMAN    EGFR_HUMAN      1       U
+   CBL_HUMAN    PLCG1_HUMAN     1       U
+   CDK1_HUMAN   NPM_HUMAN       1       D
+   CHD4_HUMAN   HDAC1_HUMAN     1       U
+   CHIP_HUMAN   HS90A_HUMAN     1       U
+   CHIP_HUMAN   P53_HUMAN       1       U
+   DNMT1_HUMAN  HDAC1_HUMAN     1       U
+   EGFR_HUMAN   EGF_HUMAN       1       U
+   EGFR_HUMAN   GRB2_HUMAN      1       U
+   EIF3B_HUMAN  EIF3G_HUMAN     1       U
+   FAK1_HUMAN   PAXI_HUMAN      1       U
+   GAB1_HUMAN   PTN11_HUMAN     1       U
+   GRB2_HUMAN   KHDR1_HUMAN     1       U
+   GRB2_HUMAN   PTN11_HUMAN     1       U
+   GRB2_HUMAN   SHC1_HUMAN      1       U
+   HDAC1_HUMAN  HDAC2_HUMAN     1       U
+   HDAC1_HUMAN  P53_HUMAN       1       U
+   HDAC1_HUMAN  RB_HUMAN        1       U
+   HDAC1_HUMAN  SIN3A_HUMAN     1       U
+   HGS_HUMAN    STAM2_HUMAN     1       U
+   HS90A_HUMAN  STIP1_HUMAN     1       U
+   HS90A_HUMAN  TEBP_HUMAN      1       U
+   KHDR1_HUMAN  LCK_HUMAN       1       U
+   KS6A1_HUMAN  MK01_HUMAN      1       U
+   MK01_HUMAN   ABI1_HUMAN      1       D
+   MK01_HUMAN   ERF_HUMAN       1       D
+   MRE11_HUMAN  RAD50_HUMAN     1       U
+   P53_HUMAN    TP53B_HUMAN     1       U
 
 ******************************
  Step 3: Use ML post-analysis
@@ -977,7 +929,7 @@ What your directory structure should like after this run:
 
 .. code:: text
 
-   spras/
+      spras/
    ├── .snakemake/
    │   └── log/
    │       └── ... snakemake log files ...
@@ -987,60 +939,27 @@ What your directory structure should like after this run:
    │   ├── phosphosite-irefindex13.0-uniprot.txt
    │   └── tps-egfr-prizes.txt
    ├── outputs/
-   │   └── basic/
+   │   └── intermediate/
    │       └── dataset-egfr-merged.pickle
-   │       └── egfr-meo-params-FJBHHNE
+   │       └── egfr-allpairs-params-X4Q2T2H
    │            └── pathway.txt
    │            └── raw-pathway.txt
-   │       └── egfr-meo-params-GKEDDFZ
-   │            └── pathway.txt
-   │            └── raw-pathway.txt
-   │       └── egfr-meo-params-JQ4DL7K
-   │            └── pathway.txt
-   │            └── raw-pathway.txt
-   │       └── egfr-meo-params-OXXIFMZ
+   │       └── egfr-domino-params-V3X4RW7
    │            └── pathway.txt
    │            └── raw-pathway.txt
    │       └── egfr-mincostflow-params-42UBTQI
    │            └── pathway.txt
    │            └── raw-pathway.txt
-   │       └── egfr-mincostflow-params-4G2PQRB
+   │       └── egfr-omicsintegrator1-params-YYFFQV4
    │            └── pathway.txt
    │            └── raw-pathway.txt
-   │       └── egfr-omicsintegrator1-params-FZI2OGW
-   │            └── pathway.txt
-   │            └── raw-pathway.txt
-   │       └── egfr-omicsintegrator1-params-GUMLBDZ
-   │            └── pathway.txt
-   │            └── raw-pathway.txt
-   │       └── egfr-omicsintegrator1-params-PCWFPQW
-   │            └── pathway.txt
-   │            └── raw-pathway.txt
-   │       └── egfr-omicsintegrator2-params-EHHWPMD
-   │            └── pathway.txt
-   │            └── raw-pathway.txt
-   │       └── egfr-omicsintegrator2-params-IV3IPCJ
-   │            └── pathway.txt
-   │            └── raw-pathway.txt
-   │       └── egfr-pathlinker-params-4YXABT7
-   │            └── pathway.txt
-   │            └── raw-pathway.txt
-   │       └── egfr-pathlinker-params-7S4SLU6
-   │            └── pathway.txt
-   │            └── raw-pathway.txt
-   │       └── egfr-pathlinker-params-D4TUKMX
+   │       └── egfr-omicsintegrator2-params-FLDAMA4
    │            └── pathway.txt
    │            └── raw-pathway.txt
    │       └── egfr-pathlinker-params-VQL7BDZ
    │            └── pathway.txt
    │            └── raw-pathway.txt
-   │       └── egfr-rwr-params-34NN6EK
-   │            └── pathway.txt
-   │            └── raw-pathway.txt
    │       └── egfr-rwr-params-GGZCZBU
-   │            └── pathway.txt
-   │            └── raw-pathway.txt
-   │       └── egfr-strwr-params-34NN6EK
    │            └── pathway.txt
    │            └── raw-pathway.txt
    │       └── egfr-strwr-params-GGZCZBU
@@ -1059,36 +978,22 @@ What your directory structure should like after this run:
    │            └── pca.png
    │       └── logs
    │            └── datasets-egfr.yaml
-   │            └── parameters-allpairs-params-BEH6YB2.yaml
+   │            └── parameters-allpairs-params-X4Q2T2H.yaml
    │            └── parameters-domino-params-V3X4RW7.yaml
-   │            └── parameters-meo-params-FJBHHNE.yaml
-   │            └── parameters-meo-params-GKEDDFZ.yaml
-   │            └── parameters-meo-params-JQ4DL7K.yaml
-   │            └── parameters-meo-params-OXXIFMZ.yaml
    │            └── parameters-mincostflow-params-42UBTQI.yaml
-   │            └── parameters-mincostflow-params-4G2PQRB.yaml
-   │            └── parameters-mincostflow-params-GGT4CVE.yaml
-   │            └── parameters-omicsintegrator1-params-FZI2OGW.yaml
-   │            └── parameters-omicsintegrator1-params-GUMLBDZ.yaml
-   │            └── parameters-omicsintegrator1-params-PCWFPQW.yaml
-   │            └── parameters-omicsintegrator2-params-EHHWPMD.yaml
-   │            └── parameters-omicsintegrator2-params-IV3IPCJ.yaml
-   │            └── parameters-pathlinker-params-4YXABT7.yaml
-   │            └── parameters-pathlinker-params-7S4SLU6.yaml
-   │            └── parameters-pathlinker-params-D4TUKMX.yaml
+   │            └── parameters-omicsintegrator1-params-YYFFQV4.yaml
+   │            └── parameters-omicsintegrator2-params-FLDAMA4.yaml
    │            └── parameters-pathlinker-params-VQL7BDZ.yaml
-   │            └── parameters-rwr-params-34NN6EK.yaml
    │            └── parameters-rwr-params-GGZCZBU.yaml
-   │            └── parameters-strwr-params-34NN6EK.yaml
    │            └── parameters-strwr-params-GGZCZBU.yaml
    │       └── prepared
+   │            └── egfr-allpairs-inputs
+   │                ├── directed_flag.txt
+   │                ├── network.txt
+   │                └── nodetypes.txt
    │            └── egfr-domino-inputs
    │                ├── active_genes.txt
    │                └── network.txt
-   │            └── egfr-meo-inputs
-   │                ├── edges.txt
-   │                ├── sources.txt
-   │                └── targets.txt
    │            └── egfr-mincostflow-inputs
    │                ├── edges.txt
    │                ├── sources.txt
@@ -1102,7 +1007,7 @@ What your directory structure should like after this run:
    │                └── prizes.txt
    │            └── egfr-pathlinker-inputs
    │                ├── network.txt
-   │                ── nodetypes.txt
+   │                └── nodetypes.txt
    │            └── egfr-rwr-inputs
    │                ├── network.txt
    │                └── nodes.txt
@@ -1131,21 +1036,20 @@ across the outputs.
 
 .. code:: text
 
-   Node1       Node2   Frequency       Direction
-   EGF_HUMAN   EGFR_HUMAN      0.42857142857142855     D
-   EGF_HUMAN   S10A4_HUMAN     0.38095238095238093     D
-   S10A4_HUMAN MYH9_HUMAN      0.38095238095238093     D
-   K7PPA8_HUMAN        MDM2_HUMAN      0.09523809523809523     D
-   MDM2_HUMAN  P53_HUMAN       0.19047619047619047     D
-   S10A4_HUMAN K7PPA8_HUMAN    0.19047619047619047     D
-   K7PPA8_HUMAN        SIR1_HUMAN      0.19047619047619047     D
-   MDM2_HUMAN  MDM4_HUMAN      0.09523809523809523     D
-   MDM4_HUMAN  P53_HUMAN       0.09523809523809523     D
-   CD2A2_HUMAN CDK4_HUMAN      0.09523809523809523     D
-   CDK4_HUMAN  RB_HUMAN        0.09523809523809523     D
-   MDM2_HUMAN  CD2A2_HUMAN     0.09523809523809523     D
-   EP300_HUMAN P53_HUMAN       0.2857142857142857      D
-   K7PPA8_HUMAN        EP300_HUMAN     0.09523809523809523     D
+   Node1        Node2      Frequency    Direction
+   EGF_HUMAN    EGFR_HUMAN      0.25    D
+   EGF_HUMAN    S10A4_HUMAN     0.25    D
+   S10A4_HUMAN  MYH9_HUMAN      0.125   D
+   K7PPA8_HUMAN MDM2_HUMAN      0.125   D
+   MDM2_HUMAN   P53_HUMAN       0.125   D
+   S10A4_HUMAN  K7PPA8_HUMAN    0.125   D
+   K7PPA8_HUMAN SIR1_HUMAN      0.125   D
+   MDM2_HUMAN   MDM4_HUMAN      0.125   D
+   MDM4_HUMAN   P53_HUMAN       0.125   D
+   CD2A2_HUMAN  CDK4_HUMAN      0.125   D
+   CDK4_HUMAN   RB_HUMAN        0.125   D
+   MDM2_HUMAN   CD2A2_HUMAN     0.125   D
+   EP300_HUMAN  P53_HUMAN       0.375   D
    ...
 
 High frequency edges indicate interactions consistently recovered by
