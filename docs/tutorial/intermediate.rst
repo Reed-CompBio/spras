@@ -1214,9 +1214,6 @@ poorly characterized biological systems, interactions may not yet be
 experimentally verified or fully known, making it difficult to define a
 reliable reference network for evaluation.
 
-TODO: Explain two sentence high level how we do evaluation: Parameter
-selection and then pr or prcs
-
 4.1 Adding evaluation post-analysis to the intermediate configuration
 =====================================================================
 
@@ -1287,7 +1284,17 @@ changes:
 
 .. note::
 
-   # TODO: add information about the egfr gold standard
+   The gold standard for this dataset consists of nodes only, following
+   the original study. The gold standard nodes are drawn from eight
+   EGFR-related reference pathways [4]_.
+
+   A limitation of this gold standard is its incomplete coverage of EGF
+   signaling pathways. Across the eight reference pathways, typically
+   5\% or fewer of the input nodes appear in any single pathway, and
+   85\% are absent from all eight. This reflects the general
+   incompleteness of curated pathway databases relative to measured
+   signaling responses, rather than a flaw specific to this dataset
+   [4]_.
 
 With these updates, SPRAS will run the evaluations across all outputs
 for a given dataset.
@@ -1296,15 +1303,249 @@ After saving the changes in the configuration file, rerun with:
 
 .. code:: bash
 
-   snakemake --cores 4 --configfile config/intermediate.yaml
-
-# TODO: add the what the directory looks like after
+   snakemake --cores 8 --configfile config/intermediate.yaml
 
 What happens when you run this command
 --------------------------------------
 
+#. Reusing cached results
+
+Snakemake reads the options set in ``intermediate.yaml`` and checks for
+any requested post-analysis steps. It reuses cached results; here the
+``pathway.txt`` files generated from the previously executed algorithms
+on the egfr dataset are reused.
+
+2. Running the ml analysis
+
+SPRAS aggregates all the reconstructed subnetworks produced across the
+specified algorithms for a given dataset. SPRAS then performs machine
+learning analyses on each these groups and saves the results in the
+``<dataset>-ml/`` (``egfr-ml/``) folder. It is also going to be running
+the ml per algorithm for a given dataset. This groups the ml post
+analysis by algorithm per dataset and produces algorithm specific ml
+outputs.
+
+3. Running the summary analysis
+
+SPRAS aggregates the ``pathway.txt`` files from all selected parameter
+combinations into a single summary table, saved as
+``egfr-pathway-summary.txt``. This is used if any tiebreakers occur
+during PCA-based parameter selection.
+
+4. Running the evaluation
+
+For each dataset listed in a gold standard's ``dataset_labels``, SPRAS
+compares the reconstructed subnetworks against that gold standard using
+the parameter selection methods enabled in the configuration.
+
+The evaluation runs at two levels: once across all algorithms combined,
+and once per algorithm. The per-algorithm evaluation depends on
+per-algorithm ML outputs, which is why ``aggregate_per_algorithm`` was
+set to true in the ``ml`` section above. This produces both
+all-algorithm evaluation files and algorithm-specific evaluation files
+for each dataset.
+
 What your directory structure should like after this run:
 ---------------------------------------------------------
+
+.. code:: text
+
+   spras/
+   ├── .snakemake/
+   │   └── log/
+   │       └── ... snakemake log files ...
+   ├── config/
+   │   └── basic.yaml
+   ├── inputs/
+   │   ├── phosphosite-irefindex13.0-uniprot.txt
+   │   └── tps-egfr-prizes.txt
+   ├── outputs/
+   │   └── intermediate/
+   │       ├── dataset-egfr-merged.pickle
+   │       ├── egfr-gs_egfr-eval/
+   │       │   ├── pr-curve-ensemble-nodes-per-algorithm-nodes.png
+   │       │   ├── pr-curve-ensemble-nodes-per-algorithm-nodes.txt
+   │       │   ├── pr-curve-ensemble-nodes.png
+   │       │   ├── pr-curve-ensemble-nodes.txt
+   │       │   ├── pr-pca-chosen-pathway-nodes.png
+   │       │   ├── pr-pca-chosen-pathway-nodes.txt
+   │       │   ├── pr-pca-chosen-pathway-per-algorithm-nodes.png
+   │       │   ├── pr-pca-chosen-pathway-per-algorithm-nodes.txt
+   │       │   ├── pr-per-pathway-for-mincostflow-nodes.png
+   │       │   ├── pr-per-pathway-for-mincostflow-nodes.txt
+   │       │   ├── pr-per-pathway-for-omicsintegrator2-nodes.png
+   │       │   ├── pr-per-pathway-for-omicsintegrator2-nodes.txt
+   │       │   ├── pr-per-pathway-for-pathlinker-nodes.png
+   │       │   ├── pr-per-pathway-for-pathlinker-nodes.txt
+   │       │   ├── pr-per-pathway-for-rwr-nodes.png
+   │       │   ├── pr-per-pathway-for-rwr-nodes.txt
+   │       │   ├── pr-per-pathway-for-strwr-nodes.png
+   │       │   ├── pr-per-pathway-for-strwr-nodes.txt
+   │       │   ├── pr-per-pathway-nodes.png
+   │       │   └── pr-per-pathway-nodes.txt
+   │       ├── egfr-mincostflow-params-42UBTQI/
+   │       │   ├── pathway.txt
+   │       │   └── raw-pathway.txt
+   │       ├── egfr-mincostflow-params-B4P4LUU/
+   │       │   ├── pathway.txt
+   │       │   └── raw-pathway.txt
+   │       ├── egfr-mincostflow-params-KTZPGLQ/
+   │       │   ├── pathway.txt
+   │       │   └── raw-pathway.txt
+   │       ├── egfr-mincostflow-params-MY6UCHG/
+   │       │   ├── pathway.txt
+   │       │   └── raw-pathway.txt
+   │       ├── egfr-ml/
+   │       │   ├── ensemble-pathway.txt
+   │       │   ├── hac-clusters-horizontal.txt
+   │       │   ├── hac-clusters-vertical.txt
+   │       │   ├── hac-horizontal.png
+   │       │   ├── hac-vertical.png
+   │       │   ├── jaccard-heatmap.png
+   │       │   ├── jaccard-matrix.txt
+   │       │   ├── mincostflow-ensemble-pathway.txt
+   │       │   ├── mincostflow-hac-clusters-horizontal.txt
+   │       │   ├── mincostflow-hac-clusters-vertical.txt
+   │       │   ├── mincostflow-hac-horizontal.png
+   │       │   ├── mincostflow-hac-vertical.png
+   │       │   ├── mincostflow-jaccard-heatmap.png
+   │       │   ├── mincostflow-jaccard-matrix.txt
+   │       │   ├── mincostflow-pca-coordinates.txt
+   │       │   ├── mincostflow-pca-variance.txt
+   │       │   ├── mincostflow-pca.png
+   │       │   ├── omicsintegrator2-ensemble-pathway.txt
+   │       │   ├── omicsintegrator2-hac-clusters-horizontal.txt
+   │       │   ├── omicsintegrator2-hac-clusters-vertical.txt
+   │       │   ├── omicsintegrator2-hac-horizontal.png
+   │       │   ├── omicsintegrator2-hac-vertical.png
+   │       │   ├── omicsintegrator2-jaccard-heatmap.png
+   │       │   ├── omicsintegrator2-jaccard-matrix.txt
+   │       │   ├── omicsintegrator2-pca-coordinates.txt
+   │       │   ├── omicsintegrator2-pca-variance.txt
+   │       │   ├── omicsintegrator2-pca.png
+   │       │   ├── pathlinker-ensemble-pathway.txt
+   │       │   ├── pathlinker-hac-clusters-horizontal.txt
+   │       │   ├── pathlinker-hac-clusters-vertical.txt
+   │       │   ├── pathlinker-hac-horizontal.png
+   │       │   ├── pathlinker-hac-vertical.png
+   │       │   ├── pathlinker-jaccard-heatmap.png
+   │       │   ├── pathlinker-jaccard-matrix.txt
+   │       │   ├── pathlinker-pca-coordinates.txt
+   │       │   ├── pathlinker-pca-variance.txt
+   │       │   ├── pathlinker-pca.png
+   │       │   ├── pca-coordinates.txt
+   │       │   ├── pca-variance.txt
+   │       │   ├── pca.png
+   │       │   ├── rwr-ensemble-pathway.txt
+   │       │   ├── rwr-hac-clusters-horizontal.txt
+   │       │   ├── rwr-hac-clusters-vertical.txt
+   │       │   ├── rwr-hac-horizontal.png
+   │       │   ├── rwr-hac-vertical.png
+   │       │   ├── rwr-jaccard-heatmap.png
+   │       │   ├── rwr-jaccard-matrix.txt
+   │       │   ├── rwr-pca-coordinates.txt
+   │       │   ├── rwr-pca-variance.txt
+   │       │   ├── rwr-pca.png
+   │       │   ├── strwr-ensemble-pathway.txt
+   │       │   ├── strwr-hac-clusters-horizontal.txt
+   │       │   ├── strwr-hac-clusters-vertical.txt
+   │       │   ├── strwr-hac-horizontal.png
+   │       │   ├── strwr-hac-vertical.png
+   │       │   ├── strwr-jaccard-heatmap.png
+   │       │   ├── strwr-jaccard-matrix.txt
+   │       │   ├── strwr-pca-coordinates.txt
+   │       │   ├── strwr-pca-variance.txt
+   │       │   └── strwr-pca.png
+   │       ├── egfr-omicsintegrator2-params-44PJEHW/
+   │       │   ├── pathway.txt
+   │       │   └── raw-pathway.txt
+   │       ├── egfr-omicsintegrator2-params-4NC62EL/
+   │       │   ├── pathway.txt
+   │       │   └── raw-pathway.txt
+   │       ├── egfr-omicsintegrator2-params-4VRLTK5/
+   │       │   ├── pathway.txt
+   │       │   └── raw-pathway.txt
+   │       ├── egfr-omicsintegrator2-params-52OUGT2/
+   │       │   ├── pathway.txt
+   │       │   └── raw-pathway.txt
+   │       ├── egfr-omicsintegrator2-params-KEVHYWP/
+   │       │   ├── pathway.txt
+   │       │   └── raw-pathway.txt
+   │       ├── egfr-omicsintegrator2-params-RUGOWNI/
+   │       │   ├── pathway.txt
+   │       │   └── raw-pathway.txt
+   │       ├── egfr-omicsintegrator2-params-RVH2YKU/
+   │       │   ├── pathway.txt
+   │       │   └── raw-pathway.txt
+   │       ├── egfr-omicsintegrator2-params-WW2ILRO/
+   │       │   ├── pathway.txt
+   │       │   └── raw-pathway.txt
+   │       ├── egfr-pathlinker-params-7S4SLU6/
+   │       │   ├── pathway.txt
+   │       │   └── raw-pathway.txt
+   │       ├── egfr-pathlinker-params-D4TUKMX/
+   │       │   ├── pathway.txt
+   │       │   └── raw-pathway.txt
+   │       ├── egfr-pathlinker-params-TFORORH/
+   │       │   ├── pathway.txt
+   │       │   └── raw-pathway.txt
+   │       ├── egfr-pathlinker-params-VQL7BDZ/
+   │       │   ├── pathway.txt
+   │       │   └── raw-pathway.txt
+   │       ├── egfr-pathway-summary.txt
+   │       ├── egfr-rwr-params-34NN6EK/
+   │       │   ├── pathway.txt
+   │       │   └── raw-pathway.txt
+   │       ├── egfr-rwr-params-GGZCZBU/
+   │       │   ├── pathway.txt
+   │       │   └── raw-pathway.txt
+   │       ├── egfr-strwr-params-34NN6EK/
+   │       │   ├── pathway.txt
+   │       │   └── raw-pathway.txt
+   │       ├── egfr-strwr-params-GGZCZBU/
+   │       │   ├── pathway.txt
+   │       │   └── raw-pathway.txt
+   │       ├── gs-gs_egfr-merged.pickle
+   │       ├── logs/
+   │       │   ├── datasets-egfr.yaml
+   │       │   ├── parameters-mincostflow-params-42UBTQI.yaml
+   │       │   ├── parameters-mincostflow-params-B4P4LUU.yaml
+   │       │   ├── parameters-mincostflow-params-KTZPGLQ.yaml
+   │       │   ├── parameters-mincostflow-params-MY6UCHG.yaml
+   │       │   ├── parameters-omicsintegrator2-params-44PJEHW.yaml
+   │       │   ├── parameters-omicsintegrator2-params-4NC62EL.yaml
+   │       │   ├── parameters-omicsintegrator2-params-4VRLTK5.yaml
+   │       │   ├── parameters-omicsintegrator2-params-52OUGT2.yaml
+   │       │   ├── parameters-omicsintegrator2-params-KEVHYWP.yaml
+   │       │   ├── parameters-omicsintegrator2-params-RUGOWNI.yaml
+   │       │   ├── parameters-omicsintegrator2-params-RVH2YKU.yaml
+   │       │   ├── parameters-omicsintegrator2-params-WW2ILRO.yaml
+   │       │   ├── parameters-pathlinker-params-7S4SLU6.yaml
+   │       │   ├── parameters-pathlinker-params-D4TUKMX.yaml
+   │       │   ├── parameters-pathlinker-params-TFORORH.yaml
+   │       │   ├── parameters-pathlinker-params-VQL7BDZ.yaml
+   │       │   ├── parameters-rwr-params-34NN6EK.yaml
+   │       │   ├── parameters-rwr-params-GGZCZBU.yaml
+   │       │   ├── parameters-strwr-params-34NN6EK.yaml
+   │       │   └── parameters-strwr-params-GGZCZBU.yaml
+   │       └── prepared/
+   │           ├── egfr-mincostflow-inputs/
+   │           │   ├── edges.txt
+   │           │   ├── sources.txt
+   │           │   └── targets.txt
+   │           ├── egfr-omicsintegrator2-inputs/
+   │           │   ├── edges.txt
+   │           │   └── prizes.txt
+   │           ├── egfr-pathlinker-inputs/
+   │           │   ├── network.txt
+   │           │   └── nodetypes.txt
+   │           ├── egfr-rwr-inputs/
+   │           │   ├── network.txt
+   │           │   └── nodes.txt
+   │           └── egfr-strwr-inputs/
+   │               ├── network.txt
+   │               ├── sources.txt
+   │               └── targets.txt
 
 4.2 What is parameter selection?
 ================================
@@ -1356,6 +1597,12 @@ closest to the highest KDE peak is selected as the most representative
 parameter setting, as it corresponds to the region where the algorithm
 most consistently produces similar subnetworks.
 
+If two or more pathways are equally close to the highest peak of the
+KDE, SPRAS resolves the tie by:
+
+-  Choosing the smallest pathway (fewest nodes and edges).
+-  If a tie remains, choosing the first pathway alphabetically by name.
+
 Ensemble network-based parameter selection
 ------------------------------------------
 
@@ -1374,24 +1621,19 @@ These consensus networks help identify the core patterns and overall
 stability of an algorithm's output's without needing to choose a single
 parameter setting (no clear optimal parameter combination could exists).
 
-Ground truth-based evaluation without parameter selection
----------------------------------------------------------
+All Plausible Parameters (No parameter selection)
+-------------------------------------------------
 
-# TODO: rename this to what it actually is
-
-The no parameter selection approach chooses all parameter combinations
-for each pathway reconstruction algorithm on a given dataset. This
-approach can be useful for idenitifying patterns in algorithm
-performance without choosing any specific parameter setting.
-
-# TODO: add more details about this/reword this based on what is in the
-paper
+The all plausible parameters approach evaluates all parameter
+combinations without selecting a representative subset or ensembling.
+This method provides an holistic view of algorithm performance by
+evaluating every valid output. For each algorithm and dataset, we
+compute precision and recall for every valid subnetwork. This allows us
+to measure reconstruction performance across the full range of parameter
+settings and observe each algorithm's full range of capabilities.
 
 4.4 Reviewing the evalaution outputs
 ====================================
-
-MAKE SURE TO UPDATE IMAGES TO WHAT THEY ARE FOR THE EGFR EXAMPLE - add
-how to look up each of these images
 
 For each pathway, evaluation can be run independently of any parameter
 selection method (the ground truth-based evaluation without parameter
@@ -1432,16 +1674,6 @@ networks for an algorithm for given dataset.
 .. raw:: html
 
    <div style="margin:20px 0;"></div>
-
-.. note::
-
-   Evaluation will only execute if ml has ``include: true``, because the
-   PCA parameter selection step depends on the PCA ML analysis.
-
-.. note::
-
-   To see evaluation in action, run SPRAS using the config.yaml or
-   egfr.yaml configuration files.
 
 ************
  References

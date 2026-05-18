@@ -93,18 +93,19 @@ analysis:
     # ml analysis per dataset
     include: true # set to true for step 3
 
+    # set all below to true for step 4??
     # adds ml analysis per algorithm output
     # only runs for algorithms with multiple parameter combinations chosen
-    aggregate_per_algorithm: false # set to true for step 4
-    kde: false # set to true for step 4
-    # TODO: double check that if I run step 3 without kde, then set it true in step 4 that pca is rerun
+    aggregate_per_algorithm: true # set to true for step 4
+    # overalls a kernel density estimation over pca
+    kde: true # set to true for step 4
     # removes empty pathways from consideration in ml analysis (pca only)
-    remove_empty_pathways: false # set to true for step 4
+    remove_empty_pathways: true # set to true for step 4
 
   evaluation:
     # evaluation per dataset-goldstandard pair
     # evaluation will not run unless ml include is set to true
-    include: false # set to true for step 4
+    include: true # set to true for step 4
     # adds evaluation per algorithm per dataset-goldstandard pair
     # evaluation per algorithm will not run unless ml include and ml aggregate_per_algorithm are set to true
-    aggregate_per_algorithm: false # set to true for step 4
+    aggregate_per_algorithm: true # set to true for step 4

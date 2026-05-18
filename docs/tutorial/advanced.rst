@@ -27,8 +27,8 @@ in the configuration file. When executed, SPRAS automatically runs each
 algorithm across all parameter combinations and collects the resulting
 subnetworks.
 
-# TODO maybe add in information about how parameter tuning seems to be
-done now # add in more details about two stage parameter tuning
+# TODO maybe add in information about how parameter tuning is to be done
+now # add in more details about two stage parameter tuning
 
 SPRAS will also support parameter refinement using graph topological
 heuristics. These topological metrics help identify parameter regions
