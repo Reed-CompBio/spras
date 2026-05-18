@@ -741,17 +741,6 @@ What your directory structure should like after this run:
    │       ├── egfr-mincostflow-params-MY6UCHG/
    │       │   ├── pathway.txt
    │       │   └── raw-pathway.txt
-   │       ├── egfr-ml/
-   │       │   ├── ensemble-pathway.txt
-   │       │   ├── hac-clusters-horizontal.txt
-   │       │   ├── hac-clusters-vertical.txt
-   │       │   ├── hac-horizontal.png
-   │       │   ├── hac-vertical.png
-   │       │   ├── jaccard-heatmap.png
-   │       │   ├── jaccard-matrix.txt
-   │       │   ├── pca-coordinates.txt
-   │       │   ├── pca-variance.txt
-   │       │   └── pca.png
    │       ├── egfr-omicsintegrator2-params-44PJEHW/
    │       │   ├── pathway.txt
    │       │   └── raw-pathway.txt
@@ -976,119 +965,130 @@ What your directory structure should like after this run:
 
 .. code:: text
 
-   ├── dataset-egfr-merged.pickle
-   ├── egfr-mincostflow-params-42UBTQI
-   │   ├── pathway.txt
-   │   └── raw-pathway.txt
-   ├── egfr-mincostflow-params-B4P4LUU
-   │   ├── pathway.txt
-   │   └── raw-pathway.txt
-   ├── egfr-mincostflow-params-KTZPGLQ
-   │   ├── pathway.txt
-   │   └── raw-pathway.txt
-   ├── egfr-mincostflow-params-MY6UCHG
-   │   ├── pathway.txt
-   │   └── raw-pathway.txt
-   ├── egfr-ml
-   │   ├── ensemble-pathway.txt
-   │   ├── hac-clusters-horizontal.txt
-   │   ├── hac-clusters-vertical.txt
-   │   ├── hac-horizontal.png
-   │   ├── hac-vertical.png
-   │   ├── jaccard-heatmap.png
-   │   ├── jaccard-matrix.txt
-   │   ├── pca-coordinates.txt
-   │   ├── pca-variance.txt
-   │   └── pca.png
-   ├── egfr-omicsintegrator2-params-44PJEHW
-   │   ├── pathway.txt
-   │   └── raw-pathway.txt
-   ├── egfr-omicsintegrator2-params-4NC62EL
-   │   ├── pathway.txt
-   │   └── raw-pathway.txt
-   ├── egfr-omicsintegrator2-params-4VRLTK5
-   │   ├── pathway.txt
-   │   └── raw-pathway.txt
-   ├── egfr-omicsintegrator2-params-52OUGT2
-   │   ├── pathway.txt
-   │   └── raw-pathway.txt
-   ├── egfr-omicsintegrator2-params-KEVHYWP
-   │   ├── pathway.txt
-   │   └── raw-pathway.txt
-   ├── egfr-omicsintegrator2-params-RUGOWNI
-   │   ├── pathway.txt
-   │   └── raw-pathway.txt
-   ├── egfr-omicsintegrator2-params-RVH2YKU
-   │   ├── pathway.txt
-   │   └── raw-pathway.txt
-   ├── egfr-omicsintegrator2-params-WW2ILRO
-   │   ├── pathway.txt
-   │   └── raw-pathway.txt
-   ├── egfr-pathlinker-params-7S4SLU6
-   │   ├── pathway.txt
-   │   └── raw-pathway.txt
-   ├── egfr-pathlinker-params-D4TUKMX
-   │   ├── pathway.txt
-   │   └── raw-pathway.txt
-   ├── egfr-pathlinker-params-TFORORH
-   │   ├── pathway.txt
-   │   └── raw-pathway.txt
-   ├── egfr-pathlinker-params-VQL7BDZ
-   │   ├── pathway.txt
-   │   └── raw-pathway.txt
-   ├── egfr-pathway-summary.txt
-   ├── egfr-rwr-params-34NN6EK
-   │   ├── pathway.txt
-   │   └── raw-pathway.txt
-   ├── egfr-rwr-params-GGZCZBU
-   │   ├── pathway.txt
-   │   └── raw-pathway.txt
-   ├── egfr-strwr-params-34NN6EK
-   │   ├── pathway.txt
-   │   └── raw-pathway.txt
-   ├── egfr-strwr-params-GGZCZBU
-   │   ├── pathway.txt
-   │   └── raw-pathway.txt
-   ├── logs
-   │   ├── datasets-egfr.yaml
-   │   ├── parameters-mincostflow-params-42UBTQI.yaml
-   │   ├── parameters-mincostflow-params-B4P4LUU.yaml
-   │   ├── parameters-mincostflow-params-KTZPGLQ.yaml
-   │   ├── parameters-mincostflow-params-MY6UCHG.yaml
-   │   ├── parameters-omicsintegrator2-params-44PJEHW.yaml
-   │   ├── parameters-omicsintegrator2-params-4NC62EL.yaml
-   │   ├── parameters-omicsintegrator2-params-4VRLTK5.yaml
-   │   ├── parameters-omicsintegrator2-params-52OUGT2.yaml
-   │   ├── parameters-omicsintegrator2-params-KEVHYWP.yaml
-   │   ├── parameters-omicsintegrator2-params-RUGOWNI.yaml
-   │   ├── parameters-omicsintegrator2-params-RVH2YKU.yaml
-   │   ├── parameters-omicsintegrator2-params-WW2ILRO.yaml
-   │   ├── parameters-pathlinker-params-7S4SLU6.yaml
-   │   ├── parameters-pathlinker-params-D4TUKMX.yaml
-   │   ├── parameters-pathlinker-params-TFORORH.yaml
-   │   ├── parameters-pathlinker-params-VQL7BDZ.yaml
-   │   ├── parameters-rwr-params-34NN6EK.yaml
-   │   ├── parameters-rwr-params-GGZCZBU.yaml
-   │   ├── parameters-strwr-params-34NN6EK.yaml
-   │   └── parameters-strwr-params-GGZCZBU.yaml
-   └── prepared
-       ├── egfr-mincostflow-inputs
-       │   ├── edges.txt
-       │   ├── sources.txt
-       │   └── targets.txt
-       ├── egfr-omicsintegrator2-inputs
-       │   ├── edges.txt
-       │   └── prizes.txt
-       ├── egfr-pathlinker-inputs
-       │   ├── network.txt
-       │   └── nodetypes.txt
-       ├── egfr-rwr-inputs
-       │   ├── network.txt
-       │   └── nodes.txt
-       └── egfr-strwr-inputs
-           ├── network.txt
-           ├── sources.txt
-           └── targets.txt
+   spras/
+   ├── .snakemake/
+   │   └── log/
+   │       └── ... snakemake log files ...
+   ├── config/
+   │   └── basic.yaml
+   ├── inputs/
+   │   ├── phosphosite-irefindex13.0-uniprot.txt
+   │   └── tps-egfr-prizes.txt
+   ├── outputs/
+   │   └── intermediate/
+   │       ├── dataset-egfr-merged.pickle
+   │       ├── egfr-mincostflow-params-42UBTQI/
+   │       │   ├── pathway.txt
+   │       │   └── raw-pathway.txt
+   │       ├── egfr-mincostflow-params-B4P4LUU/
+   │       │   ├── pathway.txt
+   │       │   └── raw-pathway.txt
+   │       ├── egfr-mincostflow-params-KTZPGLQ/
+   │       │   ├── pathway.txt
+   │       │   └── raw-pathway.txt
+   │       ├── egfr-mincostflow-params-MY6UCHG/
+   │       │   ├── pathway.txt
+   │       │   └── raw-pathway.txt
+   │       ├── egfr-ml/
+   │       │   ├── ensemble-pathway.txt
+   │       │   ├── hac-clusters-horizontal.txt
+   │       │   ├── hac-clusters-vertical.txt
+   │       │   ├── hac-horizontal.png
+   │       │   ├── hac-vertical.png
+   │       │   ├── jaccard-heatmap.png
+   │       │   ├── jaccard-matrix.txt
+   │       │   ├── pca-coordinates.txt
+   │       │   ├── pca-variance.txt
+   │       │   └── pca.png
+   │       ├── egfr-omicsintegrator2-params-44PJEHW/
+   │       │   ├── pathway.txt
+   │       │   └── raw-pathway.txt
+   │       ├── egfr-omicsintegrator2-params-4NC62EL/
+   │       │   ├── pathway.txt
+   │       │   └── raw-pathway.txt
+   │       ├── egfr-omicsintegrator2-params-4VRLTK5/
+   │       │   ├── pathway.txt
+   │       │   └── raw-pathway.txt
+   │       ├── egfr-omicsintegrator2-params-52OUGT2/
+   │       │   ├── pathway.txt
+   │       │   └── raw-pathway.txt
+   │       ├── egfr-omicsintegrator2-params-KEVHYWP/
+   │       │   ├── pathway.txt
+   │       │   └── raw-pathway.txt
+   │       ├── egfr-omicsintegrator2-params-RUGOWNI/
+   │       │   ├── pathway.txt
+   │       │   └── raw-pathway.txt
+   │       ├── egfr-omicsintegrator2-params-RVH2YKU/
+   │       │   ├── pathway.txt
+   │       │   └── raw-pathway.txt
+   │       ├── egfr-omicsintegrator2-params-WW2ILRO/
+   │       │   ├── pathway.txt
+   │       │   └── raw-pathway.txt
+   │       ├── egfr-pathlinker-params-7S4SLU6/
+   │       │   ├── pathway.txt
+   │       │   └── raw-pathway.txt
+   │       ├── egfr-pathlinker-params-D4TUKMX/
+   │       │   ├── pathway.txt
+   │       │   └── raw-pathway.txt
+   │       ├── egfr-pathlinker-params-TFORORH/
+   │       │   ├── pathway.txt
+   │       │   └── raw-pathway.txt
+   │       ├── egfr-pathlinker-params-VQL7BDZ/
+   │       │   ├── pathway.txt
+   │       │   └── raw-pathway.txt
+   │       ├── egfr-pathway-summary.txt
+   │       ├── egfr-rwr-params-34NN6EK/
+   │       │   ├── pathway.txt
+   │       │   └── raw-pathway.txt
+   │       ├── egfr-rwr-params-GGZCZBU/
+   │       │   ├── pathway.txt
+   │       │   └── raw-pathway.txt
+   │       ├── egfr-strwr-params-34NN6EK/
+   │       │   ├── pathway.txt
+   │       │   └── raw-pathway.txt
+   │       ├── egfr-strwr-params-GGZCZBU/
+   │       │   ├── pathway.txt
+   │       │   └── raw-pathway.txt
+   │       ├── logs/
+   │       │   ├── datasets-egfr.yaml
+   │       │   ├── parameters-mincostflow-params-42UBTQI.yaml
+   │       │   ├── parameters-mincostflow-params-B4P4LUU.yaml
+   │       │   ├── parameters-mincostflow-params-KTZPGLQ.yaml
+   │       │   ├── parameters-mincostflow-params-MY6UCHG.yaml
+   │       │   ├── parameters-omicsintegrator2-params-44PJEHW.yaml
+   │       │   ├── parameters-omicsintegrator2-params-4NC62EL.yaml
+   │       │   ├── parameters-omicsintegrator2-params-4VRLTK5.yaml
+   │       │   ├── parameters-omicsintegrator2-params-52OUGT2.yaml
+   │       │   ├── parameters-omicsintegrator2-params-KEVHYWP.yaml
+   │       │   ├── parameters-omicsintegrator2-params-RUGOWNI.yaml
+   │       │   ├── parameters-omicsintegrator2-params-RVH2YKU.yaml
+   │       │   ├── parameters-omicsintegrator2-params-WW2ILRO.yaml
+   │       │   ├── parameters-pathlinker-params-7S4SLU6.yaml
+   │       │   ├── parameters-pathlinker-params-D4TUKMX.yaml
+   │       │   ├── parameters-pathlinker-params-TFORORH.yaml
+   │       │   ├── parameters-pathlinker-params-VQL7BDZ.yaml
+   │       │   ├── parameters-rwr-params-34NN6EK.yaml
+   │       │   ├── parameters-rwr-params-GGZCZBU.yaml
+   │       │   ├── parameters-strwr-params-34NN6EK.yaml
+   │       │   └── parameters-strwr-params-GGZCZBU.yaml
+   │       └── prepared/
+   │           ├── egfr-mincostflow-inputs/
+   │           │   ├── edges.txt
+   │           │   ├── sources.txt
+   │           │   └── targets.txt
+   │           ├── egfr-omicsintegrator2-inputs/
+   │           │   ├── edges.txt
+   │           │   └── prizes.txt
+   │           ├── egfr-pathlinker-inputs/
+   │           │   ├── network.txt
+   │           │   └── nodetypes.txt
+   │           ├── egfr-rwr-inputs/
+   │           │   ├── network.txt
+   │           │   └── nodes.txt
+   │           └── egfr-strwr-inputs/
+   │               ├── network.txt
+   │               ├── sources.txt
+   │               └── targets.txt
 
 Step 3.2: Reviewing the ML outputs
 ==================================
@@ -1110,20 +1110,21 @@ across the outputs.
 
 .. code:: text
 
-   Node1        Node2      Frequency    Direction
-   EGF_HUMAN    EGFR_HUMAN      0.25    D
+   Node1        Node2   Frequency       Direction
+   EGF_HUMAN    EGFR_HUMAN      0.3     D
    EGF_HUMAN    S10A4_HUMAN     0.25    D
-   S10A4_HUMAN  MYH9_HUMAN      0.125   D
-   K7PPA8_HUMAN MDM2_HUMAN      0.125   D
-   MDM2_HUMAN   P53_HUMAN       0.125   D
-   S10A4_HUMAN  K7PPA8_HUMAN    0.125   D
-   K7PPA8_HUMAN SIR1_HUMAN      0.125   D
-   MDM2_HUMAN   MDM4_HUMAN      0.125   D
-   MDM4_HUMAN   P53_HUMAN       0.125   D
-   CD2A2_HUMAN  CDK4_HUMAN      0.125   D
-   CDK4_HUMAN   RB_HUMAN        0.125   D
-   MDM2_HUMAN   CD2A2_HUMAN     0.125   D
-   EP300_HUMAN  P53_HUMAN       0.375   D
+   S10A4_HUMAN  MYH9_HUMAN      0.2     D
+   K7PPA8_HUMAN MDM2_HUMAN      0.15    D
+   MDM2_HUMAN   P53_HUMAN       0.15    D
+   S10A4_HUMAN  K7PPA8_HUMAN    0.15    D
+   K7PPA8_HUMAN SIR1_HUMAN      0.15    D
+   MDM2_HUMAN   MDM4_HUMAN      0.15    D
+   MDM4_HUMAN   P53_HUMAN       0.15    D
+   CD2A2_HUMAN  CDK4_HUMAN      0.15    D
+   CDK4_HUMAN   RB_HUMAN        0.15    D
+   MDM2_HUMAN   CD2A2_HUMAN     0.15    D
+   EP300_HUMAN  P53_HUMAN       0.35    D
+   K7PPA8_HUMAN EP300_HUMAN     0.15    D
    ...
 
 High frequency edges indicate interactions consistently recovered by
