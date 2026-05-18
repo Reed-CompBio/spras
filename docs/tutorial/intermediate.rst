@@ -86,10 +86,11 @@ Example of one of the biological replicate A with one peptide:
       -  15.60
 
 Omics data can serve as input for pathway reconstruction, but it must
-first be reformatted to match the input requirements of each algorithm.
+first be reformatted to match the input format and requirements of each
+algorithm.
 
-1.2 What is the SPRAS-standardized input data?
-==============================================
+1.2 What is the standardized input data?
+========================================
 
 A pathway reconstruction algorithm at minimum requires a set of input
 nodes (node_files) and an interactome (edge_files); however, each
@@ -162,6 +163,19 @@ algorithms also interpret the input interactome differently.
 -  And some support mixed-directionaltiy interactomes. These
    interactomes contain both directed and undirected edges.
 
+.. note::
+
+   Directionality describes whether an edge in the interactome captures
+   the direction of a biological interaction.
+
+   A directed edge (A -> B) means that molecule A acts on molecule B,
+   but not the reverse, for example, a kinase phosphorylating its
+   substrate or a transcription factor regulating a target gene.
+
+   An undirected edge (A - B) means that A and B interact, but the data
+   does not specify which one acts on the other, for example, two
+   proteins that bind each other in a complex.
+
 SPRAS automatically converts the user-provided edge file (interactome)
 into the format expected by each algorithm, ensuring that the
 directionality of the interactome matches the algorithm's requirements.
@@ -184,10 +198,10 @@ directed edge:
 1.3 Preprocessing the omic data
 ===============================
 
-Before analysis, we filter out all peptides not present in all three
-replicates to ensure consistency. Then, we can also normalize each
-replicate so the intensity values are comparable and not biased by any
-replicate-specific effects.
+Before analysis, we filter out peptides that are not present in all
+three replicates to ensure consistency across measurements. We then
+normalize each replicate so that intensity values are comparable and not
+biased by replicate-specific effects.
 
 .. list-table::
    :header-rows: 1
@@ -252,9 +266,9 @@ replicate-specific effects.
 1.4 Computing prizes
 ====================
 
-From this data, we can take it's values and turn them into prizes. One
-way we can do this is by by calculating p-values per peptide. This tells
-us how likely changes in abundance happen by chance.
+We can transform these measurements into prizes for pathway
+reconstruction. One approach is to calculate a p-value per peptide,
+which quantifies how likely changes in abundance happen by chance.
 
 We use Tukey's Honest Significant Difference (HSD) test to compare all
 time points and correct for multiple testing to get a p-value for every
@@ -329,35 +343,29 @@ pair of time points.
 Peptides with lower p-values are more statistically significant and may
 represent biologically meaningful changes in phosphorylation over time.
 
-We can then take these p-values and transform them into prizes that a
-pathway reconstruction algorithm can use for their input nodes.
+To use these p-values as input node prizes, we transform them with
+``-log10(p-value)`` so that smaller p-values produce larger prize
+scores.
 
-The p-values can be transformed using ``-log10(p-value)`` so smaller
-p-values are give larger prize scores.
+Two adjustments are needed before the prizes are usable:
 
-This data include temporal information, but SPRAS doesn't include any
-algorithms that uses temporal information. Instead, for each peptide,
-the smallest p-value is selected (representing the most significant
-change) between each time point to the baseline (0 min) and between
-consecutive time points. This is because the ultimate network analysis
-will not use the temporal information.
+-  Collapsing temporal information: The dataset contains temporal
+   measurements, but SPRAS does not include algorithms that use temporal
+   information. For each peptide, we select the smallest p-value across
+   all baseline-vs-time and consecutive time-point comparisons, since
+   the smallest p-value represents the most significant change.
 
-There are also cases of duplicates, in this case for each protein they
-can be mapped to multiple peptides. To deal with this, we can take the
-maximum prize value across all its peptides is assigned and assign that
-to the protein.
+-  Resolving peptide-to-protein duplicates: A single protein can map to
+   multiple peptides. For each protein, we assign the maximum prize
+   value across all of its peptides.
 
 .. note::
 
-   all of the data needs to be in the same ID mapping namespace. For all
-   of the protein identifiers, we can convert them into a namespace we
-   will use for all of the data.
+   All node identifiers must use the same namespace across every part of
+   a dataset.
 
-   For this data, the proteins chosen are converted to UniProt Entry
-   Names. (this will also be done to the interactome chosen)
-
-   All node identifiers should use the same namespace across every part
-   of the data in a dataset.
+   For this dataset, all protein identifiers are converted to UniProt
+   Entry Names, and the same conversion is applied to the interactome.
 
 .. list-table::
    :header-rows: 1
@@ -375,7 +383,8 @@ to the protein.
       -  0.12392034609392
       -  0.906857382317364
 
-Input node data put into a SPRAS-standardized format:
+Input node data put into a SPRAS-standardized format (and IDs mapped to UniProt
+   Entry Names):
 
 .. code:: text
 
@@ -415,7 +424,7 @@ Using known pathway knowledge [1]_ [2]_ [3]_:
    correspond to proteins that are active under the given biological
    condition.
 
-Input node data put into a SPRAS-standardized format:
+Input node data transformed into a SPRAS-standardized format:
 
 .. code:: text
 
@@ -430,9 +439,9 @@ Input node data put into a SPRAS-standardized format:
 =================================
 
 To connect our proteins, we need a background interactome. For this
-dataset, we use a protein-protein interaction (PPI) interactome. For
-this dataset, two interactomes are merged (directed edges prioritized
-when available):
+dataset, we merge two protein-protein interaction (PPI) interactomes,
+prioritizing directed edges when both sources include the same
+interaction:
 
 -  iRefIndex v13 (159,095 undirected interactions)
 -  PhosphoSitePlus (4,080 directed kinase-substrate interactions)
@@ -478,8 +487,6 @@ Interactome data put into a SPRAS-standardized format:
 
 1.9 This SPRAS-standardized data is already saved into SPRAS
 ============================================================
-
-# TODO: update the config
 
 .. code:: text
 
