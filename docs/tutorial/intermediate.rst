@@ -21,12 +21,89 @@ You will learn how to:
  Step 1: Transforming high throughput experimental data into SPRAS compatible input data
 *****************************************************************************************
 
-1.1 What is the SPRAS-standardized input data?
+1.1 Example of high throughput omic data
+========================================
+
+High-throughput omics technologies measure thousands of biological
+molecules in a single experiment, producing genome-, transcriptome-, or
+proteome-wide snapshots of cellular state. These measurements quantify
+how molecular abundance or activity changes across conditions or time
+points, generating large-scale datasets that can be used as input for
+pathway reconstruction.
+
+An example dataset is EGF response mass spectrometry data [4]_, a
+proteomics dataset that measures peptide abundance after cells are
+stimulated with epidermal growth factor (EGF).
+
+The experiment for this data was repeated three times, known as
+biological replicates, to ensure the results are consistent. Each
+replicate measures the abundance of peptides at different time points
+(0-128 minutes) to capture how protein activity changes over time.
+
+.. note::
+
+   Mass spectrometry is a technique used to measure and identify
+   proteins in a sample. It works by breaking proteins into smaller
+   pieces called peptides and measuring their mass-to-charge ratio,
+   which enables identifying which peptide is being measured. The data
+   show how much of each peptide is present, which can show how protein
+   phosphorylation abundances change under different conditions.
+
+   Since proteins interact with each other in biological pathways,
+   changes in their phosphorylation abundances can reveal which parts of
+   a pathway are active or affected.
+
+Example of one of the biological replicate A with one peptide:
+
+.. list-table::
+   :header-rows: 1
+   :widths: 20 15 10 10 10 10 10 10 10 10 10 10
+
+   -  -  peptide
+      -  protein
+      -  gene.name
+      -  modified.sites
+      -  0 min
+      -  2 min
+      -  4 min
+      -  8 min
+      -  16 min
+      -  32 min
+      -  64 min
+      -  128 mn
+
+   -  -  K.n[305.21]AFWMAIGGDRDEIEGLS[167.00]S[167.00]DEEH.-
+      -  Q6PD74,B4DG44,Q5JPJ4,Q6AWA0
+      -  AAGAB
+      -  S310,S311
+      -  14.97
+      -  14.81
+      -  13.99
+      -  13.98
+      -  12.87
+      -  13.88
+      -  13.91
+      -  15.60
+
+Omics data can serve as input for pathway reconstruction, but it must
+first be reformatted to match the input requirements of each algorithm.
+
+1.2 What is the SPRAS-standardized input data?
 ==============================================
 
-A pathway reconstruction algorithm requires a set of input nodes and an
-interactome; however, each algorithm expects its inputs to follow a
-unique format.
+A pathway reconstruction algorithm at minimum requires a set of input
+nodes (node_files) and an interactome (edge_files); however, each
+algorithm expects its inputs to follow a unique format.
+
+.. note::
+
+   Input nodes are a set of molecules of interest, typically derived
+   from high-throughput omics data.
+
+   An interactome is a network of known molecule-to-molecule
+   interactions, typically compiled by aggregating experimental and
+   curated data from public databases. It defines the set of possible
+   edges that algorithms can draw on when reconstructing.
 
 To simplify this process, SPRAS requires all input data in a dataset to
 be formatted once into a standardized SPRAS format. SPRAS then
@@ -38,8 +115,8 @@ is enabled in the configuration file.
    Each algorithm uses the input nodes to guide or constrain the
    optimization process used to construct reconstruct subnetworks.
 
-   An algorithm maps these input nodes onto the interactome and uses the
-   network to identify connecting paths between the input nodes to form
+   An algorithm maps these input nodes onto the interactome and
+   identifies connecting paths between the input nodes to form
    subnetworks.
 
 Pathway reconstruction algorithms differ in the inputs nodes they
@@ -85,9 +162,9 @@ algorithms also interpret the input interactome differently.
 -  And some support mixed-directionaltiy interactomes. These
    interactomes contain both directed and undirected edges.
 
-SPRAS automatically converts the user-provided edge file into the format
-expected by each algorithm, ensuring that the directionality of the
-interactome matches the algorithm's requirements.
+SPRAS automatically converts the user-provided edge file (interactome)
+into the format expected by each algorithm, ensuring that the
+directionality of the interactome matches the algorithm's requirements.
 
 An example of an edge file required by SPRAS follows a tab-separated
 format. where ``U`` indicates an undirected edge and ``D`` indicates a
@@ -104,73 +181,13 @@ directed edge:
    about input data formats can be found in the ``inputs/README.md``
    file within the SPRAS repository.
 
-1.2 Example high throughput data
-================================
+1.3 Preprocessing the omic data
+===============================
 
-An example dataset is using EGF response mass spectrometry data [4]_.
-The experiment for this data was repeated three times, known as
-biological replicates, to ensure the results are consistent. Each
-replicate measures the abundance of peptides at different time points
-(0-128 minutes) to capture how protein activity changes over time.
-
-.. note::
-
-   Mass spectrometry is a technique used to measure and identify
-   proteins in a sample. It works by breaking proteins into smaller
-   pieces called peptides and measuring their mass-to-charge ratio,
-   which enables identifying which peptide is being measured. The data
-   show how much of each peptide is present, which can show how protein
-   phosphorylation abundances change under different conditions.
-
-   Since proteins interact with each other in biological pathways,
-   changes in their phosphorylation abundances can reveal which parts of
-   a pathway are active or affected. By mapping these changing proteins
-   onto known interaction networks, pathway reconstruction algorithms
-   can identify which signaling pathways are likely involved in the
-   biological response to a specific condition.
-
-Example of one of the biological replicate A with one peptide:
-
-.. list-table::
-   :header-rows: 1
-   :widths: 20 15 10 10 10 10 10 10 10 10 10 10
-
-   -  -  peptide
-      -  protein
-      -  gene.name
-      -  modified.sites
-      -  0 min
-      -  2 min
-      -  4 min
-      -  8 min
-      -  16 min
-      -  32 min
-      -  64 min
-      -  128 mn
-
-   -  -  K.n[305.21]AFWMAIGGDRDEIEGLS[167.00]S[167.00]DEEH.-
-      -  Q6PD74,B4DG44,Q5JPJ4,Q6AWA0
-      -  AAGAB
-      -  S310,S311
-      -  14.97
-      -  14.81
-      -  13.99
-      -  13.98
-      -  12.87
-      -  13.88
-      -  13.91
-      -  15.60
-
-The goal is to turn this experimental data into the format that SPRAS
-expects.
-
-1.3 Filtering and normalizing the replicates
-============================================
-
-Before analysis, we filter out peptides not present in all three
-replicates to ensure consistency. Then, we normalize each replicate so
-intensity values are comparable and not biased by replicate-specific
-effects.
+Before analysis, we filter out all peptides not present in all three
+replicates to ensure consistency. Then, we can also normalize each
+replicate so the intensity values are comparable and not biased by any
+replicate-specific effects.
 
 .. list-table::
    :header-rows: 1
@@ -232,11 +249,12 @@ effects.
       -  5.48
       -  A
 
-1.4 Computing p-values using Tukey's HSD Test
-=============================================
+1.4 Computing prizes
+====================
 
-We want to calculate the p-values per peptide. This tells us how likely
-changes in abundance happen by chance.
+From this data, we can take it's values and turn them into prizes. One
+way we can do this is by by calculating p-values per peptide. This tells
+us how likely changes in abundance happen by chance.
 
 We use Tukey's Honest Significant Difference (HSD) test to compare all
 time points and correct for multiple testing to get a p-value for every
@@ -311,25 +329,32 @@ pair of time points.
 Peptides with lower p-values are more statistically significant and may
 represent biologically meaningful changes in phosphorylation over time.
 
-1.5 From p-values to prizes
-===========================
+We can then take these p-values and transform them into prizes that a
+pathway reconstruction algorithm can use for their input nodes.
 
-P-values are transformed using ``-log10(p-value)`` so smaller p-values
-give larger prize scores.
+The p-values can be transformed using ``-log10(p-value)`` so smaller
+p-values are give larger prize scores.
 
-For each peptide, the smallest p-value is selected (representing the
-most significant change) between each time point to the baseline (0 min)
-and between consecutive time points. This is because the ultimate
-network analysis will not use the temporal information.
+This data include temporal information, but SPRAS doesn't include any
+algorithms that uses temporal information. Instead, for each peptide,
+the smallest p-value is selected (representing the most significant
+change) between each time point to the baseline (0 min) and between
+consecutive time points. This is because the ultimate network analysis
+will not use the temporal information.
 
-For each protein mapped to multiple peptides, the maximum prize value
-across all its peptides is assigned.
-
-Finally, all protein identifiers (using the first one listed for each
-protein) are converted to UniProt Entry Names to match the identifiers
-that will be used in the interactome.
+There are also cases of duplicates, in this case for each protein they
+can be mapped to multiple peptides. To deal with this, we can take the
+maximum prize value across all its peptides is assigned and assign that
+to the protein.
 
 .. note::
+
+   all of the data needs to be in the same ID mapping namespace. For all
+   of the protein identifiers, we can convert them into a namespace we
+   will use for all of the data.
+
+   For this data, the proteins chosen are converted to UniProt Entry
+   Names. (this will also be done to the interactome chosen)
 
    All node identifiers should use the same namespace across every part
    of the data in a dataset.
@@ -357,7 +382,7 @@ Input node data put into a SPRAS-standardized format:
    NODE_ID     prize
    AAGAB_HUMAN 0.906857382
 
-1.6 From Prizes to Source and Targets / Actives
+1.6 From prizes to sources, targets and actives
 ===============================================
 
 .. image:: ../_static/images/erbb-signaling-pathway.png
@@ -377,7 +402,8 @@ Using known pathway knowledge [1]_ [2]_ [3]_:
 -  EGF is known to initiate signaling, so it can be added and assigned a
    high score (greater than all other nodes) to emphasize its importance
    and guide algorithms to start reconstruction from this point. (EGF is
-   currently not in the data)
+   currently not in the data). We can assign it a score of 10; chosen
+   empirically.
 
 -  EGFR is in the current data. Looking at the pathway, we can see that
    EGFR directly interacts with EGF in the pathway.
@@ -403,9 +429,10 @@ Input node data put into a SPRAS-standardized format:
 1.8 Finding an Interactome to use
 =================================
 
-To connect our proteins, we use a background protein-protein interaction
-(PPI) network (the interactome). For this dataset, two interactomes are
-merged (directed edges prioritized when available):
+To connect our proteins, we need a background interactome. For this
+dataset, we use a protein-protein interaction (PPI) interactome. For
+this dataset, two interactomes are merged (directed edges prioritized
+when available):
 
 -  iRefIndex v13 (159,095 undirected interactions)
 -  PhosphoSitePlus (4,080 directed kinase-substrate interactions)
@@ -441,12 +468,18 @@ Interactome data put into a SPRAS-standardized format:
 
 .. note::
 
-   Many databases exist that provide interactomes. One is `STRING
+   Many databases provide interactomes. One example is `STRING
    <https://string-db.org/>`__, which contains known protein-protein
-   interactions across different species.
+   interactions across different species. For a broader overview of
+   available interactomes, see `Koh et al. (2025)
+   <https://pmc.ncbi.nlm.nih.gov/articles/PMC11697402/>`__. Users can
+   also construct their own interactomes from experimental or curated
+   data.
 
 1.9 This SPRAS-standardized data is already saved into SPRAS
 ============================================================
+
+# TODO: update the config
 
 .. code:: text
 
@@ -529,7 +562,7 @@ algorithm-specific inputs and an output filename (``raw-pathway.txt``).
 
 With each of the ``raw-pathway.txt`` files, an algorithm-specific
 wrapper includes a module that will convert the algorithm-specific
-format into a standardized SPRAS format.
+format into a standardized SPRAS output format.
 
 2.3 Running SPRAS with multiple algorithms
 ==========================================
@@ -537,6 +570,8 @@ format into a standardized SPRAS format.
 In the ``intermediate.yaml`` configuration file, it is set up to have
 SPRAS run multiple algorithms with multiple parameter settings on a
 single dataset.
+
+#TODO update this
 
 .. code:: yaml
 
@@ -606,6 +641,12 @@ single dataset.
          run1:
          alpha: [0.85]
          threshold: [100, 200]
+
+.. note::
+
+   TODO: The full suite of algorithms is described :doc:`Pathway
+   Reconstruction Methods <../prms/prms>`. for this part of the tutorial
+   will only be running on a subset of them.
 
 From the root directory, run the command below from the command line:
 

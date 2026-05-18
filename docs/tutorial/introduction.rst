@@ -66,6 +66,8 @@ Required knowledge:
 
    To remove unused Docker images: ``docker image prune``
 
+# TODO: add the information about the dev container
+
 ################
  SPRAS Overview
 ################
@@ -85,7 +87,7 @@ experiment.
 Pathway reconstruction algorithms address this by mapping molecules of
 interest onto large-scale interaction networks (interactomes) to
 generate candidate context-specific subnetworks that better reflect the
-high-throughput experimental data.
+condition or experiment.
 
 These algorithms allow researchers to propose computational-backed
 hypothetical subnetworks that capture the unique characteristics of a
@@ -93,7 +95,7 @@ given context without having to experimentally test every individual
 interaction.
 
 Running a single pathway reconstruction algorithm on a single dataset
-can be challenging, since each algorithm often requires its own input
+can be challenging, as each algorithm often requires its own input
 format, software environment, or even a full reimplementation. These
 challenges only grow when scaling up to using multiple algorithms and
 datasets.
