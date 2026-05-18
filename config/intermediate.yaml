@@ -93,7 +93,6 @@ analysis:
     # ml analysis per dataset
     include: true # set to true for step 3
 
-    # set all below to true for step 4??
     # adds ml analysis per algorithm output
     # only runs for algorithms with multiple parameter combinations chosen
     aggregate_per_algorithm: false # set to true for step 4

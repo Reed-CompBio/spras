@@ -578,8 +578,6 @@ In the ``intermediate.yaml`` configuration file, it is set up to have
 SPRAS run multiple algorithms with multiple parameter settings on a
 single dataset.
 
-#TODO update this
-
 .. code:: yaml
 
     algorithms:
@@ -730,70 +728,119 @@ What your directory structure should like after this run:
    │   └── tps-egfr-prizes.txt
    ├── outputs/
    │   └── intermediate/
-   │       └── dataset-egfr-merged.pickle
-   │       └── egfr-allpairs-params-X4Q2T2H
-   │            └── pathway.txt
-   │            └── raw-pathway.txt
-   │       └── egfr-domino-params-V3X4RW7
-   │            └── pathway.txt
-   │            └── raw-pathway.txt
-   │       └── egfr-mincostflow-params-42UBTQI
-   │            └── pathway.txt
-   │            └── raw-pathway.txt
-   │       └── egfr-omicsintegrator1-params-YYFFQV4
-   │            └── pathway.txt
-   │            └── raw-pathway.txt
-   │       └── egfr-omicsintegrator2-params-FLDAMA4
-   │            └── pathway.txt
-   │            └── raw-pathway.txt
-   │       └── egfr-pathlinker-params-VQL7BDZ
-   │            └── pathway.txt
-   │            └── raw-pathway.txt
-   │       └── egfr-rwr-params-GGZCZBU
-   │            └── pathway.txt
-   │            └── raw-pathway.txt
-   │       └── egfr-strwr-params-GGZCZBU
-   │            └── pathway.txt
-   │            └── raw-pathway.txt
-   │       └── logs
-   │            └── datasets-egfr.yaml
-   │            └── parameters-allpairs-params-X4Q2T2H.yaml
-   │            └── parameters-domino-params-V3X4RW7.yaml
-   │            └── parameters-mincostflow-params-42UBTQI.yaml
-   │            └── parameters-omicsintegrator1-params-YYFFQV4.yaml
-   │            └── parameters-omicsintegrator2-params-FLDAMA4.yaml
-   │            └── parameters-pathlinker-params-VQL7BDZ.yaml
-   │            └── parameters-rwr-params-GGZCZBU.yaml
-   │            └── parameters-strwr-params-GGZCZBU.yaml
-   │       └── prepared
-   │            └── egfr-allpairs-inputs
-   │                ├── directed_flag.txt
-   │                ├── network.txt
-   │                └── nodetypes.txt
-   │            └── egfr-domino-inputs
-   │                ├── active_genes.txt
-   │                └── network.txt
-   │            └── egfr-mincostflow-inputs
-   │                ├── edges.txt
-   │                ├── sources.txt
-   │                └── targets.txt
-   │            └── egfr-omicsintegrator1-inputs
-   │                ├── dummy_nodes.txt
-   │                ├── edges.txt
-   │                └── prizes.txt
-   │            └── egfr-omicsintegrator2-inputs
-   │                ├── edges.txt
-   │                └── prizes.txt
-   │            └── egfr-pathlinker-inputs
-   │                ├── network.txt
-   │                └── nodetypes.txt
-   │            └── egfr-rwr-inputs
-   │                ├── network.txt
-   │                └── nodes.txt
-   │            └── egfr-strwr-inputs
-   |                ├── network.txt
-   |                ├── sources.txt
-   |                └── targets.txt
+   │       ├── dataset-egfr-merged.pickle
+   │       ├── egfr-mincostflow-params-42UBTQI/
+   │       │   ├── pathway.txt
+   │       │   └── raw-pathway.txt
+   │       ├── egfr-mincostflow-params-B4P4LUU/
+   │       │   ├── pathway.txt
+   │       │   └── raw-pathway.txt
+   │       ├── egfr-mincostflow-params-KTZPGLQ/
+   │       │   ├── pathway.txt
+   │       │   └── raw-pathway.txt
+   │       ├── egfr-mincostflow-params-MY6UCHG/
+   │       │   ├── pathway.txt
+   │       │   └── raw-pathway.txt
+   │       ├── egfr-ml/
+   │       │   ├── ensemble-pathway.txt
+   │       │   ├── hac-clusters-horizontal.txt
+   │       │   ├── hac-clusters-vertical.txt
+   │       │   ├── hac-horizontal.png
+   │       │   ├── hac-vertical.png
+   │       │   ├── jaccard-heatmap.png
+   │       │   ├── jaccard-matrix.txt
+   │       │   ├── pca-coordinates.txt
+   │       │   ├── pca-variance.txt
+   │       │   └── pca.png
+   │       ├── egfr-omicsintegrator2-params-44PJEHW/
+   │       │   ├── pathway.txt
+   │       │   └── raw-pathway.txt
+   │       ├── egfr-omicsintegrator2-params-4NC62EL/
+   │       │   ├── pathway.txt
+   │       │   └── raw-pathway.txt
+   │       ├── egfr-omicsintegrator2-params-4VRLTK5/
+   │       │   ├── pathway.txt
+   │       │   └── raw-pathway.txt
+   │       ├── egfr-omicsintegrator2-params-52OUGT2/
+   │       │   ├── pathway.txt
+   │       │   └── raw-pathway.txt
+   │       ├── egfr-omicsintegrator2-params-KEVHYWP/
+   │       │   ├── pathway.txt
+   │       │   └── raw-pathway.txt
+   │       ├── egfr-omicsintegrator2-params-RUGOWNI/
+   │       │   ├── pathway.txt
+   │       │   └── raw-pathway.txt
+   │       ├── egfr-omicsintegrator2-params-RVH2YKU/
+   │       │   ├── pathway.txt
+   │       │   └── raw-pathway.txt
+   │       ├── egfr-omicsintegrator2-params-WW2ILRO/
+   │       │   ├── pathway.txt
+   │       │   └── raw-pathway.txt
+   │       ├── egfr-pathlinker-params-7S4SLU6/
+   │       │   ├── pathway.txt
+   │       │   └── raw-pathway.txt
+   │       ├── egfr-pathlinker-params-D4TUKMX/
+   │       │   ├── pathway.txt
+   │       │   └── raw-pathway.txt
+   │       ├── egfr-pathlinker-params-TFORORH/
+   │       │   ├── pathway.txt
+   │       │   └── raw-pathway.txt
+   │       ├── egfr-pathlinker-params-VQL7BDZ/
+   │       │   ├── pathway.txt
+   │       │   └── raw-pathway.txt
+   │       ├── egfr-pathway-summary.txt
+   │       ├── egfr-rwr-params-34NN6EK/
+   │       │   ├── pathway.txt
+   │       │   └── raw-pathway.txt
+   │       ├── egfr-rwr-params-GGZCZBU/
+   │       │   ├── pathway.txt
+   │       │   └── raw-pathway.txt
+   │       ├── egfr-strwr-params-34NN6EK/
+   │       │   ├── pathway.txt
+   │       │   └── raw-pathway.txt
+   │       ├── egfr-strwr-params-GGZCZBU/
+   │       │   ├── pathway.txt
+   │       │   └── raw-pathway.txt
+   │       ├── logs/
+   │       │   ├── datasets-egfr.yaml
+   │       │   ├── parameters-mincostflow-params-42UBTQI.yaml
+   │       │   ├── parameters-mincostflow-params-B4P4LUU.yaml
+   │       │   ├── parameters-mincostflow-params-KTZPGLQ.yaml
+   │       │   ├── parameters-mincostflow-params-MY6UCHG.yaml
+   │       │   ├── parameters-omicsintegrator2-params-44PJEHW.yaml
+   │       │   ├── parameters-omicsintegrator2-params-4NC62EL.yaml
+   │       │   ├── parameters-omicsintegrator2-params-4VRLTK5.yaml
+   │       │   ├── parameters-omicsintegrator2-params-52OUGT2.yaml
+   │       │   ├── parameters-omicsintegrator2-params-KEVHYWP.yaml
+   │       │   ├── parameters-omicsintegrator2-params-RUGOWNI.yaml
+   │       │   ├── parameters-omicsintegrator2-params-RVH2YKU.yaml
+   │       │   ├── parameters-omicsintegrator2-params-WW2ILRO.yaml
+   │       │   ├── parameters-pathlinker-params-7S4SLU6.yaml
+   │       │   ├── parameters-pathlinker-params-D4TUKMX.yaml
+   │       │   ├── parameters-pathlinker-params-TFORORH.yaml
+   │       │   ├── parameters-pathlinker-params-VQL7BDZ.yaml
+   │       │   ├── parameters-rwr-params-34NN6EK.yaml
+   │       │   ├── parameters-rwr-params-GGZCZBU.yaml
+   │       │   ├── parameters-strwr-params-34NN6EK.yaml
+   │       │   └── parameters-strwr-params-GGZCZBU.yaml
+   │       └── prepared/
+   │           ├── egfr-mincostflow-inputs/
+   │           │   ├── edges.txt
+   │           │   ├── sources.txt
+   │           │   └── targets.txt
+   │           ├── egfr-omicsintegrator2-inputs/
+   │           │   ├── edges.txt
+   │           │   └── prizes.txt
+   │           ├── egfr-pathlinker-inputs/
+   │           │   ├── network.txt
+   │           │   └── nodetypes.txt
+   │           ├── egfr-rwr-inputs/
+   │           │   ├── network.txt
+   │           │   └── nodes.txt
+   │           └── egfr-strwr-inputs/
+   │               ├── network.txt
+   │               ├── sources.txt
+   │               └── targets.txt
 
 2.4 Reviewing the pathway.txt files
 ===================================
@@ -929,92 +976,119 @@ What your directory structure should like after this run:
 
 .. code:: text
 
-      spras/
-   ├── .snakemake/
-   │   └── log/
-   │       └── ... snakemake log files ...
-   ├── config/
-   │   └── basic.yaml
-   ├── inputs/
-   │   ├── phosphosite-irefindex13.0-uniprot.txt
-   │   └── tps-egfr-prizes.txt
-   ├── outputs/
-   │   └── intermediate/
-   │       └── dataset-egfr-merged.pickle
-   │       └── egfr-allpairs-params-X4Q2T2H
-   │            └── pathway.txt
-   │            └── raw-pathway.txt
-   │       └── egfr-domino-params-V3X4RW7
-   │            └── pathway.txt
-   │            └── raw-pathway.txt
-   │       └── egfr-mincostflow-params-42UBTQI
-   │            └── pathway.txt
-   │            └── raw-pathway.txt
-   │       └── egfr-omicsintegrator1-params-YYFFQV4
-   │            └── pathway.txt
-   │            └── raw-pathway.txt
-   │       └── egfr-omicsintegrator2-params-FLDAMA4
-   │            └── pathway.txt
-   │            └── raw-pathway.txt
-   │       └── egfr-pathlinker-params-VQL7BDZ
-   │            └── pathway.txt
-   │            └── raw-pathway.txt
-   │       └── egfr-rwr-params-GGZCZBU
-   │            └── pathway.txt
-   │            └── raw-pathway.txt
-   │       └── egfr-strwr-params-GGZCZBU
-   │            └── pathway.txt
-   │            └── raw-pathway.txt
-   │       └── egfr-ml
-   │            └── ensemble-pathway.txt
-   │            └── hac-clusters-horizontal.txt
-   │            └── hac-clusters-vertical.txt
-   │            └── hac-horizontal.png
-   │            └── hac-vertical.png
-   │            └── jaccard-heatmap.png
-   │            └── jaccard-matrix.txt
-   │            └── pca-coordinates.txt
-   │            └── pca-variance.txt
-   │            └── pca.png
-   │       └── logs
-   │            └── datasets-egfr.yaml
-   │            └── parameters-allpairs-params-X4Q2T2H.yaml
-   │            └── parameters-domino-params-V3X4RW7.yaml
-   │            └── parameters-mincostflow-params-42UBTQI.yaml
-   │            └── parameters-omicsintegrator1-params-YYFFQV4.yaml
-   │            └── parameters-omicsintegrator2-params-FLDAMA4.yaml
-   │            └── parameters-pathlinker-params-VQL7BDZ.yaml
-   │            └── parameters-rwr-params-GGZCZBU.yaml
-   │            └── parameters-strwr-params-GGZCZBU.yaml
-   │       └── prepared
-   │            └── egfr-allpairs-inputs
-   │                ├── directed_flag.txt
-   │                ├── network.txt
-   │                └── nodetypes.txt
-   │            └── egfr-domino-inputs
-   │                ├── active_genes.txt
-   │                └── network.txt
-   │            └── egfr-mincostflow-inputs
-   │                ├── edges.txt
-   │                ├── sources.txt
-   │                └── targets.txt
-   │            └── egfr-omicsintegrator1-inputs
-   │                ├── dummy_nodes.txt
-   │                ├── edges.txt
-   │                └── prizes.txt
-   │            └── egfr-omicsintegrator2-inputs
-   │                ├── edges.txt
-   │                └── prizes.txt
-   │            └── egfr-pathlinker-inputs
-   │                ├── network.txt
-   │                └── nodetypes.txt
-   │            └── egfr-rwr-inputs
-   │                ├── network.txt
-   │                └── nodes.txt
-   │            └── egfr-strwr-inputs
-   |                ├── network.txt
-   |                ├── sources.txt
-   |                └── targets.txt
+   ├── dataset-egfr-merged.pickle
+   ├── egfr-mincostflow-params-42UBTQI
+   │   ├── pathway.txt
+   │   └── raw-pathway.txt
+   ├── egfr-mincostflow-params-B4P4LUU
+   │   ├── pathway.txt
+   │   └── raw-pathway.txt
+   ├── egfr-mincostflow-params-KTZPGLQ
+   │   ├── pathway.txt
+   │   └── raw-pathway.txt
+   ├── egfr-mincostflow-params-MY6UCHG
+   │   ├── pathway.txt
+   │   └── raw-pathway.txt
+   ├── egfr-ml
+   │   ├── ensemble-pathway.txt
+   │   ├── hac-clusters-horizontal.txt
+   │   ├── hac-clusters-vertical.txt
+   │   ├── hac-horizontal.png
+   │   ├── hac-vertical.png
+   │   ├── jaccard-heatmap.png
+   │   ├── jaccard-matrix.txt
+   │   ├── pca-coordinates.txt
+   │   ├── pca-variance.txt
+   │   └── pca.png
+   ├── egfr-omicsintegrator2-params-44PJEHW
+   │   ├── pathway.txt
+   │   └── raw-pathway.txt
+   ├── egfr-omicsintegrator2-params-4NC62EL
+   │   ├── pathway.txt
+   │   └── raw-pathway.txt
+   ├── egfr-omicsintegrator2-params-4VRLTK5
+   │   ├── pathway.txt
+   │   └── raw-pathway.txt
+   ├── egfr-omicsintegrator2-params-52OUGT2
+   │   ├── pathway.txt
+   │   └── raw-pathway.txt
+   ├── egfr-omicsintegrator2-params-KEVHYWP
+   │   ├── pathway.txt
+   │   └── raw-pathway.txt
+   ├── egfr-omicsintegrator2-params-RUGOWNI
+   │   ├── pathway.txt
+   │   └── raw-pathway.txt
+   ├── egfr-omicsintegrator2-params-RVH2YKU
+   │   ├── pathway.txt
+   │   └── raw-pathway.txt
+   ├── egfr-omicsintegrator2-params-WW2ILRO
+   │   ├── pathway.txt
+   │   └── raw-pathway.txt
+   ├── egfr-pathlinker-params-7S4SLU6
+   │   ├── pathway.txt
+   │   └── raw-pathway.txt
+   ├── egfr-pathlinker-params-D4TUKMX
+   │   ├── pathway.txt
+   │   └── raw-pathway.txt
+   ├── egfr-pathlinker-params-TFORORH
+   │   ├── pathway.txt
+   │   └── raw-pathway.txt
+   ├── egfr-pathlinker-params-VQL7BDZ
+   │   ├── pathway.txt
+   │   └── raw-pathway.txt
+   ├── egfr-pathway-summary.txt
+   ├── egfr-rwr-params-34NN6EK
+   │   ├── pathway.txt
+   │   └── raw-pathway.txt
+   ├── egfr-rwr-params-GGZCZBU
+   │   ├── pathway.txt
+   │   └── raw-pathway.txt
+   ├── egfr-strwr-params-34NN6EK
+   │   ├── pathway.txt
+   │   └── raw-pathway.txt
+   ├── egfr-strwr-params-GGZCZBU
+   │   ├── pathway.txt
+   │   └── raw-pathway.txt
+   ├── logs
+   │   ├── datasets-egfr.yaml
+   │   ├── parameters-mincostflow-params-42UBTQI.yaml
+   │   ├── parameters-mincostflow-params-B4P4LUU.yaml
+   │   ├── parameters-mincostflow-params-KTZPGLQ.yaml
+   │   ├── parameters-mincostflow-params-MY6UCHG.yaml
+   │   ├── parameters-omicsintegrator2-params-44PJEHW.yaml
+   │   ├── parameters-omicsintegrator2-params-4NC62EL.yaml
+   │   ├── parameters-omicsintegrator2-params-4VRLTK5.yaml
+   │   ├── parameters-omicsintegrator2-params-52OUGT2.yaml
+   │   ├── parameters-omicsintegrator2-params-KEVHYWP.yaml
+   │   ├── parameters-omicsintegrator2-params-RUGOWNI.yaml
+   │   ├── parameters-omicsintegrator2-params-RVH2YKU.yaml
+   │   ├── parameters-omicsintegrator2-params-WW2ILRO.yaml
+   │   ├── parameters-pathlinker-params-7S4SLU6.yaml
+   │   ├── parameters-pathlinker-params-D4TUKMX.yaml
+   │   ├── parameters-pathlinker-params-TFORORH.yaml
+   │   ├── parameters-pathlinker-params-VQL7BDZ.yaml
+   │   ├── parameters-rwr-params-34NN6EK.yaml
+   │   ├── parameters-rwr-params-GGZCZBU.yaml
+   │   ├── parameters-strwr-params-34NN6EK.yaml
+   │   └── parameters-strwr-params-GGZCZBU.yaml
+   └── prepared
+       ├── egfr-mincostflow-inputs
+       │   ├── edges.txt
+       │   ├── sources.txt
+       │   └── targets.txt
+       ├── egfr-omicsintegrator2-inputs
+       │   ├── edges.txt
+       │   └── prizes.txt
+       ├── egfr-pathlinker-inputs
+       │   ├── network.txt
+       │   └── nodetypes.txt
+       ├── egfr-rwr-inputs
+       │   ├── network.txt
+       │   └── nodes.txt
+       └── egfr-strwr-inputs
+           ├── network.txt
+           ├── sources.txt
+           └── targets.txt
 
 Step 3.2: Reviewing the ML outputs
 ==================================
@@ -1160,8 +1234,8 @@ poorly characterized biological systems, interactions may not yet be
 experimentally verified or fully known, making it difficult to define a
 reliable reference network for evaluation.
 
-Explain two sentence high level how we do evaluation: Parameter
-selection + pr or prcs
+TODO: Explain two sentence high level how we do evaluation: Parameter
+selection and then pr or prcs
 
 4.1 Adding evaluation post-analysis to the intermediate configuration
 =====================================================================
@@ -1179,13 +1253,17 @@ Your analysis section in the configuration file should look like this:
       ml:
          include: true
          aggregate_per_algorithm: true
-         ... (other parameters preset)
          kde: true
          remove_empty_pathways: true
 
       evaluation:
          include: true
          aggregate_per_algorithm: true
+
+# TODO: add a command to remove the ml folder and we will rerun it with
+new commands on what happens to the ml stuff - doing this because we are
+customizing the ml stuff and need to rerun them (doesn't happen
+automatically but work in progress to do that)
 
 Setting ``aggregate_per_algorithm`` to true will additionally groups
 post-analysis and evaluations by algorithm per dataset. Without this,
@@ -1195,14 +1273,6 @@ post-analysis rather than broken out per algorithm.
 Within ``ml``, ``remove_empty_pathways`` excludes pathways with no nodes
 or edges from the PCA post analysis. The ``kde`` creates a kernel
 density estimate over the PCA plots.
-
-EXPLAIN WHY WE do each of these - kde we explain in parameter selection
-so skip - remove_empty_pathways we do because we don't want to
-cluster/kda and choose empty pathways that are the representative, want
-to see something - aggregate_per_algorithm we want to see how well each
-individual algorithm does on the evaluation instead of the # 1 best or
-all outputs treated the same, we want to see how each algorithm is
-performing
 
 The intermediate configuration also includes a gold standard for the
 EGFR dataset, which is already set up in SPRAS and does not require any
@@ -1217,11 +1287,35 @@ changes:
       data_dir: "input"
       dataset_labels: ["egfr"]
 
+.. note::
+
+   # TODO: add information about the egfr gold standard
+
+With these updates, SPRAS will run the evaluations across all outputs
+for a given dataset.
+
+After saving the changes in the configuration file, rerun with:
+
+.. code:: bash
+
+   snakemake --cores 4 --configfile config/intermediate.yaml
+
+# TODO: add the what the directory looks like after
+
+What happens when you run this command
+--------------------------------------
+
+What your directory structure should like after this run:
+---------------------------------------------------------
+
 4.2 What is parameter selection?
 ================================
 
 Parameter selection refers to the process of determining which parameter
 combinations should be used for evaluation on a gold standard dataset.
+
+# TODO: add why we are picking a set of parameters / doing parameter
+selection
 
 Parameter selection is handled in the evaluation code, which supports
 multiple parameter selection strategies. Once the grid space search is
@@ -1285,33 +1379,15 @@ parameter setting (no clear optimal parameter combination could exists).
 Ground truth-based evaluation without parameter selection
 ---------------------------------------------------------
 
-# TODO rename this to what it actually is
+# TODO: rename this to what it actually is
 
 The no parameter selection approach chooses all parameter combinations
 for each pathway reconstruction algorithm on a given dataset. This
 approach can be useful for idenitifying patterns in algorithm
 performance without choosing any specific parameter setting.
 
-# add more details about this/reword this based on what is in the paper
-
-4.3 Running evaluation post analysis code
-=========================================
-
-With the updates to the intermediate.yaml config, SPRAS will run the
-full evalaution across all outputs for a given dataset and give back
-results per algorithm.
-
-After saving the changes in the configuration file, rerun with:
-
-.. code:: bash
-
-   snakemake --cores 4 --configfile config/intermediate.yaml
-
-What happens when you run this command
---------------------------------------
-
-What your directory structure should like after this run:
----------------------------------------------------------
+# TODO: add more details about this/reword this based on what is in the
+paper
 
 4.4 Reviewing the evalaution outputs
 ====================================
