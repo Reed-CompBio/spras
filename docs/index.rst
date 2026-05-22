@@ -40,6 +40,7 @@ reconstruction methods (PRMs) to omics data.
 
    output
    htcondor
+   timeout
 
 .. toctree::
    :maxdepth: 1
@@ -61,6 +62,12 @@ reconstruction methods (PRMs) to omics data.
    contributing/maintain
    contributing/patching
    contributing/design
+
+.. toctree::
+   :maxdepth: 1
+   :caption: Internal Designs
+
+   design/errors
 
 .. toctree::
    :maxdepth: 1

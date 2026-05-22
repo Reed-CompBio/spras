@@ -161,13 +161,15 @@ Algorithms
      params:
         include: true
         run1:
-           b: 0.1
-           d: 10
-           g: 1e-3
+           params:
+              b: 0.1
+              d: 10
+              g: 1e-3
         run2:
-           b: [0.55, 2, 10]
-           d: [10, 20]
-           g: 1e-3
+           params:
+              b: [0.55, 2, 10]
+              d: [10, 20]
+              g: 1e-3
 
 When defining an algorithm in the configuration file, its name must
 match one of the supported SPRAS algorithms. Each algorithm includes an
@@ -285,7 +287,7 @@ From the root directory, run the command below from the command line:
 
 .. code:: bash
 
-   snakemake --cores 1 --configfile config/beginner.yaml
+   spras run --cores 1 --configfile config/beginner.yaml
 
 This command starts the workflow manager that automates all steps
 defined by SPRAS. It tells Snakemake to use one CPU core and to load
@@ -430,7 +432,7 @@ After saving the changes, rerun with:
 
 .. code:: bash
 
-   snakemake --cores 1 --configfile config/beginner.yaml
+   spras run --cores 1 --configfile config/beginner.yaml
 
 What happens when you run this command
 --------------------------------------
@@ -600,7 +602,7 @@ After saving the changes, rerun with:
 
 .. code:: bash
 
-   snakemake --cores 1 --configfile config/beginner.yaml
+   spras run --cores 1 --configfile config/beginner.yaml
 
 What happens when you run this command
 --------------------------------------

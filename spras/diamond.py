@@ -3,6 +3,7 @@ from pathlib import Path
 from pydantic import BaseModel, ConfigDict
 
 from spras.config.container_schema import ProcessedContainerSettings
+from spras.config.runs import RunSettings
 from spras.containers import ContainerError, prepare_volume, run_container_and_log
 from spras.dataset import Dataset
 from spras.interactome import (
@@ -63,8 +64,9 @@ class DIAMOnD(PRM[DIAMOnDParams]):
         edges_df.to_csv(filename_map["network"], columns=["Interactor1", "Interactor2"], index=False, header=None, sep=',')
 
     @staticmethod
-    def run(inputs, output_file, args, container_settings=None):
+    def run(inputs, output_file, args, container_settings=None, run_settings=None):
         if not container_settings: container_settings = ProcessedContainerSettings()
+        if not run_settings: run_settings = RunSettings()
         DIAMOnD.validate_required_run_args(inputs)
 
         work_dir = '/diamond'
@@ -100,7 +102,8 @@ class DIAMOnD(PRM[DIAMOnDParams]):
                                 volumes,
                                 work_dir,
                                 out_dir,
-                                container_settings)
+                                container_settings,
+                                run_settings.timeout)
         except ContainerError as err:
             if err.streams_contain("KeyError: 'nix'"):
                 raise RuntimeError(f"{err.stderr}\n" + \

@@ -58,5 +58,6 @@ def run_cytoscape(pathways: List[Union[str, PurePath]], output_file: str, contai
                          # (https://github.com/Reed-CompBio/spras/pull/390/files#r2485100875)
                          None,
                          container_settings,
+                         None,
                          env)
     rmtree(cytoscape_output_dir)

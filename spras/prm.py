@@ -1,11 +1,13 @@
 import os
 from abc import ABC, abstractmethod
 from pathlib import Path
+from types import get_original_bases
 from typing import Any, Generic, Mapping, Optional, TypeVar, cast, get_args
 
 from pydantic import BaseModel
 
 from spras.config.container_schema import ProcessedContainerSettings
+from spras.config.runs import RunSettings
 from spras.dataset import Dataset
 from spras.util import LoosePathLike
 
@@ -52,41 +54,55 @@ class PRM(ABC, Generic[T]):
         For example, on `class PathLinker(PRM[PathLinkerParams])`,
         calling `PathLinker.get_params_generic()` returns `PathLinkerParams`.
         """
-        # TODO: use the type-safe get_original_bases when we bump to >= Python 3.12
-        # This is hacky reflection from https://stackoverflow.com/a/71720366/7589775
-        # which grabs the class of type T by the definition of `__orig_bases__`.
-        return get_args(cast(Any, cls).__orig_bases__[0])[0]
+        # This gives us (PRM[PathLinkerParams], )
+        original_bases = get_original_bases(cls)
+
+        # Since we just used reflection, we provide a few mountain-dewey error messages here
+        # to protect against any developer confusion.
+        assert len(original_bases) == 1, f"{cls} inherits from several classes, when precisely one is required."
+        original_bases_args = get_args(original_bases[0])
+        assert len(original_bases_args) == 1, "There were several generics passed into PRM, when precisely one is required."
+        T_class, = original_bases_args
+
+        if not issubclass(T_class, BaseModel):
+            raise RuntimeError("The generic passed into PRM is not a pydantic.BaseModel.")
+
+        # Finally, we cast, since issubclass overeagerly restricts T_class to type[BaseModel]
+        # instead of type[T] without imposing the restriction that T inherits from BaseModel
+        return cast(type[T], T_class)
 
     # This is used in `runner.py` to avoid a dependency diamond when trying
     # to import the actual algorithm schema.
     @classmethod
-    def run_typeless(cls, inputs: dict[str, str | os.PathLike], output_file: str | os.PathLike, args: dict[str, Any], container_settings: ProcessedContainerSettings):
+    def run_typeless(cls, inputs: dict[str, str | os.PathLike], output_file: str | os.PathLike, args: dict[str, Any], container_settings: ProcessedContainerSettings, run_settings: RunSettings):
         """
-        This is similar to PRA.run, but it does pydantic logic internally to re-validate argument parameters.
+        This is similar to PRA.run, but `args` is a dictionary and not a pydantic structure.
+        However, this method still re-validates `args` against the associated pydantic PRM argument model.
         """
         T_class = cls.get_params_generic()
-
-        # Since we just used reflection, we provide a mountain-dewey error message here
-        # to protect against any developer confusion.
-        if not issubclass(T_class, BaseModel):
-            raise RuntimeError("The generic passed into PRM is not a pydantic.BaseModel.")
 
         # Validates our untyped `args` parameter against our parameter class of type T
         # using BaseModel.model_validate (https://docs.pydantic.dev/latest/api/base_model/#pydantic.BaseModel.model_validate)
         # (Pydantic already provides nice error messages, so we don't need to worry about catching this.)
         T_parsed = T_class.model_validate(args)
 
-        return cls.run(inputs, output_file, T_parsed, container_settings)
+        return cls.run(inputs, output_file, T_parsed, container_settings, run_settings)
 
     @staticmethod
     @abstractmethod
-    def run(inputs: dict[str, str | os.PathLike], output_file: str | os.PathLike, args: T, container_settings: ProcessedContainerSettings):
+    def run(inputs: dict[str, str | os.PathLike], output_file: str | os.PathLike, args: T, container_settings: ProcessedContainerSettings, run_settings: RunSettings):
         """
-        Runs an algorithm with the specified inputs, algorithm params (T),
-        the designated output_file, and the desired container_settings.
+        Runs an algorithm.
+        @param inputs: specified inputs
+        @param output_file: designated reconstructed pathway output
+        @param args: (T) typed algorithm params
+        @param container_settings: what settings should be associated with the individual container.
+        @param run_settings: The particular run settings to use. See `RunSettings` for more info.
 
-        See the algorithm-specific `generate_inputs` and `parse_output`
+        See the algorithm-specific `PRM.generate_inputs` and `PRM.parse_output`
         for information about the input and output format.
+
+        Also see `PRM.run_typeless` for the non-pydantic version of this method (where `args` is a dict).
         """
         raise NotImplementedError
 
