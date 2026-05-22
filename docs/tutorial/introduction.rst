@@ -66,7 +66,43 @@ Required knowledge:
 
    To remove unused Docker images: ``docker image prune``
 
-# TODO: add the information about the dev container
+Opening SPRAS in a GitHub Codespace
+===================================
+
+SPRAS also ships with a dev container, and the quickest way to use it is
+through `GitHub Codespaces <https://github.com/features/codespaces>`_.
+
+A Codespace builds the dev container on GitHub's infrastructure and
+opens it in your browser, so you do not need to install Docker or set up
+a local Python environment. The ``.devcontainer`` configuration in SPRAS
+sets up the environment for you.
+
+Prerequisites
+-------------
+
+A GitHub account. Sign up at `github.com <https://github.com>`_ if you
+do not have one.
+
+Create a Codespace
+------------------
+
+#. Go to `github.com/codespaces <https://github.com/codespaces>`_.
+#. Select **New codespace**.
+#. In the repository field, search for and select
+   ``Reed-CompBio/spras``.
+#. Select **Create codespace**.
+
+GitHub builds the container from the SPRAS ``.devcontainer``
+configuration (the first build takes a few minutes) and opens a VS Code
+environment in your browser with the SPRAS dependencies already
+installed. Once the build finishes, you are ready to run SPRAS.
+
+.. note::
+
+   This tutorial's Codespace is configured with 4 CPUs. Some SPRAS
+   commands in this tutorial are set to ``--cores 8``; lower this to
+   ``--cores 4`` to match the available CPUs. However, if you leave it
+   at 8, SPRAS will still run and uses only the 4 CPUs it has.
 
 ################
  SPRAS Overview
