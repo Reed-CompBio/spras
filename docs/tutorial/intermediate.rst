@@ -893,6 +893,21 @@ contains the following reconstructed subnetwork:
  Step 3: Use ML post-analysis
 ******************************
 
+Rather than inspecting each output on its own, users may want to
+understand how the outputs from multiple algorithms and parameter
+combinations relate to one another when run on the same dataset. SPRAS
+includes machine learning (ML) post-analysis methods for this:
+hierarchical agglomerative clustering, principal component analysis,
+Jaccard similarity, and ensembling.
+
+.. note::
+
+   Each ML method operates on a dataset-specific binary
+   edge-by-subnetwork matrix. Rows represent edges in the union of all
+   reconstructed pathways, and columns represent output subnetworks. An
+   entry indicates whether a given edge appears in a given subnetwork (1
+   if present, 0 if absent).
+
 3.1 Adding ML post-analysis to the intermediate configuration
 =============================================================
 
@@ -908,14 +923,17 @@ configuration file should look like this:
            ... (other parameters preset)
 
 ``ml`` will perform unsupervised analyses such as principal component
-analysis (PCA), hierarchical agglomerative clustering (HAC), ensembling,
-and jaccard similarity comparisons of the pathways.
+analysis, hierarchical agglomerative clustering, ensembling, and jaccard
+similarity comparisons of the pathways.
 
--  The ``ml`` section includes configurable parameters that let you
-   adjust the behavior of the analyses performed.
+.. note::
 
-With these updates, SPRAS will run the full set of unsupervised machine
-learning analyses across all outputs for a given dataset.
+   The ``ml`` section includes configurable parameters that adjust the
+   behavior of these analyses. For the available options, see
+   ``config.yaml`` in the ``config/`` folder.
+
+With these updates, SPRAS will run the full ML analyses across all
+outputs for a given dataset.
 
 After saving the changes in the configuration file, rerun with:
 
@@ -937,8 +955,8 @@ on the egfr dataset are reused.
 
 SPRAS aggregates all the reconstructed subnetworks produced across the
 specified algorithms for a given dataset. SPRAS then performs machine
-learning analyses on each these groups and saves the results in the
-``<dataset>-ml/`` (``egfr-ml/``) folder.
+learning analyses on each these groups and saves the results in a
+``<dataset>-ml/`` (``egfr-ml/`` in this case) folder.
 
 What your directory structure should like after this run:
 ---------------------------------------------------------
@@ -1108,7 +1126,10 @@ across the outputs.
 
 High frequency edges indicate interactions consistently recovered by
 multiple algorithms. Low frequency edges may reflect noise or
-algorithm-specific connections.
+algorithm-specific connections. Edges that occur across many outputs are
+less likely to be algorithm-specific artifacts, so ensembling lets you
+filter for interactions supported by multiple algorithms or parameter
+settings.
 
 Hierarchical agglomerative clustering
 -------------------------------------
@@ -1119,13 +1140,16 @@ In your file explorer, go to
 ``output/intermediate/egfr-ml/hac-horizontal.png`` and/or
 ``output/intermediate/egfr-ml/hac-vertical.png`` and open it locally.
 
-SPRAS includes HAC to group similar pathways outputs based on shared
-edges. This helps identify clusters of algorithms that produce
-comparable subnetworks and highlights distinct reconstruction behaviors.
+SPRAS includes hierarchical agglomerative clustering (HAC) to group
+similar pathways outputs based on shared edges. This helps identify
+clusters of algorithms that produce comparable subnetworks and
+highlights distinct reconstruction behaviors.
 
 In the plots below, each branch represents a cluster of related
-pathways. Shorter distances between branches indicate outputs with
-greater similarity.
+pathways, and shorter distances between branches indicate greater
+similarity. Tight clusters group algorithms and parameter settings that
+produce comparable pathway structures, while isolated branches flag
+outputs that differ from the rest.
 
 .. image:: ../_static/images/hac-horizontal.png
    :alt: Hierarchical agglomerative clustering horizontal view
@@ -1145,10 +1169,6 @@ greater similarity.
 
    <div style="margin:20px 0;"></div>
 
-HAC visualizations help compare which algorithms and parameter settings
-produce similar pathway structures. Tight clusters indicate similar
-output behavior, while isolated branches may reveal unique results.
-
 Principal component analysis
 ----------------------------
 
@@ -1157,10 +1177,13 @@ Principal component analysis
 In your file explorer, go to ``output/intermediate/egfr-ml/pca.png`` and
 open it locally.
 
-SPRAS also includes PCA to visualize variation across pathway outputs.
-Each point represents a pathway, placed based on its overall network
-structure. Pathways that cluster together in PCA space are more similar,
-while those farther apart differ in their reconstructed subnetworks.
+SPRAS also includes principal component analysis (PCA) to visualize
+variation across pathway outputs. Each point represents a pathway,
+placed based on its overall network structure. Pathways that cluster
+together in PCA space are more similar, while those farther apart differ
+in their reconstructed subnetworks. PCA may help identify patterns such
+as clusters of similar algorithms outputs, parameter sensitivities,
+and/or outlier outputs in a lower lower-dimensional space.
 
 .. image:: ../_static/images/pca.png
    :alt: Principal component analysis visualization across pathway outputs
@@ -1170,9 +1193,6 @@ while those farther apart differ in their reconstructed subnetworks.
 .. raw:: html
 
    <div style="margin:20px 0;"></div>
-
-PCA may help identify patterns such as clusters of similar algorithms
-outputs, parameter sensitivities, and/or outlier outputs.
 
 Jaccard similarity
 ------------------
@@ -1185,7 +1205,9 @@ In your file explorer, go to
 SPRAS computes pairwise jaccard similarity between pathway outputs to
 measure how much overlap exists between their reconstructed subnetworks.
 The heatmap visualizes how similar the output pathways are between
-algorithms and their parameter settings.
+algorithms and their parameter settings. Higher similarity values
+indicate that pathways share many of the same edges, while lower values
+suggest distinct reconstructions.
 
 .. image:: ../_static/images/jaccard-heatmap.png
    :alt: Jaccard heatmap of the overlap between pathway outputs
@@ -1195,9 +1217,6 @@ algorithms and their parameter settings.
 .. raw:: html
 
    <div style="margin:20px 0;"></div>
-
-Higher similarity values indicate that pathways share many of the same
-edges, while lower values suggest distinct reconstructions.
 
 **************************************
  Step 4: Use Evaluation post-analysis
@@ -1214,15 +1233,22 @@ poorly characterized biological systems, interactions may not yet be
 experimentally verified or fully known, making it difficult to define a
 reliable reference network for evaluation.
 
+.. note::
+
+   A gold standard captures interactions that are already known, but
+   pathway reconstruction is also a tool for discovery. An algorithm
+   that scores well against a gold standard may do so by recovering
+   established interactions while missing novel ones.
+
 4.1 Adding evaluation post-analysis to the intermediate configuration
 =====================================================================
 
 To enable evaluation, update the analysis section of your configuration
-file. In the evaluation section, set include and aggregate_per_algorithm
-to true. Also, in the ml section, set kde, remove_empty_pathways, and
-aggregate_per_algorithm to true.
-
-Your analysis section in the configuration file should look like this:
+file. In the ``evaluation`` section, set ``include`` and
+``aggregate_per_algorithm`` to ``true``. Also, in the ``ml`` section,
+set ``kde``, ``r`emove_empty_pathways``, and ``aggregate_per_algorithm``
+to true. Your analysis section in the configuration file should look
+like this:
 
 .. code:: yaml
 
@@ -1239,10 +1265,22 @@ Your analysis section in the configuration file should look like this:
          include: true
          aggregate_per_algorithm: true
 
-Since we added customized ML settings, we need to delete the existing
-``egfr-ml/`` folder before rerunning SPRAS so that Snakemake regenerates
-the ML outputs with the new configuration. Run this command from the
-root directory:
+Setting ``aggregate_per_algorithm`` to true will additionally group
+post-analysis and evaluations by algorithm per dataset. Without this,
+outputs from all algorithm per dataset are aggregated together for
+post-analysis rather than broken out per algorithm.
+
+Within ``ml``, ``remove_empty_pathways`` excludes pathways with no nodes
+or edges from the PCA post analysis. The ``kde`` creates a kernel
+density estimate over the PCA plots.
+
+``summary`` is enabled because evaluation uses summary statistics to
+break ties between pathways for some of the parameter selection methods
+(more details further into the tutorial).
+
+We need to delete the existing ``egfr-ml/`` folder before rerunning
+SPRAS so that Snakemake regenerates the ML outputs with the new
+customized ML settings. Run this command from the root directory:
 
 .. code:: bash
 
@@ -1257,21 +1295,9 @@ root directory:
    Automatic re-execution on config changes is a known limitation and is
    being addressed in ongoing SPRAS development.
 
-Setting ``aggregate_per_algorithm`` to true will additionally groups
-post-analysis and evaluations by algorithm per dataset. Without this,
-outputs from all algorithm per dataset are aggregated together for
-post-analysis rather than broken out per algorithm.
-
-Within ``ml``, ``remove_empty_pathways`` excludes pathways with no nodes
-or edges from the PCA post analysis. The ``kde`` creates a kernel
-density estimate over the PCA plots.
-
-``summary`` is enabled because evaluation uses summary statistics to
-break ties between pathways.
-
 The intermediate configuration also includes a gold standard for the
 EGFR dataset, which is already set up in SPRAS and does not require any
-changes:
+setup:
 
 .. code:: yaml
 
@@ -1343,7 +1369,7 @@ and once per algorithm. The per-algorithm evaluation depends on
 per-algorithm ML outputs, which is why ``aggregate_per_algorithm`` was
 set to true in the ``ml`` section above. This produces both
 all-algorithm evaluation files and algorithm-specific evaluation files
-for each dataset.
+for each dataset-goldstandard pair.
 
 What your directory structure should like after this run:
 ---------------------------------------------------------
@@ -1552,15 +1578,31 @@ What your directory structure should like after this run:
 
 Parameter selection refers to the process of determining which parameter
 combinations should be used for evaluation on a gold standard dataset.
+Each parameter selection method has its own corresponding evaluation
+procedure.
 
-# TODO: add why we are picking a set of parameters / doing parameter
-selection
+.. note::
+
+   There is no single principled way to decide which outputs to
+   evaluate, so SPRAS provides several parameter selection strategies
+   instead of committing to one. Some strategies pick a single
+   representative output for each algorithm, while others evaluate
+   across the full set of parameter combinations.
+
+   Parameter selection also guards against overtuning. Algorithms differ
+   in how many parameters they expose and how much they can be tuned to
+   get a better answer, so comparing them on a representative output
+   rather than on the full sweep puts them on some fairer footing.
+
+   Selecting a representative output also measures how an algorithm
+   typically behaves rather than its best run, which is a better basis
+   for judging an algorithm in practice, where the ideal parameters for
+   a new dataset are not known in advance.
 
 Parameter selection is handled in the evaluation code, which supports
-multiple parameter selection strategies. Once the grid space search is
-complete for each dataset, the user can enable evaluation (by setting
-evaluation ``include: true``) and it will run all of the parameter
-selection code.
+multiple parameter selection strategies. A user can enable evaluation
+(by setting evaluation ``include: true``) and it will run all of the
+parameter selection code.
 
 .. note::
 
@@ -1575,15 +1617,6 @@ each pathway reconstruction algorithm on a given dataset. It selects the
 single parameter combination that best captures the central trend of an
 algorithm's reconstruction behavior.
 
-.. image:: ../_static/images/pca-kde.png
-   :alt: Principal component analysis visualization across pathway outputs with a kernel density estimate computed on top
-   :width: 600
-   :align: center
-
-.. raw:: html
-
-   <div style="margin:20px 0;"></div>
-
 For each algorithm, all reconstructed subnetworks are projected into an
 algorithm-specific 2D PCA space based on the set of edges produced by
 the respective parameter combinations for that algorithm. This
@@ -1597,11 +1630,23 @@ closest to the highest KDE peak is selected as the most representative
 parameter setting, as it corresponds to the region where the algorithm
 most consistently produces similar subnetworks.
 
+.. image:: ../_static/images/pca-kde.png
+   :alt: Principal component analysis visualization across pathway outputs with a kernel density estimate computed on top
+   :width: 600
+   :align: center
+
+.. raw:: html
+
+   <div style="margin:20px 0;"></div>
+
 If two or more pathways are equally close to the highest peak of the
 KDE, SPRAS resolves the tie by:
 
 -  Choosing the smallest pathway (fewest nodes and edges).
 -  If a tie remains, choosing the first pathway alphabetically by name.
+
+The chosen output subnetwork is then compared to the gold standard, and
+its precision and recall are measured.
 
 Ensemble network-based parameter selection
 ------------------------------------------
@@ -1621,33 +1666,51 @@ These consensus networks help identify the core patterns and overall
 stability of an algorithm's output's without needing to choose a single
 parameter setting (no clear optimal parameter combination could exists).
 
+For each algorithm-specific ensemble network, SPRAS generates a
+precision-recall curve by treating edge frequencies as thresholds and
+evaluating each ensemble network against the dataset's associated gold
+standard.
+
 All Plausible Parameters (No parameter selection)
 -------------------------------------------------
 
 The all plausible parameters approach evaluates all parameter
 combinations without selecting a representative subset or ensembling.
 This method provides an holistic view of algorithm performance by
-evaluating every valid output. For each algorithm and dataset, we
-compute precision and recall for every valid subnetwork. This allows us
-to measure reconstruction performance across the full range of parameter
-settings and observe each algorithm's full range of capabilities.
+evaluating every output. For each algorithm and dataset, we compute
+precision and recall for every subnetwork. This allows us to measure
+reconstruction performance across the full range of parameter settings
+and observe each algorithm's full range of capabilities.
 
 4.4 Reviewing the evalaution outputs
 ====================================
 
-For each pathway, evaluation can be run independently of any parameter
-selection method (the ground truth-based evaluation without parameter
-selection idea) to directly inspect precision and recall for each
-reconstructed network from a given dataset.
+PCA-based parameter selection
+-----------------------------
 
-.. image:: ../_static/images/pr-per-pathway-nodes.png
-   :alt: Precision and recall computed for each pathway and visualized on a scatter plot
+#. Open the PCA chosen parameter selection evaluation
+
+In your file explorer, go to
+``output/intermediate/egfr-gs_egfr-eval/pr-per-pathway-nodes.png`` and
+open it locally.
+
+PCA-based parameter selection computes a precision and recall for a
+single reconstructed network selected using PCA from all reconstructed
+networks for an algorithm for given dataset.
+
+.. image:: ../_static/images/pr-pca-chosen-pathway-per-algorithm-nodes.png
+   :alt: Precision and recall computed for each pathway chosen by the PCA-selection method and visualized on a scatter plot
    :width: 600
    :align: center
 
-.. raw:: html
+Ensemble network-based parameter selection
+------------------------------------------
 
-   <div style="margin:20px 0;"></div>
+#. Open the Ensemble-based parameter selection evalaution
+
+In your file explorer, go to
+``output/intermediate/egfr-gs_egfr-eval/pr-curve-ensemble-nodes-per-algorithm-nodes.png``
+and open it locally.
 
 Ensemble-based parameter selection generates precision-recall curves by
 thresholding on the frequency of edges across an ensemble of
@@ -1662,12 +1725,25 @@ reconstructed networks for an algorithm for given dataset.
 
    <div style="margin:20px 0;"></div>
 
-PCA-based parameter selection computes a precision and recall for a
-single reconstructed network selected using PCA from all reconstructed
-networks for an algorithm for given dataset.
+All Plausible Parameters (No parameter selection)
+-------------------------------------------------
 
-.. image:: ../_static/images/pr-pca-chosen-pathway-per-algorithm-nodes.png
-   :alt: Precision and recall computed for each pathway chosen by the PCA-selection method and visualized on a scatter plot
+#. Open the all plausible parameters (no parameter selection) evalaution
+
+In your file explorer, go to
+``output/intermediate/egfr-gs_egfr-eval/pr-per-pathway-nodes.png`` and
+open it locally.
+
+For each pathway, evaluation can be run independently of any parameter
+selection method to directly inspect precision and recall for each
+reconstructed network from a given dataset.
+
+.. raw:: html
+
+   <div style="margin:20px 0;"></div>
+
+.. image:: ../_static/images/pr-per-pathway-nodes.png
+   :alt: Precision and recall computed for each pathway and visualized on a scatter plot
    :width: 600
    :align: center
 
