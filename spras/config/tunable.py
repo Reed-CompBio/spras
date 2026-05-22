@@ -39,10 +39,10 @@ class Tunable[T](ABC):
     def to_list(self) -> List[T]:
         pass
 
-class TunableSet[S](RootModel[List[S]], Tunable[S]):
+class TunableList[S](RootModel[List[S]], Tunable[S]):
     """
     A thin wrapper class to allow generic sets to 'pretend' to be tunable.
-    Note that `Tunableset#tune` is the identity function.
+    Note that `TunableList#tune` is the identity function.
     """
 
     def tune(self):
@@ -174,8 +174,8 @@ class IntegerAdapter[S : (BaseTunable[float], BaseTunable[int])](RootModel[S], T
         return list({int(elem) for elem in self.root.to_list()})
 
 
-FloatTunable = Annotated[Union[Range, LinSpace, ARange, LogSpace, TunableSet[float]], Field(union_mode="left_to_right")]
+FloatTunable = Annotated[Union[Range, LinSpace, ARange, LogSpace, TunableList[float]], Field(union_mode="left_to_right")]
 
 # We have to annoyingly spread IntegerAdapter across every type we care about, to avoid multiple inheritance issues
 # TODO: maybe a better way to do this?
-IntegerTunable = Annotated[Union[Range, IntegerAdapter[LinSpace], IntegerAdapter[ARange], IntegerAdapter[LogSpace], TunableSet[int]], Field(union_mode="left_to_right")]
+IntegerTunable = Annotated[Union[Range, IntegerAdapter[LinSpace], IntegerAdapter[ARange], IntegerAdapter[LogSpace], TunableList[int]], Field(union_mode="left_to_right")]

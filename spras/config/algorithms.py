@@ -11,12 +11,13 @@ from pydantic import (
     BeforeValidator,
     ConfigDict,
     Field,
+    PlainSerializer,
     ValidationError,
     create_model,
 )
 
 from spras.config.runs import RunSettings
-from spras.config.tunable import FloatTunable, IntegerTunable, TunableSet
+from spras.config.tunable import FloatTunable, IntegerTunable, TunableList
 from spras.runner import algorithms
 
 # This contains the dynamically generated algorithm schema for use in `schema.py`
@@ -27,12 +28,12 @@ def determine_inner_type(outer_type: type):
     if get_args(outer_type) != () and get_origin(outer_type) == Union:
         # We map arbitrary unions Union[A, ...] -> Union[determine_inner_type(A), ..., TunableSet[Union[A, ...]]],
         # where we include the extra entry at the end to allow for heterogeneous lists.
-        return Union[*(determine_inner_type(arg) for arg in get_args(outer_type)), TunableSet[outer_type]]
+        return Union[*(determine_inner_type(arg) for arg in get_args(outer_type)), TunableList[outer_type]]
 
     if outer_type == float: return FloatTunable
     if outer_type == int: return IntegerTunable
     # We fall back to base `TunableSet` otherwise.
-    return TunableSet[outer_type]
+    return TunableList[outer_type]
 
 # This is the most 'hacky' part of this code, but, thanks to pydantic, we avoid reflection
 # and preserve rich type information at runtime.
@@ -74,19 +75,27 @@ def construct_algorithm_model(name: str, model: type[BaseModel]) -> type[BaseMod
         field_type = determine_inner_type(field.annotation)
 
         mapped_list_field[field_name] = (
-            Union[
-                # We first try to validate the type directly
-                field_type,
-                # If that fails, we coerce it into a list beforehand then validate it again.
-                Annotated[
+            Annotated[
+                Union[
+                    # We first try to validate the type directly
                     field_type,
-                    BeforeValidator(
-                        lambda value: [value],
-                        # and we ensure that in a JSON schema, this is properly marked
-                        # as a singleton value.
-                        json_schema_input_type=field.annotation
-                    ),
-                ]
+                    # If that fails, we coerce it into a list beforehand then validate it again.
+                    Annotated[
+                        field_type,
+                        BeforeValidator(
+                            lambda value: [value],
+                            # and we ensure that in a JSON schema, this is properly marked
+                            # as a singleton value.
+                            json_schema_input_type=field.annotation
+                        ),
+                    ]
+                ],
+                # For cleaner serialization, we also serialize singleton types
+                # as single arrays rather than full arrays. This is especially useful
+                # for parameter tuning output.
+                PlainSerializer(
+                    lambda value: value.to_list()[0] if len(value.to_list()) == 1 else value
+                )
             ],
             new_field
         )
