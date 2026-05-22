@@ -97,13 +97,6 @@ configuration (the first build takes a few minutes) and opens a VS Code
 environment in your browser with the SPRAS dependencies already
 installed. Once the build finishes, you are ready to run SPRAS.
 
-.. note::
-
-   This tutorial's Codespace is configured with 4 CPUs. Some SPRAS
-   commands in this tutorial are set to ``--cores 8``; lower this to
-   ``--cores 4`` to match the available CPUs. However, if you leave it
-   at 8, SPRAS will still run and uses only the 4 CPUs it has.
-
 ################
  SPRAS Overview
 ################

@@ -25,6 +25,10 @@ You will learn how to:
 Visit the `SPRAS GitHub repository
 <https://github.com/Reed-CompBio/spras>`__ and clone it locally
 
+.. note::
+
+   If you are using the dev container, you can skip this step
+
 0.2 Set up the SPRAS environment
 ================================
 
@@ -66,6 +70,10 @@ successfully from the command line:
 Before running SPRAS, make sure Docker Desktop is running.
 
 Launch Docker Desktop and wait until it says "Docker is running".
+
+.. note::
+
+   If you are using the dev container, you can skip this step
 
 .. note::
 
