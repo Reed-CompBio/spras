@@ -19,22 +19,37 @@ for getting parameter grids for any algorithms for a given dataset.
 Grid Search
 ===========
 
-A grid search systematically checks different combinations of parameter
-values to see how each affects network reconstruction results.
+A grid search systematically runs different combinations of parameter
+values on a dataset to see how each affects network reconstruction
+results.
 
 In SPRAS, users can define parameter grids for each algorithm directly
 in the configuration file. When executed, SPRAS automatically runs each
 algorithm across all parameter combinations and collects the resulting
 subnetworks.
 
-# TODO maybe add in information about how parameter tuning is to be done
-now # add in more details about two stage parameter tuning
+SPRAS will also include automatically narrowing down a parameter grid
+for each algorithm on each dataset using a two-stage grid search.
+Instead of tuning to a gold standard or a single metric, the search uses
+graph topological heuristics (rules based on statistics like node count
+and edge count) to discard subnetworks that are biologically
+implausible. In the first stage, SPRAS runs each algorithm over a coarse
+grid: a small set of parameter values spread across a wide range with
+large gaps between them. Parameter combinations whose output subnetworks
+pass the heuristics are kept, and the rest are discarded. Because the
+underlying data differ from dataset to dataset, the set of passing
+combinations also differs.
 
-SPRAS will also support parameter refinement using graph topological
-heuristics. These topological metrics help identify parameter regions
-that produce biologically plausible outputs networks. Based on these
-heuristics, SPRAS will generate new configuration files with refined
-parameter grids for each algorithm per dataset.
+In the second stage, SPRAS refines the surviving combinations into a
+finer grid. For each passing combination, it varies one parameter at a
+time to sample values near the ones that worked. For example, if ``b =
+5``, ``d = 10``, ``w = 2`` passed, SPRAS also tries neighbors such as
+``w = 1`` and ``w = 3`` or ``d = 5`` and ``d = 15``. A neighbor is
+evaluated as long as at least one of its adjacent coarse-grid values
+passed, so the search can still explore just past the edge of the
+passing region. The same heuristics filter these neighbors, and the
+combinations that survive both stages form the final fine-tuned grid for
+that algorithm and dataset.
 
 Users can further refine these grids by rerunning the updated
 configuration and adjusting the parameter ranges around the newly
@@ -80,10 +95,3 @@ user to set which SPRAS supported container framework to use:
        framework: docker
 
 The frameworks include Docker, Apptainer/Singularity, or dsub
-
-***********************
- Benchmarking Datasets
-***********************
-
-# add this part in # Should link to the benchmarking repo # We are
-working on the vision of the live benchmarking website
