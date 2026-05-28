@@ -53,7 +53,8 @@ replicate measures the abundance of peptides at different time points
    changes in their phosphorylation abundances can reveal which parts of
    a pathway are active or affected.
 
-Example of one peptide's measurements in one of the biological replicates:
+Example of one peptide's measurements in one of the biological
+replicates:
 
 .. list-table::
    :header-rows: 1
