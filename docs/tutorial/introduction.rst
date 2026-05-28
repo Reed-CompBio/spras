@@ -99,15 +99,9 @@ First, create the environment:
 .. code:: bash
 
    conda env create -f environment.yml
+   conda init
 
-If you immediately run ``conda activate spras``, you may see the
-following error:
-
-.. code:: text
-
-   CondaError: Run 'conda init' before 'conda activate'
-
-To resolve this, open a new terminal and then run:
+Open a new terminal and then run:
 
 .. code:: bash
 
