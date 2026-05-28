@@ -637,7 +637,7 @@ configuration.
 Similar automated steps from the previous tutorial runs behind the
 scenes for ``intermediate.yaml``. However, this configuration now runs
 multiple algorithms with different parameter combinations, which takes
-longer to complete. By increasing the number of cores to 8, it allows
+longer to complete. By increasing the number of cores to 4, it allows
 Snakemake to parallelize the work locally, speeding up execution when
 possible. (See :doc:`Using SPRAS <../usage>` for more information on
 SPRAS's parallelization.)
@@ -912,7 +912,7 @@ Jaccard similarity, and ensembling.
 =============================================================
 
 To enable the ML analysis, update the analysis section in your
-configuration file by setting ml to true. Your analysis section in the
+configuration file by setting ML to true. Your analysis section in the
 configuration file should look like this:
 
 .. code:: yaml
@@ -951,7 +951,7 @@ any requested post-analysis steps. It reuses cached results; here the
 ``pathway.txt`` files generated from the previously executed algorithms
 on the egfr dataset are reused.
 
-2. Running the ml analysis
+2. Running the ML analysis
 
 SPRAS aggregates all the reconstructed subnetworks produced across the
 specified algorithms for a given dataset. SPRAS then performs machine
@@ -1134,16 +1134,16 @@ settings.
 Hierarchical agglomerative clustering
 -------------------------------------
 
-#. Open the HAC image(s)
+#. Open the hierarchical agglomerative clustering image(s)
 
 In your file explorer, go to
 ``output/intermediate/egfr-ml/hac-horizontal.png`` and/or
 ``output/intermediate/egfr-ml/hac-vertical.png`` and open it locally.
 
-SPRAS includes hierarchical agglomerative clustering (HAC) to group
-similar pathways outputs based on shared edges. This helps identify
-clusters of algorithms that produce comparable subnetworks and
-highlights distinct reconstruction behaviors.
+SPRAS includes hierarchical agglomerative clustering to group similar
+pathways outputs based on shared edges. This helps identify clusters of
+algorithms that produce comparable subnetworks and highlights distinct
+reconstruction behaviors.
 
 In the plots below, each branch represents a cluster of related
 pathways, and shorter distances between branches indicate greater
@@ -1341,14 +1341,14 @@ any requested post-analysis steps. It reuses cached results; here the
 ``pathway.txt`` files generated from the previously executed algorithms
 on the egfr dataset are reused.
 
-2. Running the ml analysis
+2. Running the ML analysis
 
 SPRAS aggregates all the reconstructed subnetworks produced across the
 specified algorithms for a given dataset. SPRAS then performs machine
 learning analyses on each these groups and saves the results in the
 ``<dataset>-ml/`` (``egfr-ml/``) folder. It is also going to be running
-the ml per algorithm for a given dataset. This groups the ml post
-analysis by algorithm per dataset and produces algorithm specific ml
+the ML per algorithm for a given dataset. This groups the ML post
+analysis by algorithm per dataset and produces algorithm specific ML
 outputs.
 
 3. Running the summary analysis

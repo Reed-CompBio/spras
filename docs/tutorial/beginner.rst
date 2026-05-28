@@ -15,74 +15,6 @@ You will learn how to:
    dataset
 -  Enable post-analysis steps to generate post analysis information
 
-****************************************************************************
- Step 0: Clone the SPRAS repository, set up the environment, and run Docker
-****************************************************************************
-
-0.1 Clone the SPRAS repository
-==============================
-
-Visit the `SPRAS GitHub repository
-<https://github.com/Reed-CompBio/spras>`__ and clone it locally
-
-.. note::
-
-   If you are using the dev container, you can skip this step
-
-0.2 Set up the SPRAS environment
-================================
-
-From the root directory of the SPRAS repository, create and activate the
-Conda environment and install the SPRAS python package:
-
-.. code:: bash
-
-   conda env create -f environment.yml
-   conda activate spras
-   python -m pip install .
-
-.. note::
-
-   The first command performs a one-time installation of the SPRAS
-   dependencies by creating a Conda environment (an isolated space that
-   keeps all required packages and versions separate from your system).
-
-   The second command activates the newly created environment so you can
-   use these dependencies when running SPRAS; this step must be done
-   each time you open a new terminal session.
-
-   The last command is a one-time installation of the SPRAS package into
-   the environment.
-
-0.3 Test the installation
-=========================
-
-Run the following command to confirm that SPRAS has been set up
-successfully from the command line:
-
-.. code:: bash
-
-   python -c "import spras; print('SPRAS import successful')"
-
-0.4 Start Docker
-================
-
-Before running SPRAS, make sure Docker Desktop is running.
-
-Launch Docker Desktop and wait until it says "Docker is running".
-
-.. note::
-
-   If you are using the dev container, you can skip this step
-
-.. note::
-
-   SPRAS itself does not run inside a Docker container. However, Docker
-   is required because SPRAS uses it to execute individual pathway
-   reconstruction algorithms and certain post-analysis steps within
-   isolated containers. These containers include all the necessary
-   dependencies to run each algorithm or post analysis.
-
 *****************************
  Step 1: Configuration files
 *****************************
@@ -100,15 +32,6 @@ seralizaiton.
 
 SPRAS uses Snakemake to read the YAML configuration file and execute a
 SPRAS workflow accordingly.
-
-..
-   Snakemake considers a task from the configuration file complete once the expected output files are present in the output directory.
-
-..
-   As a result, rerunning the same configuration file may do nothing if those files already exist.
-
-..
-   To continue or rerun SPRAS with the same configuration file, delete the output directory (or its contents) or modify the configuration file so Snakemake regenerates new results.
 
 1.1 Save config for this tutorial
 =================================
@@ -140,6 +63,16 @@ After adding this file, your directory structure will look like this
    When downloading the beginner config file, place it in your working
    ``spras`` directory under ``spras/config``, not in the
    ``spras/spras/config`` directory.
+
+.. note::
+
+   If working in the dev container, you can upload files from your local
+   machine by right-clicking on a folder.
+
+   .. image:: ../_static/images/upload-file-dev-container.png
+      :alt: Right-click menu showing upload option
+      :scale: 40
+      :align: center
 
 config/
 -------
