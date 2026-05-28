@@ -21,7 +21,7 @@ You will learn how to:
  Step 1: Transforming high throughput experimental data into SPRAS compatible input data
 *****************************************************************************************
 
-1.1 Example of high throughput omic data
+1.1 Example of high-throughput omic data
 ========================================
 
 High-throughput omics technologies measure thousands of biological
@@ -53,7 +53,7 @@ replicate measures the abundance of peptides at different time points
    changes in their phosphorylation abundances can reveal which parts of
    a pathway are active or affected.
 
-Example of one of the biological replicate A with one peptide:
+Example of one peptide's measurements in one of the biological replicates:
 
 .. list-table::
    :header-rows: 1
