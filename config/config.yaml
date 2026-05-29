@@ -146,6 +146,8 @@ algorithms:
     runs:
       run1:
         n: 1
+  - name: "local-neighborhood"
+    include: true
 
 # Here we specify which pathways to run and other file location information.
 # DataLoader.py can currently only load a single dataset
