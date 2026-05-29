@@ -36,7 +36,7 @@ containers:
     base_url: docker.io
     # The owner or project of the registry
     # For example, "reedcompbio" if the image is available as docker.io/reedcompbio/allpairs
-    owner: reedcompbio
+    owner: akniyetnurbol
 
   # Enabling profiling adds a file called 'usage-profile.tsv' to the output directory of each algorithm.
   # The contents of this file describe the CPU utilization and peak memory consumption of the algorithm
