@@ -4,6 +4,7 @@ from typing import Optional
 from pydantic import BaseModel, ConfigDict
 
 from spras.config.container_schema import ProcessedContainerSettings
+from spras.config.runs import RunSettings
 from spras.containers import prepare_volume, run_container_and_log
 from spras.dataset import Dataset
 from spras.interactome import (
@@ -52,8 +53,9 @@ class ST_RWR(PRM[ST_RWRParams]):
         edges.to_csv(filename_map['network'],sep='|',index=False,columns=['Interactor1','Interactor2'],header=False)
 
     @staticmethod
-    def run(inputs, output_file, args, container_settings=None):
+    def run(inputs, output_file, args, container_settings=None, run_settings=None):
         if not container_settings: container_settings = ProcessedContainerSettings()
+        if not run_settings: run_settings = RunSettings()
         ST_RWR.validate_required_run_args(inputs)
 
         with Path(inputs["network"]).open() as network_f:
@@ -104,7 +106,8 @@ class ST_RWR(PRM[ST_RWRParams]):
             volumes,
             work_dir,
             out_dir,
-            container_settings)
+            container_settings,
+            run_settings.timeout)
 
         # Rename the primary output file to match the desired output filename
         output_edges = Path(out_dir, 'output.txt')

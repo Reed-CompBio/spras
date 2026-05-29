@@ -5,6 +5,7 @@ from typing import Optional
 from pydantic import BaseModel, ConfigDict
 
 from spras.config.container_schema import ProcessedContainerSettings
+from spras.config.runs import RunSettings
 from spras.containers import prepare_volume, run_container_and_log
 from spras.interactome import (
     add_directionality_constant,
@@ -136,10 +137,9 @@ class MEO(PRM[MEOParams]):
         edges.to_csv(filename_map['edges'], sep='\t', index=False,
                      columns=['Interactor1', 'EdgeType', 'Interactor2', 'Weight'], header=False)
 
-    # TODO add parameter validation
     # TODO document required arguments
     @staticmethod
-    def run(inputs, output_file=None, args=None, container_settings=None):
+    def run(inputs, output_file, args=None, container_settings=None, run_settings=None):
         """
         Run Maximum Edge Orientation in the Docker image with the provided parameters.
         The properties file is generated from the provided arguments.
@@ -148,8 +148,9 @@ class MEO(PRM[MEOParams]):
         Only the edge output file is retained.
         All other output files are deleted.
         """
-        if not container_settings: container_settings = ProcessedContainerSettings()
         if not args: args = MEOParams()
+        if not container_settings: container_settings = ProcessedContainerSettings()
+        if not run_settings: run_settings = RunSettings()
         MEO.validate_required_run_args(inputs)
 
         work_dir = '/spras'
@@ -196,7 +197,8 @@ class MEO(PRM[MEOParams]):
                              volumes,
                              work_dir,
                              out_dir,
-                             container_settings)
+                             container_settings,
+                             run_settings.timeout)
 
         properties_file_local.unlink(missing_ok=True)
 

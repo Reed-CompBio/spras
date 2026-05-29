@@ -24,6 +24,7 @@ import yaml
 
 from spras.config.container_schema import ProcessedContainerSettings
 from spras.config.revision import attach_spras_revision, spras_revision
+from spras.config.runs import RunSettings
 from spras.config.schema import DatasetSchema, RawConfig
 from spras.util import LoosePathLike, NpHashEncoder, hash_params_sha1_base32
 
@@ -61,6 +62,8 @@ class Config:
         self.hash_length = parsed_raw_config.hash_length
         # Container settings used by PRMs.
         self.container_settings = ProcessedContainerSettings.from_container_settings(parsed_raw_config.containers, self.hash_length)
+        # Dictionary of parameter hashes to their respective run settings
+        self.algorithm_param_run_settings: dict[str, RunSettings] = dict()
         # A nested dict mapping algorithm names to dicts that map parameter hashes to parameter combinations.
         # Only includes algorithms that are set to be run with 'include: true'.
         self.algorithm_params: dict[str, dict[str, Any]] = dict()
@@ -182,7 +185,7 @@ class Config:
                 # We create the product of all param combinations for each run
                 param_name_list = []
                 # We convert our run parameters to a dictionary, allowing us to iterate over it
-                run_subscriptable = vars(runs[run_name])
+                run_subscriptable = vars(runs[run_name].params)
                 for param in run_subscriptable:
                     param_name_list.append(param)
                     # this is guaranteed to be list[Any] by algorithms.py
@@ -217,6 +220,11 @@ class Config:
                     run_dict["_spras_run_name"] = run_name
 
                     self.algorithm_params[alg.name][params_hash] = run_dict
+
+                    # We finalize by handling any associated information to each parameter hash.
+                    self.algorithm_param_run_settings[params_hash] = RunSettings(
+                        timeout=runs[run_name].timeout or alg.timeout
+                    )
 
     def process_analysis(self, raw_config: RawConfig):
         if not raw_config.analysis:
