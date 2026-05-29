@@ -222,7 +222,7 @@ def run_container(
     if normalized_framework == 'docker':
         return run_container_docker(container, command, volumes, working_dir, environment, timeout, network_disabled)
     elif normalized_framework == 'singularity' or normalized_framework == "apptainer":
-        return run_container_singularity(container, command, volumes, working_dir, out_dir, container_settings, environment)
+        return run_container_singularity(container, command, volumes, working_dir, out_dir, container_settings, environment, timeout)
     elif normalized_framework == 'dsub':
         return run_container_dsub(container, command, volumes, working_dir, environment)
     else:

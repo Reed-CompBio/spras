@@ -58,7 +58,7 @@ def artifact_info_to_str(artifact_info: ArtifactInfo) -> str:
 def artifact_info_from_file(file: LoosePathLike) -> ArtifactInfo:
     """Converts a file into ArtifactInfo."""
     with open(file, 'r') as f:
-        return ArtifactInfoAdapter.validate_json(json.load(f))
+        return ArtifactInfoAdapter.validate_python(json.load(f))
 
 def mark_error(file: LoosePathLike, artifact_error: ArtifactErrorOptions):
     """Marks an artifact information file as an error with associated details."""
@@ -69,8 +69,15 @@ def mark_success(file: LoosePathLike):
     Path(file).write_text(artifact_info_to_str(ArtifactSuccess()))
 
 def is_error(file: LoosePathLike):
-    """Checks if a file was produced by mark_error."""
+    """Checks if a file was produced by `mark_error`. This is close to, but not the negation of, `is_success`. """
     try:
         return artifact_info_from_file(file).status == "error"
+    except ValueError:
+        return False
+
+def is_success(file: LoosePathLike):
+    """Checks if a file was produced by mark_success. This is close to, but not the negation of, `is_error`. """
+    try:
+        return artifact_info_from_file(file).status == "success"
     except ValueError:
         return False

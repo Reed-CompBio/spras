@@ -320,7 +320,7 @@ rule parse_output:
     output: standardized_file = SEP.join([out_dir, '{dataset}-{algorithm}-{params}', 'pathway.txt'])
     run:
         if is_error(input.artifact_info):
-            mark_error(output.standardized_file)
+            mark_error(output.standardized_file, artifact_info_from_file(input.artifact_info).error)
             return
 
         params = reconstruction_params(wildcards.algorithm, wildcards.params).copy()
