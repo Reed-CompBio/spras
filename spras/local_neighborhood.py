@@ -74,7 +74,7 @@ class LocalNeighborhood(PRM[Empty]):
         if not container_settings: container_settings = ProcessedContainerSettings()
         AllPairs.validate_required_run_args(inputs)
 
-        work_dir = '/apsp'
+        work_dir = '/docker-wrappers'
 
         # Each volume is a tuple (src, dest)
         volumes = list()
@@ -92,7 +92,7 @@ class LocalNeighborhood(PRM[Empty]):
         volumes.append(bind_path)
 
         command = ['python',
-                   '/AllPairs/all-pairs-shortest-paths.py',
+                   '/LocalNeighborhood/local_neighborhood_alg.py',
                    '--network', network_file,
                    '--nodes', node_file,
                    '--output', mapped_out_file]
