@@ -4,7 +4,7 @@ containers:
   unpack_singularity: false
   registry:
     base_url: docker.io
-    owner: reedcompbio
+    owner: akniyetnurbol
 
 algorithms:
   - name: "pathlinker"
