@@ -56,7 +56,7 @@ algorithms:
         slice_threshold: 0.3
         module_threshold: 0.05
         
-  - name: "local-neighborhood"
+  - name: "local_neighborhood"
     include: true
     
 datasets:
