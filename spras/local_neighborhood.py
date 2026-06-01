@@ -74,15 +74,15 @@ class LocalNeighborhood(PRM[Empty]):
         if not container_settings: container_settings = ProcessedContainerSettings()
         AllPairs.validate_required_run_args(inputs)
 
-        work_dir = '/docker-wrappers'
+        work_dir = '/local_neighborhood'
 
         # Each volume is a tuple (src, dest)
         volumes = list()
 
-        bind_path, node_file = prepare_volume(inputs["nodetypes"], work_dir, container_settings)
+        bind_path, node_file = prepare_volume(inputs["networks"], work_dir, container_settings)
         volumes.append(bind_path)
 
-        bind_path, network_file = prepare_volume(inputs["network"], work_dir, container_settings)
+        bind_path, network_file = prepare_volume(inputs["nodes"], work_dir, container_settings)
         volumes.append(bind_path)
 
         # Create the parent directories for the output file if needed
@@ -96,19 +96,20 @@ class LocalNeighborhood(PRM[Empty]):
                    '--network', network_file,
                    '--nodes', node_file,
                    '--output', mapped_out_file]
-        if Path(inputs["directed_flag"]).read_text().strip() == "true":
-            command.append("--directed")
+                   
+        #if Path(inputs["directed_flag"]).read_text().strip() == "true":
+            #command.append("--directed")
 
-        container_suffix = "allpairs:v4"
+        container_suffix = "local-neighborhood"
         run_container_and_log(
-            'All Pairs Shortest Paths',
+            'Local Neighborhood Shortest Paths',
             container_suffix,
             command,
             volumes,
             work_dir,
             out_dir,
             container_settings)
-        
+            
     @staticmethod
     def parse_output(raw_pathway_file, standardized_pathway_file, params):
         """
