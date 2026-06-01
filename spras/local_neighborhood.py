@@ -59,6 +59,7 @@ class LocalNeighborhood(PRM[Empty]):
             index=False,
             header=False,
             columns=['Interactor1','Interactor2'],
+        )
 
         # Since APSP doesn't use the directed/undirected column because of a lack of support for mixed graphs (in NetworkX),
         # this function dynamically detects the usage of directed edges in user input
