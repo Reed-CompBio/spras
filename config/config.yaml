@@ -242,7 +242,7 @@ analysis:
     # to pick the 'best' parameter combination.
     kde: true
     # removes empty pathways from consideration in ml analysis (pca only)
-    remove_empty_pathways: false
+    remove_empty_pathways: true
   evaluation:
     # evaluation per dataset-goldstandard pair
     # evaluation will not run unless ml include is set to true
