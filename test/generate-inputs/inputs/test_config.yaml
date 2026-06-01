@@ -8,13 +8,13 @@ containers:
 
 algorithms:
   - name: "pathlinker"
-    include: true
+    include: false
     runs:
       run1:
         k: range(100,201,100)
 
   - name: "omicsintegrator1"
-    include: true
+    include: false
     runs:
       run1:
         b: [5, 6]
@@ -22,7 +22,7 @@ algorithms:
         d: 10
 
   - name: "omicsintegrator2"
-    include: true
+    include: false
     runs:
       run1:
         b: 4
@@ -32,7 +32,7 @@ algorithms:
         g: 3
 
   - name: "meo"
-    include: true
+    include: false
     runs:
       run1:
         max_path_length: 3
@@ -40,17 +40,17 @@ algorithms:
         rand_restarts: 10
 
   - name: "mincostflow"
-    include: true
+    include: false
     runs:
       run1:
         flow: 1 # The flow must be an int
         capacity: 1
 
   - name: "allpairs"
-    include: true
+    include: false
 
   - name: "domino"
-    include: true
+    include: false
     runs:
       run1:
         slice_threshold: 0.3
