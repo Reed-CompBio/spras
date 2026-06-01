@@ -45,7 +45,7 @@ class LocalNeighborhood(PRM[Empty]):
         input_df.loc[sources_targets["sources"] == True, "Node type"] = "source"
         input_df.loc[sources_targets["targets"] == True, "Node type"] = "target"
 
-        input_df.to_csv(filename_map["nodetypes"], sep="\t", index=False, columns=["#Node", "Node type"])
+        input_df.to_csv(filename_map["nodes"], sep="\t", index=False, columns=["#Node", "Node type"])
 
         # Create network file
         edges_df = data.get_interactome()
