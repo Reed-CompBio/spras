@@ -108,3 +108,20 @@ class LocalNeighborhood(PRM[Empty]):
             work_dir,
             out_dir,
             container_settings)
+        
+    @staticmethod
+    def parse_output(raw_pathway_file, standardized_pathway_file, params):
+        """
+        Convert a predicted pathway into the universal format
+        @param raw_pathway_file: pathway file produced by an algorithm's run function
+        @param standardized_pathway_file: the same pathway written in the universal format
+        """
+        df = raw_pathway_df(raw_pathway_file, sep='\t', header=None)
+        if not df.empty:
+            df = add_rank_column(df)
+            df = reinsert_direction_col_undirected(df)
+            df.columns = ['Node1', 'Node2', 'Rank', 'Direction']
+            df, has_duplicates = duplicate_edges(df)
+            if has_duplicates:
+                print(f"Duplicate edges were removed from {raw_pathway_file}")
+        df.to_csv(standardized_pathway_file, header=True, index=False, sep='\t')
