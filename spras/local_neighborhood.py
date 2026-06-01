@@ -53,21 +53,17 @@ class LocalNeighborhood(PRM[Empty]):
         if edges_df is None:
             raise ValueError("Dataset does not have an interactome.")
 
+        edges_df.to_csv(
+            filename_map['netowrk'],
+            sep'|',
+            index=False,
+            header=False,
+            columns=['Interactor1','Interactor2'],
+
         # Since APSP doesn't use the directed/undirected column because of a lack of support for mixed graphs (in NetworkX),
         # this function dynamically detects the usage of directed edges in user input
         # and, if the graph has a directed edge, it switches the entire graph to use directed edges, with a dummy file used to
         # signal to `run` that the graph is directed.
-        if has_direction(edges_df):
-            edges_df = convert_undirected_to_directed(edges_df)
-            # we write to a 'directed_flag.txt' file to say that this is directed
-            Path(filename_map['directed_flag']).write_text("true")
-        else:
-            Path(filename_map['directed_flag']).write_text("false")
-
-        # This is pretty memory intensive. We might want to keep the interactome centralized.
-        edges_df.to_csv(filename_map["network"], sep="\t", index=False,
-                                      columns=["Interactor1", "Interactor2", "Weight"],
-                                      header=["#Interactor1", "Interactor2", "Weight"])
                                       
     @staticmethod
     def run(inputs, output_file, args=None, container_settings=None):
