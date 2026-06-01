@@ -146,7 +146,7 @@ algorithms:
     runs:
       run1:
         n: 1
-  - name: "local-neighborhood"
+  - name: "local_neighborhood"
     include: true
 
 # Here we specify which pathways to run and other file location information.
