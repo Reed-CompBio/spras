@@ -54,6 +54,8 @@ class LocalNeighborhood(PRM[Empty]):
         #input_df.to_csv(filename_map["nodes"], sep="\t", index=False, columns=["#Node", "Node type"])
 
         # Create network file
+        selected_nodes = node_attrs[mask][[Dataset.NODE_ID]]
+        selected_nodes.to_csv(filename_map['nodes'], sep='\t', index=False, header=False)
         
         edges_df = data.get_interactome()
         if edges_df is None:
