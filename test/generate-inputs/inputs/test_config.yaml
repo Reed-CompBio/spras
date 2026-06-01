@@ -55,7 +55,10 @@ algorithms:
       run1:
         slice_threshold: 0.3
         module_threshold: 0.05
-
+        
+  - name: "local-neighborhood"
+    include: true
+    
 datasets:
   - # Labels can only contain letters, numbers, or underscores
     label: test_data
