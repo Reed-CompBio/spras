@@ -54,7 +54,7 @@ class LocalNeighborhood(PRM[Empty]):
             raise ValueError("Dataset does not have an interactome.")
 
         edges_df.to_csv(
-            filename_map['netowork'],
+            filename_map['network'],
             sep='|',
             index=False,
             header=False,
