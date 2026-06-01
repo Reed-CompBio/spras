@@ -28,7 +28,7 @@ class LocalNeighborhood(PRM[Empty]):
         - network: network file containing edges and their weights
         - directed_flag: contains `true` if `network` is fully directed.
         """
-        AllPairs.validate_required_inputs(filename_map)
+        LocalNeighborhood.validate_required_inputs(filename_map)
 
         # Get sources and targets for node input file
         # Borrowed code from pathlinker.py
