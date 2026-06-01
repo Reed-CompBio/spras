@@ -55,7 +55,7 @@ class LocalNeighborhood(PRM[Empty]):
 
         edges_df.to_csv(
             filename_map['netowrk'],
-            sep'|',
+            sep='|',
             index=False,
             header=False,
             columns=['Interactor1','Interactor2'],
