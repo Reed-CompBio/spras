@@ -76,7 +76,7 @@ class LocalNeighborhood(PRM[Empty]):
         # Each volume is a tuple (src, dest)
         volumes = list()
 
-        bind_path, node_file = prepare_volume(inputs["networks"], work_dir, container_settings)
+        bind_path, node_file = prepare_volume(inputs["network"], work_dir, container_settings)
         volumes.append(bind_path)
 
         bind_path, network_file = prepare_volume(inputs["nodes"], work_dir, container_settings)
