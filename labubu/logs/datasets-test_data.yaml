@@ -1,0 +1,9 @@
+data_dir: test/generate-inputs/inputs
+edge_files:
+- network.txt
+label: test_data
+node_files:
+- node-prizes.txt
+- sources.txt
+- targets.txt
+other_files: []

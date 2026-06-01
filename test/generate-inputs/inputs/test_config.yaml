@@ -72,4 +72,4 @@ datasets:
 
 reconstruction_settings:
   locations:
-    reconstruction_dir: "output"
+    reconstruction_dir: "labubu"

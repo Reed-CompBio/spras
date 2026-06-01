@@ -24,6 +24,7 @@ algorithms = {
     'allpairs': {},
     'domino': {},
     'bowtiebuilder': {},
+    'local_neighborhood': {},
     'responsenet': {},
     'strwr': {
         'threshold': 3,
