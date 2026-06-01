@@ -30,26 +30,32 @@ class LocalNeighborhood(PRM[Empty]):
         """
         LocalNeighborhood.validate_required_inputs(filename_map)
 
-        # Get sources and targets for node input file
-        # Borrowed code from pathlinker.py
-        sources_targets = data.get_node_columns(["sources", "targets"])
+            # Get sources and targets for node input file
+            # Borrowed code from pathlinker.py
+        sources_targets = data.get_node_columns(["prize", "active", "sources", "targets"])
+            #both_series = sources_targets.sources & sources_targets.targets
 
-        both_series = sources_targets.sources & sources_targets.targets
-        for _index, row in sources_targets[both_series].iterrows():
-            warn_msg = row.NODEID + " has been labeled as both a source and a target."
+        if source_targets.empty:
+            raise ValueError("Empty (no prize, active sources or targets)")
+            
+        both_series = (sources_targets["sources"]==True) & (sources_targets["targets"]==True)
+        invalid_nodes = sources_targets.loc[both_series, "NODEID"]
+        
+        for node_id in invalid_nodes:
+            warn_msg = f"{node_id} has been labeled as both a source and a target."
             warnings.warn(warn_msg, stacklevel=2)
 
         # Create nodetype file
-        input_df = sources_targets[[Dataset.NODE_ID]].copy()
-        input_df.columns = ["#Node"]
-        input_df.loc[sources_targets["sources"] == True, "Node type"] = "source"
-        input_df.loc[sources_targets["targets"] == True, "Node type"] = "target"
+        #input_df = sources_targets[[Dataset.NODE_ID]].copy()
+        #input_df.columns = ["#Node"]
+        #input_df.loc[sources_targets["sources"] == True, "Node type"] = "source"
+        #input_df.loc[sources_targets["targets"] == True, "Node type"] = "target"
 
-        input_df.to_csv(filename_map["nodes"], sep="\t", index=False, columns=["#Node", "Node type"])
+        #input_df.to_csv(filename_map["nodes"], sep="\t", index=False, columns=["#Node", "Node type"])
 
         # Create network file
+        
         edges_df = data.get_interactome()
-
         if edges_df is None:
             raise ValueError("Dataset does not have an interactome.")
 
