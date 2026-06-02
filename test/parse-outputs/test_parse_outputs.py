@@ -25,6 +25,7 @@ algorithms = {
     'domino': {},
     'bowtiebuilder': {},
     'responsenet': {},
+    'localneighborhood': {},
     'strwr': {
         'threshold': 3,
         'dataset': Dataset(dataset_params=DatasetSchema(

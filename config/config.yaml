@@ -10,7 +10,7 @@ hash_length: 7
 #
 # By default, this is disabled, as it can make output file names confusing. Here, it's set to true since we use this
 # configuration file for testing.
-immutable_files: true
+immutable_files: false
 
 # Collection of container options
 containers:
@@ -70,13 +70,13 @@ containers:
 
 algorithms:
   - name: "pathlinker"
-    include: true
+    include: false
     runs:
       run1:
         k: range(100,201,100)
 
   - name: "omicsintegrator1"
-    include: true
+    include: false
     runs:
       run1:
         b: [5, 6]
@@ -85,7 +85,7 @@ algorithms:
         dummy_mode: "file" # Or "terminals", "all", "others"
 
   - name: "omicsintegrator2"
-    include: true
+    include: false
     runs:
       run1:
         b: 4
@@ -95,54 +95,54 @@ algorithms:
         g: 3
 
   - name: "meo"
-    include: true
+    include: false
     runs:
       run1:
         max_path_length: 3
-        local_search: true
+        local_search: false
         rand_restarts: 10
 
   - name: "mincostflow"
-    include: true
+    include: false
     runs:
       run1:
         flow: 1
         capacity: 1
 
   - name: "allpairs"
-    include: true
+    include: false
 
   - name: "domino"
-    include: true
+    include: false
     runs:
       run1:
         slice_threshold: 0.3
         module_threshold: 0.05
 
   - name: "strwr"
-    include: true
+    include: false
     runs:
       run1:
         alpha: [0.85]
         threshold: [100, 200]
 
   - name: "rwr"
-    include: true
+    include: false
     runs:
       run1:
         alpha: [0.85]
         threshold: [100, 200]
 
   - name: "bowtiebuilder"
-    include: true
+    include: false
 
   - name: "responsenet"
-    include: true
+    include: false
     runs:
       run1:
         gamma: [10]
   - name: "diamond"
-    include: true
+    include: false
     runs:
       run1:
         n: 1
@@ -216,21 +216,21 @@ reconstruction_settings:
 analysis:
   # Create one summary per pathway file and a single summary table for all pathways for each dataset
   summary:
-    include: true
+    include: false
   # Create Cytoscape session file with all pathway graphs for each dataset
   cytoscape:
-    include: true
+    include: false
   # Machine learning analysis (e.g. clustering) of the pathway output files for each dataset
   ml:
     # ml analysis per dataset
-    include: true
+    include: false
     # adds ml analysis per algorithm output
     # only runs for algorithms with multiple parameter combinations chosen
-    aggregate_per_algorithm: true
+    aggregate_per_algorithm: false
     # specify how many principal components to calculate
     components: 2
     # boolean to show the labels on the pca graph
-    labels: true
+    labels: false
     # 'ward', 'complete', 'average', 'single'
     # if linkage: ward, must use metric: euclidean
     linkage: 'ward'
@@ -240,13 +240,13 @@ analysis:
     # the coordinates of the KDE maximum (kde_peak) are also saved to the PCA coordinates output file.
     # KDE needs to be run in order to select a parameter combination with PCA because the maximum kernel density is used
     # to pick the 'best' parameter combination.
-    kde: true
+    kde: false
     # removes empty pathways from consideration in ml analysis (pca only)
     remove_empty_pathways: false
   evaluation:
     # evaluation per dataset-goldstandard pair
-    # evaluation will not run unless ml include is set to true
-    include: true
+    # evaluation will not run unless ml include is set to false
+    include: false
     # adds evaluation per algorithm per dataset-goldstandard pair
-    # evaluation per algorithm will not run unless ml include and ml aggregate_per_algorithm are set to true
-    aggregate_per_algorithm: true
+    # evaluation per algorithm will not run unless ml include and ml aggregate_per_algorithm are set to false
+    aggregate_per_algorithm: false

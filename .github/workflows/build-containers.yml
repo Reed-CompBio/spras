@@ -73,3 +73,8 @@ jobs:
       # of detected changes.
       always_build: true
       context: ./
+  build-and-remove-local-neighborhood:
+    uses: "./.github/workflows/build-and-remove-template.yml"
+    with:
+      path: docker-wrappers/LocalNeighborhood
+      container: sabahhoq/local_neighborhood

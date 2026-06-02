@@ -162,8 +162,10 @@ class LocalNeighborhood(spras.prm.PRM[Empty]): # type: ignore
         print(edges.columns)
         print(edges)
         print("test")
-
-
+    # Obtain the raw-pathway output (e.g. from the run function in your wrapper 
+    # by running the Snakemake workflow). btain the expected universal output from the 
+    # workflow, manually confirm it is correct, and save it 
+    # Add the new algorithm’s name to the algorithms dict 
         pass 
-    
+  
 print("it worked")

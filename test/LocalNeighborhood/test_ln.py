@@ -5,7 +5,7 @@ from pathlib import Path
 import pytest
 
 import spras.config.config as config
-from spras.local_neighborhood import LocalNeighborhood
+# from spras.local_neighborhood import LocalNeighborhood
 
 config.init_from_file("config/config.yaml")
 
@@ -20,7 +20,7 @@ from local_neighborhood_alg import local_neighborhood
 TEST_DIR = Path('test', 'LocalNeighborhood/')
 OUT_FILE = Path(TEST_DIR, 'output', 'ln-output.txt')
 
-from spras.local_neighborhood import LocalNeighborhhod
+from spras.local_neighborhood import LocalNeighborhood
 
 class TestLocalNeighborhood:
     """
@@ -56,24 +56,29 @@ class TestLocalNeighborhood:
     # Write tests for the Local Neighborhood run function here.
     # The tests above test the internal python code for local_neighborhood - can you
     # write the `missing_file` and `ln` tests above but for Docker using LocalNeighborhood,
-    def missing_file(self):
-        
-        pass
     # and at least one for Singularity?
     def test_ln_singularity(self):
-        out_path = OUT_FILE / 'sample-out.txt'
-        out_path.unlink(missing_okay=True)
-        LocalNeighborhood.run({"network": str(Path(TEST_DIR, 'input', 'ln-network.txt')),
-                               "nodes": str(Path(TEST_DIR, 'input', 'ln-nodes.txt')),})
-        output_file = str(out_path)
-        assert out_path.exists()
-        # local_neighborhood(network_file=Path(TEST_DIR, 'input', 'ln-network.txt'),
-        #                    nodes_file=Path(TEST_DIR, 'input', 'ln-nodes.txt'),
-        #                    output_file=OUT_FILE)
-        # assert OUT_FILE.exists(), 'Output file was not written'
-        # expected_file = Path(TEST_DIR, 'expected_output', 'ln-output.txt')
-        # assert cmp(OUT_FILE, expected_file, shallow=False)
+        OUT_FILE.unlink(missing_okay=True)
 
+        inputs = {
+            "network": str(Path(TEST_DIR, 'input', 'ln-network.txt')),
+            "nodes": str(Path(TEST_DIR, 'input', 'ln-nodes.txt'))
+        }
+        container_framework = {
+            "name": "ContainerFramework.singularity",
+            "image": "sabahhoq/local-neighborhood",
+            "tag": "v1"
+        }
+        LocalNeighborhood.run(
+            inputs, 
+            container_framework, 
+            str(OUT_FILE.parent)
+        )
+        assert OUT_FILE.exists(), 'Output file was not written by Singularity run'
+        
+        expected_file = Path(TEST_DIR, 'expected_output', 'ln-output.txt')
+        if expected_file.exists():
+            assert cmp(OUT_FILE, expected_file, shallow=False), 'Singularity output does not match expected output'
     
 
 
