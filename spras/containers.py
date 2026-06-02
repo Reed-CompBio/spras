@@ -10,7 +10,7 @@ import docker
 import docker.errors
 
 from spras.config.container_schema import ProcessedContainerSettings
-from spras.logging import indent
+from spras.spras_logging import indent
 from spras.profiling import create_apptainer_container_stats, create_peer_cgroup
 from spras.util import hash_filename
 

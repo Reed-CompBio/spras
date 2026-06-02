@@ -16,6 +16,7 @@ from spras.responsenet import ResponseNet
 from spras.rwr import RWR
 from spras.strwr import ST_RWR
 from spras.util import LoosePathLike
+from spras.local_neighborhood import LocalNeighborhood
 
 algorithms: dict[str, type[PRM]] = {
     "allpairs": AllPairs,
@@ -30,6 +31,7 @@ algorithms: dict[str, type[PRM]] = {
     "responsenet": ResponseNet,
     "rwr": RWR,
     "strwr": ST_RWR,
+    "localneighborhood": LocalNeighborhood,
 }
 
 def get_algorithm(algorithm: str) -> type[PRM]:
