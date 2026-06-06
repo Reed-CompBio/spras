@@ -37,10 +37,12 @@ dependencies = [
 
 [project.optional-dependencies]
 dev = [
-   # Only required for development
+    # Only required for development
     "pre-commit==4.2.0",
     "pytest==8.4.1",
     "pytest-split==0.10.0",
+    "sphinx==7.4.7",
+    "sphinx-rtd-theme==2.0.0",
 ]
 
 [project.urls]
@@ -81,3 +83,16 @@ include = ["spras*"]
 
 # packages tells setuptools what the exported package is called (ie allows import spras)
 packages = ["spras", "spras.analysis", "spras.config"]
+
+[tool.pixi.project]
+channels = ["conda-forge", "bioconda"]
+platforms = ["linux-64", "osx-arm64", "osx-64", "win-64"]
+
+[tool.pixi.dependencies]
+# for yamlfmt
+go = ">=1.24.4,<2"
+# to force local usage of the oldest supported python ver.
+python = "3.11.*"
+
+[tool.pixi.environments]
+default = {features = ["dev"], solve-group = "default"}
