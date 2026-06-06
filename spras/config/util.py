@@ -48,6 +48,33 @@ yaml.SafeDumper.add_multi_representer(
     yaml.representer.SafeRepresenter.represent_str,
 )
 
+# The single source of truth for all supported algorithms.
+# Keys are algorithm names; values are (module_path, class_name) tuples for importlib loading.
+# To register a new algorithm, add an entry here.
+ALGORITHM_REGISTRY: dict[str, tuple[str, str]] = {
+    "allpairs":        ("spras.allpairs", "AllPairs"),
+    "bowtiebuilder":   ("spras.btb", "BowTieBuilder"),
+    "diamond":         ("spras.diamond", "DIAMOnD"),
+    "domino":          ("spras.domino", "DOMINO"),
+    "meo":             ("spras.meo", "MEO"),
+    "mincostflow":     ("spras.mincostflow", "MinCostFlow"),
+    "omicsintegrator1": ("spras.omicsintegrator1", "OmicsIntegrator1"),
+    "omicsintegrator2": ("spras.omicsintegrator2", "OmicsIntegrator2"),
+    "pathlinker":      ("spras.pathlinker", "PathLinker"),
+    "responsenet":     ("spras.responsenet", "ResponseNet"),
+    "rwr":             ("spras.rwr", "RWR"),
+    "strwr":           ("spras.strwr", "ST_RWR"),
+}
+
+# Auto-generated enum from the registry keys. Inherits CaseInsensitiveEnum so
+# AlgorithmName("PathLinker") resolves to AlgorithmName.pathlinker.
+AlgorithmName = CaseInsensitiveEnum("AlgorithmName", {k: k for k in ALGORITHM_REGISTRY})
+
+def get_valid_algorithm_names() -> set[str]:
+    """Return the set of valid algorithm name strings (lowercase)."""
+    return {member.value for member in AlgorithmName}
+
+
 class Empty(BaseModel):
     """
     The empty base model. Used for specifying that an algorithm takes no parameters,

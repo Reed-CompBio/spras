@@ -25,6 +25,7 @@ import yaml
 from spras.config.container_schema import ProcessedContainerSettings
 from spras.config.revision import attach_spras_revision, spras_revision
 from spras.config.schema import DatasetSchema, RawConfig
+from spras.config.util import AlgorithmName, get_valid_algorithm_names
 from spras.util import LoosePathLike, NpHashEncoder, hash_params_sha1_base32
 
 config = None
@@ -61,6 +62,21 @@ class Config:
         self.hash_length = parsed_raw_config.hash_length
         # Container settings used by PRMs.
         self.container_settings = ProcessedContainerSettings.from_container_settings(parsed_raw_config.containers, self.hash_length)
+
+        # Validate that all keys in containers.images are recognized algorithm names
+        if self.container_settings.images:
+            valid_names = get_valid_algorithm_names()
+            for key in self.container_settings.images:
+                try:
+                    AlgorithmName(key)
+                except ValueError as err:
+                    raise ValueError(
+                        f"Unknown algorithm name '{key}' in configured containers.images. Is there a typo? "
+                        f"Valid algorithm names are: {sorted(valid_names)}"
+                    ) from err
+
+        # The list of algorithms to run in the workflow. Each is a dict with 'name' as an expected key.
+        self.algorithms = None
         # A nested dict mapping algorithm names to dicts that map parameter hashes to parameter combinations.
         # Only includes algorithms that are set to be run with 'include: true'.
         self.algorithm_params: dict[str, dict[str, Any]] = dict()

@@ -262,6 +262,16 @@ def collect_prepared_input(wildcards):
 
     return prepared_inputs
 
+# Look up a per-algorithm container image override from config for HTCondor transfer.
+# When a local .sif path is configured, it will be included in htcondor_transfer_input_files
+# so the HTCondor executor transfers it to the EP alongside the job.
+def get_algorithm_image(wildcards):
+    images = container_settings.images
+    override = images.get(wildcards.algorithm, "")
+    if override.endswith('.sif'):
+        return override
+    return None
+
 # Run the pathway reconstruction algorithm
 rule reconstruct:
     input: collect_prepared_input
@@ -271,6 +281,8 @@ rule reconstruct:
     # same name regardless of the inputs or parameters, and these aren't renamed until after the container command
     # terminates
     output: pathway_file = SEP.join([out_dir, '{dataset}-{algorithm}-{params}', 'raw-pathway.txt'])
+    resources:
+        htcondor_transfer_input_files=get_algorithm_image
     run:
         # Create a copy so that the updates are not written to the parameters logfile
         params = reconstruction_params(wildcards.algorithm, wildcards.params).copy()
