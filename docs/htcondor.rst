@@ -170,7 +170,7 @@ setup as the previous section, but with two additions.
 
    .. code:: bash
 
-      pip install git+https://github.com/htcondor/snakemake-executor-plugin-htcondor.git
+      pip install snakemake-executor-plugin-htcondor
 
 #. Instead of editing ``spras.sub`` to define the workflow, this
    scenario requires editing the SPRAS profile in
