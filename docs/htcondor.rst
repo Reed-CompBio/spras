@@ -41,6 +41,56 @@ first is to submit all SPRAS jobs to a single remote Execution Point
 (EP). The second is to use the Snakemake HTCondor executor to
 parallelize the workflow by submitting each job to its own EP.
 
+***********************************
+ Which Files Are Used in Each Mode
+***********************************
+
+The ``htcondor`` directory contains several files, but not all of them
+are used in both run modes. A common point of confusion is which files
+apply where -- for example, ``spras.sub`` is only used when submitting
+to a single EP and is ignored when running in parallel. The table below
+summarizes what each file is for and which mode uses it, so you know
+what to edit before submitting.
+
+.. list-table::
+   :header-rows: 1
+   :widths: 34 13 13 40
+
+   -  -  File
+      -  Single EP
+      -  Parallel
+      -  Purpose
+
+   -  -  ``htcondor/spras.sub``
+      -  ✓
+      -
+      -  HTCondor submit file that runs the entire workflow as a single
+         job on one EP.
+
+   -  -  ``htcondor/spras.sh``
+      -  ✓
+      -  ✓
+      -  Wrapper script that invokes Snakemake inside the container.
+         Used as the executable in both modes.
+
+   -  -  ``htcondor/spras_profile/config.yaml``
+      -
+      -  ✓
+      -  Snakemake HTCondor-executor profile defining resources and
+         submission settings for parallel runs.
+
+   -  -  ``htcondor/snakemake_long.py``
+      -
+      -  ✓
+      -  Launches Snakemake as a long-running managed job so the
+         workflow survives terminal disconnects.
+
+   -  -  ``run_htcondor.sh``
+      -
+      -  ✓
+      -  Convenience wrapper (in the repository root) around
+         ``snakemake_long.py``.
+
 **********************************************************
  Converting Docker Images to Apptainer/Singularity Images
 **********************************************************
@@ -97,8 +147,7 @@ Before submitting all SPRAS jobs to a single remote Execution Point
    the root of the repository.
 
 Once these steps are complete, you can submit the job from the root of
-the the SPRAS repository by running ``condor_submit
-htcondor/spras.sub``.
+the SPRAS repository by running ``condor_submit htcondor/spras.sub``.
 
 When the job completes, the ``output`` directory from the workflow
 should be returned as ``output``.
@@ -190,9 +239,9 @@ log files).
    flag. This can be passed to Snakemake via the ``snakemake_long.py``
    script by adding it to the script's argument list, e.g.:
 
-.. code:: bash
+   .. code:: bash
 
-   ./htcondor/snakemake_long.py --profile htcondor/spras_profile/ --verbose
+      ./htcondor/snakemake_long.py --profile htcondor/spras_profile/ --verbose
 
 If you use mamba instead of conda for environment management, you can
 specify this with the ``--env-manager`` flag:
