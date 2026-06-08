@@ -164,7 +164,7 @@ class Dataset:
     def get_node_columns(self, col_names: list[str]) -> pd.DataFrame:
         """
         @param scope: The name of the algorithm (or a more general 'scope' like SPRAS)
-            to fail on if get_node_columns fails.
+        to fail on if get_node_columns fails.
         @returns: A table containing the requested column names and node IDs
         for all nodes with at least 1 of the requested values being non-empty
         """
