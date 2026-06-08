@@ -117,6 +117,12 @@ After running this command, a new file called ``spras-v0.6.0.sif`` will
 exist in the directory where the command was run. Note that the Docker
 image does not use a "v" in the tag.
 
+.. tip::
+
+   If you're building an Apptainer image at CHTC, please follow this
+   guide for building images in an interactive job:
+   https://chtc.cs.wisc.edu/uw-research-computing/apptainer-htc.html
+
 ************************************
  Submitting All Jobs to a Single EP
 ************************************
