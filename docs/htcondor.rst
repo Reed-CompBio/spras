@@ -117,11 +117,128 @@ After running this command, a new file called ``spras-v0.6.0.sif`` will
 exist in the directory where the command was run. Note that the Docker
 image does not use a "v" in the tag.
 
-.. tip::
+.. warning::
 
-   If you're building an Apptainer image at CHTC, please follow this
-   guide for building images in an interactive job:
+   Do not run ``apptainer build`` (or otherwise pull/convert large
+   images) directly on an Access Point. APs are shared, login-style
+   nodes, and image builds are resource-intensive enough that doing so
+   is discouraged and may violate your pool's usage policies. Instead,
+   build images inside an interactive job on an Execution Point. If
+   you're working at CHTC, follow their guide for building Apptainer
+   images in an interactive job:
    https://chtc.cs.wisc.edu/uw-research-computing/apptainer-htc.html
+
+   The ``apptainer build`` commands shown above and in the next section
+   are meant to be run from within such an interactive job (or on your
+   local machine), not on the AP itself.
+
+*********************************************
+ Pre-Building Per-Algorithm Container Images
+*********************************************
+
+In addition to the SPRAS runtime image (the container that runs
+Snakemake itself), each pathway reconstruction method runs inside its
+own container -- ``pathlinker``, ``omicsintegrator1``, ``mincostflow``,
+and so on. By default, these per-algorithm images are pulled from a
+registry (Docker Hub) at runtime, *on the Execution Point (EP) where
+each job lands*.
+
+We **strongly** recommend that you instead pre-build these images once
+on the Access Point (AP) and reference them from your config file. There
+are two reasons this matters in an HTCondor environment:
+
+#. **It avoids redundant work.** When images are pulled at runtime,
+   every job that uses a given algorithm re-pulls (and, under
+   ``singularity``/``apptainer``, re-converts and re-unpacks) the same
+   image. In a parallelized workflow that can mean hundreds of EPs each
+   repeating the same build. Building each image once on the AP and
+   letting HTCondor transfer the finished ``.sif`` file to each EP turns
+   that repeated work into a one-time cost.
+
+#. **It avoids Docker Hub rate limiting.** A distributed workflow can
+   issue a large number of near-simultaneous pulls from Docker Hub from
+   many different EPs. This routinely trips Docker Hub's anonymous
+   pull-rate limits, which surfaces as hard-to-diagnose, intermittent
+   runtime failures. Transferring a pre-built image sidesteps the
+   registry entirely at job time.
+
+How To Pre-Build and Reference Images
+=====================================
+
+#. From the root of the SPRAS repository, create a folder to hold your
+   pre-built images:
+
+   .. code:: bash
+
+      mkdir images
+
+#. Build an Apptainer ``.sif`` image for each algorithm you intend to
+   run, placing each one in ``images/``. As with the SPRAS runtime
+   image, these must be built for the ``linux/amd64`` architecture. For
+   example, to pre-build the Omics Integrator 1 and PathLinker images:
+
+   .. code:: bash
+
+      apptainer build images/omics-integrator-1_v2.sif docker://reedcompbio/omics-integrator-1:v2
+      apptainer build images/pathlinker_v2.sif docker://reedcompbio/pathlinker:v2
+
+#. In your SPRAS configuration file, point each algorithm at its
+   pre-built image using the ``containers.images`` block. Keys are
+   algorithm names (matching the ``algorithms`` list in the same config
+   file), and values are the paths to the ``.sif`` files:
+
+   .. code:: yaml
+
+      containers:
+        framework: singularity
+        unpack_singularity: true
+        images:
+          omicsintegrator1: "images/omics-integrator-1_v2.sif"
+          pathlinker: "images/pathlinker_v2.sif"
+
+   Any algorithm that is *not* listed here falls back to pulling its
+   image from the registry at runtime, so list every algorithm you want
+   to run.
+
+.. important::
+
+   All image paths in the config file are relative to the location you
+   submit from -- which, in these instructions, is the root of the SPRAS
+   repository. Using a repository-rooted ``images/`` folder (as above)
+   keeps these paths stable regardless of which run mode you use. Avoid
+   absolute paths, since the EP that runs a job will not share a
+   filesystem with the AP.
+
+.. note::
+
+   Local ``.sif`` overrides are only supported when the container
+   framework is set to ``singularity``/``apptainer``. If the framework
+   is Docker, ``.sif`` entries are ignored with a warning. See the
+   ``containers`` section of ``config/config.yaml`` for the full set of
+   accepted value formats (bare image names, full registry references,
+   and local ``.sif`` paths).
+
+How the Images Reach the EP
+===========================
+
+The way your pre-built images get to the EP depends on which run mode
+you use:
+
+-  **Parallel jobs** (``shared-fs-usage: none`` in
+   ``htcondor/spras_profile/config.yaml``): any ``.sif`` path listed in
+   ``containers.images`` is automatically added to that job's
+   ``htcondor_transfer_input_files``, so the HTCondor executor transfers
+   the image to the EP alongside the rest of the job's inputs. No
+   further action is required.
+
+-  **Single EP**: the entire workflow runs as one job defined by
+   ``htcondor/spras.sub``, so you must transfer the ``images/`` folder
+   yourself by adding it to that file's ``transfer_input_files`` line,
+   e.g.:
+
+   .. code::
+
+      transfer_input_files = $(CONFIG_FILE), $(INPUT_DIR), $(SNAKEFILE), images
 
 ************************************
  Submitting All Jobs to a Single EP
