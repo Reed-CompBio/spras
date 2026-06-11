@@ -47,6 +47,18 @@ SPRAS contributions:
    or `10 minutes to pandas
    <https://pandas.pydata.org/pandas-docs/stable/user_guide/10min.html>`__
 
+
+
+   Before getting started, verify your environment is ready with these checks:
+
+.. code:: bash
+
+   docker --version
+   docker run hello-world
+   docker login
+   conda --version
+   git --version
+
 *************************************************
  Step 0: Fork the repository and create a branch
 *************************************************
@@ -202,8 +214,9 @@ and explore the nodes and interactome.
 .. code:: python
 
    > from spras.dataset import Dataset
-   > dataset_dict = {'label': 'data0', 'node_files': ['node-prizes.txt', 'sources.txt', 'targets.txt'], 'edge_files': ['network.txt'], 'other_files': [], 'data_dir': 'input'}
-   > data = Dataset(dataset_dict)
+   > from spras.config.dataset import DatasetSchema
+   > dataset_schema = DatasetSchema(label='data0', node_files=['node-prizes.txt', 'sources.txt', 'targets.txt'], edge_files=['network.txt'], other_files=[], data_dir='input')
+   > data = Dataset(dataset_schema)
    > data.node_table.head()
      NODEID  prize active sources targets
    0      C    5.7   True     NaN    True
@@ -416,6 +429,16 @@ branch and create a pull request. Make sure to commit all of the new and
 modified files and push them to the ``local-neighborhood`` branch on
 your fork.
 
+
+.. note::
+
+   If you are using HTTPS to push and your commit touches files in
+   ``.github/workflows/``, your PAT must have both ``repo`` and
+   ``workflow`` scopes. A PAT with ``repo`` scope only will be rejected
+   with a non-obvious error. SSH push works without this restriction.
+
+
+
 The SPRAS maintainers will review the pull request and provide feedback
 and suggested changes. If you are not already in communication with
 them, you can open a `GitHub issue
@@ -424,6 +447,8 @@ feedback. However, once the pull request has been approved, it will
 **not** be merged as usual. The pull request will be closed so that the
 ``main`` branch of the fork stays synchronized with the ``main`` branch
 of the main SPRAS repository.
+
+
 
 ***********************************************************************
  General steps for contributing a new pathway reconstruction algorithm
