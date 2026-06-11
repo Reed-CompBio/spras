@@ -35,5 +35,8 @@ dependencies:
   - sphinx=7.4.7
   - sphinx-rtd-theme=2.0.0
 
+  # dsub 0.4.13 pins tenacity<=8.2.3, which is incompatible with snakemake 9.x.
+  # Using a fork with the upper bound relaxed until dsub merges the fix:
+  # https://github.com/DataBiosphere/dsub/pull/329
   - pip:
-      - dsub==0.4.13
+      - git+https://github.com/tristan-f-r/dsub.git@65c0b0934bbf5af8ee5aefd4953b69420814a879
