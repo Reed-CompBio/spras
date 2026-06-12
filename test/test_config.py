@@ -3,6 +3,7 @@ import pickle
 from typing import Iterable
 
 import pytest
+import yaml
 from pydantic import BaseModel
 
 import spras.config.config as config
@@ -451,3 +452,84 @@ class TestConfig:
         assert config.config.analysis_include_evaluation == expected_eval
         assert config.config.analysis_include_summary == expected_summary
 
+
+    @pytest.mark.parametrize("numeric_string, expected_float", [
+        (".5", 0.5),
+        ("6.", 6.0),
+        ("3.1", 3.1),
+        ("-4.7", -4.7),
+        ("1e-3", 0.001),
+        ("1E-3", 0.001),
+        ("2.5e4", 25000.0),
+        ("2e4", 20000.0),
+        ("+5e+2", 500.0),
+        ("-3e-2", -0.03),
+    ])
+    def test_scientific_notation_variants(self, numeric_string, expected_float):
+        """
+        Ensures that the PyYAML SafeLoader accurately converts all standard
+        scientific notation formats into Python floats.
+        Used for YAML files parsed directly.
+        """
+        yaml_string = f"value: {numeric_string}"
+        # Tests the modified float imported from spras.config.config
+        parsed = yaml.safe_load(yaml_string)
+
+        assert isinstance(parsed["value"], float)
+        assert parsed["value"] == expected_float
+
+
+    @pytest.mark.parametrize("non_numeric_string", [
+        "range1e3",
+        "e-3",  # Missing coefficient
+        "1e",  # Missing exponent power
+    ])
+    def test_scientific_notation_does_not_match_strings(self, non_numeric_string):
+        """
+        Ensures that strings, labels, and parameters containing 'e' numbers
+        are correctly preserved as strings and not warped into floats.
+        Used for YAML files parsed directly.
+        """
+        yaml_string = f"label: {non_numeric_string}"
+        # Tests the modified float imported from spras.config.config
+        parsed = yaml.safe_load(yaml_string)
+
+        assert isinstance(parsed["label"], str)
+        assert parsed["label"] == non_numeric_string
+
+    def test_sanitize_scientific_notation(self):
+        """
+        Verifies that sanitize_scientific_notation recursively converts scientific
+        notation strings into floats across nested dictionaries and lists.
+        Used for YAML files loaded externally by Snakemake.
+        """
+        # Does not follow the SPRAS config file syntax
+        nested_config = {
+            "f": "1e-3",
+            "algorithms": {
+                "omicsintegrator2": {
+                    "params": {
+                        "sweep": ["2.5e4", "5e-2"],
+                        "x": "-6e2"
+                    },
+                    "nodes": "terminals"
+                }
+            },
+            "threads": 4
+        }
+
+        expected_config = {
+            "f": 0.001,
+            "algorithms": {
+                "omicsintegrator2": {
+                    "params": {
+                        "sweep": [25000.0, 0.05],
+                        "x": -600.0
+                    },
+                    "nodes": "terminals"
+                }
+            },
+            "threads": 4
+        }
+
+        assert config.sanitize_scientific_notation(nested_config) == expected_config

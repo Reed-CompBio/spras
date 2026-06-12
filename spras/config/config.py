@@ -15,6 +15,7 @@ will grab the top level registry configuration option as it appears in the confi
 import copy as copy
 import functools
 import itertools as it
+import re
 import warnings
 from pathlib import Path
 from typing import Any
@@ -28,6 +29,15 @@ from spras.config.schema import DatasetSchema, RawConfig
 from spras.config.util import AlgorithmName, get_valid_algorithm_names
 from spras.util import LoosePathLike, NpHashEncoder, hash_params_sha1_base32
 
+# Modify YAML float specification when a YAML file is parsed directly
+# Default requires decimal point for scientific notation: https://yaml.org/type/float.html
+# add_implicit_resolver adds the regex pattern to the float type: https://pyyaml.org/wiki/PyYAMLDocumentation
+yaml.SafeLoader.add_implicit_resolver(
+    'tag:yaml.org,2002:float',
+    re.compile(r'^[-+]?([0-9]+(\.[0-9]*)?|\.[0-9]+)[eE][-+]?[0-9]+$'),
+    list('-+0123456789.')
+)
+
 config = None
 
 # This will get called in the Snakefile, instantiating the singleton with the raw config
@@ -39,6 +49,24 @@ def init_from_file(filepath):
     global config
     config = Config.from_file(filepath)
 
+def sanitize_scientific_notation(data: Any) -> Any:
+    """
+    Recursively checks a YAML configuration file parsed externally by Snakemake to convert scientific notation strings
+    back to floats.
+
+    Default YAML 1.1 requires decimal point for scientific notation: https://yaml.org/type/float.html
+    """
+    if isinstance(data, dict):
+        return {k: sanitize_scientific_notation(v) for k, v in data.items()}
+    elif isinstance(data, list):
+        return [sanitize_scientific_notation(item) for item in data]
+    elif isinstance(data, str):
+        if re.match(r'^[-+]?([0-9]+(\.[0-9]*)?|\.[0-9]+)[eE][-+]?[0-9]+$', data):
+            try:
+                return float(data)
+            except ValueError:
+                return data
+    return data
 
 class Config:
     def __init__(self, raw_config: dict[str, Any]):
@@ -46,6 +74,8 @@ class Config:
         # wrapper error first before passing validation to pydantic.
         if raw_config == {}:
             raise ValueError("Config file cannot be empty. Use --configfile <filename> to set a config file.")
+
+        raw_config = sanitize_scientific_notation(raw_config)
 
         parsed_raw_config = RawConfig.model_validate(raw_config)
 
