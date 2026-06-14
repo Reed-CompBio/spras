@@ -22,6 +22,14 @@ from spras.runner import algorithms
 # This contains the dynamically generated algorithm schema for use in `schema.py`
 __all__ = ['AlgorithmUnion']
 
+def is_numeric(value: Any) -> bool:
+    """Checks if the input value can be parsed by `float`."""
+    try:
+        float(value)
+        return True
+    except ValueError:
+        return False
+
 def is_numpy_friendly(type: type[Any] | None) -> bool:
     """
     Whether the passed in type can have any numpy helpers.
@@ -44,7 +52,7 @@ def python_evalish_coerce(value: Any) -> Any:
     resources if wanted. This only prevents secret leakage.
     """
 
-    if not isinstance(value, str):
+    if not isinstance(value, str) or is_numeric(value):
         return value
 
     # These strings are in the form of function calls `function.name(param1, param2, ...)`.

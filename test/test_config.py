@@ -67,6 +67,9 @@ def get_test_config():
                 "include": True,
                 "runs": {
                     "strings": {"dummy_mode": ["terminals", "others"], "b": 3},
+                    # We include slightly absurd numbers here for b
+                    # to test https://github.com/Reed-CompBio/spras/issues/484.
+                    "scientific": {"dummy_mode": "terminals", "b": ["1e-2", "1e2"]},
                     # spacing in np.linspace is on purpose
                     "singleton_string_np_linspace": {"dummy_mode": "terminals", "b": "np.linspace(0,    5,2,)"},
                     "str_array_np_logspace": {"dummy_mode": ["others", "all"], "g": "np.logspace(1,1)"}
@@ -294,6 +297,11 @@ class TestConfig:
         value_test_util('omicsintegrator2', 'strings', OmicsIntegrator2Params, [
             OmicsIntegrator2Params(dummy_mode=DummyMode.terminals, b=3),
             OmicsIntegrator2Params(dummy_mode=DummyMode.others, b=3)
+        ])
+
+        value_test_util('omicsintegrator2', 'scientific', OmicsIntegrator2Params, [
+            OmicsIntegrator2Params(dummy_mode=DummyMode.terminals, b=100),
+            OmicsIntegrator2Params(dummy_mode=DummyMode.terminals, b=0.01)
         ])
 
         value_test_util('omicsintegrator2', 'singleton_string_np_linspace', OmicsIntegrator2Params, [
