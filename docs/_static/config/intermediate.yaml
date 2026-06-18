@@ -6,127 +6,82 @@ containers:
     base_url: docker.io
     owner: reedcompbio
 
-# Each algorithm has an 'include' parameter. By toggling 'include' to true/false the user can change
-# which algorithms are run in a given experiment.
-#
-# algorithm-specific parameters are embedded in lists so that users can specify multiple. If multiple
-# parameters are specified then the algorithm will be run as many times as needed to cover all parameter
-# combinations. For instance if we have the following:
-# - name: "myAlg"
-#   params:
-#         include: true
-#         a: [1,2]
-#         b: [0.5,0.75]
-#
-# then myAlg will be run on (a=1,b=0.5),(a=1,b=0.75),(a=2,b=0.5), and (a=2,b=0,75). Pretty neat, but be
-# careful: too many parameters might make your runs take a long time.
-
 algorithms:
   - name: "pathlinker"
     include: true
     runs:
       run1:
-        k: 1
-      run2:
-        k: [10, 100]
-  - name: omicsintegrator1
-    include: true
-    runs:
-      run1:
-        b: [0.55, 2, 10]
-        d: 10
-        g: 1e-3
-        r: 0.01
-        w: 0.1
-        mu: 0.008
+        k: [1, 10, 100, 1000]
+
   - name: omicsintegrator2
     include: true
     runs:
       run1:
-        b: 4
-        g: 0
-      run2:
-        b: 2
-        g: 3
-  - name: meo
-    include: true
-    runs:
-      run1:
-        local_search: [true, false]
-        max_path_length: [2, 3]
-        rand_restarts: 10
-  - name: allpairs
-    include: true
-  - name: domino
-    include: true
-    runs:
-      run1:
-        slice_threshold: 0.3
-        module_threshold: 0.05
+        b: [4, 10]
+        g: [0, 3]
+        w: [0.25, 6]
+
   - name: mincostflow
     include: true
     runs:
       run1:
-        capacity: 15
-        flow: 80
-      run2:
-        capacity: 1
-        flow: 6
-      run3:
-        capacity: 5
-        flow: 60
+        capacity: [15, 30]
+        flow: [80, 15]
+
   - name: "strwr"
     include: true
     runs:
       run1:
-        alpha: [0.85]
+        alpha: 0.85
         threshold: [100, 200]
+
   - name: "rwr"
     include: true
     runs:
       run1:
-        alpha: [0.85]
+        alpha: 0.85
         threshold: [100, 200]
 
-# Here we specify which pathways to run and other file location information.
-# Assume that if a dataset label does not change, the lists of associated input files do not change
-datasets: # TODO update this based on the dataset that I set up
-  - # Labels can only contain letters, numbers, or underscores
-    label: egfr
-    node_files: ["tps-egfr-prizes.txt"] # the input nodes
-    edge_files: ["phosphosite-irefindex13.0-uniprot.txt"] # the interactome
-    # Placeholder
+datasets:
+  - label: egfr
+    node_files: ["tps-egfr-prizes.txt"]
+    edge_files: ["phosphosite-irefindex13.0-uniprot.txt"]
     other_files: []
-    # Relative path from the spras directory where these files live
     data_dir: "input"
 
-reconstruction_settings:
+gold_standards:
+  - # Labels can only contain letters, numbers, or underscores
+    label: gs_egfr
+    node_files: ["gs-egfr.txt"]
+    data_dir: "input"
+    # List of dataset labels to compare with the specific gold standard dataset
+    dataset_labels: ["egfr"]
 
-  # Set where everything is saved
+reconstruction_settings:
   locations:
     reconstruction_dir: "output/intermediate"
 
 analysis:
+  summary:
+    include: false # set to true for step 4
+
   # Machine learning analysis (e.g. clustering) of the pathway output files for each dataset
   ml:
     # ml analysis per dataset
     include: false # set to true for step 3
+
     # adds ml analysis per algorithm output
     # only runs for algorithms with multiple parameter combinations chosen
-    aggregate_per_algorithm: false
-    # specify how many principal components to calculate
-    components: 2
-    # boolean to show the labels on the pca graph
-    labels: true
-    # 'ward', 'complete', 'average', 'single'
-    # if linkage: ward, must use metric: euclidean
-    linkage: 'ward'
-    # 'euclidean', 'manhattan', 'cosine'
-    metric: 'euclidean'
-    # controls whether kernel density estimation (KDE) is computed and visualized on top of PCA plots.
-    # the coordinates of the KDE maximum (kde_peak) are also saved to the PCA coordinates output file.
-    # KDE needs to be run in order to select a parameter combination with PCA because the maximum kernel density is used
-    # to pick the 'best' parameter combination.
-    kde: false
+    aggregate_per_algorithm: false # set to true for step 4
+    # overalls a kernel density estimation over pca
+    kde: false # set to true for step 4
     # removes empty pathways from consideration in ml analysis (pca only)
-    remove_empty_pathways: false
+    remove_empty_pathways: false # set to true for step 4
+
+  evaluation:
+    # evaluation per dataset-goldstandard pair
+    # evaluation will not run unless ml include is set to true
+    include: false # set to true for step 4
+    # adds evaluation per algorithm per dataset-goldstandard pair
+    # evaluation per algorithm will not run unless ml include and ml aggregate_per_algorithm are set to true
+    aggregate_per_algorithm: false # set to true for step 4

@@ -15,66 +15,6 @@ You will learn how to:
    dataset
 -  Enable post-analysis steps to generate post analysis information
 
-****************************************************************************
- Step 0: Clone the SPRAS repository, set up the environment, and run Docker
-****************************************************************************
-
-0.1 Clone the SPRAS repository
-==============================
-
-Visit the `SPRAS GitHub repository
-<https://github.com/Reed-CompBio/spras>`__ and clone it locally
-
-0.2 Set up the SPRAS environment
-================================
-
-From the root directory of the SPRAS repository, create and activate the
-Conda environment and install the SPRAS python package:
-
-.. code:: bash
-
-   conda env create -f environment.yml
-   conda activate spras
-   python -m pip install .
-
-.. note::
-
-   The first command performs a one-time installation of the SPRAS
-   dependencies by creating a Conda environment (an isolated space that
-   keeps all required packages and versions separate from your system).
-
-   The second command activates the newly created environment so you can
-   use these dependencies when running SPRAS; this step must be done
-   each time you open a new terminal session.
-
-   The last command is a one-time installation of the SPRAS package into
-   the environment.
-
-0.3 Test the installation
-=========================
-
-Run the following command to confirm that SPRAS has been set up
-successfully from the command line:
-
-.. code:: bash
-
-   python -c "import spras; print('SPRAS import successful')"
-
-0.4 Start Docker
-================
-
-Before running SPRAS, make sure Docker Desktop is running.
-
-Launch Docker Desktop and wait until it says "Docker is running".
-
-.. note::
-
-   SPRAS itself does not run inside a Docker container. However, Docker
-   is required because SPRAS uses it to execute individual pathway
-   reconstruction algorithms and certain post-analysis steps within
-   isolated containers. These containers include all the necessary
-   dependencies to run each algorithm or post analysis.
-
 *****************************
  Step 1: Configuration files
 *****************************
@@ -92,15 +32,6 @@ seralizaiton.
 
 SPRAS uses Snakemake to read the YAML configuration file and execute a
 SPRAS workflow accordingly.
-
-..
-   Snakemake considers a task from the configuration file complete once the expected output files are present in the output directory.
-
-..
-   As a result, rerunning the same configuration file may do nothing if those files already exist.
-
-..
-   To continue or rerun SPRAS with the same configuration file, delete the output directory (or its contents) or modify the configuration file so Snakemake regenerates new results.
 
 1.1 Save config for this tutorial
 =================================
@@ -123,6 +54,25 @@ After adding this file, your directory structure will look like this
    │   ├── phosphosite-irefindex13.0-uniprot.txt # pre-defined in SPRAS already, used by the beginner.yaml file
    │   ├── tps-egfr-prizes.txt # pre-defined in SPRAS already, used by the beginner.yaml file
    │   └── ... other input data ...
+
+.. note::
+
+   There is a nested ``spras`` folder within the larger ``spras``
+   repository.
+
+   When downloading the beginner config file, place it in your working
+   ``spras`` directory under ``spras/config``, not in the
+   ``spras/spras/config`` directory.
+
+.. note::
+
+   If working in the dev container, you can upload files from your local
+   machine by right-clicking on a folder.
+
+   .. image:: ../_static/images/upload-file-dev-container.png
+      :alt: Right-click menu showing upload option
+      :scale: 40
+      :align: center
 
 config/
 -------
@@ -160,19 +110,32 @@ Algorithms
    - name: omicsintegrator1
      params:
         include: true
-        run1:
-           b: 0.1
-           d: 10
-           g: 1e-3
-        run2:
-           b: [0.55, 2, 10]
-           d: [10, 20]
-           g: 1e-3
+        runs:
+         run1:
+            b: 0.1
+            d: 10
+            g: 1e-3
+         run2:
+            b: [0.55, 2, 10]
+            d: [10, 20]
+            g: 1e-3
 
 When defining an algorithm in the configuration file, its name must
 match one of the supported SPRAS algorithms. Each algorithm includes an
 include flag, which you set to true to have Snakemake run it, or false
 to disable it.
+
+A parameter is a configurable value, or set of values, that controls an
+algorithm's behavior. Parameters govern algorithm-specific behavior that
+shapes how an output subnetwork is constructed, so changing them
+produces different subnetworks from the same input data.
+
+Each algorithm exposes its own set of parameters that control its
+optimization strategy. Some algorithms have no adjustable parameters,
+while others include multiple tunable settings that influence how
+subnetworks are created. These parameters vary widely between algorithms
+and reflect the unique optimization techniques each method employs under
+the hood.
 
 Algorithm parameters can be organized into one or more run blocks (e.g.,
 run1, run2, …), with each block containing key-value pairs. When
@@ -182,13 +145,6 @@ lists within a run block, SPRAS generates all possible combinations
 (Cartesian product) of those list values together with any fixed
 single-value parameters in the same run block. Each unique combination
 runs once per algorithm.
-
-Each algorithm exposes its own set of parameters that control its
-optimization strategy. Some algorithms have no adjustable parameters,
-while others include multiple tunable settings that influence how
-subnetworks are created. These parameters vary widely between algorithms
-and reflect the unique optimization techniques each method employs under
-the hood.
 
 (See :doc:`Pathway Reconstruction Methods <../prms/prms>` for
 information about algorithms and their parameters).
@@ -200,7 +156,7 @@ Datasets
 
    datasets:
    -
-       label: egfr
+       label: data1
        node_files: ["prizes.txt", "sources-targets.txt"]
        edge_files: ["interactome.txt"]
        other_files: []
@@ -227,6 +183,41 @@ A dataset must include the following types of keys and files:
    connecting two molecules. An interactome is a large network of
    possible interactions that defines many edges connecting molecules.
 
+Gold standard datasets
+----------------------
+
+.. code:: yaml
+
+   gold_standards:
+       -
+       label: gs1
+       node_files: ["gs_nodes0.txt", "gs_nodes1.txt"]
+       data_dir: "input"
+       dataset_labels: ["data0"]
+       -
+       label: gs2
+       edge_files: ["gs_edges0.txt"]
+       data_dir: "input"
+       dataset_labels: ["data0", "data1"]
+
+Users can specify one or more gold standard datasets in the
+configuration file to evaluate the subnetworks reconstructed from each
+dataset. When gold standards are provided and evaluation is enabled
+(shown below), SPRAS compares the output subnetworks for a given dataset
+against the gold standards listed in its ``dataset_labels`` field.
+
+A gold standard dataset must include the following types of keys and
+files:
+
+-  ``label``: a name that uniquely identifies a gold standard dataset
+   throughout the SPRAS workflow and outputs.
+-  ``node_file`` or ``edge_file``: A list of node or edge files. Only
+   one of these can be defined per gold standard dataset.
+-  ``data_dir``: The file path of the directory where the input gold
+   standard dataset files are located.
+-  ``dataset_labels``: a list of dataset labels indicating which
+   datasets this gold standard dataset should be evaluated against.
+
 Reconstruction settings
 -----------------------
 
@@ -246,17 +237,19 @@ Analysis
 .. code:: yaml
 
    analysis:
-   summary:
-       include: true
-   cytoscape:
-       include: true
-   ml:
-       include: true
+      summary:
+         include: true
+      cytoscape:
+         include: true
+      ml:
+         include: true
+      evaluation:
+         include: true
 
 SPRAS includes multiple downstream analyses that can be toggled on or
 off directly in the configuration file. When enabled, these analyses are
-performed per dataset and produce summaries or visualizations of the
-results from all enabled algorithms for that dataset.
+performed per dataset and produce summaries, visualizations, or
+evaluations of the results from all enabled algorithms for that dataset.
 
 .. note::
 
@@ -419,8 +412,24 @@ under pathlinker so it looks like:
 
 .. code:: yaml
 
-   run2:
-       k: [10, 100]
+   - name: "pathlinker"
+    include: true
+    runs:
+      run1:
+         k: 1
+      run2:
+         k: [10, 100]
+
+.. note::
+
+   YAML is indentation-sensitive. The ``run1`` and ``run2`` keys must be
+   aligned at the same indentation level, and their ``k`` parameters
+   must also be aligned with each other. Misaligned indentation will
+   cause the configuration file to fail to parse.
+
+   Tools like `YAML Prettifier
+   <https://onlineyamltools.com/prettify-yaml>`_ can help format and
+   validate your configuration file.
 
 With this update, the ``beginner.yaml`` configuration file is set up
 have SPRAS run a single algorithm with multiple parameter settings on
@@ -570,6 +579,11 @@ Your analysis section in the configuration file should look like this:
            include: true
        cytoscape:
            include: true
+
+.. note::
+
+   The Cytoscape analysis step will take noticeably longer to run than
+   the other analysis options.
 
 ``summary`` generates graph topological summary statistics for each
 algorithm's parameter combination output, generating a summary file for

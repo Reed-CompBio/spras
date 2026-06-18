@@ -2,3 +2,6 @@
 # Ignore data files
 extend-glob = ["*.txt"]
 check-file = false
+
+[default.extend-words]
+STIP = "STIP"
