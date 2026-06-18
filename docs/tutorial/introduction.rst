@@ -121,19 +121,6 @@ Open a new terminal and then run:
    The last command is a one-time installation of the SPRAS package into
    the environment.
 
-.. note::
-
-   You may see the following error during installation:
-
-   .. code:: text
-
-      ERROR: pip's dependency resolver does not currently take into account all the packages that are installed. This behaviour is the source of the following dependency conflicts.
-      dsub 0.4.13 requires tenacity<=8.2.3, but you have tenacity 9.1.4 which is incompatible.
-
-   This is safe to ignore. We do not use dsub as a container option in
-   this tutorial, and a fix is currently in progress. SPRAS and this
-   tutorial will run correctly without a working dsub installation.
-
 Step 3: Test the installation
 -----------------------------
 

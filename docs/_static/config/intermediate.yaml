@@ -6,22 +6,6 @@ containers:
     base_url: docker.io
     owner: reedcompbio
 
-# Each algorithm has an 'include' parameter. By toggling 'include' to true/false the user can change
-# which algorithms are run in a given experiment.
-#
-# algorithm-specific parameters are embedded in lists so that users can specify multiple. If multiple
-# parameters are specified then the algorithm will be run as many times as needed to cover all parameter
-# combinations. For instance if we have the following:
-# - name: "myAlg"
-#   params:
-#         include: true
-#         a: [1,2]
-#         b: [0.5,0.75]
-#
-# then myAlg will be run on (a=1,b=0.5),(a=1,b=0.75),(a=2,b=0.5), and (a=2,b=0,75). Pretty neat, but be
-# careful: too many parameters might make your runs take a long time.
-
-# TODO: get rid of the algorithms that will take too long to run
 algorithms:
   - name: "pathlinker"
     include: true
@@ -58,16 +42,11 @@ algorithms:
         alpha: 0.85
         threshold: [100, 200]
 
-# Here we specify which pathways to run and other file location information.
-# Assume that if a dataset label does not change, the lists of associated input files do not change
 datasets:
-  - # Labels can only contain letters, numbers, or underscores
-    label: egfr
-    node_files: ["tps-egfr-prizes.txt"] # the input nodes
-    edge_files: ["phosphosite-irefindex13.0-uniprot.txt"] # the interactome
-    # Placeholder
+  - label: egfr
+    node_files: ["tps-egfr-prizes.txt"]
+    edge_files: ["phosphosite-irefindex13.0-uniprot.txt"]
     other_files: []
-    # Relative path from the spras directory where these files live
     data_dir: "input"
 
 gold_standards:
@@ -79,8 +58,6 @@ gold_standards:
     dataset_labels: ["egfr"]
 
 reconstruction_settings:
-
-  # Set where everything is saved
   locations:
     reconstruction_dir: "output/intermediate"
 
