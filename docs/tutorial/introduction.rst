@@ -31,7 +31,7 @@ Required knowledge
 Option 1: Running SPRAS in a GitHub Codespace
 =============================================
 
-SPRAS also ships with a dev container, and the quickest way to use it is
+SPRAS ships with a dev container, and the quickest way to use it is
 through `GitHub Codespaces <https://github.com/features/codespaces>`_.
 
 A Codespace builds the dev container on GitHub's infrastructure and
@@ -85,8 +85,7 @@ installed. Once the build finishes, you are ready to run SPRAS.
          -  180 hrs
 
    You will not be charged for codespace usage unless you exceed your
-   quota. If you hit the limit, free options are to create a new GitHub
-   account or switch to the local SPRAS setup.
+   quota. If you hit the limit, the free option is to switch to the local SPRAS setup.
 
 Step 2: Set up the SPRAS environment
 ------------------------------------
