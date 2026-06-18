@@ -85,7 +85,8 @@ installed. Once the build finishes, you are ready to run SPRAS.
          -  180 hrs
 
    You will not be charged for codespace usage unless you exceed your
-   quota. If you hit the limit, the free option is to switch to the local SPRAS setup.
+   quota. If you hit the limit, the free option is to switch to the
+   local SPRAS setup.
 
 Step 2: Set up the SPRAS environment
 ------------------------------------
