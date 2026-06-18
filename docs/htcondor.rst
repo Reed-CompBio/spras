@@ -24,17 +24,40 @@ from the AP clone this repo:
    the image with Docker on your local machine, push the image to Docker
    Hub, and then convert it to Apptainer's ``sif`` format on the AP.
 
-.. tip::
+.. important::
 
-   It is best practice to make sure that the Snakefile you copy for your
-   workflow is the same version as the Snakefile baked into your
-   workflow's container image. When this workflow runs, the Snakefile
-   you just copied will be used during remote execution instead of the
-   Snakefile from the container. As a result, difficult-to-diagnose
-   versioning issues may occur if the version of SPRAS in the remote
-   container doesn't support the Snakefile on your current branch. The
-   safest bet is always to create your own image so you always know
-   what's inside of it.
+   **Keep your local SPRAS repo and your container image on the same
+   version.** When the workflow runs, Snakemake uses the ``Snakefile``
+   from your local repo checkout during remote execution -- *not* the
+   one baked into the container image. The rest of the SPRAS code,
+   however, comes from the container. If the ``Snakefile`` on your
+   current branch expects a version of the SPRAS package that the
+   container doesn't provide, you get difficult-to-diagnose failures at
+   runtime, commonly a ``ModuleNotFoundError`` or other import/attribute
+   errors deep in a job's logs.
+
+   There are two reliable ways to keep the repo and the container in
+   sync. Pick whichever fits your situation:
+
+   #. **Build the container to match your repo.** If you are developing
+      against a specific branch or have local changes, rebuild the SPRAS
+      image from that exact code (see `Converting Docker Images to
+      Apptainer/Singularity Images`_), push it to Docker Hub if needed,
+      and submit your jobs using that image. This guarantees the
+      container holds the same SPRAS version as your ``Snakefile``.
+
+   #. **Check out the repo to match the container.** If you want to use
+      a published image such as ``reedcompbio/spras:0.6.0``, check out
+      the matching release of the repository so your ``Snakefile`` lines
+      up with it:
+
+      .. code:: bash
+
+         git checkout 0.6.0
+
+   Either way, the goal is the same: the ``Snakefile`` in your checkout
+   and the SPRAS code inside the container must come from the same
+   version.
 
 There are currently two options for running SPRAS with HTCondor. The
 first is to submit all SPRAS jobs to a single remote Execution Point
@@ -127,6 +150,8 @@ image does not use a "v" in the tag.
    you're working at CHTC, follow their guide for building Apptainer
    images in an interactive job:
    https://chtc.cs.wisc.edu/uw-research-computing/apptainer-htc.html
+   Specifically, create the apptainer.sub file on the AP and run
+   ``condor_submit -i apptainer.sub`` on the AP.
 
    The ``apptainer build`` commands shown above and in the next section
    are meant to be run from within such an interactive job (or on your
@@ -143,15 +168,15 @@ and so on. By default, these per-algorithm images are pulled from a
 registry (Docker Hub) at runtime, *on the Execution Point (EP) where
 each job lands*.
 
-We **strongly** recommend that you instead pre-build these images once
-on the Access Point (AP) and reference them from your config file. There
-are two reasons this matters in an HTCondor environment:
+We **strongly** recommend that you instead pre-build these images once,
+up front, and reference them from your config file. There are two
+reasons this matters in an HTCondor environment:
 
 #. **It avoids redundant work.** When images are pulled at runtime,
    every job that uses a given algorithm re-pulls (and, under
    ``singularity``/``apptainer``, re-converts and re-unpacks) the same
    image. In a parallelized workflow that can mean hundreds of EPs each
-   repeating the same build. Building each image once on the AP and
+   repeating the same build. Building each image once up front and
    letting HTCondor transfer the finished ``.sif`` file to each EP turns
    that repeated work into a one-time cost.
 
@@ -174,8 +199,11 @@ How To Pre-Build and Reference Images
 
 #. Build an Apptainer ``.sif`` image for each algorithm you intend to
    run, placing each one in ``images/``. As with the SPRAS runtime
-   image, these must be built for the ``linux/amd64`` architecture. For
-   example, to pre-build the Omics Integrator 1 and PathLinker images:
+   image, these must be built for the ``linux/amd64`` architecture, and
+   -- as noted in the warning above -- the ``apptainer build`` commands
+   below should be run from within an interactive build job (or on your
+   local machine), **not** directly on the Access Point. For example, to
+   pre-build the Omics Integrator 1 and PathLinker images:
 
    .. code:: bash
 
@@ -195,6 +223,14 @@ How To Pre-Build and Reference Images
         images:
           omicsintegrator1: "images/omics-integrator-1_v2.sif"
           pathlinker: "images/pathlinker_v2.sif"
+      ...
+      Algorithms:
+        - name: "pathlinker"
+          include: true
+          ...
+        - name: "omicsintegrator1"
+          include: true
+          ...
 
    Any algorithm that is *not* listed here falls back to pulling its
    image from the registry at runtime, so list every algorithm you want
@@ -253,12 +289,20 @@ for testing and debugging purposes.
 Before submitting all SPRAS jobs to a single remote Execution Point
 (EP), you'll need to set up three things:
 
-#. You'll need to modify ``htcondor/spras.sub`` to point at your
-   container image, along with any other configuration changes you want
-   to make like choosing a logging directory or toggling OSPool
-   submission. Note that all paths in the submit file are relative to
-   the directory from which you run ``condor_submit``, which will
-   typically be the root of the SPRAS repository.
+#. You'll need to modify ``htcondor/spras.sub`` to point at your general
+   spras container image (built from ``docker-wrappers/SPRAS``), along
+   with any other configuration changes you want to make like choosing a
+   logging directory or toggling OSPool submission. Note that all paths
+   in the submit file are relative to the directory from which you run
+   ``condor_submit``, which will typically be the root of the SPRAS
+   repository.
+
+   .. note::
+
+      OSPool submission is disabled by default. To enable it, uncomment
+      the relevant lines near the bottom of ``htcondor/spras.sub`` --
+      the in-file comments there explain exactly which lines to
+      uncomment and when each is needed.
 
 #. You'll need to ensure your SPRAS configuration file has a few key
    values set, including ``unpack_singularity: true`` and
@@ -282,8 +326,9 @@ should be returned as ``output``.
 Parallelizing SPRAS workflows with HTCondor requires much of the same
 setup as the previous section, but with two additions.
 
-#. Build/activate the SPRAS conda/mamba environment and ``pip install``
-   the SPRAS module (via ``pip install .`` inside the SPRAS directory).
+#. :ref:`Build/activate the SPRAS conda/mamba environment
+   <using-a-conda-environment>` and ``pip install`` the SPRAS module
+   (via ``pip install .`` inside the SPRAS directory).
 
 #. Install the `HTCondor Snakemake executor
    <https://github.com/htcondor/snakemake-executor-plugin-htcondor>`__;
@@ -298,8 +343,33 @@ setup as the previous section, but with two additions.
 #. Instead of editing ``spras.sub`` to define the workflow, this
    scenario requires editing the SPRAS profile in
    ``htcondor/spras_profile/config.yaml``. Make sure you specify the
-   correct container, and change any other config values needed by your
-   workflow (defaults are fine in most cases).
+   correct SPRAS container image, and change any other config values
+   needed by your workflow (defaults are fine in most cases). Memory and
+   hardware requirements are also set here. To use a config file other
+   than ``config/config.yaml``, set the path next to the ``configfile:``
+   variable in this file.
+
+   .. note::
+
+      Despite the shared file name,
+      ``htcondor/spras_profile/config.yaml`` is **not** the same as your
+      SPRAS config file (typically ``config/config.yaml``), and they
+      serve different purposes:
+
+      -  ``htcondor/spras_profile/config.yaml`` is a *Snakemake
+         profile*. It controls *how* Snakemake runs the workflow on
+         HTCondor -- the executor, per-job resources (memory, disk,
+         CPUs), the container image, and so on.
+
+      -  ``config/config.yaml`` is the *SPRAS config file*. It defines
+         *what* the workflow does -- the algorithms, datasets, and
+         analysis options.
+
+      The two are linked by the ``configfile:`` key in the profile,
+      which tells Snakemake which SPRAS config file to load. So when
+      these instructions mention editing "the SPRAS profile" versus
+      "your SPRAS config file," they are referring to these two
+      different files -- double-check you're editing the intended one.
 
 #. Modify your SPRAS configuration file to set ``unpack_singularity:
    true`` and ``containers.framework: singularity``.
@@ -452,6 +522,44 @@ retries and prevents your workflow from completing, this indicates some
 user/developer intervention is likely required. If you choose to open a
 github issue, please include a description of the error(s) and what
 troubleshooting steps you've already taken.
+
+How To Fix a Locked Working Directory
+=====================================
+
+While a workflow runs, Snakemake places a lock on its working directory
+so that two runs can't modify the same outputs at once. Normally
+Snakemake releases this lock when it finishes or is stopped cleanly. If
+a run is interrupted abruptly, however, the lock can be left behind --
+the most common cause is removing a running workflow with ``condor_rm``
+(which kills the managed Snakemake job before it can clean up), but
+killing a terminal-attached run before it exits will do the same.
+
+The next time you launch the workflow, Snakemake refuses to start and
+raises a ``LockException``, reporting that the directory cannot be
+locked. This is easy to miss in the long-running (HTCondor-managed)
+mode, because the error is written to your log directory (e.g.
+``htcondor/logs/snakemake.err``) instead of your terminal -- so the
+submitted job can look like it finished immediately even though no
+workflow steps ever ran.
+
+To clear a stale lock, run Snakemake once with the ``--unlock`` flag,
+using the same profile you launch the workflow with, from the root of
+the SPRAS repository:
+
+.. code:: bash
+
+   snakemake --profile htcondor/spras_profile/ --unlock
+
+This only removes the lock; it does not run any workflow steps. Once it
+completes, re-launch the workflow as usual and Snakemake will pick up
+where it left off.
+
+.. warning::
+
+   Only unlock when you're certain no other Snakemake process is still
+   running against the same directory. The lock exists to prevent
+   concurrent runs from corrupting each other's state, so unlocking
+   while a real run is in progress can lead to inconsistent output.
 
 How To Fix HTCondor Creds Error
 ===============================
