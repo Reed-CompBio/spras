@@ -251,6 +251,22 @@ class TestConfig:
         with pytest.raises(ValueError, match="Unknown algorithm name 'typo_algo'"):
             config.init_global(test_config)
 
+    def test_config_container_enable_profiling(self):
+        # enable_profiling must survive the ContainerSettings -> ProcessedContainerSettings
+        # conversion in from_container_settings(). containers.py reads it off the processed
+        # settings at runtime, so if it isn't propagated the profiling code path never runs.
+        # Regression test for the field being silently dropped during that conversion.
+        test_config = get_test_config()
+
+        # Default: absent from config --> False
+        config.init_global(test_config)
+        assert config.config.container_settings.enable_profiling is False
+
+        # Explicitly enabled --> must propagate to the processed settings as True
+        test_config["containers"]["enable_profiling"] = True
+        config.init_global(test_config)
+        assert config.config.container_settings.enable_profiling is True
+
     def test_error_dataset_label(self):
         test_config = get_test_config()
         error_test_dicts = [{"label": "test$"}, {"label": "@test'"}, {"label": "[test]"}, {"label": "test-test"},
