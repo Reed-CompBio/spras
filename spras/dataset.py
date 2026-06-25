@@ -130,11 +130,12 @@ class Dataset:
                 f"Edge file {interactome_loc} must have three or four columns but found {num_cols}"
             )
 
-        node_set = set(self.interactome.Interactor1.unique())
-        node_set = node_set.union(set(self.interactome.Interactor2.unique()))
+        # We get uniqueness afterwards to make `load_files_from_dict` have a well-defined node ordering,
+        # since algorithms may depend on the order of nodes passed.
+        nodes = list(pd.concat([self.interactome.Interactor1, self.interactome.Interactor2]).unique())
 
         # Load generic node tables
-        self.node_table = pd.DataFrame(node_set, columns=[self.NODE_ID])
+        self.node_table = pd.DataFrame(nodes, columns=[self.NODE_ID])
         for node_file in node_data_files:
             single_node_table = pd.read_table(os.path.join(data_loc, node_file))
             # If we have only 1 column, assume this is an indicator variable
