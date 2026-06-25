@@ -27,7 +27,9 @@ class ST_RWRParams(BaseModel):
 # Note: This class is almost identical to the rwr.py file.
 class ST_RWR(PRM[ST_RWRParams]):
     required_inputs = ['network','sources','targets']
-    dois = []
+    # Paper relevant to biological applications of random walks,
+    # then the personalization-vector-based PageRank paper.
+    dois = ["10.1093/bioinformatics/btq680", "10.1145/511446.511513"]
 
     @staticmethod
     def generate_inputs(data, filename_map):
