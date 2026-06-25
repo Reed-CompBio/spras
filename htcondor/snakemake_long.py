@@ -9,6 +9,7 @@ runs the actual snakemake executable.
 import argparse
 import os
 import pathlib
+import shlex
 import subprocess
 import sys
 import time
@@ -30,6 +31,9 @@ def parse_args(isLocal=False):
         parser.add_argument("command", help="Helper command to run", choices=["long"])
     parser.add_argument("--snakefile", help="The Snakefile to run. If omitted, the Snakefile is assumed to be in the current directory.", required=False)
     parser.add_argument("--profile", help="A path to a directory containing the desired Snakemake profile.", required=True)
+    parser.add_argument("--verbose", help="Enable verbose output for debugging.", action="store_true", required=False)
+    parser.add_argument("--env-manager", help="The environment manager to use (conda or mamba). Default is conda.",
+                        choices=["conda", "mamba"], default="conda", required=False)
     # I'd love to change this to "logdir", but using the same name as Snakemake for consistency of feeling between this script
     # and Snakemake proper.
     parser.add_argument("--htcondor-jobdir", help="The directory Snakemake will write logs to. If omitted, a 'logs` directory will be created in the current directory", required=False)
@@ -39,19 +43,25 @@ def parse_args(isLocal=False):
 Given a Snakefile, profile, and HTCondor job directory, submit a local universe job that runs
 Snakemake from the context of the submission directory.
 """
-def submit_local(snakefile, profile, htcondor_jobdir):
+def submit_local(snakefile, profile, htcondor_jobdir, verbose=False, env_manager="conda"):
     # Get the location of this script, which also serves as the executable for the condor job.
     script_location = pathlib.Path(__file__).resolve()
+
+    # Build arguments string, including optional flags
+    args_list = ["long", "--snakefile", snakefile, "--profile", profile, "--htcondor-jobdir", htcondor_jobdir, "--env-manager", env_manager]
+    if verbose:
+        args_list.append("--verbose")
+    args_str = " ".join(shlex.quote(str(arg)) for arg in args_list)
 
     submit_description = htcondor.Submit({
         "executable":              script_location,
         # We use the "long" command to indicate to the script that it should run the Snakemake command instead of submitting another job.
         # See comment in parse_args for more information.
-        "arguments":               f"long --snakefile {snakefile} --profile {profile} --htcondor-jobdir {htcondor_jobdir}",
+        "arguments":               args_str,
         "universe":                "local",
         "request_disk":            "512MB",
         "request_cpus":            1,
-        "request_memory":          512,
+        "request_memory":          "512MB",
 
         # Set up logging
         "log":                     f"{htcondor_jobdir}/snakemake.log",
@@ -92,15 +102,11 @@ def top_main():
 
     # Make sure we have a value for the log directory and that the directory exists.
     if args.htcondor_jobdir is None:
-        args.htcondor_jobdir = pathlib.Path(os.getcwd()) / "snakemake-long-logs"
-        if not os.path.exists(args.htcondor_jobdir):
-            os.makedirs(args.htcondor_jobdir)
-    else:
-        if not os.path.exists(args.htcondor_jobdir):
-            os.makedirs(args.htcondor_jobdir)
+        args.htcondor_jobdir = pathlib.Path(os.getcwd()) / "htcondor" / "logs"
+    args.htcondor_jobdir.mkdir(exist_ok=True)
 
     try:
-        submit_local(args.snakefile, args.profile, args.htcondor_jobdir)
+        submit_local(args.snakefile, args.profile, args.htcondor_jobdir, args.verbose, args.env_manager)
     except Exception as e:
         print(f"Error: Could not submit local universe job. {e}")
         raise
@@ -108,17 +114,29 @@ def top_main():
 """
 Command to activate conda environment and run Snakemake. This is run by the local universe job, not the user.
 """
+def get_env_activation_command(env_manager, env_name="spras"):
+    """Generate the appropriate shell commands to activate the environment based on the env manager."""
+    if env_manager == "mamba":
+        # mamba uses shell hook for activation
+        return f'eval "$(mamba shell hook --shell bash)" && mamba activate {env_name}'
+    else:  # conda (default)
+        return f'source $(conda info --base)/etc/profile.d/conda.sh && conda activate {env_name}'
+
 def long_main():
     args = parse_args(True)
 
     # Note that we need to unset APPTAINER_CACHEDIR in this case but not in the local terminal case because the wrapper
     # HTCondor job has a different environment and populating this value causes Snakemake to fail when it tries to write
     # to spool (a read-only filesystem from the perspective of the EP job).
+    verbose_flag = "--verbose" if args.verbose else ""
+
+    # Get the appropriate activation command for the detected/specified env manager
+    activation_cmd = get_env_activation_command(args.env_manager)
+
     command = f"""
-    source $(conda info --base)/etc/profile.d/conda.sh && \
-    conda activate spras && \
+    {activation_cmd} && \
     unset APPTAINER_CACHEDIR && \
-    snakemake -s {args.snakefile} --profile {args.profile} --htcondor-jobdir {args.htcondor_jobdir}
+    snakemake -s {args.snakefile} --profile {args.profile} --htcondor-jobdir {args.htcondor_jobdir} {verbose_flag}
     """
 
     try:

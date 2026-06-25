@@ -5,6 +5,8 @@
 SPRAS provides several convenient ways to use the package, depending on
 your needs
 
+.. _using-a-conda-environment:
+
 ***************************
  Using a Conda Environment
 ***************************
