@@ -22,6 +22,9 @@ class ST_RWRParams(BaseModel):
     alpha: Optional[float] = None
     "The chance of a restart during the random walk"
 
+    max_iter: Optional[int] = None
+    "The maximum amount of PageRank iterations."
+
     model_config = ConfigDict(extra='forbid', use_attribute_docstrings=True)
 
 # Note: This class is almost identical to the rwr.py file.
@@ -92,11 +95,13 @@ class ST_RWR(PRM[ST_RWRParams]):
                    '--targets', target_file,
                    '--output', mapped_out_prefix]
 
-        # Add alpha as an optional argument
+        # Add optional arguments
         if args.alpha is not None:
             command.extend(['--alpha', str(args.alpha)])
+        if args.max_iter is not None:
+            command.extend(['--max-iter', str(args.max_iter)])
 
-        container_suffix = 'st-rwr:v1'
+        container_suffix = 'st-rwr:v2'
         run_container_and_log(
             "Source-Target RandomWalk with Restart",
             container_suffix,
