@@ -35,3 +35,12 @@ repos:
     rev: v0.0.14
     hooks:
       - id: rstfmt
+  - repo: local
+    hooks:
+      - id: schema
+        name: schema
+        entry: python3 ./util/update_schema.py
+        language: unsupported
+        always_run: true
+        files: ./config/schema.yaml
+        pass_filenames: false
