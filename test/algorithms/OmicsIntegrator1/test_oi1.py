@@ -14,7 +14,7 @@ from spras.omicsintegrator1 import (
 
 config.init_from_file("config/config.yaml")
 
-TEST_DIR = 'test/OmicsIntegrator1/'
+TEST_DIR = 'test/algorithms/OmicsIntegrator1/'
 OUT_FILE = TEST_DIR+'output/test_optimalForest.sif'
 
 
