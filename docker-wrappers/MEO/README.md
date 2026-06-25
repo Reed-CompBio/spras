@@ -26,3 +26,4 @@ The Docker wrapper can be tested with `pytest`.
 
 - `v1`: Initial version
 - `v2`: Use `amazoncorretto` alpine base image
+- `v3`: Compile MEO from source, explicit `lp_solve` dependency.
