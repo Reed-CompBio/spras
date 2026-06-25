@@ -35,6 +35,11 @@ class CytoscapeAnalysis(BaseModel):
 
     model_config = ConfigDict(extra='forbid')
 
+class VisJsAnalysis(BaseModel):
+    include: bool
+
+    model_config = ConfigDict(extra='forbid')
+
 # Note that CaseInsensitiveEnum is not pydantic: pydantic
 # has special support for enums, but we avoid the
 # pydantic-specific "model_config" key here for this reason.
@@ -70,6 +75,7 @@ class EvaluationAnalysis(BaseModel):
 class Analysis(BaseModel):
     summary: SummaryAnalysis = SummaryAnalysis(include=False)
     cytoscape: CytoscapeAnalysis = CytoscapeAnalysis(include=False)
+    visjs: VisJsAnalysis = VisJsAnalysis(include=False)
     ml: MlAnalysis = MlAnalysis(include=False)
     evaluation: EvaluationAnalysis = EvaluationAnalysis(include=False)
 
