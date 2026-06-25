@@ -1,0 +1,21 @@
+rule all:
+	input:
+		expand("output_{index}.png", index=range(1,4))
+rule debug:
+	wildcard_constraints:
+    		index = r'\d+'
+	output:
+		output_file = "output_{index}.png"
+	run:
+		import numpy as np
+		import seaborn as sns
+		import matplotlib.pyplot as plt
+		X = np.random.randint(0,10,10)
+		Y = np.random.randint(3,7,10)
+        	column_names = ["#col{0}".format(i%2) for i in range(1,11)]
+		custom_palette = sns.color_palette("husl", len(column_names))		
+		label_color_map = {label: color for label, color in zip(column_names, custom_palette)}
+		plt.figure(figsize=(10, 7))
+		sns.scatterplot(x=X, y=Y,s=70, hue=column_names, legend=True, palette=label_color_map)
+		plt.savefig(output.output_file, dpi=300)
+
