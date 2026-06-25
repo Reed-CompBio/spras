@@ -1,6 +1,6 @@
 [type.txt]
 # Ignore data files
-extend-glob = ["*.txt"]
+extend-glob = ["*.txt", "*.sif"]
 check-file = false
 
 [default.extend-words]
