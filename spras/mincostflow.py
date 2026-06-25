@@ -67,7 +67,7 @@ class MinCostFlow(PRM[MinCostFlowParams]):
         edges = convert_undirected_to_directed(edges)
 
         # creates the edges files that contains the head and tail nodes and the weights after them
-        edges.to_csv(filename_map['edges'], sep='\t', index=False, columns=["Interactor1", "Interactor2", "Weight"],
+        edges.to_csv(filename_map['edges'], sep='\t', index=False, columns=["Interactor1", "Interactor2", "Weight", "Direction"],
                      header=False)
 
     @staticmethod
@@ -113,7 +113,7 @@ class MinCostFlow(PRM[MinCostFlowParams]):
             command.extend(['--capacity', str(args.capacity)])
 
         # choosing to run in docker or singularity container
-        container_suffix = "mincostflow"
+        container_suffix = "mincostflow:v2"
 
         # constructs a docker run call
         run_container_and_log('MinCostFlow',
@@ -142,9 +142,7 @@ class MinCostFlow(PRM[MinCostFlowParams]):
         """
         Convert a predicted pathway into the universal format
 
-        Although the algorithm constructs a directed network, the resulting network is treated as undirected.
-        This is because the flow within the network doesn't imply causal relationships between nodes.
-        The primary goal of the algorithm is node identification, not the identification of directional edges.
+        The algorithm constructs a mixed directional network, the resulting network is treated as mixed directional.
 
         @param raw_pathway_file: pathway file produced by an algorithm's run function
         @param standardized_pathway_file: the same pathway written in the universal format
@@ -153,9 +151,6 @@ class MinCostFlow(PRM[MinCostFlowParams]):
         df = raw_pathway_df(raw_pathway_file, sep='\t', header=None)
         if not df.empty:
             df = add_rank_column(df)
-            # TODO update MinCostFlow version to support mixed graphs
-            # Currently directed edges in the input will be converted to undirected edges in the output
-            df = reinsert_direction_col_undirected(df)
             df.columns = ['Node1', 'Node2', 'Rank', "Direction"]
             df, has_duplicates = duplicate_edges(df)
             if has_duplicates:
