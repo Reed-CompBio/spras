@@ -90,7 +90,8 @@ installed. Once the build finishes, you are ready to run SPRAS.
 
    After you finish this tutorial, we recommend that you `delete the codespace
    <https://github.com/codespaces>`_ so that you will not continue to accrue
-   storage usage.
+   storage usage. You can also reduce the `default retention period
+   <https://github.com/settings/codespaces>`_.
 
 Step 2: Set up the SPRAS environment
 ------------------------------------
