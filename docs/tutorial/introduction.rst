@@ -88,10 +88,10 @@ installed. Once the build finishes, you are ready to run SPRAS.
    quota. If you hit the limit, the free option is to switch to the
    local SPRAS setup.
 
-   After you finish this tutorial, we recommend that you `delete the codespace
-   <https://github.com/codespaces>`_ so that you will not continue to accrue
-   storage usage. You can also reduce the `default retention period
-   <https://github.com/settings/codespaces>`_.
+   After you finish this tutorial, we recommend that you `delete the
+   codespace <https://github.com/codespaces>`_ so that you will not
+   continue to accrue storage usage. You can also reduce the `default
+   retention period <https://github.com/settings/codespaces>`_.
 
 Step 2: Set up the SPRAS environment
 ------------------------------------
