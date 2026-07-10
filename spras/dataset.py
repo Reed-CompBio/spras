@@ -1,7 +1,7 @@
 import os
 import pickle as pkl
 import warnings
-from typing import Union
+from typing import NotRequired, Union
 
 import pandas as pd
 
@@ -93,6 +93,7 @@ class Dataset:
         """
 
         self.label = dataset_params.label
+        self.category = dataset_params.category
 
         # Get file paths from config
         # TODO support multiple edge files
