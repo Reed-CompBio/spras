@@ -1,0 +1,6 @@
+datapoint_labels	PC1	PC2
+data-test-params-123	0.52704628	0.70710678
+data-test-params-456	-1.05409255	-0.0
+data-test-params-789	0.52704628	-0.70710678
+centroid	0.0	-0.0
+kde_peak	0.11419336	-0.00785674

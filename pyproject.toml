@@ -68,7 +68,8 @@ select = [
     "F823", # undefined-local
     "F841", # unused-variable
     "I", # isort
-    "W292", # missing-newline-at-end-of-file
+    "W292", # missing-newline-at-end-of-file,
+    "PD002", # pandas-use-of-inplace-argument
 ]
 
 [tool.setuptools.packages.find]
