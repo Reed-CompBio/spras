@@ -136,7 +136,7 @@ class ResponseNet(PRM[ResponseNetParams]):
         df = raw_pathway_df(raw_pathway_file, sep='\t', header=0)
         if not df.empty:
             df.columns = ['Node1', 'Node2', 'Flow']
-            df = df.drop(columns=['Flow'], axis=1)
+            df = df.drop(columns=['Flow'])
             df = add_rank_column(df)
             # ResponseNet's outputs should be treated as undirected outputs.
             df = reinsert_direction_col_undirected(df)
