@@ -95,6 +95,7 @@ class ProcessedContainerSettings:
             unpack_singularity=unpack_singularity,
             base_url=container_base_url,
             prefix=container_prefix,
+            enable_profiling=settings.enable_profiling,
             hash_length=hash_length,
             images=dict(settings.images),
         )
