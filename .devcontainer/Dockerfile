@@ -1,4 +1,4 @@
-FROM mcr.microsoft.com/devcontainers/anaconda:1-3
+FROM mcr.microsoft.com/devcontainers/anaconda:1.3.22-3
 
 # Install dependencies necessary to build Singularity
 RUN sudo apt-get update && sudo apt-get install -y \
