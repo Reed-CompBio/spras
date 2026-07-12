@@ -33,14 +33,22 @@ dependencies = [
 
     # toolchain deps
     "pip==25.3",
+
+
+    # dsub 0.4.13 pins tenacity<=8.2.3, which is incompatible with snakemake 9.x.
+    # Using a fork with the upper bound relaxed until dsub merges the fix:
+    # https://github.com/DataBiosphere/dsub/pull/329
+    "dsub==git+https://github.com/tristan-f-r/dsub.git@65c0b0934bbf5af8ee5aefd4953b69420814a879"
 ]
 
 [project.optional-dependencies]
 dev = [
-   # Only required for development
+    # Only required for development
     "pre-commit==4.2.0",
     "pytest==8.4.1",
     "pytest-split==0.10.0",
+    "sphinx==7.4.7",
+    "sphinx-rtd-theme==2.0.0",
 ]
 
 [project.urls]
@@ -81,3 +89,16 @@ include = ["spras*"]
 
 # packages tells setuptools what the exported package is called (ie allows import spras)
 packages = ["spras", "spras.analysis", "spras.config"]
+
+[tool.pixi.project]
+channels = ["conda-forge", "bioconda"]
+platforms = ["linux-64", "osx-arm64", "osx-64", "win-64"]
+
+[tool.pixi.dependencies]
+# for yamlfmt
+go = ">=1.24.4,<2"
+# to force local usage of the oldest supported python ver.
+python = "3.11.*"
+
+[tool.pixi.environments]
+default = {features = ["dev"], solve-group = "default"}
