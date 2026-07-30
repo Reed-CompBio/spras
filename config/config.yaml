@@ -272,3 +272,17 @@ analysis:
     # adds evaluation per algorithm per dataset-goldstandard pair
     # evaluation per algorithm will not run unless ml include and ml aggregate_per_algorithm are set to true
     aggregate_per_algorithm: true
+  lpca:
+    # if true, runs LPCA in addition to the existing PCA (both analyses will run in parallel).
+    # Running both helps compare the two methods on the same data.
+    include: false
+    # adds separate LPCA analysis for each algorithm that has multiple parameter combinations
+    aggregate_per_algorithm: false
+    # number of principal components to compute
+    k: 2
+    # fixed value of the logisticPCA tuning parameter m, used when cv is false.
+    # default of 6 was selected based on cross-validation experiments across multiple
+    # SPRAS algorithms (see https://github.com/Jeebjean/lpca-spras for details)
+    m: 6
+    # if true, choose m by cross-validation; if false, use the fixed m above
+    cv: false

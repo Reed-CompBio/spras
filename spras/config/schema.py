@@ -67,10 +67,20 @@ class EvaluationAnalysis(BaseModel):
 
     model_config = ConfigDict(extra='forbid')
 
+class LpcaAnalysis(BaseModel):
+    include: bool
+    aggregate_per_algorithm: bool = False
+    k: int = 2
+    m: float = 6
+    cv: bool = False
+
+    model_config = ConfigDict(extra='forbid')
+
 class Analysis(BaseModel):
     summary: SummaryAnalysis = SummaryAnalysis(include=False)
     cytoscape: CytoscapeAnalysis = CytoscapeAnalysis(include=False)
     ml: MlAnalysis = MlAnalysis(include=False)
+    lpca: LpcaAnalysis = LpcaAnalysis(include=False)
     evaluation: EvaluationAnalysis = EvaluationAnalysis(include=False)
 
     model_config = ConfigDict(extra='forbid')

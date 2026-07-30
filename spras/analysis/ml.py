@@ -156,7 +156,8 @@ def pca(dataframe: pd.DataFrame, output_png: str | PathLike, output_var: str | P
 
     # center binary data by subtracting the column-wise mean
     # allows PCA to focus on edge inclusion patterns across runs rather than raw output volume.
-    # TODO: replace PCA https://github.com/Reed-CompBio/spras/issues/271
+    # TODO: consider replacing PCA with LPCA for binary data https://github.com/Reed-CompBio/spras/issues/271
+    # LPCA is now available as an alternative analysis (analysis.lpca in config)
     scaler = StandardScaler(with_std=False)
     scaler.fit(X)  # compute mean inclusion rate per edge
     X_scaled = scaler.transform(X)
