@@ -86,6 +86,26 @@ def add_rank_column(df: pd.DataFrame) -> pd.DataFrame:
     df['Rank'] = 1
     return df
 
+def pval_to_prize(pval: float) -> float:
+    """
+    Converts a p-value to a prize value using the formula -log10(pval)
+    @param pval: the p-value to convert
+    @return: the prize value
+    """
+    if pval <= 0:
+        raise ValueError("p-value must be greater than 0")
+    return -np.log10(pval)
+
+def prize_to_pval(prize: float) -> float:
+    """
+    Converts a prize value to a p-value using the formula 10^(-prize)
+    @param prize: the prize value to convert
+    @return: the p-value
+    """
+    if prize < 0:
+        raise ValueError("prize must be greater than or equal to 0")
+    return 10 ** (-prize)
+
 def shrink_rank_column(df: pd.DataFrame) -> pd.DataFrame:
     """
     Takes the df `Rank` column (e.g. [11, 2, 4, 2, 9]),

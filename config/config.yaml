@@ -94,13 +94,13 @@ containers:
 
 algorithms:
   - name: "pathlinker"
-    include: true
+    include: false
     runs:
       run1:
         k: range(100,201,100)
 
   - name: "omicsintegrator1"
-    include: true
+    include: false
     runs:
       run1:
         b: [5, 6]
@@ -109,7 +109,7 @@ algorithms:
         dummy_mode: "file" # Or "terminals", "all", "others"
 
   - name: "omicsintegrator2"
-    include: true
+    include: false
     runs:
       run1:
         b: 4
@@ -119,7 +119,7 @@ algorithms:
         g: 3
 
   - name: "meo"
-    include: true
+    include: false
     runs:
       run1:
         max_path_length: 3
@@ -127,49 +127,65 @@ algorithms:
         rand_restarts: 10
 
   - name: "mincostflow"
-    include: true
+    include: false
     runs:
       run1:
         flow: 1
         capacity: 1
 
   - name: "allpairs"
-    include: true
+    include: false
 
   - name: "domino"
-    include: true
+    include: false
     runs:
       run1:
         slice_threshold: 0.3
         module_threshold: 0.05
 
   - name: "strwr"
-    include: true
+    include: false
     runs:
       run1:
         alpha: [0.85]
         threshold: [100, 200]
 
   - name: "rwr"
-    include: true
+    include: false
     runs:
       run1:
         alpha: [0.85]
         threshold: [100, 200]
 
   - name: "bowtiebuilder"
-    include: true
+    include: false
 
   - name: "responsenet"
-    include: true
+    include: false
     runs:
       run1:
         gamma: [10]
   - name: "diamond"
-    include: true
+    include: false
     runs:
       run1:
         n: 1
+
+  - name: "netmix2"
+    include: false
+    runs:
+      run1:
+        num_edges: 100000
+        density: 0.05
+
+# Secrets are used to specify credentials to proprietary services in use
+# by some algorithms. In SPRAS, we .gitignore the `licences` folder for this
+# use. All tools below are the ones in use by any SPRAS algorithm.
+secrets:
+  # Gurobi (https://www.gurobi.com/) is a proprietary SMT.
+  # It comes with free academic use:
+  # https://www.gurobi.com/academia/academic-program-and-licenses/
+  gurobi: "licenses/gurobi.lic"
 
 # Here we specify which pathways to run and other file location information.
 # DataLoader.py can currently only load a single dataset
@@ -179,20 +195,24 @@ datasets:
     label: data0
     # To run OmicsIntegrator1 with dummy nodes, add dummy.txt file to node_files
     # or a dummy column to the node table
-    node_files: ["node-prizes.txt", "sources.txt", "targets.txt"]
+    # Changed to EGFR — original 2-node toy data is too small for NetMix2's locfdr step
+    # node_files: ["node-prizes.txt", "sources.txt", "targets.txt"]
     # DataLoader.py can currently only load a single edge file, which is the primary network
-    edge_files: ["network.txt"]
+    # edge_files: ["network.txt"]
+    node_files: ["tps-egfr-prizes.txt"]
+    edge_files: ["phosphosite-irefindex13.0-uniprot.txt"]
     # Placeholder
     other_files: []
     # Relative path from the spras directory
     data_dir: "input"
-  - label: data1
-    # Reuse some of the same sources file as 'data0' but different network and targets
-    node_files: ["node-prizes.txt", "sources.txt", "alternative-targets.txt"]
-    edge_files: ["alternative-network.txt"]
-    other_files: []
-    # Relative path from the spras directory
-    data_dir: "input"
+    # data1 commented out — only one dataset needed for NetMix2 testing
+    # - label: data1
+    #   # Reuse some of the same sources file as 'data0' but different network and targets
+    #   node_files: ["node-prizes.txt", "sources.txt", "alternative-targets.txt"]
+    #   edge_files: ["alternative-network.txt"]
+    #   other_files: []
+    #   # Relative path from the spras directory
+    #   data_dir: "input"
 
 # A gold standard dataset defines the ground-truth nodes or edges that
 # will be used to evaluate reconstructed networks.
@@ -211,14 +231,15 @@ gold_standards:
     data_dir: "input"
     # List of dataset labels to compare with the specific gold standard dataset
     dataset_labels: ["data0"]
-  - label: gs1
-    node_files: ["gs_nodes1.txt"]
-    data_dir: "input"
-    dataset_labels: ["data1", "data0"]
+  # gs1 commented out — referenced data1 which is disabled
+  # - label: gs1
+  #   node_files: ["gs_nodes1.txt"]
+  #   data_dir: "input"
+  #   dataset_labels: ["data1", "data0"]
   - label: gs2
     edge_files: ["gs_edges0.txt"]
     data_dir: "input"
-    dataset_labels: ["data0", "data1"]
+    dataset_labels: ["data0"]
   - label: gs3
     edge_files: ["gs_edges0.txt", "gs_edges1.txt"]
     data_dir: "input"
@@ -245,7 +266,8 @@ analysis:
   # Machine learning analysis (e.g. clustering) of the pathway output files for each dataset
   ml:
     # ml analysis per dataset
-    include: true
+    # Disabled — ML requires multiple pathways; only NetMix2 is enabled
+    include: false
     # adds ml analysis per algorithm output
     # only runs for algorithms with multiple parameter combinations chosen
     aggregate_per_algorithm: true

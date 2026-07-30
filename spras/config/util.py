@@ -58,6 +58,7 @@ ALGORITHM_REGISTRY: dict[str, tuple[str, str]] = {
     "domino":          ("spras.domino", "DOMINO"),
     "meo":             ("spras.meo", "MEO"),
     "mincostflow":     ("spras.mincostflow", "MinCostFlow"),
+    "netmix2":         ("spras.netmix2", "NetMix2"),
     "omicsintegrator1": ("spras.omicsintegrator1", "OmicsIntegrator1"),
     "omicsintegrator2": ("spras.omicsintegrator2", "OmicsIntegrator2"),
     "pathlinker":      ("spras.pathlinker", "PathLinker"),

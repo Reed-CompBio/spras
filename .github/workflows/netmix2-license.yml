@@ -1,0 +1,45 @@
+name: NetMix2 tests, license required
+
+on:
+  workflow_run:
+    workflows: ["Test SPRAS"]
+    types: [completed]
+
+permissions:
+  contents: read
+
+jobs:
+  approval_gate:
+    if: github.event.workflow_run.conclusion == 'success' || github.event.workflow_run.conclusion == 'failure'
+    runs-on: ubuntu-latest
+    environment: safe-to-test
+    timeout-minutes: 5
+    steps:
+      - run: echo "Approved to run Gurobi-licensed NetMix2 tests"
+
+  netmix2-tests:
+    needs: approval_gate
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          ref: ${{ github.event.workflow_run.head_sha }}
+      - name: Write Gurobi license
+        env:
+          GUROBI_LICENSE: ${{ secrets.GUROBI_LICENSE }}
+        run: |
+          mkdir -p licenses
+          printf '%s\n' "$GUROBI_LICENSE" > licenses/gurobi.lic
+      - name: Install conda environment
+        uses: conda-incubator/setup-miniconda@v2
+        with:
+          activate-environment: spras
+          environment-file: environment.yml
+          auto-activate-base: false
+          miniconda-version: 'latest'
+      - name: Install spras in conda env
+        shell: bash --login {0}
+        run: pip install .
+      - name: Run NetMix2 tests with real license
+        shell: bash --login {0}
+        run: pytest -vs -k "nm2 or netmix2"
