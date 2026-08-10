@@ -4,13 +4,6 @@
    You can adapt this file completely to your liking, but it should at least
    contain the root `toctree` directive.
 
-.. raw:: html
-
-   <div style="border: 2px solid red; padding: 10px; text-align: center; background-color: yellow; font-size: 1.5em;">
-       <strong>🚧 Under Construction 🚧</strong>
-       <p>This documentation is currently under construction. Some sections may be incomplete or subject to change.</p>
-   </div>
-
 ###################################
  Welcome to SPRAS's documentation!
 ###################################
