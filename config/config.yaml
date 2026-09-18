@@ -252,7 +252,7 @@ analysis:
     # specify how many principal components to calculate
     components: 2
     # boolean to show the labels on the pca graph
-    labels: false
+    labels: true
     # 'ward', 'complete', 'average', 'single'
     # if linkage: ward, must use metric: euclidean
     linkage: 'ward'
