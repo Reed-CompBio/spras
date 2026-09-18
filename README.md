@@ -22,11 +22,11 @@ SPRAS overview showing [PathLinker](https://github.com/Murali-group/PathLinker) 
 
 ## Hardware Requirements
 
-We recommend running with at least 4 cores and 16 GBs of RAM
+We recommend running with at least 4 cores and 16 GBs of RAM.
 
 ## Operating systems
 
-SPRAS runs on Linux, macOS, and Windows
+SPRAS runs on Linux, macOS, and Windows.
 
 Our continuous integration runs on GitHub Actions using Ubuntu 24.04.5, macOS 26.6.2, Windows 10.0.26100.
 
@@ -94,9 +94,7 @@ The example config defines two small datasets built from the files in `input/`:
   `alternative-targets.txt`
 
 Four gold standard sets are declared (`gs_nodes0.txt`, `gs_nodes1.txt`,
-`gs_edges0.txt`, `gs_edges1.txt`) and mapped to the two datasets. Evaluation is
-switched off in this config, so they are parsed but not scored. Set
-`analysis.evaluation.include: true` to turn evaluation on.
+`gs_edges0.txt`, `gs_edges1.txt`) and mapped to the two datasets.
 
 #### Expected output
 
