@@ -2,6 +2,9 @@
 [![Test SPRAS](https://github.com/Reed-CompBio/spras/actions/workflows/test-spras.yml/badge.svg)](https://github.com/Reed-CompBio/spras/actions/workflows/test-spras.yml)
 [![Documentation](https://readthedocs.org/projects/spras/badge/?version=latest)](https://spras.readthedocs.io)
 
+
+## Overview
+
 SPRAS is a work-in-progress dockerized library of pathway reconstruction enhancement tools.
 The framework will contain different pathway reconstruction algorithms that connect genes and proteins of interest in the context of a general protein-protein interaction network, allowing users to run multiple algorithms on their inputs.
 See the GLBIO 2021 [slides](https://doi.org/10.6084/m9.figshare.14551476) or [video](https://www.youtube.com/watch?v=nU8EARwMqdM&list=PLmX8XnLr6zeHlqhhxDy4fA5o65Q6m76KX&index=19) for more information.
@@ -17,7 +20,20 @@ SPRAS is inspired by tools for single-cell transcriptomics such as [BEELINE](htt
 ![SPRAS overview](docs/_static/spras-overview.png)
 SPRAS overview showing [PathLinker](https://github.com/Murali-group/PathLinker) and [Omics Integrator](https://github.com/fraenkel-lab/OmicsIntegrator) as representative pathway reconstruction algorithms.
 
-## Installing and running SPRAS
+## Hardware Requirements
+
+We recommend running with at least 4 cores and 16 GBs of RAM
+
+## Operating systems
+
+SPRAS runs on Linux, macOS, and Windows
+
+Our continuous integration runs on GitHub Actions using Ubuntu 24.04.5, macOS 26.6.2, Windows 10.0.26100.
+
+## Installing SPRAS and setting up software dependencies
+
+The setup should take around 10 minutes.
+
 SPRAS requires
 - Files in this repository
 - Python
@@ -50,19 +66,79 @@ code are reflected in the installed module.
 You also need to install [Docker](https://docs.docker.com/get-docker/).
 After installing Docker, start Docker before running SPRAS.
 
-Once you have activated the conda environment and started Docker, you can run SPRAS with the example Snakemake workflow.
+## Running SPRAS with a test dataset
+
+Running SPRAS locally on the test dataset takes around 10 minutes.
+
+Once you have activated the conda environment and started Docker, you can run SPRAS on an example data.
 From the root directory of the `spras` repository, run the command
 ```
 snakemake --cores 1 --configfile config/config.yaml
 ```
+
 This will run the SPRAS workflow with the example config file (`config/config.yaml`) and input files.
-Output files will be written to the `output` directory.
+The run covers 12 algorithms on two toy datasets, across parameter
+combination listed in the config, followed by the post-processing analyses that
+the config enables. Output files are written to the `output` directory.
 
 You do not need to manually download Docker images from DockerHub before running SPRAS.
 The workflow will automatically download any missing images as long as Docker is running.
 
+#### The toy dataset
+
+The example config defines two small datasets built from the files in `input/`:
+
+- `data0`: `network.txt` as the interactome, with `node-prizes.txt`,
+  `sources.txt`, and `targets.txt` as node inputs
+- `data1`: `alternative-network.txt`, with `node-prizes.txt`, `sources.txt`, and
+  `alternative-targets.txt`
+
+Four gold standard sets are declared (`gs_nodes0.txt`, `gs_nodes1.txt`,
+`gs_edges0.txt`, `gs_edges1.txt`) and mapped to the two datasets. Evaluation is
+switched off in this config, so they are parsed but not scored. Set
+`analysis.evaluation.include: true` to turn evaluation on.
+
+#### Expected output
+
+Output is written to the `output` directory. For each dataset, expect:
+
+- **19 pathway directories**, one per algorithm-parameter combination, named
+  `{dataset}-{algorithm}-params-{hash}`. Across both datasets that is 38
+  reconstructions.
+- `{dataset}-pathway-summary.txt`, node and edge counts and topological
+  statistics for every output pathway for that dataset.
+- `{dataset}-ml/`, the machine learning comparison of those output pathways.
+- `{dataset}-cytoscape.cys`, a Cytoscape session holding every pathway graph for
+  that dataset.
+- `{dataset}-{gold_standard}-eval/`, one directory per dataset-gold standard pair
+  declared in `gold_standards`, holding the corresponding evaluations.
+- `dataset-{dataset}-merged.pickle`, the merged input data, plus
+  `gs-{gold_standard}-merged.pickle` for each gold standard.
+- `logs/` and `prepared/`, holding the parameter-hash mappings and the
+  algorithm-specific input files generated before each run.
+
 ### Running SPRAS with HTCondor
 Large SPRAS workflows may benefit from execution with HTCondor, a scheduler/manager for distributed high-throughput computing workflows that allows many Snakemake steps to be run in parallel. For instructions on running SPRAS in this setting, see `docker-wrappers/SPRAS/README.md`.
+
+### Running on your own data
+
+1. Format your interactome and node files per [our input format docs](https://spras.readthedocs.io/en/latest/output.html).
+2. Place them under `input/`, or another directory and add the path to `data_dir`, which is
+   read relative to the spras directory.
+3. Write a configuration file following the format of `config/config.yaml`:
+   - Add a `datasets` entry with a label and your `node_files` and `edge_files`.
+     Labels may contain only letters, numbers, and underscores.
+   - Set `include: true` for each algorithm you want and list its parameter
+     values. List-valued parameters expand combinatorially, so a few extra values
+     multiply the number of runs quickly.
+   - To score against a gold standard, add a `gold_standards` entry listing
+     either `node_files` or `edge_files` (not both) and the `dataset_labels` it
+     applies to. Then set `analysis.ml.include` and `analysis.evaluation.include`
+     to `true`; evaluation does not run unless ML is also enabled.
+4. Run `snakemake --cores <N> --configfile <config-file>`.
+
+More instructions provided in our [documentation](https://spras.readthedocs.io).
+
 
 ## Components
 **Configuration file**: Specifies which pathway reconstruction algorithms to run, which hyperparameter combinations to use, and which datasets to run them on.

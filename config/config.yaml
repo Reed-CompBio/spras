@@ -241,7 +241,7 @@ analysis:
     include: true
   # Create Cytoscape session file with all pathway graphs for each dataset
   cytoscape:
-    include: false
+    include: true
   # Machine learning analysis (e.g. clustering) of the pathway output files for each dataset
   ml:
     # ml analysis per dataset
@@ -268,7 +268,7 @@ analysis:
   evaluation:
     # evaluation per dataset-goldstandard pair
     # evaluation will not run unless ml include is set to true
-    include: false
+    include: true
     # adds evaluation per algorithm per dataset-goldstandard pair
     # evaluation per algorithm will not run unless ml include and ml aggregate_per_algorithm are set to true
     aggregate_per_algorithm: true
