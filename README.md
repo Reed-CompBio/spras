@@ -120,22 +120,7 @@ Large SPRAS workflows may benefit from execution with HTCondor, a scheduler/mana
 
 ### Running on your own data
 
-1. Format your interactome and node files per [our input format docs](https://spras.readthedocs.io/en/latest/output.html).
-2. Place them under `input/`, or another directory and add the path to `data_dir`, which is
-   read relative to the spras directory.
-3. Write a configuration file following the format of `config/config.yaml`:
-   - Add a `datasets` entry with a label and your `node_files` and `edge_files`.
-     Labels may contain only letters, numbers, and underscores.
-   - Set `include: true` for each algorithm you want and list its parameter
-     values. List-valued parameters expand combinatorially, so a few extra values
-     multiply the number of runs quickly.
-   - To score against a gold standard, add a `gold_standards` entry listing
-     either `node_files` or `edge_files` (not both) and the `dataset_labels` it
-     applies to. Then set `analysis.ml.include` and `analysis.evaluation.include`
-     to `true`; evaluation does not run unless ML is also enabled.
-4. Run `snakemake --cores <N> --configfile <config-file>`.
-
-More instructions provided in our [documentation](https://spras.readthedocs.io).
+Please refer to the instructions in our [documentation](https://spras.readthedocs.io).
 
 
 ## Components
