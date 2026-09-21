@@ -22,7 +22,7 @@ SPRAS overview showing [PathLinker](https://github.com/Murali-group/PathLinker) 
 
 ## Hardware Requirements
 
-We recommend running with at least 4 cores and 16 GBs of RAM.
+We recommend running with at least 4 cores and 16 GB of RAM.
 
 ## Operating systems
 
@@ -70,7 +70,7 @@ After installing Docker, start Docker before running SPRAS.
 
 Running SPRAS locally on the test dataset takes around 10 minutes.
 
-Once you have activated the conda environment and started Docker, you can run SPRAS on an example data.
+Once you have activated the conda environment and started Docker, you can run SPRAS on example data.
 From the root directory of the `spras` repository, run the command
 ```
 snakemake --cores 1 --configfile config/config.yaml
