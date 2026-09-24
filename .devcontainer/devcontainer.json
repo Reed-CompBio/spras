@@ -4,13 +4,13 @@
 // For format details, see https://aka.ms/devcontainer.json. For config options, see the
 // README at: https://github.com/devcontainers/templates/tree/main/src/anaconda
 {
-	"name": "Anaconda (Python 3)",
+	"name": "Pixi (Python 3)",
 	"build": { 
 		"context": "..",
 		"dockerfile": "Dockerfile"
 	},
 	"features": {
-		"ghcr.io/devcontainers/features/docker-in-docker:2": {},
+		"ghcr.io/devcontainers/features/docker-in-docker:4": {},
 		// For building singularity
 		"ghcr.io/devcontainers/features/go:1": {}
 	},

@@ -326,13 +326,13 @@ should be returned as ``output``.
 Parallelizing SPRAS workflows with HTCondor requires much of the same
 setup as the previous section, but with two additions.
 
-#. :ref:`Build/activate the SPRAS conda/mamba environment
-   <using-a-conda-environment>` and ``pip install`` the SPRAS module
+#. :ref:`Build/activate the SPRAS pixi environment
+   <using-pixi>` and ``pip install`` the SPRAS module
    (via ``pip install .`` inside the SPRAS directory).
 
 #. Install the `HTCondor Snakemake executor
    <https://github.com/htcondor/snakemake-executor-plugin-htcondor>`__;
-   once your SPRAS conda/mamba environment is activated and SPRAS is
+   once your SPRAS pixi environment is activated and SPRAS is
    ``pip install``-ed, you can install the HTCondor Snakemake executor
    with the following:
 
@@ -436,7 +436,7 @@ log files).
 
       ./htcondor/snakemake_long.py --profile htcondor/spras_profile/ --verbose
 
-If you use mamba instead of conda for environment management, you can
+If you use mamba instead of pixi for environment management, you can
 specify this with the ``--env-manager`` flag:
 
 .. code:: bash
@@ -467,7 +467,7 @@ profile's default-resources block:
 .. tip::
 
    If you encounter an error that says ``No module named 'spras'``, make
-   sure you've ``pip install``-ed the SPRAS module into your conda
+   sure you've ``pip install``-ed the SPRAS module into your pixi
    environment.
 
 ****************
@@ -572,9 +572,9 @@ containing:
    raise CredsError("Credentials not found for this workflow")
 
 it indicates you must upgrade the version of the HTCondor Snakemake
-executor bundled with your conda environment.
+executor bundled with your pixi environment.
 
-To upgrade, from your activated ``spras`` conda environment run:
+To upgrade, from your activated ``spras`` pixi environment run:
 
 .. code:: bash
 
@@ -600,4 +600,4 @@ executor repository
 inspecting the commit history.
 
 If the preceding steps did not update the installed version, you may
-need to delete and rebuild your ``spras`` conda environment.
+need to delete and rebuild your ``spras`` pixi environment.
