@@ -1,11 +1,17 @@
 # DOMINO wrapper
 # https://github.com/Shamir-Lab/DOMINO
-FROM python:3.7
+FROM python:3.8.20-bullseye
 
-RUN pip install domino-python==0.1.1
+COPY requirements.txt .
 
-# DOMINO requires data files in hard-coded locations
-RUN cd /usr/local/lib/python3.7/site-packages/src/data && \
-    wget https://raw.githubusercontent.com/Shamir-Lab/DOMINO/master/src/data/ensg2gene_symbol.txt && \
-    wget https://raw.githubusercontent.com/Shamir-Lab/DOMINO/master/src/data/ensmusg2gene_symbol.txt && \
-    wget https://raw.githubusercontent.com/Shamir-Lab/DOMINO/master/src/data/graph.html.format
+RUN pip install -r requirements.txt
+
+COPY *.patch .
+
+RUN git clone https://github.com/Shamir-Lab/DOMINO/ && \
+    cd /DOMINO && \
+    git reset --hard 85dad1515717b425b17f58f92b13a063ccccb85d && \
+    git config user.email "email@example.com" && \
+    git config user.name "Non-existent User" && \
+    # https://stackoverflow.com/a/4832785/7589775
+    git apply --ignore-space-change --ignore-whitespace --verbose /*.patch
