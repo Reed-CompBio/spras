@@ -48,3 +48,6 @@ gold_standards:
 reconstruction_settings:
   locations:
     reconstruction_dir: "test/analysis/input/run/example"
+analysis:
+  summary:
+    include: true
