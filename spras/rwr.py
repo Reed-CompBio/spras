@@ -23,6 +23,9 @@ class RWRParams(BaseModel):
     alpha: Optional[float] = None
     "The chance of a restart during the random walk"
 
+    max_iter: Optional[int] = None
+    "The maximum amount of PageRank iterations."
+
     model_config = ConfigDict(extra='forbid', use_attribute_docstrings=True)
 
 class RWR(PRM[RWRParams]):
@@ -87,11 +90,13 @@ class RWR(PRM[RWRParams]):
                    '--nodes', nodes_file,
                    '--output', mapped_out_prefix]
 
-        # Add alpha as an optional argument
+        # Add optional arguments
         if args.alpha is not None:
             command.extend(['--alpha', str(args.alpha)])
+        if args.max_iter is not None:
+            command.extend(['--max-iter', str(args.max_iter)])
 
-        container_suffix = 'rwr:v1'
+        container_suffix = 'rwr:v2'
         run_container_and_log(
             "RandomWalk with Restart",
             container_suffix,
