@@ -1,0 +1,8 @@
+numpy==1.19.5
+scipy==1.5.4
+matplotlib==3.3.4
+pandas==1.1.5
+statsmodels==0.12.2
+gurobipy==9.5.2
+networkx==2.5.1
+packaging==24.0

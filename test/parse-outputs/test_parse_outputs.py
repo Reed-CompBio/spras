@@ -25,6 +25,15 @@ algorithms = {
     'domino': {},
     'bowtiebuilder': {},
     'responsenet': {},
+    'netmix2': {
+        'dataset': Dataset(dataset_params=DatasetSchema(
+            label='test_dataset',
+            node_files=['netmix2-dataset-prizes.txt'],
+            edge_files=['netmix2-dataset-network.txt'],
+            other_files=[],
+            data_dir=INDIR / 'dataset' / 'netmix2'
+        ))
+    },
     'strwr': {
         'threshold': 3,
         'dataset': Dataset(dataset_params=DatasetSchema(

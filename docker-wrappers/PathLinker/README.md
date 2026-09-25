@@ -2,7 +2,7 @@
 
 A Docker image for [PathLinker](https://github.com/Murali-group/PathLinker) that is available on [DockerHub](https://hub.docker.com/repository/docker/reedcompbio/pathlinker).
 
-To create the Docker image run:
+To create the Docker image, run:
 ```
 docker build -t reedcompbio/pathlinker -f Dockerfile .
 ```
