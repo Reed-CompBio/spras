@@ -1,17 +1,16 @@
 # Signaling Pathway Reconstruction Analysis Streamliner (SPRAS)
 [![Test SPRAS](https://github.com/Reed-CompBio/spras/actions/workflows/test-spras.yml/badge.svg)](https://github.com/Reed-CompBio/spras/actions/workflows/test-spras.yml)
 [![Documentation](https://readthedocs.org/projects/spras/badge/?version=latest)](https://spras.readthedocs.io)
+[![DOI](https://zenodo.org/badge/DOI/10.5281/zenodo.13366795.svg)](https://doi.org/10.5281/zenodo.13366795)
 
 
 ## Overview
 
-SPRAS is a work-in-progress dockerized library of pathway reconstruction enhancement tools.
-The framework will contain different pathway reconstruction algorithms that connect genes and proteins of interest in the context of a general protein-protein interaction network, allowing users to run multiple algorithms on their inputs.
-See the GLBIO 2021 [slides](https://doi.org/10.6084/m9.figshare.14551476) or [video](https://www.youtube.com/watch?v=nU8EARwMqdM&list=PLmX8XnLr6zeHlqhhxDy4fA5o65Q6m76KX&index=19) for more information.
-To read more about the specific pathway reconstruction algorithms that may be supported in the future, refer to [our list of algorithms](https://spras.readthedocs.io/en/latest/prms/prms.html).
+SPRAS is a containerized library of pathway reconstruction tools.
+The framework contains different pathway reconstruction algorithms that connect proteins of interest in the context of a general protein-protein interaction network, allowing users to run multiple algorithms on their inputs.
+See the SPRAS [manuscript](https://doi.org/10.64898/2026.08.04.742550) or the GLBIO 2021 [slides](https://doi.org/10.6084/m9.figshare.14551476) or [video](https://www.youtube.com/watch?v=nU8EARwMqdM&list=PLmX8XnLr6zeHlqhhxDy4fA5o65Q6m76KX&index=19) for more information.
 
-This repository is very much a work in progress and is not yet stable enough for real data analysis.
-The latest features can be found on various development branches.
+This repository may undergo breaking changes.
 The instructions below support running SPRAS with a fixed configuration on example data to demonstrate its functionality.
 Open a [GitHub issue](https://github.com/Reed-CompBio/spras/issues) or contact [Anthony Gitter](https://gitterlab.org/) or [Anna Ritz](https://www.reed.edu/biology/ritz/) to provide feedback on this early version of SPRAS.
 
@@ -128,8 +127,7 @@ Please refer to the instructions in our [documentation](https://spras.readthedoc
 
 **Snakemake file**: Defines a workflow to run all pathway reconstruction algorithms on all datasets with all specified hyperparameters.
 
-**Dockerized pathway reconstruction algorithms**: Pathway reconstruction algorithms are run via Docker images using the docker-py Python package.
-[PathLinker](https://github.com/Murali-group/PathLinker), [Omics Integrator](https://github.com/fraenkel-lab/OmicsIntegrator), [Omics Integrator 2](https://github.com/fraenkel-lab/OmicsIntegrator2), and [Maximum Edge Orientation](https://github.com/agitter/meo/) are the first supported algorithms.
+**Containerized pathway reconstruction algorithms**: Pathway reconstruction algorithms are run via Docker images using the docker-py Python package.
 The files to create these Docker images are in the `docker-wrappers` subdirectory along with links to algorithms' original repositories.
 The Docker images are available on [DockerHub](https://hub.docker.com/orgs/reedcompbio).
 
@@ -141,7 +139,7 @@ The tests require the conda environment in `environment.yml` and Docker.
 Run the tests with `pytest -s`.
 
 ## Singularity
-Some computing environments are unable to run Docker and prefer Singularity as the container runtime.
+Some computing environments are unable to run Docker and prefer Singularity (or Apptainer) as the container runtime.
 SPRAS has limited experimental support for Singularity instead of Docker, and only for some pathway reconstruction algorithms.
 SPRAS uses the spython package to interface with Singularity, which only supports Linux.
 
@@ -151,3 +149,9 @@ If you use SPRAS in a research project, please cite the original datasets and al
 
 Part of `ml.py` is taken from the [scikit-learn example code](https://scikit-learn.org/stable/auto_examples/cluster/plot_agglomerative_dendrogram.html).
 The original third-party code is available under the BSD 3-Clause License, Copyright © 2007 - 2023, scikit-learn developers.
+
+## Citation
+[A framework for benchmarking pathway reconstruction algorithms](https://doi.org/10.64898/2026.08.04.742550)  
+Neha Talluri, Tristan Figueroa-Reid, Justin Hiemstra, Chris S Magnano, Adam Shedivy, Nistha Panda, Yancheng Liu, Sumedha Sanjeev, Oliver Faulkner Anderson, Altaf Barelvi, Aden O'Brien, Olivia T Johnson, James A Haddad, Spencer A Halberg-Spencer, Akniyet Nurbol, Iris Jan, Mahunan Degbelo, Daniel Nachreiner, Canek Llera-Magord, Gabriel Howland, Grace H Li, Anna Ritz<sup>+</sup>, Anthony Gitter<sup>+</sup>.  
+*bioRxiv*, 2026. doi:10.64898/2026.08.04.742550  
+<sup>+</sup> denotes equal contribution.
