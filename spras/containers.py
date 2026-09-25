@@ -553,7 +553,7 @@ def run_container_singularity(resolved: ResolvedImage, command: List[str], volum
         # as `containers.py`.
         wrapper = os.path.join(os.path.dirname(__file__), "cgroup_wrapper.sh")
         cmd = [wrapper, my_cgroup] + singularity_cmd
-        proc = subprocess.run(cmd, capture_output=True, text=True, stderr=subprocess.STDOUT)
+        proc = subprocess.run(cmd, text=True, stdout=subprocess.PIPE, stderr=subprocess.STDOUT)
 
         print("Reading memory and CPU stats from cgroup")
         create_apptainer_container_stats(my_cgroup, out_dir)

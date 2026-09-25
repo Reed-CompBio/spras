@@ -273,6 +273,16 @@ def get_algorithm_image(wildcards):
     return None
 
 # Run the pathway reconstruction algorithm
+# When profiling is enabled, each reconstruct job writes a 'usage-profile.tsv' alongside its raw-pathway.txt.
+# Declare it as a rule output so that Snakemake tracks it and, critically, transfers it back from the execute
+# node in environments without a shared filesystem (e.g. HTCondor with shared-fs-usage: none). This is only
+# produced when profiling is actually performed, which requires the singularity/apptainer container framework
+# (see run_container_singularity), so we gate on the same condition to avoid declaring an output that is never
+# created (which would fail the rule).
+profiling_outputs = {}
+if container_settings.enable_profiling and container_settings.framework.is_singularity_family:
+    profiling_outputs['profile_file'] = SEP.join([out_dir, '{dataset}-{algorithm}-{params}', 'usage-profile.tsv'])
+
 rule reconstruct:
     input: collect_prepared_input
     # Each reconstruct call should be in a separate output subdirectory that is unique for the parameter combination so
@@ -280,7 +290,9 @@ rule reconstruct:
     # Overwriting files can happen because the pathway reconstruction algorithms often generate output files with the
     # same name regardless of the inputs or parameters, and these aren't renamed until after the container command
     # terminates
-    output: pathway_file = SEP.join([out_dir, '{dataset}-{algorithm}-{params}', 'raw-pathway.txt'])
+    output:
+        pathway_file = SEP.join([out_dir, '{dataset}-{algorithm}-{params}', 'raw-pathway.txt']),
+        **profiling_outputs
     resources:
         htcondor_transfer_input_files=get_algorithm_image
     run:
