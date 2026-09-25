@@ -1,0 +1,50 @@
+# This is a brief alternative to pyvis,
+# which doesn't support mixed graphs.
+import os
+from pathlib import Path
+
+import pandas as pd
+
+# https://stackoverflow.com/a/5137509/7589775
+# The file we want, visjs.html, is also included in MANIFEST.in
+dir_path = os.path.dirname(os.path.realpath(__file__))
+visjs_html = Path(dir_path, "visjs.html").read_text()
+
+def visualize(network: pd.DataFrame | str | os.PathLike) -> str:
+    """
+    Visualizes an output interactome
+    as a visjs .html file.
+    """
+    if not isinstance(network, pd.DataFrame):
+        network = pd.read_csv(network, sep='\t', header=0)
+
+    current_id = 0
+    node_ids: dict[str, int] = dict()
+
+    nodes_repr: list[str] = list()
+    edges_repr: list[str] = list()
+
+    for _index, row in network.iterrows():
+        source_node = row["Node1"]
+        target_node = row["Node2"]
+        directed = row["Direction"] == "D"
+
+        if source_node not in node_ids:
+            node_ids[source_node] = current_id
+            nodes_repr.append(f"{{id: {current_id}, label: '{source_node}'}}")
+            current_id += 1
+
+        if target_node not in node_ids:
+            node_ids[target_node] = current_id
+            nodes_repr.append(f"{{id: {current_id}, label: '{target_node}'}}")
+            current_id += 1
+
+        # Note: directed will be python True or False. See visjs.html for its fix.
+        edge_repr = {"from": node_ids[source_node], "to": node_ids[target_node], "arrows": {"to": {"enabled": directed}, "type": "arrow"}}
+        edges_repr.append(str(edge_repr))
+
+    output_html = visjs_html
+    output_html = output_html.replace("// {{nodes}}", ','.join(nodes_repr))
+    output_html = output_html.replace("// {{edges}}", ','.join(edges_repr))
+
+    return output_html
