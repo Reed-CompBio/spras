@@ -10,7 +10,7 @@ from spras.responsenet import ResponseNet, ResponseNetParams
 
 config.init_from_file("config/config.yaml")
 
-TEST_DIR = Path('test', 'ResponseNet')
+TEST_DIR = Path('test', 'algorithms', 'ResponseNet')
 OUT_FILE = TEST_DIR / 'output' / 'rn-output.txt'
 EXPECTED_FILE = TEST_DIR / 'expected' / 'rn-expected.txt'
 EXPECTED_FILE_OPTIONAL = TEST_DIR / 'expected' / 'rn-expected-optional.txt'

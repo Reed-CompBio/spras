@@ -9,7 +9,7 @@ from spras.omicsintegrator2 import DummyMode, OmicsIntegrator2, OmicsIntegrator2
 
 config.init_from_file("config/config.yaml")
 
-TEST_DIR = Path('test', 'OmicsIntegrator2')
+TEST_DIR = Path('test', 'algorithms', 'OmicsIntegrator2')
 OUT_FILE = TEST_DIR / 'output' / 'test.tsv'
 
 EDGE_FILE = TEST_DIR / 'input' / 'simple' / 'oi2-edges.txt'

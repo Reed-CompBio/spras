@@ -10,7 +10,7 @@ from spras.rwr import RWR, RWRParams
 
 config.init_from_file("config/config.yaml")
 
-TEST_DIR = Path('test', 'RWR/')
+TEST_DIR = Path('test', 'algorithms', 'RWR/')
 OUT_FILE = Path(TEST_DIR, 'output', 'rwr-output.txt')
 
 
