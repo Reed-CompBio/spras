@@ -3,14 +3,15 @@
 #############
 
 SPRAS is run through `Snakemake <https://snakemake.readthedocs.io/>`_,
-which comes with the SPRAS conda environment.
+which comes with the SPRAS conda environment and as a dependency of
+SPRAS.
 
 To run SPRAS, run the following command inside the ``spras`` directory,
 specifying a ``config.yaml`` and the number of cores to run SPRAS with:
 
 .. code:: bash
 
-   snakemake --cores 1 --configfile config.yaml
+   spras run --cores 1 --configfile config.yaml
 
 *********************
  Parallelizing SPRAS
@@ -25,7 +26,7 @@ To parallelize SPRAS, specify ``--cores`` to be a value higher than
 
 .. code:: bash
 
-   snakemake --cores 4 --configfile config.yaml
+   spras run --cores 4 --configfile config.yaml
 
 SPRAS also supports high-performance computing with its integration with
 `HTCondor <https://htcondor.org/>`_. See :doc:`Running with HTCondor

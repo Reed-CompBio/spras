@@ -72,7 +72,7 @@ Running SPRAS locally on the test dataset takes around 10 minutes.
 Once you have activated the conda environment and started Docker, you can run SPRAS on example data.
 From the root directory of the `spras` repository, run the command
 ```
-snakemake --cores 1 --configfile config/config.yaml
+spras run --cores 1 --configfile config/config.yaml
 ```
 
 This will run the SPRAS workflow with the example config file (`config/config.yaml`) and input files.
