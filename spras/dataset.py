@@ -226,6 +226,15 @@ class Dataset:
                     return False
                 return True
 
+    def get_input_nodes(self) -> pd.DataFrame:
+        """
+        Returns: a table listing the input nodes considered as starting points for pathway reconstruction algorithms,
+        restricted to nodes that have at least one of the specified attributes.
+        """
+        input_node_columns = ["sources", "targets", "prize", "active"] # TODO: do we want to add dummy nodes?
+        input_nodes = Dataset.get_node_columns(self, col_names = input_node_columns)
+        return input_nodes
+
     def get_other_files(self):
         return self.other_files.copy()
 
