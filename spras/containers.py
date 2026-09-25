@@ -359,7 +359,7 @@ def run_container_docker(container: str, command: List[str], volumes: List[Tuple
 
     # Initialize a Docker client using environment variables
     try:
-        client = docker.from_env()
+        client = docker.from_env(timeout=600)
     except Exception as err:
         err.add_note("An error occurred when fetching the docker daemon: is docker installed and is dockerd running?")
         raise err
