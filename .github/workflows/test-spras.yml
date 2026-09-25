@@ -101,6 +101,9 @@ jobs:
         # race conditions from #268 and #279
         # We also enforce strict DAG evaluation to catch DAG problems before they appear as user errors. (#359)
         run: snakemake --cores 4 --configfile config/config.yaml --show-failed-logs --strict-dag-evaluation cyclic-graph --strict-dag-evaluation functions --strict-dag-evaluation periodic-wildcards
+      - name: Collect Snakemake workflow report
+        shell: bash --login {0}
+        run: snakemake --configfile config/config.yaml --report report.zip
 
   # Run pre-commit checks on source files
   pre-commit:
