@@ -2,61 +2,71 @@
 
 Docker image: https://hub.docker.com/r/reedcompbio/lpca
 
-This wrapper runs [logisticPCA](https://github.com/andland/logisticPCA)
+This wrapper uses [logisticPCA](https://github.com/andland/logisticPCA)
+([Landgraf & Lee, 2020](https://doi.org/10.1016/j.jmva.2020.104668)) for an
+exploratory, two-dimensional comparison of reconstructed networks. It calls
+`logisticPCA`, not `logisticSVD`. It supports only two components and a fixed,
+finite, strictly positive `m`. Cross-validation for automatic selection of `m`
+and modifying `k` are not supported.
 
-([Landgraf & Lee, 2020](https://doi.org/10.1016/j.jmva.2020.104668)) as a SPRAS analysis step. It reduces the binary
-edge-by-run matrix built from a set of pathway reconstruction outputs to a small
-number of components and reports the proportion of deviance explained.
+## Container interface
 
-The analysis is driven by the `analysis.lpca` config block and the
-`lpca_analysis` Snakemake rule, and is implemented in `spras/analysis/lpca.py`.
+The image contains one R script, invoked explicitly by the caller:
 
-## Configuration
+```text
+Rscript /app/run_lpca.R <input.csv> <scores.csv> <k=2> <m> <deviance.txt>
+```
 
-    analysis:
-      lpca:
-        include: false   # run the LPCA analysis per algorithm
-        k: 2             # number of principal components
-        m: 6             # fixed logisticPCA tuning parameter, used when cv is false
-        cv: false        # true: choose m by cross-validation; false: use the fixed m
+### Input
 
-LPCA only runs for algorithms with multiple parameter combinations, so that the
-binary matrix has more than one column. It also needs a reasonable number of
-observations to be meaningful; very small inputs (such as the bundled example
-datasets) produce degenerate results, which is why it is disabled by default.
+The CSV has a header row, a first column of nonempty, unique run identifiers,
+and one column per binary edge feature. Rows are runs, not edges. The caller
+must transpose the edge-by-run matrix returned by `summarize_networks` before
+writing it.
 
-  ### `partial_decomp`
+This wrapper deliberately requires at least three runs, three edge features,
+and three distinct binary network profiles. All feature values must be finite
+numeric zeros or ones. Missing, nonnumeric, and nonbinary entries are error.
+Duplicate profiles and constant features are
+retained when the input otherwise satisfies these requirements.
 
-  The LPCA wrapper always runs `logisticSVD` with `partial_decomp = TRUE`, which
-  uses a truncated (rARPACK-based) decomposition instead of a full one. This is
-  hardcoded rather than exposed as a parameter:
+`k` must equal 2. `m` must be finite and strictly positive.
 
-  - On small datasets it has no practical effect on the result.
-  - On large datasets it is required to avoid out-of-memory (OOMKilled) errors
-    that occur with the full decomposition.
+### Outputs and numerical checks
 
-  Because it is beneficial on large inputs and harmless on small ones, it is
-  enabled unconditionally and is not a user-facing configuration option.
+The raw scores CSV contains `datapoint_labels`, `PC1`, and `PC2`, with one row
+per input run and no synthetic centroid. It is an intermediate for Python's
+PCA-compatible plotting and coordinate formatting, not a second public
+coordinate table.
 
-## Scripts
+The deviance summary is a small text file:
 
-The image contains two R scripts under `/app`:
+```text
+components: 2
+m: <fixed positive value>
+percent_deviance_explained: <100 times the package's whole-model statistic>
+```
 
-- `run_lpca.R <input> <output> <k> <m>`: runs logisticPCA with a fixed `m` and
-  writes the scores CSV plus a sibling `<output basename>_deviance.txt`.
-- `run_cv.R <input> <output> <k>`: cross-validates `m` over 1..20 and writes a
-  CSV with a `best_m` column (plus a `_curve.csv` with the full CV curve). Only
-  used when `cv: true`.
+## SPRAS configuration
 
-Both read a CSV whose first column holds row labels and whose remaining columns
-are binary (0/1) features, and coerce missing values to 0.
+The `analysis.lpca` config settings are:
 
-## Dependency note
+```yaml
+analysis:
+  lpca:
+    include: false
+    aggregate_per_algorithm: false
+    k: 2
+    m: 6
+```
 
-`logisticPCA` declares `ggplot2` as a hard `Imports` dependency, so building the
-image compiles the ggplot2 stack. The Dockerfile installs the required Debian
-system libraries for that. To build from a source CRAN mirror the `repos`
-argument already points at `https://cran.r-project.org`.
+## Decomposition
+
+`partial_decomp=TRUE` is always set. It uses
+`rARPACK` (backed by `RSpectra`) for partial decompositions where supported. The
+package can fall back to full eigendecomposition. It still constructs dense
+edge-by-edge matrices, so memory use can grow quadratically with the number of
+edge features.
 
 ## Building and publishing the image
 
@@ -67,3 +77,16 @@ Docker Hub organization:
     docker build -t reedcompbio/lpca:v1 docker-wrappers/lpca/
     docker push reedcompbio/lpca:v1
 
+## Testing
+Run the test Python script to test the Docker image
+```commandline
+python docker-wrappers/LPCA/test_container.py
+```
+Expected output will end with
+```commandline
+=== RESULT: 28 passed; 0 failed ===
+Container exit status: 0
+```
+
+## AI
+GPT 6 Astra was used to refactor these files and write the test code.
