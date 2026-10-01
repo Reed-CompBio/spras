@@ -77,7 +77,7 @@ if (abs(tail(changes, 1L)) >= conv_criteria) {
   stop(sprintf("LPCA did not converge within %d iterations.", max_iters))
 }
 
-# Python adds the centroid and formats the public coordinate table.
+# Python formats the public coordinate table.
 score_table <- data.frame(datapoint_labels = row_labels,
                           PC1 = scores[, 1], PC2 = scores[, 2])
 summary <- c(

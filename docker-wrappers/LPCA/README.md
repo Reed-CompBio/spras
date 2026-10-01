@@ -74,7 +74,7 @@ For the SPRAS default registry to resolve the image, it must be published as
 `docker.io/reedcompbio/lpca:v1`, which requires access to the `reedcompbio`
 Docker Hub organization:
 
-    docker build -t reedcompbio/lpca:v1 docker-wrappers/lpca/
+    docker build -t reedcompbio/lpca:v1 docker-wrappers/LPCA/
     docker push reedcompbio/lpca:v1
 
 ## Testing

@@ -1,125 +1,121 @@
+"""Test SPRAS integration; numerical edge cases belong in docker-wrappers/LPCA/test_container.py."""
+
+import shutil
 from pathlib import Path
+from unittest.mock import Mock
 
+import matplotlib.pyplot as plt
+import numpy as np
 import pandas as pd
+import pytest
+from scipy.spatial.distance import pdist
 
-import spras.config.config as config
-from spras.analysis.lpca import plot_lpca, run_lpca
+from spras.analysis import lpca
 from spras.analysis.ml import summarize_networks
 
-config.init_from_file("config/config.yaml")
+INPUT_DIR = Path(__file__).parent / 'input' / 'lpca'
+# Existing four-graph fixture, logisticPCA 0.2, k=2, m=4. Distances allow a
+# common change of axis orientation, not independent sign changes per graph.
+REFERENCE_SCORES = np.array([
+    [4.96756989310632, -7.80927209388169],
+    [-7.42875819587666, 7.21294742051829],
+    [12.7488840407735, 1.711517188498],
+    [-11.2979872320273, -5.51380214217161],
+])
+REFERENCE_DEVIANCE = 91.92536834497237
 
-TEST_DIR = Path('test/analysis/')
-OUT_DIR = TEST_DIR / 'output'
 
-INPUT_FILES = [
-    'test/analysis/input/lpca/pathway-params-1.txt',
-    'test/analysis/input/lpca/pathway-params-2.txt',
-    'test/analysis/input/lpca/pathway-params-3.txt',
-    'test/analysis/input/lpca/pathway-params-4.txt',
-]
+@pytest.fixture
+def outputs(tmp_path):
+    return {
+        'output_png': tmp_path / 'lpca.png',
+        'output_deviance': tmp_path / 'lpca-deviance.txt',
+        'output_coord': tmp_path / 'lpca-coordinates.txt',
+        'output_matrix': tmp_path / 'lpca-binary-matrix.csv',
+    }
 
-class TestLpca:
-    """
-    Run Logistic PCA (LPCA) analysis tests
-    """
-    @classmethod
-    def setup_class(cls):
-        OUT_DIR.mkdir(parents=True, exist_ok=True)
 
-    def test_lpca_output_exists(self):
-        """Test that LPCA produces an output scores file"""
-        out_path = OUT_DIR / 'lpca-scores.csv'
-        matrix_path = OUT_DIR / 'lpca-binary-matrix.csv'
-        out_path.unlink(missing_ok=True)
+@pytest.mark.parametrize('per_algorithm', [False, True], ids=['all_algorithms', 'per_algorithm'])
+def test_lpca_container(tmp_path, outputs, per_algorithm):
+    algorithms = ['allpairs'] * 4 if per_algorithm else ['allpairs', 'allpairs', 'meo', 'meo']
+    paths = []
+    for i, algorithm in enumerate(algorithms, start=1):
+        # summarize_networks derives run identifiers from parent directories.
+        path = tmp_path / 'input graphs' / f'dataset-{algorithm}-params-{i:07d}' / 'pathway.txt'
+        path.parent.mkdir(parents=True)
+        shutil.copyfile(INPUT_DIR / f'pathway-params-{i}.txt', path)
+        paths.append(path)
+    networks = summarize_networks(paths)
+    lpca.run_lpca(networks, **outputs, m=4, labels=not per_algorithm)
 
-        summary_df = summarize_networks(INPUT_FILES)
-        run_lpca(
-            dataframe=summary_df,
-            output_scores=str(out_path),
-            output_matrix=str(matrix_path),
-            k=2,
-            m=4,
-            cv=False,
-        )
+    assert all(path.is_file() for path in outputs.values())
+    assert outputs['output_png'].read_bytes().startswith(b'\x89PNG\r\n\x1a\n')
+    matrix = pd.read_csv(outputs['output_matrix'], index_col='datapoint_labels')
+    pd.testing.assert_frame_equal(matrix, networks.T.rename_axis('datapoint_labels'))
+    coordinates = pd.read_csv(outputs['output_coord'], sep='\t')
+    assert list(coordinates.columns) == ['datapoint_labels', 'PC1', 'PC2']
+    assert coordinates['datapoint_labels'].tolist() == list(networks.columns)
+    points = coordinates[['PC1', 'PC2']].to_numpy()
+    assert points.shape == (4, 2)
+    assert np.isfinite(points).all()
+    np.testing.assert_allclose(pdist(points), pdist(REFERENCE_SCORES), atol=1e-3, rtol=0)
+    summary = dict(line.split(': ', 1)
+                   for line in outputs['output_deviance'].read_text().splitlines())
+    assert float(summary['components']) == 2
+    assert float(summary['m']) == 4
+    assert float(summary['percent_deviance_explained']) == pytest.approx(
+        REFERENCE_DEVIANCE, abs=1e-3, rel=0)
+    assert not list(tmp_path.glob('.lpca-*'))
 
-        assert out_path.exists(), "LPCA scores file was not created"
 
-    def test_lpca_output_shape(self):
-        """Test that LPCA scores have shape (runs x k)"""
-        out_path = OUT_DIR / 'lpca-scores-shape.csv'
-        matrix_path = OUT_DIR / 'lpca-binary-matrix-shape.csv'
-        out_path.unlink(missing_ok=True)
+@pytest.mark.parametrize('labels', [True, False])
+def test_plot_lpca(outputs, monkeypatch, labels):
+    names = ['001', 'NA', 'dataset-meo-params-CCCCCCC', 'run-four']
+    scores = pd.DataFrame(REFERENCE_SCORES, columns=['PC1', 'PC2'], index=names)
+    # Mock records calls without moving labels, so we can inspect what our
+    # plotting code passes to the label-placement function.
+    adjust = Mock()
+    # Replace the name used by lpca only for this test. The monkeypatch
+    # fixture restores the original function afterward, even on failure.
+    monkeypatch.setattr(lpca, 'adjust_text', adjust)
+    lpca.plot_lpca(scores, outputs['output_png'], outputs['output_coord'],
+                   REFERENCE_DEVIANCE, labels=labels)
 
-        summary_df = summarize_networks(INPUT_FILES)
-        run_lpca(
-            dataframe=summary_df,
-            output_scores=str(out_path),
-            output_matrix=str(matrix_path),
-            k=2,
-            m=4,
-            cv=False,
-        )
+    coordinates = pd.read_csv(outputs['output_coord'], sep='\t',
+                              dtype={'datapoint_labels': str}, keep_default_na=False)
+    assert list(coordinates.columns) == ['datapoint_labels', 'PC1', 'PC2']
+    assert coordinates['datapoint_labels'].tolist() == names
+    np.testing.assert_allclose(coordinates[['PC1', 'PC2']], REFERENCE_SCORES,
+                               atol=1e-8, rtol=0)
+    assert outputs['output_png'].read_bytes().startswith(b'\x89PNG\r\n\x1a\n')
+    if labels:
+        adjust.assert_called_once()
+        # call_args stores the last call; kwargs contains named arguments.
+        ax = adjust.call_args.kwargs['ax']
+        assert len(ax.collections) == 1  # Only graph coordinates; no extra plotted points.
+        np.testing.assert_allclose(ax.collections[0].get_offsets(), REFERENCE_SCORES)
+        assert ax.get_xlabel() == 'PC1'
+        assert ax.get_ylabel() == 'PC2'
+        assert ax.get_title() == 'Logistic PCA (91.9% deviance explained)'
+        # args[0] is the first positional argument: the list of text labels.
+        assert [text.get_text() for text in adjust.call_args.args[0]] == names
+        assert not plt.fignum_exists(ax.figure.number)
+    else:
+        adjust.assert_not_called()
 
-        scores = pd.read_csv(out_path, index_col=0)
-        assert scores.shape[1] == 2, f"Expected 2 PC columns, got {scores.shape[1]}"
-        assert scores.shape[0] == len(INPUT_FILES), \
-            f"Expected {len(INPUT_FILES)} rows, got {scores.shape[0]}"
 
-    def test_lpca_plot_output(self):
-        """Test that LPCA plot and coordinates files are created"""
-        scores_path = OUT_DIR / 'lpca-scores-plot.csv'
-        matrix_path = OUT_DIR / 'lpca-binary-matrix-plot.csv'
-        png_path = OUT_DIR / 'lpca-plot.png'
-        coord_path = OUT_DIR / 'lpca-coordinates.txt'
-
-        summary_df = summarize_networks(INPUT_FILES)
-        run_lpca(
-            dataframe=summary_df,
-            output_scores=str(scores_path),
-            output_matrix=str(matrix_path),
-            k=2,
-            m=4,
-            cv=False,
-        )
-        plot_lpca(str(scores_path), str(png_path), str(coord_path))
-
-        assert png_path.exists(), "LPCA plot PNG was not created"
-        assert coord_path.exists(), "LPCA coordinates file was not created"
-
-    def test_lpca_known_output(self):
-        """Test that LPCA produces the expected scores for known inputs.
-
-        Compared in absolute value because LPCA components, like PCA, are only
-        defined up to a sign (an axis can flip without changing the result).
-        """
-        out_path = OUT_DIR / 'lpca-scores-known.csv'
-        matrix_path = OUT_DIR / 'lpca-binary-matrix-known.csv'
-        out_path.unlink(missing_ok=True)
-
-        summary_df = summarize_networks(INPUT_FILES)
-        run_lpca(
-            dataframe=summary_df,
-            output_scores=str(out_path),
-            output_matrix=str(matrix_path),
-            k=2,
-            m=4,
-            cv=False,
-        )
-
-        scores = pd.read_csv(out_path, index_col=0)
-
-        expected = pd.DataFrame({
-            'V1': [4.96756989310632, -7.42875819587666, 12.7488840407735, -11.2979872320273],
-            'V2': [-7.80927209388169, 7.21294742051829, 1.711517188498, -5.51380214217161],
-        })
-
-        assert scores.shape == expected.shape, \
-            f"Expected shape {expected.shape}, got {scores.shape}"
-
-        # Compare in absolute value to stay robust to sign flips (sign non-identifiability)
-        pd.testing.assert_frame_equal(
-            scores.reset_index(drop=True).abs(),
-            expected.abs(),
-            check_dtype=False,
-            atol=1e-4,
-        )
+def test_container_failure_propagates(tmp_path, outputs, monkeypatch):
+    # side_effect raises this error when the mock is called, simulating a
+    # failed container without starting Docker. The call is still recorded.
+    failure = Mock(side_effect=RuntimeError('container failed'))
+    # Replace lpca's imported function; pytest restores it after this test.
+    monkeypatch.setattr(lpca, 'run_container_and_log', failure)
+    networks = pd.DataFrame(np.eye(3), columns=['a', 'b', 'c'])
+    with pytest.raises(RuntimeError, match='container failed'):
+        lpca.run_lpca(networks, **outputs)
+    failure.assert_called_once()
+    # The sixth positional argument is the container helper's output directory.
+    assert failure.call_args.args[5] == tmp_path
+    assert not outputs['output_png'].exists()
+    assert not outputs['output_coord'].exists()
+    assert not list(tmp_path.glob('.lpca-*'))
