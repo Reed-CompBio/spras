@@ -4,7 +4,7 @@ import shutil
 import yaml
 from spras.dataset import Dataset
 from spras.evaluation import Evaluation
-from spras.analysis import ml, summary, cytoscape
+from spras.analysis import ml, summary, cytoscape, lpca
 from spras.config.revision import detach_spras_revision
 import spras.config.config as _config
 
@@ -24,6 +24,7 @@ _config.init_global(config)
 out_dir = _config.config.out_dir
 algorithm_params = _config.config.algorithm_params
 pca_params = _config.config.pca_params
+lpca_params = _config.config.lpca_params
 hac_params = _config.config.hac_params
 container_settings = _config.config.container_settings
 include_aggregate_algo_eval = _config.config.analysis_include_evaluation_aggregate_algo
@@ -43,6 +44,8 @@ def algo_has_mult_param_combos(algo):
     return len(algorithm_params.get(algo, {})) > 1
 
 algorithms_mult_param_combos = [algo for algo in algorithms if algo_has_mult_param_combos(algo)]
+# LPCA requires at least three runs; keep the PCA eligibility threshold unchanged.
+algorithms_lpca = [algo for algo in algorithms if len(algorithm_params[algo]) >= 3]
 
 # Get the parameter dictionary for the specified
 # algorithm and parameter combination hash
@@ -94,15 +97,15 @@ def make_final_input(wildcards):
         
     if _config.config.analysis_include_lpca:
         final_input.extend(expand('{out_dir}{sep}{dataset}-ml{sep}lpca.png',out_dir=out_dir, sep=SEP, dataset=dataset_labels))
-        final_input.extend(expand('{out_dir}{sep}{dataset}-ml{sep}lpca-scores.csv',out_dir=out_dir, sep=SEP, dataset=dataset_labels))
+        final_input.extend(expand('{out_dir}{sep}{dataset}-ml{sep}lpca-deviance.txt',out_dir=out_dir, sep=SEP, dataset=dataset_labels))
         final_input.extend(expand('{out_dir}{sep}{dataset}-ml{sep}lpca-coordinates.txt',out_dir=out_dir, sep=SEP, dataset=dataset_labels))
         final_input.extend(expand('{out_dir}{sep}{dataset}-ml{sep}lpca-binary-matrix.csv',out_dir=out_dir, sep=SEP, dataset=dataset_labels))
 
     if _config.config.analysis_include_lpca_aggregate_algo:
-        final_input.extend(expand('{out_dir}{sep}{dataset}-ml{sep}{algorithm}-lpca-scores.csv',out_dir=out_dir, sep=SEP, dataset=dataset_labels, algorithm=algorithms_mult_param_combos))
-        final_input.extend(expand('{out_dir}{sep}{dataset}-ml{sep}{algorithm}-lpca.png',out_dir=out_dir, sep=SEP,dataset=dataset_labels,algorithm=algorithms_mult_param_combos))
-        final_input.extend(expand('{out_dir}{sep}{dataset}-ml{sep}{algorithm}-lpca-coordinates.txt',out_dir=out_dir, sep=SEP, dataset=dataset_labels,algorithm=algorithms_mult_param_combos))
-        final_input.extend(expand('{out_dir}{sep}{dataset}-ml{sep}{algorithm}-lpca-binary-matrix.csv',out_dir=out_dir, sep=SEP, dataset=dataset_labels,algorithm=algorithms_mult_param_combos))
+        final_input.extend(expand('{out_dir}{sep}{dataset}-ml{sep}{algorithm}-lpca-deviance.txt',out_dir=out_dir, sep=SEP, dataset=dataset_labels, algorithm=algorithms_lpca))
+        final_input.extend(expand('{out_dir}{sep}{dataset}-ml{sep}{algorithm}-lpca.png',out_dir=out_dir, sep=SEP,dataset=dataset_labels,algorithm=algorithms_lpca))
+        final_input.extend(expand('{out_dir}{sep}{dataset}-ml{sep}{algorithm}-lpca-coordinates.txt',out_dir=out_dir, sep=SEP, dataset=dataset_labels,algorithm=algorithms_lpca))
+        final_input.extend(expand('{out_dir}{sep}{dataset}-ml{sep}{algorithm}-lpca-binary-matrix.csv',out_dir=out_dir, sep=SEP, dataset=dataset_labels,algorithm=algorithms_lpca))
 
     if _config.config.analysis_include_ml_aggregate_algo:
         final_input.extend(expand('{out_dir}{sep}{dataset}-ml{sep}{algorithm}-pca.png',out_dir=out_dir,sep=SEP,dataset=dataset_labels,algorithm=algorithms_mult_param_combos))
@@ -416,56 +419,57 @@ rule ml_analysis_aggregate_algo:
         ml.hac_horizontal(summary_df, output.hac_image_horizontal, output.hac_clusters_horizontal, **hac_params)
         ml.pca(summary_df, output.pca_image, output.pca_variance, output.pca_coordinates, **pca_params)
 
+# Track fit and plot settings so changes schedule a new fit.
 rule lpca_analysis_all:
     input:
         pathways = expand('{out_dir}{sep}{{dataset}}-{algorithm_params}{sep}pathway.txt', out_dir=out_dir, sep=SEP, algorithm_params=algorithms_with_params)
     output:
-        lpca_scores = SEP.join([out_dir, '{dataset}-ml', 'lpca-scores.csv']),
         lpca_png = SEP.join([out_dir, '{dataset}-ml', 'lpca.png']),
+        lpca_deviance = SEP.join([out_dir, '{dataset}-ml', 'lpca-deviance.txt']),
         lpca_coord = SEP.join([out_dir, '{dataset}-ml', 'lpca-coordinates.txt']),
         lpca_matrix = SEP.join([out_dir, '{dataset}-ml', 'lpca-binary-matrix.csv'])
+    params:
+        k = lpca_params.k,
+        m = lpca_params.m,
+        labels = lpca_params.labels,
     run:
-        from spras.analysis import lpca
         summary_df = ml.summarize_networks(input.pathways)
         lpca.run_lpca(
             summary_df,
-            output.lpca_scores,
-            output.lpca_matrix,
-            k=_config.config.lpca_params.k,
-            m=_config.config.lpca_params.m,
-            cv=_config.config.lpca_params.cv,
+            output_png=output.lpca_png,
+            output_deviance=output.lpca_deviance,
+            output_coord=output.lpca_coord,
+            output_matrix=output.lpca_matrix,
+            k=params.k,
+            m=params.m,
+            labels=params.labels,
             container_settings=container_settings
-        )
-        lpca.plot_lpca(
-            output.lpca_scores,
-            output.lpca_png,
-            output.lpca_coord
         )
 
 rule lpca_analysis_aggregate_algo:
     input:
         pathways = collect_pathways_per_algo
     output:
-        lpca_scores = SEP.join([out_dir, '{dataset}-ml', '{algorithm}-lpca-scores.csv']),
         lpca_png = SEP.join([out_dir, '{dataset}-ml', '{algorithm}-lpca.png']),
+        lpca_deviance = SEP.join([out_dir, '{dataset}-ml', '{algorithm}-lpca-deviance.txt']),
         lpca_coord = SEP.join([out_dir, '{dataset}-ml', '{algorithm}-lpca-coordinates.txt']),
         lpca_matrix = SEP.join([out_dir, '{dataset}-ml', '{algorithm}-lpca-binary-matrix.csv'])
+    params:
+        k = lpca_params.k,
+        m = lpca_params.m,
+        labels = lpca_params.labels,
     run:
-        from spras.analysis import lpca
         summary_df = ml.summarize_networks(input.pathways)
         lpca.run_lpca(
             summary_df,
-            output.lpca_scores,
-            output.lpca_matrix,
-            k=_config.config.lpca_params.k,
-            m=_config.config.lpca_params.m,
-            cv=_config.config.lpca_params.cv,
+            output_png=output.lpca_png,
+            output_deviance=output.lpca_deviance,
+            output_coord=output.lpca_coord,
+            output_matrix=output.lpca_matrix,
+            k=params.k,
+            m=params.m,
+            labels=params.labels,
             container_settings=container_settings
-        )
-        lpca.plot_lpca(
-            output.lpca_scores,
-            output.lpca_png,
-            output.lpca_coord
         )
 
 # Ensemble the output pathways for each dataset per algorithm

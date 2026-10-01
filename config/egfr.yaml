@@ -134,6 +134,12 @@ analysis:
     labels: true
     kde: true
     remove_empty_pathways: true
+  lpca:
+    include: false
+    aggregate_per_algorithm: false
+    k: 2
+    m: 6
+    labels: true
   evaluation:
     include: true
     aggregate_per_algorithm: true

@@ -460,3 +460,31 @@ class TestConfig:
         assert config.config.analysis_include_evaluation == expected_eval
         assert config.config.analysis_include_summary == expected_summary
 
+
+    @pytest.mark.parametrize("include, aggregate", [
+        (False, False), (False, True), (True, False), (True, True)
+    ])
+    def test_lpca_options(self, include, aggregate):
+        test_config = get_test_config()
+        test_config["analysis"]["lpca"] = {
+            "include": include, "aggregate_per_algorithm": aggregate,
+            "m": 4.5, "labels": False,
+        }
+        parsed = config.Config(test_config)
+        assert parsed.analysis_include_lpca == include
+        assert parsed.analysis_include_lpca_aggregate_algo == (include and aggregate)
+        assert not parsed.analysis_include_ml
+        assert parsed.lpca_params.k == 2
+        assert parsed.lpca_params.m == 4.5
+        assert not parsed.lpca_params.labels
+
+    @pytest.mark.parametrize("options", [
+        {"k": 1}, {"k": 3}, {"k": 2.5},
+        {"m": 0}, {"m": -1}, {"m": float("inf")}, {"m": float("nan")},
+        {"cv": False}, {"cv": True}, {"kde": True},
+    ])
+    def test_lpca_invalid_options(self, options):
+        test_config = get_test_config()
+        test_config["analysis"]["lpca"] = {"include": True, **options}
+        with pytest.raises(ValueError):
+            config.Config(test_config)

@@ -10,9 +10,9 @@ We declare models using two classes here:
 - `CaseInsensitiveEnum` (see ./util.py)
 """
 
-from typing import Annotated
+from typing import Annotated, Literal
 
-from pydantic import AfterValidator, BaseModel, ConfigDict
+from pydantic import AfterValidator, BaseModel, ConfigDict, Field
 
 from spras.config.algorithms import AlgorithmUnion
 from spras.config.container_schema import ContainerSettings
@@ -70,9 +70,9 @@ class EvaluationAnalysis(BaseModel):
 class LpcaAnalysis(BaseModel):
     include: bool
     aggregate_per_algorithm: bool = False
-    k: int = 2
-    m: float = 6
-    cv: bool = False
+    k: Literal[2] = 2  # only support k=2 currently
+    m: float = Field(default=6, gt=0, allow_inf_nan=False)
+    labels: bool = True
 
     model_config = ConfigDict(extra='forbid')
 
