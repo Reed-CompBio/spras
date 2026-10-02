@@ -5,7 +5,7 @@ Docker image: https://hub.docker.com/r/reedcompbio/lpca
 This wrapper uses [logisticPCA](https://github.com/andland/logisticPCA)
 ([Landgraf & Lee, 2020](https://doi.org/10.1016/j.jmva.2020.104668)) for an
 exploratory, two-dimensional comparison of reconstructed networks. It calls
-`logisticPCA`, not `logisticSVD`. It supports only two components and a fixed,
+`logisticPCA`, not `logisticSVD`. It supports only `k = 2` components and a fixed,
 finite, strictly positive `m`. Cross-validation for automatic selection of `m`
 and modifying `k` are not supported.
 

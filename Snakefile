@@ -101,6 +101,7 @@ def make_final_input(wildcards):
         final_input.extend(expand('{out_dir}{sep}{dataset}-ml{sep}lpca-coordinates.txt',out_dir=out_dir, sep=SEP, dataset=dataset_labels))
         final_input.extend(expand('{out_dir}{sep}{dataset}-ml{sep}lpca-binary-matrix.csv',out_dir=out_dir, sep=SEP, dataset=dataset_labels))
 
+    # Only run LPCA per algorithm for the algorithms collected in algorithms_lpca
     if _config.config.analysis_include_lpca_aggregate_algo:
         final_input.extend(expand('{out_dir}{sep}{dataset}-ml{sep}{algorithm}-lpca-deviance.txt',out_dir=out_dir, sep=SEP, dataset=dataset_labels, algorithm=algorithms_lpca))
         final_input.extend(expand('{out_dir}{sep}{dataset}-ml{sep}{algorithm}-lpca.png',out_dir=out_dir, sep=SEP,dataset=dataset_labels,algorithm=algorithms_lpca))

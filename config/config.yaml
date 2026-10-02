@@ -49,6 +49,7 @@ containers:
   #
   #       requirements = versionGE(split(Target.CondorVersion)[1], "24.8.0") && (isenforcingdiskusage =!= true)
   enable_profiling: false
+
 # Override the default container image for specific algorithms.
 # Keys are algorithm names (as they appear in the algorithms list below).
 # Values are interpreted based on the container framework:
@@ -273,11 +274,11 @@ analysis:
     aggregate_per_algorithm: true
   lpca:
     # Compare pathway graphs across all algorithms, independently of ml.include
-    include: false
-    # Also fit each algorithm with at least three configured parameter combinations.
+    include: true
+    # Also fit each algorithm that has at least three configured parameter combinations.
     # Requires lpca.include: true; algorithms with fewer combinations are omitted.
-    aggregate_per_algorithm: false
-    # Only a two-component fit is supported
+    aggregate_per_algorithm: true
+    # Only a two-component fit is supported. Keep k=2.
     k: 2
     # Fixed, finite, strictly positive tuning parameter; no automatic selection
     m: 6
