@@ -1,9 +1,8 @@
 #!/usr/bin/env python3
 """Run standalone regression tests for the SPRAS LPCA container.
 
-Save this file beside run_lpca.R in docker-wrappers/LPCA/. From the repository
-root, build the image and run the tests with Python >= 3.9 and Docker:
-    docker build -t reedcompbio/lpca:v1 docker-wrappers/LPCA
+Build the image as described in README.md, then run the tests from the
+repository root with Python >= 3.9 and Docker:
     python docker-wrappers/LPCA/test_container.py
 
 The wrapper is located relative to this file, not the working directory.
@@ -272,7 +271,7 @@ def main() -> int:
         description=__doc__, formatter_class=argparse.RawDescriptionHelpFormatter
     )
     parser.add_argument("--image", default="reedcompbio/lpca:v1",
-                        help="Local image to test (default: reedcompbio/lpca:v1)")
+                        help="Local image to test (default: %(default)s)")
     parser.add_argument("--log", type=Path,
                         help="Also save output to a new UTF-8 file; never overwrite")
     parser.add_argument("--timeout", type=int, default=600,

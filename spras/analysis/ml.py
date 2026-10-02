@@ -154,7 +154,8 @@ def pca(dataframe: pd.DataFrame, output_png: str | PathLike, output_var: str | P
     if not isinstance(labels, bool):
         raise ValueError(f"labels={labels} must be True or False")
 
-    # center binary data by subtracting the column-wise mean
+    # For the logistic PCA alternative, see spras.analysis.lpca.run_lpca.
+    # Center binary data by subtracting the column-wise mean
     # allows PCA to focus on edge inclusion patterns across runs rather than raw output volume.
     scaler = StandardScaler(with_std=False)
     scaler.fit(X)  # compute mean inclusion rate per edge

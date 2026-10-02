@@ -94,7 +94,7 @@ def make_final_input(wildcards):
         final_input.extend(expand('{out_dir}{sep}{dataset}-ml{sep}ensemble-pathway.txt',out_dir=out_dir,sep=SEP,dataset=dataset_labels,algorithm_params=algorithms_with_params))
         final_input.extend(expand('{out_dir}{sep}{dataset}-ml{sep}jaccard-matrix.txt',out_dir=out_dir,sep=SEP,dataset=dataset_labels,algorithm_params=algorithms_with_params))
         final_input.extend(expand('{out_dir}{sep}{dataset}-ml{sep}jaccard-heatmap.png',out_dir=out_dir,sep=SEP,dataset=dataset_labels,algorithm_params=algorithms_with_params))
-        
+
     if _config.config.analysis_include_lpca:
         final_input.extend(expand('{out_dir}{sep}{dataset}-ml{sep}lpca.png',out_dir=out_dir, sep=SEP, dataset=dataset_labels))
         final_input.extend(expand('{out_dir}{sep}{dataset}-ml{sep}lpca-deviance.txt',out_dir=out_dir, sep=SEP, dataset=dataset_labels))
@@ -370,7 +370,6 @@ rule ml_analysis:
         ml.hac_vertical(summary_df, output.hac_image_vertical, output.hac_clusters_vertical, **hac_params)
         ml.hac_horizontal(summary_df, output.hac_image_horizontal, output.hac_clusters_horizontal, **hac_params)
         ml.pca(summary_df, output.pca_image, output.pca_variance, output.pca_coordinates, **pca_params)
-
 
 # Calculated Jaccard similarity between output pathways for each dataset
 rule jaccard_similarity:

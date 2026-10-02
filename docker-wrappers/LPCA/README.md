@@ -26,11 +26,15 @@ writing it.
 
 This wrapper deliberately requires at least three runs, three edge features,
 and three distinct binary network profiles. All feature values must be finite
-numeric zeros or ones. Missing, nonnumeric, and nonbinary entries are error.
+numeric zeros or ones. Missing, nonnumeric, and nonbinary entries are errors.
 Duplicate profiles and constant features are
 retained when the input otherwise satisfies these requirements.
 
 `k` must equal 2. `m` must be finite and strictly positive.
+
+The default `m=6` is based on the exploratory
+[LPCA-SPRAS experiments](https://github.com/Jeebjean/lpca-spras).
+No single value of `m` was universally best.
 
 ### Outputs and numerical checks
 
@@ -58,6 +62,7 @@ analysis:
     aggregate_per_algorithm: false
     k: 2
     m: 6
+    labels: true
 ```
 
 ## Decomposition
@@ -70,12 +75,12 @@ edge features.
 
 ## Building and publishing the image
 
-For the SPRAS default registry to resolve the image, it must be published as
-`docker.io/reedcompbio/lpca:v1`, which requires access to the `reedcompbio`
-Docker Hub organization:
+Replace `<tag>` below with the tag from `LPCA_CONTAINER_SUFFIX` in
+`spras/analysis/lpca.py`. Publishing to the default registry requires access
+to the `reedcompbio` Docker Hub organization:
 
-    docker build -t reedcompbio/lpca:v1 docker-wrappers/LPCA/
-    docker push reedcompbio/lpca:v1
+    docker build -t "reedcompbio/lpca:<tag>" docker-wrappers/LPCA/
+    docker push "reedcompbio/lpca:<tag>"
 
 ## Testing
 Run the test Python script to test the Docker image
