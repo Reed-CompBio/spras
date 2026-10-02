@@ -49,7 +49,7 @@ containers:
   #
   #       requirements = versionGE(split(Target.CondorVersion)[1], "24.8.0") && (isenforcingdiskusage =!= true)
   enable_profiling: false
-  # Override the default container image for specific algorithms.
+# Override the default container image for specific algorithms.
 # Keys are algorithm names (as they appear in the algorithms list below).
 # Values are interpreted based on the container framework:
 #
