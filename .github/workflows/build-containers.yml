@@ -73,3 +73,8 @@ jobs:
       # of detected changes.
       always_build: true
       context: ./
+  build-and-remove-lpca:
+    uses: "./.github/workflows/build-and-remove-template.yml"
+    with:
+      path: docker-wrappers/LPCA
+      container: reedcompbio/lpca

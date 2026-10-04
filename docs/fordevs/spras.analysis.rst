@@ -15,6 +15,15 @@
    :undoc-members:
    :show-inheritance:
 
+****************************
+ spras.analysis.lpca module
+****************************
+
+.. automodule:: spras.analysis.lpca
+   :members:
+   :undoc-members:
+   :show-inheritance:
+
 **************************
  spras.analysis.ml module
 **************************

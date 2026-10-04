@@ -86,6 +86,8 @@ class Config:
         self.evaluation_params = self.analysis_params.evaluation
         # A dict with the ML settings
         self.ml_params = self.analysis_params.ml
+        # A dict with the LPCA settings
+        self.lpca_params = self.analysis_params.lpca
         # A Boolean specifying whether to run ML analysis for individual algorithms
         self.analysis_include_ml_aggregate_algo = None
         # A dict with the PCA settings
@@ -96,6 +98,8 @@ class Config:
         self.analysis_include_summary = None
         # A Boolean specifying whether to run the Cytoscape analysis
         self.analysis_include_cytoscape = None
+        # A Boolean specifying whether to run the LPCA analysis
+        self.analysis_include_lpca = None
         # A Boolean specifying whether to run the ML analysis
         self.analysis_include_ml = None
         # A Boolean specifying whether to run the Evaluation analysis
@@ -254,6 +258,7 @@ class Config:
         self.analysis_include_summary = raw_config.analysis.summary.include
         self.analysis_include_cytoscape = raw_config.analysis.cytoscape.include
         self.analysis_include_ml = raw_config.analysis.ml.include
+        self.analysis_include_lpca = raw_config.analysis.lpca.include
         self.analysis_include_evaluation = raw_config.analysis.evaluation.include
 
         # Only run ML aggregate per algorithm if analysis include ML is set to True
@@ -261,6 +266,12 @@ class Config:
             self.analysis_include_ml_aggregate_algo = raw_config.analysis.ml.aggregate_per_algorithm
         else:
             self.analysis_include_ml_aggregate_algo = False
+
+        # Only run LPCA aggregate per algorithm if analysis include LPCA is set to True
+        if self.analysis_include_lpca and raw_config.analysis.lpca.aggregate_per_algorithm:
+            self.analysis_include_lpca_aggregate_algo = raw_config.analysis.lpca.aggregate_per_algorithm
+        else:
+            self.analysis_include_lpca_aggregate_algo = False
 
         # Raises an error if Evaluation is enabled but no gold standard data is provided
         if self.gold_standards == {} and self.analysis_include_evaluation:
