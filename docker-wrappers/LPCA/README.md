@@ -71,7 +71,9 @@ analysis:
 `rARPACK` (backed by `RSpectra`) for partial decompositions where supported. The
 package can fall back to full eigendecomposition. It still constructs dense
 edge-by-edge matrices, so memory use can grow quadratically with the number of
-edge features.
+edge features. For example, the `egfr.yaml` configuration (19 runs, 18,851 edge features, `k=2`, `m=6`)
+requires nearly 20GB memory. Completing this run may require modifying the memory
+provided to the running container.
 
 ## Building and publishing the image
 

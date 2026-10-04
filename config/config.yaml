@@ -274,6 +274,9 @@ analysis:
     aggregate_per_algorithm: true
   lpca:
     # Compare pathway graphs across all algorithms, independently of ml.include
+    # LPCA allocates dense edge-by-edge matrices, requiring quadratic memory.
+    # Partial decomposition does not remove them.
+    # LPCA fits may fail due to out-of-memory errors.
     include: true
     # Also fit each algorithm that has at least three configured parameter combinations.
     # Requires lpca.include: true; algorithms with fewer combinations are omitted.
