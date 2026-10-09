@@ -5,8 +5,10 @@ Utility functions for pathway reconstruction
 import base64
 import hashlib
 import json
+from functools import wraps
 from os import PathLike
 from pathlib import Path
+from threading import RLock
 from typing import Any, Dict, Optional, Union
 
 import numpy as np
@@ -14,6 +16,43 @@ import pandas as pd
 
 """Represents a file that points to some location."""
 LoosePathLike = Union[str, PathLike[str]]
+
+# Matplotlib is not thread-safe. Pyplot's current figure/axes are shared by
+# threads, so one job can modify or save another job's figure, even with Agg.
+# https://matplotlib.org/stable/users/faq.html#work-with-threads
+# This led to plots overwriting each other on Windows
+# https://github.com/Reed-CompBio/spras/issues/98
+#
+# All SPRAS plotting entry points must use this SAME process-local lock,
+# including functions that draw indirectly through Seaborn or other helpers.
+#
+# Snakemake 9.6.2's local executor runs native Windows `run:` jobs in threads
+# within one process. Those jobs share this lock and serialize decorated calls.
+# Normal POSIX `run:` jobs use separate Python processes, each with its own lock,
+# so their existing job parallelism is preserved. The relevant executor behavior is documented in:
+# https://github.com/snakemake/snakemake/blob/v9.6.2/src/snakemake/api.py
+# https://github.com/snakemake/snakemake/blob/v9.6.2/src/snakemake/executors/local.py
+#
+# No OS check is needed: POSIX callers using threads (e.g. --force-use-threads)
+# share the same plotting state and require the same protection as Windows.
+_PLOT_LOCK = RLock()
+
+
+def serialized_plot(function):
+    """Serialize a complete plotting call within the current Python process.
+    """
+    @wraps(function)
+    def wrapped(*args, **kwargs):
+        # Lock before any plotting, not just savefig. RLock lets the SAME thread
+        # re-enter a decorated helper, e.g. hac_horizontal -> plot_dendrogram,
+        # without deadlocking. Other threads wait until the outer call exits.
+        # The context manager also releases the lock if the function raises;
+        # the exception still propagates to the caller.
+        with _PLOT_LOCK:
+            return function(*args, **kwargs)
+
+    return wrapped
+
 
 # https://stackoverflow.com/a/57915246/7589775
 # numpy variables are not, by default, encodable by python's JSONEncoder.

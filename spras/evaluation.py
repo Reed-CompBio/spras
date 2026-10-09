@@ -20,6 +20,7 @@ from spras.interactome import (
     convert_undirected_to_directed,
     sort_and_deduplicate_undirected,
 )
+from spras.util import serialized_plot
 
 
 class GoldStandardDict(TypedDict):
@@ -185,6 +186,7 @@ class Evaluation:
         return pr_df
 
     @staticmethod
+    @serialized_plot
     def visualize_precision_and_recall_plot(pr_df: pd.DataFrame, output_file: str | PathLike, output_png: str | PathLike, title: str):
         """
         Generates a scatter plot of precision and recall values for each pathway and saves both
@@ -265,6 +267,7 @@ class Evaluation:
             raise ValueError("No pathways were provided to evaluate and visulize on. This likely means no algorithms or parameter combinations were run.")
 
     @staticmethod
+    @serialized_plot
     def precision_and_recall_pca_chosen_pathway(pr_df: pd.DataFrame, output_file: str | PathLike, output_png: str | PathLike, aggregate_per_algorithm: bool = False):
         """
 
@@ -429,6 +432,7 @@ class Evaluation:
         return node_ensembles_dict
 
     @staticmethod
+    @serialized_plot
     def precision_recall_curve_node_ensemble(node_ensembles: dict, node_table: pd.DataFrame, output_png: str | PathLike,
                                              output_file: str | PathLike, aggregate_per_algorithm: bool = False):
         """

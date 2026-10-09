@@ -14,7 +14,7 @@ from sklearn.metrics import jaccard_score
 from sklearn.neighbors import KernelDensity
 from sklearn.preprocessing import StandardScaler
 
-from spras.util import make_required_dirs
+from spras.util import make_required_dirs, serialized_plot
 
 plt.switch_backend('Agg')
 
@@ -116,6 +116,7 @@ def create_palette(column_names):
     label_color_map = {label: color for label, color in zip(unique_column_names, custom_palette, strict=True)}
     return label_color_map
 
+@serialized_plot
 def pca(dataframe: pd.DataFrame, output_png: str | PathLike, output_var: str | PathLike, output_coord: str | PathLike, components: int = 2, labels: bool = True,
         kde: bool = False, remove_empty_pathways: bool = False):
     """
@@ -269,6 +270,7 @@ def pca(dataframe: pd.DataFrame, output_png: str | PathLike, output_var: str | P
 # This function is taken from the scikit-learn version 1.2.1 example code
 # https://scikit-learn.org/stable/auto_examples/cluster/plot_agglomerative_dendrogram.html
 # available under the BSD 3-Clause License, Copyright 2007 - 2023, scikit-learn developers
+@serialized_plot
 def plot_dendrogram(model, **kwargs):
     """
     Plot a dendrogram to visualize a hierarchical clustering solution
@@ -297,6 +299,7 @@ def plot_dendrogram(model, **kwargs):
     dendrogram(linkage_matrix, **kwargs)
 
 
+@serialized_plot
 def hac_vertical(dataframe: pd.DataFrame, output_png: str | PathLike, output_file: str | PathLike, linkage: str = 'ward', metric: str = 'euclidean'):
     """
     Performs hierarchical agglomerative clustering on the dataframe,
@@ -356,6 +359,7 @@ def hac_vertical(dataframe: pd.DataFrame, output_png: str | PathLike, output_fil
     plt.savefig(output_png, bbox_inches="tight", dpi=DPI)
 
 
+@serialized_plot
 def hac_horizontal(dataframe: pd.DataFrame, output_png: str | PathLike, output_file: str | PathLike, linkage: str = 'ward', metric: str = 'euclidean'):
     """
     Performs hierarchical agglomerative clustering on the dataframe,
@@ -429,6 +433,7 @@ def ensemble_network(dataframe: pd.DataFrame, output_file: str | PathLike):
     row_means[['Node1', 'Node2', 'Frequency', "Direction"]].to_csv(output_file, sep='\t', index=False, header=True)
 
 
+@serialized_plot
 def jaccard_similarity_eval(summary_df: pd.DataFrame, output_file: str | PathLike, output_png: str | PathLike):
     """
     Calculates the pairwise Jaccard similarity matrix from the binary representation of `summary_df`.
