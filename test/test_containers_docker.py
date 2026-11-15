@@ -9,7 +9,7 @@ from spras.containers import run_container_docker
 
 
 def _run_with_mock_client(tmp_path, run):
-    """Call run_container_docker with docker.from_env mocked so that client.containers.run is `run`."""
+    """Call run_container_docker with a mocked Docker client whose containers.run is `run`."""
     client = MagicMock()
     client.containers.run.side_effect = run
     with patch("spras.containers.docker.from_env", return_value=client):
@@ -23,11 +23,7 @@ def test_docker_output_is_decoded(tmp_path):
 
 
 def test_docker_output_none(tmp_path):
-    """
-    docker-py returns None instead of the output when the logging driver is not json-file or journald, for example
-    the `local` driver, which Docker Desktop 4.94 made the default for new Linux containers
-    (https://github.com/docker/docker-py/issues/3455).
-    """
+    """A None output from docker-py is passed through instead of being decoded."""
     out, client = _run_with_mock_client(tmp_path, [None])
     assert out is None
     client.containers.run.assert_called_once()

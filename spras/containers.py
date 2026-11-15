@@ -351,7 +351,7 @@ def run_container_docker(container: str, command: List[str], volumes: List[Tuple
     @param volumes: a list of volumes to mount where each item is a (source, destination) tuple
     @param working_dir: the working directory in the container
     @param environment: environment variables to set in the container
-    @return: output from Docker run, or None if Docker did not return the output, or will error if the container errored.
+    @return: output from Docker run, or None if Docker returned no output, or will error if the container errored.
     """
 
     if not environment:
@@ -387,9 +387,7 @@ def run_container_docker(container: str, command: List[str], volumes: List[Tuple
                                 working_dir=working_dir,
                                 network_disabled=network_disabled,
                                 environment=environment)
-    # docker-py returns None instead of the output when the logging driver is not json-file or journald, for example
-    # the `local` driver, which Docker Desktop 4.94 made the default for new Linux containers
-    # See https://github.com/docker/docker-py/issues/3455
+    # docker-py returns None when the logging driver is not json-file or journald (https://github.com/docker/docker-py/issues/3455)
     if out is not None:
         out = out.decode('utf-8')
 
